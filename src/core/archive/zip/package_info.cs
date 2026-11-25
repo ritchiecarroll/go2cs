@@ -219,8 +219,8 @@ partial class zipᴛReadCloser {
 }
 partial class zipᴛReader {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) => zip_package.init⁔(Ꮡr, rdr, size);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RegisterDecompressor(this ref Reader r, uint16 method, Func<io.Reader, io.ReadCloser> dcomp) => zip_package.RegisterDecompressor⁔(ref r, method, dcomp);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Func<io.Reader, io.ReadCloser> decompressor(this ref Reader r, uint16 method) => zip_package.decompressor⁔(ref r, method);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RegisterDecompressor(this ref Reader r, uint16 method, Decompressor dcomp) => zip_package.RegisterDecompressor⁔(ref r, method, dcomp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Decompressor decompressor(this ref Reader r, uint16 method) => zip_package.decompressor⁔(ref r, method);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void initFileList(this ж<Reader> Ꮡr) => zip_package.initFileList⁔(Ꮡr);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (fs.File, error) Open(this ж<Reader> Ꮡr, @string name) => zip_package.Open⁔(Ꮡr, name);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<fileListEntry> openLookup(this ref Reader r, @string name) => zip_package.openLookup⁔(ref r, name);
@@ -236,9 +236,9 @@ partial class zipᴛWriter {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> Ꮡfh) => zip_package.CreateHeader⁔(ref w, Ꮡfh);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.Writer, error) CreateRaw(this ref Writer w, ж<FileHeader> Ꮡfh) => zip_package.CreateRaw⁔(ref w, Ꮡfh);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Copy(this ref Writer w, ж<File> Ꮡf) => zip_package.Copy⁔(ref w, Ꮡf);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RegisterCompressor(this ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) => zip_package.RegisterCompressor⁔(ref w, method, comp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RegisterCompressor(this ref Writer w, uint16 method, Compressor comp) => zip_package.RegisterCompressor⁔(ref w, method, comp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error AddFS(this ж<Writer> Ꮡw, fs.FS fsys) => zip_package.AddFS⁔(Ꮡw, fsys);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Func<io.Writer, (io.WriteCloser, error)> compressor(this ref Writer w, uint16 method) => zip_package.compressor⁔(ref w, method);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Compressor compressor(this ref Writer w, uint16 method) => zip_package.compressor⁔(ref w, method);
 }
 partial class zipᴛchecksumReader {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ref checksumReader r) => zip_package.Stat⁔(ref r);

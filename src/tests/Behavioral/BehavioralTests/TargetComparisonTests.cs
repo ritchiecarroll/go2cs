@@ -46,6 +46,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
 
     [TestMethod]
+    public void CheckAliasKeywordPackage() => CheckTarget("AliasKeywordPackage");
+
+    [TestMethod]
     public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
 
     [TestMethod]
@@ -569,6 +572,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
+
+    [TestMethod]
+    public void CheckDefinedFuncTypeIdentity() => CheckTarget("DefinedFuncTypeIdentity");
 
     [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
@@ -1537,6 +1543,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
+    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
@@ -1598,6 +1607,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
+
+    [TestMethod]
+    public void CheckNamedChanMapNumericShadow() => CheckTarget("NamedChanMapNumericShadow");
 
     [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
@@ -1702,6 +1714,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedPointerLocalSurface() => CheckTarget("NamedPointerLocalSurface");
 
     [TestMethod]
+    public void CheckNamedPointerNilInterface() => CheckTarget("NamedPointerNilInterface");
+
+    [TestMethod]
     public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
 
     [TestMethod]
@@ -1712,6 +1727,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedPointerValueSlot() => CheckTarget("NamedPointerValueSlot");
+
+    [TestMethod]
+    public void CheckNamedPointerValueStruct() => CheckTarget("NamedPointerValueStruct");
 
     [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
@@ -1853,6 +1871,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
+
+    [TestMethod]
+    public void CheckNestedNamespaceReach() => CheckTarget("NestedNamespaceReach");
 
     [TestMethod]
     public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
@@ -1997,6 +2018,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
+
+    [TestMethod]
+    public void CheckPackageSuffixCollision() => CheckTarget("PackageSuffixCollision");
 
     [TestMethod]
     public void CheckPackageVarFuncLitPointerParam() => CheckTarget("PackageVarFuncLitPointerParam");
@@ -2503,6 +2527,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
 
     [TestMethod]
+    public void CheckSameNameOs() => CheckTarget("SameNameOs");
+
+    [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");
 
     [TestMethod]
@@ -2980,6 +3007,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnsafeBuiltinIntegerLen() => CheckTarget("UnsafeBuiltinIntegerLen");
 
     [TestMethod]
+    public void CheckUnsafeHeaderViewFamily() => CheckTarget("UnsafeHeaderViewFamily");
+
+    [TestMethod]
+    public void CheckUnsafeHeaderViewRefusals() => CheckTarget("UnsafeHeaderViewRefusals");
+
+    [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]
@@ -3137,6 +3170,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
+
+    [TestMethod]
+    public void CheckVariadicSpreadHeapAlias() => CheckTarget("VariadicSpreadHeapAlias");
 
     [TestMethod]
     public void CheckVendoredPathModuleImport() => CheckTarget("VendoredPathModuleImport");

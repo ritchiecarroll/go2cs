@@ -194,9 +194,11 @@ public class EscapeRegistryGenerator : ISourceGenerator
             return;
         }
 
-        // A variadic tail (Span<T>) and a Go multi-return (ValueTuple) carry Go values as their type arguments.
-        if (type is INamedTypeSymbol { IsGenericType: true, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } carrier &&
-            (carrier.Name == "Span" || carrier.Name == "ValueTuple"))
+        // A variadic tail (variadic<T>, or a hand-written Span<T>) and a Go multi-return (ValueTuple) carry Go values as their
+        // type arguments.
+        if (type is INamedTypeSymbol { IsGenericType: true } carrier &&
+            (carrier is { ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } && (carrier.Name == "Span" || carrier.Name == "ValueTuple") ||
+             carrier is { Name: "variadic", Arity: 1, ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } }))
         {
             foreach (ITypeSymbol argument in carrier.TypeArguments)
                 Reach(compilation, package, argument, registered, visited, depth + 1, walkPerOS, exportedOnly);
@@ -419,7 +421,7 @@ public class EscapeRegistryGenerator : ISourceGenerator
     }
 
     // The registration of a variadic func type's trampolines (golib's GoReflect.RegisterVariadicFunc/RegisterVariadicAction,
-    // GoReflect.VariadicRegistry.cs), or null when the delegate is not one: its Invoke must end in a Span<T> tail, take
+    // GoReflect.VariadicRegistry.cs), or null when the delegate is not one: its Invoke must end in a variadic<T> tail, take
     // every parameter by value, and have a golib family of its arity. The family's type arguments are read from Invoke, so
     // a C# natural delegate type (a method group or lambda converted to an interface) registers the family it rebinds onto
     // without being named. A compilation and package check that every type it spells can be named from the package; the
@@ -427,7 +429,7 @@ public class EscapeRegistryGenerator : ISourceGenerator
     internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol { DelegateInvokeMethod: { } invoke } || invoke.Parameters.Length == 0 || invoke.ReturnsByRef || invoke.ReturnsByRefReadonly ||
-            invoke.Parameters[^1].Type is not INamedTypeSymbol { Name: "Span", Arity: 1, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } tail ||
+            invoke.Parameters[^1].Type is not INamedTypeSymbol { Name: "variadic", Arity: 1, ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } } tail ||
             invoke.Parameters.Any(parameter => parameter.RefKind != RefKind.None))
         {
             return null;

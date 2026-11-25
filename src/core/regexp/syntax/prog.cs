@@ -8,7 +8,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class syntax_package {
 

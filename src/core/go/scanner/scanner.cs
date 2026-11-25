@@ -19,7 +19,7 @@ using global::go.go;
 using global::go.go.@internal;
 using global::go.unicode;
 using path;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class scanner_package {
 
@@ -27,18 +27,18 @@ partial class scanner_package {
 // encountered and a handler was installed, the handler is called with a
 // position and an error message. The position points to the beginning of
 // the offending token.
-// type ErrorHandler is a methodless func type — rendered inline as its base delegate
+public delegate void ErrorHandler(token.Position pos, @string msg);
 
 // A Scanner holds the scanner's internal state while processing
 // a given text. It can be allocated as part of another data
 // structure but must be initialized via [Scanner.Init] before use.
 partial struct Scanner {
     // immutable state
-    internal ж<token.File> @file;                 // source file handle
-    internal @string dir;                         // directory portion of file.Name()
-    internal slice<byte> src;                     // source
-    internal Action<token.Position, @string> err; // error reporting; or nil
-    internal Mode mode;                           // scanning mode
+    internal ж<token.File> @file; // source file handle
+    internal @string dir;         // directory portion of file.Name()
+    internal slice<byte> src;     // source
+    internal ErrorHandler err;    // error reporting; or nil
+    internal Mode mode;           // scanning mode
     // scanning state
     internal rune ch;             // current character
     internal nint offset;         // character offset
@@ -148,7 +148,7 @@ internal static Mode dontInsertSemis => 2;            // do not automatically in
 //
 // Note that Init may call err if there is an error in the first character
 // of the file.
-internal static void Init⁔(/*this*/ ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, Action<token.Position, @string> err, Mode mode) {
+internal static void Init⁔(/*this*/ ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, ErrorHandler err, Mode mode) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     // Explicitly initialize all fields since a scanner may be reused.
@@ -182,7 +182,7 @@ internal static void error⁔(/*this*/ ref Scanner s, nint offs, @string msg) {
 }
 
 internal static void errorf⁔(/*this*/ ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     s.error(offs, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }

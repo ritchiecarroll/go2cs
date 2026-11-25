@@ -1,0 +1,29 @@
+Usage: go2cs [options] <input> [output_dir]
+
+Common options:
+  -recurse[=module,nuget]  Convert a module and its third-party dependencies (=module: the module
+                           only; =nuget: standard library from NuGet)
+  -go2cspath <dir>         Where the go2cs standard library and runtime are when not from NuGet, and
+                           where -stdlib writes
+  -platforms <os/arch>     The target platform, os/arch (default: this machine's)
+  -tags <list>             Build tags applied when loading packages, comma-separated
+  -comments                Carry the Go source comments into the C#
+  -stdlib                  For go2cs development: convert the Go standard library into the
+                           -go2cspath root
+  -cgo                     Convert a cgo package whose C use go2cs can bind (needs a C compiler)
+  -tests                   Also convert the package's Go tests and emit a runnable C# test host
+  -test-action <action>    With -tests: convert, build, run, compare (with go test) or all
+  -version                 Print the converter's release tuple and exit
+
+Examples:
+  go2cs -recurse=nuget module_dir out        convert a program (its module and dependencies); the
+                                             standard library comes from NuGet
+  cd out/src/<import-path> && dotnet run     then build and run it (needs the .NET 10 SDK)
+  go2cs package_dir out                      convert one package; it builds against a go2cs clone
+                                             (-go2cspath)
+  go2cs -tests -test-action all pkg_dir out  convert a package's tests, run them and compare with go
+                                             test (in a go2cs clone)
+
+go2cs -help all lists every option. go2cs -help <option> explains one, for example go2cs -help tests.
+go2cs toolchain -help manages the Go toolchain go2cs converts with.
+Every option, in full: https://go2cs.net/CommandLine.html

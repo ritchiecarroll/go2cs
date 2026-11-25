@@ -4,7 +4,7 @@ namespace go;
 
 using fmt = fmt_package;
 using os = os_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
@@ -12,7 +12,7 @@ partial struct holder {
     internal any v;
 }
 
-// type byteFunc is a methodless func type — rendered inline as its base delegate
+internal delegate @string byteFunc(byte _);
 
 internal static int8 a = 100;
 internal static uint8 u = 200;
@@ -31,7 +31,7 @@ internal static @string show(any x) { return fmt.Sprintf("%v %T"u8, x, x); }
 internal static any ret(int8 a) { return (int8)(a + a); }
 
 internal static @string variadic(params ꓸꓸꓸany xsʗp) {
-    var xs = xsʗp.sslice();
+    var xs = xsʗp;
 
     return fmt.Sprint(xs.ꓸꓸꓸ);
 }
@@ -186,7 +186,7 @@ internal static void main() {
     arm("negated minimum", [GoFunc("main.func31")] () => fmt.Sprint((nint)((int8)(-m8)), " ", (int64)((int8)(-m8))));
     arm("named func param", [GoFunc("main.func32")] () => {
 
-        Func<byte, @string> f = [GoFunc("main.func32.1")] (byte b) => fmt.Sprint(b);
+        byteFunc f = [GoFunc("main.func32.1")] (byte b) => fmt.Sprint(b);
         return f((byte)(u + w8)) + " "u8 + f((byte)((u >> 1)));
     });
 

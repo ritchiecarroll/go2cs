@@ -39,7 +39,7 @@ func (v *Visitor) visitSendStmt(sendStmt *ast.SendStmt, format FormattingContext
 
 	var channelOperation string
 
-	if v.options.useChannelOperators {
+	if v.chanOperatorSpelling(sendStmt.Chan) {
 		channelOperation = ChannelLeftOp
 	} else {
 		channelOperation = "Send"
@@ -170,6 +170,10 @@ func (v *Visitor) convSendValueExpr(sendStmt *ast.SendStmt) string {
 	if elemIsNonEmptyIface {
 		sendExpr = v.convertToInterfaceType(elemType, v.getExprType(sendStmt.Value), sendExpr)
 	}
+
+	// A func value sent on a channel of a different func type (`ch <- plain`, ch a `chan F`): a defined func type
+	// and its unnamed signature convert implicitly in Go (see funcValueForSlot).
+	sendExpr = v.funcValueForSlot(elemType, sendStmt.Value, sendExpr)
 
 	// An untyped CONSTANT sent into an EMPTY-interface element boxes at Go's default type for its
 	// kind (the numeric twin of the @string boxing above), so a later `x.(int)` / `case int:` on the

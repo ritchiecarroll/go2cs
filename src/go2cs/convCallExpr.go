@@ -317,6 +317,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return door
 	}
 
+	// A conversion from a defined func type TO its unnamed signature, `(func(string) error)(f)`, converts as an
+	// assignment does (funcValueForSlot). Its callee is a func-type LITERAL, which isTypeConversion does not
+	// classify, so it would otherwise render as the cast `(Func<…>)(f)`: no cast exists between two delegate
+	// types, and followed by a call, `(Func<…>)(f)(x)` does not parse as one.
+	if converted, ok := v.funcTypeLiteralConversion(callExpr); ok {
+		return converted
+	}
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
@@ -1040,7 +1048,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// `unsafe.Pointer` args are not boxes and keep the implicit-cast path below; only a genuine
 		// pointer arg needs this.) The numeric address is still not GC-stable — the same caveat as
 		// every unsafe.Pointer-as-uintptr use; the RETAINED box is what survives a move.
-		if targetTypeName == "@unsafe.Pointer" {
+		//
+		// An ALIAS of unsafe.Pointer (`type ptr = unsafe.Pointer`) is the same type, so it takes every arm of this door,
+		// spelled through the alias name (pointerName), which a file that does not import unsafe can still name.
+		// Gated on the name alone, an alias skipped the block: rule 6 below became `(ptr)h.Data`, a number that keeps
+		// nothing, and the named-uintptr and receiver arms failed to compile.
+		if targetTypeName == "@unsafe.Pointer" || v.isUnsafePointerAlias(callExpr.Fun) {
+			pointerName := v.unsafePointerConversionName(callExpr.Fun)
+			targetTypeName = pointerName
+
 			// Go's unsafe RULE 6 on a reflect header's Data field: `unsafe.Pointer(h.Data)` in ONE expression, with h a
 			// *reflect.StringHeader or *reflect.SliceHeader (spelled `h.Data`, `(*h).Data`, or the inline conversion's
 			// `.Data`). Go's pointer keeps what the header describes alive, and the number the field holds keeps nothing,
@@ -1053,14 +1069,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// the emission stays today's number pointer (P3's arm b: it must compile).
 			if header, ok := v.reflectHeaderDataOperand(arg); ok {
 				if !v.exprIsDerefAliasedPointer(header) {
-					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", v.convExpr(header, nil))
+					return fmt.Sprintf("%s.FromHeaderData(%s)", pointerName, v.convExpr(header, nil))
 				}
 
 				identContext := DefaultIdentContext()
 				identContext.isPointer = true
 
 				if box := v.convExpr(header, []ExprContext{identContext}); strings.HasPrefix(box, AddressPrefix) {
-					return fmt.Sprintf("@unsafe.Pointer.FromHeaderData(%s)", box)
+					return fmt.Sprintf("%s.FromHeaderData(%s)", pointerName, box)
 				}
 
 				// DELIBERATE fall-through to the number pointer below: an alias with no box (a `[GoRecv] this ref T`
@@ -1078,10 +1094,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok {
 				if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Kind() == types.Uintptr {
 					if v.needsParentheses(arg) {
-						return fmt.Sprintf("((@unsafe.Pointer)(uintptr)(%s))", expr)
+						return fmt.Sprintf("((%s)(uintptr)(%s))", pointerName, expr)
 					}
 
-					return fmt.Sprintf("((@unsafe.Pointer)(uintptr)%s)", expr)
+					return fmt.Sprintf("((%s)(uintptr)%s)", pointerName, expr)
 				}
 
 				// A NAMED-over-POINTER arg — `unsafe.Pointer(result.Addr)` where Addr is
@@ -1089,7 +1105,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// the named wrapper's uintptr bridge provides the first leg, golib Pointer
 				// converts from uintptr — same two-leg hop as the named-numeric arm above.
 				if _, isPtrUnder := argNamed.Underlying().(*types.Pointer); isPtrUnder {
-					return fmt.Sprintf("((@unsafe.Pointer)(uintptr)(%s))", expr)
+					return fmt.Sprintf("((%s)(uintptr)(%s))", pointerName, expr)
 				}
 			}
 
@@ -1111,7 +1127,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
 
-					return v.unsafePointerBoxEmission(callExpr, arg, v.convExpr(arg, []ExprContext{identContext}))
+					return v.unsafePointerBoxEmission(callExpr, arg, v.convExpr(arg, []ExprContext{identContext}), pointerName)
 				}
 
 				// A deref-aliased pointer RECEIVER renders as the pointed-to VALUE alias
@@ -1120,14 +1136,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// mint that cannot retain (FromRef sees only the ref); a recorded residual, loud at
 				// the primitives if ever reached.
 				if v.exprIsDerefAliasedPointer(arg) {
-					if emission, ok := v.receiverPointerAtProvenUse(callExpr); ok {
+					if emission, ok := v.receiverPointerAtProvenUse(callExpr, pointerName); ok {
 						return emission
 					}
 
-					return fmt.Sprintf("@unsafe.Pointer.FromRef(ref %s)", expr)
+					return fmt.Sprintf("%s.FromRef(ref %s)", pointerName, expr)
 				}
 
-				return fmt.Sprintf("@unsafe.Pointer.FromBox(%s)", expr)
+				return fmt.Sprintf("%s.FromBox(%s)", pointerName, expr)
 			}
 		}
 
@@ -2727,23 +2743,35 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// parameter is the written `func(ResponseWriter, *Request)` (CS1503). Go converts
 				// named→structural implicitly; C# needs the same delegate re-wrap, targeting the
 				// synthesized structural delegate: `new Action<ResponseWriter, ж<Request>>(handler)`.
-				// Two argument shapes render named: a value whose GO type is a named func type
-				// (with methods — a METHODLESS named func type already renders as the structural
-				// delegate itself and stays bare), and a `:=` local DECLARED from a method group,
+				// Two argument shapes render named: a value whose GO type is a named func type,
+				// and a `:=` local DECLARED from a method group,
 				// which the declaration emission types with the matching package named delegate
 				// (`HandlerFunc handler = Ꮡsc.Value.handler.ServeHTTP;` — see visitAssignStmt's
 				// methodGroupDelegateType) even though go/types keeps it structural. Method
 				// groups and func literals themselves convert natively and are excluded by both
 				// gates.
-				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && paramHasArg && !typeContainsTypeParams(paramType) {
+				//
+				// A generic callee's structural parameter can name its type parameters inside the signature
+				// (`count[T any](p func(T) bool, v T)`), which typeContainsTypeParams does not look into. The wrap
+				// then targets the parameter as this call instantiates it (`func(int) bool`), from which C# also
+				// infers T; a parameter still open after that keeps the value as it is.
+				structuralParamType := paramType
+
+				if signatureMentionsTypeParams(paramType) {
+					structuralParamType = v.instantiatedParamType(callExpr, i)
+
+					if structuralParamType == nil || signatureMentionsTypeParams(structuralParamType) {
+						structuralParamType = nil
+					}
+				}
+
+				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && paramHasArg && structuralParamType != nil && !typeContainsTypeParams(paramType) {
 					if argType := v.getType(callExpr.Args[i], false); argType != nil {
 						argRendersNamedDelegate := false
 
 						if argNamed, ok := types.Unalias(argType).(*types.Named); ok {
 							if _, argIsSig := argNamed.Underlying().(*types.Signature); argIsSig {
-								if _, collapses := methodlessNamedFuncSignature(argNamed); !collapses {
-									argRendersNamedDelegate = true
-								}
+								argRendersNamedDelegate = true
 							}
 						} else if argSig, ok := types.Unalias(argType).(*types.Signature); ok {
 							if argIdent, ok := callExpr.Args[i].(*ast.Ident); ok &&
@@ -2753,7 +2781,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						if argRendersNamedDelegate {
-							v.recordDelegateArgWrap(callExprContext, i, paramType, callExpr.Args[i], argType)
+							v.recordDelegateArgWrap(callExprContext, i, structuralParamType, callExpr.Args[i], argType)
 						}
 					}
 				}
@@ -2874,6 +2902,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							// The unsafe.Pointer sibling: a nil one is a null CLASS reference.
 							if isExactUnsafePointer(argType) {
 								callExprContext.markAnyBoxedUnsafePointerArg(j)
+							}
+
+							// The named-pointer sibling: its wrapper class's zero value is a null reference.
+							if isNamedPointerType(argType) && isEmptyInterfaceTarget(paramType) {
+								callExprContext.markAnyBoxedNamedPointerArg(j)
 							}
 
 							// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
@@ -3037,7 +3070,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						return fmt.Sprintf("%d", arr.Len())
 					}
 
-					return fmt.Sprintf("%s(%s.Value)", ident.Name, v.convExpr(callExpr.Args[0], nil))
+					// A named pointer type itself named Value declares the member as NamedWrapperValue (pointerWrapperMember).
+					return fmt.Sprintf("%s(%s.%s)", ident.Name, v.convExpr(callExpr.Args[0], nil), v.pointerWrapperMember(v.info.TypeOf(callExpr.Args[0]), "Value"))
 				}
 			}
 		}
@@ -3373,6 +3407,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 									callExprContext.markAnyBoxedUnsafePointerArg(i)
 								}
 
+								if isNamedPointerType(argType) {
+									callExprContext.markAnyBoxedNamedPointerArg(i)
+								}
+
 								// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
 								if typeParam, isTypeParam := argType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) {
 									callExprContext.markAnyBoxedTypeParamArg(i)
@@ -3397,8 +3435,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// family).
 					if named, isNamed := types.Unalias(sliceUnder.Elem()).(*types.Named); isNamed {
 						switch named.Underlying().(type) {
-						case *types.Basic, *types.Interface:
-							// numeric / interface element casts are handled above
+						case *types.Basic, *types.Interface, *types.Signature:
+							// numeric / interface element casts are handled above; a defined func type element
+							// converts through the nil-safe delegate wrap the variadic arguments take (a cast
+							// between two delegate types does not compile)
 						default:
 							elemCSType := convertToCSTypeName(v.getAliasQualifiedTypeName(sliceUnder.Elem(), false))
 
@@ -3673,7 +3713,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// This is required since unsafe.Pointer is in its own library and no implicit cast can
 		// be added for it on the pointer class (ж<T>) in the core library without creating a
 		// circular dependency.
-		if resultType.String() == "unsafe.Pointer" {
+		//
+		// An ALIAS of unsafe.Pointer prints its own name here, so the test is on the type: the alias takes the receiver
+		// arm below as unsafe.Pointer does, spelled through the alias (C45).
+		if isUnsafePointerBasic(resultType) {
+			pointerName := v.unsafePointerConversionName(callExpr.Fun)
+
 			if len(constructType) == 0 {
 				// …unless the call IS a bare expression statement, where nothing consumes the
 				// result and C# allows only a call, never a cast: `func() { SwapPointer(nil, nil) }`
@@ -3734,11 +3779,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						//
 						// At a use known at this node, and with the receiver's box in scope, the box is
 						// emitted instead (receiverPointerAtProvenUse); every other use keeps FromRef.
-						if emission, ok := v.receiverPointerAtProvenUse(callExpr); ok {
+						if emission, ok := v.receiverPointerAtProvenUse(callExpr, pointerName); ok {
 							return emission
 						}
 
-						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
+						return fmt.Sprintf("(uintptr)%s.FromRef(ref %s)", pointerName, v.convExpr(callExpr.Args[0], nil))
 					}
 				}
 			}
@@ -4207,8 +4252,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// The `unsafe.Pointer(x)` constructor form of the dead-wrapper peephole (see
 		// markDeadUnsafePointerBox): the enclosing `uintptr(…)` reads the address straight back
 		// out, so the wrapper object is never built and the operand stands alone.
+		//
+		// An ALIAS of unsafe.Pointer (`type ptr = unsafe.Pointer`, github.com/zeebo/xxh3's utils.go) is the same type and
+		// takes the same door: spelled `new ptr(Ꮡ(…))` it bound the bare mint, which retains nothing, so a pointer to a
+		// composite literal (`ptr(&[secretSize]byte{})`, the package's `key`) lost its storage to the collector while
+		// the pointer was still in use (C45 D6, the converted xxh3 identity program).
 		if constructType == "new " && funcName == "@unsafe.Pointer" && len(callExpr.Args) == 1 {
-			result = v.unsafePointerBoxEmission(callExpr, callExpr.Args[0], expr)
+			result = v.unsafePointerBoxEmission(callExpr, callExpr.Args[0], expr, funcName)
+		} else if constructType == "new " && v.isUnsafePointerAlias(callExpr.Fun) && len(callExpr.Args) == 1 {
+			result = v.unsafePointerBoxEmission(callExpr, callExpr.Args[0], expr, v.unsafePointerConversionName(callExpr.Fun))
 		} else {
 			// Go's stack backing store: a variable's first qualifying append passes the buffer its function declared
 			// at entry (stackAppendHints.go).
@@ -5293,12 +5345,17 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 				// rendered through THIS FILE's alias (getCSharpTypeName prefers
 				// importPathAliases), so the using must declare that alias too: go-cmp's test
 				// imports `ts "…/internal/teststructs"`, records `ts.AssignB`, and the
-				// package-name using left `ts` undeclared (CS0246).
+				// package-name using left `ts` undeclared (CS0246). The alias is spelled as every
+				// other import alias is (getSanitizedImport): a package named by a C# keyword
+				// (go-json-experiment's `internal`) declares `using @internal = …;`, where the bare
+				// keyword fails CS1041 and every following directive in the file cascades.
 				qualifier := importQualifier(pkg.Name())
 
 				if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
 					qualifier = fileAlias
 				}
+
+				qualifier = getSanitizedImport(qualifier)
 
 				packageLock.Lock()
 				conversionPackageUsings[qualifier] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
@@ -5747,6 +5804,22 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 				case *types.Basic:
 					if srcUnder.Kind() == types.UnsafePointer {
 						carried = storedValue(false)
+					} else if srcUnder.Info()&types.IsString != 0 {
+						// A STRING's first word is its data pointer: `unsafe.Pointer(unsafe.StringData(s))`'s own
+						// emission, which carries the element box and takes no pin. An empty string reads nil, as
+						// in Go. zeebo/xxh3 reads it this way (hasher.go, `*(*ptr)(ptr(&buf))`; C45 D4).
+						carried = fmt.Sprintf("@unsafe.Pointer.FromBox(@unsafe.StringData(%s))", storedValue(false))
+					}
+				case *types.Slice:
+					// A SLICE's first word is its data pointer too: `unsafe.Pointer(unsafe.SliceData(b))`. A named
+					// slice type reaches slice<T> only through its implicit conversion, which C# type inference
+					// does not apply, so the element type is spelled for it.
+					slice := storedValue(false)
+
+					if _, named := srcElem.(*types.Named); named {
+						carried = fmt.Sprintf("@unsafe.Pointer.FromBox(@unsafe.SliceData<%s>(%s))", v.getCSharpTypeName(srcUnder.Elem()), slice)
+					} else {
+						carried = fmt.Sprintf("@unsafe.Pointer.FromBox(@unsafe.SliceData(%s))", slice)
 					}
 				}
 			}
@@ -6437,6 +6510,45 @@ func (v *Visitor) needsParentheses(expr ast.Expr) bool {
 	}
 }
 
+// funcTypeLiteralConversion renders `(func(…) …)(x)` where x is a value of a defined func type of that signature.
+// Any other func-type conversion (a nil, a func literal, a value already of the unnamed type) is left to the
+// regular path.
+func (v *Visitor) funcTypeLiteralConversion(callExpr *ast.CallExpr) (string, bool) {
+	if len(callExpr.Args) != 1 || callExpr.Ellipsis.IsValid() {
+		return "", false
+	}
+
+	if _, isFuncType := ast.Unparen(callExpr.Fun).(*ast.FuncType); !isFuncType {
+		return "", false
+	}
+
+	calleeTV, ok := v.info.Types[callExpr.Fun]
+
+	if !ok || !calleeTV.IsType() {
+		return "", false
+	}
+
+	arg := callExpr.Args[0]
+	argType := v.info.TypeOf(arg)
+
+	if argType == nil || types.Identical(argType, calleeTV.Type) {
+		return "", false
+	}
+
+	if _, isNamed := types.Unalias(argType).(*types.Named); !isNamed {
+		return "", false
+	}
+
+	rendered := v.convExpr(arg, nil)
+	converted := v.funcValueForSlot(calleeTV.Type, arg, rendered)
+
+	if converted == rendered {
+		return "", false
+	}
+
+	return converted, true
+}
+
 func (v *Visitor) isConstructorCall(callExpr *ast.CallExpr) bool {
 	// Get the object associated with the function being called.
 	//
@@ -6448,6 +6560,12 @@ func (v *Visitor) isConstructorCall(callExpr *ast.CallExpr) bool {
 	// two IIFE spellings. Unwrapping cannot widen the answer beyond that: `(*T)(x)` and
 	// `(func())(nil)` unwrap to *ast.StarExpr / *ast.FuncType, which still hit the default arm.
 	var obj types.Object
+
+	// An instance of a GENERIC alias of unsafe.Pointer (`gptr[int](&x)`) is spelled as an index expression, but it is
+	// the same conversion as `unsafe.Pointer(&x)` and takes its constructor route (unsafePointerConversionName).
+	if v.isUnsafePointerAlias(callExpr.Fun) {
+		return true
+	}
 
 	switch funExpr := ast.Unparen(callExpr.Fun).(type) {
 	case *ast.Ident:
@@ -6547,6 +6665,30 @@ func typeContainsTypeParams(t types.Type) bool {
 				if typeContainsTypeParams(args.At(i)) {
 					return true
 				}
+			}
+		}
+	}
+
+	return false
+}
+
+// signatureMentionsTypeParams reports whether t is a func signature any of whose parameters or results is, or
+// contains, an unbound type parameter, looking into nested signatures as well.
+func signatureMentionsTypeParams(t types.Type) bool {
+	sig, ok := types.Unalias(t).(*types.Signature)
+
+	if !ok {
+		return false
+	}
+
+	for _, tuple := range []*types.Tuple{sig.Params(), sig.Results()} {
+		if tuple == nil {
+			continue
+		}
+
+		for i := range tuple.Len() {
+			if element := tuple.At(i).Type(); typeContainsTypeParams(element) || signatureMentionsTypeParams(element) {
+				return true
 			}
 		}
 	}
@@ -6773,7 +6915,9 @@ func (v *Visitor) getFunctionSignature(callExpr *ast.CallExpr) *types.Signature 
 
 	resultType := v.info.TypeOf(callExpr)
 
-	if resultType != nil && strings.Contains(resultType.String(), "unsafe.Pointer") {
+	// An alias of unsafe.Pointer does not print that name, so the type is tested too. The string test stays beside it:
+	// it also admits a type that only spells unsafe.Pointer inside (a *unsafe.Pointer), which this does not re-scope.
+	if resultType != nil && (isUnsafePointerBasic(resultType) || strings.Contains(resultType.String(), "unsafe.Pointer")) {
 		pkg := types.NewPackage("unsafe", "unsafe")
 
 		// Only concerned with making the parameter a "pointer like" type
@@ -7660,10 +7804,11 @@ func (v *Visitor) markDeadUnsafePointerBox(callExpr *ast.CallExpr, arg ast.Expr)
 
 // unsafePointerBoxEmission renders an `unsafe.Pointer(x)` conversion whose operand has already been
 // converted to operandExpr — as the wrapper construction, or as the bare operand when the wrapper is
-// dead (see markDeadUnsafePointerBox). The operand keeps the file's usual parenthesization rule: a
+// dead (see markDeadUnsafePointerBox). typeName is the name the conversion spells: `@unsafe.Pointer`, or an alias of it
+// (`ptr`), which a file that does not import unsafe can still name. The operand keeps the file's usual parenthesization rule: a
 // primary expression stands alone under the enclosing `(uintptr)` cast, while one that binds looser
 // than a cast (`unsafe.Pointer(uintptr(p) + off)`) is wrapped so the cast still applies to all of it.
-func (v *Visitor) unsafePointerBoxEmission(callExpr *ast.CallExpr, arg ast.Expr, operandExpr string) string {
+func (v *Visitor) unsafePointerBoxEmission(callExpr *ast.CallExpr, arg ast.Expr, operandExpr, typeName string) string {
 	if !v.deadUnsafePointerBoxes[callExpr] {
 		// A POINTER operand renders as the managed box `ж<T>`, and `new @unsafe.Pointer(box)` binds
 		// the implicit `ж<T> → uintptr` conversion into `Pointer(uintptr)` — which PINS the storage (the
@@ -7680,10 +7825,10 @@ func (v *Visitor) unsafePointerBoxEmission(callExpr *ast.CallExpr, arg ast.Expr,
 		// Only a genuine POINTER operand takes this door: a `uintptr` or `unsafe.Pointer` operand is a
 		// number rather than a box, and `Pointer(uintptr)` is the right and only mint for it.
 		if _, isPtr := types.Unalias(v.info.TypeOf(arg)).(*types.Pointer); isPtr {
-			return fmt.Sprintf("@unsafe.Pointer.FromPinnedBox(%s)", operandExpr)
+			return fmt.Sprintf("%s.FromPinnedBox(%s)", typeName, operandExpr)
 		}
 
-		return fmt.Sprintf("new @unsafe.Pointer(%s)", operandExpr)
+		return fmt.Sprintf("new %s(%s)", typeName, operandExpr)
 	}
 
 	// An ADDRESS-OF operand is the exception among the shapes needsParentheses rejects: `&x` renders
@@ -7796,6 +7941,39 @@ func (v *Visitor) isUnsafePointerType(expr ast.Expr) bool {
 	basic, isBasic := t.Underlying().(*types.Basic)
 
 	return isBasic && basic.Kind() == types.UnsafePointer
+}
+
+// isUnsafePointerAlias reports whether expr denotes an ALIAS of unsafe.Pointer (`type ptr = unsafe.Pointer`): the same
+// type under another name, unlike a defined type over it (`type P unsafe.Pointer`), which keeps its own name.
+func (v *Visitor) isUnsafePointerAlias(expr ast.Expr) bool {
+	t := v.info.TypeOf(expr)
+
+	if _, isAlias := t.(*types.Alias); !isAlias {
+		return false
+	}
+
+	basic, isBasic := types.Unalias(t).(*types.Basic)
+
+	return isBasic && basic.Kind() == types.UnsafePointer
+}
+
+// unsafePointerConversionName answers the name a conversion to unsafe.Pointer spells when fun denotes the target type:
+// `@unsafe.Pointer`, or the alias's own name for an ALIAS of it (`ptr`, `subꓸPtr`), which a file that does not import
+// unsafe can still name. An INSTANCE of a generic alias (`type gptr[T any] = unsafe.Pointer`, `gptr[int](&x)`) has no C#
+// declaration to name, since a `global using` takes no type parameters, so it spells unsafe.Pointer itself, as a
+// variable of that type does.
+func (v *Visitor) unsafePointerConversionName(fun ast.Expr) string {
+	if !v.isUnsafePointerAlias(fun) {
+		return "@unsafe.Pointer"
+	}
+
+	alias := v.info.TypeOf(fun).(*types.Alias)
+
+	if alias.TypeArgs().Len() > 0 {
+		return "@unsafe.Pointer"
+	}
+
+	return convertToCSTypeName(v.getAliasQualifiedTypeName(alias, false))
 }
 
 // isPointerToUnsafePointerType reports whether expr denotes `*unsafe.Pointer` (the conversion

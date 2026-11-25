@@ -7,11 +7,12 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards a `:=` local (and a `_ =` discard) initialized from a method group whose signature matches
-// a METHODLESS named func type of the package. Such a type is rendered inline as its base delegate
-// and declares no C# type (methodlessNamedFuncSignature), but namedFuncTypeNameForSignature still
-// offered its name for the local, so the local was declared with a type that does not exist: CS0246
-// at Go 1.26's internal/runtime/gc/scan tests (`expR := scan.ExpandReference` beside
-// `type expandFunc func(...)`, and `scanR := scan.ScanSpanPackedReference` beside `type scanFunc`).
+// a METHODLESS named func type of the package. Go types the local with the UNNAMED signature, so it
+// keeps the structural delegate (`var expR = expandRef;`), never the named one: naming it gave the
+// local the wrong identity, and before every defined func type had its own delegate it named a type
+// that did not exist (CS0246 at Go 1.26's internal/runtime/gc/scan tests, `expR :=
+// scan.ExpandReference` beside `type expandFunc func(...)`). Passing the local to a parameter of the
+// named type converts it as Go does (NilSafeDelegateConversion).
 //
 // Control: a SELF-REFERENTIAL func type (`type stateFn func(*lexer) stateFn`) does not collapse and
 // keeps its named delegate, which the state-machine reassignment `state = state(l)` needs.
@@ -40,7 +41,7 @@ func TestMethodlessFuncTypeNameNeverTypesALocal(t *testing.T) {
 
 import "strings"
 
-// Methodless and naming no func type: rendered inline as its base delegate.
+// Methodless and naming no func type: its own delegate; a local from a matching method group stays unnamed.
 type expandFunc func(n int, out *int)
 
 type upperFunc func(string) string
@@ -112,14 +113,23 @@ func main() {
 
 	output := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "inlinefunctype", "main.cs"))
 
-	// The collapsed names may appear only in their declaration markers; any other line using one names
-	// a type that was never emitted.
-	for _, name := range []string{"expandFunc", "upperFunc"} {
-		for _, line := range strings.Split(output, "\n") {
-			if strings.Contains(line, name) && !strings.Contains(line, "// type "+name+" is a methodless func type") {
-				t.Errorf("collapsed func type %s is named outside its marker (it has no C# type; CS0246):\n%s", name, line)
-			}
+	// Each methodless func type is declared as its own delegate.
+	for _, decl := range []string{"internal delegate void expandFunc(", "internal delegate @string upperFunc("} {
+		if !strings.Contains(output, decl) {
+			t.Errorf("expected the delegate declaration %q:\n%s", decl, output)
 		}
+	}
+
+	// The method-group locals keep the unnamed type Go gives them.
+	for _, local := range []string{"var expR = expandRef;", "var up = strings.ToUpper;"} {
+		if !strings.Contains(output, local) {
+			t.Errorf("expected the method-group local typed structurally (%q):\n%s", local, output)
+		}
+	}
+
+	// The unnamed local reaches the named parameter through the nil-safe conversion.
+	if want := "useExpand(NilSafeDelegateConversion<expandFunc, Action<nint, ж<nint>>>(expR))"; !strings.Contains(output, want) {
+		t.Errorf("expected the unnamed local converted to the named parameter (%q):\n%s", want, output)
 	}
 
 	// The self-referential control keeps its named delegate for the method-group local.

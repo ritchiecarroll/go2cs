@@ -53,7 +53,9 @@ namespace go;
 /// SCOPE. <typeparamref name="TDst"/> is a value type whose two instance fields are, in declaration order, the
 /// <c>unsafe.Pointer</c> class and an <c>nint</c>: unsafeheader.String, runtime.stringStruct, internal/runtime/maps'
 /// stringStruct. Or a <c>uintptr</c> and an <c>nint</c>, <c>reflect.StringHeader</c>: the NUMBER shape, whose Data
-/// follows Go's rodata-or-heap split (see <c>s_dataIsNumber</c>; docs/phase4/DESIGN-sqlite-ccgo-ts.md).
+/// follows Go's rodata-or-heap split (see <c>s_dataIsNumber</c>; docs/phase4/DESIGN-sqlite-ccgo-ts.md). The length may
+/// also be an UNSIGNED <c>uint</c> (<c>nuint</c>): github.com/zeebo/xxh3's <c>str{p unsafe.Pointer; l uint}</c>, the
+/// same two words with Len read and written as Go's uint (see <c>s_lenIsUnsigned</c>; C45).
 /// </para>
 /// </remarks>
 internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
@@ -85,7 +87,10 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
         // reflect.StringHeader's Data is a NUMBER (uintptr); see s_dataIsNumber.
         bool number = pointerType == typeof(uintptr);
 
-        if (fields[1].FieldType != typeof(nint))
+        // Go's int (nint), or an unsigned uint (nuint): the same word, Len's sign aside (C45, zeebo/xxh3's header).
+        bool unsignedLen = fields[1].FieldType == typeof(nuint);
+
+        if (fields[1].FieldType != typeof(nint) && !unsignedLen)
             return;
 
         MethodInfo? fromBox = null;
@@ -104,6 +109,7 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
         s_fields = fields;
         s_fromBox = fromBox;
         s_dataIsNumber = number;
+        s_lenIsUnsigned = unsignedLen;
         Applies = true;
     }
 
@@ -126,6 +132,16 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
     //   PINNED while h2's header box lives; for a header over package-level storage that is one pinned array for the
     //   process, per header. Bounded by the headers, not by the reads.
     private static readonly bool s_dataIsNumber;
+
+    // Whether the header's Len is a uint (nuint) rather than Go's int (nint). A Len past nint's range is not a length any
+    // string has, so it reads as negative and is refused as an inconsistent header would be (L2).
+    private static readonly bool s_lenIsUnsigned;
+
+    // The resolved shape, for the slice-origin header (SliceStringHeaderBox), which serves the same header types.
+    internal static FieldInfo[]? Fields => s_fields;
+    internal static MethodInfo? FromBoxMethod => s_fromBox;
+    internal static bool DataIsNumber => s_dataIsNumber;
+    internal static bool LenIsUnsigned => s_lenIsUnsigned;
 
     internal static ж<TDst> Mint(ж<@string> source)
     {
@@ -194,7 +210,8 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
     {
         object boxed = m_value!;
         object? data = s_fields![0].GetValue(boxed);
-        nint len = (nint)s_fields[1].GetValue(boxed)!;
+        object lenWord = s_fields[1].GetValue(boxed)!;
+        nint len = s_lenIsUnsigned ? unchecked((nint)(nuint)lenWord) : (nint)lenWord;
 
         // A number Data (D5) resolves through the registry, or through the element box this header minted it from. An (L)
         // copy's number is native memory, so a store of it rebuilds the string as a copy.
@@ -344,7 +361,9 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
             return m_mintNumber;
         }
 
-        ж<byte> element = builtin.Ꮡ(window, 0);
+        // A static backing (a literal, a one-byte string) reads unsafe.StringData's private copy, so Data equals
+        // StringData(s) as in Go (ReadOnlyStringBacking).
+        ж<byte> element = ReadOnlyStringBacking.TryDataBox(window) ?? builtin.Ꮡ(window, 0);
         elementBox = element;
         return ((INilPointer)element).StableAddress();
     }
@@ -395,7 +414,8 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
         {
             if (m_pointer is null || !SameWindow(source, m_pointerFor))
             {
-                object? elementZero = source.Length == 0 ? null : builtin.Ꮡ(source.UnsafeBackingWindow(), 0);
+                slice<byte> window = source.UnsafeBackingWindow();
+                object? elementZero = source.Length == 0 ? null : ReadOnlyStringBacking.TryDataBox(window) ?? builtin.Ꮡ(window, 0);
                 m_pointer = s_fromBox!.Invoke(null, [elementZero]);
                 m_pointerFor = source;
             }
@@ -403,7 +423,7 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
             s_fields![0].SetValue(boxed, m_pointer);
         }
 
-        s_fields[1].SetValue(boxed, (nint)source.Length);
+        s_fields[1].SetValue(boxed, s_lenIsUnsigned ? (object)(nuint)source.Length : (nint)source.Length);
 
         m_value = (TDst)boxed;
         m_handedOut = m_value;

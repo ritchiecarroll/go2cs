@@ -4,9 +4,9 @@ using errors = errors_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using sort = sort_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 
@@ -101,8 +101,6 @@ internal static @string callString(any fn, params ꓸꓸꓸany argsʗp) {
 }
 
 internal static void main() {
-    var namesᴷ = new stackAppend<@string>();
-
     fmt.Println("join3    :", callString(join, "go", (nint)1, (nint)2, (nint)3));
     fmt.Println("join0    :", callString(join, "go"));
 
@@ -151,7 +149,7 @@ internal static void main() {
     };
     var names = new slice<@string>(0, len(funcs));
     foreach (var (name, _) in funcs) {
-        names = append(namesᴷ, names, name);
+        names = append(names, name);
     }
     sort.Strings(names);
     foreach (var (_, name) in range(names)) {

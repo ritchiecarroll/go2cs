@@ -21,9 +21,17 @@ SDK picks the build for your machine when it installs the tool. Building the con
 NuGet.
 A single-package `-cgo` conversion builds against a go2cs clone (`dotnet build -p:go2csPath=<go2cs>/src/`). Under
 `-recurse=nuget -cgo`, a module's cgo packages convert with it and reference the `go.*` packages, for the machine's
-own operating system and architecture only. Packing a cgo package for every platform, from the feed, is planned for
-the next release.
-<!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+own operating system and architecture, or for another target when `CC` names that target's C compiler (see `-cgo` in
+[Command line](CommandLine.md)). A module's cgo package is packed for publishing for `win-x64`,
+`linux-x64`, `osx-x64` and `linux-arm64`; `osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64`
+build.
+<!-- 2026-11-23 .5 docs pass (P1), UX-8, at master 97cca467a2 (owner: resolve each "next release" in present tense, as
+     true at .5): "planned for the next release" described the pack before it landed. It landed in train 3
+     (claude/c2-cgo-nuget-pack, claude/c2-cgo-pack-2b, merge ef9be9bd32) and its push gate, the run-time target check
+     A6, in train 4 (claude/c2-cgo-a6, merge c9143ae615): docs/NugetgoPublish.md "Cgo" states the four RIDs, the
+     osx-arm64 exclusion, and that a pack is pushed only against a go.lib that carries A6, which the .5 go.lib does.
+     The other-target sentence: commit 07378119f9 (merge 640d45c9eb, train 3), CommandLine.md's -cgo row. -->
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way"); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 Update it with `dotnet tool update -g go2cs`, and remove it with `dotnet tool uninstall -g go2cs`. To run it once
 without installing it, use `dnx go2cs -- <arguments>`.
@@ -55,6 +63,21 @@ built into the converter before it uses it: go.dev's SHA-256 for the release arc
 
 A module whose `go` line names a newer Go than the tool converts with is refused with a message that says so:
 use the go2cs release built for that Go, or lower the module's `go` line.
+
+Go is needed only to convert. Building, running and deploying the converted C# need .NET alone: the `go.*`
+packages are already C#, so neither the build machine nor the machine the program runs on needs Go. Two
+conversion steps need more than Go. A `-tests` run also runs `go test`, to compare its results with the
+converted tests. A `-cgo` conversion needs a C compiler, but only while it converts: the converted package
+calls the C library's functions directly, so building it needs no C compiler, and running it needs the C
+library itself.
+<!-- Measured 2026-11-24 (P1), linux-x64, master cb6def82a2, .NET SDK 10.0.115. A program using fmt, strings, sort, a
+     map, a goroutine and a channel was converted, then built (`dotnet build -c Release -p:GoTargetOS=linux`) and run
+     in `env -i` with PATH=/usr/lib/dotnet:/usr/bin:/bin: no go on PATH, GOROOT and GO2CS_GOROOT unset. Traced with
+     `strace -f -e trace=execve,openat`: the build executed only dotnet (4) and csc (66), the run only the program;
+     neither opened any path under a Go install, the module cache or go2cs's toolchain cache (0 matches). The program
+     printed what `go run` prints. A cgo program calling `add` from a shared library libadd.so was converted with
+     `-cgo` (gcc as CC), then built the same way: dotnet (4) and csc (50) only, no C compiler executed, and it ran
+     with only libadd.so on LD_LIBRARY_PATH, printing what `go run` prints ("add: 42"). -->
 
 ## `go2cs toolchain`
 

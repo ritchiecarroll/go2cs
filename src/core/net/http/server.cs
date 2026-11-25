@@ -38,7 +38,7 @@ using go.net;
 using go.sync;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class http_package {
 
@@ -259,7 +259,7 @@ partial struct conn {
     // Immutable; never nil.
     internal ж<Server> server;
     // cancelCtx cancels the connection-level context.
-    internal Action cancelCtx;
+    internal context.CancelFunc cancelCtx;
     // rwc is the underlying network connection.
     // This is never wrapped by other types and is the value given out
     // to [Hijacker] callers. It is usually of type *net.TCPConn or
@@ -426,12 +426,12 @@ internal static void close⁔(/*this*/ ref chunkWriter cw) {
 // A response represents the server side of an HTTP response.
 partial struct response {
     internal ж<conn> conn;
-    internal ж<Request> req;        // request for this response
-    internal ж<body> reqBody;       // nil when NoBody
-    internal Action cancelCtx;      // when ServeHTTP exits
-    internal bool wroteHeader;      // a non-1xx header has been (logically) written
-    internal bool wants10KeepAlive; // HTTP/1.0 w/ Connection "keep-alive"
-    internal bool wantsClose;       // HTTP request has Connection "close"
+    internal ж<Request> req;               // request for this response
+    internal ж<body> reqBody;              // nil when NoBody
+    internal context.CancelFunc cancelCtx; // when ServeHTTP exits
+    internal bool wroteHeader;             // a non-1xx header has been (logically) written
+    internal bool wants10KeepAlive;        // HTTP/1.0 w/ Connection "keep-alive"
+    internal bool wantsClose;              // HTTP request has Connection "close"
     internal ж<expectContinueReader> ecReader;
     // canWriteContinue is an atomic boolean that says whether or
     // not a 100 Continue header can be written to the
@@ -3925,7 +3925,7 @@ internal static void SetKeepAlivesEnabled⁔(/*this*/ ж<Server> Ꮡs, bool v) {
 }
 
 internal static void logf⁔(/*this*/ ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     if (s.ErrorLog != nil) {
         s.ErrorLog.Printf(format, args.ꓸꓸꓸ);
@@ -3938,7 +3938,7 @@ internal static void logf⁔(/*this*/ ref Server s, @string format, params ꓸ�
 // via ServerContextKey. If there's no associated server, or if ErrorLog
 // is nil, logging is done via the log package's standard logger.
 internal static void logf(ж<Request> Ꮡr, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (s, _) = r.Context().Value(ServerContextKey.OrTypedNil())._<ж<Server>>(ᐧ);
@@ -4130,7 +4130,7 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<timeoutHandler> Ꮡh, Resp
 
         var ctx = h.testContext;
         if (ctx == nil) {
-            Action cancelCtx = default;
+            context.CancelFunc cancelCtx = default;
             (ctx, cancelCtx) = context.WithTimeout(r.Context(), h.dt);
             var cancelCtxʗ1 = cancelCtx;
             defer(() => cancelCtxʗ1(), ref ᒐ, recovers: true);

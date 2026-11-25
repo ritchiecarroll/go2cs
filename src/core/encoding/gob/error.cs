@@ -4,7 +4,7 @@
 namespace go.encoding;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class gob_package {
 
@@ -23,7 +23,7 @@ partial struct gobError {
 // errorf is like error_ but takes Printf-style arguments to construct an error.
 // It always prefixes the message with "gob: ".
 internal static void errorf(@string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     error_(fmt.Errorf("gob: "u8 + format, args.ꓸꓸꓸ));
 }

@@ -596,6 +596,10 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					if materialized := v.coreTypeParamValue(resultParams.At(i).Type(), v.getExprType(expr), resultExpr); materialized != "" {
 						resultExpr = materialized
 					}
+
+					// A func value returned as a different func type: a defined func type and its unnamed
+					// signature convert implicitly in Go (see funcValueForSlot).
+					resultExpr = v.funcValueForSlot(resultParams.At(i).Type(), expr, resultExpr)
 				}
 
 				// Box an untyped CONSTANT returned as an EMPTY interface at Go's default type (the

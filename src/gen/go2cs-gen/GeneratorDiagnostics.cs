@@ -190,7 +190,7 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    // GO2CS0014, TwinGenerator (M:N, experimental: N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
+    // GO2CS0014, TwinGenerator (M:N, experimental: the N3 design's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
     // caller rule a function that calls through a func value is twinned, so its call can await a pair's twin. A function
     // the generator REFUSES a twin (a by-ref or ref-like parameter, unsafe, an iterator, ...) keeps calling the plain
     // delegate, so a func value that can park blocks its carrier there. Reported once per function, not per call.
@@ -202,8 +202,8 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
-    // GO2CS0015, TwinGenerator (M:N, experimental: the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
-    // FREEZE-SHEET.md 2026-11-13): a go statement the generator does not launch as a twin, where its goroutine could
+    // GO2CS0015, TwinGenerator (M:N, experimental: the LOUD fallback: the A3 decision of 2026-11-12; severity by the owner,
+    // docs/phase4/FREEZE-mn-surface.md 2026-11-13): a go statement the generator does not launch as a twin, where its goroutine could
     // park, keeps its plain launch on a thread. A WARNING by default; WarningsAsErrors (or an .editorconfig severity) on
     // this code is the opt-in that makes it an error. Reported once per go statement, naming the reason.
     public static readonly DiagnosticDescriptor PlainGoLaunch = new(
@@ -248,8 +248,20 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    // GO2CS0020, TwinGenerator (the func-value seat: COORD's ruling of 2026-11-21, docs/phase4/inbox/G/
-    // 20261121T233319Z-COORD.md and its approval): in a package built with twins, a call through a func value whose
+    // GO2CS0019, TwinGenerator (M:N, N1: DESIGN-mn-nopark.md 3.1 and 4.7): an entry of GoTwinsWeak,
+    // GoTwinsCut or go2cs-gen's stdlib table that does nothing in this build, on one of four arms: it names no member, it
+    // names no such call site, or it is dead (a cut whose callee no longer parks, a weak member whose own twin cannot
+    // park). A warning; the stdlib table's GenTests row reads it as an error, so the table cannot rot.
+    public static readonly DiagnosticDescriptor StaleParkEntry = new(
+        id: "GO2CS0019",
+        title: "A weak-member or cut-site entry does nothing",
+        messageFormat: "'{0}' ({1}) is a stale N1 entry: {2}",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
+    // GO2CS0020, TwinGenerator (the func-value fix: a design decision of 2026-11-21,
+    // commit b8de4a762c): in a package built with twins, a call through a func value whose
     // shape the pair test cannot reach (a call's result, a conditional access, a parenthesized or converted value, a
     // signature with no twin delegate type, else the expression's syntax kind) runs the
     // plain delegate, so a stored function that parks holds its carrier there, with nothing else to say so. A WARNING
@@ -263,7 +275,7 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
-    // GO2CS0021, TwinGenerator (M:N, row 7 piece 1: DATA-mn-row7-hosts.md, COORD's ruling (B)): a twin is written into
+    // GO2CS0021, TwinGenerator (M:N, row 7 piece 1: DATA-mn-row7-hosts.md, decision (B)): a twin is written into
     // its host reopened as `partial`, so a member that PARKS in a host that is not partial gets no twin, and every twin
     // that calls it holds its carrier for the call. The hosts with parkers were made partial; this names any that is not.
     public static readonly DiagnosticDescriptor ParkingHostNotPartial = new(

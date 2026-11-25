@@ -954,7 +954,14 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			declared := v.getSignature(funcLit.Type).Params()
 			named := declared.At(declared.Len() - 1)
 
-			if v.options.preferVarDecl {
+			if v.packForwardOnly[param] {
+				// A pack whose only use is a forward binds the pack itself (see packForwardOnly).
+				if v.options.preferVarDecl {
+					prologue = fmt.Sprintf("%s%svar %s = %s;", v.newline, v.indent(bodyIndent), getSanitizedIdentifier(named.Name()), getVariadicParamName(named))
+				} else {
+					prologue = fmt.Sprintf("%s%svariadic<%s> %s = %s;", v.newline, v.indent(bodyIndent), v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(named.Name()), getVariadicParamName(named))
+				}
+			} else if v.options.preferVarDecl {
 				prologue = fmt.Sprintf("%s%svar %s = %s.%s();", v.newline, v.indent(bodyIndent), getSanitizedIdentifier(named.Name()), getVariadicParamName(named), sliceMethod)
 			} else {
 				prologue = fmt.Sprintf("%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(bodyIndent), sliceType, v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(named.Name()), getVariadicParamName(named), sliceMethod)

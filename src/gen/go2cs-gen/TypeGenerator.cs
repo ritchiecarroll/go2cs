@@ -119,7 +119,10 @@ public class TypeGenerator : ISourceGenerator
             // "internal" scope is used so types can be referenced instead of "private".
             // An explicit modifier on the converter's partial declaration wins (e.g. an
             // unexported type publicized because it is an exported field's type — CS0051/CS0052).
-            string scope = GetExplicitAccessModifier(targetSyntax) ?? GetScope(identifier);
+            // A type whose Go name starts with Δ carries it in a [GoName] stamp, and Go exports it: the name rule would
+            // remove the marker as a rename's and read the rest.
+            string scope = GetExplicitAccessModifier(targetSyntax) ??
+                (semanticModel.GetDeclaredSymbol(targetSyntax) is { } declaredType && GetGoNameStamp(declaredType) is { } goTypeName ? GetGoScope(goTypeName) : GetScope(identifier));
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
@@ -162,6 +165,7 @@ public class TypeGenerator : ISourceGenerator
                             ChanDirInitializerMembers = structDeclaration.GetChanDirInitializerMembers(),
                             ReadOnlyZeroSizeMembers = structDeclaration.GetReadOnlyExplicitLayoutMembers(),
                             AlignmentCarrierMembers = structDeclaration.GetAlignmentCarrierMembers(),
+                            GoNameMembers = structDeclaration.GetGoNameMembers(),
                             InlineLayoutFields = structDeclaration.HasGoInlineLayout() ? structDeclaration.GetInstanceFields() : null,
                             HasEqualityOperators = hasEqualityOperators,
                             HandWrittenEquality = DeclaresOwnEquality(semanticModel.GetDeclaredSymbol(structDeclaration) as INamedTypeSymbol),
@@ -311,6 +315,8 @@ public class TypeGenerator : ISourceGenerator
                             TypeName = typeName,
                             TargetTypeName = identifier,
                             TypeClass = "Numeric",
+                            // A Go method named CompareTo takes IComparable<T>'s member explicit (NumericTypeTemplate).
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -519,6 +525,8 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeName = typeName,
                             TypeClass = NamedUnderlyingTypeClass(typeDefinition),
                             ForwardedStructMembers = forwardedMembers,
+                            GoNameMembers = underlyingStruct is not null ? underlyingStruct.GetGoNameMembers() :
+                                foreignUnderlyingSymbol is not null ? StructDeclarationSyntaxExtensions.GetGoNameMembers(foreignUnderlyingSymbol) : [],
                             StructEquality = forwardedMembers is { Count: > 0 },
                             UnderlyingArrayElementType = underlyingArrayElem,
                             ValueClone = valueCloneFields.Length > 0,

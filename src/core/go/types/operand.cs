@@ -14,7 +14,7 @@ using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class types_package {
 
@@ -120,7 +120,7 @@ private static readonly @string withInvalidTypeˢᵇ = " with invalid type"u8;
 //
 // cgofunc    <expr> (<untyped kind> <mode>                    )
 // cgofunc    <expr> (               <mode>       of type <typ>)
-internal static @string operandString(ref operand x, Func<ж<Package>, @string> qf) {
+internal static @string operandString(ref operand x, Qualifier qf) {
     // special-case nil
     if (isTypes2) {
         if (x.mode == nilvalue) {
@@ -474,7 +474,7 @@ internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, �
     }
 
     [GoFunc("(*operand).assignableTo.func2")] void errorf(@string format, params ꓸꓸꓸany argsʗp) {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         if (check != nil && Ꮡcause != nil) {
             @string msg = check.sprintf(format, args.ꓸꓸꓸ);
             if (Ꮡcause.Value != ""u8) {

@@ -34,7 +34,7 @@ using strings = strings_package;
 using global::go.go;
 using global::go.go.@internal;
 using global::go.go.build;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class parser_package {
 
@@ -81,7 +81,7 @@ internal static void init⁔(/*this*/ ж<parser> Ꮡp, ж<token.File> Ꮡfile, s
     var eh = [GoFunc("(*parser).init.func1")] (token.Position pos, @string msg) => {
         Ꮡp.Value.errors.Add(pos, msg);
     };
-    p.scanner.Init(p.@file, src, eh, scanner.ScanComments);
+    p.scanner.Init(p.@file, src, NilSafeDelegateConversion<scanner.ErrorHandler, Action<token.Position, @string>>(eh), scanner.ScanComments);
 
     p.top = true;
     p.mode = mode;
@@ -96,7 +96,7 @@ private static readonly @string dotsᶜᵇ = ". . . . . . . . . . . . . . . . . 
 // ----------------------------------------------------------------------------
 // Parsing support
 internal static void printTrace⁔(/*this*/ ref parser p, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     @string dots = dotsᶜ;
     const nint n = /* len(dots) */ 64;
@@ -3367,7 +3367,7 @@ internal static ast.Stmt /*s*/ parseStmt⁔(/*this*/ ж<parser> Ꮡp) {
     return s;
 }
 
-// type parseSpecFunction is a methodless func type — rendered inline as its base delegate
+internal delegate ast.Spec parseSpecFunction(ж<ast.CommentGroup> doc, token.Token keyword, nint iota);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string importSpecˢ => ref importSpecˢᵇ;
@@ -3690,7 +3690,7 @@ internal static bool isTypeElem(ast.Expr x) {
     return false;
 }
 
-internal static ж<ast.GenDecl> parseGenDecl⁔(/*this*/ ж<parser> Ꮡp, token.Token keyword, Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f) {
+internal static ж<ast.GenDecl> parseGenDecl⁔(/*this*/ ж<parser> Ꮡp, token.Token keyword, parseSpecFunction f) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3824,7 +3824,7 @@ internal static ast.Decl parseDecl⁔(/*this*/ ж<parser> Ꮡp, map<token.Token,
             defer(un, trace(Ꮡp, declarationˢ), ref ᒐ);
         }
 
-        Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f = default;
+        parseSpecFunction f = default;
         switch (p.tok) {
         case var ᴛ when ᴛ == token.IMPORT: {
             f = (ж<ast.CommentGroup> p1, token.Token p2, nint p3) => Ꮡp.parseImportSpec(p1, p2, p3);
@@ -3900,7 +3900,7 @@ internal static ж<ast.File> parseFile⁔(/*this*/ ж<parser> Ꮡp) {
         if ((Mode)(p.mode & PackageClauseOnly) == 0) {
             // import decls
             while (p.tok == token.IMPORT) {
-                decls = append(decls, (ast.Decl)(new ast.GenDeclжDecl(Ꮡp.parseGenDecl(token.IMPORT, new Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec>(Ꮡp.parseImportSpec)))));
+                decls = append(decls, (ast.Decl)(new ast.GenDeclжDecl(Ꮡp.parseGenDecl(token.IMPORT, new parseSpecFunction(Ꮡp.parseImportSpec)))));
             }
 
             if ((Mode)(p.mode & ImportsOnly) == 0) {

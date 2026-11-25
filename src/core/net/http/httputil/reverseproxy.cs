@@ -30,7 +30,7 @@ using go.net.http.@internal;
 using go.sync;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class httputil_package {
 
@@ -463,7 +463,7 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
             // Context implementation with no cancellation signal),
             // then consult the CloseNotifier if available.
         } else if (rw._<http.CloseNotifier>(out var cn)) {
-            Action cancel = default;
+            context.CancelFunc cancel = default;
             (ctx, cancel) = context.WithCancel(ctx);
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
@@ -849,7 +849,7 @@ internal static (int64, error) copyBuffer⁔(/*this*/ ref ReverseProxy p, io.Wri
 }
 
 internal static void logf⁔(/*this*/ ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     if (p.ErrorLog != nil) {
         p.ErrorLog.Printf(format, args.ꓸꓸꓸ);

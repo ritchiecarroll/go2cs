@@ -168,13 +168,13 @@ func TestForeignReExportedAliasesAreDerivedFromTheDependency(t *testing.T) {
 		t.Fatalf("defined type over the empty interface must publish object, got %q", got)
 	}
 
-	// --- the deliberate omissions: a wrong target is worse than none ---
-
-	// A methodless named func type is rendered inline as its base delegate — there is no
-	// `<pkg>_package.Handle` type for an alias to name.
-	if got, published := derived["Handler"]; published {
-		t.Fatalf("alias to a methodless named func type must publish nothing, got %q", got)
+	// A defined func type, methodless or not, declares its own delegate in its package class, so an alias to it
+	// publishes that member.
+	if got := derived["Handler"]; got != otherClass+".Handle" {
+		t.Fatalf("alias to a defined func type must publish its delegate, got %q", got)
 	}
+
+	// --- the deliberate omissions: a wrong target is worse than none ---
 
 	// The target is ITSELF emitted as a using alias by its own package; following that second hop
 	// is not attempted.

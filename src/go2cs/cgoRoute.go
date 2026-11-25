@@ -85,6 +85,10 @@ var (
 	// cgoRouteFunctions maps each _Cfunc_ or _C2func_ name the package calls to its pseudo-package member.
 	cgoRouteFunctions map[string]string
 
+	// cgoRouteVariables maps each _Cvar_ name the package uses to its pseudo-package member (cgo item 3): *_Cvar_x is
+	// C.x, a ref property over the variable, and _Cvar_x alone is C.Ꮡx, the box over its address.
+	cgoRouteVariables map[string]string
+
 	// cgoCheckClosures maps each recognised call of cmd/cgo's check closure to its unwrap.
 	cgoCheckClosures map[*ast.CallExpr]*cgoCheckClosure
 
@@ -441,7 +445,7 @@ func cgoClosureVariable(ident *ast.Ident, prefix string) int {
 // that needs no check), then one check of each checked argument, then the call itself, of exactly _cgo0 … _cgoN-1 in
 // order, returned or as a statement. Anything else is not recognised, and the census refuses it.
 //
-// cgo Phase 3, increment 3.2, seat 1b (design 18.12 item 5) adds cmd/cgo's element and slice forms (checkIndex,
+// cgo Phase 3, the pinned class (DESIGN-cgo-phase3-marshaling 18.12 item 5) adds cmd/cgo's element and slice forms (checkIndex,
 // checkSlice): `_cgoIndexN := &a` (or `a` when it is not a variable) with `_cgoN := &(*_cgoIndexN)[i]` under conversions
 // and the check `_cgoCheckPointer(_cgoN, *_cgoIndexN)`; and `_cgoSliceN := s[lo:hi]` with `_cgoN := …_cgoSliceN…` and the
 // check `_cgoCheckPointer(_cgoSliceN, 0 == 0)`. Each variable stands for its definition, as `_cgoBaseN` does, and the
@@ -896,9 +900,9 @@ func cgoCalledFunction(node ast.Node, declarations map[types.Object]cgoDeclarati
 // nil when the package holds no cmd/cgo output (cmd/cgo did not run), so the caller's own refusal stands, and refuses,
 // exiting before anything is written, when any C use is outside Phase 2's set.
 func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRoute, error) {
-	// C++ sources need a C++ compiler (CXX) for ANOTHER target, which INC 2 does not take: R3, by name (P3's INC 2 shape
+	// C++ sources need a C++ compiler (CXX) for ANOTHER target, which INC 2 does not take: R3, by name (INC 2 shape
 	// read, SHOULD 5). go/packages lists them among a package's OtherFiles. At the host's own target they convert as they
-	// did before INC 2 (measured at 6bdf33a157; P3's 2a CLEAR, SHOULD 4), so the refusal reads the host first.
+	// did before INC 2 (measured at 6bdf33a157; INC 2a review, SHOULD 4), so the refusal reads the host first.
 	host, hostErr := cgoGoEnv(load, "GOHOSTOS", "GOHOSTARCH")
 	crossTarget := hostErr != nil || host[0]+"/"+host[1] != options.targetPlatform
 
@@ -955,6 +959,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	consumed := map[*ast.Ident]bool{}
 	closures := map[*ast.CallExpr]*cgoCheckClosure{}
 	calledIdents := map[*ast.Ident]bool{}
+	starredIdents := map[*ast.Ident]bool{}
 	var used []cgoDeclaration
 	usedAt := map[types.Object]token.Position{}
 
@@ -1002,6 +1007,11 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 					refuse(n.Pos(), fmt.Sprintf("%s: a goroutine started on a call through cmd/cgo's pointer-check closure, whose arguments cmd/cgo evaluates inside the new goroutine: not supported yet", cgoCalledFunction(n, declarations, info)))
 					consume(n)
 					return false
+				}
+			case *ast.StarExpr:
+				// cmd/cgo writes each use of a C variable as *_Cvar_x, _Cvar_x being the variable's address.
+				if operand, ok := ast.Unparen(n.X).(*ast.Ident); ok {
+					starredIdents[operand] = true
 				}
 			case *ast.CallExpr:
 				if callee, ok := ast.Unparen(n.Fun).(*ast.Ident); ok {
@@ -1060,7 +1070,13 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 					used = append(used, declaration)
 				}
 			case found && declaration.kind == cgoVar:
-				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable: go2cs does not read or write C variables yet", declaration.cName))
+				// cgo item 3: C.x reads and writes the variable in place, through a box over its exported address.
+				if !starredIdents[ident] {
+					refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable's address in a shape cmd/cgo does not write (go2cs reads only *_Cvar_x)", declaration.cName))
+				} else if _, seen := usedAt[object]; !seen {
+					usedAt[object] = pkg.Fset.Position(ident.Pos())
+					used = append(used, declaration)
+				}
 			case found && declaration.kind == cgoFuncValue:
 				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C function's address used as a value: not supported yet", declaration.cName))
 			case found && declaration.kind == cgoMacro:
@@ -1099,6 +1115,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 	var symbols []string
 	functions := map[string]string{}
+	variables := map[string]string{}
 
 	// A first pass decides refusals, before any C toolchain runs; the bindings are written once the capture names
 	// each symbol's library.
@@ -1118,7 +1135,11 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 			errnoForm = true
 		}
 
-		functions[declaration.object.Name()] = member
+		if declaration.kind == cgoVar {
+			variables[declaration.object.Name()] = member
+		} else {
+			functions[declaration.object.Name()] = member
+		}
 
 		if symbol := cgoSymbolOf(declaration); symbol != "" && !slices.Contains(symbols, symbol) {
 			symbols = append(symbols, symbol)
@@ -1158,7 +1179,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	}
 
 	// The C compiler's target triple, which cgoHostTarget checked against the requested target, is recorded in the
-	// bindings' header beside its --version line (P3's INC 2 shape read, MUST 1).
+	// bindings' header beside its --version line (INC 2 shape read, MUST 1).
 	var triple string
 
 	if cgoCaptureOverride != nil {
@@ -1188,6 +1209,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	}
 
 	set := newCgoWrapperSet(target, sizes)
+	set.class = cgoPseudoPackageClass(pkg.Name)
 	set.libraries = map[string]string{}
 
 	for _, entry := range captured {
@@ -1241,6 +1263,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 	cgoRouteActive = true
 	cgoRouteFunctions = functions
+	cgoRouteVariables = variables
 	cgoCheckClosures = closures
 
 	return route, nil
@@ -1302,7 +1325,7 @@ func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) error {
 	}
 
 	// The caller hands this to refusePackage: fatal for a single package, and under -recurse the package is skipped and
-	// named while the rest of the module converts (recurseRefusal.go; COORD's ruling on C2's 193007Z).
+	// named while the rest of the module converts (recurseRefusal.go; 2b4e84400e).
 	return fmt.Errorf("package %s uses C in %d way(s) go2cs does not convert, each named above (docs/Limitations.md#cgo); nothing was written", pkg.PkgPath, len(refusals))
 }
 
@@ -1564,7 +1587,7 @@ func cgoGoEnv(load cgoLoad, keys ...string) ([]string, error) {
 }
 
 // cgoHostTarget refuses a -cgo conversion whose C compiler does not compile for the requested target (§11.20, S3; cgo
-// against go.* INC 2a, R3, as amended by P3's shape read, MUST 1). cmd/cgo lays out C types, and the library capture
+// against go.* INC 2a, R3, as amended by the shape read, MUST 1). cmd/cgo lays out C types, and the library capture
 // links its probe, with the C compiler `go env CC` reads in the load's environment, which also honours a `go env -w CC`.
 // A compiler that is merely SET proves nothing: the host's gcc named for a windows target sizes C.long at 8 bytes where
 // windows has 4, under windows' Register string, and nothing links at conversion time to notice. So the compiler is
@@ -1599,7 +1622,7 @@ func cgoHostTarget(load cgoLoad, target string) error {
 	// A C compiler that does not resolve at all is the case where cmd/cgo itself cannot run: R3 steps aside, and the
 	// no-compiler contract holds unchanged (a plain cgo-tag file converts; a raw cgo source is refused naming its file;
 	// "cmd/cgo did not run"). R3 guards against a compiler that TARGETS the wrong platform, so one that resolves and
-	// fails, or answers another triple, is still refused (COORD's ruling on the train 3 red: the i7, no gcc on PATH).
+	// fails, or answers another triple, is still refused (decided on a red gate run with no gcc on PATH; 78e369a4a9).
 	if errors.Is(err, exec.ErrNotFound) {
 		return nil
 	}
@@ -1614,7 +1637,7 @@ func cgoHostTarget(load cgoLoad, target string) error {
 		return fmt.Errorf("cgo: this -cgo conversion asks for %s, and the C compiler go env CC names in its load targets %q (-dumpmachine; the host is %s): name a C compiler for %s in CC (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, triple, hostTarget, target)
 	}
 
-	// The ABI narrow v1 binds against: glibc on linux, the gnu or mingw C runtime on windows (P3's 2a CLEAR, SHOULD 1).
+	// The ABI narrow v1 binds against: glibc on linux, the gnu or mingw C runtime on windows (INC 2a review, SHOULD 1).
 	if abi == "musl" || abi == "android" || abi == "msvc" {
 		return fmt.Errorf("cgo: this -cgo conversion for %s has a C compiler for the %s ABI (-dumpmachine %q); go2cs's cgo support takes the gnu ABI on linux, and gnu or mingw on windows", target, abi, triple)
 	}
@@ -1628,7 +1651,7 @@ var (
 )
 
 // cgoCompilerTriple is what the load's C compiler (go env CC, split as cmd/go splits it) answers to -dumpmachine, asked
-// once per run for each CC value and target (P3's 2a CLEAR, SHOULD 3).
+// once per run for each CC value and target (INC 2a review, SHOULD 3).
 func cgoCompilerTriple(load cgoLoad, target string) (string, error) {
 	values, err := cgoGoEnv(load, "CC")
 

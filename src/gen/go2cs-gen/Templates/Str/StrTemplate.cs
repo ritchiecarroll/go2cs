@@ -15,7 +15,7 @@ namespace go2cs.Templates.Str;
 // Renders an sstring twin's @string forwarder and, for a package-level function, its canonical value
 // delegate (see StrGenerator). Types are rendered fully qualified from the symbols, never from
 // the source file's text: the converted file's `using` aliases (`Δio = io_package`, `ꓸꓸꓸany =
-// Span<any>`) are not in scope in a generated file.
+// variadic<any>`) are not in scope in a generated file.
 internal class StrTemplate : TemplateBase
 {
     private const string SStringType = "go.sstring";
@@ -108,8 +108,8 @@ internal class StrTemplate : TemplateBase
             ? $"({string.Join(", ", tuple.TupleElements.Select(element => TypeArgument(element.Type)))})"
             : type.ToDisplayString(s_typeFormat);
 
-    // The canonical delegate's type: golib's variadic family for a `params Span<T>` tail (the converter's
-    // rendering of `...T`), otherwise System.Func / System.Action.
+    // The canonical delegate's type: golib's variadic family for a variadic tail (`params variadic<T>`, the converter's
+    // rendering of `...T`, or a hand-written `params Span<T>`), otherwise System.Func / System.Action.
     private string DelegateType
     {
         get
@@ -119,10 +119,10 @@ internal class StrTemplate : TemplateBase
 
             foreach (IParameterSymbol parameter in Method.Parameters)
             {
-                if (parameter.IsParams && parameter.Type is INamedTypeSymbol { Name: "Span", TypeArguments.Length: 1 } span)
+                if (parameter.IsParams && MethodSet.SpanElement(parameter.Type) is { } element)
                 {
                     variadic = true;
-                    typeArguments.Add(TypeArgument(span.TypeArguments[0]));
+                    typeArguments.Add(TypeArgument(element));
                     continue;
                 }
 

@@ -23,4 +23,19 @@ public static class ClaimableWrapperMembers
 
     /// <summary>The claimable members of a type defined over a named array (IArrayViewTypeTemplate).</summary>
     public static IReadOnlyCollection<string> ArrayView => IArrayViewTypeTemplate.ClaimableMembers;
+
+    /// <summary>The named-channel wrapper's claimable members (IChannelTypeTemplate).</summary>
+    public static IReadOnlyCollection<string> Channel => IChannelTypeTemplate.ClaimableMembers;
+
+    /// <summary>The named-map wrapper's claimable members (IMapTypeTemplate).</summary>
+    public static IReadOnlyCollection<string> Map => IMapTypeTemplate.ClaimableMembers;
+
+    /// <summary>The named-numeric wrapper's claimable members (NumericTypeTemplate).</summary>
+    public static IReadOnlyCollection<string> Numeric => NumericTypeTemplate.ClaimableMembers;
+
+    /// <summary>The named-string wrapper's claimable members (InheritedTypeTemplate's string surface).</summary>
+    public static IReadOnlyCollection<string> String => InheritedTypeTemplate.StringClaimableMembers;
+
+    /// <summary>The named-pointer wrapper's claimable members, claimed by the type's own name only (PointerTypeTemplate).</summary>
+    public static IReadOnlyCollection<string> Pointer => PointerTypeTemplate.ClaimableMembers;
 }

@@ -30,8 +30,8 @@ using global::go.@internal;
 using global::go.io;
 using global::go.math;
 using path;
-using ꓸꓸꓸCorpusEntry = Span<CorpusEntry>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸCorpusEntry = variadic<CorpusEntry>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class fuzz_package {
 
@@ -111,7 +111,8 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
 
         if (opts.Timeout > 0) {
             Action cancel = default;
-            (ctx, cancel) = context.WithTimeout(ctx, opts.Timeout);
+            (ctx, var cancelᴛ1) = context.WithTimeout(ctx, opts.Timeout);
+            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
@@ -1097,7 +1098,7 @@ internal static bool shouldPrintDebugInfo() {
 }
 
 internal static void debugLogf⁔(/*this*/ ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     @string t = time.Now().Format("2006-01-02 15:04:05.999999999");
     fmt.Fprintf(c.opts.Log, t + " DEBUG "u8 + format + "\n"u8, args.ꓸꓸꓸ);

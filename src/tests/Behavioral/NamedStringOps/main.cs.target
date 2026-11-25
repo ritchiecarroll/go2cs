@@ -11,7 +11,7 @@ partial struct Path /*@string*/;
 
 partial struct Tag /*@string*/;
 
-internal static T maxOf<T>(params Span<T> xsʗp)
+internal static T maxOf<T>(params variadic<T> xsʗp)
     where T : /* cmp.Ordered */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     var xs = xsʗp.slice();

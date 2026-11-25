@@ -526,7 +526,7 @@ namespace BehavioralRunner
 
                 bool ok = true, hitTimeout = false, hitBestEffort = false;
 
-                // A project's go2cs.options (extra converter arguments; only -warn=<codes>) is read here as it is
+                // A project's go2cs.options (extra converter arguments; only -warn=<codes> and -stack-append=on) is read here as it is
                 // at the other three converter call sites (TestBehavioralHarnessReadsConverterOptions).
                 (string options, string? optionsError) = BehavioralPackages.ConverterOptions(projPath);
 

@@ -236,7 +236,7 @@ internal static void MarshalASN1⁔(/*this*/ ref Builder b, any v) {
 // Tags greater than 30 are not supported and result in an error (i.e.
 // low-tag-number form only). The child builder passed to the
 // BuilderContinuation can be used to build the content of the ASN.1 object.
-internal static void AddASN1⁔(/*this*/ ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builder>> f) {
+internal static void AddASN1⁔(/*this*/ ж<Builder> Ꮡb, asn1.Tag tag, BuilderContinuation f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (b.err != nil) {

@@ -39,7 +39,8 @@ type cgoWrapperSet struct {
 	// pointerBearing names the mirrors that hold a pointer member, directly or through a nested struct or an inline array
 	// (.5 cgo item 1(a), DESIGN 18.12.3). Their copy-out takes the wrapper's stack copies, and each has a pin check.
 	pointerBearing map[string]bool
-	allocates      bool // a helper or C.malloc allocates, so the pseudo-package binds the package's own malloc
+	allocates      bool   // a helper or C.malloc allocates, so the pseudo-package binds the package's own malloc
+	class          string // the pseudo-package class, whose assembly a C variable's lookup names (cgo item 3)
 }
 
 func newCgoWrapperSet(target cgoBindingTarget, sizes types.Sizes) *cgoWrapperSet {
@@ -221,7 +222,7 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 		loop := fmt.Sprintf("%sfor (int %s = 0; %s < %d; %s++)\n%s", indent, index, index, underlying.Len(), index, element)
 
 		// go2cs keeps an array's elements in the array's own storage, so B-10 asks that storage for a published
-		// unsafe.Pointer word before the elements are copied raw into the mirror (3.2 seat 1b, design 18.7 finding 2).
+		// unsafe.Pointer word before the elements are copied raw into the mirror (DESIGN-cgo-phase3-marshaling 18.7 finding 2).
 		if in {
 			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireNoPublishedWordIn(%s);\n%s", indent, g, loop), nil
 		}
@@ -272,7 +273,7 @@ type cgoStructParam struct {
 	pointer bool
 	void    bool
 
-	// out is a pointer to one C pointer, the out-parameter (`&db`, `char **`; Phase 3 shape (i), 3.2 seat 1b), and
+	// out is a pointer to one C pointer, the out-parameter (`&db`, `char **`; Phase 3 shape (i)), and
 	// goSide is then the C pointer's pointee: the slot is a ж<ж<goSide>>.
 	out bool
 }
@@ -391,6 +392,10 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		}
 	}
 
+	if declaration.kind == cgoVar {
+		return set.variable(declaration)
+	}
+
 	// Anything not a C function is the scalar binding's to take or refuse.
 	if declaration.kind != cgoFunc && !errnoForm {
 		return cgoScalarWrapper(declaration, scalarTarget)
@@ -500,7 +505,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	// The words C returns (an out-parameter's word, a pointer result), each checked against each pinned argument inside
 	// the `fixed`: a word inside pinned Go storage is refused by name, never minted as a native box over memory that moves
-	// once the `fixed` ends (P3's review of 1b, item 4). Each entry is a guard condition (empty for none) and the word.
+	// once the `fixed` ends (DESIGN-cgo-phase3-marshaling 18.12.2). Each entry is a guard condition (empty for none) and the word.
 	type returnedWord struct{ guard, word string }
 	var returnedWords []returnedWord
 
@@ -1053,7 +1058,7 @@ func (set *cgoWrapperSet) helper(declaration cgoDeclaration) (string, error) {
 
 		text.WriteString("    // C.GoString, cmd/cgo's own helper: the bytes of a C string, up to its NUL, as a Go string.\n")
 		fmt.Fprintf(&text, "    internal static @string GoString(%s p0)\n    {\n", pointerType)
-		// Go memory is read from its pinned storage, as a Go function reads it (3.2 seat 1b, design 18.12 item 3).
+		// Go memory is read from its pinned storage, as a Go function reads it (DESIGN-cgo-phase3-marshaling 18.12 item 3).
 		fmt.Fprintf(&text, "        return %sGoStringOf(p0, %q);\n    }\n", args, function)
 
 	case "GoStringN":
@@ -1101,4 +1106,53 @@ func indentCSharp(text string) string {
 	}
 
 	return strings.Join(lines, "\n") + "\n"
+}
+
+// variable writes C.x for a C global variable (cgo item 3). cmd/cgo declares _Cvar_x as the variable's address, of
+// type *T, and writes every use as *_Cvar_x. The pseudo-package holds a box over the address the library exports for
+// the symbol, looked up on first use (GoCgoLibraries.Variable), as Ꮡx, and x is a ref property over the box's value, so
+// C.x reads and writes the variable in place, as Go does, and &C.x is the same box on every use. T is a C scalar or a
+// C struct; any other C type is refused by name.
+func (set *cgoWrapperSet) variable(declaration cgoDeclaration) (string, error) {
+	name := declaration.cName
+	pointer, ok := declaration.object.Type().(*types.Pointer)
+
+	if !ok {
+		return "", fmt.Errorf("cgo wrapper: C.%s is a C variable cmd/cgo did not declare as an address", name)
+	}
+
+	named, ok := types.Unalias(pointer.Elem()).(*types.Named)
+	cType := ""
+
+	if ok {
+		cType, ok = strings.CutPrefix(named.Obj().Name(), "_Ctype_")
+	}
+
+	if !ok {
+		return "", fmt.Errorf("cgo wrapper: C.%s is a C variable of type %s, which is not a C scalar or struct; go2cs reads and writes only those C variables", name, strings.ReplaceAll(types.TypeString(pointer.Elem(), func(*types.Package) string { return "" }), "_Ctype_", "C."))
+	}
+
+	switch underlying := named.Underlying().(type) {
+	case *types.Basic:
+		if underlying.Kind() == types.UnsafePointer || underlying.Kind() == types.String {
+			return "", fmt.Errorf("cgo wrapper: C.%s is a C variable of type C.%s, a pointer; go2cs reads and writes only C scalar and struct variables", name, cType)
+		}
+	case *types.Struct:
+	default:
+		return "", fmt.Errorf("cgo wrapper: C.%s is a C variable of type C.%s, which is not a C scalar or struct; go2cs reads and writes only those C variables", name, cType)
+	}
+
+	member := getCoreSanitizedIdentifier(name)
+	goSide := getCoreSanitizedIdentifier(cType)
+	library := set.libraryOf(name)
+	box := AddressPrefix + member
+
+	var text strings.Builder
+
+	fmt.Fprintf(&text, "    // C.%s, a C variable in %s, read and written in place through a box over its address.\n", name, library)
+	fmt.Fprintf(&text, "    private static ж<%s>? %sᴍvariable;\n\n", goSide, member)
+	fmt.Fprintf(&text, "    internal static ж<%s> %s => %sᴍvariable ??= global::go.golib.GoCgoLibraries.Variable<%s>(typeof(%s).Assembly, %q, %q);\n\n", goSide, box, member, goSide, set.class, library, name)
+	fmt.Fprintf(&text, "    internal static ref %s %s => ref %s.Value;\n", goSide, member, box)
+
+	return text.String(), nil
 }

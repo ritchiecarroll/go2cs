@@ -14,8 +14,8 @@ using time = time_package;
 using go.log.slog;
 using go.sync;
 using io = io_package;
-using ꓸꓸꓸAttr = Span<slog_package.Attr>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸAttr = variadic<slog_package.Attr>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class slog_package {
 
@@ -172,7 +172,7 @@ public static ж<Logger> New(Handler h) {
 
 // With calls [Logger.With] on the default logger.
 public static ж<Logger> With(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Default().With(args.ꓸꓸꓸ);
 }
@@ -203,70 +203,70 @@ public static ж<log.Logger> NewLogLogger(Handler h, Level level) {
 //     into an Attr.
 //   - Otherwise, the argument is treated as a value with key "!BADKEY".
 internal static partial void Log⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(ctx, level, msg, args.ꓸꓸꓸ);
 }
 
 // LogAttrs is a more efficient version of [Logger.Log] that accepts only Attrs.
 internal static partial void LogAttrs⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
-    var attrs = attrsʗp.sslice();
+    var attrs = attrsʗp;
 
     l.logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);
 }
 
 // Debug logs at [LevelDebug].
 internal static partial void Debug⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(context.Background(), LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // DebugContext logs at [LevelDebug] with the given context.
 internal static partial void DebugContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(ctx, LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // Info logs at [LevelInfo].
 internal static partial void Info⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(context.Background(), LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // InfoContext logs at [LevelInfo] with the given context.
 internal static partial void InfoContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(ctx, LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // Warn logs at [LevelWarn].
 internal static partial void Warn⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(context.Background(), LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // WarnContext logs at [LevelWarn] with the given context.
 internal static partial void WarnContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(ctx, LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // Error logs at [LevelError].
 internal static partial void Error⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(context.Background(), LevelError, msg, args.ꓸꓸꓸ);
 }
 
 // ErrorContext logs at [LevelError] with the given context.
 internal static partial void ErrorContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     l.log(ctx, LevelError, msg, args.ꓸꓸꓸ);
 }
@@ -275,7 +275,7 @@ internal static partial void ErrorContext⁔(/*this*/ ref Logger l, context.Cont
 // It must always be called directly by an exported logging method
 // or function, because it uses a fixed call depth to obtain the pc.
 internal static partial void log⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (ctx == nil) {
         ctx = context.Background();
@@ -297,7 +297,7 @@ internal static partial void log⁔(/*this*/ ref Logger l, context.Context ctx, 
 
 // logAttrs is like [Logger.log], but for methods that take ...Attr.
 internal static partial void logAttrs⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
-    var attrs = attrsʗp.sslice();
+    var attrs = attrsʗp;
 
     if (ctx == nil) {
         ctx = context.Background();
@@ -319,70 +319,70 @@ internal static partial void logAttrs⁔(/*this*/ ref Logger l, context.Context 
 
 // Debug calls [Logger.Debug] on the default logger.
 public static partial void Debug(@string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(context.Background(), LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // DebugContext calls [Logger.DebugContext] on the default logger.
 public static partial void DebugContext(context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(ctx, LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // Info calls [Logger.Info] on the default logger.
 public static partial void Info(@string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(context.Background(), LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // InfoContext calls [Logger.InfoContext] on the default logger.
 public static partial void InfoContext(context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(ctx, LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // Warn calls [Logger.Warn] on the default logger.
 public static partial void Warn(@string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(context.Background(), LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // WarnContext calls [Logger.WarnContext] on the default logger.
 public static partial void WarnContext(context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(ctx, LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // Error calls [Logger.Error] on the default logger.
 public static partial void Error(@string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(context.Background(), LevelError, msg, args.ꓸꓸꓸ);
 }
 
 // ErrorContext calls [Logger.ErrorContext] on the default logger.
 public static partial void ErrorContext(context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(ctx, LevelError, msg, args.ꓸꓸꓸ);
 }
 
 // Log calls [Logger.Log] on the default logger.
 public static partial void Log(context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Default().log(ctx, level, msg, args.ꓸꓸꓸ);
 }
 
 // LogAttrs calls [Logger.LogAttrs] on the default logger.
 public static partial void LogAttrs(context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
-    var attrs = attrsʗp.sslice();
+    var attrs = attrsʗp;
 
     Default().logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);
 }

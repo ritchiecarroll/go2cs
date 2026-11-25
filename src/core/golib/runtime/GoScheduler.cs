@@ -36,7 +36,7 @@ public sealed class GoParkSlot
 
     // A Gosched yield park (GoScheduler.GoschedTwin): the carrier requeues the goroutine at the global queue's tail instead
     // of committing the park. Carried on the SLOT, never on the carrier, so a park attempt that fails (ParkPending throws)
-    // cannot turn the step's earlier, real park into a requeue (P3's read of the Gosched seat).
+    // cannot turn the step's earlier, real park into a requeue (review of the Gosched park, 3849220da4).
     internal bool IsYield { get; init; }
     private Goroutine? m_goroutine;
 
@@ -103,9 +103,55 @@ public static class GoScheduler
     // The P count: how many goroutine steps run at once. It follows GOMAXPROCS (SetProcs, below).
     private static int s_procs = ReadProcs();
 
-    // A carrier runs inline continuations of any depth the twin chain reaches, so it gets a goroutine-sized
-    // stack rather than the prototype's 256 KB.
-    private const int CarrierStackSize = 1024 * 1024;
+    // A carrier runs a goroutine's step on its own stack, and a step may recurse as deeply as Go allows a goroutine to.
+    // Any carrier may run a step of main's twin (it moves between carriers at every park), so a carrier reserves what
+    // main's own thread does, MainThread.StackReserve (1 GiB), or Goroutine.StackReserve when that is larger. A fixed
+    // 1 MB overflowed a 200,000-level recursion that Go and the thread path both run (M:N row 4, behavioral
+    // GoroutineStackReserve), and the goroutine reserve alone left main's twin short of the 1 GiB main has without the
+    // scheduler (behavioral MainDeepRecursion; C46's typescript-go parse units). A GO2CS_GOROUTINE_STACK that is set
+    // governs the carrier in both directions instead (never below MinCarrierStackSize): a host that charges each
+    // thread's full reserve to a commit limit (linux with vm.overcommit_memory=2) may need less, and asks for it there.
+    // The reserve is address space elsewhere, committed only as deep as a step recurses. There is a carrier per P, plus
+    // one injected beside each step that runs long and one for each carrier blocked in a call (MnMixedStorm at 16 Ps
+    // read 17 to 32), where the goroutine reserve is multiplied by every goroutine on a thread of its own. A platform
+    // that cannot reserve the size gets the largest it grants, halving down to MinCarrierStackSize, published and said
+    // on stderr by name only once a start at it succeeds (CarrierThread); never a silent 1 MB.
+    internal static readonly int DefaultCarrierStackSize = CarrierStackSizeFor(GoroutineStackIsSet(), Goroutine.StackReserve);
+    private static int s_carrierStackSize = DefaultCarrierStackSize;
+    internal const int MinCarrierStackSize = 1024 * 1024;
+
+    // The carrier reserve for a goroutine reserve that GO2CS_GOROUTINE_STACK set, or did not.
+    internal static int CarrierStackSizeFor(bool goroutineStackSet, int goroutineReserve) =>
+        goroutineStackSet ? Math.Max(goroutineReserve, MinCarrierStackSize) : Math.Max(MainThread.StackReserve, goroutineReserve);
+
+    // Whether GO2CS_GOROUTINE_STACK holds a setting Goroutine.StackReserve took (one it ignores, with its warning, is unset).
+    private static bool GoroutineStackIsSet() =>
+        Environment.GetEnvironmentVariable(Goroutine.StackReserveVariable) is { } setting && !string.IsNullOrWhiteSpace(setting) &&
+        Goroutine.TryParseByteSize(setting, out long bytes) && bytes is >= 0 and <= int.MaxValue;
+
+    // TEST-ONLY, not a user knob: GolibTests' CarrierStackFallbackTests sets it to make a carrier stack above this many
+    // bytes refused, as a platform would refuse it, so the fallback below is made to fail (safety floor 13).
+    internal static int RefuseCarrierStackAboveForTest = int.MaxValue;
+
+    // TEST-ONLY: the carrier stack size a carrier starts at now.
+    internal static int CarrierStackSize => Volatile.Read(ref s_carrierStackSize);
+
+    // TEST-ONLY: the carrier start failures counted so far.
+    internal static long CarrierStartFailures => Interlocked.Read(ref s_carrierStartFailures);
+
+    // TEST-ONLY: the carriers started so far.
+    internal static long CarriersStarted => Interlocked.Read(ref s_carriersStarted);
+
+    // TEST-ONLY: puts both carrier-start counters back after a row that started carriers of its own, so a row reading
+    // them process-wide (SchedulerOffTests: no carrier starts with the scheduler off) reads only the scheduler's.
+    internal static void RestoreCarrierCountersForTest(long started, long failures)
+    {
+        Interlocked.Exchange(ref s_carriersStarted, started);
+        Interlocked.Exchange(ref s_carrierStartFailures, failures);
+    }
+
+    // TEST-ONLY: puts the carrier stack size back to a row's starting state.
+    internal static void ResetCarrierStackForTest(int size) => Volatile.Write(ref s_carrierStackSize, size);
 
     // GO2CS_MN_PREEMPT_MS: how long a step may run before the monitor injects a P beside it (default 10 ms,
     // Go's forcePreemptNS). 0 turns injection off: a measurement arm, not a mode.
@@ -189,13 +235,13 @@ public static class GoScheduler
             }
         }
 
-        // DESIGN-mn-pin.md 15 (P3's SHOULD 3): the shared-pool floor, a standing reading: at least P shared carriers.
+        // DESIGN-mn-pin.md 15 (review SHOULD 3): the shared-pool floor, a standing reading: at least P shared carriers.
         lock (s_carriersLock)
         {
             if (s_carriers.Count - s_pinnedCount < s_procs)
                 Interlocked.Increment(ref s_sharedFloorViolations);
 
-            // 15.3 (P3's NIT): the pinned-blocked count stays within 0 and the pinned count, a standing reading.
+            // 15.3 (review NIT): the pinned-blocked count stays within 0 and the pinned count, a standing reading.
             int pinnedBlocked = Volatile.Read(ref s_pinnedBlocked);
 
             if (pinnedBlocked < 0 || pinnedBlocked > s_pinnedCount)
@@ -240,11 +286,11 @@ public static class GoScheduler
     private static int s_overBudget;
     private static int s_blocked;
 
-    // DESIGN-mn-pin.md 15 (P3's MUST on the pin build): carriers pinned to a goroutine, running or waiting, kept under
+    // DESIGN-mn-pin.md 15 (review MUST on the pin build): carriers pinned to a goroutine, running or waiting, kept under
     // s_carriersLock at pin, unpin and retire. A pinned carrier serves one goroutine, so it is never shared capacity.
     private static int s_pinnedCount;
 
-    // DESIGN-mn-pin.md 15.2 (P3's SHOULD on the floor fix): the pinned carriers counted in s_blocked, waiting pinned, in a
+    // DESIGN-mn-pin.md 15.2 (review SHOULD on the floor fix): the pinned carriers counted in s_blocked, waiting pinned, in a
     // plain park (EnterBlocked) or retaken in a native call; raised and lowered with s_blocked through each carrier's flag.
     private static int s_pinnedBlocked;
     private static long s_sharedFloorViolations;
@@ -278,7 +324,7 @@ public static class GoScheduler
     private static long s_migrated;
     private static long s_handoffs;
 
-    // The other half of the hand-off counter (COORD's split for byref-param, 2026-11-16): an outermost PLAIN park of a
+    // The other half of the hand-off counter (the split for byref-param, 2026-11-16, 56baaf2de4): an outermost PLAIN park of a
     // goroutine with no carrier to hand off (a thread goroutine, or one off its carrier), so it blocks its own thread.
     // `handoffs` alone rose under N2 as more goroutines came onto carriers; the two together show where blocks went.
     private static long s_threadBlocks;
@@ -316,7 +362,7 @@ public static class GoScheduler
     internal static int Procs => Volatile.Read(ref s_procs);
 
     /// <summary>
-    /// The P count follows GOMAXPROCS, as Go's procresize does (COORD's ruling for .5, C1/20261122T141803Z): runtime's one
+    /// The P count follows GOMAXPROCS, as Go's procresize does (design decision, commit c11cb99971): runtime's one
     /// writer of the setting hands every new value here, the GOMAXPROCS variable at start and runtime.GOMAXPROCS(n) live.
     /// With the scheduler off the count is only kept, so a later start uses it. A P added is a token released and, once
     /// started, a shared carrier; a P removed takes a token out of circulation, now if one is free and otherwise once a
@@ -466,7 +512,7 @@ public static class GoScheduler
         Enqueue(goroutine, step);
     }
 
-    // DESIGN-mn-pin.md 14.2 (COORD's arm (c)): the locked waker's hand-off, kept out of Ready's hot path as a cold static
+    // DESIGN-mn-pin.md 14.2 (arm (c)): the locked waker's hand-off, kept out of Ready's hot path as a cold static
     // helper, so the lock-taking call cannot change how Ready is compiled for the unlocked path.
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static bool HandToIdle(Goroutine goroutine, object step)
@@ -527,6 +573,7 @@ public static class GoScheduler
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
                $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
+               $" carrier-stack-mb={Volatile.Read(ref s_carrierStackSize) / (1024 * 1024)}" +
                $" retakes={Interlocked.Read(ref s_retakes)}" +
                $" off-carrier-resumes={Interlocked.Read(ref s_offCarrierResumes)}" +
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
@@ -557,7 +604,7 @@ public static class GoScheduler
         }
     }
 
-    // The Gosched-park seat (COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md): a twin's
+    // The Gosched park (a design decision of 2026-11-21, commit ed6fc23e74): a twin's
     // runtime.Gosched is a park point that requeues the goroutine at the GLOBAL run queue's tail, as Go's goschedImpl
     // puts it on the global queue, so a goroutine that spins on Gosched ends its step and every goroutine queued
     // before it runs first (S2 arm 1, MnSpinCap: spinners beyond the P count starved parked goroutines while Gosched
@@ -579,7 +626,7 @@ public static class GoScheduler
     // The slot a Gosched yield parks on (its own factory, so a row can read the mark the carrier reads).
     internal static GoParkSlot YieldSlot() => new() { IsYield = true };
 
-    // What the carrier does with a committed park after the unmount (P3's read): a yield slot's goroutine is requeued, any
+    // What the carrier does with a committed park after the unmount (from review): a yield slot's goroutine is requeued, any
     // other slot is committed. The decision reads the PENDING slot alone, so nothing a failed park attempt left behind can
     // change it.
     internal static bool RequeuesOnCommit(GoParkSlot slot) => slot.IsYield;
@@ -695,25 +742,67 @@ public static class GoScheduler
                 s_peakCarriers = s_carriers.Count;
         }
 
-        try
-        {
-            Thread thread = new(carrier.Loop, CarrierStackSize) { IsBackground = true, Name = "go-carrier" };
-
-            // A carrier is often started from inside a goroutine's step. It must not start under that
-            // goroutine's ExecutionContext, or every goroutine it mounts afterwards could read it.
-            if (s_contextSwap)
-                thread.UnsafeStart();
-            else
-                thread.Start();
-
-            Interlocked.Increment(ref s_carriersStarted);
-        }
-        catch (OutOfMemoryException)
+        if (!StartCarrierThread(carrier.Loop))
         {
             lock (s_carriersLock)
                 s_carriers.Remove(carrier);
+        }
+    }
 
+    // Starts a carrier thread and counts it. A refusal at MinCarrierStackSize is counted as a start failure instead, and
+    // the caller drops the carrier (false).
+    internal static bool StartCarrierThread(ThreadStart loop)
+    {
+        try
+        {
+            CarrierThread(loop);
+            Interlocked.Increment(ref s_carriersStarted);
+            return true;
+        }
+        catch (OutOfMemoryException)
+        {
             Interlocked.Increment(ref s_carrierStartFailures);
+            return false;
+        }
+    }
+
+    // Starts a carrier thread at the carrier stack size (s_carrierStackSize). A refused start above MinCarrierStackSize
+    // retries at half a LOCAL size; only a start that SUCCEEDS publishes its smaller size for every later carrier, and
+    // the publisher says it on stderr, naming the size that worked. A refusal for a reason that is not the size (a thread
+    // or process limit) refuses every size, so it throws on at MinCarrierStackSize to StartCarrierThread, which counts a
+    // start failure, and the shared size is left alone: the deep-recursion overflow cannot come back that way (P3, row 4).
+    private static void CarrierThread(ThreadStart loop)
+    {
+        int shared = Volatile.Read(ref s_carrierStackSize);
+        int size = shared;
+
+        while (true)
+        {
+            try
+            {
+                if (size > RefuseCarrierStackAboveForTest)
+                    throw new OutOfMemoryException("a carrier stack refused by GoScheduler.RefuseCarrierStackAboveForTest");
+
+                Thread thread = new(loop, size) { IsBackground = true, Name = "go-carrier" };
+
+                // A carrier is often started from inside a goroutine's step. It must not start under that
+                // goroutine's ExecutionContext, or every goroutine it mounts afterwards could read it.
+                if (s_contextSwap)
+                    thread.UnsafeStart();
+                else
+                    thread.Start();
+
+                // Publish a size that worked, once: of two carriers that halved at the same time, one wins the exchange
+                // and says it, and a later carrier starts at the published size with nothing to say.
+                if (size < shared && Interlocked.CompareExchange(ref s_carrierStackSize, size, shared) == shared)
+                    Console.Error.WriteLine($"go2cs: could not reserve a {shared / (1024 * 1024)} MB carrier stack; carriers started from now reserve {size / (1024 * 1024)} MB, so a goroutine on one, main included, recurses at most that deep ({Goroutine.StackReserveVariable})");
+
+                return;
+            }
+            catch (OutOfMemoryException) when (size > MinCarrierStackSize)
+            {
+                size = Math.Max(size / 2, MinCarrierStackSize);
+            }
         }
     }
 
@@ -1013,7 +1102,7 @@ public static class GoScheduler
                 // 3.4: the goroutine ended locked to this thread, so the thread ends with it, as Go terminates it.
                 if (m_retiring)
                 {
-                    // DESIGN-mn-pin.md 15 (P3's MUST, (i)): the retiring thread starts its replacement whenever fewer
+                    // DESIGN-mn-pin.md 15 (review MUST (i)): the retiring thread starts its replacement whenever fewer
                     // than P shared carriers remain, whatever the queue holds: a later Enqueue would strand too.
                     lock (s_carriersLock)
                     {
@@ -1244,7 +1333,7 @@ public static class GoScheduler
 
                 // A Gosched yield goes to the GLOBAL queue's tail (Go's goschedImpl -> globrunqput), never the run-next
                 // slot, so every goroutine queued before it runs first. A pinned goroutine goes back to its own carrier, after a
-                // Thread.Yield, so its thread still gives the processor up as runtime.Gosched did (P3's nit).
+                // Thread.Yield, so its thread still gives the processor up as runtime.Gosched did (a review nit).
                 if (RequeuesOnCommit(slot))
                 {
                     Interlocked.Increment(ref s_goschedYields);

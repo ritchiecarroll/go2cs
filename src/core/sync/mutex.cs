@@ -514,12 +514,12 @@ internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Se
 [GoRecv] public static bool TryLock(this ref Mutex m) => Interlocked.CompareExchange(ref m.state, 1, 0) == 0;
 
 // The M:N twin of Lock, which a twinned program's twin awaits (M:N scheduler, experimental, opt-in: GoTwins=true and
-// GO2CS_MN=1; inert otherwise). FROZEN SURFACE from .5 (COORD's ruling, docs/phase4/inbox/G/20261122T114603Z-COORD.md;
+// GO2CS_MN=1; inert otherwise). FROZEN SURFACE from .5 (design decision, commit 7ad503ca6d, docs/phase4/FREEZE-mn-surface.md;
 // row 7 pieces 2+3, DESIGN-mn-stdlib-twins.md): generated code in user assemblies names it, so its signature holds.
 //
 // A contended Lock PARKS here instead of blocking its carrier. Before row 7 this twin was `internal Lockꞏtwin(this ref
 // Mutex)` and forwarded to Lock, so every contended Lock in a twinned program blocked an OS thread: MnMixedStorm at
-// 100,000 goroutines held 25,409 threads in Lock and hung about 1 run in 10 (the train-4 capture). The receiver is the
+// 100,000 goroutines held 25,409 threads in Lock and hung about 1 run in 10 (the release-gate capture, 7ad503ca6d). The receiver is the
 // BOX: the lock word is written after the await, which a `ref` cannot cross, and with no own-shape `this ref` twin
 // beside it the generator routes a twinned caller's `s.mu.Lock()` here, naming `s.mu`'s box without a copy.
 //
@@ -535,7 +535,12 @@ internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Se
 // is woken through ONE ThreadPool hop: Unlock's Release queues the task's completion, a pool thread runs the
 // continuation (Wake), and Wake queues the goroutine's step for a carrier. ExecuteSynchronously only keeps the
 // continuation on that pool thread. MnLockWake reads the hand-off's latency tail (row 7's record, section 6).
+//
+// WEAK (N1, DESIGN-mn-nopark.md 3.2): a call to Lock never makes its caller a twin. A caller that is a twin for another
+// reason awaits this twin as above; a caller with no other park stays plain, and a contended Lock there blocks its
+// thread. sync is hand-owned and no generator runs over it, so the mark is written here by hand.
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+[global::go.golib.GoParkWeak]
 public static global::go.golib.GoTask Lockꞏtwin(this ж<Mutex> Ꮡm) {
     if (Interlocked.CompareExchange(ref Ꮡm.Value.state, 1, 0) == 0) {
         return default;

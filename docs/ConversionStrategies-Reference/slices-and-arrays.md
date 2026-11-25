@@ -991,22 +991,24 @@ The full identity enumeration golib maintains (invariant: **nil ⟺ `m_array is 
 | `s[a:a]`, `s[len(s):]` of non-nil `s` (even cap 0) | non-nil empty | `Reslice` shares the real backing array |
 | `append(emptySlice)` — nothing to add | that same non-nil empty | `Append` identity return |
 | `append(s, elems...)` with elements | non-nil | in-place or reallocated — always a real array |
-| `f()` — zero-argument variadic call | nil | empty `params` pack → `Span<T>.slice()` answers `default` |
-| `f(nilSlice...)` — spread of nil | nil | `ꓸꓸꓸ`/`ToSpan` of a null backing → same path |
-| `f([]T{}...)`, `f(x[:0]...)` — spread of non-nil empty | non-nil empty | span carries a real reference → the copy path |
+| `f()` — zero-argument variadic call | nil | empty literal `params` pack → its `.slice()` copies through `Span<T>.slice()`, which answers `default` |
+| `f(nilSlice...)` — spread of nil | nil | the `variadic<T>` pack carries the caller's nil slice, and `.slice()` hands it back |
+| `f([]T{}...)`, `f(x[:0]...)` — spread of non-nil empty | non-nil empty | the pack carries the caller's slice itself, and `.slice()` hands it back |
 
-The last three rows rest on one fact. Copied through `ReadOnlySpan<T>.ToArray()`, a zero-argument
+A spread passes the caller's slice itself, as Go does, so the last two rows need nothing more. The
+zero-argument row rests on one fact. Copied through `ReadOnlySpan<T>.ToArray()`, a zero-argument
 variadic call's pack would be a non-nil empty where Go passes nil, because `Array.Empty<T>()` is a real
 (hence non-nil) backing array. Nil-ness crosses the C# `params` boundary intact once you read the right
 property: **a span's data reference is null exactly when Go's slice header's data pointer is nil**,
 which is the same invariant `slice<T>` already keeps one level up (`m_array is null` ⟺ nil).
 `SliceExtensions.slice<T>(this Span<T>, …)` answers `default` for an empty pack whose reference
-is null and takes the copy path otherwise, which separates all three variadic shapes above. Roslyn's
+is null and takes the copy path otherwise, which keeps the zero-argument call nil. Roslyn's
 choice of `default(Span<T>)` for an empty pack is not language-guaranteed, but the degradation if it
 ever changes is to a real reference (hence non-nil), never to a nil where Go
-has storage; the spread half depends on golib's own `ToSpan`, not on the compiler. One residual, from
-`ToSpan` rather than from the rule: a zero-size element type (`[]struct{}`) spans as `Span<T>.Empty`
-when empty, so an empty non-nil slice of a zero-size type reads as nil across a spread.
+has storage. Releases whose pack was a `Span<T>` read a spread through golib's `ToSpan` too, and so
+read an empty non-nil slice of a zero-size element type (`[]struct{}`, which spans as `Span<T>.Empty`)
+as nil across a spread; the `variadic<T>` pack carries the slice and has no such residual.
+<!-- src/core/golib/variadicPack.cs:118-119 `pack.IsSpread ? pack.Spread : pack.Elements.slice();` -->
 
 (Guarded by the `SliceNilVsEmpty` behavioral test — every row of the table probed with `s == nil`,
 `len`, and `cap` against `go run`; `resliceTailCapZero` discriminates the operator fix, `nilReslice`
@@ -1084,6 +1086,21 @@ Go prints `4 4 4 4 8`, where growslice alone gives `1 2 4 4 8`. A flag in the fr
 buffer is taken, so a function takes it at most once per call: a slice reset to nil and refilled grows as
 growslice does. An element of zero size or over 32 bytes, a spread `append(x, s...)`, a slice that is not
 empty, and a variable whose address is taken never take it.
+
+**When the converter emits the buffer.** Only when `-stack-append` is on. It is on by default for `-stdlib` and
+`-tests` conversions, whose converted tests are compared with Go's own and can observe `cap()` and
+`testing.AllocsPerRun`. A plain or `-recurse` conversion emits plain `append(x, v)` unless it passes
+`-stack-append=on`, and `-stack-append=off` turns the buffer off for `-stdlib` and `-tests` too. golib's buffer
+is a heap array, so the buffer changes what a program can observe, never how many allocations it makes: with
+it off, a converted program differs from Go only where it reads a capacity the buffer sets, and no
+`go build -gcflags=-m` runs. A behavioral project that tests the buffer turns it on in its own `go2cs.options`
+file, as `StackAppendBackingStore` does
+([`-stack-append`](../CommandLine.md#option-stack-append)).
+<!-- Ruled by the owner 2026-11-24 on P5's scout (COORD 2026-11-24 17:50Z): hint off, 41 of the 42 behavioral projects
+     that carried a buffer printed what go run prints; StackAppendBackingStore differed in 11 of its 19 lines, all cap().
+     golib's buffer is `new T[K]` (src/core/golib/stackAppend.cs), uncharged to AllocationCounter. -->
+
+Guarded by: `TestStackAppendModeResolves`, `TestStackAppendOffRunsNoProbe` (`src/go2cs/stackAppendOption_test.go`).
 
 Which appends qualify is the compiler's decision, made after inlining and escape analysis, so the converter
 reads it from the compiler instead of re-deriving it (`src/go2cs/stackAppendHints.go`). For each package
@@ -1211,8 +1228,8 @@ answers the ONE shared element (Go computes `&s[i]` as `data + i*0`, so every in
 address), and `range` is a counted loop.
 
 **A slice-typed spread operand travels AS THE SLICE IT IS.** `Span<T>.Length` is `int32` while a Go
-slice length is `int`, so a spread projected to a span (`ꓸꓸꓸ`, golib's `Span<T>` projection of a slice)
-could not carry `slices.Grow`'s `append(s[:cap(s)], make([]E, n)...)` to `n == MaxInt`. The emission
+slice length is `int`, so a spread projected to a span (`ꓸꓸꓸ` was golib's `Span<T>` projection of a slice
+before the `variadic<T>` pack replaced it) could not carry `slices.Grow`'s `append(s[:cap(s)], make([]E, n)...)` to `n == MaxInt`. The emission
 therefore passes a slice-typed operand whole to golib's `appendꓸꓸꓸ`, whose name carries the spread:
 <!-- history: until 2026-08-27 a spread emitted as append(dst, src.ꓸꓸꓸ), projecting every operand to a span. -->
 
@@ -1233,7 +1250,7 @@ binds `appendꓸꓸꓸ<T>(slice<T>, in sslice<T>)` and is read as the span it al
 reach the call. The `ISlice<T>` overload remains for other operands. Its interface parameter boxes a
 struct operand, which is why a `slice<T>` has its own exact overload. The constrained form,
 `appendꓸꓸꓸ<S, E>`, takes `ISlice<E>`, with an `sslice<E>` twin.
-<!-- src/core/golib/builtin.cs:543 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :556 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :530 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1451 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1459 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
+<!-- src/core/golib/builtin.cs:552 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :565 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :539 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1469 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1477 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
 <!-- The exact slice<T> overload landed in golib 17785ec85 (2026-10-22). Before it a slice<T> operand bound the ISlice<T> overload and was boxed: 56 B per call that AllocationCounter never sees; Go 1.26's bytes TestReplace read it as 56 objects per run for `append([]byte(nil), s...)`, which allocates nothing in Go (builtin.cs's doc comment on that overload). -->
 
 Inside golib the window's own span serves every copy a span can express (managed backings are
@@ -2005,7 +2022,7 @@ emitted both public; the CS0111 held fmt's (63 verdicts) and archive/tar's (97) 
 
 The non-generic overload is explicit —
 
-<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:157 -->
+<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:161 -->
 ```csharp
 ISlice? ISlice.Append(object[] elems) => ((ISlice)m_value).Append(elems);
 ```
@@ -2061,16 +2078,13 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:157-158 -->
 ```csharp
-    pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
+    pack = append(pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));
 ```
-(`packᴷ` is the variable's Go stack buffer, which its first append passes —
-see
-[A non-escaping append can take Go's 32-byte stack buffer](#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
 An already-interface-typed element stays bare. The **empty interface** (`any`) element type is affected identically and takes the same cast — `append(args[:len(args):len(args)], c.output)` with `args []any` and `c.output []byte` infers `T=[]byte` on the `ISlice` overload but `T=any` on the `slice<T>` overload (testing's `flushToParent`, CS0121), and appending a scalar (`append(anys, 5)`) is the same shape; the differing element is cast to `any` so both overloads agree, as in the `AppendUntypedConst` golden:
-<!-- source: src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 -->
+<!-- source: src/tests/Behavioral/AppendUntypedConst/main.cs.target:31 -->
 ```csharp
 anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));
 ```
@@ -2084,18 +2098,15 @@ call), appending **ZERO** elements rather than one nil element. That would silen
 index `[-1]`. The converter therefore casts any untyped-nil element to the slice's element type, forcing single-element
 binding — the interface (`error`) and named-composite branches above for their own reasons, and an **unnamed** nillable
 element type (slice/map/pointer/chan/func) for this one:
-<!-- source: src/tests/Behavioral/AppendNilSliceElement/main.cs.target:14, 19, 23 -->
+<!-- source: src/tests/Behavioral/AppendNilSliceElement/main.cs.target:10, 15, 19 -->
 ```csharp
     lines = append(lines, (slice<nint>)(default));
     …
-    maps = append(mapsᴷ, maps, (map<@string, nint>)(default));
+    maps = append(maps, (map<@string, nint>)(default));
     …
-    ptrs = append(ptrsᴷ, ptrs, (ж<nint>)(nil));
+    ptrs = append(ptrs, (ж<nint>)(nil));
 ```
-(The pointer element's `nil` renders in pointer context. `mapsᴷ` and `ptrsᴷ` are the variables' Go stack
-buffers, passed by a variable's first append that may take one —
-see
-[A non-escaping append can take Go's 32-byte stack buffer](#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
+(The pointer element's `nil` renders in pointer context.)
 A nil element is only ever valid when the element type is nillable, so the cast target always exists. Spread appends (`append(dst, src...)`) are excluded (the existing `Ellipsis.IsValid()` guard). Guarded by the `AppendNilSliceElement` behavioral test (slice/map/pointer element types, output-compared vs Go).
 
 ---

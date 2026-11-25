@@ -495,6 +495,15 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// A spread operand's pack (<c>append(s, v.ꓸꓸꓸ)</c>, golib's <see cref="variadic{T}"/>): append only reads
+    /// it, so its elements are appended as they stand.
+    /// </summary>
+    public static slice<T> append<T>(slice<T> slice, variadic<T> elems)
+    {
+        return go.slice<T>.Append(slice, elems.Elements);
+    }
+
+    /// <summary>
     /// The read-only twin of the span form above: Go's <c>append(b, s...)</c> with a STRING operand,
     /// whose spread is a <see cref="ReadOnlySpan{T}"/> because no view of a string's bytes may be
     /// writable (see <see cref="@string.ToSpan"/>).
@@ -1437,6 +1446,15 @@ public static partial class builtin
     public static S append<S, T>(S s, params Span<T> items) where S : ISlice<T>, ISliceWrap<S, T>
     {
         return S.Wrap(go.slice<T>.Append(new slice<T>(s), items));
+    }
+
+    /// <summary>
+    /// The constrained form for a spread operand's pack (golib's <see cref="variadic{T}"/>), whose element type the
+    /// span form above could not infer through the pack's conversion.
+    /// </summary>
+    public static S append<S, T>(S s, variadic<T> items) where S : ISlice<T>, ISliceWrap<S, T>
+    {
+        return S.Wrap(go.slice<T>.Append(new slice<T>(s), items.Elements));
     }
 
     /// <summary>
@@ -3361,8 +3379,8 @@ public static partial class builtin
     // (every pointer and every interface) an entry point runs as ONE shared body, where `is T`, typeof(T) and each
     // per-T static is a runtime lookup, so the hit still pays that lookup. Inlining the entry points made T exact at the
     // call site (11.84 to 3.91 ns a hit, tiering off, a micro-benchmark) but pasted their bodies into every asserting
-    // caller, and the whole program lost: TypeScript's checkdemo +12 s, +17% (R's train 2 split, 2026-11-21; COORD
-    // ruled the attributes out). Keeping the micro gain needs a whole-program arm (BOARD, P2 TS items 4 and 6 block).
+    // caller, and the whole program lost: TypeScript's checkdemo +12 s, +17% (a split measurement, 2026-11-21; the
+    // attributes were ruled out, 29a075a00e). Keeping the micro gain needs a whole-program arm (TS items 4 and 6).
     //
     // It answers only what the body would answer, and only where that is cheap to prove:
     //  - a concrete T other than object: `target is T`. No adapter is ever a concrete Go type, so this is the body's

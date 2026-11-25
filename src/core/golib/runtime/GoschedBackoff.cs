@@ -81,6 +81,12 @@ internal static class GoschedBackoff
     /// <summary>Clears this thread's yield streak before a pooled thread runs its next goroutine.</summary>
     internal static void ResetThread() => t_consecutiveInertYields = 0;
 
+    /// <summary>
+    /// Exchanges this thread's yield streak with a multiplexed goroutine's saved one at its mount and unmount, so the
+    /// streak is the goroutine's, not the carrier's (M:N row 11, N10).
+    /// </summary>
+    internal static void SwapMounted(ref int saved) => (saved, t_consecutiveInertYields) = (t_consecutiveInertYields, saved);
+
     // Total escalations across all threads — a test-visible observation point, not a control input.
     private static long s_escalations;
 

@@ -63,7 +63,7 @@ public class TwinIfaceUnmarkTests
         }
         """;
 
-    private static (string twins, Diagnostic[] errors) Run(string? unmark)
+    private static (string twins, Diagnostic[] errors) Run(string? unmark, string shape = "default")
     {
         CSharpParseOptions options = new(LanguageVersion.CSharp13);
         CSharpCompilation compilation = CSharpCompilation.Create("twiniface",
@@ -73,7 +73,7 @@ public class TwinIfaceUnmarkTests
         Dictionary<string, string> properties = new()
         {
             ["build_property.GoTwins"] = "true",
-            ["build_property.GoTwinsIface"] = "default",
+            ["build_property.GoTwinsIface"] = shape,
             ["build_property.GoTwinsIfaceAll"] = "true"
         };
 
@@ -115,6 +115,44 @@ public class TwinIfaceUnmarkTests
         Assert.IsFalse(twins.Contains("Stringꞏtwin(", StringComparison.Ordinal), "String is unmarked: no twin slot, no awaited call");
         StringAssert.Contains(twins, "Closeꞏtwin(", "Close keeps its mark");
         StringAssert.Contains(twins, "return s.String();", "name's twin calls String plain");
+    }
+
+    // M:N row 3 (PromotedMethodFrames): a twin calls an interface member through the hidden interface's static helper,
+    // `I.Mꞏcall(recv, …)`, which runs the plain member when the receiver is no twin implementer, and an implementer's
+    // unforwarded slot runs its default body, which calls the plain member too. Both are real frames between the Go caller
+    // and the method, so each carries go2cs-gen's [GeneratedCode], which the Go traceback skips (runtime managed_impl.cs,
+    // classifyGoSourceFrame); without it `runtime.Caller(1)` inside the method named `main.Ptrꞏcall`, not the caller.
+    [TestMethod]
+    [DataRow("default", 2, DisplayName = "default shape: the two slot bodies")]
+    [DataRow("hidden", 4, DisplayName = "hidden shape: the two helpers and the two slot bodies")]
+    public void TheInterfaceCallHelperAndSlotBodyAreNoGoFrames(string shape, int expected)
+    {
+        (string twins, Diagnostic[] errors) = Run(null, shape);
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+
+        string[] lines = twins.Replace("\r\n", "\n").Split('\n');
+        string[] declarations = ["Stringꞏcall(", "Closeꞏcall(", "Stringꞏtwin(", "Closeꞏtwin("];
+        List<string> unstamped = [];
+        int seen = 0;
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string line = lines[i].TrimStart();
+
+            // a member DECLARATION of the hidden interface (the helper is static; a slot body returns the twin result)
+            if (!declarations.Any(declaration => line.Contains(declaration, StringComparison.Ordinal)) || line.StartsWith("return", StringComparison.Ordinal) ||
+                !(line.StartsWith("static ", StringComparison.Ordinal) || line.StartsWith("global::", StringComparison.Ordinal)) || line.Contains("await ", StringComparison.Ordinal))
+                continue;
+
+            seen++;
+
+            if (!lines[i - 1].Contains("GeneratedCode(\"go2cs-gen\"", StringComparison.Ordinal))
+                unstamped.Add(line);
+        }
+
+        Assert.AreEqual(expected, seen, $"{shape}: the row read {seen} helper/slot declarations:\n{twins}");
+        Assert.AreEqual(0, unstamped.Count, "a hidden interface's helper or slot body is a Go frame (no [GeneratedCode(\"go2cs-gen\")]):\n" + string.Join("\n", unstamped));
     }
 
     private static IEnumerable<MetadataReference> References()

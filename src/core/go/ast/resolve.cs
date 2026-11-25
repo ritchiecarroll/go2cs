@@ -9,7 +9,7 @@ using scanner = global::go.go.scanner_package;
 using token = global::go.go.token_package;
 using strconv = strconv_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class ast_package {
 
@@ -23,7 +23,7 @@ internal static void error⁔(/*this*/ ref pkgBuilder p, token.Pos pos, @string 
 }
 
 internal static void errorf⁔(/*this*/ ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     p.error(pos, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
@@ -70,7 +70,7 @@ internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
 // return pkg.
 //
 // Deprecated: use the type checker [go/types] instead; see [Object].
-// type Importer is a methodless func type — rendered inline as its base delegate
+public delegate (ж<Object> pkg, error err) Importer(map<@string, ж<Object>> imports, @string path);
 
 // NewPackage creates a new [Package] node from a set of [File] nodes. It resolves
 // unresolved identifiers across files and updates each file's Unresolved list
@@ -82,7 +82,7 @@ internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
 // The result is a package node and a [scanner.ErrorList] if there were errors.
 //
 // Deprecated: use the type checker [go/types] instead; see [Object].
-public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@string, ж<File>> files, Func<map<@string, ж<Object>>, @string, (ж<Object>, error)> importer, ж<Scope> universe) {
+public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@string, ж<File>> files, Importer importer, ж<Scope> universe) {
     ref var fset = ref Ꮡfset.DerefOrNull();
 
     pkgBuilder p = default;

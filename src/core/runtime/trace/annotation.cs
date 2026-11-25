@@ -8,7 +8,7 @@ using fmt = fmt_package;
 using atomic = go.sync.atomic_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using go.sync;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class trace_package {
 
@@ -104,7 +104,7 @@ public static void Log(context.Context ctx, @string category, @string message) {
 
 // Logf is like [Log], but the value is formatted using the specified format spec.
 public static void Logf(context.Context ctx, @string category, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (IsEnabled()) {
         // Ideally this should be just Log, but that will

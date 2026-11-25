@@ -11,7 +11,7 @@ using strconv = go.strconv_package;
 using @unsafe = go.unsafe_package;
 // value.cs declares this alias file-scoped, so a member MOVED here for hand-owning cannot see it.
 // Spelled identically to the emission so the displaced signature matches the generated one exactly.
-using ꓸꓸꓸValue = System.Span<go.reflect_package.Value>;
+using ꓸꓸꓸValue = go.variadic<go.reflect_package.Value>;
 
 // Hand-finished conversion (the reflection bridge — Phase 4, value side). Go's reflect.Value reads the
 // value through v.ptr as flat memory at computed field/element offsets — reinterpreting an interface's
@@ -1362,7 +1362,7 @@ public static uintptr Pointer(this Value v) {
 // had no storage to resolve. Through Addr the answer is the aliased box's token, REGISTERED by
 // reflectPointerToken, so NewAt resolves it, and token + a Go field offset, back to real storage.
 //
-// It stays the ORDER TOKEN where Pointer now answers the box's own number (COORD's %p ruling, 2026-11-22, option A):
+// It stays the ORDER TOKEN where Pointer now answers the box's own number (the %p decision, 2026-11-22, option A; 1721a77ac4):
 // NewAt resolves EXACT ONLY through the token table (ruled 2026-10-04), so a pinned address plus a field offset would
 // miss it and fall to a zero box, which is go-cmp's unexported-field read. The cost is the disclosed residual: for
 // reference-free storage, UnsafeAddr differs from uintptr(unsafe.Pointer(&field)).
@@ -2376,17 +2376,10 @@ public static slice<Value> CallSlice(this Value v, slice<Value> @in) {
     // The final argument is checked against the func's own []T parameter — which is exactly what
     // marshalCallArg does, so Go's assignability rule AND its "CallSlice using X as type []T" panic
     // text come for free rather than being restated here.
-    Value tailArg = @in[fixedCount];
-    marshalCallArg(tailArg, ins[^1]);
-    System.Type tailElem = ins[^1].GetGenericArguments()[0];
-    nint tailLen = tailArg.Len();
-    // `Array` alone is reflect.Array (a Kind constant is in scope here), so this one is qualified —
-    // the same collision callVariadic annotates.
-    System.Array tail = System.Array.CreateInstance(tailElem, (int)tailLen);
-    for (nint i = 0; i < tailLen; i++) {
-        tail.SetValue(marshalCallArg(tailArg.Index(i), tailElem), (int)i);
-    }
-    return callResults(GoReflect.InvokeVariadic(del, args, tail), outs);
+    // The marshalled slice itself is the tail: Go's CallSlice hands the callee the caller's slice, so
+    // element writes in the callee are visible through it (golib InvokeVariadicSlice keeps the header).
+    object? tail = marshalCallArg(@in[fixedCount], ins[^1]);
+    return callResults(GoReflect.InvokeVariadicSlice(del, args, tail), outs);
 }
 
 } partial class reflect_package {

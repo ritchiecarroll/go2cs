@@ -5,7 +5,7 @@ namespace go.vendor.golang.org.x.crypto;
 
 using errors = errors_package;
 using fmt = fmt_package;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 
 partial class cryptobyte_package {
 
@@ -132,7 +132,7 @@ internal static void AddBytes⁔(/*this*/ ref Builder b, slice<byte> v) {
 // If the continuation panics with a value of type BuildError then the inner
 // error will be returned as the error from Bytes. If the child panics
 // otherwise then Bytes will repanic with the same value.
-// type BuilderContinuation is a methodless func type — rendered inline as its base delegate
+public delegate void BuilderContinuation(ж<Builder> child);
 
 // BuildError wraps an error. If a BuilderContinuation panics with this value,
 // the panic will be recovered and the inner error will be returned from
@@ -142,26 +142,26 @@ partial struct BuildError {
 }
 
 // AddUint8LengthPrefixed adds a 8-bit length-prefixed byte sequence.
-internal static void AddUint8LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint8LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, BuilderContinuation f) {
     Ꮡb.addLengthPrefixed(1, false, f);
 }
 
 // AddUint16LengthPrefixed adds a big-endian, 16-bit length-prefixed byte sequence.
-internal static void AddUint16LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint16LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, BuilderContinuation f) {
     Ꮡb.addLengthPrefixed(2, false, f);
 }
 
 // AddUint24LengthPrefixed adds a big-endian, 24-bit length-prefixed byte sequence.
-internal static void AddUint24LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint24LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, BuilderContinuation f) {
     Ꮡb.addLengthPrefixed(3, false, f);
 }
 
 // AddUint32LengthPrefixed adds a big-endian, 32-bit length-prefixed byte sequence.
-internal static void AddUint32LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint32LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, BuilderContinuation f) {
     Ꮡb.addLengthPrefixed(4, false, f);
 }
 
-internal static void callContinuation⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f, ж<Builder> arg) {
+internal static void callContinuation⁔(/*this*/ ж<Builder> Ꮡb, BuilderContinuation f, ж<Builder> arg) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -192,7 +192,7 @@ internal static void callContinuation⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Bu
     finally { ᒐ.Run(); }
 }
 
-internal static void addLengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, nint lenLen, bool isASN1, Action<ж<Builder>> f) {
+internal static void addLengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, nint lenLen, bool isASN1, BuilderContinuation f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Subsequent writes can be ignored if the builder has encountered an error.

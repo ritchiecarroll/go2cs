@@ -61,8 +61,8 @@ using go.sync;
 using vendor.golang.org.x.net;
 using vendor.golang.org.x.net.http;
 using vendor.golang.org.x.net.http2;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸhttp2Setting = Span<http_package.http2Setting>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸhttp2Setting = variadic<http_package.http2Setting>;
 
 partial class http_package {
 
@@ -1510,9 +1510,9 @@ internal static http2Flags http2FlagPushPromisePadded => 0x8;
 // a frameParser parses a frame given its FrameHeader and payload
 // bytes. The length of payload will always equal fh.Length (which
 // might be 0).
-// type http2frameParser is a methodless func type — rendered inline as its base delegate
+internal delegate (http2Frame, error) http2frameParser(ж<http2frameCache> fc, http2FrameHeader fh, Action<@string> countError, slice<byte> payload);
 
-[GoLazy] partial class lazyᴛhttp2frameParsers { internal static array<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>> http2frameParsers = new golib.SparseArray<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>>{
+[GoLazy] partial class lazyᴛhttp2frameParsers { internal static array<http2frameParser> http2frameParsers = new golib.SparseArray<http2frameParser>{
     [http2FrameData] = http2parseDataFrame,
     [http2FrameHeaders] = http2parseHeadersFrame,
     [http2FramePriority] = http2parsePriorityFrame,
@@ -1525,7 +1525,7 @@ internal static http2Flags http2FlagPushPromisePadded => 0x8;
     [http2FrameContinuation] = http2parseContinuationFrame
 }.array(); }
 
-internal static Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)> http2typeFrameParser(http2FrameType t) {
+internal static http2frameParser http2typeFrameParser(http2FrameType t) {
     if ((nint)t < len(http2frameParsers)) {
         return http2frameParsers[t];
     }
@@ -4663,7 +4663,8 @@ internal static (context.Context ctx, Action cancel) http2serverConnBaseContext(
     context.Context ctx = default;
     Action cancel = default;
 
-    (ctx, cancel) = context.WithCancel(opts.context());
+    (ctx, var cancelᴛ1) = context.WithCancel(opts.context());
+    cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
     ctx = context.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), c.LocalAddr());
     var hs = opts.baseConfig(); if (hs != nil) {
         ctx = context.WithValue(ctx, ServerContextKey.OrTypedNil(), hs.OrTypedNil());
@@ -4837,7 +4838,7 @@ internal static void setConnState⁔(/*this*/ ref http2serverConn sc, ConnState 
 }
 
 internal static void vlogf⁔(/*this*/ ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (http2VerboseLogs) {
         sc.logf(format, args.ꓸꓸꓸ);
@@ -4845,7 +4846,7 @@ internal static void vlogf⁔(/*this*/ ref http2serverConn sc, @string format, p
 }
 
 internal static void logf⁔(/*this*/ ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     var lg = sc.hs.ErrorLog; if (lg != nil) {
         lg.Printf(format, args.ꓸꓸꓸ);
@@ -4895,7 +4896,7 @@ internal static bool http2isClosedConnError(error err) {
 }
 
 internal static void condlogf⁔(/*this*/ ref http2serverConn sc, error err, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     if (err == nil) {
         return;
@@ -6607,7 +6608,7 @@ internal static ж<http2stream> newStream⁔(/*this*/ ж<http2serverConn> Ꮡsc,
         id: id,
         state: state,
         ctx: ctx,
-        cancelCtx: cancelCtx
+        cancelCtx: NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtx)
     ));
     st.Ꮡcw.Init();
     st.flow.conn = Ꮡsc.Ꮡflow; // link to conn-level counter
@@ -11522,19 +11523,19 @@ internal static error http2errResponseHeaderListSize = errors.New("http2: respon
 internal static error http2errRequestHeaderListSize = httpcommon.ErrRequestHeaderListSize;
 
 internal static void logf⁔(/*this*/ ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     cc.t.logf(format, args.ꓸꓸꓸ);
 }
 
 internal static void vlogf⁔(/*this*/ ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     cc.t.vlogf(format, args.ꓸꓸꓸ);
 }
 
 internal static void vlogf⁔(/*this*/ ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (http2VerboseLogs) {
         t.logf(format, args.ꓸꓸꓸ);
@@ -11542,7 +11543,7 @@ internal static void vlogf⁔(/*this*/ ref http2Transport t, @string format, par
 }
 
 internal static void logf⁔(/*this*/ ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     log.Printf(format, args.ꓸꓸꓸ);
 }

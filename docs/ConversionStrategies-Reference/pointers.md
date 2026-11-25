@@ -141,7 +141,7 @@ with zero bytes allocated, Go's aliasing and equality, the chunk cost, a type wi
 fresh boxes, and a dropped backing being collected.)
 <!-- The table: src/core/golib/ж.ElemRefBox.cs:168 (`internal static ж<T> OfArrayElement(array<T> array, int index)`),
      the chunk: src/core/golib/ж.ElemRefBox.cs:160 (`private const int ElementBoxChunk = 64;`), the first of the
-     three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2698 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
+     three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2716 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
      Commits 8a714cf6dd, edb753ebca, 29d469bc11. The slice<T> overloads keep a fresh box per expression. -->
 
 (Guarded by the `SlicePointerIdentity` behavioral output test — self identity, distinctness, re-slice and re-slice-of-re-slice aliasing, the in-capacity `append` result, array-vs-slice-over-that-array, struct elements, a write through an element pointer observed through both views, and `map[*int]` store/overwrite/lookup/miss including a lookup keyed through a *different* window — vs `go run`. Counter-proven: pre-fix **every** identity assertion printed `false`, both map lookups returned empty, and `len(m)` grew from 2 to 3 on the overwrite.)
@@ -333,7 +333,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
-<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:116-120 -->
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:114-118 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -1210,13 +1210,13 @@ Guarded by: the behavioral program `UnsafePointerCallResultLifetime`; `TestDisca
 
 Go's `(*T)(p)` turns an `unsafe.Pointer` into a typed pointer to the same memory, and the typed pointer keeps that memory alive. The converter emits golib's typed conversion, `@unsafe.Pointer.To<T>(p)`, which receives the pointer itself: its number and [the box it carries](#converting-a-go-pointer-to-unsafepointer).
 
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.go:20-22 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.go:24-26 -->
 ```go
 func readU32(p ptr, o uintptr) uint32 {
 	return *(*uint32)(unsafe.Add(p, o))
 }
 ```
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:19-21 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:23-25 -->
 ```csharp
 internal static uint32 readU32(ptr p, uintptr o) {
     return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));
@@ -2163,7 +2163,7 @@ mergeCancel := func(ctx, cancelCtx Context) (Context, CancelFunc) {
 lambda conversion, which is what the gate tests.) Without the cast the tuple has no natural type, so
 neither does the enclosing conversion — CS8917 on the declaration and CS8130 at every deconstruction
 of its result. Naming the type is also the more faithful rendering: Go's declared result there *is*
-`CancelFunc`, a methodless func type, which renders inline as its base delegate `Action`. An UNNAMED `func() bool` result would need the synthesized
+`CancelFunc`, a defined func type, which is its own delegate. An UNNAMED `func() bool` result would need the synthesized
 `Func<…>`/`Action` spelling and has no corpus site today, so it is deliberately left.
 
 ## Publicization decides WHAT a type's modifier is; the test-bridge arm only decides WHERE
@@ -2770,29 +2770,29 @@ type record struct {
 partial class main_package {
 …
     var blob = new slice<byte>(24);
-    var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
+    var rec = Ꮡ(blob, 0).Reinterpret<byte, Δrecord>();
 
     rec.Kind = 0x01020304;
     rec.Length = 0x0506;
     rec.Off = 7;
     rec.Off += 1;
-    rec.of(record.ᏑPath).ElementRef(1) = 0x0a0b;
-    nint n = copy(rec.of(record.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
+    rec.of(main_package.Δrecord.ᏑPath).ElementRef(1) = 0x0a0b;
+    nint n = copy(rec.of(main_package.Δrecord.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
     rec.tail.B = 0x1112;
 ```
 
-`rec.Kind` is a C# 14 extension PROPERTY on `ж<record>` that go2cs-gen emits, a `ref` with `ж<T>.field`'s two
+`rec.Kind` is a C# 14 extension PROPERTY on `ж<Δrecord>` that go2cs-gen emits, a `ref` with `ж<T>.field`'s two
 arms:
 
 <!-- illustration: not converter output -->
 ```csharp
-extension(global::go.ж<global::go.main_package.@record> ʗp)
+extension(global::go.ж<global::go.main_package.Δrecord> ʗp)
 {
     public ref uint Kind
     {
         [GeneratedCode("go2cs-gen", …), MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => ref ʗp is global::go.NativeBox<global::go.main_package.@record>
-            ? ref ʗp.field(global::go.main_package.@record.ᏑKind)
+        get => ref ʗp is global::go.NativeBox<global::go.main_package.Δrecord>
+            ? ref ʗp.field(global::go.main_package.Δrecord.ᏑKind)
             : ref ʗp.Value.Kind;
     }
     …

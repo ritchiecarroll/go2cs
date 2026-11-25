@@ -83,7 +83,7 @@ namespace go.@internal.trace;
 
 using static go.@internal.trace.testtrace_package;
 using trace = go.@internal.trace_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("testtrace")]
 public static partial class testtrace_package

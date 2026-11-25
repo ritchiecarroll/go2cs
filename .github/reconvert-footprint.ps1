@@ -6,8 +6,13 @@
 .DESCRIPTION
     The os-matrix reconvert-footprint stage's instrument (COORD's ruling, 2026-11-23). A footprint is measured by TWO
     seeded reconverts diffed against EACH OTHER, never by a reconvert diffed against the committed tree, which carries
-    unbanked drift (.claude/skills/corpus-reconvert, section 2). This script does that for ONE target, the -Goos
+    unbanked drift (.claude/skills/corpus-reconvert, section 2). This script does that for ONE target, the -Goos/-Goarch
     flavour, so a lane whose box cannot hold two corpus roots still gets a measured footprint.
+
+    -Goarch defaults to amd64, the arch every flavour but linux/arm64 is converted at. The pair must be one the corpus
+    is laid out for, and the script reads that set from -Base's own src/core/Directory.Build.props (the
+    GoCheckLayoutTarget conditions, which TestCorpusBuildFileCarriesTheUniverseCheck holds to the converter's
+    platformUniverse) rather than keeping a list of its own. Any other pair is refused by name before anything is built.
 
     Both arms are seeded from the SAME tree, -Base's: its src/core, src/version.props, docs/validation and
     docs/ValidatedTestPackages.md, laid out as the repository lays them out. The seeds are therefore identical and only
@@ -34,6 +39,8 @@ param(
     [Parameter(Mandatory)] [string] $Base,
     [Parameter(Mandatory)] [string] $Changed,
     [Parameter(Mandatory)] [ValidateSet('windows', 'linux', 'darwin')] [string] $Goos,
+    # The flavour's arch. With -Goos it must name a target of -Base's layout universe (see the description).
+    [ValidatePattern('^[a-z0-9]+$')] [string] $Goarch = 'amd64',
     # An empty or absent directory outside the repository: the two arms, the two converters and the archives go here.
     [Parameter(Mandatory)] [string] $Work,
     [Parameter(Mandatory)] [string] $OutDir
@@ -67,6 +74,15 @@ foreach ($sha in @($Base, $Changed | Select-Object -Unique)) {
         if ($LASTEXITCODE -ne 0) { Deny "fetched $sha, and it is still not a commit here." }
     }
 }
+
+# The target must be one the corpus is laid out for, read from -Base's own build file: src/core/Directory.Build.props
+# carries the converter's platformUniverse as GoCheckLayoutTarget's conditions. A pair outside it (windows/arm64) would
+# convert a flavour the corpus never carries and read as a footprint.
+$target = "$Goos/$Goarch"
+$layoutProps = (& git -C $repo show "${Base}:src/core/Directory.Build.props" 2>$null) -join "`n"
+$universe = @([regex]::Matches($layoutProps, "'\$\(_GoLayoutTarget\)'!='(?<t>[a-z0-9]+/[a-z0-9]+)'") | ForEach-Object { $_.Groups['t'].Value })
+if (-not $universe.Count) { Deny "$Base's src/core/Directory.Build.props declares no layout targets (GoCheckLayoutTarget), so -Goos/-Goarch cannot be checked against it." }
+if ($target -cnotin $universe) { Deny "$target is not a target the converted standard library is laid out for at $Base ($($universe -join ', ')); pass -Goos and -Goarch as one of them." }
 
 # GOROOT exactly as go prints it: a respelled GOROOT misroutes the whole emission and still exits 0 (safety floor 6).
 $goroot = (& go env GOROOT).Trim()
@@ -136,9 +152,9 @@ foreach ($arm in $arms.Keys) {
     # The conversion. Under 'Stop' a stderr warning would end this script and leave the converter running.
     $log = Join-Path $OutDir "convert-$arm.log"
     $started = [DateTime]::UtcNow
-    Write-Host "== $arm ($sha): go2cs -stdlib -comments -platforms $Goos/amd64 -go2cspath $(Join-Path $root 'src')"
+    Write-Host "== $arm ($sha): go2cs -stdlib -comments -platforms $target -go2cspath $(Join-Path $root 'src')"
     $ErrorActionPreference = 'Continue'
-    & $exe -stdlib -comments -platforms "$Goos/amd64" -go2cspath (Join-Path $root 'src') *>&1 | Out-File -LiteralPath $log -Encoding utf8
+    & $exe -stdlib -comments -platforms $target -go2cspath (Join-Path $root 'src') *>&1 | Out-File -LiteralPath $log -Encoding utf8
     $convertExit = $LASTEXITCODE
     $ErrorActionPreference = 'Stop'
     $seconds = [int]([DateTime]::UtcNow - $started).TotalSeconds
@@ -223,7 +239,7 @@ foreach ($arm in $report.Keys) {
 }
 
 $summary = @(
-    "## Reconvert footprint -- $Goos/amd64"
+    "## Reconvert footprint -- $target"
     ''
     "base ``$Base`` -> changed ``$Changed``; both seeded from base ($($b.Seeded) .cs, $($b.HandOwns) hand-owned files); $goVersion, GOROOT ``$goroot``"
     ''
@@ -246,7 +262,7 @@ if ($files) {
     $summary += @('```', '')
 }
 if ($failures) { $summary += @('**FAILED:**', '') + @($failures | ForEach-Object { "- $_" }) + '' }
-$summary += "FOOTPRINT goos=$Goos base=$Base changed=$Changed files=$files removed=$removed added=$added posmap=-$posRemoved/+$posAdded markers=$($b.Markers.Count)/$($c.Markers.Count) handown-rewritten=$($b.Clobbered.Count)/$($c.Clobbered.Count) written=$($b.Written)/$($c.Written) exit=$($b.Exit)/$($c.Exit)"
+$summary += "FOOTPRINT goos=$Goos goarch=$Goarch base=$Base changed=$Changed files=$files removed=$removed added=$added posmap=-$posRemoved/+$posAdded markers=$($b.Markers.Count)/$($c.Markers.Count) handown-rewritten=$($b.Clobbered.Count)/$($c.Clobbered.Count) written=$($b.Written)/$($c.Written) exit=$($b.Exit)/$($c.Exit)"
 
 $summary | Set-Content -LiteralPath (Join-Path $OutDir 'summary.md') -Encoding utf8
 $summary | ForEach-Object { Write-Host $_ }

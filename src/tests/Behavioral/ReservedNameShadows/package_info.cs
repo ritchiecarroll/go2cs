@@ -73,10 +73,10 @@ public static partial class main_package
     internal partial struct @required {}
     internal partial struct @scoped {}
     internal partial struct box {}
-    internal partial struct record {}
     internal partial struct Δany {}
     internal partial struct Δbuiltin {}
     internal partial struct Δnint {}
+    internal partial struct Δrecord {}
     internal partial struct Δrune {}
     internal partial struct Δsstring {}
     public partial struct ΔGoFrame {}

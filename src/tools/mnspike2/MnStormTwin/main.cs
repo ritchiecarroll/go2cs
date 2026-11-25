@@ -86,7 +86,7 @@ internal static async global::go.golib.GoTask workerꞏtwin(this ж<storm> Ꮡs,
         }
 
         s = ref Ꮡs.DerefOrNull();
-        await s.mu.Lockꞏtwin();
+        await Ꮡs.Ꮡmu.Lockꞏtwin();
         s = ref Ꮡs.DerefOrNull();
         s.counter += id;
         s.mu.Unlock();

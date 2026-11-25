@@ -9,7 +9,7 @@ using reflect = reflect_package;
 
 partial class gob_package {
 
-[GoLazy] partial class lazyᴛdecArrayHelper { internal static map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>> decArrayHelper = new map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>>{
+[GoLazy] partial class lazyᴛdecArrayHelper { internal static map<reflect.Kind, decHelper> decArrayHelper = new map<reflect.Kind, decHelper>{
     [reflect.Bool] = decBoolArray,
     [reflect.Complex64] = decComplex64Array,
     [reflect.Complex128] = decComplex128Array,
@@ -28,7 +28,7 @@ partial class gob_package {
     [reflect.Uintptr] = decUintptrArray
 }; }
 
-[GoLazy] partial class lazyᴛdecSliceHelper { internal static map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>> decSliceHelper = new map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>>{
+[GoLazy] partial class lazyᴛdecSliceHelper { internal static map<reflect.Kind, decHelper> decSliceHelper = new map<reflect.Kind, decHelper>{
     [reflect.Bool] = decBoolSlice,
     [reflect.Complex64] = decComplex64Slice,
     [reflect.Complex128] = decComplex128Slice,

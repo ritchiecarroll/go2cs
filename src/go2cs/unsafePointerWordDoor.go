@@ -15,7 +15,7 @@ import (
 	"go/types"
 )
 
-// THE unsafe.Pointer WORD DOOR (W1 and W2; docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3 to 18.7, seat S-B1).
+// THE unsafe.Pointer WORD DOOR (W1 and W2; docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3 to 18.7, cure S-B1).
 //
 // `*p` and `*p = v`, where p's static type is *unsafe.Pointer, are emitted as calls:
 //
@@ -49,7 +49,7 @@ import (
 // ONE SILENT CASE, and it is master's behavior rather than this predicate's: a STORE through shape (a) writes into the
 // fresh box, which nothing else reads, so the write is lost (reinterpretManagedEmission's own comment names it). The
 // corpus has it at runtime's debugcall.cs (debugCallWrap2's dispatchF) and the per-OS cgocall.cs (cgocallbackg1's cb),
-// both a pointer word stored into a func variable: the BOARD's (ff) LOST WRITE row of 2026-11-20.
+// both a pointer word stored into a func variable: the (ff) LOST WRITE finding of 2026-11-20 (9cec06ef4c).
 
 // isUnsafePointerPointerType reports whether t is exactly *unsafe.Pointer.
 func isUnsafePointerPointerType(t types.Type) bool {
@@ -105,9 +105,9 @@ func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
 
 // unsafePointerShapeBStoreAccessor answers the accessor of a STORE `*p = v` through shape (b), `&x` of a local or a
 // parameter: `.ValueSlot`, the converter's own convention for writing a held reference (`pp.ValueSlot = Ꮡx`). `.Value`
-// would read the held value first and panic on a nil unsafe.Pointer, where Go stores (COORD ruling on P3's review of
-// seat S-B1, 2026-11-20). Loads through (b) already read the slot (`~Ꮡx`), and shape (a)'s store keeps its emission:
-// its fresh box is the BOARD's (ff) lost write, not this. Every other operand keeps accessor.
+// would read the held value first and panic on a nil unsafe.Pointer, where Go stores (design decision on the review of
+// cure S-B1, 2026-11-20; d02c2dda3b). Loads through (b) already read the slot (`~Ꮡx`), and shape (a)'s store keeps its emission:
+// its fresh box is the (ff) lost write, not this. Every other operand keeps accessor.
 func (v *Visitor) unsafePointerShapeBStoreAccessor(operand ast.Expr, accessor string) string {
 	if isUnsafePointerPointerType(v.info.TypeOf(operand)) && v.unsafePointerManagedSlotShape(operand) == 'b' {
 		return ".ValueSlot"

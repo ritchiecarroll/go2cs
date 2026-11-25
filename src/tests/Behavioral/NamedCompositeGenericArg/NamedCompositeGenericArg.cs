@@ -8,7 +8,7 @@ partial class main_package {
 partial struct Names /*map[nint, @string]*/;
 partial struct Scores /*[]float64*/;
 partial struct Feed /*chan nint*/;
-// type Pred is a methodless func type — rendered inline as its base delegate
+public delegate bool Pred(nint _);
 partial struct Grid /*[2]nint*/;
 
 internal static T first<T>(/*[2]*/ array<T> a) {
@@ -66,8 +66,8 @@ internal static void main() {
     feed.ᐸꟷ(7);
     fmt.Println("named chan:", drain<nint>(feed));
 
-    Func<nint, bool> even = [GoFunc("main.func1")] (nint v) => v % 2 == 0;
-    fmt.Println("named func:", count(slice<nint>([1, 2, 4]), even));
+    Pred even = [GoFunc("main.func1")] (nint v) => v % 2 == 0;
+    fmt.Println("named func:", count(slice<nint>([1, 2, 4]), NilSafeDelegateConversion<Func<nint, bool>, Pred>(even)));
 
     var grid = new Grid(new nint[]{4, 5}.array());
     fmt.Println("named array:", first<nint>(grid));

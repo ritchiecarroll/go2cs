@@ -63,7 +63,7 @@ namespace go;
 
 using sysdll = @internal.syscall.windows.sysdll_package;
 using Δsync = sync_package;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = go.variadic<uintptr>;
 using static syscall_package;
 
 partial class syscall_package {

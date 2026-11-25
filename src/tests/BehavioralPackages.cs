@@ -69,6 +69,8 @@ internal static class BehavioralPackages
     /// repoguard TestBehavioralHarnessReadsConverterOptions fails by name if any converter call site stops doing so: a
     /// call site that silently dropped the file would convert the project without -warn, which is false-green route #2's
     /// shape (two instruments disagreeing on how a project converts).
+    /// -stack-append=on pins a project that tests Go's stack-append buffer to it, since a plain conversion resolves the
+    /// hint off (the owner's ruling, 2026-11-24) and the project's golden records the buffer.
     /// </summary>
     public const string ConverterOptionsFile = "go2cs.options";
 
@@ -79,12 +81,12 @@ internal static class BehavioralPackages
     /// </summary>
     public const string ExpectedOutputFile = "expected-output.txt";
 
-    private static readonly System.Text.RegularExpressions.Regex s_allowedConverterOption = new(@"^-warn=GO2CS\d{4}(,GO2CS\d{4})*$");
+    private static readonly System.Text.RegularExpressions.Regex s_allowedConverterOption = new(@"^(-warn=GO2CS\d{4}(,GO2CS\d{4})*|-stack-append=on)$");
 
     /// <summary>
     /// The project's converter options as one argument prefix ("" when it has no go2cs.options), or the error naming a
-    /// line the file may not carry. The file may carry -warn=&lt;codes&gt; and nothing else, so a project cannot use it to turn
-    /// on any other converter behavior.
+    /// line the file may not carry. The file may carry -warn=&lt;codes&gt; and -stack-append=on and nothing else, so a project
+    /// cannot use it to turn on any other converter behavior.
     /// </summary>
     public static (string Options, string? Error) ConverterOptions(string projectDir)
     {
@@ -103,7 +105,7 @@ internal static class BehavioralPackages
                 continue;
 
             if (!s_allowedConverterOption.IsMatch(line))
-                return ("", $"{ConverterOptionsFile}: \"{line}\" is not an allowed converter option (only -warn=<code>[,<code>...])");
+                return ("", $"{ConverterOptionsFile}: \"{line}\" is not an allowed converter option (only -warn=<code>[,<code>...] and -stack-append=on)");
 
             options.Append(line).Append(' ');
         }

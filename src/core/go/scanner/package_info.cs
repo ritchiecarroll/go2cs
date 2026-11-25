@@ -76,7 +76,7 @@ namespace go.go;
 
 using static global::go.go.scanner_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("scanner")]
 public static partial class scanner_package
@@ -148,7 +148,7 @@ partial class scannerᴛErrorList {
 partial class scannerᴛScanner {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void next(this ref Scanner s) => scanner_package.next⁔(ref s);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte peek(this ref Scanner s) => scanner_package.peek⁔(ref s);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init(this ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, Action<token.Position, @string> err, Mode mode) => scanner_package.Init⁔(ref s, Ꮡfile, src, err, mode);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init(this ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, ErrorHandler err, Mode mode) => scanner_package.Init⁔(ref s, Ꮡfile, src, err, mode);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void error(this ref Scanner s, nint offs, @string msg) => scanner_package.error⁔(ref s, offs, msg);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void errorf(this ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) => scanner_package.errorf⁔(ref s, offs, format, argsʗp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, nint) scanComment(this ref Scanner s) => scanner_package.scanComment⁔(ref s);

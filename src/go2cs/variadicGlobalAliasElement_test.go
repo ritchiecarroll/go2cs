@@ -117,13 +117,13 @@ func TestVariadicAliasOfAGlobalAliasElementIsNotPackageQualified(t *testing.T) {
 	}
 
 	for _, element := range []string{"Hook", "Source"} {
-		if line := aliasLine(element); line != "using ꓸꓸꓸ"+element+" = Span<"+element+">;" {
+		if line := aliasLine(element); line != "using ꓸꓸꓸ"+element+" = variadic<"+element+">;" {
 			t.Errorf("%s is a global alias, not a package-class member: %s", element, line)
 		}
 	}
 
 	for _, element := range []string{"box", "Shape"} {
-		if line := aliasLine(element); !strings.Contains(line, "Span<main_package."+element+">") {
+		if line := aliasLine(element); !strings.Contains(line, "variadic<main_package."+element+">") {
 			t.Errorf("%s is a package-class member and must stay qualified: %s", element, line)
 		}
 	}

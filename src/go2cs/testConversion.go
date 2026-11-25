@@ -1383,6 +1383,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	// class-qualified. Computed from the loaded variants before either converts, and session-scoped
 	// — resetPackageState does not clear it.
 	testAmbiguousLocalTypeNames = ambiguousVariantTypeNames(internal, external)
+	testDeltaLedTypeNames = deltaLedTypeNames(internal, external)
 	testInternalDeclaredNames = internalTestDeclaredNames(internal)
 
 	// Cleared for every package, filled only by the recompile-model seed below: the alias bindings a
@@ -1769,6 +1770,26 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 // the anchor a metadata file's bare local type references bind to.
 func metadataClassPrefix(namespace, goPackageName string) string {
 	return namespace + "." + getSanitizedImport(goPackageName+PackageSuffix)
+}
+
+// deltaLedTypeNames collects the package-level type names either loaded `-tests` variant declares whose Go name
+// starts with the Δ rename marker (testDeltaLedTypeNames).
+func deltaLedTypeNames(variants ...*packages.Package) hashset.HashSet[string] {
+	names := hashset.HashSet[string]{}
+
+	for _, variant := range variants {
+		if variant == nil || variant.Types == nil {
+			continue
+		}
+
+		for _, name := range variant.Types.Scope().Names() {
+			if _, ok := variant.Types.Scope().Lookup(name).(*types.TypeName); ok && strings.HasPrefix(name, ShadowVarMarker) {
+				names.Add(name)
+			}
+		}
+	}
+
+	return names
 }
 
 // ambiguousVariantTypeNames returns the simple type names declared by BOTH `-tests` variants: the
@@ -3896,7 +3917,7 @@ func splitWhiteboxVariantRecords(bridgeTypeNames hashset.HashSet[string], bridge
 			name = strings.TrimSuffix(trimmed, ">")
 		}
 
-		return !strings.Contains(name, ".") && bridgeTypeNames.Contains(strings.TrimPrefix(name, ShadowVarMarker))
+		return !strings.Contains(name, ".") && containsEmittedName(bridgeTypeNames, name)
 	}
 
 	splitImplements := func(source map[string]hashset.HashSet[string], bridge, test map[string]hashset.HashSet[string]) {
@@ -6105,8 +6126,8 @@ func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded ma
 	// a ж receiver and under a value receiver, and from a VALUE-receiver method (`this T`, which go2cs-gen also gives a
 	// `this ж<T>` twin) under a ж receiver.
 	//
-	// So the candidate set is every same-named method a visible package declares, at an arity the call accepts (COORD
-	// rulings 20261117T145209Z and 20261117T172451Z). C# weighs fewer: it searches namespace scopes innermost first and
+	// So the candidate set is every same-named method a visible package declares, at an arity the call accepts (design
+	// decisions of 2026-11-17, 8bb34759dd). C# weighs fewer: it searches namespace scopes innermost first and
 	// stops at the first that holds an applicable candidate, which is why registry's banked windows suite builds with
 	// no io/fs reference beside os's `Stat(this ж<File>)` (its own `Key.Stat` is in its namespace; os's is in the outer
 	// `go`). This set over-approximates that search, never under. A visible package is one this project references,
@@ -6271,7 +6292,7 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 		}
 
 		qualifier := argument[match[2]:match[3]]
-		name := strings.TrimPrefix(strings.TrimPrefix(argument[match[1]:], "."), "Δ")
+		name := strings.TrimPrefix(argument[match[1]:], ".")
 
 		// A generic instantiation (`Checker<nint>`) seeds its declaration: the converter emits a generic interface's
 		// bases from the declared type (getStructuralInterfaceBases), so the walk looks up the same one.
@@ -6288,7 +6309,7 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 				continue
 			}
 
-			typeName, isTypeName := typesByPath[path].Scope().Lookup(name).(*types.TypeName)
+			typeName, isTypeName := lookupEmittedTypeName(typesByPath[path].Scope(), name)
 
 			if !isTypeName {
 				continue
@@ -6304,6 +6325,23 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 	}
 
 	return result
+}
+
+// lookupEmittedTypeName resolves an EMITTED type spelling in a Go scope: the Go name itself, or the Go name the
+// converter renamed with the Δ marker when the spelling
+// is not a Go name of the scope. A Go name that itself starts with Δ is emitted as written, so `ΔMatrix`
+// resolves to `ΔMatrix`, never to a `Matrix` beside it.
+func lookupEmittedTypeName(scope *types.Scope, emitted string) (*types.TypeName, bool) {
+	if typeName, ok := scope.Lookup(emitted).(*types.TypeName); ok {
+		return typeName, true
+	}
+
+	if trimmed, renamed := strings.CutPrefix(emitted, ShadowVarMarker); renamed {
+		typeName, ok := scope.Lookup(trimmed).(*types.TypeName)
+		return typeName, ok
+	}
+
+	return nil, false
 }
 
 // sameNameCandidates returns the methods of pkg's non-interface named types, value and pointer receivers alike (the
@@ -7454,9 +7492,11 @@ func classifyTestSources(inputPath string, included hashset.HashSet[string], com
 // digest (F7): any option that changes emitted C# invalidates the manifest. Machine-specific
 // paths (goRoot/goPath/go2csPath) are deliberately excluded so digests stay machine-portable.
 func conversionOptionsDigest(options Options) string {
-	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t",
+	// stack-append is the resolved mode: a package converted with -stack-append=off and then compared without it is
+	// stale, not a default run, because its emission has no stack-append buffers.
+	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t;stack-append=%t",
 		options.useChannelOperators, options.preferVarDecl, options.indentSpaces,
-		options.includeComments, options.parseCgoTargets)
+		options.includeComments, options.parseCgoTargets, stackAppendEnabled(options))
 }
 
 // runtimeSourcesDigest hashes the hand-owned runtime the converted tests build against (golib +
@@ -8240,6 +8280,11 @@ type testEnvironmentRecord struct {
 	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
 	OracleGOARCH string `json:"oracleGoarch,omitempty"`
 
+	// StackAppend is "off" when the run's -stack-append mode resolved off: its emission has no stack-append buffers, so
+	// cap() after a non-escaping append, and an allocation count that reads it, can differ from a default -tests run.
+	// Omitted when the mode resolved on, the -tests default, so every default record is unchanged.
+	StackAppend string `json:"stackAppend,omitempty"`
+
 	// OracleBuildTags is the oracle `go test` child's build tags, recorded only when they differ from the
 	// conversion's (oracleBuildTagsRecord): every row but math/big's own drops math_big_pure_go, so Go ran
 	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise. A POINTER so an
@@ -8298,6 +8343,10 @@ func testEnvironmentFromOptions(options Options) testEnvironmentRecord {
 
 	if oracle := oracleOptions(options); oracle.targetPlatform != options.targetPlatform {
 		_, record.OracleGOARCH, _ = strings.Cut(oracle.targetPlatform, "/")
+	}
+
+	if !stackAppendEnabled(options) {
+		record.StackAppend = "off"
 	}
 
 	return record
@@ -9091,7 +9140,7 @@ func hostFatalMintAgainstPage(page, importPath, dir, absentReason string, names 
 
 // hostFatalMintViolationsFor is the mint rule for the package a -tests run compares: hostFatalMintViolations for a
 // standard-library package, and for a MODULE row (options.mainModulePath set) the same rule against the module's
-// committed proof page (COORD 20261120T091624Z, GAP 2). A module row's banked record is the page copied into the go2cs
+// committed proof page (GAP 2, 874493f734). A module row's banked record is the page copied into the go2cs
 // checkout the run converts against: docs/validation/modules/<module>@<version>/<package path in the module>.md, the
 // module's root package as index.md. Before this, a module output, never under <root>/core, reported every host-fatal
 // entry UNCHECKED and no module page was read.
@@ -11177,7 +11226,7 @@ func oracleVetFindings(dir string, options Options, packagePath string) ([]strin
 
 	// go vet names each file with its symlinks resolved, so a dir spelled through a symlink trims nothing: on macOS
 	// /var is /private/var, and a module-cache release tested from its copy under TMPDIR (/var/folders/...) put a
-	// /private/var/folders/... host path into the proof page and MODULE.md (train 6's darwin go-test). The dir is
+	// /private/var/folders/... host path into the proof page and MODULE.md (a darwin go-test, 172ea25705). The dir is
 	// resolved once, as moduleCacheRel resolves a cache path, and the textual spelling is still tried first.
 	resolvedDir, resolveErr := filepath.EvalSymlinks(dir)
 
@@ -11380,7 +11429,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	}
 
 	// -test-oracle-vet-off: what go test's vet reports is read first, by analyzer, and the option is refused for a
-	// package it does not stop: the oracle drops vet only where Go's own run fails at it (COORD, 2026-11-22).
+	// package it does not stop: the oracle drops vet only where Go's own run fails at it (decided 2026-11-22, 3f94b4818a).
 	var vetFindings []string
 
 	if options.testOracleVetOff {

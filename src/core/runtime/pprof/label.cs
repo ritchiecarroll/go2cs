@@ -9,7 +9,7 @@ using label = @internal.runtime.pprof.label_package;
 using slices = slices_package;
 using strings = strings_package;
 using @internal.runtime.pprof;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class pprof_package {
 

@@ -7,10 +7,14 @@
 global using static global::go.net.http.fcgi_package;
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.net.http.fcgi_internal_test_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6465736320737472696e673b2072656354797065206e65742f687474702f666367692e726563547970653b2072657149642075696e7431363b20636f6e74656e74205b5d627974653b20726177205b5d627974657d", "streamTestsᴛ1")]
@@ -55,7 +59,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("fcgi_test.cs", 483, 9, 0)]
+[assembly: GoBoundedGoroutine("fcgi_test.cs", 460, 9, 0)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -65,10 +69,13 @@ using static global::go.net.http.fcgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABYiAAcWgoKCgoKUgoKUggALCgAZPLSCgoKCgoKCgoKUlIKClIKClIKClIKCgoCCgqSAgoKkggAMEoKC5oKmggAIBoKClIKCgoKmhoK4ggAIFIqClIKCggAJFAARGgAaOIKmgsyysoKCgoK6goKmlJQAChKCyJIABxCCgrgAFyQADi6ysoKCgoKogoKUgpSUggAPCIIAFDKykoKCgoKCqIKClIKCggAQFoKmgoL6wpSCoriClJSigqaClJiClJSCgqI=", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "55=Join/1/1/12;206=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;224=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;319=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;400=Repeat/1/2/16,Repeat/2/2/21", "", "495:21,496:13")]
+[assembly: GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABUiAAcWgoKCgoKUgoKUggALCgAXPJSCgoKCgoKCgoKUlIKClIKClIKClIKCgoCCgqSAgoKkggAKEoKC5oKmguaCgpSCgoKCpoaCuIIACBSKgpSCgoIACRQAERoAGDiCpoKssrKCgoKCuoKCppSUAAgSgqiSAAcQgoK4ABckAA4usrKCgoKCqIKClIKUlIIADQiCABQyspKCgoKCgqiCgpSCgoIADhaCpoKC2sKUgqK4gpSUooKmgpSYgpSUgoKi", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "54=Join/1/1/12;197=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;215=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;302=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;381=Repeat/1/2/16,Repeat/2/2/21", "", "472:55,473:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static global::go.net.http.fcgi_internal_test_package;
+using io = go.io_package;
 
 [GoPackage("fcgi")]
 public static partial class fcgi_internal_test_package
@@ -113,9 +120,36 @@ public static partial class fcgi_internal_test_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fcgi_internal_test_package.nilCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛnilCloser;
-[GoMethodHost(typeof(fcgi_internal_test_package.nopWriteCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛnopWriteCloser;
-[GoMethodHost(typeof(fcgi_internal_test_package.rwNopCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛrwNopCloser;
-[GoMethodHost(typeof(fcgi_internal_test_package.signalingNopWriteCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛsignalingNopWriteCloser;
-[GoMethodHost(typeof(fcgi_internal_test_package.writeOnlyConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛwriteOnlyConn;
+[GoMethodHost(typeof(fcgi_internal_test_package.nilCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛnilCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.nopWriteCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛnopWriteCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.rwNopCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛrwNopCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.signalingNopWriteCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛsignalingNopWriteCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.writeOnlyConn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛwriteOnlyConn;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fcgi_internal_testᴛnilCloser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref nilCloser c) => fcgi_internal_test_package.Close⁔(ref c);
+}
+partial class fcgi_internal_testᴛnopWriteCloser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this nopWriteCloser _, slice<byte> buf) => fcgi_internal_test_package.Write⁔(_, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this nopWriteCloser _) => fcgi_internal_test_package.Close⁔(_);
+}
+partial class fcgi_internal_testᴛrwNopCloser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this rwNopCloser _) => fcgi_internal_test_package.Close⁔(_);
+}
+partial class fcgi_internal_testᴛsignalingNopWriteCloser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this signalingNopWriteCloser recvᴛ, slice<byte> p) => fcgi_internal_test_package.Read⁔(recvᴛ, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref signalingNopWriteCloser _, slice<byte> buf) => fcgi_internal_test_package.Write⁔(ref _, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref signalingNopWriteCloser rc) => fcgi_internal_test_package.Close⁔(ref rc);
+}
+partial class fcgi_internal_testᴛwriteOnlyConn {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref writeOnlyConn c, slice<byte> p) => fcgi_internal_test_package.Write⁔(ref c, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref writeOnlyConn c, slice<byte> p) => fcgi_internal_test_package.Read⁔(ref c, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref writeOnlyConn c) => fcgi_internal_test_package.Close⁔(ref c);
+}
+// </MethodForwarders>

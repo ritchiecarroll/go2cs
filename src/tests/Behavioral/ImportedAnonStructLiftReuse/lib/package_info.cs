@@ -28,6 +28,7 @@ using static go.ImportedAnonStructLiftReuse.lib_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b517561645061727420696e7436347d", "largeIntegerᴛ1")]
+[assembly: GoDynamicTypeLift("7374727563747b5720696e7433323b204820696e7433327d", "rectᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -50,7 +51,7 @@ using static go.ImportedAnonStructLiftReuse.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAoSooI=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAsSooIABxY=")]
 // </GoSourcePositionMaps>
 
 namespace go.ImportedAnonStructLiftReuse;
@@ -66,6 +67,7 @@ public static partial class lib_package
 
     // <TypeAccessibility>
     public partial struct largeIntegerᴛ1 {}
+    public partial struct rectᴛ1 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

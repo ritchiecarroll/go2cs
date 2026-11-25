@@ -8,7 +8,7 @@ using version = global::go.go.version_package;
 using goversion = global::go.@internal.goversion_package;
 using global::go.@internal;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class types_package {
 
@@ -59,7 +59,7 @@ internal static bool allowVersion⁔(/*this*/ ref Checker check, goVersion want)
 // verifyVersionf is like allowVersion but also accepts a format string and arguments
 // which are used to report a version error if allowVersion returns false.
 internal static bool verifyVersionf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     if (!check.allowVersion(v)) {

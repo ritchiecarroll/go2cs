@@ -32,10 +32,11 @@ import (
 //
 // The digest covers the package's production Go sources and //go:embed payloads (named relative to the package, so it
 // is the same on any host), its hand-owned files and *_impl.cs companions, the target platform, the output-affecting
-// conversion options other than comments, the Go toolchain and the converter revision. Comments are left out: they move
-// only the emitted C#'s line layout, and a -tests proof could otherwise never match a -recurse=nuget root converted
-// without -comments. -provenance is left out for the same reason: it writes only comment lines, and nugetgo-pack.ps1
-// converts with it for an Apache-2.0 module whose proof was made without it.
+// conversion options other than comments (with the -stack-append mode as it resolves), the Go toolchain and the
+// converter revision. Comments are left out: they move only the emitted C#'s line layout, and a -tests proof could
+// otherwise never match a -recurse=nuget root converted without -comments. -provenance is left out for the same
+// reason: it writes only comment lines, and nugetgo-pack.ps1 converts with it for an Apache-2.0 module whose proof was
+// made without it.
 
 const inputDigestProperty = "GoInputDigest"
 
@@ -56,7 +57,7 @@ func recordsInputDigest(projectFileName string, options Options) bool {
 // (cgo-nuget-e2e's first J2, run 44995089337: the pack's own linux flavor did not reproduce -RecurseRoot). cmd/cgo's
 // types file is not read either; in its place the digest takes the bindings file's header (cgoBindingsHeader): the
 // target, the C toolchain's version line and target triple, and the sha256 of the import "C" sources and the C
-// declarations cmd/cgo gave them -- no path. So a new zig pin or a changed C layout moves the digest (COORD's INC 4
+// declarations cmd/cgo gave them -- no path. So a new zig pin or a changed C layout moves the digest (the INC 4
 // review, fold 3), where leaving the types file out with nothing in its place would not.
 func moduleInputDigest(projectFileName string, fset *token.FileSet, files []FileEntry, outputPath, cgoHeader string, options Options) string {
 	if !recordsInputDigest(projectFileName, options) {
@@ -155,9 +156,12 @@ func packageInputDigest(sourceFiles []string, outputPath, cgoHeader string, opti
 		fmt.Fprintf(hash, "cgo-bindings\x00%d\x00%s", len(cgoHeader), cgoHeader)
 	}
 
-	fmt.Fprintf(hash, "\x00%s\x00uco=%t;var=%t;indent=%d;cgo=%t\x00%s\x00%s", options.targetPlatform,
+	// stack-append is the RESOLVED mode (stackAppendEnabled), not the flag as typed: a module's -recurse -tests proof
+	// resolves auto to on and its -recurse=nuget pack resolves auto to off, and the two emissions differ, so a proof
+	// must not bind a pack converted under the other mode.
+	fmt.Fprintf(hash, "\x00%s\x00uco=%t;var=%t;indent=%d;cgo=%t;stack-append=%t\x00%s\x00%s", options.targetPlatform,
 		options.useChannelOperators, options.preferVarDecl, options.indentSpaces, options.parseCgoTargets,
-		runtime.Version(), revision)
+		stackAppendEnabled(options), runtime.Version(), revision)
 
 	return "sha256-" + hex.EncodeToString(hash.Sum(nil)), nil
 }

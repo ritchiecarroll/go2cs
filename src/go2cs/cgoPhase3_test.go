@@ -503,6 +503,12 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "argvc"},
 		{name: "argvfield"},
 		{name: "argvvoid"},
+		// C global variables (cgo item 3): an int, a struct, an errno-style int a call sets, and a global's address,
+		// each read and written in place both ways.
+		{name: "cvar"},
+		{name: "cvarstruct"},
+		{name: "cvarerrno"},
+		{name: "cvaraddr"},
 	}
 }
 

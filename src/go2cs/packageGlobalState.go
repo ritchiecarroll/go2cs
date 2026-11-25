@@ -114,14 +114,6 @@ var importedTypeAliasNamespacedKeys map[string]bool
 // other package's type. Reset per package.
 var ambiguousImportedTypeAliases hashset.HashSet[string]
 
-// packageInlineFuncTypeNames records the names of this package's NON-GENERIC METHODLESS named func
-// types — the ones visitFuncType renders inline as their base delegate and whose named declaration
-// is skipped (there is no `<name>_package.<Δname>` type). Their exported-type-alias must NOT be
-// emitted: a `[GoTypeAlias("Filter", "ΔFilter")]` makes consumers reference a nonexistent
-// `go.go.ast_package.ΔFilter` (go/doc's `ast.Filter`, CS0426). Keyed by both the raw Go name and its
-// core-sanitized form to match either exportedTypeAliases population site.
-var packageInlineFuncTypeNames map[string]bool
-
 // importedPointerImplements records `[assembly: GoImplement<T, Iface>(Pointer = true)]` lines
 // parsed from IMPORTED packages' package_info files, keyed "pkgName|T|ifaceSimple" - the
 // existence proof that the foreign assembly generated the public TжIface adapter class
@@ -620,6 +612,12 @@ var internalTestDynamicTypeNames map[string]string
 // either is converted) and deliberately NOT cleared by resetPackageState;
 // nil for every other conversion, so no other emission changes.
 var testAmbiguousLocalTypeNames hashset.HashSet[string]
+
+// testDeltaLedTypeNames holds the package-level TYPE names, of either `-tests` variant, whose Go name starts
+// with the Δ rename marker. Such a name is emitted as written, so the -tests name sets keyed on Go names read
+// its spelling as the Go name and never remove the marker from it (containsEmittedName). Session-scoped to one
+// `-tests` conversion, computed in convertTestVariants beside testAmbiguousLocalTypeNames; nil otherwise.
+var testDeltaLedTypeNames hashset.HashSet[string]
 
 // testInternalDeclaredNames holds the package-level names the package under test's internal `_test.go`
 // files declare, which its internal-test class (`<pkg>_internal_test_package`) holds and every external

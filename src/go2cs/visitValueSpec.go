@@ -316,13 +316,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							assembly := linknameAssemblyName(pkgPath)
 							typeName := fmt.Sprintf("%s, %s", class, assembly)
 							v.writeOutput("%s static %s %s { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, \"%s\", \"%s\")] get => global::go.LinknameVar<%s>.Get(\"%s\", \"%s\"); set => global::go.LinknameVar<%s>.Set(\"%s\", \"%s\", value); }",
-								getAccess(goIDName), csTypeName, csIDName, class, assembly, csTypeName, typeName, remote, csTypeName, typeName, remote)
+								getGoAccess(goIDName), csTypeName, csIDName, class, assembly, csTypeName, typeName, remote, csTypeName, typeName, remote)
 							v.writeComment(valueSpec.Comment, valueSpec.End())
 							continue
 						}
 
 						v.importQueue.Add(pkgPath)
-						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getAccess(goIDName), csTypeName, csIDName, ref, ref)
+						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getGoAccess(goIDName), csTypeName, csIDName, ref, ref)
 						// The spec's trailing comment rides the property line (os's `var executablePath string // set by
 						// ../runtime/os_darwin.go`), as every other var's does.
 						v.writeComment(valueSpec.Comment, valueSpec.End())
@@ -393,15 +393,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// `var f parseSpecFunction` (`func(*go/ast.CommentGroup, go/token.Token, int)
 					// ast.Spec`) — mangles those elements to the nonexistent `go.go.ast.CommentGroup`/
 					// `go.go.token.Token` (CS0234), while its matching parameter and assigned-lambda
-					// sites render structurally through getCSharpTypeName. getCSharpTypeName routes both forms
-					// through iifeDelegateType, whose aliasedElementTypeName keeps each element's
-					// `pkg.Type` alias. This precedence matches getCSharpTypeName's own (a func render wins
-					// over the foreign-alias route below, whose alias would point at the SKIPPED
-					// methodless-func declaration). A NAMED func type WITH methods keeps its delegate name.
+					// sites render structurally through getCSharpTypeName. getCSharpTypeName routes the
+					// anonymous form through iifeDelegateType, whose aliasedElementTypeName keeps each
+					// element's `pkg.Type` alias. A NAMED func type keeps its delegate name.
 					_, isSig := types.Unalias(def.Type()).(*types.Signature)
-					_, isMethodlessFunc := methodlessNamedFuncSignature(def.Type())
 
-					if isSig || isMethodlessFunc {
+					if isSig {
 						csTypeName = v.getCSharpTypeName(def.Type())
 					} else if aliased, ok := v.foreignAliasedTypeName(def.Type()); ok {
 						// A local declared as a foreign RENAMED type routes through the recorded
@@ -725,6 +722,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							valExpr = narrowedChan
 						}
 
+						// A func value reaching a slot of a different func type: a defined func type and its unnamed
+						// signature convert implicitly in Go (see funcValueForSlot).
+						valExpr = v.funcValueForSlot(def.Type(), valueSpec.Values[i], valExpr)
+
 						// A slice- or map-cored type parameter as a typed var's value (see coreTypeParamValue).
 						if materialized := v.coreTypeParamValue(def.Type(), v.info.TypeOf(valueSpec.Values[i]), valExpr); materialized != "" {
 							valExpr = materialized
@@ -1030,7 +1031,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 			goTypeName := v.getAliasQualifiedTypeName(declType, false)
 			csTypeName := convertToCSTypeName(goTypeName)
-			access := v.testDeclaredValueAccess(getAccess(goIDName), ident.Pos(), declType)
+			access := v.testDeclaredValueAccess(getGoAccess(goIDName), ident.Pos(), declType)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(access) + (len(csIDName) - len(goIDName)))
 
 			// Check if the type is a named type (user-defined), not a basic type. Unalias first: a
@@ -1635,7 +1636,7 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 
 		firstLine = false
 		csTypeName := v.getCSharpTypeName(tuple.At(i).Type())
-		access := v.testDeclaredValueAccess(getAccess(goIDName), ident.Pos(), tuple.At(i).Type())
+		access := v.testDeclaredValueAccess(getGoAccess(goIDName), ident.Pos(), tuple.At(i).Type())
 
 		// An ALL-BLANK spec (`var _, _ = f()`) must still evaluate the call once for its side
 		// effect: carry it on the first blank's initializer. Otherwise blanks stay uninitialized —
@@ -1696,7 +1697,7 @@ func (v *Visitor) writeMovedPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple 
 
 		firstLine = false
 		csTypeName := v.getCSharpTypeName(tuple.At(i).Type())
-		access := v.testDeclaredValueAccess(getAccess(goIDName), ident.Pos(), tuple.At(i).Type())
+		access := v.testDeclaredValueAccess(getGoAccess(goIDName), ident.Pos(), tuple.At(i).Type())
 
 		if v.isAddressedGlobal(ident) {
 			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, "", isInherentlyHeapAllocatedType(tuple.At(i).Type()))

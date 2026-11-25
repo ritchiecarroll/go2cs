@@ -1,9 +1,9 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸbox = Span<main_package.box>;
-using ꓸꓸꓸgreatestEnd_nodes = Span<main_package.greatestEnd_nodes>;
-using ꓸꓸꓸsumPoints_points = Span<main_package.sumPoints_points>;
+using ꓸꓸꓸbox = variadic<main_package.box>;
+using ꓸꓸꓸgreatestEnd_nodes = variadic<main_package.greatestEnd_nodes>;
+using ꓸꓸꓸsumPoints_points = variadic<main_package.sumPoints_points>;
 
 partial class main_package {
 

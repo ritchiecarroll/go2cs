@@ -7,7 +7,7 @@ namespace go;
 using fmt = fmt_package;
 using rand = math.rand_package;
 using math;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 
@@ -18,7 +18,7 @@ partial struct score {
     internal nint player, opponent, thisTurn;
 }
 
-// type action is a methodless func type — rendered inline as its base delegate
+internal delegate (score result, bool turnIsOver) action(score current);
 
 internal static (score, bool) roll(score s) {
     nint outcome = rand.Intn(6) + 1;
@@ -32,7 +32,7 @@ internal static (score, bool) stay(score s) {
     return (new score(s.opponent, s.player + s.thisTurn, 0), true);
 }
 
-internal delegate Func<score, (score, bool)> strategy(score _);
+internal delegate action strategy(score _);
 
 internal static strategy stayAtK(nint k) {
     return [GoFunc("stayAtK.func1")] (score s) => {
@@ -171,10 +171,10 @@ partial struct resolver {
     internal Func<@string, @string, bool> lookupSym;
 }
 
-// type splitter is a methodless func type — rendered inline as its base delegate
+internal delegate (nint, @string, error) splitter(@string s);
 
 partial struct machine {
-    internal Func<@string, (nint, @string, error)> split;
+    internal splitter split;
 }
 
 partial struct worker {

@@ -602,7 +602,8 @@ func adapterStructQualifierIsLocal(qualifier string) bool {
 // (CS1503 ×20, the io wall's reappearance). Exact-key matches run as a full pass FIRST so a
 // fallback match on an early pair can never shadow an exact match on a later one.
 func emittedAdapterPair(pairs [][2]string, structBase, interfaceTypeName string) ([2]string, bool) {
-	structKey := strings.TrimPrefix(adapterStructKey(structBase), ShadowVarMarker)
+	rawStructKey := adapterStructKey(structBase)
+	structKey := strings.TrimPrefix(rawStructKey, ShadowVarMarker)
 
 	// ⚠⚠ BOTH SIDES OF THIS COMPARISON STRIP, and they must, because the two sides arrive in
 	// DIFFERENT SPELLINGS: `interfaceTypeName` comes from the deferred marker — already stripped by
@@ -623,6 +624,16 @@ func emittedAdapterPair(pairs [][2]string, structBase, interfaceTypeName string)
 		pairRef := stripAdapterInterfaceTypeArgs(pair[1])
 
 		return strings.TrimPrefix(adapterInterfacePackagePrefix(pairRef), ShadowVarMarker)+adapterInterfaceSimpleName(pairRef) == interfaceKey
+	}
+
+	// The struct spelled exactly as the cast spells it wins first: Go names one Δ apart (`Matrix` beside
+	// `ΔMatrix`, both Go's own) strip to one key, and record order would hand ΔMatrix's cast to Matrix's pair.
+	// A collision-renamed struct whose cast and record spell it alike matches here too; one spelled apart
+	// still meets its record in the stripped pass below.
+	for _, pair := range pairs {
+		if matchesInterface(pair) && adapterStructKey(pair[0]) == rawStructKey {
+			return pair, true
+		}
 	}
 
 	for _, pair := range pairs {
@@ -804,8 +815,8 @@ func resolveAdapterNameMarkers(outputFileNames []string, metadataAnchor ...strin
 
 			if !ok {
 				// A payload that will not decode names no pair, so there is nothing to resolve to. Dropping the
-				// marker leaves `new (x)`, which cannot compile, so the pass refuses (GO2CS2014; P3's review of the
-				// godebug seat, 2026-11-19) instead of warning under an exit code of 0. The marker is still replaced,
+				// marker leaves `new (x)`, which cannot compile, so the pass refuses (GO2CS2014; review of the
+				// godebug change, 2026-11-19) instead of warning under an exit code of 0. The marker is still replaced,
 				// THIS occurrence only, so the rewrite loop ends and a test observing the refusal sees each bad one.
 				refuseMarkerPass(fmt.Sprintf("%s:%d", fileName, line), "an adapter-name marker's payload does not decode, so the cast it stands for names no adapter")
 				return "", false

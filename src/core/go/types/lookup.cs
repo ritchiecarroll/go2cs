@@ -623,7 +623,7 @@ internal static @string funcString⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Func> �
     ref var f = ref Ꮡf.DerefOrNull();
 
     var buf = bytes.NewBufferString(f.name);
-    Func<ж<Package>, @string> qf = default;
+    Qualifier qf = default;
     if (Ꮡcheck != nil && !pkgInfo) {
         qf = (ж<Package> p1) => Ꮡcheck.qualifier(p1);
     }

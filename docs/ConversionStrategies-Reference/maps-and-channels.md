@@ -786,13 +786,14 @@ regressed the legacy Sending path). -->
 * **`make(chan T)` emits `new channel<T>(0)`** — capacity 0 is a real rendezvous channel; `cap()` is
   `dataqsiz` and `len()` is `qcount`, so `make(chan T)` vs `make(chan T, 1)` are distinct
   (the make default in `convCallExpr.go` covers plain and named channels; the gen Channel template's
-  wrapper constructor forwards the size unclamped). A parked operation blocks its goroutine's
+  wrapper constructor forwards the size unclamped). By default a parked operation blocks its goroutine's
   own dedicated thread (`Goroutine.Start`), so parking costs nobody else's capacity and a program
   can park thousands of goroutines at once — the shape `GoroutineParkStorm` guards. The thread is
   dedicated for the goroutine's life and reused after it (`GoroutineThreadPool`, as Go reuses an M),
   because creating a thread is costly and does not get faster with more creators; a goroutine that
   finds no idle thread still gets a new one, so reuse changes what a `go` statement costs, never
-  how many can run.
+  how many can run. Under async twins a channel operation or `select` in a twin parks without a
+  thread (`channel.cs`'s `Sendꞏtwin` and `Receiveꞏtwin`, `builtin.Twins.cs`; [Async twins](../AsyncTwins.md)).
   <!-- src/core/golib/runtime/GoroutineThreadPool.cs:21 `costs on the order of 100 µs to create and hand-shake`
   (platform not recorded; the same comment measures 6-9.5k threads a second on a 16-thread laptop).
   history: golib once queued goroutines on the shared ThreadPool and raised its min-thread floor to
@@ -861,7 +862,7 @@ local's form). A plain `out var result` in the comm-clause label would leave `�
 (`visitSelectStmt.go`) receives into a uniquely-numbered temp and opens the clause body with the
 entry-time box pattern proven by the escaping-parameter preamble:
 
-<!-- source: src/core/internal/fuzz/fuzz.cs:265-266 -->
+<!-- source: src/core/internal/fuzz/fuzz.cs:266-267 -->
 ```csharp
 case 2 when selᴛ3.ꟷᐳ(out var resultᴛ1): {
     ref var result = ref heap(resultᴛ1, out var Ꮡresult);

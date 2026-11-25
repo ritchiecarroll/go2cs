@@ -1,13 +1,13 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 
-// type stopFn is a methodless func type — rendered inline as its base delegate
+internal delegate void stopFn();
 
-internal static Action makeStop(@string tag, channel/*<-*/<@string> @out) {
+internal static stopFn makeStop(@string tag, channel/*<-*/<@string> @out) {
     var outʗ1 = @out;
     return [GoFunc("makeStop.func1")] () => {
         outʗ1.ᐸꟷ(tag);

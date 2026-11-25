@@ -38,7 +38,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // A call through a func value that a twin CAN test for a pair: the callee is a local, a parameter, a field (t.run) or
         // an element (fs[i], m[k]) whose delegate type has a canonical twin delegate (the rewriter's own PairShape test,
         // asked here for N3's caller rule). A field or element is read ONCE, into a temp, before the test (the func-value
-        // seat; P5's S2 arm 3 found a table-driven main never twinned while only a bare identifier qualified).
+        // fix; S2 arm 3 found a table-driven main never twinned while only a bare identifier qualified).
         public bool PairCallable;
 
         // A call through a func value the generator cannot test for a pair: the shape, for GO2CS0020 (null when covered).
@@ -76,6 +76,13 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         // The call, for the report's named-plain row of a function that parks nowhere else (SN-7).
         public InvocationExpressionSyntax? Node;
+
+        // N1 (DESIGN-mn-nopark.md 4): a named cut of its caller (GoTwinsCut or the stdlib table), never a park.
+        public bool Cut;
+
+        // N1: a method forwarder's one call, to its own suffix-form body (one key names both). Never weak, never cut:
+        // the forwarder parks through it, as its callers expect.
+        public bool OwnBody;
     }
 
     // golib's goǃ and goǃtwin ladders take the goroutine's function and at most 16 arguments.
@@ -105,6 +112,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // 7a (DESIGN-mn-twin-set.md 12.1, R3): a member of the population with no state-machine twin gets a FORWARDER,
         // `[GoParkForwarder] Mꞏtwin(...)`, which calls the plain member and returns a completed task.
         public bool Forwarded;
+
+        // N1 (DESIGN-mn-nopark.md 4): a weak member (GoTwinsWeak or the stdlib table). Its twin parks as before and carries
+        // [GoParkWeak], so a call to it never makes its caller a twin.
+        public bool Weak;
     }
 
     public void Initialize(GeneratorInitializationContext context)
@@ -223,10 +234,15 @@ public sealed partial class TwinGenerator : ISourceGenerator
         bool boxParam = !(options.TryGetValue("build_property.GoTwinsBoxParam", out string? param) && string.Equals(param, "false", StringComparison.OrdinalIgnoreCase));
         bool boxArgCopy = options.TryGetValue("build_property.GoTwinsBoxArgCopy", out string? argCopy) && string.Equals(argCopy, "true", StringComparison.OrdinalIgnoreCase);
 
+        // N1 (DESIGN-mn-nopark.md 4): GoTwinsWeak names weak members, GoTwinsCut names cut sites (`Caller->Callee`). Neither
+        // changes the twin set's population, so neither is an arm switch and O2 does not refuse them (TwinGenerator.ParkCuts.cs).
+        options.TryGetValue("build_property.GoTwinsWeak", out string? weakMembers);
+        options.TryGetValue("build_property.GoTwinsCut", out string? cutSites);
+
         new Run(context, goSites, ifaceShape, ifaceAll)
         {
             Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, GuardDrop = guardDrop, Forwarders = forwarders, GuardWarn = guardWarn, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy,
-            BoxParam = boxParam, BoxArgCopy = boxArgCopy
+            BoxParam = boxParam, BoxArgCopy = boxArgCopy, WeakProperty = weakMembers, CutProperty = cutSites
         }.Execute();
     }
 
@@ -285,6 +301,14 @@ public sealed partial class TwinGenerator : ISourceGenerator
             foreach (Candidate candidate in m_ordered)
                 new Collector(this, Model(candidate.Syntax.SyntaxTree), candidate).Visit((SyntaxNode?)candidate.Syntax.Body ?? candidate.Syntax.ExpressionBody);
 
+            // N1 (TwinGenerator.ParkCuts.cs): this build's weak members and cut sites, set before the fixpoint reads them.
+            ReadParkCuts();
+            MarkOwnBodies();
+            MarkCuts();
+
+            foreach (Candidate candidate in m_ordered)
+                candidate.Weak = WeakListed(candidate.Symbol);
+
             for (bool changed = true; changed;)
             {
                 changed = false;
@@ -314,6 +338,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 else if (candidate.Twinned && BoxRecv && SharedMemberRef(candidate))
                     candidate.Refusal = "ref-shared-member";
             }
+
+            CheckParkCuts();
 
             m_populationAssembly = !Common.IsHandOwnedAssembly(Context.Compilation);
 
@@ -392,7 +418,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
                 ReportPlainLaunches(candidate);
 
-                // GO2CS0020: a func-value call the pair test cannot reach, once per function (the func-value seat). Not for
+                // GO2CS0020: a func-value call the pair test cannot reach, once per function (the func-value fix). Not for
                 // a function GO2CS0014 already names (every call of it runs plain), and not with the pair core off
                 // (GoTwinsPairs=false: no call is tested at all, the A/B control).
                 Site[] uncovered = [.. candidate.Sites.Where(site => site is { Active: true, Delegate: true, PairBody: false, PairUncovered: not null })];
@@ -419,10 +445,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         internal int GoPlain;
 
-        // GO2CS0020's count: func-value calls the pair test cannot reach (the func-value seat).
+        // GO2CS0020's count: func-value calls the pair test cannot reach (the func-value fix).
         internal int UncoveredFuncValueCalls;
 
-        // The LOUD fallback (COORD's A3 ruling; the owner's severity, FREEZE-SHEET.md 2026-11-13): a go statement the
+        // The LOUD fallback (the A3 decision; the owner's severity, docs/phase4/FREEZE-mn-surface.md 2026-11-13): a go statement the
         // generator does not launch as a twin keeps its plain launch -- a thread, where a goroutine that parks blocks it --
         // and warns ONCE, at the statement, naming the reason. It does not warn where the goroutine's function provably
         // never parks: nothing is lost there. Named limit: a go statement inside a literal that may become a pair (its
@@ -480,13 +506,13 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         private void AddCandidate(MethodDeclarationSyntax method)
         {
-            // A bodyless `extern` member is a candidate too (P3's read of 4afbe98217): it can never be twinned (IsNative
+            // A bodyless `extern` member is a candidate too (review of 4afbe98217): it can never be twinned (IsNative
             // refuses it), but a PUBLIC one in a converted file is in the population and gets a forwarder (R3).
             // Before this it was never seen, so it had no twin, no forwarder and no guard row. Any other bodyless
             // method (an abstract or partial declaration) still is not a candidate. A bodyless `partial` declaration
             // in a converted file is a Go function whose body is hand-written (its implementing part in an `_impl.cs`
             // companion: assembly, linkname or runtime-provided). That is R5, the hand-owned population, which moves
-            // with row 7 (DESIGN-mn-twin-set.md 12.1 and 12.6, P3's finding 6: 127 distinct public functions in 15
+            // with row 7 (DESIGN-mn-twin-set.md 12.1 and 12.6, review finding 6: 127 distinct public functions in 15
             // packages, sync/atomic and internal/runtime/atomic the bulk).
             //
             // Row 7 piece 4 (DATA-mn-row7-r5.md): R5 joins the population by its DECLARATION's file (InPopulation). The
@@ -593,11 +619,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (method.DescendantNodes().OfType<YieldStatementSyntax>().Any())
                 return "iterator";
 
-            // Stage (c)'s SC-1 (COORD's GO, 2026-11-15): a twin is written into its host reopened as `partial`, so a method
+            // Stage (c)'s SC-1 (approved 2026-11-15): a twin is written into its host reopened as `partial`, so a method
             // whose host chain is not all partial (a hand-owned helper such as runtime's Sysmon) cannot get one: CS0260.
             // Refused by name, as the interface forwarders skip such a host (ForwarderSkip). Its callers keep their twins
             // and call it plain: a thread, never a wrong answer. The count is record 10.8's owed number.
-            // Train 6's union fix (COORD's ruling, 2026-11-23): checked AFTER every structural refusal above, so a member
+            // The union fix (4b5c8d96e2, 2026-11-23): checked AFTER every structural refusal above, so a member
             // refused here is one `partial` would actually twin, and GO2CS0021 names only such a member. Before, an instance
             // method a C# consumer writes by hand (MnIfaceTwin's HandParker.Park, which calls time.Sleep) was refused here
             // first and named, though partial would only have refused it `instance`: its file must compile unchanged.
@@ -622,9 +648,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
             return definition.PartialDefinitionPart ?? definition;
         }
 
-        // P3's read of 80c099ee33: a twin outside this compilation's own assembly binds only when it is PUBLIC. A friend grant
+        // From the review of 80c099ee33: a twin outside this compilation's own assembly binds only when it is PUBLIC. A friend grant
         // (InternalsVisibleTo) must not hand a caller a twin that is not that assembly's surface: sync's and time's hand
-        // twins are internal by ruling (FREEZE-SHEET.md, 7b), and a twin is part of the frozen surface or not bound at all.
+        // twins are internal by ruling (docs/phase4/FREEZE-mn-surface.md, 7b), and a twin is part of the frozen surface or not bound at all.
         internal bool TwinVisible(IMethodSymbol twin) =>
             SymbolEqualityComparer.Default.Equals(twin.ContainingAssembly, m_augmented.Assembly) || twin.DeclaredAccessibility == Accessibility.Public;
 
@@ -727,10 +753,13 @@ public sealed partial class TwinGenerator : ISourceGenerator
         internal static bool IsBoxedReceiver(IMethodSymbol symbol, int index) =>
             index == 0 && symbol.IsExtensionMethod && symbol.Parameters[0].RefKind == RefKind.Ref;
 
-        // F4: Go's `...T`, as the converter lowers it (`params ꓸꓸꓸT`, a Span<T> alias): its element type, or null. The
-        // forwarder takes `slice<T>` and spreads it back with `.ꓸꓸꓸ` (11.6).
+        // F4: Go's `...T`, as the converter lowers it (`params ꓸꓸꓸT`, an alias of golib's go.variadic<T> since wall E, of
+        // System.Span<T> before it), or a hand-written `params Span<T>` / `params ReadOnlySpan<T>`: its element type, or
+        // null. The forwarder takes `slice<T>` and spreads it back with `.ꓸꓸꓸ` (11.6), which is a variadic<T> pack.
         internal static ITypeSymbol? VariadicElement(IParameterSymbol parameter) =>
-            parameter is { IsParams: true, Type: INamedTypeSymbol { Name: "Span" or "ReadOnlySpan", TypeArguments: [{ } element], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } }
+            parameter is { IsParams: true, Type: INamedTypeSymbol { TypeArguments: [{ } element] } tail } &&
+            (tail is { Name: "Span" or "ReadOnlySpan", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } ||
+             tail is { Name: "variadic", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } })
                 ? element : null;
 
         internal static bool IsSString(ITypeSymbol type) =>
@@ -764,7 +793,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
             return m_hasTwin[definition] = has;
         }
 
-        // The func-value seat: the callees a pair test reads. A local or parameter (named once already), a field or property
+        // The func-value fix: the callees a pair test reads. A local or parameter (named once already), a field or property
         // read (t.run, t.inner.run, Ꮡt.Value.run), and an element of an array, slice or map (fs[i], m[k]). The rewriter reads
         // a field or element ONCE into a temp, so the test and the call see one value and an index is evaluated once.
         internal static bool PairableCallee(ExpressionSyntax callee, SemanticModel model) => callee switch
@@ -794,7 +823,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
                    m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.Twinned;
         }
 
-        // The Gosched-park seat (COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md): in a twin,
+        // The Gosched park (a design decision of 2026-11-21, commit ed6fc23e74): in a twin,
         // runtime.Gosched is a park point that requeues the goroutine, as in Go. runtime is a hand-owned stdlib package
         // with no public hand twin under L-min, so the twin is golib's builtin.Goschedꞏtwin: CanPark reads the call as a
         // park, and the rewriter awaits the builtin in its place. Only where that twin binds (golib carries it).
@@ -808,7 +837,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
             } &&
             (m_goschedTwin ??= Context.Compilation.GetTypeByMetadataName("go.builtin")?.GetMembers("Goschedꞏtwin").OfType<IMethodSymbol>().Any(TwinBinds) == true);
 
+        // A named cut (N1, TwinGenerator.ParkCuts.cs) is never awaited, even inside a twin.
         internal bool ShouldAwait(Site site) =>
+            !site.Cut && WouldAwait(site);
+
+        // The site parks, N1 aside: ShouldAwait's predicate before a cut, and the input to GO2CS0019's two dead arms.
+        internal bool WouldAwait(Site site) =>
             site is { Active: true, Go: GoKind.None, Renameable: true, Delegate: false } &&
             (site.Interface ? site.IfaceCallable && IfaceCanPark(site.IfaceTarget) :
              site is { ViaBoxOverload: true, BoxOverload: { } overload } && !IsBoxTwinTarget(site.Target) ? CanPark(overload) :
@@ -830,8 +864,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
         {
             foreach (Site site in candidate.Sites)
             {
-                // A call through a func value twins its function only by N3's caller rule (TwinGenerator.Pairs.cs).
-                if (site.Direct && (ShouldAwait(site) || goSites && GoTwinnable(site) || site.Delegate && CallerRuleTwins(site)))
+                // A call through a func value twins its function only by N3's caller rule (TwinGenerator.Pairs.cs). A call to a
+                // weak member (N1) never makes its caller a twin; a caller that is a twin for another reason still awaits it.
+                if (site.Direct && (ShouldAwait(site) && !WeakTarget(site) || goSites && GoTwinnable(site) || site.Delegate && CallerRuleTwins(site)))
                     return true;
             }
 
@@ -885,7 +920,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         // A by-ref wrapper's thunk is followed only where every argument is what the go statement evaluated, as Go evaluates
         // them all there: each by-ref argument a `ref ᴛk.DerefOrNull()` over one of the literal's own parameters, and each
-        // by-value name one of them too, or a constant or a type's member (P3's finding 3: never a captured variable the
+        // by-value name one of them too, or a constant or a type's member (review finding 3: never a captured variable the
         // goroutine reads when it runs).
         private static bool BoundThunk(ParenthesizedLambdaExpressionSyntax lambda, SemanticModel model)
         {

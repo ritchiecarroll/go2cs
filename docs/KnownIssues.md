@@ -3,6 +3,29 @@
 This page lists specific bugs, each with a workaround. For the limits that come with running Go on .NET, and
 the rough spots real code hits today, see [Limitations](Limitations.md).
 
+Each entry describes go2cs as it is on the master branch and in the 1.26.11.1 release. Where the two differ, the
+entry says which has the issue. Issues that affect only releases before 1.26.11.1 are at the end of the page, under
+[Issues in older versions](#issues-in-older-versions).
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2 (owner rule of 2026-11-22: lead with the current state in
+     present tense; issues of older versions move to the bottom with their text and anchors). Every entry was read
+     against master 97cca467a2 and the 1.26.11.1 tag (nuget-1.26.11.1, ec3e170e4b). Changes:
+     - this paragraph, and a new last section "Issues in older versions";
+     - moved there, text and comments unchanged: "With go2cs 1.26.10.2 or earlier, ... built Debug", "With the go.*
+       1.26.10.1 packages, a Native AOT program that uses the network can exit with an error" and "With the go.*
+       1.24.13.7 packages or earlier, a Native AOT publish can take hours or not finish" (each heading kept, so each
+       anchor still resolves);
+     - modernc sqlite seed: a -recurse run derives the seed on master (train 2, claude/c2-recurse-importer-seed, merge
+       00b0dc37dd); 1.26.11.1 still needs the flag;
+     - M:N: master only (no GO2CS_MN in golib at the tag); GO2CS_MN_PROCS's "goes away in a later release" restated;
+     - stale local root and the Native AOT error assertion: "Fixed in the next go2cs release" restated as fixed on
+       master (merges 6379495c3b, train 1, and 42d78181d4, train 3) and still present in 1.26.11.1 (UX-8);
+     - Ubuntu .NET: "It becomes the default if ..." restated as the present rule (UX-8);
+     - probe cache: master only (-probe-cache and GO2CS_PROBE_CACHE absent at the tag, merge dcfc9c99a1); 1.26.11.1
+       probes into GOCACHE;
+     - Δ-led names: the refusal is master only (merge e25362aedc, train 4); 1.26.11.1 converts them and drops the Δ
+       silently; "Fix owed" restated as still open (the three golib projections are unchanged at 97cca467a2);
+     - runtime.Caller: tests compiled unoptimized is master only (GoTestOptimize absent at the tag). -->
+
 ## Writes through the address of another package's pointer or interface variable are lost
 
 Taking the address of a variable that another package exports gives a pointer to the variable itself when its
@@ -39,7 +62,7 @@ architecture-specific path in the standard library.
      windows' and darwin's extern.cs at the same line;
      src/core/internal/goarch/amd64/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
      *_arm64.cs file exists anywhere under src/core. debug.ReadBuildInfo's GOARCH setting is composed from runtime.GOARCH
-     (src/core/runtime/debug/stubs_impl.cs:199 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
+     (src/core/runtime/debug/stubs_impl.cs:210 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
      (C1, claude/c1-aes-arm64): internal/cpu's ARM64 flags are filled on an arm64 process, so crypto/tls's
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
@@ -67,8 +90,10 @@ architecture-specific path in the standard library.
 <a id="the-packages-do-not-ship-linux-arm64"></a>
 ## Converting modernc sqlite for Windows needs a seed for libc's `largeInteger` {#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger}
 
-A converted `modernc.org/sqlite` program on Windows panics the first time it opens a database in WAL mode, unless
-the conversion passed `-inline-arrays=modernc.org/libc#largeInteger`. The panic names both delegate types:
+A converted `modernc.org/sqlite` program on Windows panics the first time it opens a database in WAL mode when
+libc was converted without a seed for its `largeInteger` type. On the master branch, a `-recurse` conversion of the
+sqlite module seeds libc by itself. With go2cs 1.26.11.1, and for a libc converted on its own, the conversion needs
+`-inline-arrays=modernc.org/libc#largeInteger`. The panic names both delegate types:
 
 ```text
 panic: go2cs: func cookie 0x... holds a
@@ -83,10 +108,18 @@ golib's `array<T>`, and the two are different C# types. A function word that lib
 then called through sqlite's type, and the call fails. The seed makes libc lay the type out as sqlite does, so both
 packages share one lift. A database that is never opened in WAL mode does not reach the call.
 
-**To avoid it**, convert the sqlite module and libc together (`-recurse`) and pass
-`-inline-arrays=modernc.org/libc#largeInteger`; the same value is harmless on other targets, where libc declares
-no `largeInteger`. A libc converted on its own (as a separate package) carries no seed, so sqlite on Windows hits
-the panic again when built against it.
+**To avoid it**, convert the sqlite module and libc together (`-recurse`). On the master branch that is enough:
+the run seeds libc's `largeInteger` because sqlite admits the same struct, and emits what the flag emits. With go2cs
+1.26.11.1, also pass `-inline-arrays=modernc.org/libc#largeInteger`; the same value is harmless on other targets,
+where libc declares no `largeInteger`. A libc converted on its own (as a separate package) is seeded by neither
+route, so it needs the flag on every release, or sqlite on Windows hits the panic again when built against it.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the -recurse importer seed landed in train 2
+     (claude/c2-recurse-importer-seed, merge 00b0dc37dd). Its rule: docs/ConversionStrategies-Reference/slices-and-arrays.md,
+     "A struct read from native memory holds its arrays inline, and seeds make two packages agree" (a package converted
+     on its own is not seeded by its future importers). Its census, the BOARD row of 2026-11-17 (C2, ruling C item 3):
+     windows/amd64 derives 1 seed, libc#largeInteger, and recovers "the flag's, line for line". The text before this
+     pass said the flag was always needed, which is 1.26.11.1's state (no inlineArrayImporterSeed.go at the tag). -->
+
 <!-- Source: COORD ruling C, 2026-11-17 12:14Z (C2, claude/c2-c-inline-seed). G's windows WAL read at 6bcc05d11f
      (mailbox 01d7b332fe): delete pass equal to Go, WAL pass panics at _winHandleSeek <- _winHandleTruncate <-
      _winLockSharedMemory <- _winShmMap with the message above; it was ruling A's known limit. Census at bd2a09c423:
@@ -166,7 +199,8 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 
 **To avoid it**, bound how many goroutines are alive at once, with a worker pool for example.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) has the details, under
-*Goroutines are operating-system threads*.
+*Goroutines are operating-system threads*. [Async twins](AsyncTwins.md), experimental and opt-in, lift the limit
+for goroutines that wait in twinned code.
 <!-- Source: C1's run 42497561630 (claude/c1-darwin-threadcap a85e0cf11), on GitHub-hosted macOS runners: osx-arm64
      (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
      first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
@@ -182,7 +216,7 @@ and the program ends; nothing can catch it. A Go goroutine is not a thread, so t
 the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
 mappings each thread uses, and a larger `vm.max_map_count` on the machine.
 
-**Under the M:N scheduler** (experimental: `GoTwins=true` and `GO2CS_MN=1`), a goroutine parked in a twin holds no
+**Under [async twins](AsyncTwins.md)** (experimental, on the master branch only: build with twins and run with `GO2CS_MN=1`), a goroutine parked in a twin holds no
 thread, so the limit counts only the goroutines blocked in calls the twins do not cover: a `sync.WaitGroup` or
 `sync.Cond` wait, a Lock reached through a `sync.Locker` interface, a cgo or system call. About 16,000 of those blocked
 at once end the program the same way (`PAL_SEHException`, then an abort); the same bound avoids it.
@@ -198,24 +232,33 @@ at once end the program the same way (`PAL_SEHException`, then an abort); the sa
 ## Goroutines on a shared pool of threads (M:N) are experimental, and off unless you build and run for them {#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them}
 
 By default each goroutine is an operating-system thread, which is what the two sections above describe. go2cs also has
-an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do. It is inert
-unless both halves are switched on:
+an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do
+([Async twins](AsyncTwins.md) explains it and how to opt in). The scheduler is
+on the master branch only; go2cs 1.26.11.1 does not have it. It is inert unless both halves are switched on:
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: `git grep GO2CS_MN nuget-1.26.11.1 -- src/core/golib` finds
+     nothing, and src/Directory.Build.targets has no GoTwinsFor at the tag; the M:N work landed in trains 1 to 7. -->
 
-- **The build**: the projects are built with twins, an async copy of each function that can wait without holding a
-  thread. The `GoTwinsFor` property names the projects to build with twins, separated by `;`. Set it in the
+
+- **The build**: the projects are built with twins (async twins), an async copy of each function that can wait
+  without holding a thread. The `GoTwinsFor` property names the projects to build with twins, by project file name
+  without `.csproj`, separated by `;`. Set it in the
   environment: on the `dotnet build` command line each `;` must be written `%3B`, or MSBuild ends the property there.
-  `GoTwins=true` in one project's own file builds that project with twins. These properties are read by
-  `src/Directory.Build.targets`, so they work only in a project built inside a go2cs repository clone. The published
+  `GoTwins=true` in one project's own file builds that project with twins, but a new conversion writes the file
+  again and drops it. These properties are read by `src/Directory.Build.targets`, so they work only for a project
+  under the `src` directory of a go2cs repository clone. The published
   `go.*` packages are not built with twins, and a project that references them gets no twins from them.
 - **The run**: the environment sets `GO2CS_MN=1`. How many goroutines run at once follows `GOMAXPROCS`, as in Go: the
   `GOMAXPROCS` environment variable at start, and `runtime.GOMAXPROCS(n)` while the program runs. `GO2CS_MN_PROCS=<n>`
-  pins the count instead; it is a measurement switch and goes away in a later release.
+  pins the count instead; it is a measurement switch, not a supported setting.
+  <!-- 2026-11-23 .5 docs pass (P1), UX-8: was "it is a measurement switch and goes away in a later release"; no
+       release removing it is scheduled, so the sentence states what it is now. -->
+
 
 Without `GO2CS_MN=1` a program built with twins runs on threads as usual, and `runtime.GOMAXPROCS` reads and sets the
 value Go's does but caps nothing: the operating system decides how many threads run at once. With it, a goroutine that
 waits inside code built without twins keeps its thread while it waits. The other `GO2CS_MN_*` variables the scheduler
 reads are measurement switches, not settings: none is supported, and they may change or go away. The diagnostics
-`GO2CS0014` through `GO2CS0018` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.
+`GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.<!-- 2026-11-24 (P4, row 18, P3's NIT 8): GO2CS0019 added; it landed with row 7's N1 in train 9 and is reported only in a build with twins (DiagnosticCodes.md row 0019). --><!-- 2026-11-23 .5 docs pass (P1): the old range "GO2CS0014 through GO2CS0018" took in GO2CS0016, the GoFrame rule, which every build runs (DiagnosticCodes.md rows 0014-0021 at 97cca467a2). -->
 
 **A plain read and a call in the same expression can see different values with and without twins.** In an expression
 such as `fmt.Println(a, f())`, Go orders only the calls: the read of `a` may come before or after `f()`, and the gc
@@ -225,42 +268,14 @@ evaluated ahead of the plain reads in its expression, as gc evaluates it, and th
 the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
 unspecified behavior.
 
-## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
-
-**Symptom.** A program converted by go2cs 1.26.10.2 or earlier with plain `-recurse` or `-recurse=module`
-references the standard library as local projects. Built with `dotnet build -c Release` in its folder, its
-standard-library assemblies come out built Debug, unoptimized, and it runs slower than the same program built from
-its `.csproj` (about 21 times slower on a TLS handshake under the JIT, on `win-x64`, on one development machine).
-`dotnet publish -c Release -r <rid>` in the folder can fail with
-`ILLink : error IL1034: Root assembly 'golib' ... does not have entry point`, and when it succeeds the published
-program carries the same Debug assemblies. A `-recurse=nuget` conversion is not affected.
-
-**Cause.** The converter wrote a `.slnx` beside each project, and in a folder that holds both, `dotnet build` and
-`dotnet publish` take the solution. A solution build gives its configuration only to the projects the solution
-lists, which were the program, `golib` and the analyzer, so every other standard-library project it built took its
-default configuration, Debug. Publishing the solution also published `golib` as a project of its own.
-
-**Fix.** Re-convert with go2cs 1.26.10.3 or later. It writes no solution for a local-reference conversion, and it
-removes the one an earlier converter wrote, if that file is unchanged.
-
-**Workaround.** Build or publish the **project**, not a solution: run the command in a folder that holds no `.sln`
-or `.slnx`, or name the `.csproj` (`dotnet build <app>.csproj -c Release`). Do not build these conversions through
-a solution: the core projects a solution does not list build Debug. In Visual Studio, open the `.csproj`.
-
-<!-- Found 2026-11-06 by G and root-caused there: read from DebuggableAttribute, a converted TLS closure was 160 of
-     163 assemblies Debug and a Sieve closure 64 of 67, and building the .csproj instead gave 0 Debug and the TLS
-     program's release time, 1,070 ms against about 23 s. G also traced the IL1034 publish failure to the same
-     solution. Measured on H at master df7c09ab7b, with a fmt + strings program (66 core projects) converted with
-     plain -recurse. Today's output: a bare `dotnet build -c Release` gave 45 of 46 standard-library assemblies Debug
-     (only golib, which the solution listed, was Release), and a bare `dotnet publish -c Release -r win-x64` failed
-     IL1034. With the publish-guarded golib.csproj (batch 223) the publish succeeded but shipped the same 45 Debug
-     assemblies. Three remedies were measured. (a) ShouldUnsetParentConfigurationAndPlatform=false in the generated
-     Directory.Build.props: 0 Debug in the output, but 63 core projects were also built a second time in Debug
-     (+70% wall). (b) The solution listing the whole core closure: 0 Debug, but the solution publish published all 66
-     core libraries in their own right, and two builds of one library raced on its deps.json (MSB4018). (c) No
-     solution: 0 Debug and no Debug build, and the bare publish succeeded even without the golib guard, its output
-     equal to go run. (c) was ruled, scoped to local references. Under -recurse=nuget the i9 measured, as relayed by
-     the coordinator, a bare build through the generated solution: 0 Debug, and the bare publish succeeded. -->
+**After a carrier stack could not be reserved, goroutines recurse to two depths.** Under the M:N scheduler each carrier
+thread reserves 1 GiB, or what a set `GO2CS_GOROUTINE_STACK` says ([Tuning](Tuning.md#goroutine-stacks)). A carrier
+that cannot reserve its size, for instance because the carriers already running used up a commit or address-space
+limit, starts at the largest size it gets, halving down to 1 MiB, and says so once on stderr; carriers started after it
+take that size. Carriers started before it keep theirs, so a goroutine, `main` included, can recurse to the full depth
+on one carrier and run out of stack at half of it on another, depending on which carrier resumes it.
+<!-- Source: src/core/golib/runtime/GoScheduler.cs, CarrierThread (a halved size is published for later carriers only);
+     P3's row 4 read, 2026-11-24, NIT 4. -->
 
 ## A nugetgo package built on 1.26.10.3 beside the go.* 1.26.11.1 packages fails at restore {#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore}
 
@@ -296,8 +311,13 @@ standard-library names that earlier go2cs releases prefixed with `Δ` and the pu
 170 across about 70 packages, among them `time.Second`, `time.Month`, `reflect.Type`, `reflect.Value` and
 `os.Signal`, so most programs converted on such a machine meet it.
 
-**Fixed** in the next go2cs release: under `-recurse=nuget` the converter reads standard-library names only from the
-metadata built into it, and says once when it finds a local go2cs standard library that it does not read.
+**Fixed on the master branch**: under `-recurse=nuget` the converter reads standard-library names only from the
+metadata built into it, and says once when it finds a local go2cs standard library that it does not read. go2cs
+1.26.11.1 still has the issue; with that release, use the workaround below.
+<!-- 2026-11-23 .5 docs pass (P1), UX-8, at master 97cca467a2: was "Fixed in the next go2cs release". The fix is on
+     master since 2026-11-20, train 1 (claude/i9-nuget-metadata-precedence, merge 6379495c3b); publishedStdLibRecord
+     is in src/go2cs at 97cca467a2. -->
+
 
 **Cause.** Under `-recurse=nuget` the converter still looks for a local go2cs root: `-go2cspath` when it is given,
 else the `GO2CSPATH` environment variable, else `~/go2cs` (`%USERPROFILE%\go2cs` on Windows). When that folder holds
@@ -353,8 +373,11 @@ file, though the next conversion rewrites that file:
 ```
 
 Converted executable projects carry this line, commented out. On `linux-x64` (Canonical's .NET 10, one 4-core
-machine) it costs about 90 ms (16%) more startup time, and steady-state loop speed stays within measurement noise. It becomes the default if a converted Go program
-ever reproduces the fault. [Tuning converted code](Tuning.md#net-runtime-settings) lists the runtime settings and
+machine) it costs about 90 ms (16%) more startup time, and steady-state loop speed stays within measurement noise. It is
+not the default, because no converted Go program is known to reproduce the fault.
+<!-- 2026-11-23 .5 docs pass (P1), UX-8: was "It becomes the default if a converted Go program ever reproduces the
+     fault." The owner's ruling of 2026-09-30 (opt-in, not default; the comment below) is the present rule. -->
+ [Tuning converted code](Tuning.md#net-runtime-settings) lists the runtime settings and
 what each trades.
 <!-- Source of the 90 ms (16%) figure, found 2026-10-26: the fleet mailbox post C2 -> COORD of 2026-09-30T10:57Z
      (commit 80f928db5a on origin/claude/mailbox, file docs/phase4/inbox/COORD/20260930T105729Z-C2.md, not on master).
@@ -366,34 +389,6 @@ what each trades.
      machine). The same post measured the opt-in at 0/96 BAD against 64/96 BAD for the default on the OSR repro
      (claude/c2-osr-repro); the owner ruled it opt-in, not default, on 2026-09-30. -->
 
-## With the go.* 1.26.10.1 packages, a Native AOT program that uses the network can exit with an error
-
-**Symptom.** A Native AOT executable (`PublishAot`) that references the `go.*` 1.26.10.1 packages exits with code 2
-the first time it passes a pointer to certain Go structs to a system call. It prints
-`System.NotSupportedException: 'System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences[System.UInt16]()' is missing native code`
-(the type in brackets varies). On Windows, a program that uses `net` or `crypto/tls` reaches it while setting up a
-socket, in `syscall.WSAIoctl`. On Linux and macOS, the same system-call marshalling runs for a pointer to a struct that
-holds a pointer, slice, string or array, and fails the same way. The same program run under the JIT (`dotnet run`, or
-the converted project's default ReadyToRun publish) is not affected. Measured on `win-x64`, `linux-x64` and `osx-arm64`.
-
-**Cause.** The runtime library's system-call marshalling sorted a struct's fields with a generic method it closed at run
-time, and a Native AOT image has no code for such a method.
-
-**Fix.** Move to the `go.*` 1.26.10.2 packages or later.
-
-**Workaround on 1.26.10.1.** Publish without Native AOT: the converted project's default `dotnet publish` (ReadyToRun) and a
-framework-dependent build run the same code under the JIT.
-
-<!-- Found 2026-10-27 by the performance re-baseline's AOT window (PLAN-perf-rebaseline, window 2): both 1.26.10.1
-     PerfTlsHandshake images published on the i9 (the template default and the folding-off build, ILC 10.0.14) exited 2
-     on G-LAPTOP with that exception, the stack running syscall.WSAIoctl -> ж`1.op_Implicit (to uintptr) ->
-     FieldRefBox`1.StorageKind -> CrossesAsItsRoot -> NativeStructMarshal.WidestAtSameAddress -> HasDeepImage ->
-     deepRefusal -> Leaf.containsReferences. golib's NativeStructMarshal closed IsReferenceOrContainsReferences<T>,
-     Unsafe.SizeOf<T>, its leaf copiers and NativeBox<T> over run-time Types with MakeGenericMethod, under file-wide
-     IL3050 pragmas, and golib built without the AOT analyzer. Fixed in 1.26.10.2 seat #18, whose GolibAotProbe
-     scenarios (src/tests/PackageTests) read rc 2 at the base and rc 0 at the fix under Native AOT on win-x64 (G-LAPTOP),
-     and on linux-x64 (ubuntu) and osx-arm64 (macos-15) hosted runners, run 40611703805, each equal to the JIT run. -->
-
 ## Under Native AOT, a type assertion to `error` that the method set decides can answer false
 
 **Symptom.** In a Native AOT executable (`PublishAot`), a Go type assertion to `error` answers `ok == false` for a value
@@ -401,8 +396,13 @@ whose method set has `Error() string` when no compile-time adapter for that pair
 `var p any = new(runtime.PanicNilError); _, ok := p.(error)`: Go and the JIT answer `true`, Native AOT answers `false`.
 No exception is raised, so the program goes on with the wrong answer. A failing assertion still answers correctly.
 
-**Fixed** in the next go2cs release: `error` declares a second run-time shell that holds the value without a generic
-type closed over it, so Native AOT has code for it and the assertion answers as Go's does.
+**Fixed on the master branch**: `error` declares a second run-time shell that holds the value without a generic
+type closed over it, so Native AOT has code for it and the assertion answers as Go's does. The go.* 1.26.11.1
+packages still have the issue; with them, use the workaround below.
+<!-- 2026-11-23 .5 docs pass (P1), UX-8, at master 97cca467a2: was "Fixed in the next go2cs release". The fix is on
+     master since 2026-11-21, train 3 (claude/p2-aot-structural-hit, merges a9ee17b1eb, 82110652f9, 42d78181d4);
+     golib's error.cs stamps errorObjectShell at 97cca467a2 and not at nuget-1.26.11.1. -->
+
 
 **Cause.** The runtime library finds the method (its method-set check answers `true`), then builds the interface value
 from `error`'s run-time shell, `error<T>`, closed over the value's type with `MakeGenericType`. Native AOT has no code
@@ -477,7 +477,10 @@ machine with 15 GB and .NET SDK 10.0.404), the README walkthrough's program, whi
 cost, because it uses the same setting. With the 1.26.10.3 packages the walkthrough's program does not publish at
 all on `linux-x64`: the compiler stops at the native string table's 2 GiB ceiling
 ([how to recognize it](Tuning.md#native-aot-method-body-folding)). A build, `dotnet run` and a publish without
-Native AOT are not affected. For the 1.24.13.7 packages and earlier, see the section that follows.
+Native AOT are not affected. For the 1.24.13.7 packages and earlier, see
+[Issues in older versions](#with-the-go-124137-packages-or-earlier-a-native-aot-publish-can-take-hours-or-not-finish).
+<!-- 2026-11-23 .5 docs pass (P1): was "see the section that follows"; that section moved to the end of the page. -->
+
 
 <!-- 2026-11-20 (P4, first post-.4 docs batch, COORD 07:19Z): the cost sentence read "On a 4-core Linux cloud machine,
      converted from source at the tree of the coming 1.26.11.1 release, a hello world that imports `strings` and `fmt`
@@ -519,52 +522,6 @@ Native AOT are not affected. For the 1.24.13.7 packages and earlier, see the sec
      hours. Two such publishes run side by side on the same machine (ILC 8.7 and 10.3 GB, 1.3 GB left free) were
      both still compiling at the four-hour ceiling. The ~250 MB consumer above measured 243,136,000 bytes on the same
      machine and tree. -->
-
-## With the go.* 1.24.13.7 packages or earlier, a Native AOT publish can take hours or not finish
-
-**Symptom.** A Native AOT publish (`PublishAot`) of a program that references the `go.*` 1.24.13.7 packages, or an
-earlier release, does not finish or takes hours. The ILC compiler holds about 14 GB of memory and prints tens of
-thousands of warnings that a method will always throw because a type from `golib` failed to load. Measured on
-`win-x64`, on one development machine.
-
-**Cause.** These releases were built before the fix to the runtime library's generic cycle (see
-[the Native AOT section](#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)). Native
-AOT expands that cycle until it reaches its nesting limit, and compiles each method that reaches past the limit to
-throw, which is what those warnings report.
-
-**Fix.** Move to the `go.*` 1.26.10.1 packages or later. They carry the fix, and the 1.24.13.7 packages' deprecation
-notice already points to them.
-
-**Workaround on 1.24.13.7.** Turn off identical-method folding in the project file:
-
-```xml
-<IlcFoldIdenticalMethodBodies>false</IlcFoldIdenticalMethodBodies>
-```
-
-The publish then finishes for most programs, at a cost: ILC peaked at about 28 GB, and the executable was 3.3 times
-the size of the same program built against 1.26.10.1. A very large program can still fail at link (`LNK1183`,
-"extended relocation count 9 less than 65535") when the compiler's object file passes 4 GiB, the COFF object
-format's limit, and the workaround has nothing more to offer it: move to 1.26.10.1. Measured on `win-x64`: every program
-of the performance suite but the TLS handshake published this way; that one failed at link.
-
-<!-- Measured 2026-10-27 on the i9 (win-x64), relayed by COORD; the attribution is G's, settled by the i9's count.
-     The 1.24.13.7 leg of the performance re-baseline (PLAN-perf-rebaseline) published PerfChannel and PerfFib with the
-     template's default Native AOT recipe: each reached the 4 h cap with ILC plateaued at ~13.9 GB and no image, and
-     printed 56,190 "will always throw" lines. With IlcFoldIdenticalMethodBodies=false, PerfChannel published: rc 0 in
-     1,622 s, ILC peak 28.15 GB, image 563,323,392 bytes against 170,638,848 for the same program on 1.26.10.1 (3.3x).
-     Cause, read at the tree: nuget-1.24.13.7 (57ca7c1616, 2026-10-13 23:53 -0500) does not contain golib's generic-cycle
-     fix, e2move (merge b1ba1380b4, 2026-10-14 08:51 -0500); `git merge-base --is-ancestor b1ba1380b4` reads false for
-     nuget-1.24.13.6 and nuget-1.24.13.7 and true for nuget-1.26.10.1. The i9's count over the PerfFib default log: all
-     56,190 lines are "Failed to load type ..." over golib 1.24.13.7, and 46,626 of them (83.0%; 85.7% with array`1's
-     nested types) declare on array`1, slice`1 or ж`1, mostly five-level nests. The log has no separate cut-off line;
-     the cut-off shows only as these lines. The release gate's aot-smoke consumer published within its bound before the
-     fix (windows 71 min, run 37523439849), so the stall depends on the program; the perf suite's programs exceed it.
-     Amended 2026-10-27 (COORD's ruling; the i9's aot-foldoff2 queue, win-x64): with IlcFoldIdenticalMethodBodies=false
-     the 1.24.13.7 leg published 16 of 17 programs. PerfTlsHandshake failed at link: LNK1183 "extended relocation
-     count 9 less than 65535", because ILC wrote a 6,594,692,833-byte object, past COFF's 4 GiB; ILC peaked at 51 GB
-     private and printed 97,161 "will always throw" lines against the 56,190 above. The same program on 1.26.10.1
-     writes a 2.67 GB object and links (338.5 MB image). The default recipe stalls on that leg as well, so the
-     performance re-baseline's 1.24 TLS AOT cell reads n/a with this reason. -->
 
 ## A single-file publish with composite ReadyToRun runs out of memory
 
@@ -644,8 +601,11 @@ A publish that is not a single file never makes a composite image, so it is not 
      from GOCACHE.
      Measured the same day on one very large package of another module: its probe entries took about 2,273 MB
      (about 200 MB of compiled object per target). Plain-statement ask from COORD 10:19Z. -->
-For each package it converts, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
-targets, so it emits the same escape decisions Go makes. Those builds go into their own cache, not your `GOCACHE`:
+When `-stack-append` is on, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
+targets for each package it converts, so it emits the same stack-append buffers Go makes. The option is on by
+default only for `-stdlib` and `-tests`; a plain or `-recurse` conversion runs none of these builds and never
+creates the cache unless you pass `-stack-append=on`
+([`-stack-append`](CommandLine.md#option-stack-append)). Those builds go into their own cache, not your `GOCACHE`:
 `go2cs/probe-cache` under the user cache directory, or the directory named by `-probe-cache` or `GO2CS_PROBE_CACHE`.
 The first conversion builds the standard library there for each target, about 60 MB each, and later conversions of
 any module reuse it. Each converted package adds its own entries, which grow with the size of its compiled code: about 5 MB
@@ -667,28 +627,41 @@ the temporary directory, created with mode 0700. Because that directory is share
 directory owned by you that no other user can open; otherwise the run stops before its first probe and asks for
 `-probe-cache`. A run that does not probe, such as `-test-action build`, never needs the directory.
 
-## A Go struct field, method or type whose name starts with `Δ` refuses its package {#delta-led-field-method-type-refused}
+The separate cache is on the master branch. go2cs 1.26.11.1 runs the same builds in your own `GOCACHE`, so they take
+the same space there, and it has neither `-probe-cache` nor `GO2CS_PROBE_CACHE`.
+`-stack-append` is new on the master branch: go2cs 1.26.11.1 runs these builds for every conversion.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the probe cache landed in train 1 (claude/p4-probe-cache,
+     merge dcfc9c99a1). At nuget-1.26.11.1, src/go2cs has no probe-cache flag or GO2CS_PROBE_CACHE, and the escape
+     probe's go build runs with the caller's environment, so its entries go to the default GOCACHE. -->
+<!-- 2026-11-24 (P5, train 12): the owner ruled the stack-append hint on by default only for -stdlib and -tests and off
+     for plain and -recurse conversions, with -stack-append=on|off|auto (COORD 2026-11-24 17:50Z, on P5's scout). With
+     the hint off, collectStackAppendHints returns before any harvest, so no probe build runs and the cache directory is
+     never created (TestStackAppendOffRunsNoProbe, with the gate removed it reads 4 harvests and the cache created). -->
 
-**Symptom.** Converting a package that declares a struct field, a method (an interface method included) or a named type
-whose name starts with `Δ`, such as `type P struct{ Δt float64 }`, stops with `error GO2CS2015`, which names the
-identifier and what Go would report for it. A `Δ`-led local, parameter, package variable, constant or function converts.
 
-**Cause.** go2cs renames a Go name that collides with something it generates by adding a leading `Δ`, and the runtime
-library reads a leading `Δ` back as that marker: it drops it when it gives a converted field, method or type its Go name.
-A Go name that itself starts with `Δ` would then lose it: `P.Δt` would reflect and json-encode as `t`, unexported, so
-`json.Marshal(P{1})` would write `{}` where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()` would read
-`Matrix`. The refusal turns that silent difference into a stop at conversion.
+## By default, `cap()` after appending to a slice that does not escape can differ from Go {#by-default-cap-after-appending-to-a-slice-that-does-not-escape-can-differ-from-go}
 
-**Workaround.** Rename the field, method or type so it does not start with `Δ` (`Dt`, `DeltaT`). A struct tag keeps the
-encoded name: `` Dt float64 `json:"Δt"` ``.
+**Symptom.** In a program converted without `-stdlib` or `-tests`, `cap()` of a slice built by `append` inside one
+function can read lower than Go's. Go 1.25 and later give the first `append` to an empty slice that does not escape a
+32-byte buffer, so after `var x []int64; x = append(x, 1)` Go reads `cap(x)` as 4 where the converted program reads 1.
+The slice's contents and length are always the same; only its capacity, and code that reads the capacity, differ.
 
-**Fix owed.** The runtime library is told which `Δ` go2cs added, so a user's `Δ`-led field, method or type converts and
-reads back under its own name, and this refusal is retired.
+**Cause.** Reproducing the buffer needs the Go compiler's escape decision for each `append`, which go2cs reads from a
+`go build -gcflags=-m` per package and target. `-stack-append` controls it, and its default `auto` turns it on only for
+`-stdlib` and `-tests`, where converted tests compare against Go's own, because those builds cost time and disk (see
+[A conversion keeps a Go build cache of its own](#a-conversion-keeps-a-go-build-cache-of-its-own)). The buffer is a
+heap array in the converted program, so turning it on changes what a program can observe, not its speed or its
+allocations.
 
-<!-- P3 code read of the R1 seat (inbox/COORD/20261122T045652Z-P3.md, finding 2), ruled by COORD 045750Z: refuse now
-     (2a), durable cure as its own .5 seat (2b). The three projection sites: src/core/golib/GoReflect.FieldAccess.cs:404
-     `if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (fields), GoReflect.TypeNaming.cs:718 `if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (type names), runtime/TypeExtensions.GoMethodSets.cs:709 `emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)` (methods). The
-     refusal: src/go2cs/markerGlyphRefusal.go, deltaProjectionReason. -->
+**Workaround.** Convert with `-stack-append=on` ([`-stack-append`](CommandLine.md#option-stack-append)) to reproduce
+Go's capacities. A single standard-library package converted without `-stdlib` takes the same default; convert it with
+`-stdlib <package>` or `-stack-append=on` to get the standard library's emission.
+
+The default is new on the master branch. go2cs 1.26.11.1 emits the buffer for every conversion.
+<!-- 2026-11-24 (P5, train 12), P3 review of 57f318f4b0 finding 3 and NIT 4, COORD 19:52Z: the owner's ruling
+     (COORD 17:50Z) made the hint off by default for plain and -recurse conversions, and only the reference page said
+     what that changes. Measured on P5's scout (COORD 2026-11-24 17:43Z, P5): of 42 behavioral projects with a buffer,
+     41 printed identically with the hint off, and StackAppendBackingStore's 11 differing lines were all cap(). -->
 
 ## In optimized code, `runtime.Caller` can report an earlier line of the calling function {#in-optimized-code-runtimecaller-can-report-an-earlier-line-of-the-calling-function}
 
@@ -720,10 +693,14 @@ in one statement, such as a method chain written over several lines (`b.On(1).` 
 both report the line of the first call. This holds under every JIT setting, because the positions a frame can report
 are fixed when the assembly is compiled.
 
-Converted Go tests are not affected. The test assembly go2cs writes for a package's tests is compiled without
-optimization, so `t.Logf`, testify's failure locations and every other line read from test code match Go, while the
-package under test stays optimized. To build a test assembly optimized, for a benchmark run, set the MSBuild property
-`GoTestOptimize` to `true` (`-p:GoTestOptimize=true`).
+On the master branch, converted Go tests are not affected. The test assembly go2cs writes for a package's tests is
+compiled without optimization, so `t.Logf`, testify's failure locations and every other line read from test code match
+Go, while the package under test stays optimized. To build a test assembly optimized, for a benchmark run, set the
+MSBuild property `GoTestOptimize` to `true` (`-p:GoTestOptimize=true`). go2cs 1.26.11.1 compiles test assemblies
+optimized and has no `GoTestOptimize`, so lines read from test code can show the same loss there.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: GoTestOptimize (go.lib.symbols.targets) is in src at
+     97cca467a2 and nowhere at nuget-1.26.11.1; it landed in train 6 (the C2 stack, claude/c2-m2-test-switch). -->
+
 
 To get Go's lines in a program, use one of these, at a large cost in speed:
 - a `Debug` build, which reports both cases as Go does: in the measurement above, about 38 times slower than the
@@ -731,3 +708,130 @@ To get Go's lines in a program, use one of these, at a large cost in speed:
 - `DOTNET_JITMinOpts=1` in the program's environment, which keeps a `Release` build but turns off JIT optimization: it
   reports the call's line instead of the function's first statement, but not two calls of one function in one
   statement apart; about 33 times slower on the same workload.
+
+<!-- Measured 2026-11-24 on linux-x64 (.NET 10), go1.26.11, P2's Δ cure seat at 27691240dc: Native AOT publishes of
+     DeltaNameProjection (Go `frame: main.Δf 78`, AOT `frame: main.Δf 0`) and CallerLineCallSite (9 of 9 rows false
+     against Go's true) under PublishAot=true. COORD 2026-11-24T05:20:52Z: same class as the 11-22 ruling; BOARD row
+     "caller line under Native AOT reads 0". -->
+Under Native AOT, `runtime.Caller` reports line 0 instead of the call's line, measured on `linux-x64`; the function
+name it reports matches Go. Neither route above applies to a Native AOT program, so for Go's lines run the program
+under the JIT with one of them.
+
+## Issues in older versions {#issues-in-older-versions}
+
+These issues affect only go2cs and `go.*` releases before 1.26.11.1. Each entry names the release that fixed it.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the three entries below moved here unchanged, in their old
+     order, by the owner rule of 2026-11-22. Each fix is in nuget-1.26.11.1: the no-solution local-reference output
+     (1.26.10.3), golib's AOT-safe system-call marshalling (1.26.10.2, seat #18) and golib's generic-cycle fix (e2move,
+     merge b1ba1380b4, an ancestor of nuget-1.26.10.1). -->
+
+## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
+
+**Symptom.** A program converted by go2cs 1.26.10.2 or earlier with plain `-recurse` or `-recurse=module`
+references the standard library as local projects. Built with `dotnet build -c Release` in its folder, its
+standard-library assemblies come out built Debug, unoptimized, and it runs slower than the same program built from
+its `.csproj` (about 21 times slower on a TLS handshake under the JIT, on `win-x64`, on one development machine).
+`dotnet publish -c Release -r <rid>` in the folder can fail with
+`ILLink : error IL1034: Root assembly 'golib' ... does not have entry point`, and when it succeeds the published
+program carries the same Debug assemblies. A `-recurse=nuget` conversion is not affected.
+
+**Cause.** The converter wrote a `.slnx` beside each project, and in a folder that holds both, `dotnet build` and
+`dotnet publish` take the solution. A solution build gives its configuration only to the projects the solution
+lists, which were the program, `golib` and the analyzer, so every other standard-library project it built took its
+default configuration, Debug. Publishing the solution also published `golib` as a project of its own.
+
+**Fix.** Re-convert with go2cs 1.26.10.3 or later. It writes no solution for a local-reference conversion, and it
+removes the one an earlier converter wrote, if that file is unchanged.
+
+**Workaround.** Build or publish the **project**, not a solution: run the command in a folder that holds no `.sln`
+or `.slnx`, or name the `.csproj` (`dotnet build <app>.csproj -c Release`). Do not build these conversions through
+a solution: the core projects a solution does not list build Debug. In Visual Studio, open the `.csproj`.
+
+<!-- Found 2026-11-06 by G and root-caused there: read from DebuggableAttribute, a converted TLS closure was 160 of
+     163 assemblies Debug and a Sieve closure 64 of 67, and building the .csproj instead gave 0 Debug and the TLS
+     program's release time, 1,070 ms against about 23 s. G also traced the IL1034 publish failure to the same
+     solution. Measured on H at master df7c09ab7b, with a fmt + strings program (66 core projects) converted with
+     plain -recurse. Today's output: a bare `dotnet build -c Release` gave 45 of 46 standard-library assemblies Debug
+     (only golib, which the solution listed, was Release), and a bare `dotnet publish -c Release -r win-x64` failed
+     IL1034. With the publish-guarded golib.csproj (batch 223) the publish succeeded but shipped the same 45 Debug
+     assemblies. Three remedies were measured. (a) ShouldUnsetParentConfigurationAndPlatform=false in the generated
+     Directory.Build.props: 0 Debug in the output, but 63 core projects were also built a second time in Debug
+     (+70% wall). (b) The solution listing the whole core closure: 0 Debug, but the solution publish published all 66
+     core libraries in their own right, and two builds of one library raced on its deps.json (MSB4018). (c) No
+     solution: 0 Debug and no Debug build, and the bare publish succeeded even without the golib guard, its output
+     equal to go run. (c) was ruled, scoped to local references. Under -recurse=nuget the i9 measured, as relayed by
+     the coordinator, a bare build through the generated solution: 0 Debug, and the bare publish succeeded. -->
+
+## With the go.* 1.26.10.1 packages, a Native AOT program that uses the network can exit with an error
+
+**Symptom.** A Native AOT executable (`PublishAot`) that references the `go.*` 1.26.10.1 packages exits with code 2
+the first time it passes a pointer to certain Go structs to a system call. It prints
+`System.NotSupportedException: 'System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences[System.UInt16]()' is missing native code`
+(the type in brackets varies). On Windows, a program that uses `net` or `crypto/tls` reaches it while setting up a
+socket, in `syscall.WSAIoctl`. On Linux and macOS, the same system-call marshalling runs for a pointer to a struct that
+holds a pointer, slice, string or array, and fails the same way. The same program run under the JIT (`dotnet run`, or
+the converted project's default ReadyToRun publish) is not affected. Measured on `win-x64`, `linux-x64` and `osx-arm64`.
+
+**Cause.** The runtime library's system-call marshalling sorted a struct's fields with a generic method it closed at run
+time, and a Native AOT image has no code for such a method.
+
+**Fix.** Move to the `go.*` 1.26.10.2 packages or later.
+
+**Workaround on 1.26.10.1.** Publish without Native AOT: the converted project's default `dotnet publish` (ReadyToRun) and a
+framework-dependent build run the same code under the JIT.
+
+<!-- Found 2026-10-27 by the performance re-baseline's AOT window (PLAN-perf-rebaseline, window 2): both 1.26.10.1
+     PerfTlsHandshake images published on the i9 (the template default and the folding-off build, ILC 10.0.14) exited 2
+     on G-LAPTOP with that exception, the stack running syscall.WSAIoctl -> ж`1.op_Implicit (to uintptr) ->
+     FieldRefBox`1.StorageKind -> CrossesAsItsRoot -> NativeStructMarshal.WidestAtSameAddress -> HasDeepImage ->
+     deepRefusal -> Leaf.containsReferences. golib's NativeStructMarshal closed IsReferenceOrContainsReferences<T>,
+     Unsafe.SizeOf<T>, its leaf copiers and NativeBox<T> over run-time Types with MakeGenericMethod, under file-wide
+     IL3050 pragmas, and golib built without the AOT analyzer. Fixed in 1.26.10.2 seat #18, whose GolibAotProbe
+     scenarios (src/tests/PackageTests) read rc 2 at the base and rc 0 at the fix under Native AOT on win-x64 (G-LAPTOP),
+     and on linux-x64 (ubuntu) and osx-arm64 (macos-15) hosted runners, run 40611703805, each equal to the JIT run. -->
+
+## With the go.* 1.24.13.7 packages or earlier, a Native AOT publish can take hours or not finish
+
+**Symptom.** A Native AOT publish (`PublishAot`) of a program that references the `go.*` 1.24.13.7 packages, or an
+earlier release, does not finish or takes hours. The ILC compiler holds about 14 GB of memory and prints tens of
+thousands of warnings that a method will always throw because a type from `golib` failed to load. Measured on
+`win-x64`, on one development machine.
+
+**Cause.** These releases were built before the fix to the runtime library's generic cycle (see
+[the Native AOT section](#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)). Native
+AOT expands that cycle until it reaches its nesting limit, and compiles each method that reaches past the limit to
+throw, which is what those warnings report.
+
+**Fix.** Move to the `go.*` 1.26.10.1 packages or later. They carry the fix, and the 1.24.13.7 packages' deprecation
+notice already points to them.
+
+**Workaround on 1.24.13.7.** Turn off identical-method folding in the project file:
+
+```xml
+<IlcFoldIdenticalMethodBodies>false</IlcFoldIdenticalMethodBodies>
+```
+
+The publish then finishes for most programs, at a cost: ILC peaked at about 28 GB, and the executable was 3.3 times
+the size of the same program built against 1.26.10.1. A very large program can still fail at link (`LNK1183`,
+"extended relocation count 9 less than 65535") when the compiler's object file passes 4 GiB, the COFF object
+format's limit, and the workaround has nothing more to offer it: move to 1.26.10.1. Measured on `win-x64`: every program
+of the performance suite but the TLS handshake published this way; that one failed at link.
+
+<!-- Measured 2026-10-27 on the i9 (win-x64), relayed by COORD; the attribution is G's, settled by the i9's count.
+     The 1.24.13.7 leg of the performance re-baseline (PLAN-perf-rebaseline) published PerfChannel and PerfFib with the
+     template's default Native AOT recipe: each reached the 4 h cap with ILC plateaued at ~13.9 GB and no image, and
+     printed 56,190 "will always throw" lines. With IlcFoldIdenticalMethodBodies=false, PerfChannel published: rc 0 in
+     1,622 s, ILC peak 28.15 GB, image 563,323,392 bytes against 170,638,848 for the same program on 1.26.10.1 (3.3x).
+     Cause, read at the tree: nuget-1.24.13.7 (57ca7c1616, 2026-10-13 23:53 -0500) does not contain golib's generic-cycle
+     fix, e2move (merge b1ba1380b4, 2026-10-14 08:51 -0500); `git merge-base --is-ancestor b1ba1380b4` reads false for
+     nuget-1.24.13.6 and nuget-1.24.13.7 and true for nuget-1.26.10.1. The i9's count over the PerfFib default log: all
+     56,190 lines are "Failed to load type ..." over golib 1.24.13.7, and 46,626 of them (83.0%; 85.7% with array`1's
+     nested types) declare on array`1, slice`1 or ж`1, mostly five-level nests. The log has no separate cut-off line;
+     the cut-off shows only as these lines. The release gate's aot-smoke consumer published within its bound before the
+     fix (windows 71 min, run 37523439849), so the stall depends on the program; the perf suite's programs exceed it.
+     Amended 2026-10-27 (COORD's ruling; the i9's aot-foldoff2 queue, win-x64): with IlcFoldIdenticalMethodBodies=false
+     the 1.24.13.7 leg published 16 of 17 programs. PerfTlsHandshake failed at link: LNK1183 "extended relocation
+     count 9 less than 65535", because ILC wrote a 6,594,692,833-byte object, past COFF's 4 GiB; ILC peaked at 51 GB
+     private and printed 97,161 "will always throw" lines against the 56,190 above. The same program on 1.26.10.1
+     writes a 2.67 GB object and links (338.5 MB image). The default recipe stalls on that leg as well, so the
+     performance re-baseline's 1.24 TLS AOT cell reads n/a with this reason. -->

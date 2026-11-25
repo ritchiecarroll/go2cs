@@ -13,7 +13,7 @@ using utf8 = go.unicode.utf8_package;
 using transform = go.vendor.golang.org.x.text.transform_package;
 using go.unicode;
 using go.vendor.golang.org.x.text;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 
 partial class norm_package {
 

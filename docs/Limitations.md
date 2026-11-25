@@ -12,6 +12,25 @@ spots real code hits today.
      nothing still true and user-facing was dropped. Figures that no standing process re-measures are stated in words;
      each comment keeps the measured numbers. The pre-tightening text is this file at master 091935257c. -->
 
+This page describes go2cs as it is on the master branch and in the 1.26.11.1 release. Where the two differ, it says
+which one a limit applies to.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2 (owner rule of 2026-11-22: the current state, in present tense).
+     Every bullet was read against master 97cca467a2 and the 1.26.11.1 tag (nuget-1.26.11.1, ec3e170e4b). No entry
+     here affects only releases before 1.26.11.1, so nothing moved to an older-versions section. Changes:
+     - this paragraph;
+     - the func-word bullet: master only (TC-13, train 5, claude/h-tc13-funcword, merge 3d7d5e6ec0); 1.26.11.1 loses
+       the store; "until cgo callbacks bind functions to code addresses" restated (UX-8);
+     - the unsafe header views bullet: "The general fix is planned" restated (UX-8);
+     - testify: objx's suite validates on master (train 6, merge bb6267d0e4; no objx row at the tag);
+     - cgo, "What converts": reading C memory through a C struct's pointer field and through **C.T, master only
+       (trains 4 and 6: claude/h-cgo-sb2a, merge 1f2a9afdfc; claude/h-cgo-1c, merge 5f2f2d0aa3);
+     - cgo, "One target": -recurse -cgo, cross-target CC, the per-RID pack and the load-time target check are master
+       only (train 3: claude/c2-cgo-nuget-pack, merges 8de0f7ece2 and 640d45c9eb; claude/c2-cgo-pack-2b, merge
+       ef9be9bd32; train 4: claude/c2-cgo-a6, merge c9143ae615; train 5: claude/c2-cgo-gopointer, merge 54b02b555d);
+       "still to come" and "is planned, and is what will change this" restated (UX-8);
+     - cgo, "Where it differs from Go": the "five places" count (UX-13) checked against the list and laid out as five
+       cases in two groups. -->
+
 ## The short version
 
 **Good odds tonight:** pure Go that builds with the Go release go2cs tracks and `CGO_ENABLED=0`, leans mostly on the
@@ -25,7 +44,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   libraries ship a pure-Go fallback behind a build tag. A plain `-recurse` applies the common ones (`safe`, `purego`,
   `noasm`) for you; an explicit `-tags` replaces them, so restate them beside your own.
 * **By default, each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's
-  million are out of reach.
+  million are out of reach. A program built and run with [async twins](AsyncTwins.md) parks goroutines that wait in twinned code
+  instead (experimental). <!-- (b)-dependent -->
 * **It's usually slower than Go**, starts slower and uses more memory.
 * **One conversion targets one operating system.**
 * **Most failures are loud. A few differences are silent**: see the last bullet under
@@ -94,6 +114,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   the threads one process may run (`kern.num_taskthreads`, a few thousand on the hosted macOS 15 machines measured),
   and the `go` statement past it ends the program
   ([Known issues](KnownIssues.md#on-macos-a-go-statement-past-the-systems-thread-limit-ends-the-program)).
+  [Async twins](AsyncTwins.md), experimental and opt-in, run goroutines that wait in twinned code on a small pool of
+  threads. <!-- (b)-dependent -->
   <!-- Measured by C1 on 2026-11-08 (run 42497561630, claude/c1-darwin-threadcap a85e0cf11, the GolibTests probe
        DarwinGoroutineThreadCapProbe), on GitHub-hosted macOS runners, both shipped mac RIDs:
        - osx-arm64, macOS 15.8.2: kern.num_taskthreads 2048; the first go statement to fail found 2,027 live parked
@@ -116,12 +138,19 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   where, by default, each goroutine is a thread named `goroutine-N`.
   <!-- src/core/golib/runtime/Goroutine.cs:1096 `internal static bool IsForeverWait(WaitReason reason) =>`
        and :1169 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
-* **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
+* **Stacks don't grow.** By default, `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), or 16 MB when the converter proves it
   cannot recurse ([how](ConversionStrategies.md#goroutines)). Recursion past a thread's reserve ends the process
   with .NET's `Stack overflow.`, with no panic and no deferred calls, where Go prints `fatal error: stack overflow`
   and exits 2. Your main package's `init` functions run on the startup thread's smaller stack, and so does `main`
-  when an `init` called `runtime.LockOSThread`, as in Go.
+  when an `init` called `runtime.LockOSThread`, as in Go. With the scheduler of [async twins](AsyncTwins.md) on, every pool thread
+  reserves 1 GiB, or the goroutine reserve when that is larger, so `main`'s twin and every goroutine the scheduler runs
+  keep at least `main`'s 1 GiB. A set `GO2CS_GOROUTINE_STACK` sizes the pool threads instead, lower or higher, never
+  below 1 MiB, and then bounds `main`'s recursion too; goroutines on threads of their own keep 256 MB (16 MB bounded).
+  <!-- 2026-11-24 (P4, row 18 sweep): the post-row-4 truth, R's M:N row 4 (claude/r-mn-row4-stack), train 11.
+       Final rule at R's fold 2 37fede0ea6 (COORD 224341Z): GoScheduler.CarrierStackSizeFor = goroutineStackSet ?
+       Math.Max(goroutineReserve, MinCarrierStackSize 1 MiB) : Math.Max(MainThread.StackReserve 1 GiB, goroutineReserve).
+       Earlier reading: the carrier stack was Goroutine.StackReserve, never under 1 MiB. -->
   <!-- C46 (COORD ruling 2026-11-11, option A): src/core/golib/runtime/MainThread.cs `public const int StackReserve =
        1024 * 1024 * 1024;` and its LockOSThread rule; go2cs-gen MainEntryGenerator writes the entry point. The init
        residual: the main package's init is a module initializer of the entry assembly, which the CLR runs before
@@ -161,9 +190,17 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   mechanically.
 * **A func variable takes a pointer word stored into it only when the word is another func value's word.**
   `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p` copies the func when `p` was read the same way from another func,
-  and nil is the nil func. A hand-built `funcval` whose word is a code address panics by name, until cgo callbacks
-  bind functions to code addresses
+  and nil is the nil func. A hand-built `funcval` whose word is a code address panics by name: go2cs does not bind a
+  function to a code address, which belongs with callbacks from C into Go, and those are not supported yet
   ([func words](ConversionStrategies-Reference/pointers.md#a-func-value-carried-as-a-number--one-word-per-static-function-through-gofunccookie)).
+  This is the master branch. In go2cs 1.26.11.1 such a store is lost with no message: the func variable keeps the
+  value it had, so a func that was nil stays nil and a call through it panics.
+  <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the store landed in train 5 (TC-13, claude/h-tc13-funcword,
+       merge 3d7d5e6ec0; commit 9cec06ef4c: the earlier emission wrote p into a fresh box nothing reads, so f stayed
+       nil and the next call was a nil func call, measured by Behavioral FuncWordShapes). "until cgo callbacks bind
+       functions to code addresses" (UX-8) is restated as the present state: //export is refused by name (the cgo
+       section below), and 9cec06ef4c places binding a PC with cgo callbacks. -->
+
 * **A func value's word does not keep a closure alive.** Held as an `unsafe.Pointer` or a `uintptr`, the word of a
   closure names it only while something else holds the closure. Once nothing does and a collection runs, storing the
   word back into a func variable, or calling through it, panics by name ("names no live func"). In Go, the
@@ -230,6 +267,44 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   * Copying a struct by value shares any fixed-size array inside an embedded struct.
   * A slice of one number type laid over another's storage
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
+  * A write through `unsafe.StringData`'s pointer into a string literal or a one-byte string faults in Go, because
+    those bytes are read-only. In go2cs those bytes are shared by every equal string, so the write changes every
+    later evaluation of that literal, in every package, or every one-byte string of that byte. Set
+    `GO2CS_CHECK_STRING_WRITES=1` ([Tuning](Tuning.md#checking-writes-through-string-data)) to have it caught by
+    name: `unsafe.StringData` then gives the pointer a private copy of the bytes, so the write reaches no other
+    string, and the program panics at the next read through that pointer (`*p`, or a pointer `unsafe.Add` made from
+    it) or at the next `unsafe.StringData` over the same string. A write through a view that reads the bytes
+    directly, a slice from `unsafe.Slice(p, n)` or a `(*[N]byte)(unsafe.Pointer(p))` array pointer, also lands in
+    the copy, and is reported only if a later access goes through one of those two checks. The `Data` of a
+    `reflect.StringHeader` laid over such a string names the same copy. With the check on, three cases are still
+    not covered, and none of them panics:
+    - A literal hoisted into a `static readonly` field (`"..."u8`), which the standard library does throughout and
+      a package converted with `-hoist-literals` does too. A write through `unsafe.StringData` changes that literal
+      wherever it is used: after a write through the pointer to `err.(*strconv.NumError).Func` from
+      `strconv.ParseBool("x")`, every later such error names the changed function.
+    - A literal written in place as `"..."u8` (format strings and other string arguments in converted code). It
+      becomes a new array at each evaluation, so a write through `unsafe.StringData` is private to that one value.
+    - A string `unsafe.String` builds from `unsafe.StringData`'s pointer. It shares the private copy, so it reads
+      any byte later written there, and `unsafe.StringData` over it hands out a pointer with no check.
+
+    A heap string (one built at run time) behaves as in Go: the write changes it and every string sharing its bytes.
+  <!-- 2026-11-24 (P5, D5). COORD ruled option A 20261124T103731Z (a private copy and a next-access panic, always on,
+       cut f4318664d4 + cf7e3b212b); the owner then ruled it an OPT-IN DIAGNOSTIC, off by default (COORD
+       20261124T133212Z: "no need for normal runtime work where Go already protects converted code"), after the 50,000-
+       literal bench read the always-on registry at about twice master's gen-2 pause and three times its gen-0 pause.
+       golib ReadOnlyStringBacking.Enabled reads GO2CS_CHECK_STRING_WRITES once at start-up; off, no literal is
+       registered and StringData makes no lookup. Guarded by GolibTests ReadOnlyStringDataTests: the switch-off row pins
+       this default (the write reaches the equal literal), and the switch-on rows run in a child host (red at master
+       b2c9435159 on the literal, one-byte and unsafe.Slice arms; the next-access check neutered fails the three panic
+       arms by name). Behavioral StringDataIdentity compares identity, heap and near-miss arms against go run with the
+       switch off. The header's Data goes through the same door (ж.StringHeaderBox.cs (H) and the pointer shape),
+       guarded by GolibTests StringHeaderNumberTests W4. The uncovered cases, counted by P3 at cf7e3b212b
+       (COORD/20261124T130505Z-P3.md): (a) 10,799 hoisted `xˢᵇ = "..."u8` declarations in 1,284 files under src/core,
+       test files included, plus any user package converted with -hoist-literals (hoistedLiteralOperations.go); P3's
+       scenario is strconv/number.cs `parseBoolˢᵇ`. (b) A non-hoisted "..."u8 operand converts through implicit
+       operator @string(ReadOnlySpan<byte>) into a fresh array per evaluation. (c) unsafe.String over the shadow (P3
+       NIT 4). Registering hoisted field backings is dropped from .5; if ever wanted it is diagnostic-only, an OPEN
+       BOARD row (2026-11-24). -->
   * A pointer's number kept in a `uintptr` and turned back into a pointer in a later statement
     (`n := uintptr(unsafe.Pointer(p))`, then `(*T)(unsafe.Pointer(n))`) can name memory that has since moved, and
     the number does not keep the value alive. Go calls this invalid too, but it often works there. Do the
@@ -265,17 +340,60 @@ pointer, or a `void *` that is nil or points at C memory. `C.CString`, `C.CBytes
 `C.GoBytes`, `C.malloc`, `C.free` and `defer C.f(…)` convert, with the package's C types and constants. A
 program that uses the converted package needs only the C library.
 
+On the master branch, Go code that walks C memory converts too: it reads and writes a pointer field of a C struct
+that lives in C memory (`l.next`), and loads and stores through a `**C.T` (`*p`, as a walk down a C list such as
+`addrinfo`'s `ai_next` does). A pointer field reached through a nested struct value, an array of pointers, a field
+whose type is a C pointer typedef, and a union are still refused by name, and so is storing a pointer into Go memory
+into C memory. In go2cs 1.26.11.1, reading a pointer field of a C struct in C memory fails with a panic.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: cgo increment 3.2 seat 1a (train 4, claude/h-cgo-sb2a, merge
+     1f2a9afdfc; docs/phase4/DESIGN-cgo-phase3-marshaling.md section 18.9: [GoCgoStruct], the GET/SET accessor at the
+     field's Go offset, and the four shapes left out by name) and seat 1c (train 6, claude/h-cgo-1c, merge 5f2f2d0aa3;
+     section 18.11: the **C.T load and store over C memory). Arms: s6nextnil, s6nextdirect and s6name back to plain
+     rows (commit 01ecb22bb9), s6next by 1c, s6store as Go and s6storego refused by name. Before them the hosted
+     os-matrix cgo legs (run 44883224786) read golib's "cannot read native memory as ...: its CLR layout is not its Go
+     layout" refusal for all four rows on five targets (commit e6210fa543), and section 18.1 read s6next as a nil
+     dereference panic on 2026-11-15; which of the two 1.26.11.1 prints is not measured, so the text says "a panic".
+     1.26.11.1 has neither seat. Go memory
+     handed to C without a copy (seat 1b, the pinned class) has not landed, so the refusals below stand. -->
+
 **One target.** A `-cgo` conversion is for one operating system and architecture: the machine's own, or another one
 named with `-platforms` when `CC` names that target's C compiler (for example `zig cc -target <triple>`). The converted
-package refuses to call C on any other. A single-package conversion builds against a go2cs clone
-(`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's cgo packages convert with the module.
-Packing a cgo package against the `go.*` packages for every platform is still to come ([Roadmap](Roadmap.md#cgo)).
+package refuses its C bindings on any other: when the package loads, before any of its code runs. A single-package
+conversion builds against a go2cs clone (`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's
+cgo packages convert with the module, and under `-recurse=nuget -cgo` they reference the `go.*` packages. A module
+with a cgo package packs for publishing as a package for each of `win-x64`, `linux-x64`, `osx-x64` and
+`linux-arm64`; `osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64` build. Such a package is
+published only against a `go.lib` that carries the load-time target check, which the go.* 1.26.11.1 packages do not.
 The standard library itself is converted with `CGO_ENABLED=0`, and a module converted with `-recurse -cgo` uses it as
 it is. So a package that imports `net` or `os/user` gets their builds without cgo, the ones Go itself uses with
 `CGO_ENABLED=0`: `net` resolves host names with Go's own resolver, not the C library's, and `os/user` reads the user
-database files directly. Converting the `net` resolver with cgo is planned, and is what will change this. A package
-that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are not working builds.
-<!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+database files directly. go2cs does not convert the `net` resolver with cgo yet ([Roadmap](Roadmap.md#cgo)). A
+package that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are not working builds.
+
+That is the master branch. go2cs 1.26.11.1 converts one cgo package at a time, for the machine's own operating system
+and architecture only: there `-cgo` does not combine with `-recurse`, a cgo package cannot be packed, and the target
+check runs at the package's first C call rather than when it loads.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2. "Packing a cgo package against the go.* packages for every
+     platform is still to come" and "Converting the net resolver with cgo is planned, and is what will change this"
+     (UX-8) are restated in the present tense. Sources:
+     - -recurse -cgo and -recurse=nuget -cgo: train 3, claude/c2-cgo-nuget-pack INC 1 (merge 8de0f7ece2; commits
+       4531a7a37e and 32c6b517e5); route refusals skip their package: claude/c2-cgo-route-skip (merge f74b4d7385).
+     - Another target with CC naming its compiler: INC 2a (commit 07378119f9; R3 steps aside without a CC, 78e369a4a9,
+       merge 640d45c9eb).
+     - The per-RID pack: claude/c2-cgo-pack-2b (merge ef9be9bd32): win-x64, linux-x64, osx-x64 and linux-arm64, osx-arm64
+       left out by name (docs/NugetgoPublish.md, "Cgo"; an internal runbook, so not linked).
+     - The load-time target check (A6): train 4, claude/c2-cgo-a6 (merge c9143ae615, commit 77e91b3c0c):
+       GoCgoLibraries.Register refuses in the cgo package's module initializer; before it, Resolve refused at the
+       first C call. nugetgo-pack -Cgo refuses a restored go.lib without it ("the published 1.26.11.1 is refused by
+       name"), and src/_nugetpush.ps1 pushes a -Cgo pack only with the "a6:" record. Master's golib carries it, so the
+       next go.lib release carries it; no version is named here because none is set.
+     - The local-closure rehearsal and the module-cache release with no go.mod: train 5, claude/c2-cgo-gopointer
+       (merge 54b02b555d), not user-facing beyond the above.
+     - At nuget-1.26.11.1, main.go's -cgo help read "Not combinable with -stdlib, -tests or -recurse" and converted for
+       the host only (this section's text at the tag: "One package, one machine").
+     - The net resolver: no merge in trains 1 to 7 converts it. -->
+
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way"); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name.** Each of these is not supported yet; [the Roadmap](Roadmap.md#cgo) says what is planned.
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`.
@@ -286,7 +404,10 @@ that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are 
 - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
   compiled C;
 - `//export`;
-- a C variable, a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
+- a C variable whose type is not a C scalar or struct (an array, a pointer, a function pointer or a union);
+  `C.x` of a scalar or struct type reads and writes the variable in place, as Go does, once a library the
+  package links exports it;
+- a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
 - a C function Go's own cgo build does not import by its C name: one a header renames (macOS on x64 makes
   `fstat` the symbol `fstat$INODE64`), or one the C compiler inlines. go2cs cannot tell the two apart, so it
   refuses both rather than bind a function C would not call:
@@ -299,13 +420,26 @@ that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are 
 
 **Where it differs from Go.** go2cs never hands C a pointer into Go's memory: it hands C a copy of the one
 struct a pointer points at, and copies it back after the call. So cgo's pointer check differs from Go's in
-five places, all where a program breaks or bends cgo's pointer rules:
-- Go checks a pointer held in a variable against the whole object it points into, and panics when that
-  object also holds a Go pointer or lives in package-level memory. go2cs proceeds, since C only sees the
-  copy. This is the check most cgo calls in the Go toolchain's own cgo packages take.
-- Go accepts a struct member that points at memory pinned with `runtime.Pinner`, any pointer under
-  `GODEBUG=cgocheck=0`, and a struct passed by value whose pointer member points into Go memory that
-  holds no pointer. go2cs refuses all three when the call is made.
+five cases, all where a program breaks or bends cgo's pointer rules. In two, Go panics and go2cs proceeds:
+- a pointer held in a variable, when the object it points into also holds a Go pointer;
+- a pointer held in a variable, when the object it points into lives in package-level memory.
+
+Go checks a pointer held in a variable against the whole object it points into. go2cs proceeds in both cases, since C
+only sees the copy. This variable check is the one most cgo calls in the Go toolchain's own cgo packages take.
+
+In three, Go proceeds and go2cs refuses the call when it is made:
+- a struct member that points at memory pinned with `runtime.Pinner`;
+- any pointer under `GODEBUG=cgocheck=0`;
+- a struct passed by value whose pointer member points into Go memory that holds no pointer.
+<!-- 2026-11-23 .5 docs pass (P1), UX-13, at master 97cca467a2: the passage said "five places" over two bullets of
+     2 and 3 cases, so the count was right and the list hid it. The five are DESIGN-cgo-phase2-pinvoke.md §11.16's
+     amendment of 2026-11-11 (fixture functions PackageLevel, Sibling, Pinned and ByValue, plus cgocheck=0, an
+     environment setting with no fixture). Re-read at 97cca467a2: src/go2cs/testdata/cgo/phase2 is unchanged since
+     nuget-1.26.11.1; golib's GoCgoArgs.PointerMember still refuses every managed pointer member with cmd/cgo's
+     "argument of cgo function has Go pointer to unpinned Go pointer" (covering Pinned and ByValue), and no switch
+     reads cgocheck. Go memory handed to C without a copy (cgo 3.2 seat 1b) has not landed in trains 1 to 7, so
+     none of the five changed, and the count is the same in 1.26.11.1. -->
+
 <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.16 and §11.20 (COORD's M1 ruling, 2026-11-11); the census is
      TestCgoCheckClosureFormsAcrossGorootsCgoPackages, hosted run 42973745743: address 31, variable 50, index 22,
      slice 0, defer 9, go 0 over GOROOT's 29 cgo packages (50 of the 81 checked calls that pass no element of a
@@ -431,7 +565,12 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
 * **A test suite that imports testify depends on the `safe` tag.** Its bundled go-spew does pointer
   arithmetic into `reflect.Value` at load, which the runtime library refuses by design, and go-spew's
   `safe` tag selects its fallback. Drop the tag, with `-module-safe-tag=false` or an explicit `-tags` that
-  leaves it out, and the converted test program dies at startup.
+  leaves it out, and the converted test program dies at startup. With the tag on, testify works: on the master
+  branch, github.com/stretchr/objx's suite, which uses testify, validates
+  ([validated modules](ValidatedModules.md)).
+  <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: objx v0.5.2 and v0.5.3 rows in docs/ValidatedModules.md,
+       landed in train 6 (merge bb6267d0e4); docs/ValidatedModules.md at nuget-1.26.11.1 has no objx row. -->
+
 * **A hung test is stopped, where `go test` waits.** A converted test still running 15 minutes after it
   started is reported as a failure and marked abandoned, and the run moves on to the next test
   (`-test-deadline` changes the limit, [Command line](CommandLine.md)). Its goroutines keep running, so
@@ -449,8 +588,12 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
   `unsafe.Pointer(uintptr(p) + i)` or through `(*[8]byte)(p)`. Converted, these stop with a named runtime panic,
   because the string or slice lives in .NET-managed memory with no fixed address to offset. github.com/zeebo/xxh3
   is the common case; the repository carries an `unsafe`-free copy of it that computes the same hashes, for a
-  `replace github.com/zeebo/xxh3 => <go2cs clone>/src/forks/github.com/zeebo/xxh3@v1.1.0`. The general fix is
-  planned.
+  `replace github.com/zeebo/xxh3 => <go2cs clone>/src/forks/github.com/zeebo/xxh3@v1.1.0`. go2cs has no general
+  fix for these views yet.
+  <!-- 2026-11-23 .5 docs pass (P1), UX-8: was "The general fix is planned." No header-view change landed in trains 1
+       to 7 (no matching merge in `git log --first-parent nuget-1.26.11.1..97cca467a2`), so the bullet states the
+       present state. -->
+
   <!-- C45 (COORD rulings 2026-11-11): option D for 1.26.10.4, the fork src/forks/github.com/zeebo/xxh3@v1.1.0 with
        its FORK.md and identity/check.sh (16,632 results byte-identical to the original under real Go); option A, the
        general fix, is a post-1.26.10.4 train, docs/phase4/DESIGN-unsafe-header-views.md on branch
@@ -458,6 +601,21 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
        Go layout", "unsafe pointer arithmetic on a managed pointer with no address", and "cannot view native memory as
        array<Byte>: the address has no managed element storage behind it" (Behavioral UnsafeHeaderViewFamily, parked
        on that branch). -->
+* **A store through a `[]byte` read as a string panics, or is lost.** `*(*string)(unsafe.Pointer(&b)) = s`, and the
+  same store through a two-word string header (`*(*struct{ p unsafe.Pointer; n uint })(unsafe.Pointer(&b)) = h`),
+  replaces the slice's data pointer and length in Go and keeps its capacity. The views go2cs reads these through are
+  read-only. When the conversion is written in the assignment itself, as above, the converted statement panics with
+  `go2cs: store through a read-only view`; in a `for` statement's init or post clause, the converter stops on the file
+  and names it (`GO2CS2008`). When the view is held in a variable first (`p := (*string)(unsafe.Pointer(&b)); *p = s`),
+  or passed to a function that stores through it, the store goes into the view, which panics by name on the next
+  access through `p`. If there is none, the store is lost with no word: `len(b)` still reads the old length.
+  <!-- C45, P3's read 2026-11-24 (finding 2): the store used to land in a temporary view box and be lost silently. The
+       converter's readOnlySliceViewStore emits the panic; Behavioral UnsafeHeaderViewRefusals; matching Go's store is
+       the BOARD row of 2026-11-24 "a store through a slice read as a string or string header" (OPEN, post-.5).
+       P3's delta read of e87b097396 (COORD 20261124T063422Z): the variable form is not refused at the statement
+       (readOnlySliceViewStore needs the conversion under the star) and the view's own check runs on its next access
+       (golib ж.SliceStringViewBox.cs); the for-clause form stops the file, since a throw cannot stand in a C# for
+       header. UnsafeHeaderViewRefusals has both variable arms; the "last access" arm prints the wrong 3 on purpose. -->
 * **One bad dependency blocks everything above it.** A package that fails to convert, or that the
   converter refuses, is reported and skipped: the rest of the module still converts, and every project
   that imports it fails to build. The run ends with exit 1, and its summary names each such package
@@ -470,7 +628,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4262 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4283 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :859
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
@@ -503,7 +661,7 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
        GitHub Release with the archives, SHA256SUMS and the attestation bundle. src/sign-release-binaries.ps1 (the
        release machine) signs the Windows executables and SHA256SUMS on the draft; .github/workflows/attest-release.yml
        attests the archives as the draft then holds them. Signing began with the 1.26.10.2 release. -->
-* **Where it runs.** The standard library is validated on x64 Windows, on Linux, x64 and arm64 (glibc, on
+* **Where it runs.** The standard library is validated on x64 Windows, on Linux, x64 and Arm64 (glibc, on
   Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)), and on macOS,
   Intel and Apple silicon. The [roster](ValidatedTestPackages.md) shows each package's counts on each platform; two
   Windows-only packages have no Linux or macOS reading. The packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`; a build for any other platform

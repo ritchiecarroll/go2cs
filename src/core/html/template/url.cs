@@ -6,7 +6,7 @@ namespace go.html;
 using fmt = fmt_package;
 using strings = strings_package;
 using io = io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class template_package {
 
@@ -33,7 +33,7 @@ partial class template_package {
 // explicitly indicate that such a URL is expected and safe by encapsulating it
 // in a template.URL value.
 internal static @string urlFilter(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (s, t) = stringify(args.ꓸꓸꓸ);
     if (t == contentTypeURL) {
@@ -67,7 +67,7 @@ internal static bool isSafeURL(@string s) {
 // urlEscaper produces an output that can be embedded in a URL query.
 // The output can be embedded in an HTML attribute without further escaping.
 internal static @string urlEscaper(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return urlProcessor(false, args.ꓸꓸꓸ);
 }
@@ -78,7 +78,7 @@ internal static @string urlEscaper(params ꓸꓸꓸany argsʗp) {
 // encode '&' so correct embedding in an HTML attribute requires escaping of
 // '&' to '&amp;'.
 internal static @string urlNormalizer(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return urlProcessor(true, args.ꓸꓸꓸ);
 }
@@ -86,7 +86,7 @@ internal static @string urlNormalizer(params ꓸꓸꓸany argsʗp) {
 // urlProcessor normalizes (when norm is true) or escapes its input to produce
 // a valid hierarchical or opaque URL part.
 internal static @string urlProcessor(bool norm, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (s, t) = stringify(args.ꓸꓸꓸ);
     if (t == contentTypeURL) {
@@ -165,7 +165,7 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> b)
 // Filters and normalizes srcset values which are comma separated
 // URLs followed by metadata.
 internal static @string srcsetFilterAndEscaper(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (s, t) = stringify(args.ꓸꓸꓸ);
     switch (t) {

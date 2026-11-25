@@ -15,7 +15,7 @@ using global::go.io;
 using global::go.os;
 using io = io_package;
 using path;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class gccgoimporter_package {
 
@@ -107,7 +107,7 @@ internal static slice<@string> /*paths*/ SearchPaths⁔(/*this*/ ref GccgoInstal
 
 // Return an importer that searches incpaths followed by the gcc installation's
 // built-in search paths and the current directory.
-internal static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter⁔(/*this*/ ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
+internal static Importer GetImporter⁔(/*this*/ ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
     return GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), (@string)"."), initmap);
 }
 

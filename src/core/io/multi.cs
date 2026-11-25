@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using ꓸꓸꓸReader = Span<io_package.Reader>;
-using ꓸꓸꓸWriter = Span<io_package.Writer>;
+using ꓸꓸꓸReader = variadic<io_package.Reader>;
+using ꓸꓸꓸWriter = variadic<io_package.Writer>;
 
 partial class io_package {
 

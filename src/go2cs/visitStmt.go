@@ -105,6 +105,7 @@ func getStmtContext[TContext StmtContext](contexts []StmtContext) TContext {
 func (v *Visitor) visitListStmt(stmt ast.Stmt) {
 	v.visitStmt(stmt, []StmtContext{})
 	v.writeTrailingComment(stmt.End())
+	v.trailingCommentAnchor = commentAnchor{}
 }
 
 func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {

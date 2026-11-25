@@ -216,7 +216,7 @@ is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/gol
      landed
      in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:2018
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
-     src/core/golib/slice.cs:306 (`The single creation door for a native-backed slice`). -->
+     src/core/golib/slice.cs:311 (`The single creation door for a native-backed slice`). -->
 
 ## The CryptoAPI chain seam — when a native record must be READ as a struct and HANDED BACK as a pointer
 
@@ -642,7 +642,7 @@ variadic `Call`/`CallSlice`, and `reflectlite`'s `rtype.Name` — are hand-owned
 
 <a id="variadic-call-and-makefunc-under-native-aot"></a>
 **A variadic `Call` and `MakeFunc` work under Native AOT through compiled trampolines that go2cs-gen
-registers.** A converted Go variadic takes its tail as a C# `Span<T>`, so it is a golib `Funcꓸꓸꓸ<…>` or
+registers.** A converted Go variadic takes its tail as golib's `variadic<T>` pack, so it is a golib `Funcꓸꓸꓸ<…>` or
 `Actionꓸꓸꓸ<…>` delegate, and `reflect` calls or makes one through a generic trampoline closed over that
 delegate's own type arguments (`GoReflect.VariadicRegistry.cs`). The JIT closes such a trampoline for any types.
 Native AOT has code for it only when compiled code named the instantiation, and a value type such as `@string`, a
@@ -673,10 +673,10 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
 <!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
      :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :82-83
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
-     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:427
+     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:429
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:437 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :398 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
+     src/gen/go2cs-gen/MethodSet.cs:445 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :406 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :132-133
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
@@ -844,7 +844,7 @@ field is an embed to `reflect`* below).
 <!-- history: Anonymous first waited on field ORDER, because go2cs-gen declared the promoted-embed backing box
      after the declared fields, so struct{X; y; Inner; inner; Ptr} walked as X, y, Ptr, Inner, inner; GoFields'
      reorder by the all-fields constructor and the Anonymous projection landed together. The converter has since
-     declared embeds in place (src/go2cs/visitStructType.go:1038 `// declaration order, marked like every other embed:`). -->
+     declared embeds in place (src/go2cs/visitStructType.go:1048 `// declaration order, marked like every other embed:`). -->
 
 Guard: `tests/Behavioral/ReflectUnexportedFieldFlags`, byte-identical to `go run` — the indexed
 walk's `IsExported`/`PkgPath`/`Tag`, `FieldByName` carrying the same flags (including the blank
@@ -2365,10 +2365,12 @@ Go field name IS its type name).
 Two residuals are stated rather than hidden. The **interface** arm proves "methodless" only for
 `object` (Go's `any`), so a DEFINED empty interface with a managed type of its own is answered *not
 identical* — the conservative direction, since a false negative degrades a caller to "this needs a
-conversion" while a false positive hands it a silent wrong assignment. And a **defined methodless
-func type has no managed identity at all**: the converter renders it inline as its base delegate, so
-`type myFunc func(int) bool` and `func(int) bool` are one managed type, and the named/unnamed pairs
-every other kind can assert cannot be produced for funcs.
+conversion" while a false positive hands it a silent wrong assignment. And the **func** pairs are
+new: until 2026-11-23 a defined methodless func type was rendered inline as its base delegate, so
+`type myFunc func(int) bool` and `func(int) bool` were one managed type and no named/unnamed func pair
+could be produced. Every defined func type now declares a delegate of its own
+([struct-types.md](struct-types.md#every-defined-func-type-declares-its-own-delegate)), so the pair exists,
+and what this walk answers for it has not been measured.
 
 <!-- history: 2026-08-20 -->
 <a id="the-chan-direction-is-carried-by-the-value--descriptor-cargo-exactly-like-an-arrays-length-2026-08-20"></a>
@@ -2926,8 +2928,8 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      encoding/json's dominance rules are decided by DEPTH and tag, never by declaration order, and its one
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
-     embeds in place (src/go2cs/visitStructType.go:1038 `// declaration order, marked like every other embed:`). The
-     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:530 (`An embed is emitted by the converter as a partial PROPERTY`). -->
+     embeds in place (src/go2cs/visitStructType.go:1048 `// declaration order, marked like every other embed:`). The
+     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:529 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
 
@@ -2951,16 +2953,17 @@ what keeps `Name()` and the descriptor's `TFlagNamed` agreeing with the string.
 **The variadic tail is recognized by SHAPE, not by the delegate family's name.** The golib families
 carry a name marker and the detection used to rely on it, but a declared `func(string, ...int)` used
 as a method group in an `any` position acquires C#'s NATURAL delegate type instead, whose name carries
-no marker — so it reported non-variadic and `In(1)` handed back a raw `Span<int>`, rendering
-``func(string, Span`1)``. A `Span<T>` parameter cannot arise any other way in converted code (Go has
-no such type, and the converter emits one only for a variadic tail), so testing for it subsumes the
-name test rather than widening it.
+no marker — so it reported non-variadic and `In(1)` handed back the raw tail type, rendering
+``func(string, Span`1)`` in the releases whose tail was a `Span<T>`. A `variadic<T>` parameter cannot
+arise any other way in converted code (Go has no such type, and the converter emits one only for a
+variadic tail), so testing for it subsumes the name test rather than widening it.
+<!-- the shape test: src/core/golib/GoReflect.TypeLayout.cs:1567 `tail.GetGenericTypeDefinition() == typeof(variadic<>);` (wall E moved it from Span<>). -->
 
-Residual, stated rather than hidden: a defined **methodless** func type has no managed identity — the
-converter renders it inline as its base delegate family — so it is indistinguishable from an unnamed
-one here and reports the unnamed answer. That is the same "describe the type the bridge can actually
-build a descriptor for" rule `ChanDir` settles on. A defined func type carrying a method does get its
-own delegate and keeps its name. Guarded by `ReflectBridgeClosure` (six unnamed shapes and one named,
+Every defined func type, with or without methods, is its own delegate and keeps its name: `%T`,
+`Name()` and `String()` answer `main.F`, `"F"` and `"main.F"` for `type F func(string) error`. Until
+2026-11-23 a defined methodless func type was rendered inline as its base delegate family, so it
+reported the unnamed answer here ([struct-types.md](struct-types.md#every-defined-func-type-declares-its-own-delegate);
+the `DefinedFuncTypeIdentity` behavioral test reads these answers against `go run`). Guarded by `ReflectBridgeClosure` (six unnamed shapes and one named,
 against `go run`) and `GolibTests.GoReflectBridgeClosureTests`.
 
 ## `reflect.Value.Bytes`/`SetBytes` are defined over the element KIND, and they ALIAS
@@ -3231,13 +3234,13 @@ everything below them stays auto-converted and simply becomes unreachable.
 
 | Go API | Managed realization | Divergence |
 |---|---|---|
-| `Gosched()` | `Thread.Yield()` | none — same "offer the rest of the slice, then continue" contract |
-| `GOMAXPROCS(n)` | remembered value; `n < 1` queries. It starts as Go's `schedinit` starts it: the `GOMAXPROCS` environment variable when it parses as a positive number (which marks the setting custom), and otherwise Go's default for `NumCPU`. `NumCPU` is `getCPUCount()`, the CPUs the operating system lets the process run on, read once at start-up as `osinit` reads it. Neither reads `DOTNET_PROCESSOR_COUNT` or .NET's `Environment.ProcessorCount`: a converted program answers as the Go program does on the same machine, and `GOMAXPROCS` is the cap it honours (.NET still sizes its own thread pool by `DOTNET_PROCESSOR_COUNT`) | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads. The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
+| `Gosched()` | `Thread.Yield()` by default; under async twins, a park: the goroutine gives its pool thread to another | none — same "offer the rest of the slice, then continue" contract |
+| `GOMAXPROCS(n)` | remembered value; `n < 1` queries. It starts as Go's `schedinit` starts it: the `GOMAXPROCS` environment variable when it parses as a positive number (which marks the setting custom), and otherwise Go's default for `NumCPU`. `NumCPU` is `getCPUCount()`, the CPUs the operating system lets the process run on, read once at start-up as `osinit` reads it. Neither reads `DOTNET_PROCESSOR_COUNT` or .NET's `Environment.ProcessorCount`: a converted program answers as the Go program does on the same machine, and `GOMAXPROCS` is the cap it honours (.NET still sizes its own thread pool by `DOTNET_PROCESSOR_COUNT`) | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads; with async twins and `GO2CS_MN=1` it sets how many goroutines run at once, as in Go ([Async twins](../AsyncTwins.md)). The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
 | `SetDefaultGOMAXPROCS()` | Go's body over the remembered value: it sets `defaultGOMAXPROCS(0)`, the CPUs the process may run on, which on linux is lowered to the cgroup's CPU limit (rounded up, at least 2; the cgroup is opened at start-up, after `parsedebugvars`, as `schedinit`'s `defaultGOMAXPROCSInit` does). `GOMAXPROCS(n)` marks the setting custom, as Go's does, and this clears the mark | none in the value. Go's automatic update runs as Go's does: the managed sysmon tick re-reads `defaultGOMAXPROCS(0)` at most once a second while the setting is not custom, and a changed value is set with the world stopped, so the process follows a change of its CPU affinity or its cgroup's CPU limit (`GODEBUG=updatemaxprocs=0` turns it off; `GOMAXPROCS(n)` waits for a read in flight, and always wins). One difference in cost: Go's sysmon parks while every P is idle, so an idle Go program runs no check, while the managed tick keeps checking, about 0.1 ms of CPU a second once warm on a linux box (2026-11-18). The converted body set `newprocs` for a `startTheWorldWithSema` that never runs, so before 2026-11-17 the call changed nothing, and before 2026-11-18 the value followed a change only when the program called this |
 | `GC()` | blocking compacting collect → `WaitForPendingFinalizers` → collect → **`GcPauseRecorder.Drain()`** | none observable; the second pass reclaims what finalizers released, which is the state a completed Go cycle leaves. The drain is what makes `NumGC` current on return |
 | `Stack(buf, all)` | a Go-shaped traceback rendered from the managed stack into `buf`; `all` enumerates every live goroutine | see *`runtime.Stack` renders a GO-shaped traceback* and *`runtime.Stack(all: true)`* below |
 | `ReadMemStats(m)` | `GC.GetTotalMemory`/`GetTotalAllocatedBytes` + one `GcPauseRecorder` snapshot | allocator-internal fields (`Mallocs`/`Frees`/`HeapObjects`/`BySize`) and `GCCPUFraction` stay **zero** rather than invented; the pause history, `LastGC`, `PauseTotalNs`, `NumGC`, `NumForcedGC` and `HeapReleased` are **real** (see below) |
-| `LockOSThread`/`UnlockOSThread` | no-ops | no-ops **by construction**: a goroutine already *is* a managed thread, so the guarantee they exist to provide holds unconditionally |
+| `LockOSThread`/`UnlockOSThread` | Go's bodies: a lock count, the nesting overflow panic, and a goroutine that exits locked retires its thread | with the default threads a goroutine already *is* a managed thread, so the pin itself holds unconditionally; under async twins a locked goroutine also takes its thread out of the shared pool until it unlocks |
 
 `Stack` had one divergence that looked like a bug: Go keeps the panicking frames alive until the
 panic completes, so `debug.Stack()` called from a deferred function *during* a panic shows the
@@ -3603,11 +3606,11 @@ work here: a copy of a locked mutex is locked, and a copy of an idle mutex is a 
 queue. One copy differs from Go. A mutex copied WHILE a goroutine waits on it carries the queue's
 handle, and until that queue empties a waiter of the copy can take a wakeup meant for the original.
 In Go the two wait on different addresses. That copy also reads two words other goroutines are
-writing; it is recorded on the BOARD.
+writing, a known gap.<!-- 2026-11-23 .5 docs pass (P1), UX-7: process term moved out of visible text: "it is recorded on the BOARD" (docs/phase4/BOARD-next-validation-candidates.md). -->
 
 **Where this differs from Go.** Wakeups follow the semaphore's order and a woken waiter competes with
-newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. A waiter blocks its OS
-thread in the semaphore, where Go parks a goroutine and frees its M, and an `Unlock` that read 2
+newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. By default a waiter blocks its OS
+thread in the semaphore, where Go parks a goroutine and frees its M; under async twins a contended `Lock` parks when its caller is a twin for another reason (a channel, a `select`, a `Sleep`, a call that parks); a caller whose only wait is `Lock` keeps its thread, as does any `Lock` with the block or mutex profile on. An `Unlock` that read 2
 takes its stripe's monitor for the lookup. `Unlock` reads the `sema` word after the swap that unlocks,
 as Go's own slow path does. Memory that is zeroed and reused as a mutex while a queue it named still
 has waiters, or bytes that happen to hold a handle a stripe hands out again after its 26-bit sequence
@@ -3888,7 +3891,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5543 (`INLINED PANIC SITES`), :5551 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5546 (`INLINED PANIC SITES`), :5554 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -3949,8 +3952,8 @@ Stage B of the scheduler design, held behind the synthetic-PC registry that woul
 Three further limits are stated rather than approximated: `running` covers Go's `_Grunnable` as well
 as `_Grunning` (there is no P and no run queue, so a thread waiting for a core is indistinguishable
 from one on it); Go's ` (scan)`, `, N minutes` and `, locked to thread` header decorations are omitted
-(no GC of ours, no park timestamp, and `LockOSThread` is a no-op here because every goroutine already
-owns its thread); and `NumGoroutine()` and the enumeration are two reads of one registry, so they agree
+(no GC of ours, no park timestamp, and the lock count `LockOSThread` keeps is not read into the
+header); and `NumGoroutine()` and the enumeration are two reads of one registry, so they agree
 at rest and can differ while a goroutine is registering or retiring — the same direction as the count's
 already-documented early-climb/late-decay. (Guarded by the `GoroutineWaitState` behavioral test — four
 goroutines parked on a mutex, a channel receive, a select and a WaitGroup, read back through a
@@ -4613,7 +4616,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3701-3722 -->
+<!-- source: src/core/reflect/value_impl.cs:3694-3715 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {

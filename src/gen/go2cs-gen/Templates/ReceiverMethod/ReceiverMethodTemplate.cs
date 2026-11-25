@@ -38,6 +38,10 @@ internal class ReceiverMethodTemplate : TemplateBase
     // Required for the same reason NoInlining is.
     public required string? OverloadResolutionPriority;
 
+    // The SOURCE method's [GoName] stamp (Common.GetGoNameStamp), or null. A twin is a member of the Go method
+    // set golib reads, so it carries the Go name its source carries.
+    public string? GoName;
+
     // Whether the SOURCE method is a Go VALUE-receiver method (`this T`, or a by-ref receiver marked
     // [GoCopyBound]) rather than a pointer-receiver one. Go's method set of *T holds T's value methods, and
     // `p.M()` on a pointer dereferences p and copies the pointee into the receiver AT THE CALL. The twin does
@@ -59,6 +63,9 @@ internal class ReceiverMethodTemplate : TemplateBase
 
             if (OverloadResolutionPriority is not null)
                 attributes += $", global::System.Runtime.CompilerServices.OverloadResolutionPriority({OverloadResolutionPriority})";
+
+            if (GoName is not null)
+                attributes += $", global::go.GoName(\"{GoName}\")";
 
             // The forwarder calls the user's method: Just My Code steps through it.
             attributes += $", {NonUserCodeAttribute}";
@@ -134,20 +141,14 @@ internal class ReceiverMethodTemplate : TemplateBase
     {
         get
         {
+            // The limit: `scoped` and `ref readonly` are written as plain `ref` and `in` (ParameterRefKinds records only
+            // ref, out and in), and the converter emits neither.
             List<string> result = [];
-            bool first = true;
 
-            foreach ((string type, string name) in Method.Parameters)
+            for (int i = 0; i < Method.Parameters.Length; i++)
             {
-                if (first)
-                {
-                    result.Add($"this {PointerPrefix}<{type}> {ReceiverBoxName}");
-                    first = false;
-                }
-                else
-                {
-                    result.Add($"{type} {name}");
-                }
+                (string type, string name) = Method.Parameters[i];
+                result.Add(i == 0 ? $"this {PointerPrefix}<{type}> {ReceiverBoxName}" : $"{RefKind(i)}{type} {name}");
             }
 
             return string.Join(", ", result);
@@ -157,8 +158,14 @@ internal class ReceiverMethodTemplate : TemplateBase
     private string ReturnStatement =>
         Method.ReturnType == "void" ? "" : "return ";
 
-    private string CallParams => 
-        string.Join(", ", Method.Parameters.Skip(1).Select(item => item.name));
+    // A by-ref parameter is passed on by-ref (`ref u`), as the overload takes it. A parameter's name carries its default
+    // (`u = 5`, for the declaration above), so the call takes the bare identifier: `t.M(u = 5)` would overwrite the caller's
+    // argument with the default.
+    private string CallParams =>
+        string.Join(", ", Method.Parameters.Select((item, i) => RefKind(i) + MethodInfo.ParameterIdentifier(item.name)).Skip(1));
+
+    private string RefKind(int index) =>
+        index < Method.ParameterRefKinds.Length ? Method.ParameterRefKinds[index] : "";
 
     // The narrowest of {this method's own scope, the receiver type's scope}. The narrowing is
     // load-bearing in BOTH directions: a public overload over a `ж<internalT>` receiver is CS0051,

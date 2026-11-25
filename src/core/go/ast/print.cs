@@ -10,12 +10,12 @@ using io = io_package;
 using os = os_package;
 using reflect = reflect_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class ast_package {
 
 // A FieldFilter may be provided to [Fprint] to control the output.
-// type FieldFilter is a methodless func type — rendered inline as its base delegate
+public delegate bool FieldFilter(@string name, reflect.Value value);
 
 // NotNilFilter is a [FieldFilter] that returns true for field values
 // that are not nil; it returns false otherwise.
@@ -36,11 +36,11 @@ public static bool NotNilFilter(@string _, reflect.Value v) {
 // struct fields for which f(fieldname, fieldvalue) is true are
 // printed; all others are filtered from the output. Unexported
 // struct fields are never printed.
-public static error Fprint(io.Writer w, ж<token.FileSet> fset, any x, Func<@string, reflect.Value, bool> f) {
+public static error Fprint(io.Writer w, ж<token.FileSet> fset, any x, FieldFilter f) {
     return fprint(w, fset, x, f);
 }
 
-internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x, Func<@string, reflect.Value, bool> f) {
+internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x, FieldFilter f) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -76,13 +76,13 @@ internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x,
 // Print prints x to standard output, skipping nil fields.
 // Print(fset, x) is the same as Fprint(os.Stdout, fset, x, NotNilFilter).
 public static error Print(ж<token.FileSet> fset, any x) {
-    return Fprint(new os.FileжWriter(os.Stdout), fset, x, new Func<@string, reflect.Value, bool>(NotNilFilter));
+    return Fprint(new os.FileжWriter(os.Stdout), fset, x, new FieldFilter(NotNilFilter));
 }
 
 partial struct printer {
     internal io.Writer output;
     internal ж<token.FileSet> fset;
-    internal Func<@string, reflect.Value, bool> filter;
+    internal FieldFilter filter;
     internal map<any, nint> ptrmap; // *T -> line number
     internal nint indent;           // current indentation level
     internal byte last;             // the last byte processed by Write
@@ -134,7 +134,7 @@ partial struct localError {
 
 // printf is a convenience wrapper that takes care of print errors.
 internal static void printf⁔(/*this*/ ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != nil) {
         throw panic(new localError(err));

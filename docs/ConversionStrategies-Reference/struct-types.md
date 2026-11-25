@@ -851,7 +851,7 @@ internal static nint convLocal(hertz h) {
   user-defined `==` candidates for `a == h` (CS9342), so the unnamed side is cast: `(hertz)a == h`. A `switch`
   whose tag and case value are one of each does the same in its `when` clause.
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246-596 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246-592 -->
 ```csharp
 internal static (bool, bool) sameLocal(anonBox_V a, hertz h) { return ((hertz)a == h, h != (hertz)a); }
 …
@@ -913,7 +913,7 @@ func laterTempo() (r struct{ Bpm int }) {
 }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:685-840 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:681-834 -->
 ```csharp
 internal static nint liftVar() {
     liftVar_x x = laterTempo();
@@ -946,8 +946,9 @@ internal static laterTempo_r /*r*/ laterTempo() {
 Go's, by `TestEachNamedUnnamedStructMoveRecordsItsConversion` in the converter, one package per site, and by the
 `ForeignStructSourceConversionTests` generator tests.)
 
-**Limits, each loud (a C# compile error, never a wrong value), with repros in
-`docs/phase4/probes/p2-struct-lift-neighbours` and a BOARD row of 2026-11-15:**
+**Limits, each loud (a C# compile error, never a wrong value):**
+<!-- 2026-11-23 .5 docs pass (P1), UX-7: process term moved out of visible text: the repros are in docs/phase4/probes/p2-struct-lift-neighbours, with the findings ledger row of
+     2026-11-15 (docs/phase4/BOARD-next-validation-candidates.md). -->
 
 - two lifts in two FILES of one package record nothing (CS0029): a lift's name is known per file;
 - the unnamed type behind a pointer, slice, map or channel, `*struct{…}` against a second lift's pointer: no
@@ -1093,6 +1094,79 @@ not. A field of type `[0]T` is therefore no reason to clone a struct and no memb
 uncomparable, is skipped the same way. A bare `[0]T` value still takes its own `.Clone()` where Go copies it.
 (Guarded by `TestAZeroLengthArrayFieldTakesNoClone` in the converter.)
 
+<a id="a-methodless-named-func-type-renders-as-its-base-delegate"></a>
+## Every defined func type declares its own delegate
+
+A defined func type, `type F func(string) error`, is a Go type of its own: `%T` prints `main.F`, reflect's
+`Name()` is `"F"`, and an interface holding an `F` does not hold a `func(string) error`, so
+`i.(func(string) error)` fails and a type switch with both cases takes the `F` case. Every defined func type
+therefore declares a C# delegate of its own, whether or not it has methods, and every reference names it:
+
+<!-- illustration: not converter output -->
+```csharp
+public delegate error F(@string _);
+
+F f = (@string _Δp0) => default;
+var (_, isF) = i._<F>(ᐧ);                       // true
+var (_, isPlain) = i._<Func<@string, error>>(ᐧ); // false, as in Go
+```
+
+Go assigns a defined func type and its unnamed signature to each other implicitly. C# has no conversion
+between two delegate types, so the value is converted through golib's `NilSafeDelegateConversion<TTarget,
+TSource>`, which returns null for a nil value as Go's assignment does. Every assignment site takes it: an
+assignment (`a = plain`), a declaration with a type (`var a F = plain`), a result (`return plain`), a call
+argument, a struct-literal field, a slice or array literal element (`[]F{plain}`), a keyed map, array or slice
+element (`map[string]F{"a": plain}`), an `append` element, a channel send (`ch <- plain`), and a conversion either
+way (`F(plain)`, `(func(string) error)(f)`). A func literal and a method group convert to the delegate natively and
+are left as they are; a method expression, `(*node).add`, is a cast of its method group to the unnamed delegate, so
+it reaches a defined func type through that type's constructor, `new handler((Func<ж<node>, nint, nint>)(…))`.
+
+Two sites need more than a wrap. A multi-value call deconstructed into existing variables, `ctx, cancel =
+context.WithTimeout(ctx, d)` with `var cancel func()`, cannot convert inside a C# tuple deconstruction, so that
+element deconstructs into a temporary and is assigned, converted, after the statement. A deferred call through a
+defined-func-type value, `defer release(err)`, hands the value to golib's `defer`, whose overloads take `Action<…>`
+and `Func<…>`, so the value converts to its underlying signature's delegate:
+
+<!-- illustration: not converter output -->
+```csharp
+F a = NilSafeDelegateConversion<F, Func<@string, error>>(plain);
+Func<@string, error> b = NilSafeDelegateConversion<Func<@string, error>, F>(f);
+ch.ᐸꟷ(NilSafeDelegateConversion<F, Func<@string, error>>(plain));
+
+(n, var cancelᴛ1) = pairF();
+cancel = NilSafeDelegateConversion<Func<@string, error>, F>(cancelᴛ1);
+defer(NilSafeDelegateConversion<Func<@string, error>, F>(f), (@string)"deferred", ref ᒐ);
+```
+
+At a generic callee's func parameter (`count[T any](p func(T) bool, v T)`) the value converts to the parameter
+as the call instantiates it, `Func<nint, bool>`, from which C# also infers `T`. A `:=` local declared from a
+method group keeps the unnamed delegate Go gives it (`var expR = expandRef;`); the self-referential
+`type stateFn func(*machine) stateFn` is the exception, since its signature has no finite structural form, and
+its local is declared `stateFn` ([the bare-function-value rule](value-receiver-delegates.md#a-bare-function-value-in--takes-its-named-delegate-type-not-var)).
+An assignment to such a local compares what the local renders as, so `state = state(m)` needs no conversion.
+
+A func type declared inside a function body is lifted to member level, as every other local type kind is: C#
+declares no delegate in a method body. It is named `<func>_<name>` and carries its Go name in `[GoLocalName]`,
+so reflection prints `main.aFunc`:
+
+<!-- illustration: not converter output -->
+```csharp
+[GoLocalName("aFunc")] internal delegate nint grouped_aFunc(nint x);
+```
+
+(Guarded by the `DefinedFuncTypeIdentity` behavioral test: `%T`, `Name()`, `String()` and `Kind()` of a
+defined func type, a typed nil, another package's defined func type, a type with methods, an alias and the
+unnamed signature; the assertion and the type switch; and every assignment site above, both ways, against a
+second package's type too, including the tuple, the deferred call and the keyed method expressions the converted
+standard library first showed (database/sql, net/http, internal/fuzz, internal/trace), output-compared with Go. The converter tests `TestTypeSwitchNamedFuncCase`,
+`TestLocalFuncTypeLiftedUnderComments` and `TestMethodlessFuncTypeNameNeverTypesALocal` pin the case labels, the
+lift and the method-group local.)
+
+<!-- HISTORY, before 2026-11-23: a defined func type with no methods was rendered as its base delegate and never
+declared (methodlessNamedFuncSignature), so Go's free conversion between it and its signature was identity in
+C#. That lost the type's identity: %T, Name() and String() read the unnamed signature, the type assertion to the
+unnamed signature held, and a type switch with both cases did not compile (CS8120). The rule as it stood:
+
 ## A methodless named func type renders as its base delegate
 
 Go treats a named func type as freely interconvertible with its underlying `func(...)` when the
@@ -1108,12 +1182,12 @@ A **non-generic** named func type with **no methods** is therefore rendered AS i
 delegate (`Action`/`Func<…>`) everywhere it is referenced (`getAliasQualifiedTypeName`/`getFullyQualifiedTypeName` return
 the underlying signature), and its declaration is skipped (`visitFuncType` emits only a marker
 comment). Every named↔underlying conversion becomes identity, exactly as Go models it:
-<!-- illustration: not converter output -->
-```csharp
+(note: illustration: not converter output )
+(csharp)
 // type releaseConn is a methodless func type — rendered inline as its base delegate
 internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<ΔConn> Ꮡc, context.Context _) { … }
 internal static error queryDC(this ref DB db, …, Action<error> release, …) { … }
-```
+(end)
 Three exclusions keep the collapse sound — a type is left as a named delegate if any holds:
 - it **has methods** (its method set is meaningful — the `FirstClassFunctions`/`hashFunc` wrap case
   below still applies);
@@ -1131,12 +1205,21 @@ Because the collapse applies at both the declaration and every reference, and to
 consistency holds across packages. One position needed a companion fix: a variadic `...Option`
 element is package-class-qualified (`main_package.Option`) for a package-local named type, which
 would mangle a collapsed delegate to `main_package.Action` (CS0426) — `variadicElementType` now
-skips the qualifier when the element collapsed. <!-- cleared 13 of database/sql's 17 errors (the whole
-named-func family + the CS1929 it masked). --> Guarded by `MethodlessFuncType` (a function returning
+skips the qualifier when the element collapsed. (note: cleared 13 of database/sql's 17 errors (the whole
+named-func family + the CS1929 it masked). ) Guarded by `MethodlessFuncType` (a function returning
 the named type, one taking the anonymous underlying, a struct field, and a tuple-deconstruction
 seam across the two); regression-checked against the self-referential (`NamedFuncTypeStateMachine`,
 unchanged), nested-reference (`FirstClassFunctions`), and variadic-param (`PublicizedFuncTypeParam`)
 cases.
+
+-->
+
+**A defined func type exports its `[GoTypeAlias]` like any other type.** A collision-renamed
+`type Filter func(...)` beside a method `Filter` (go/ast's `Filter` and `(CommentMap).Filter`; the
+`ReservedTypeMethodCollision` shape) records `[assembly: GoTypeAlias("Filter", "ΔFilter")]`, and the consumer's
+`global using astꓸFilter = go.go.ast_package.ΔFilter;` names the declared delegate. (Guarded by the `CrossPkgUser`
+extension, a cross-package `CrossPkgLib.Sift` func type colliding with a `Sift` method, output vs Go.)
+<!-- HISTORY, before 2026-11-23, when a methodless func type declared nothing:
 
 **A collapsed methodless func type must NOT export a `[GoTypeAlias]`.** When such a type is *also*
 collision-renamed — `type Filter func(...)` alongside a method `Filter` (go/ast's `Filter` vs
@@ -1153,9 +1236,11 @@ collapse. (Guarded by the `CrossPkgUser` extension — a cross-package `CrossPkg
 func type colliding with a `Sift` method, named as a var type and rendered inline, output vs Go; and
 by `ReservedTypeMethodCollision` whose `[GoTypeAlias]` is now correctly absent.)
 
-When such a collapsed delegate's signature carries a parameter whose type lives in a **sub-package**
+-->
+
+When a structural delegate's signature carries a parameter whose type lives in a **sub-package**
 (an import path with a slash), the `Func<…>`/`Action<…>` rendering must qualify that type as the
-package **class**, not the namespace. The collapsed signature is produced from the Go signature's
+package **class**, not the namespace. The signature was produced from the Go signature's
 `t.String()`, which keeps the canonical import PATH inline — `func(*sync/atomic.Int32) int32`,
 `func(string, io/fs.DirEntry, error) error` (path/filepath's `WalkDirFunc`) — losing the file's import
 alias. `convertToCSFullTypeName` converted the whole slash-bearing string as one import path, dotting
@@ -1172,7 +1257,7 @@ set) is byte-identical — only the func-type-subpackage-param shape moves. (Gua
 collapsed delegate carries the `sync/atomic` sub-package parameter, output-compared vs Go; the same
 shape drives path/filepath's `WalkDir`/`Walk` referencing `io/fs.DirEntry`/`FileInfo`.)
 
-A collapsed func type's **parameter list must not be double-converted**. `convertToCSFullTypeName`'s
+A func signature's **parameter list must not be double-converted**. `convertToCSFullTypeName`'s
 `func(` handler split the parameter string with `extractTypes`, then re-ran `convertToCSTypeName` over each
 result — but `extractTypes` already renders a NAMED parameter in C# form (it strips the Go name and converts
 the type). Re-feeding an already-C# `map<@string, ж<Object>>` through the `map<` arm's `splitMapKeyValue`
@@ -1185,6 +1270,13 @@ converted once and stay so, just at the `extractTypes` site rather than the call
 `NamedFuncTypeMapParam` behavioral test — `type Importer func(imports map[string]*Node, path string) (pkg
 *Node, err error)` used as a function parameter, output-compared vs Go; every behavioral test re-converts unchanged,
 and an A/B reconvert of go/ast shows only that one collapsed-delegate parameter shape moving.)
+
+**An unnamed signature's delegate type renders through `iifeDelegateType`, never the string path.** Each element
+is named through `aliasedElementTypeName`, so a cross-package element keeps its file alias: `new Func<map<@string,
+ж<ast.Object>>, @string, (ж<ast.Object>, error)>(simpleImporter)`, never `go.ast.Object` (CS0234), and a
+multi-result signature's tuple carries no Go result names. A defined func type renders by its name.
+<!-- HISTORY: the paragraph below described the route for a COLLAPSED methodless named func type, which since
+2026-11-23 renders by its own name:
 
 **A collapsed methodless named func type's DELEGATE TYPE renders through `iifeDelegateType`, not the string
 path.** The double-conversion fix above kept the collapsed delegate on `convertToCSFullTypeName`'s `func(`
@@ -1214,6 +1306,8 @@ extension — a package-level `simpleResolve` passed as a METHOD GROUP to `Cross
 renders `ж<CrossPkgLib.Node>` via the alias, output-compared vs Go. The single-segment producer compiles
 either way, so the byte-golden — unnamed vs Go-named result tuple — is what guards the routing; the exact
 slash-bearing CS0234/CS0123 needs a multi-segment producer like go/ast, verified by the go/doc source A/B.)
+
+-->
 
 A companion root cleared path/filepath fully: a **cross-package type ALIAS whose target lives in yet
 another package** — `os.FileInfo = fs.FileInfo` (os/types.go, target in `io/fs`) — is emitted as an
@@ -1283,8 +1377,15 @@ exactly. That fixed the variadic func type as a type-ASSERTION target as a rider
 `.(func(string, ...any))` (net/http transport.go's `tLogKey` logger) previously emitted the
 unparseable `._<Action<@string, .any>>(ᐧ)` and now renders `._<Actionꓸꓸꓸ<@string, any>>(ᐧ)`.
 (Guarded by the `FuncFieldNestedTupleParam` behavioral test — builtin-typed struct fields with
-nested-func-returning-tuple params in both the anonymous and named-collapse forms plus a
+nested-func-returning-tuple params in both the anonymous and the defined forms plus a
 named-tuple-result sibling, all invoked at runtime vs Go.)
+
+A **type ASSERTION** to a defined func type asserts its own delegate: `ci.(Compressor)` with
+`type Compressor func(io.Writer) (io.WriteCloser, error)` (archive/zip's registries) renders `ci._<Compressor>()`,
+and holds only for a `Compressor`, as in Go. An unnamed func-type target renders through `getCSharpTypeName`
+(the variadic note in the next paragraph). (Guarded by the `MethodlessFuncTypeAssert` behavioral test,
+`i.(Compressor)` on a matching and a non-matching dynamic type, output-compared vs Go.)
+<!-- HISTORY, before 2026-11-23:
 
 A **type ASSERTION** whose target is a methodless func type must assert against the **collapsed
 delegate**, not the (never-emitted) name. `ci.(Compressor)` where
@@ -1297,6 +1398,14 @@ emitted (a collapsed delegate). Other assertion targets are unchanged. (Guarded 
 `MethodlessFuncTypeAssert` behavioral test — `i.(Compressor)` on a matching and a non-matching dynamic
 type, output-compared vs Go; every behavioral test re-converts unchanged, and re-converting archive/zip before and after shows only the two intended
 `_<Compressor>`/`_<Decompressor>` → `_<Func<…>>` lines.)
+
+-->
+
+An **UNINITIALIZED local `var` of an unnamed func type** renders its declared type through
+`getCSharpTypeName` → `iifeDelegateType`, whose `aliasedElementTypeName` keeps each element's `pkg.Type` alias;
+the string path mangled a slash-bearing cross-package element (go/parser's `var f func(*ast.CommentGroup,
+token.Token, int) ast.Spec` shape, CS0234). A local of a defined func type is declared with the type's name.
+<!-- HISTORY, before 2026-11-23, when go/parser's parseSpecFunction was a collapsed methodless func type:
 
 An **UNINITIALIZED local `var` of a methodless named func type** renders its declared type through the
 same structural path. `visitValueSpec`'s no-initializer branch computed the type from
@@ -1322,6 +1431,8 @@ unchanged. An A/B full-stdlib reconvert moves exactly one file (go/parser/parser
 Go. As with the delegate-routing sibling above, a single-segment/same-package producer compiles either way,
 so the unnamed-vs-Go-named result tuple is what guards the routing; the exact slash-bearing CS0234 needs a
 multi-segment producer like go/ast, verified by the go/parser source A/B.)
+
+-->
 
 ## Named delegate types wrap mismatched initializers
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
@@ -1352,15 +1463,13 @@ invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(h), 1, "
 ```
 
 Two argument shapes render named and take the wrap: a value whose **Go type** is a named func type
-(with methods), and a `:=` local **declared from a method group**, which the declaration emission
-types with the matching package named delegate (`HandlerFunc handler = Ꮡsc.Value.handler.ServeHTTP;`
+(with or without methods), and a `:=` local **declared from a method group**, which the declaration
+emission types with the matching package named delegate (`HandlerFunc handler = Ꮡsc.Value.handler.ServeHTTP;`
 — the bare-function-value `:=` rule above) even though go/types keeps it structural — the exact
-h2_bundle shape. A **methodless** named func type already *renders* as the structural delegate
-(`methodlessNamedFuncSignature` collapses it — same C# type), so it stays bare; method groups and
-func literals themselves convert natively. A generic structural parameter (unsubstituted type
+h2_bundle shape. Method groups and func literals themselves convert natively. A generic structural parameter (unsubstituted type
 params) also stays native. (Guarded by the `NamedDelegateStructuralParam` behavioral test —
-named-with-method and method-group-declared locals wrapped, methodless/method-group/func-literal
-controls bare, values vs Go.)
+named and method-group-declared locals wrapped, method-group and func-literal controls bare, values vs
+Go.)
 
 The same mirror applies to a **composite-literal FIELD** (met in sort's test-suite
 conversion): the composite walk previously wrapped only the named-field ← different-delegate
@@ -1381,13 +1490,10 @@ instance method cannot have null 'this'" when `x` is null. So the classifier dis
 
 - **A method group or func literal** keeps `new D(x)`. It is never null, and it has no delegate type of
   its own to compare.
-- **A value that already renders as the target delegate** passes unwrapped. A methodless named func
-  type renders as the structural delegate of its signature
-  ([A methodless named func type renders as its base delegate](#a-methodless-named-func-type-renders-as-its-base-delegate)),
-  so a value of the unnamed signature, or of another methodless named type with the identical
-  signature, is already the target's C# type. A type relater is the shape:
-  `core.IfElse(reportErrors, r.reportError, nil)` passed to an `ErrorReporter func(*Message, ...any)`
-  parameter is an `Actionꓸꓸꓸ<ж<Message>, any>` reaching an `Actionꓸꓸꓸ<ж<Message>, any>` parameter.
+- **A value that already renders as the target delegate** passes unwrapped: two unnamed signatures that
+  are identical render as one structural delegate. A defined func type is a delegate of its own
+  ([Every defined func type declares its own delegate](#every-defined-func-type-declares-its-own-delegate)), so
+  it never shares the target's C# type unless it IS the target type.
 - **Any other value** converts through golib's `NilSafeDelegateConversion<TTarget, TSource>`, the
   helper the explicit `T(x)` conversion already uses
   ([value-receiver-delegates.md](value-receiver-delegates.md)): null in, null out.
@@ -1437,30 +1543,32 @@ assigned from a named func and func literals, called loose/empty/spread — for 
 
 ## A variadic func type lowers to the golib `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` delegates
 
-A **variadic function TYPE used as a value** — a parameter, variable, struct field, or collapsed
-methodless named type such as go/types' `reportf func(format string, args ...interface{})` — used
+A **variadic function TYPE used as a value** — a parameter, variable or struct field such as go/types'
+`reportf func(format string, args ...interface{})` — used
 to have three mutually incompatible lowerings: the delegate type rendered `Action<@string,
 slice<any>>` (no `params` — the BCL `Action` cannot express one), a variadic func LITERAL emitted
 the named-function convention `(@string format, params ꓸꓸꓸany argsʗp) => …` (CS1661/CS1678
 against that `Action`), and calls through the value passed loose Go-style args as if `params`
 existed (`reportf("…"u8, (~f).typ)` — CS1503; `reportf("empty type set"u8)` — CS7036).
 
-The lowering targets a golib delegate family carrying a real C# 13 `params Span<T>` tail
+The lowering targets a golib delegate family carrying a real C# 13 `params variadic<T>` tail (golib's
+pack type; earlier releases used `params Span<T>`: see
+[Multi-Result Values](multi-result-and-comma-ok.md#multi-result-values-and-comma-ok-forms))
 (`src/core/golib/variadic.cs`; fixed-arity prefixes up to eight mirror the BCL Action/Func family,
 and the `ꓸꓸꓸ` suffix reads as Go's `...`):
 
 <!-- source: src/core/golib/variadic.cs:26, 53 -->
 ```csharp
-[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params variadic<TArg> args);
 …
-[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params variadic<TArg> args);
 ```
 
-`iifeDelegateType` — the single structural lowering every `getCSharpTypeName(*types.Signature)` and
-collapsed methodless named func type routes through — names the family when `sig.Variadic()` and
+`iifeDelegateType` — the single structural lowering every `getCSharpTypeName(*types.Signature)` routes
+through — names the family when `sig.Variadic()` and
 passes the variadic **element** type as the last type argument. Everything else then agrees with
 **zero changes** to the other emissions, because the parameter types match by identity
-(`ꓸꓸꓸT` *is* `Span<T>`):
+(`ꓸꓸꓸT` *is* `variadic<T>`):
 
 - the named-function convention (`internal static @string gather(@string prefix, params ꓸꓸꓸnint
   valsʗp)`) converts as a method group — `apply(gather)` stays bare;
@@ -1492,8 +1600,7 @@ the asserted type by converting the TYPE EXPRESSION through the string-based typ
 skips the variadic lowering above — net/http transport.go's
 `cw.(func(string, ...any))` emitted `._<Action<@string, .any>>(ᐧ)` with a literal `.any` (CS1001, the
 `...` mangled instead of lowered). An anonymous-signature assert target renders through
-`getCSharpTypeName` → `iifeDelegateType`, exactly like the collapsed methodless NAMED func target already
-did: `._<Actionꓸꓸꓸ<@string, any>>(ᐧ)`. Non-variadic signatures render identically on both paths, so the
+`getCSharpTypeName` → `iifeDelegateType`: `._<Actionꓸꓸꓸ<@string, any>>(ᐧ)`. Non-variadic signatures render identically on both paths, so the
 only full-stdlib delta is the transport.cs site. (Guarded by `VariadicFuncTypeAssert` — a positive
 variadic assert invoked through the asserted value, a negative assert on a non-func value, and a
 non-variadic anonymous func assert, output-compared vs Go.)
@@ -1533,7 +1640,7 @@ value was then an arity error — `errorf("…", n)` CS1503 on a bare `n` agains
 `errorf("…", a, b)` CS1593 "does not take 3 arguments", `errorf("…")` CS7036 — which is the same
 family the lambda's explicit parameters were introduced to fix, one level in. The tail renders
 through `variadicParamType`, the same routine the named-function convention uses (a file-local
-`using ꓸꓸꓸT = Span<…>;` alias where one is mintable, inline `Span<T>` otherwise), so the forwarded
+`using ꓸꓸꓸT = variadic<…>;` alias where one is mintable, inline `variadic<T>` otherwise), so the forwarded
 argument binds the receiving `params ꓸꓸꓸany` parameter directly and the call inside the lambda is
 unchanged.
 
@@ -1561,9 +1668,9 @@ never reaches it.
 
 ## `reflect.Value.Call` over a variadic func value is TYPED dispatch — no reflective invoke can carry the tail
 
-The `params Span<T>` tail above is what makes a converted variadic callable and readable from Go
+The `params variadic<T>` tail above is what makes a converted variadic callable and readable from Go
 AND from C#. It also puts the value permanently out of reach of every reflective invoke path:
-`Span<T>` is a **ref struct**, and `Delegate.DynamicInvoke` and `MethodInfo.Invoke` both marshal
+`variadic<T>`, like the `Span<T>` it replaced, is a **ref struct**, and `Delegate.DynamicInvoke` and `MethodInfo.Invoke` both marshal
 their arguments through an `object?[]` a ref struct cannot enter. `System.Linq.Expressions`
 refuses one outright as well, so the method-value binder's `Expression.Lambda` approach
 (GoReflect.MethodSets.cs) does not generalize either. `reflect.Value.Call` therefore threw
@@ -1575,14 +1682,19 @@ One small generic trampoline per family arity — eighteen, the closed set golib
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
 an ordinary delegate, the `MakeGenericMethod` + `CreateDelegate` idiom GoReflect.FieldAccess.cs already uses:
 
-<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1927-1928 -->
+<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1955-1956 -->
 ```csharp
-private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
-{ return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }
+private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, object? t)
+{ return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, variadicTail<TArg>(t)); }
 ```
 
-Inside the trampoline the tail is a `TArg[]` and its conversion to `Span<TArg>` is ordinary, so
-nothing is boxed and the tail ALIASES the array rather than copying it. Two consequences worth
+Inside the trampoline the tail is a slice and `variadicTail` hands it over as a SPREAD pack, so
+nothing is boxed and the callee receives the slice itself rather than a copy, as a Go `f(s...)`
+does. `Value.Call` packs its loose arguments into a fresh array first (Go builds a new slice for them
+too); `Value.CallSlice` passes the caller's own slice through `GoReflect.InvokeVariadicSlice`, so a
+callee's element writes reach the caller's backing array, as Go's `CallSlice` does.
+<!-- variadicTail: src/core/golib/GoReflect.TypeLayout.cs:1915-1923#1a17bc (a slice<TArg>, a named ISlice<TArg>, a TArg[] or null);
+     InvokeVariadicSlice: GoReflect.TypeLayout.cs:1823#e355fe. Wall E, COORD 2026-11-20T12:12:30Z. --> Two consequences worth
 stating: a panic inside the callee propagates natively (a direct call wraps nothing in a
 `TargetInvocationException`, unlike the fixed-arity `DynamicInvoke` path beside it), and a fixed
 prefix beyond the family's eight throws a named `NotImplementedException` rather than mis-indexing.
@@ -1639,7 +1751,7 @@ a typed Go func (`t.DNSStart(info)`), through `Value.Call`, and through composit
 
 The returned Value rides `typ`'s **own** descriptor box rather than a fresh `synthType`, so the
 dims cargo survives and `Type()` interns back to the caller's wrapper: `MakeFunc(t, fn).Type() == t`
-by identity. A VARIADIC func type's tail is `params Span<T>`, a byref-like type no expression tree can
+by identity. A VARIADIC func type's tail is `params variadic<T>`, a byref-like type no expression tree can
 carry, so `MakeGoFuncDelegate` builds it through a typed family (`makeVariadicFunc{N}`/`makeVariadicAction{N}`,
 golib's `GoReflect.MakeVariadicDelegate.cs`), the reverse of `InvokeVariadic`'s call trampolines above; the
 invoker receives the variadic parameter as its packed slice.

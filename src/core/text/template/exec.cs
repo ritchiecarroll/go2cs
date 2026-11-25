@@ -14,7 +14,7 @@ using parse = go.text.template.parse_package;
 using @internal;
 using go.text.template;
 using iter = iter_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class template_package {
 
@@ -137,7 +137,7 @@ internal static error Unwrap⁔(/*this*/ ExecError e) {
 
 // errorf records an ExecError and terminates processing.
 internal static void errorf⁔(/*this*/ ref state s, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     @string name = doublePercent(s.tmpl.Name());
     if (s.node == nil) {

@@ -94,8 +94,73 @@ public class ThreadStateCensusTests
         ("sync/runtime_impl.cs|t_procId", Disposition.Registered, "t_procId = 0;", "sync.Pool's shard id for this goroutine"),
         ("sync/runtime_impl.cs|t_procIdAssigned", Disposition.Registered, "t_procIdAssigned = false;", "sync.Pool's shard id for this goroutine"),
         ("testing/TestExecution.cs|s_current", Disposition.FlowsWithContext, "AsyncLocal<TestExecution?> s_current", "the test a goroutine belongs to, inherited from its creator"),
-        ("time/time_impl.cs|t_sleepTimer", Disposition.KeptThreadResource, "private static sleepTimer? t_sleepTimer;", "this thread's sleep timer (a GoTimer and the event its firing sets), Go's gp.timer kept per thread: a sleep resets the event, re-arms the timer and returns only once its own deadline has passed, so a firing left by an earlier sleep cannot end the next one early"),
+        ("time/time_impl.cs|t_sleepTimer", Disposition.KeptThreadResource, "private static sleepTimer? t_sleepTimer;", "this thread's sleep timer (a GoTimer and the event its firing sets), Go's gp.timer kept per thread: a sleep resets the event, re-arms the timer and returns only once its own deadline has passed, so a firing left by an earlier sleep cannot end the next one early. It also stays with the carrier under M:N: only the blocking Sleep path uses it, a goroutine blocked there stays mounted, and Sleepꞏtwin makes its own (P3's read of N10)"),
     ];
+
+    // How a goroutine-scoped slot meets a MULTIPLEXED goroutine (M:N), which parks on one carrier and resumes on another.
+    private enum Mount
+    {
+        /// <summary>Moved with the goroutine at Mount and Unmount; the proof is the swap's own line.</summary>
+        Swapped,
+
+        /// <summary>Written and read with no park between them, or tied to the carrier as Go ties it to the P; the proof is that reason.</summary>
+        StepLocal
+    }
+
+    // N10 (M:N row 11; P3's read): every goroutine-scoped census row -- GolibReset or Registered -- names how it moves with a
+    // multiplexed goroutine, so a future [ThreadStatic] with a Register reset cannot silently miss the swap and let a
+    // goroutine resumed on another carrier read that carrier's value. A Swapped row's proof is a line in ProofFile.
+    private static readonly (string Key, Mount Mount, string ProofFile, string Proof)[] MountCensus =
+    [
+        ("golib/AllocationCounter.cs|t_count", Mount.Swapped, "golib/AllocationCounter.cs", "internal static void SwapMounted(ref long saved) => (saved, t_count) = (t_count, saved);"),
+        ("golib/builtin.cs|s_fallthrough", Mount.StepLocal, "", "a switch fallthrough flag set and consumed within one statement, with no park between"),
+        ("golib/channel.cs|t_frames", Mount.Swapped, "golib/channel.cs", "internal static void SwapMounted(ref object? saved)"),
+        ("golib/GoThreadState.cs|t_current", Mount.Swapped, "golib/GoThreadState.cs", "internal static void SwapMounted(ref GoThreadState? saved) => (saved, t_current) = (t_current, saved);"),
+        ("golib/GoFrame.cs|t_splicesRefused", Mount.Swapped, "golib/GoFrame.Mounted.cs", "internal static void SwapMounted(ref long activation, ref object? token, ref bool refused)"),
+        ("golib/PanicException.cs|t_lastAdopted", Mount.Swapped, "golib/PanicException.cs", "internal static void SwapMounted(ref PanicException? saved) => (saved, t_lastAdopted) = (t_lastAdopted, saved);"),
+        ("golib/GoexitException.cs|t_started", Mount.Swapped, "golib/GoexitException.cs", "internal static void SwapMounted(ref bool saved) => (saved, t_started) = (t_started, saved);"),
+        ("golib/runtime/GoschedBackoff.cs|t_consecutiveInertYields", Mount.Swapped, "golib/runtime/GoschedBackoff.cs", "internal static void SwapMounted(ref int saved) => (saved, t_consecutiveInertYields) = (t_consecutiveInertYields, saved);"),
+        ("golib/runtime/Goroutine.cs|t_escaped", Mount.StepLocal, "", "two passes of one unwind on one thread (the escape, then the crash report that names it), which no park separates"),
+        ("golib/runtime/Goroutine.cs|t_escapedFrom", Mount.StepLocal, "", "the goroutine t_escaped escaped from: the same unwind, on the same thread"),
+        ("runtime/stubs_impl.cs|t_getg", Mount.Swapped, "runtime/stubs_impl.cs", "private static readonly bool s_getgMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>"),
+        ("runtime/stubs_impl.cs|t_getgOwner", Mount.Swapped, "runtime/stubs_impl.cs", "private static readonly bool s_getgMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>"),
+        ("golib/GoMemProfile.cs|t_recording", Mount.StepLocal, "", "a re-entrancy guard set and cleared around one memory-profile sample, which does not span a park"),
+        ("runtime/cpusampler_impl.cs|t_cpuSamplerDraining", Mount.StepLocal, "", "a re-entrancy guard set and cleared inside one CPU sampler Stop drain, which does not span a park"),
+        ("runtime/debug/stubs_impl.cs|t_panicOnFault", Mount.Swapped, "runtime/debug/stubs_impl.cs", "private static readonly bool s_panicOnFaultMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>"),
+        ("runtime/lock_managed_impl.cs|t_heldLocks", Mount.Swapped, "runtime/lock_managed_impl.cs", "private static readonly bool s_heldLocksMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>"),
+        ("runtime/lock_managed_impl.cs|t_heldCount", Mount.Swapped, "runtime/lock_managed_impl.cs", "private static readonly bool s_heldLocksMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>"),
+        ("runtime/lock_managed_impl.cs|t_runtimeLockProfilePending", Mount.Swapped, "runtime/lock_managed_impl.cs", "private static readonly bool s_heldLocksMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>"),
+        ("sync/runtime_impl.cs|t_procId", Mount.StepLocal, "", "sync.Pool's shard id: thread-affine by its own comment, and a carrier is the nearer thing to Go's P, whose shard Go uses"),
+        ("sync/runtime_impl.cs|t_procIdAssigned", Mount.StepLocal, "", "whether t_procId is assigned: tied to the carrier with it"),
+    ];
+
+    [TestMethod]
+    public void EveryGoroutineScopedRow_NamesHowItMovesWithAMultiplexedGoroutine()
+    {
+        string root = CoreRoot();
+
+        if (!Directory.Exists(Path.Combine(root, "golib")))
+            Assert.Inconclusive($"source not found at {root}; this guard reads the tree it was built from");
+
+        string[] scoped = Census.Where(static e => e.Disposition is Disposition.GolibReset or Disposition.Registered).Select(static e => e.Key).ToArray();
+        string[] named = MountCensus.Select(static e => e.Key).ToArray();
+        string[] unnamed = scoped.Except(named).ToArray();
+        string[] stale = named.Except(scoped).ToArray();
+
+        Assert.AreEqual(0, unnamed.Length,
+            "a goroutine-scoped thread-static names no M:N disposition: move it with a GoroutineThreadState.RegisterMounted swap (or golib's " +
+            "Goroutine.SwapLogicalState) and list it Swapped, or list it StepLocal with the reason no park separates its write from its read:\n  " +
+            string.Join("\n  ", unnamed));
+        Assert.AreEqual(0, stale.Length, "an M:N disposition names a row that is not goroutine-scoped in the census:\n  " + string.Join("\n  ", stale));
+
+        foreach ((string key, Mount mount, string proofFile, string proof) in MountCensus)
+        {
+            if (mount == Mount.Swapped)
+                Assert.IsTrue(File.ReadAllText(Path.Combine(root, proofFile)).Contains(proof, StringComparison.Ordinal), $"{key}: its swap is gone from {proofFile}: {proof}");
+            else
+                Assert.IsFalse(string.IsNullOrWhiteSpace(proof), $"{key}: a StepLocal row states its reason");
+        }
+    }
 
     private static string CoreRoot([CallerFilePath] string thisFile = "") =>
         Path.GetFullPath(Path.Combine(Path.GetDirectoryName(thisFile)!, "..", "..", "core"));

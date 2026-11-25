@@ -89,8 +89,8 @@ using static global::go.go.@internal.gccgoimporter_package;
 using constant = global::go.go.constant_package;
 using io = global::go.io_package;
 using types = global::go.go.types_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 [GoPackage("gccgoimporter")]
 public static partial class gccgoimporter_package
@@ -162,7 +162,7 @@ public static partial class gccgoimporter_package
 partial class gccgoimporterᴛGccgoInstallation {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) => gccgoimporter_package.InitFromDriver⁔(ref inst, gccgoPath, argsʗp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) => gccgoimporter_package.SearchPaths⁔(ref inst);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) => gccgoimporter_package.GetImporter⁔(ref inst, incpaths, initmap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Importer GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) => gccgoimporter_package.GetImporter⁔(ref inst, incpaths, initmap);
 }
 partial class gccgoimporterᴛimportError {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this importError e) => gccgoimporter_package.Error⁔(e);

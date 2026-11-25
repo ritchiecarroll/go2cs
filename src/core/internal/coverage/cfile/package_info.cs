@@ -149,7 +149,7 @@ partial class cfileᴛemitState {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) => cfile_package.openOutputFiles⁔(ref s, metaHash, metaLen, which);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) => cfile_package.emitMetaDataFile⁔(ref s, finalHash, tlen);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool needMetaDataFile(this ref emitState s) => cfile_package.needMetaDataFile⁔(ref s);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) => cfile_package.VisitFuncs⁔(ref s, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error VisitFuncs(this ref emitState s, encodecounter.CounterVisitorFn f) => cfile_package.VisitFuncs⁔(ref s, f);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) => cfile_package.emitCounterDataFile⁔(Ꮡs, finalHash, w);
 }
 partial class cfileᴛtstate {

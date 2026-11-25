@@ -60,10 +60,10 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("forms.go", "forms.cs", "ABUolpaigpSUgoKUgpSClIKUgpSUlMS2lKaUgoI=")]
+[assembly: GoPositionMap("forms.go", "forms.cs", "ABUolpaigpSUgoKUgpSClIKUgpSUlMS2lKbcgoKC7oKCgqaCgpSCgpSCgg==")]
 [assembly: GoPositionMap("main.go", "main.cs", "AA4clNiUgoKmlIKCpoKUpKaCpqiClLSm7JSaAAYQxIKCgoKCgoKCgpSClJSCloKCopSCgg==", "", "103=main.Box.Scale")]
-[assembly: GoPositionMap("others.go", "others.cs", "AAscgoKUgpaU2pSUlIKClIKClA==")]
-[assembly: GoPositionMap("shadow.go", "shadow.cs", "AAoSgoKolpSCgg==")]
+[assembly: GoPositionMap("others.go", "others.cs", "AAscgoKUgpaU2pSUmIKCpoKClIKClII=")]
+[assembly: GoPositionMap("shadow.go", "shadow.cs", "AAoSgoKolpaUgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -82,6 +82,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial struct gauge {}
+    internal partial struct math {}
     internal partial struct meter {}
     internal partial struct words {}
     public partial struct Box {}
@@ -90,6 +91,7 @@ public static partial class main_package
     public partial struct Pair<T> {}
     public partial struct Seal {}
     public partial struct Shelf {}
+    public partial struct SliceBuilder {}
     public partial struct Tag {}
     // </TypeAccessibility>
 
@@ -101,7 +103,7 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(global::go.math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     // </ImportInitializers>
 }
@@ -117,6 +119,8 @@ public static partial class main_package
 [GoMethodHost(typeof(main_package.Chest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛChest;
 [GoMethodHost(typeof(main_package.Pair<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛPair;
 [GoMethodHost(typeof(main_package.Shelf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛShelf;
+[GoMethodHost(typeof(main_package.SliceBuilder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛSliceBuilder;
+[GoMethodHost(typeof(main_package.math)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛmath;
 [GoMethodHost(typeof(main_package.meter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛmeter;
 [GoMethodHost(typeof(main_package.words)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛwords;
 // </MethodHolders>
@@ -146,6 +150,12 @@ partial class mainᴛPair {
 }
 partial class mainᴛShelf {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this Shelf s) => main_package.Limit⁔(s);
+}
+partial class mainᴛSliceBuilder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this ref main_package.SliceBuilder s) => main_package.Limit⁔(ref s);
+}
+partial class mainᴛmath {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Limit(this ref main_package.math m) => main_package.Limit⁔(ref m);
 }
 partial class mainᴛmeter {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Limit(this meter m) => main_package.Limit⁔(m);

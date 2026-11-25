@@ -141,6 +141,27 @@ public static class Common
         return simpleName == "Value" ? NamedWrapperValue : "Value";
     }
 
+    /// <summary>
+    /// Gets the name a named POINTER wrapper declares one of its own members under (PointerTypeTemplate.ClaimableMembers
+    /// and Value): the member itself, or, when the wrapper's own type is named like it (CS0542; R7), <see
+    /// cref="WrapperValueMember"/>'s name for <c>Value</c> and <c>Δ</c> + the member for the rest.
+    /// </summary>
+    /// <remarks>
+    /// Go declares no method on a named pointer type (an invalid receiver), so its NAME is the only claim. Every reader
+    /// of such a member by name spells it through this rule: the pointer template, InheritedTypeTemplate's nil members,
+    /// the converter's dereference, address and typed-nil sites (<c>pointerWrapperMember</c> in typeNameResolution.go)
+    /// and golib's NilInstance probe.
+    /// </remarks>
+    public static string PointerWrapperMember(string typeName, string member)
+    {
+        if (member == "Value")
+            return WrapperValueMember(typeName);
+
+        string simpleName = StripGenericTypeArguments(typeName);
+        simpleName = simpleName[(simpleName.LastIndexOf('.') + 1)..].TrimStart('@');
+        return simpleName == member ? $"Δ{member}" : member;
+    }
+
     public static string GetSimpleName(string typeName, bool dropGeneric = false, bool dropCollisionPrefix = false)
     {
         // Check if type name is a pointer, i.e., ж<T>. Match the prefix as `ж<` specifically — a bare
@@ -828,6 +849,61 @@ public static class Common
         return $"@{typeName}";
     }
 
+    // The [GoName] stamp the converter writes on a declaration whose Go name starts with the Δ rename marker
+    // (golib's GoNameAttribute): the Go name, or null where the declaration carries none.
+    public static string? GetGoNameStamp(ISymbol symbol) =>
+        symbol.GetAttributes().FirstOrDefault(attribute => attribute.AttributeClass?.Name == "GoNameAttribute")?.ConstructorArguments is [{ Value: string name }]
+            ? name
+            : null;
+
+    // A stamp that names a Go name starting with Δ: the declaration's C# name is that Go name. A stamp the
+    // converter wrote for a rename that adds more than one marker (ΔΔfile, Δsliceᴛ) names the Go name and not the
+    // C# one, so a site looking for the C# name of a member reads this.
+    public static string? GetDeltaLedGoName(ISymbol symbol) =>
+        GetGoNameStamp(symbol) is { } name && name.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? name : null;
+
+    // The same stamp read from a declaration's attribute lists, as SPELLED in the emission (a generator cannot bind
+    // another generator's output): `[GoName("Δt")]`.
+    public static string? GetGoNameStamp(SyntaxList<AttributeListSyntax> attributeLists)
+    {
+        foreach (AttributeSyntax attribute in attributeLists.SelectMany(list => list.Attributes))
+        {
+            if (attribute.Name.ToString().Split('.').Last() is not ("GoName" or "GoNameAttribute"))
+                continue;
+
+            if (attribute.ArgumentList is { Arguments.Count: 1 } arguments && arguments.Arguments[0].Expression is LiteralExpressionSyntax { Token.Value: string name })
+                return name;
+        }
+
+        return null;
+    }
+
+    // The Go name of an emitted member, as golib projects it (GoNameAttribute.GoNameOf): its [GoName] stamp, else
+    // the emitted name with one leading Δ rename marker removed.
+    public static string GoNameOf(ISymbol symbol)
+    {
+        string name = symbol.Name;
+
+        if (!name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))
+            return name;
+
+        return GetGoNameStamp(symbol) ?? (name.Length > ShadowVarMarker.Length ? name[ShadowVarMarker.Length..] : name);
+    }
+
+    // The scope Go's export rule gives a Go name: a name that starts with Δ is exported (Δ is an upper-case
+    // letter), so a stamped Go name is read as written; any other name goes through GetScope.
+    public static string GetGoScope(string goName) =>
+        goName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? "public" : GetScope(goName);
+
+    // The scope of an emitted declaration: its [GoName] stamp's Go name where it carries one (Δfoo is exported in Go,
+    // though GetScope, dropping the Δ, reads the lower-case f), else the export rule over the emitted name.
+    public static string GetStampedScope(string? goName, string emittedName) =>
+        goName is { } name ? GetGoScope(name) : GetScope(emittedName);
+
+    // The same, reading the stamp from the symbol.
+    public static string GetStampedScope(ISymbol symbol) =>
+        GetStampedScope(GetGoNameStamp(symbol), symbol.Name);
+
     public static string GetScope(string identifier)
     {
         // The collision marker is an EMISSION artifact, not part of the Go identifier, so it comes
@@ -988,7 +1064,7 @@ public static class Common
     {
         Accessibility.Public => true,
         Accessibility.Internal or Accessibility.ProtectedOrInternal => false,
-        _ => GetScope(simpleName) == "public"
+        _ => GetStampedScope(GetGoNameStamp(type), simpleName) == "public"
     };
 
     // Returns the explicit C# access modifier on a member declaration (e.g. the converter-emitted

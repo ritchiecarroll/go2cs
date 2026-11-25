@@ -1,12 +1,12 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
 internal static @string escaper(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return fmt.Sprint(args.ꓸꓸꓸ);
 }
@@ -16,7 +16,7 @@ private static readonly object plainˢ = (@string)"plain"u8;
 
 internal static void main() {
     Actionꓸꓸꓸ<@string, any> fn = [GoFunc("main.func1")] (@string format, params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
     };
     any logf = (((Actionꓸꓸꓸ<@string, any>)(fn))).OrTypedNilFunc();
@@ -40,7 +40,7 @@ internal static void main() {
     }
 
     any direct = ((Funcꓸꓸꓸ<any, @string>)([GoFunc("main.func3")] @string (params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         return fmt.Sprint(args.ꓸꓸꓸ);
     }));
     {

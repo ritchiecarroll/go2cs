@@ -650,7 +650,7 @@ namespace go.golib;
 
     /// <summary>
     /// Go's <c>*p</c> for <c>p</c> a <c>**C.T</c>, the load go2cs emits on the cgo route (cgo Phase 3, increment 3.2,
-    /// seat 1c: docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.11).
+    /// part 1c: docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.11).
     /// </summary>
     /// <remarks>
     /// A native box (<c>&amp;l.next</c> over a C struct in C memory, at the field's Go offset) names a WORD, which the
@@ -686,7 +686,7 @@ namespace go.golib;
     }
 
     // A nil p (IsNilPointer: the box itself, never a box that holds nil) is Go's nil dereference. A field view over a native source (no known Go offset; ж.cs's nativeFieldView kept
-    // the view) is refused before any read or write: its CLR slot is not where the field's bytes are (18.11 [P3 M1]).
+    // the view) is refused before any read or write: its CLR slot is not where the field's bytes are (18.11, review item M1).
     private static void RequireManagedSlot<U>(ж<ж<U>>? p)
     {
         if (p is null || p.IsNilPointer)

@@ -8,7 +8,7 @@ partial struct myMap /*map[@string, nint]*/;
 
 partial struct mySlice /*[]nint*/;
 
-// type myFunc is a methodless func type — rendered inline as its base delegate
+internal delegate @string myFunc(nint _);
 
 partial struct withSlice {
     public nint A;
@@ -120,7 +120,7 @@ internal static void main() {
         _ = AreEqual(nslʗ1, nslʗ1);
     });
 
-    any nf = new Func<nint, @string>([GoFunc("main.func7")] (nint _Δp0) => "");
+    any nf = new myFunc([GoFunc("main.func7")] (nint _Δp0) => "");
     var nfʗ1 = nf;
     checkPanicOnly("named func", [GoFunc("main.func8")] () => {
         _ = AreEqual(nfʗ1, nfʗ1);

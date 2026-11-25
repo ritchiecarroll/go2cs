@@ -80,6 +80,26 @@ internal static uintptr plainLocalStruct() {
     return sizes.size;
 }
 
+partial struct @file {
+    internal nint size;
+}
+
+internal static nint Size(this @file f) { return f.size * 2; }
+
+partial struct Δextension {
+    internal nint n;
+}
+
+internal static Δextension pass<Δextension>(Δextension v) { return v; }
+
+partial struct Δclosed /*num:nint*/;
+
+partial struct Δunion {
+    internal nint a, b;
+}
+
+internal static Δsafe keep<Δsafe>(Δsafe v) { return v; }
+
 internal static sizer std = new @fixed(n: 3);
 
 internal static void main() {
@@ -108,6 +128,10 @@ internal static void main() {
     fmt.Println(keywordLocalIface());
     fmt.Println(keywordLocalRef());
     fmt.Println(plainLocalStruct());
+
+    fmt.Println(new @file(size: 21).Size());
+    fmt.Println(new Δextension(n: 5).n, pass<nint>(42));
+    fmt.Println((Δclosed)6, new Δunion(a: 3, b: 4).a + new Δunion(a: 3, b: 4).b, keep((@string)"s"));
 }
 
 } // end main_package

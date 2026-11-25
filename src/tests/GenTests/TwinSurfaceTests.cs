@@ -334,7 +334,9 @@ public class TwinSurfaceTests
     [TestMethod]
     public void F10_EveryTwinSwitchTheGeneratorReadsIsRefusedOrNamedAsAdmitted()
     {
-        string[] admitted = ["GoTwins", "GoTwinsArm", "GoTwinsSiblings", "GoTwinsTiming"];
+        // N1's two lists (DESIGN-mn-nopark.md 3.1) are admitted: they change which calls park, never the twin set's
+        // population (R1), so O2 does not refuse them (ParkCutTests N1-6).
+        string[] admitted = ["GoTwins", "GoTwinsArm", "GoTwinsSiblings", "GoTwinsTiming", "GoTwinsWeak", "GoTwinsCut"];
         string root = GeneratorRoot();
         string[] read = System.IO.Directory.GetFiles(root, "*.cs", System.IO.SearchOption.AllDirectories)
             .Where(path => !path.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}") &&
@@ -559,6 +561,29 @@ public class TwinSurfaceTests
         StringAssert.Contains(twins, "interface IWorkꞏtwin", "the hidden twin interface");
         StringAssert.Contains(twins, "IWorkꞏtwin.Waitꞏtwin()", "Worker forwards its parking slot to Wait's twin");
         Assert.AreEqual(0, errors.Length, Errors(errors));
+    }
+
+    // M:N row 3, P3's SHOULD: the implementer's slot FORWARDER (`IWorkꞏtwin.Waitꞏtwin() => work_package.Waitꞏtwin(this)`) is
+    // a real frame between a twin's Go caller and the method, the third of the class TwinIfaceUnmarkTests guards (the
+    // hidden interface's call helper and slot body). It carries go2cs-gen's [GeneratedCode], which the Go traceback skips.
+    [TestMethod]
+    public void S_AnImplementersSlotForwarderIsNoGoFrame()
+    {
+        Microsoft.CodeAnalysis.CSharp.CSharpParseOptions options = new(Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp13);
+        Microsoft.CodeAnalysis.CSharp.CSharpCompilation compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create("twinwork",
+            [Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(ImplementerSource, options, path: @"C:\twinwork\main.cs")], References(),
+            new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        Microsoft.CodeAnalysis.CSharp.CSharpGeneratorDriver.Create(
+                [new go2cs.ImplementGenerator(), new go2cs.RecvGenerator(), new go2cs.FieldAccessGenerator(), new go2cs.TypeGenerator(), new go2cs.TwinGenerator()],
+                parseOptions: options, optionsProvider: new BuildProperties(new() { ["build_property.GoTwins"] = "true" }))
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        string[] lines = string.Join("\n", output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString())).Replace("\r\n", "\n").Split('\n');
+        int[] forwarders = Enumerable.Range(1, lines.Length - 1).Where(i => lines[i].Contains("IWorkꞏtwin.Waitꞏtwin(", StringComparison.Ordinal) && lines[i].Contains("=>", StringComparison.Ordinal)).ToArray();
+
+        Assert.AreEqual(1, forwarders.Length, "the row must read exactly Worker's one slot forwarder");
+        StringAssert.Contains(lines[forwarders[0] - 1], "GeneratedCode(\"go2cs-gen\"", $"the slot forwarder is a Go frame: {lines[forwarders[0]].Trim()}");
     }
 
     private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));

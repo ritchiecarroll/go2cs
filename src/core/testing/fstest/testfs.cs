@@ -18,8 +18,8 @@ using go.io;
 using go.testing;
 using iter = iter_package;
 using time = time_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class fstest_package {
 
@@ -43,7 +43,7 @@ partial class fstest_package {
 //		t.Fatal(err)
 //	}
 public static error TestFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
-    var expected = expectedʗp.sslice();
+    var expected = expectedʗp.slice();
     var subExpectedᴷ = new stackAppend<@string>();
 
     {
@@ -116,7 +116,7 @@ partial struct fsTester {
 
 // errorf adds an error to the list of errors.
 internal static void errorf⁔(/*this*/ ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     t.errors = append(t.errors, fmt.Errorf(format, args.ꓸꓸꓸ));
 }
