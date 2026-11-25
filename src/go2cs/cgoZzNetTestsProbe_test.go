@@ -61,6 +61,10 @@ func TestZzCgoNetTestsProbe(t *testing.T) {
 		t.Fatalf("seed fieldAccessCollisions.txt: %v\n%s", err, out)
 	}
 
+	if err := os.WriteFile(filepath.Join(scratch, cgoScratchRootMarker), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
 	input := filepath.Join(strings.TrimSpace(string(goRoot)), "src", "net")
 	output := filepath.Join(scratch, "core", "net")
 	args := []string{"-go2cspath", scratch, "-cgo", "-tests", "-test-action", "all", "-test-timeout", "20m",
