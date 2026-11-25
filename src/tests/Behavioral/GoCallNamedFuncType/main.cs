@@ -41,20 +41,20 @@ internal static partial void main() {
     fmt.Println(ᐸꟷ(@out));
 
     var f1ʗ1 = f1;
-    goǃ(NilSafeDelegateConversion<Action<nint>, one>(f1ʗ1), (nint)1);
+    goǃ(builtin.NilSafeDelegateConversion<Action<nint>, one>(f1ʗ1), (nint)1);
     fmt.Println(ᐸꟷ(@out));
 
     var f2ʗ1 = f2;
-    goǃ(NilSafeDelegateConversion<Action<nint, @string>, two>(f2ʗ1), (nint)2, (@string)"b");
+    goǃ(builtin.NilSafeDelegateConversion<Action<nint, @string>, two>(f2ʗ1), (nint)2, (@string)"b");
     fmt.Println(ᐸꟷ(@out));
 
     var fvʗ1 = fv;
-    goǃ(NilSafeDelegateConversion<Func<nint, nint>, valued>(fvʗ1), (nint)3);
+    goǃ(builtin.NilSafeDelegateConversion<Func<nint, nint>, valued>(fvʗ1), (nint)3);
     fmt.Println(ᐸꟷ(@out));
 
     nint n = 4;
     var f1ʗ2 = f1;
-    goǃ(NilSafeDelegateConversion<Action<nint>, one>(f1ʗ2), n);
+    goǃ(builtin.NilSafeDelegateConversion<Action<nint>, one>(f1ʗ2), n);
     n = 40;
     fmt.Println(ᐸꟷ(@out), n);
 
@@ -67,7 +67,7 @@ internal static partial void main() {
         close(doneʗ1);
     });
     var cancelʗ1 = cancel;
-    goǃ(NilSafeDelegateConversion<Action<error>, context.CancelCauseFunc>(cancelʗ1), errors.New("stopped"));
+    goǃ(builtin.NilSafeDelegateConversion<Action<error>, context.CancelCauseFunc>(cancelʗ1), errors.New("stopped"));
     ᐸꟷ(done);
     fmt.Println("cause:", context.Cause(ctx));
 
@@ -83,7 +83,7 @@ internal static partial void main() {
             var f2ʗ3 = f2ʗ2;
             defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func6.2")] () => {
                 var f2ʗ4 = f2ʗ3;
-                goǃ(NilSafeDelegateConversion<Action<nint, @string>, two>(f2ʗ4), (nint)5, (@string)"e");
+                goǃ(builtin.NilSafeDelegateConversion<Action<nint, @string>, two>(f2ʗ4), (nint)5, (@string)"e");
             }, ref ᒐ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
