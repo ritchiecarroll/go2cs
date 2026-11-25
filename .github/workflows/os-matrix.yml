@@ -2923,14 +2923,22 @@ jobs:
           # read 0, or it fails by name. Under ;twins=1 the SHARD must read above 0 in total: a row whose whole closure holds no
           # code that can park reads 0 even when twinned, while a build the property never reached reads 0 on every row. With no
           # twins option it is a reading only, so a routine linux row never fails for another seat's twin.
+          # A twin name's base (the identifier before the marker) is read too: sync.Mutex's hand-written Lockꞏtwin, and
+          # time's Sleepꞏtwin, are PROMOTED into every type that embeds them, so a plain io, os, syscall or reflect carries
+          # "Lockꞏtwin" in every build (wave 0's plain half read 8-18 per host from them). Those two bases are not counted.
           $twinMarker = [System.Text.Encoding]::UTF8.GetBytes([string][char]0xA78F + 'twin')
+          $handTwinBases = @('Lock', 'Sleep')
           function Measure-TwinNames([string]$path) {
               $bytes = [System.IO.File]::ReadAllBytes($path); $n = 0
               for ($i = 0; $i -le $bytes.Length - $twinMarker.Length; $i++) {
                   if ($bytes[$i] -ne $twinMarker[0]) { continue }
                   $j = 1
                   while ($j -lt $twinMarker.Length -and $bytes[$i + $j] -eq $twinMarker[$j]) { $j++ }
-                  if ($j -eq $twinMarker.Length) { $n++ }
+                  if ($j -ne $twinMarker.Length) { continue }
+                  $k = $i
+                  while ($k -gt 0 -and (($bytes[$k - 1] -ge 0x30 -and $bytes[$k - 1] -le 0x39) -or ($bytes[$k - 1] -ge 0x41 -and $bytes[$k - 1] -le 0x5A) -or ($bytes[$k - 1] -ge 0x61 -and $bytes[$k - 1] -le 0x7A) -or $bytes[$k - 1] -eq 0x5F)) { $k-- }
+                  $base = [System.Text.Encoding]::ASCII.GetString($bytes, $k, $i - $k).TrimStart('_')
+                  if ($handTwinBases -notcontains $base) { $n++ }
               }
               return $n
           }
