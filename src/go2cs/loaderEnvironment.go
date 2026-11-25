@@ -109,6 +109,13 @@ func checkCgoTestsOutput(options Options, outputPath string) error {
 		return fmt.Errorf("-cgo -tests writes a cgo-on conversion, and %s is in the repository's corpus (%s), which is emitted at CGO_ENABLED=0 by ruling: convert into a scratch root seeded from src/core instead", outputPath, corpus)
 	}
 
+	// The output must lie under the MARKED root's core, both resolved: the marker is read at the root, and an explicit
+	// root is kept (resolveGo2CSPath), so a marked root with the output in a deployed corpus (%GOPATH%/src/go2cs/core/net,
+	// no .git above it) passed both checks above, and 4c would remove its cgo_stub.cs (P3's A1, ruled required).
+	if core := filepath.Join(resolveExistingSymlinks(options.go2csPath), "core"); !isPathUnder(resolveExistingSymlinks(outputPath), core) {
+		return fmt.Errorf("-cgo -tests writes into the marked scratch root's own core (%s), and %s is not under it: convert into the scratch root's core", core, outputPath)
+	}
+
 	return nil
 }
 
@@ -120,7 +127,8 @@ func repositoryCorpusOf(path string) (string, bool) {
 	resolved := resolveExistingSymlinks(path)
 
 	for dir := resolved; ; {
-		if filepath.Base(dir) == "core" {
+		// EqualFold: on a case-insensitive volume an output typed .../src/Core/net names the same directory (P3's A2).
+		if strings.EqualFold(filepath.Base(dir), "core") {
 			if _, err := os.Stat(filepath.Join(filepath.Dir(filepath.Dir(dir)), ".git")); err == nil {
 				return dir, true
 			}

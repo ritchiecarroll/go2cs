@@ -448,6 +448,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\analyzerPublishAot_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\cgoScratchMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\annotatorSelfTest_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\arrayPointerViewDoors_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\behavioralHarnessOptions_test.go" />

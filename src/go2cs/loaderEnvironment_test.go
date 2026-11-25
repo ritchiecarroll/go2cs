@@ -284,6 +284,30 @@ func TestACgoTestsConversionNeverWritesTheRepositorysCorpus(t *testing.T) {
 		check(t, cgoTests, link, filepath.Join(link, "core", "net"), "CGO_ENABLED=0 by ruling")
 	})
 
+	t.Run("A1: a marked root, the output in a deployed corpus outside its core", func(t *testing.T) {
+		deployed := filepath.Join(t.TempDir(), "go2cs", "core", "net")
+
+		if err := os.MkdirAll(deployed, 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		check(t, cgoTests, scratch, deployed, "not under it")
+	})
+
+	t.Run("A2: a repository's core typed in another case", func(t *testing.T) {
+		upper := t.TempDir()
+
+		if err := os.MkdirAll(filepath.Join(upper, "src", "Core", "net"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filepath.Join(upper, ".git"), []byte("gitdir: elsewhere"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		check(t, cgoTests, scratch, filepath.Join(upper, "src", "Core", "net"), "CGO_ENABLED=0 by ruling")
+	})
+
 	t.Run("a marked scratch root", func(t *testing.T) {
 		check(t, cgoTests, scratch, filepath.Join(scratch, "core", "net"), "")
 	})
