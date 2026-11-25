@@ -30,7 +30,7 @@ using go.net.http.@internal;
 using go.sync;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class httputil_package {
 
@@ -849,7 +849,7 @@ internal static (int64, error) copyBuffer⁔(/*this*/ ref ReverseProxy p, io.Wri
 }
 
 internal static void logf⁔(/*this*/ ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     if (p.ErrorLog != nil) {
         p.ErrorLog.Printf(format, args.ꓸꓸꓸ);

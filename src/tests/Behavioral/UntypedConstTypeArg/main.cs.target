@@ -10,7 +10,7 @@ internal static @string show<E>(E e) { return fmt.Sprintf("%T %v"u8, (e).OrTyped
 
 internal static @string pair<E>(E a, E b) { return fmt.Sprintf("%T"u8, (b).OrTypedNilOf()); }
 
-internal static @string many<E>(params Span<E> esʗp) {
+internal static @string many<E>(params variadic<E> esʗp) {
     var es = esʗp.slice();
 
     return fmt.Sprintf("%T %d"u8, es, len(es));

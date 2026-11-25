@@ -203,7 +203,7 @@ public static partial class TypeExtensions
     {
         foreach (MethodInfo candidate in candidates)
         {
-            if (!GoMethodNameMatches(candidate, interfaceMethod.Name, projectGoName))
+            if (!GoMethodNameMatches(candidate, projectGoName ? GoNameAttribute.GoNameOf(interfaceMethod) : interfaceMethod.Name, projectGoName))
                 continue;
 
             if (!UnexportedMethodPackageMatches(interfaceMethod, candidate))
@@ -245,10 +245,7 @@ public static partial class TypeExtensions
     // go/ast's `*BadExpr` satisfies `Expr` through the `exprNode` its own holder declares.
     private static bool UnexportedMethodPackageMatches(MethodInfo interfaceMethod, MethodInfo candidate)
     {
-        string goName = interfaceMethod.Name;
-
-        if (goName.StartsWith(ShadowVarMarker, StringComparison.Ordinal))
-            goName = goName[ShadowVarMarker.Length..];
+        string goName = GoNameAttribute.GoNameOf(interfaceMethod);
 
         if (goName.Length == 0 || char.IsUpper(goName[0]))
             return true;
@@ -299,7 +296,7 @@ public static partial class TypeExtensions
 
         return name.Length > ShadowVarMarker.Length &&
                name.StartsWith(ShadowVarMarker, StringComparison.Ordinal) &&
-               string.Equals(name[ShadowVarMarker.Length..], goMethodName, StringComparison.Ordinal);
+               string.Equals(GoNameAttribute.GoNameOf(candidate, name), goMethodName, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -417,7 +414,7 @@ public static partial class TypeExtensions
             }
         }
 
-        throw builtin.panic($"go2cs: cannot close method {ProjectGoMethodName(open.Name)} of {GoReflect.GoTypeName(valueElement)} over its type arguments: " +
+        throw builtin.panic($"go2cs: cannot close method {ProjectGoMethodName(open)} of {GoReflect.GoTypeName(valueElement)} over its type arguments: " +
             "the type has no generated method source (IGoMethodSource) and this runtime cannot generate code");
     }
 
@@ -653,7 +650,7 @@ public static partial class TypeExtensions
                 if (IsUniversalReceiver(candidate, key.element))
                     continue;
 
-                string name = ProjectGoMethodName(candidate.Name);
+                string name = ProjectGoMethodName(candidate);
 
                 if (Rune.DecodeFromUtf16(name, out Rune first, out _) != OperationStatus.Done || !Rune.IsUpper(first))
                     continue;
@@ -681,7 +678,7 @@ public static partial class TypeExtensions
             Dictionary<string, MethodInfo> byGoName = [];
 
             foreach (MethodInfo method in t.GetInterfaceMethods())
-                byGoName[ProjectGoMethodName(method.Name)] = method;
+                byGoName[ProjectGoMethodName(method)] = method;
 
             return [.. byGoName.Select(static pair => new GoMethodSetEntry(pair.Key, pair.Value))
                                .OrderBy(static entry => entry.GoName, StringComparer.Ordinal)];
@@ -704,10 +701,13 @@ public static partial class TypeExtensions
 
     // Projects an emitted receiver-method name to its GO method name — the leading collision-avoidance
     // marker stripped (see GoMethodNameMatches, which applies the same strip when matching).
-    internal static string ProjectGoMethodName(string emittedName)
+    // A method the Go source names with a leading Δ carries that name in a [GoName] stamp instead.
+    internal static string ProjectGoMethodName(MethodInfo method)
     {
+        string emittedName = method.Name;
+
         return emittedName.Length > ShadowVarMarker.Length && emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)
-            ? emittedName[ShadowVarMarker.Length..]
+            ? GoNameAttribute.GoNameOf(method, emittedName)
             : emittedName;
     }
 
@@ -975,7 +975,7 @@ public static partial class TypeExtensions
             if (Satisfies(interfaceMethod, candidates, false) || Satisfies(interfaceMethod, candidates, true))
                 continue;
 
-            string name = ProjectGoMethodName(interfaceMethod.Name);
+            string name = ProjectGoMethodName(interfaceMethod);
 
             if (first.Length == 0 || CompareGoMethodOrder(name, first) < 0)
                 first = name;

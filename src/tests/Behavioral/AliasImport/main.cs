@@ -3,7 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using time = time_package;
 using AliasImportLib = AliasImportLib_package;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 

@@ -2239,7 +2239,13 @@ public static ж<byte> StringData(@string str) {
     // (backing, absolute index) pair, so two calls over one string still answer equal and two
     // distinct backings still answer unequal — guarded by the StringDataIdentity behavioral test,
     // whose sub-string arm covers point 2.
-    return Ꮡ(str.UnsafeBackingWindow(), 0);
+    //
+    // A STATIC backing (a string literal's, or a one-byte string's) is the exception: Go keeps those bytes in
+    // read-only memory and faults on a write, where here they are shared by the whole process. Such a window gets an
+    // element box over one private copy of its backing instead, which keeps pointer identity across calls and reports a
+    // write at its next access (golib's ReadOnlyStringBacking). A heap string keeps the alias above, as Go's does.
+    slice<byte> window = str.UnsafeBackingWindow();
+    return ReadOnlyStringBacking.TryDataBox(window) ?? Ꮡ(window, 0);
 }
 
 // Go's `(*[N]T)(unsafe.Pointer(&p.f))` where f's type is not T: the converter emits it as

@@ -15,23 +15,23 @@ internal static void main() {
     var q = Ꮡ(new node(id: 2));
 
     any direct = p.OrTypedNil();
-    fmt.Println("direct == p:", AreEqual(direct, p));
-    fmt.Println("direct != p:", !AreEqual(direct, p));
-    fmt.Println("direct == q:", AreEqual(direct, q));
+    fmt.Println("direct == p:", AreEqual(direct, p.OrTypedNil()));
+    fmt.Println("direct != p:", !AreEqual(direct, p.OrTypedNil()));
+    fmt.Println("direct == q:", AreEqual(direct, q.OrTypedNil()));
 
     error err = new nodeжerror(p);
     any widened = err;
-    fmt.Println("widened == p:", AreEqual(widened, p));
-    fmt.Println("widened != p:", !AreEqual(widened, p));
-    fmt.Println("p == widened:", AreEqual(p, widened));
-    fmt.Println("widened == q:", AreEqual(widened, q));
+    fmt.Println("widened == p:", AreEqual(widened, p.OrTypedNil()));
+    fmt.Println("widened != p:", !AreEqual(widened, p.OrTypedNil()));
+    fmt.Println("p == widened:", AreEqual(p.OrTypedNil(), widened));
+    fmt.Println("widened == q:", AreEqual(widened, q.OrTypedNil()));
 
     fmt.Println("lookup:", lookup(err, p));
     fmt.Println("lookup other:", lookup(err, q));
 }
 
 internal static @string lookup(any key, ж<node> want) {
-    if (AreEqual(key, want)) {
+    if (AreEqual(key, want.OrTypedNil())) {
         return "found";
     }
 

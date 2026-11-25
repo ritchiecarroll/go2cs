@@ -38,7 +38,7 @@ namespace go;
 {
     /// <summary>
     /// <paramref name="value"/>, or, when it is null, the canonical typed nil of <typeparamref name="T"/>: the pointer's
-    /// <see cref="ж{T}.NilBox"/>, the func type's carrier, or <c>unsafe.Pointer</c>'s nil. An interface type argument (or
+    /// <see cref="ж{T}.NilBox"/>, a named pointer type's NilInstance, the func type's carrier, or <c>unsafe.Pointer</c>'s nil. An interface type argument (or
     /// any type with no typed nil) keeps the null, which is Go's nil interface.
     /// </summary>
     public static object? OrTypedNilOf<T>(this T value) => value is not null ? value : CanonicalNil<T>.Value;
@@ -68,6 +68,12 @@ namespace go;
                 RuntimeHelpers.RunModuleConstructor(type.Module.ModuleHandle);
                 return UnsafePointerNil;
             }
+
+            // A NAMED pointer type (`type P *T`) is go2cs-gen's wrapper class, not a ж<T>, and its zero value is a null
+            // reference: its canonical typed nil is the wrapper's own NilInstance, which CanonicalNilPointer resolves.
+            // Without it `show[P](p)` with a nil p boxed Go's nil interface (i9, 2026-11-24, R's board row of 2026-11-23).
+            if (typeof(INilPointer).IsAssignableFrom(type))
+                return GoReflect.CanonicalNilPointer(type);
 
             return null;
         }

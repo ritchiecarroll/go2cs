@@ -93,8 +93,8 @@ using fs = go.io.fs_package;
 using io = go.io_package;
 using parse = go.text.template.parse_package;
 using reflect = go.reflect_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 [GoPackage("template")]
 public static partial class template_package

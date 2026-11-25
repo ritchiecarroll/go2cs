@@ -39,6 +39,9 @@ go.slice`1
 go.slice`1+Enumerator
 go.string
 go.uintptr
+# go.variadic`1: added 2026-11-20 on COORD's ruling (inbox/P2/20261120T135029Z-COORD.md): a variadic parameter's type,
+# named by every converted variadic signature and returned by slice<T>.ꓸꓸꓸ; its plumbing members are hidden.
+go.variadic`1
 go.ж`1
 
 [go-tier2]
@@ -141,6 +144,9 @@ go.GoMemberRecordAttribute
 go.GoMethodHostAttribute
 go.GoMethodText
 go.GoModInfoAttribute
+# go.GoNameAttribute: added 2026-11-22 with the Δ projection cure, on each declaration whose Go name starts with Δ.
+# COORD 2026-11-22 (065204Z, the cure's design cleared): a converter-emitted attribute, as GoLocalNameAttribute; [go-tier2] by ruling
+go.GoNameAttribute
 go.GoPackageAttribute
 go.GoParamDimsAttribute
 go.GoPlatformExclusiveAttribute
@@ -243,6 +249,9 @@ go.TypedNilOfExtensions
 go.UntypedComplex
 go.UntypedFloat
 go.UntypedInt
+# go.VariadicExtensions: added 2026-11-20 on COORD's ruling (inbox/P2/20261120T135029Z-COORD.md): the two pack
+# prologues (.slice(), .sslice()), beside SSliceExtensions; converted projects do not import go.golib.
+go.VariadicExtensions
 go.channel
 go.comparable`1
 go.errorExtensions
@@ -458,6 +467,8 @@ go.builtin :: field const System.IntPtr iota
 go.builtin :: field static readonly System.Boolean ᐧᐧ
 go.builtin :: field static readonly go.NilType nil
 go.builtin :: field static readonly go.NilType ꓸꓸꓸ
+# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): append of a variadic pack, wall E.
+go.builtin :: method static S append<S, T>(S, go.variadic<T>)
 go.builtin :: method static S append<S, T>(S, params System.ReadOnlySpan<T>)
 go.builtin :: method static S append<S, T>(S, params System.Span<T>)
 go.builtin :: method static S appendꓸꓸꓸ<S, T>(S, go.ISlice<T>)
@@ -757,6 +768,8 @@ go.builtin :: method static go.complex64 complex(System.Single, System.Single)
 go.builtin :: method static go.complex64 i(System.Single)
 go.builtin :: method static go.slice<System.Byte> append(go.slice<System.Byte>, params System.ReadOnlySpan<System.Int32>)
 go.builtin :: method static go.slice<T> append<T>(go.ISlice, params T[])
+# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): append of a variadic pack, wall E.
+go.builtin :: method static go.slice<T> append<T>(go.slice<T>, go.variadic<T>)
 go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params System.ReadOnlySpan<T>)
 go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params System.Span<T>)
 go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params T[])
@@ -1015,12 +1028,13 @@ go.slice<T> :: property System.IntPtr Capacity { get; }
 go.slice<T> :: property System.IntPtr High { get; }
 go.slice<T> :: property System.IntPtr Length { get; }
 go.slice<T> :: property System.IntPtr Low { get; }
-go.slice<T> :: property System.Span<T> ꓸꓸꓸ { get; }
 go.slice<T> :: property T& Item[System.Int32] { get; }
 go.slice<T> :: property T& Item[System.IntPtr] { get; }
 go.slice<T> :: property T& Item[System.UInt64] { get; }
 go.slice<T> :: property T[] Source { get; }
 go.slice<T> :: property go.slice<T> Item[System.Range] { get; }
+# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): was System.Span<T>; a named break of the .5 floor move.
+go.slice<T> :: property go.variadic<T> ꓸꓸꓸ { get; }
 go.slice<T>.Enumerator :: method System.Boolean MoveNext()
 go.slice<T>.Enumerator :: method System.Void Dispose()
 go.slice<T>.Enumerator :: property T Current { get; }
@@ -1167,6 +1181,16 @@ go.uintptr :: method static go.uintptr op_Subtraction(go.uintptr, go.uintptr)
 go.uintptr :: method static go.uintptr op_UnaryNegation(go.uintptr)
 go.uintptr :: method static go.uintptr op_UnaryPlus(go.uintptr)
 go.uintptr :: method static go.uintptr op_UnsignedRightShift(go.uintptr, System.Int32)
+# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): go.variadic<T> enters [tier1] with these members.
+go.variadic<T> :: method System.Span<T>.Enumerator GetEnumerator()
+go.variadic<T> :: method static System.ReadOnlySpan<T> op_Implicit(go.variadic<T>)
+go.variadic<T> :: method static System.Span<T> op_Implicit(go.variadic<T>)
+go.variadic<T> :: method static go.variadic<T> op_Implicit(System.Span<T>)
+go.variadic<T> :: property System.Int32 Length { get; }
+# 2026-11-20, COORD review (inbox/P2/20261120T145250Z-COORD.md item 4): Elements is hidden; tier 1 reaches a span by
+# the copying implicit conversion.
+go.variadic<T> :: property T& Item[System.Int32] { get; }
+go.variadic<T> :: property T& Item[System.IntPtr] { get; }
 go.ж<T> :: method System.Boolean CompareExchangePointerWord(System.UIntPtr, System.UIntPtr)
 go.ж<T> :: method System.Boolean Equals(System.Object)
 go.ж<T> :: method System.Boolean Equals(go.ж<T>)

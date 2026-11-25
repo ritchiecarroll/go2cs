@@ -38,7 +38,8 @@ is disclosed by name, with its reason, on the package's row in
 says what that proves.
 
 Some things do differ, and you should know them before you start. By default a goroutine is an
-operating-system thread, so thousands are fine and hundreds of thousands are not. A deadlock usually hangs where Go would
+operating-system thread, so thousands are fine and hundreds of thousands are not ([async twins](AsyncTwins.md) change that for a
+program that opts in). A deadlock usually hangs where Go would
 report it. A goroutine's stack does not grow.
 [What converts, but doesn't behave exactly like Go](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)
 lists them all.
@@ -93,7 +94,7 @@ machine that has no .NET 10 runtime the program runs on the newer runtime, which
 on. The README's [Requirements](README.md#requirements) says how to require .NET 10 instead.
 <!-- 2026-11-23 .5 docs pass (P1), UX-12, at master 97cca467a2: the FAQ said "exactly one ... .NET release at a
      time", which the README's Requirements contradicts since go.lib's buildTransitive targets give an executable
-     RollForward=Major when no .NET 10 runtime is present (src/core/golib/buildTransitive/go.lib.targets:444 `<RollForward>Major</RollForward>`;
+     RollForward=Major when no .NET 10 runtime is present (src/core/golib/buildTransitive/go.lib.targets:445 `<RollForward>Major</RollForward>`;
      src/tests/PackageTests/RollForward). Owner's release-readiness item UX-12 (COORD 2026-11-22 083506Z). -->
 
 ## Which platforms are supported?
@@ -170,6 +171,11 @@ the converted standard-library packages your code imports (`go.<package>`), and 
 together, so a project uses one version of all of them. A converted program
 needs the .NET runtime, or you publish it self-contained. It does not need Go installed to run.
 Converting uses a Go toolchain, which the go2cs dotnet tool downloads on first use.
+
+## Do I need Go installed to build or run converted code?
+
+No. Go is needed only to convert; building and running the converted C# need .NET alone. The
+[dotnet tool guide](DotnetTool.md#the-go-it-converts-with) names the two conversion steps that need more.
 
 ## What license covers the code go2cs generates?
 

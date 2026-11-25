@@ -132,6 +132,94 @@ public unsafe class CgoProbeTests
         Assert.IsNull(none, "a zero errno is a nil error, as cgo makes it");
     }
 
+    // cgo Phase 3, increment 3.2, seat 1b: the pressure arm (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18 item 4, 18.1
+    // COORD (b); prediction P-5). C fills a pinned Go array one byte at a time, pausing between bytes, while another
+    // thread forces compacting collections and churns the heap. Go reads every byte C wrote, in every round. Two
+    // controls: an unpinned twin array, allocated beside each round's array, must be shown to MOVE under the same
+    // collections, or the arm proves nothing about the pin and reads Inconclusive; and every round counts the
+    // collections that ran while the C call was open, which must be more than zero, or the collector never overlapped
+    // the call and the round proves nothing either.
+    //
+    // The collector sleeps 1 ms between collections. Without the gap a thread returning from native code (it must wait
+    // for the collection in progress to end) can lose every race to the next one on a small box: on 4 vCPU the C call
+    // never returned and OnAGoroutine's 30 s deadline fired (BOARD 2026-11-25, P6). Thread.Yield is not enough, since
+    // it returns at once when the collector is the only runnable thread. The stop sits in a finally so that a failed
+    // round stops the collector; before it, a red here kept the collector running and starved the whole test host.
+    [TestMethod]
+    public void ThePinnedArmHoldsWhileCompactingCollectionsRunMidCall()
+    {
+        CgoProbe.Require();
+
+        const int rounds = 12;
+        const int size = 48;
+        const int micros = 500;
+        int twinMoved = 0;
+        int fewestMidCall = int.MaxValue;
+        int totalMidCall = 0;
+
+        for (int round = 0; round < rounds; round++)
+        {
+            array<C.@char> buffer = new(size);
+            byte[] twin = new byte[size];
+            nint twinBefore = AddressOf(twin);
+            int midCall = 0;
+
+            using var stop = new System.Threading.CancellationTokenSource();
+            System.Threading.Thread collector = new(() =>
+            {
+                while (!stop.IsCancellationRequested)
+                {
+                    _ = new byte[4096];
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+                    System.Threading.Thread.Sleep(1);
+                }
+            });
+
+            collector.Start();
+            int32 filled;
+
+            try
+            {
+                filled = OnAGoroutine(() =>
+                {
+                    int before = GC.CollectionCount(GC.MaxGeneration);
+                    int32 count = (int32)C.go2cs_probe_slow_fill(new ElemRefBox<C.@char>(buffer, 0), size, micros);
+                    midCall = GC.CollectionCount(GC.MaxGeneration) - before;
+                    return count;
+                });
+            }
+            finally
+            {
+                stop.Cancel();
+                collector.Join();
+            }
+
+            Assert.AreEqual(size, filled, $"round {round}: C filled the whole buffer");
+            Assert.IsTrue(midCall > 0, $"round {round}: no collection ran while the C call was open, so the round says nothing about the pin");
+
+            for (int i = 0; i < size; i++)
+                Assert.AreEqual((int8)('a' + i % 26), (int8)buffer[i], $"round {round}: byte {i} is what C wrote");
+
+            if (AddressOf(twin) != twinBefore)
+                twinMoved++;
+
+            fewestMidCall = Math.Min(fewestMidCall, midCall);
+            totalMidCall += midCall;
+            GC.KeepAlive(twin);
+        }
+
+        Console.WriteLine($"READING the pressure arm: {rounds} rounds, every byte read back; the unpinned twin moved in {twinMoved} of them; {totalMidCall} collections ran while the C calls were open, at least {fewestMidCall} in every round");
+
+        if (twinMoved == 0)
+            Assert.Inconclusive("the unpinned twin never moved under the same collections, so the arm says nothing about the pin");
+    }
+
+    private static nint AddressOf(byte[] array)
+    {
+        fixed (byte* first = array)
+            return (nint)first;
+    }
+
     private static (int64, error?) Strtol(string text)
     {
         byte[] bytes = Encoding.ASCII.GetBytes(text + "\0");

@@ -29,7 +29,7 @@ internal static void main() {
     b.Value = 8;
     fmt.Println("implicit named:", (pp.Value).I);
 
-    var f = reflect.ValueOf(pp).Elem().Field(0);
+    var f = reflect.ValueOf((pp ?? (pubPtr)nil)).Elem().Field(0);
     fmt.Println("reflect agrees:", f.Addr().Interface()._<ж<nint>>() == pp.of(pub.ᏑI));
 
     var h = new holder(p: new pubPtr(Ꮡ(new pub(1))));

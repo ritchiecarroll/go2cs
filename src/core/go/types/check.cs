@@ -17,7 +17,7 @@ using global::go.@internal;
 using global::go.go;
 using global::go.sync;
 using io = io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class types_package {
 

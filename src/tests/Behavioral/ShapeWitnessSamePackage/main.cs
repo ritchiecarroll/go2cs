@@ -4,7 +4,7 @@ using fmt = fmt_package;
 using stdio = io_package;
 using strings = strings_package;
 using Δio = io_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 
@@ -200,11 +200,16 @@ internal static void main() {
     var (srcs, n) = Readers<ж<memSrc>, memSrcжSourceΔshape>(slice<ж<memSrc>>([Ꮡ(new memSrc("abc")), Ꮡ(new memSrc("de"))]));
     fmt.Println("foreign type in the signature:", len(srcs), n, srcs[1].data);
     fmt.Println("package Span:", new Span<nint>(1, 2).hi);
+
+    var parts = slice<@string>(["x", "y"]);
+    var stamped = StampThrough<ж<memSrc>, memSrcжSourceΔshape>(srcs[0], parts);
+    fmt.Println("spread through the witness:", parts[0], parts[1], stamped[0] == srcs[0]);
 }
 
 partial interface Source {
     stdio.Reader Open();
     @string Join(@string sep, params ꓸꓸꓸstring partsʗp);
+    void Stamp(params ꓸꓸꓸstring partsʗp);
 }
 
 partial struct Span<T> {
@@ -221,6 +226,21 @@ internal static @string Join(this ref memSrc m, @string sep, params ꓸꓸꓸstr
     var parts = partsʗp.slice();
 
     return m.data + ":"u8 + strings.Join(parts, sep);
+}
+
+internal static void Stamp(this ref memSrc m, params ꓸꓸꓸstring partsʗp) {
+    var parts = partsʗp.slice();
+
+    stampFirst(parts, m.data);
+}
+
+internal static void stampFirst(slice<@string> dst, @string v) { dst[0] = v; }
+
+public static slice<T> StampThrough<T, TΔSource>(T s, slice<@string> parts)
+    where TΔSource : struct, SourceΔshape<T>
+{
+    TΔSource.Stamp(s, parts.ꓸꓸꓸ);
+    return [s];
 }
 
 public static (slice<T>, nint) Readers<T, TΔSource>(slice<T> srcs)

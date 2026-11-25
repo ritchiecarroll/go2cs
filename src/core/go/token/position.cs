@@ -11,7 +11,7 @@ using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using global::go.sync;
 using iter = iter_package;
-using ꓸꓸꓸжFile = Span<ж<token_package.File>>;
+using ꓸꓸꓸжFile = variadic<ж<token_package.File>>;
 
 partial class token_package {
 

@@ -102,6 +102,7 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 				identEscapesHeap: fileEntry.identEscapesHeap,
 				sstringEligible:  fileEntry.sstringEligible,
 				ssliceEligible:   fileEntry.ssliceEligible,
+				packForwardOnly:  fileEntry.packForwardOnly,
 				sstringConvExprs: fileEntry.sstringConvExprs,
 			}
 
@@ -326,11 +327,21 @@ func (v *Visitor) markVariadicSSliceEligible(params *ast.FieldList, body *ast.Bl
 
 		obj := v.info.ObjectOf(ident)
 
-		if obj == nil || v.identEscapesHeap[obj] || !v.ssliceUsesAreSafe(obj, body) {
+		if obj == nil || v.identEscapesHeap[obj] {
+			continue
+		}
+
+		safe, forwardOnly := v.ssliceUsesAreSafe(obj, body)
+
+		if !safe {
 			continue
 		}
 
 		v.ssliceEligible[obj] = true
+
+		if forwardOnly && v.packForwardOnly != nil {
+			v.packForwardOnly[obj] = true
+		}
 
 		if os.Getenv("GO2CS_DEBUG_SSLICE") != "" {
 			pos := v.fset.Position(ident.Pos())
@@ -340,7 +351,8 @@ func (v *Visitor) markVariadicSSliceEligible(params *ast.FieldList, body *ast.Bl
 }
 
 // ssliceUsesAreSafe reports whether every occurrence of obj is a non-escaping operation supported
-// directly by sslice<T>: len/cap, the base of an element index, or the expression ranged over.
+// directly by sslice<T>: len/cap, the base of an element READ, or the expression ranged over. An element
+// write refuses the view (ssliceElementIsWritten).
 // A use inside a nested function literal rejects the candidate because it would capture a ref struct.
 // Taking an indexed element's address is also rejected: the converter's element-address helpers are
 // heap-slice based, and the resulting pointer may outlive the stack view.
@@ -350,20 +362,25 @@ func (v *Visitor) markVariadicSSliceEligible(params *ast.FieldList, body *ast.Bl
 //
 //   - COPY SOURCE, `copy(dst, v)`: golib's `copy(…, in sslice<T>)` reads the view's storage. Only the
 //     source position; `copy(v, src)` writes through the pack and stays refused.
-//   - PASS-THROUGH, `f(x, v...)` (builtin `append(s, v...)` included): the callee receives a params
-//     Span<T> (or, for append, golib's `appendꓸꓸꓸ(…, in sslice<T>)`), which C# cannot let it retain, and
-//     a callee that keeps the pack copies it in its own prologue exactly as it does today. Go passes
-//     the pack's header here, so the callee now sees the caller's storage as it does in Go, where the
-//     copy the prologue made used to hide it. Refused when the call is a `defer` or `go` statement's:
-//     the arguments of those are captured, and a span cannot be. Only the spread position:
-//     `append(v, …)` grows the pack and stays refused.
+//   - PASS-THROUGH, `f(x, v...)` (builtin `append(s, v...)` included). Refused when the call is a
+//     `defer` or `go` statement's: the arguments of those are captured, and a span cannot be. Only the
+//     spread position: `append(v, …)` grows the pack and stays refused. The builtin append only reads
+//     the pack (golib's `appendꓸꓸꓸ(…, in sslice<T>)`). A NON-builtin callee receives Go's pack header
+//     itself, and may keep it and write it later, so the forward must hand on the caller's own pack
+//     (golib variadic<T>, which carries a spread caller's slice) and nothing in this frame may read the
+//     pack after the callee could have written it: a non-builtin pass-through is admitted only as the
+//     pack's SOLE use and outside any loop, and is then reported forwardOnly (the prologue binds the
+//     pack itself, `var v = vʗp;`). Any other use beside it keeps the heap prologue, whose slice is
+//     shared with the callee exactly as in Go.
 //
 // Measured by the two-seeded -stdlib emission at fa18863b94, the two admit 161 prologues on windows and
 // 158 on linux and darwin (every changed line a `.slice()` -> `.sslice()` swap). log's Printf, whose
 // pack a closure captures (log.go's `l.output(…, func(b []byte) … fmt.Appendf(b, format, v...))`), is
 // still refused by the nested-function rule above.
-func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) bool {
+func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) (safe, forwardOnly bool) {
 	safeIdents := map[*ast.Ident]bool{}
+	forwards := 0
+	forwardInLoop := false
 	var stack []ast.Node
 
 	ast.Inspect(body, func(n ast.Node) bool {
@@ -402,6 +419,11 @@ func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) bool 
 				if e.Ellipsis.IsValid() && len(e.Args) > 0 && !ssliceCallIsDeferredOrGo(e, stack) {
 					if id, ok := e.Args[len(e.Args)-1].(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
 						safeIdents[id] = true
+
+						if !v.isBuiltinCall(e) {
+							forwards++
+							forwardInLoop = forwardInLoop || ssliceStackHasLoop(stack)
+						}
 					}
 				}
 			}
@@ -417,7 +439,7 @@ func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) bool 
 						}
 					}
 
-					if !addressTaken {
+					if !addressTaken && !ssliceElementIsWritten(e, stack) {
 						safeIdents[id] = true
 					}
 				}
@@ -436,20 +458,95 @@ func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) bool 
 	})
 
 	allSafe := true
+	uses := 0
 
 	ast.Inspect(body, func(n ast.Node) bool {
 		if !allSafe {
 			return false
 		}
 
-		if id, ok := n.(*ast.Ident); ok && v.info.ObjectOf(id) == obj && !safeIdents[id] {
-			allSafe = false
+		if id, ok := n.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+			uses++
+
+			if !safeIdents[id] {
+				allSafe = false
+			}
 		}
 
 		return true
 	})
 
-	return allSafe
+	if !allSafe {
+		return false, false
+	}
+
+	// A non-builtin forward is admitted only as the pack's sole use, outside any loop.
+	if forwards > 0 {
+		if forwards != 1 || uses != 1 || forwardInLoop {
+			return false, false
+		}
+
+		return true, true
+	}
+
+	return true, false
+}
+
+// ssliceStackHasLoop reports whether the node being visited sits inside a for or range statement of
+// the body: a forward there runs again after the callee could have written the pack.
+func ssliceStackHasLoop(stack []ast.Node) bool {
+	for _, node := range stack {
+		switch node.(type) {
+		case *ast.ForStmt, *ast.RangeStmt:
+			return true
+		}
+	}
+
+	return false
+}
+
+// ssliceElementIsWritten reports whether index is a WRITE of one element of the pack: an assignment
+// target, an ++/-- operand or a range clause's key or value, each possibly parenthesised. Any such
+// write refuses the stack view, whatever the element type. A literal pack's elements are storage the
+// compiler chose: for an all-constant primitive list it is the module's read-only data (a write is an
+// access violation), and nothing in the language keeps it from reusing storage for other constant
+// lists either. The heap prologue copies a literal pack (and shares a spread's slice), so a pack its
+// callee writes always takes it. A write to a FIELD of an element (`xs[i].f = v`) is not one of these and
+// keeps the view: a struct element is never a constant, so its storage is per call, and a spread's is the
+// caller's, as in Go.
+func ssliceElementIsWritten(index *ast.IndexExpr, stack []ast.Node) bool {
+	var target ast.Expr = index
+	k := len(stack) - 1
+
+	for k >= 0 {
+		paren, ok := stack[k].(*ast.ParenExpr)
+
+		if !ok || paren.X != target {
+			break
+		}
+
+		target = paren
+		k--
+	}
+
+	if k < 0 {
+		return false
+	}
+
+	switch parent := stack[k].(type) {
+	case *ast.AssignStmt:
+		for _, lhs := range parent.Lhs {
+			if lhs == target {
+				return true
+			}
+		}
+	case *ast.IncDecStmt:
+		return parent.X == target
+	case *ast.RangeStmt:
+		return parent.Key == target || parent.Value == target
+	}
+
+	return false
 }
 
 // ssliceCallIsDeferredOrGo reports whether call is the call of a `defer` or `go` statement, the two
@@ -2243,4 +2340,17 @@ func isInherentlyHeapAllocatedType(typ types.Type) bool {
 	default:
 		return false
 	}
+}
+
+// isBuiltinCall reports whether call calls a Go builtin (append, copy, …), which golib implements
+// without keeping its arguments.
+func (v *Visitor) isBuiltinCall(call *ast.CallExpr) bool {
+	fun := ast.Unparen(call.Fun)
+
+	if ident, ok := fun.(*ast.Ident); ok {
+		_, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin)
+		return isBuiltin
+	}
+
+	return false
 }

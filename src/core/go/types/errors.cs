@@ -13,7 +13,7 @@ using strings = strings_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using io = io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class types_package {
 
@@ -64,7 +64,7 @@ internal static ж<error_> newError⁔(/*this*/ ж<Checker> Ꮡcheck, errors.Cod
 // in the error message (types2) or continuation errors identified by a tab-indented error
 // message (go/types).
 internal static void addf⁔(/*this*/ ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     err.desc = append(err.desc, new errorDesc(at, err.check.sprintf(format, args.ꓸꓸꓸ)));
 }
@@ -258,7 +258,7 @@ internal static void error⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, erro
 }
 
 internal static void errorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var err = Ꮡcheck.newError(code);
     err.addf(at, format, args.ꓸꓸꓸ);
@@ -266,7 +266,7 @@ internal static void errorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, err
 }
 
 internal static void softErrorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var err = Ꮡcheck.newError(code);
     err.addf(at, format, args.ꓸꓸꓸ);
@@ -275,7 +275,7 @@ internal static void softErrorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at,
 }
 
 internal static void versionErrorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
     var err = Ꮡcheck.newError(UnsupportedFeature);

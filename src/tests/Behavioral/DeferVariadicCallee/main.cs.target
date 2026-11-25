@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸnint = Span<nint>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸnint = variadic<nint>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 
@@ -55,7 +55,7 @@ internal static ж<counter> run() {
 
 internal static channel<EmptyStruct> defaultDone = new channel<EmptyStruct>(0);
 
-internal static void signalDone(params Span<channel<EmptyStruct>> chansʗp) {
+internal static void signalDone(params variadic<channel<EmptyStruct>> chansʗp) {
     var chans = chansʗp.sslice();
 
     if (len(chans) == 0) {

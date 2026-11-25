@@ -20,7 +20,7 @@ internal static nint fill(slice<byte> buf, nint seed) {
     nint sum;
 
     unsafe {
-        fixed (byte* p = buf.ꓸꓸꓸ) {
+        fixed (byte* p = buf.ToSpan()) {
             side.ᐸꟷ(seed);
             GoNativeCall.Enter();
 
@@ -40,7 +40,7 @@ internal static nint count(slice<byte> buf) {
     nint n;
 
     unsafe {
-        fixed (byte* p = buf.ꓸꓸꓸ) {
+        fixed (byte* p = buf.ToSpan()) {
             GoNativeCall.Enter();
 
             try {

@@ -34,6 +34,14 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 	localName := v.localNameAttrFor(identType)
 	name, target, finish := v.liftLocalTypeDecl(name, identType)
 
+	// The delegate's access follows its Go name at package level (getGoAccess: a Δ-led name is exported), as its
+	// [GoName] stamp does (localNameAttrFor); a lifted local delegate keeps its emitted name's.
+	access := getAccess(name)
+
+	if named, ok := identType.(*types.Named); ok && !v.inFunction {
+		access = getGoAccess(named.Obj().Name())
+	}
+
 	if len(constraints) > 0 {
 		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
 	}
@@ -43,7 +51,7 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 	}
 
 	v.writePendingTypeDoc(target)
-	v.writeString(target, "%s%s delegate %s %s%s(%s)%s;", localName, getAccess(name), resultsSignature, name, typeParams, parameterSignature, constraints)
+	v.writeString(target, "%s%s delegate %s %s%s(%s)%s;", localName, access, resultsSignature, name, typeParams, parameterSignature, constraints)
 	target.WriteString(v.newline)
 	finish()
 }

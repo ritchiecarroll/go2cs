@@ -154,9 +154,9 @@ internal static void reflection() {
     fmt.Println("adapter:", st.String(), ok, len(back));
 
     var p = new PDirect(Ꮡd);
-    runtime.SetFinalizer(p, [GoFunc("reflection.func1")] (PDirect _) => {
+    runtime.SetFinalizer((p ?? (PDirect)nil), [GoFunc("reflection.func1")] (PDirect _) => {
     });
-    runtime.SetFinalizer(p, default);
+    runtime.SetFinalizer((p ?? (PDirect)nil), default);
     fmt.Println("finalizer:", p != nil, len(d));
 }
 

@@ -114,13 +114,13 @@ internal static void appendArms() {
     fmt.Println("one element:", single, one);
 }
 
-internal static slice<array<nint>> addAll(slice<array<nint>> dst, params Span<array<nint>> moreʗp) {
+internal static slice<array<nint>> addAll(slice<array<nint>> dst, params variadic<array<nint>> moreʗp) {
     var more = moreʗp.sslice();
 
     return appendꓸꓸꓸ(dst, more);
 }
 
-internal static void fill(slice<array<nint>> dst, params Span<array<nint>> vʗp) {
+internal static void fill(slice<array<nint>> dst, params variadic<array<nint>> vʗp) {
     var v = vʗp.sslice();
 
     copy(dst, v);

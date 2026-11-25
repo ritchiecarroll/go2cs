@@ -58,7 +58,7 @@ Each `visit*` file handles one Go AST node category, emitting the corresponding 
 | `visitIfStmt.go` / `visitForStmt.go` / `visitRangeStmt.go` | Conditionals & loops (range handles ptr deref). |
 | `visitSwitchStmt.go` / `visitTypeSwitchStmt.go` / `visitSelectStmt.go` / `visitCommClause.go` | switch / type-switch / select + comm clauses. |
 | `visitReturnStmt.go` / `visitBranchStmt.go` / `visitLabeledStmt.go` | return, break/continue/goto, labels. |
-| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (a `goǃ` call; golib runs the goroutine on its own OS thread by default, reused through `GoroutineThreadPool`). |
+| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (a `goǃ` call; golib runs the goroutine on its own OS thread by default, reused through `GoroutineThreadPool`, or, built with twins and run with `GO2CS_MN=1`, on `GoScheduler`'s pool threads ([Async twins](AsyncTwins.md)). |
 | `visitIdent.go` | Identifier emission / name sanitization. |
 
 ## `conv*.go` — expression & type converters

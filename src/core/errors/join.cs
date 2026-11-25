@@ -4,7 +4,7 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using ꓸꓸꓸerror = Span<error>;
+using ꓸꓸꓸerror = variadic<error>;
 
 partial class errors_package {
 

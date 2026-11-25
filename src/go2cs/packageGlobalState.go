@@ -613,6 +613,12 @@ var internalTestDynamicTypeNames map[string]string
 // nil for every other conversion, so no other emission changes.
 var testAmbiguousLocalTypeNames hashset.HashSet[string]
 
+// testDeltaLedTypeNames holds the package-level TYPE names, of either `-tests` variant, whose Go name starts
+// with the Δ rename marker. Such a name is emitted as written, so the -tests name sets keyed on Go names read
+// its spelling as the Go name and never remove the marker from it (containsEmittedName). Session-scoped to one
+// `-tests` conversion, computed in convertTestVariants beside testAmbiguousLocalTypeNames; nil otherwise.
+var testDeltaLedTypeNames hashset.HashSet[string]
+
 // testInternalDeclaredNames holds the package-level names the package under test's internal `_test.go`
 // files declare, which its internal-test class (`<pkg>_internal_test_package`) holds and every external
 // test file names in a `using static`. A method holder of the external variant writes an own name in

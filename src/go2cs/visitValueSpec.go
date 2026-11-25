@@ -316,13 +316,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							assembly := linknameAssemblyName(pkgPath)
 							typeName := fmt.Sprintf("%s, %s", class, assembly)
 							v.writeOutput("%s static %s %s { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, \"%s\", \"%s\")] get => global::go.LinknameVar<%s>.Get(\"%s\", \"%s\"); set => global::go.LinknameVar<%s>.Set(\"%s\", \"%s\", value); }",
-								getAccess(goIDName), csTypeName, csIDName, class, assembly, csTypeName, typeName, remote, csTypeName, typeName, remote)
+								getGoAccess(goIDName), csTypeName, csIDName, class, assembly, csTypeName, typeName, remote, csTypeName, typeName, remote)
 							v.writeComment(valueSpec.Comment, valueSpec.End())
 							continue
 						}
 
 						v.importQueue.Add(pkgPath)
-						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getAccess(goIDName), csTypeName, csIDName, ref, ref)
+						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getGoAccess(goIDName), csTypeName, csIDName, ref, ref)
 						// The spec's trailing comment rides the property line (os's `var executablePath string // set by
 						// ../runtime/os_darwin.go`), as every other var's does.
 						v.writeComment(valueSpec.Comment, valueSpec.End())
@@ -1031,7 +1031,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 			goTypeName := v.getAliasQualifiedTypeName(declType, false)
 			csTypeName := convertToCSTypeName(goTypeName)
-			access := v.testDeclaredValueAccess(getAccess(goIDName), ident.Pos(), declType)
+			access := v.testDeclaredValueAccess(getGoAccess(goIDName), ident.Pos(), declType)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(access) + (len(csIDName) - len(goIDName)))
 
 			// Check if the type is a named type (user-defined), not a basic type. Unalias first: a
@@ -1636,7 +1636,7 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 
 		firstLine = false
 		csTypeName := v.getCSharpTypeName(tuple.At(i).Type())
-		access := v.testDeclaredValueAccess(getAccess(goIDName), ident.Pos(), tuple.At(i).Type())
+		access := v.testDeclaredValueAccess(getGoAccess(goIDName), ident.Pos(), tuple.At(i).Type())
 
 		// An ALL-BLANK spec (`var _, _ = f()`) must still evaluate the call once for its side
 		// effect: carry it on the first blank's initializer. Otherwise blanks stay uninitialized —
@@ -1697,7 +1697,7 @@ func (v *Visitor) writeMovedPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple 
 
 		firstLine = false
 		csTypeName := v.getCSharpTypeName(tuple.At(i).Type())
-		access := v.testDeclaredValueAccess(getAccess(goIDName), ident.Pos(), tuple.At(i).Type())
+		access := v.testDeclaredValueAccess(getGoAccess(goIDName), ident.Pos(), tuple.At(i).Type())
 
 		if v.isAddressedGlobal(ident) {
 			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, "", isInherentlyHeapAllocatedType(tuple.At(i).Type()))

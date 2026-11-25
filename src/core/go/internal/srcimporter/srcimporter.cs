@@ -23,7 +23,7 @@ using sync = sync_package;
 using global::go.go;
 using global::go.os;
 using path;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class srcimporter_package {
 
@@ -313,7 +313,7 @@ internal static bool isAbsPath⁔(/*this*/ ref Importer p, @string path) {
 }
 
 internal static @string joinPath⁔(/*this*/ ref Importer p, params ꓸꓸꓸstring elemʗp) {
-    var elem = elemʗp.sslice();
+    var elem = elemʗp.slice();
 
     var f = p.ctxt.JoinPath; if (f != nil) {
         return f(elem.ꓸꓸꓸ);
