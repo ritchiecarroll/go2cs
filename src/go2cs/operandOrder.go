@@ -25,18 +25,24 @@ import (
 //
 // gc orders more than calls. These EARLY forms run at their lexical place among the calls, reading their operands
 // then: len, cap, append, min, max, make, real, imag, complex, copy, a conversion to []byte, to []rune or from a slice
-// to an array, a type assertion, a slice expression, a map index whose key is string(bytes), an && or || that holds a
-// call (as one unit, so its short circuit stands), and a value boxed to an interface that is not addressable and is a
-// bool, a one-byte integer, a struct, an array or &T{...}. An early form never triggers a hoist; when a later call
-// moves ahead of it, it moves too, in order, as its own temp.
+// to an array, a type assertion, a slice expression, a map index whose key is string(bytes), a map literal that reads
+// an operand a call can write, and a value boxed to an interface that is not addressable and is a bool, a one-byte
+// integer, a struct, an array or &T{...}. An early form never triggers a hoist; when a later call moves ahead of it,
+// it moves too, in order, as its own temp. An && or || that holds a call, and a map literal that holds one, are one
+// ordered call: the first so its short circuit stands, the second because gc evaluates its elements in place.
+//
+// &T{...} evaluates the literal's elements like any other operands; any other &x evaluates only what locates x (an
+// index, a pointer), as the left side of an assignment does.
 //
 // What is never hoisted, and what a call never reorders:
 //   - an operand of && or ||, which runs only after the left one: an && or || that holds a call moves whole or not
 //     at all;
+//   - an element of a map literal, which moves with its literal;
 //   - a func literal's body, which is another function;
-//   - a map literal, whose elements gc reads in place;
-//   - a multi-value call, and a statement whose right side is one (a, b = f()) or a comma-ok form;
-//   - &x, which takes an address and reads nothing a call can change.
+//   - a multi-value call, and a statement whose right side is one (a, b = f()) or a comma-ok form.
+//
+// A fail-safe backs the walk (operandOrderCovers): a statement holding a call, receive or early form before its last
+// hoist that the walk did not record keeps C#'s order, so a form the walk does not know never reorders two calls.
 
 type operandOrderKind int
 
@@ -126,6 +132,29 @@ func (w *operandOrderWalk) walk(expr ast.Expr) {
 		literalType := types.Unalias(v.getExprType(e)).Underlying()
 
 		if _, isMap := literalType.(*types.Map); isMap {
+			// gc evaluates a map literal's elements in place, at the literal's lexical position among the calls, so the
+			// literal is one ordered unit: a call when it holds one, like && and ||, and otherwise an early form when it
+			// reads an operand a call can write. Either way it moves whole.
+			if operandHoldsCall(v, e) {
+				w.walkUnit(e, operandOrderCall, nil)
+				return
+			}
+
+			elements := &operandOrderWalk{v: v}
+
+			for _, elt := range e.Elts {
+				if kv, ok := elt.(*ast.KeyValueExpr); ok {
+					elements.walk(kv.Key)
+					elements.walk(kv.Value)
+				} else {
+					elements.walk(elt)
+				}
+			}
+
+			if len(elements.events) > 0 {
+				w.walkUnit(e, operandOrderEarly, nil)
+			}
+
 			return
 		}
 
@@ -173,6 +202,13 @@ func (w *operandOrderWalk) walk(expr ast.Expr) {
 		case token.ARROW:
 			w.walkUnit(e, operandOrderCall, nil, e.X)
 		case token.AND:
+			// &T{...} evaluates the literal's elements; any other &x evaluates only what locates x (an index, a
+			// pointer), as an assignment's left side does, and reads nothing at x itself.
+			if literal, isLiteral := ast.Unparen(e.X).(*ast.CompositeLit); isLiteral {
+				w.walk(literal)
+			} else {
+				w.walkStore(e.X)
+			}
 		default:
 			w.walk(e.X)
 		}
@@ -184,7 +220,7 @@ func (w *operandOrderWalk) walk(expr ast.Expr) {
 			return
 		}
 
-		if !operandHoldsCall(v, e) {
+		if !operandHoldsCall(v, e) && !operandHoldsLiteral(e) {
 			w.read(e)
 			return
 		}
@@ -193,7 +229,7 @@ func (w *operandOrderWalk) walk(expr ast.Expr) {
 		w.walk(e.Index)
 		w.read(e)
 	case *ast.StarExpr, *ast.SelectorExpr:
-		if !operandHoldsCall(v, e) {
+		if !operandHoldsCall(v, e) && !operandHoldsLiteral(e) {
 			w.read(e)
 			return
 		}
@@ -470,6 +506,25 @@ func operandHoldsCall(v *Visitor, expr ast.Expr) bool {
 	return found
 }
 
+// operandHoldsLiteral reports whether expr holds a composite literal, whose elements are operands of their own: an
+// element read of the literal (map[K]V{k: g}[k]) is walked through it rather than read whole.
+func operandHoldsLiteral(expr ast.Expr) bool {
+	found := false
+
+	ast.Inspect(expr, func(node ast.Node) bool {
+		switch node.(type) {
+		case *ast.FuncLit:
+			return false
+		case *ast.CompositeLit:
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
+}
+
 // operandIsMutable is the predicate: reading expr can observe a write made by a call of the same statement. A plain
 // local is never such an operand, because no call can write it, which is why it is left out (the reason is that the
 // write is unobservable, not that it is unreached). The operands that are:
@@ -513,6 +568,11 @@ func (v *Visitor) operandIsMutable(expr ast.Expr) bool {
 
 		return v.operandIsMutable(e.X)
 	case *ast.IndexExpr:
+		// An element of a literal is no call's to write: only its index can be.
+		if _, isLiteral := ast.Unparen(e.X).(*ast.CompositeLit); isLiteral {
+			return v.operandIsMutable(e.Index)
+		}
+
 		switch base := types.Unalias(v.getExprType(e.X)).Underlying().(type) {
 		case *types.Slice, *types.Map:
 			return true
@@ -673,7 +733,70 @@ func (v *Visitor) operandOrderHoists(stores []ast.Expr, readStores bool, exprs [
 		}
 	}
 
+	if len(hoists) > 0 && !operandOrderCovers(v, walk.events, hoists, stores, exprs) {
+		return nil
+	}
+
 	return hoists
+}
+
+// operandOrderCovers is the fail-safe: every call, receive and early form the statement evaluates before its last hoist
+// must be an event of the walk or lie inside a hoisted unit, or a later call moved ahead of it would run first. A
+// statement holding one the walk did not see keeps C#'s order.
+func operandOrderCovers(v *Visitor, events []operandOrderEvent, hoists []ast.Expr, stores []ast.Expr, exprs []ast.Expr) bool {
+	seen := make(map[ast.Node]bool, len(events))
+
+	for _, event := range events {
+		seen[event.node] = true
+	}
+
+	lastHoist := hoists[len(hoists)-1]
+	covered := true
+
+	check := func(node ast.Node) {
+		if seen[node] || node.Pos() >= lastHoist.End() {
+			return
+		}
+
+		for _, hoist := range hoists {
+			if node.Pos() >= hoist.Pos() && node.End() <= hoist.End() {
+				return
+			}
+		}
+
+		covered = false
+	}
+
+	for _, root := range append(append([]ast.Expr{}, stores...), exprs...) {
+		ast.Inspect(root, func(node ast.Node) bool {
+			if !covered {
+				return false
+			}
+
+			switch n := node.(type) {
+			case *ast.FuncLit:
+				return false
+			case *ast.UnaryExpr:
+				if n.Op == token.ARROW {
+					check(n)
+				}
+			case *ast.CallExpr:
+				if v.operandCallKind(n) != operandCallTransparent {
+					check(n)
+				}
+			case *ast.SliceExpr, *ast.TypeAssertExpr:
+				check(n)
+			case *ast.IndexExpr:
+				if v.operandMapIndexByBytes(n) {
+					check(n)
+				}
+			}
+
+			return true
+		})
+	}
+
+	return covered
 }
 
 func operandAncestorsWithin(inner, outer map[ast.Expr]bool) bool {

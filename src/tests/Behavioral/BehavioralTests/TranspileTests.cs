@@ -1975,6 +1975,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
 
     [TestMethod]
+    public void CheckOperandOrderAddrMap() => CheckTarget("OperandOrderAddrMap");
+
+    [TestMethod]
     public void CheckOperandOrderAssign() => CheckTarget("OperandOrderAssign");
 
     [TestMethod]

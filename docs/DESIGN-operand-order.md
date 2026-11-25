@@ -44,6 +44,9 @@ place among the calls, reading their own operands then:
 - a conversion from a string to `[]byte` or `[]rune`, and from a slice to an array;
 - a type assertion `x.(T)`, a slice expression `s[i:j]`, and a map index whose key is `string(b)` for a byte slice;
 - an `&&` or `||` that holds a call, as one unit;
+- a map literal: gc evaluates its elements in place, at the literal's own position among the calls, so the literal
+  is one unit. One that holds a call is an ordered call, like `&&` and `||`; one that reads a mutable operand is an
+  early form. `fmt.Println(g, map[string]int{"k": g}["k"], mut())` prints the new `g`, then the old one;
 - a value assigned to an interface parameter or element (boxed) that is not addressable and is a `bool`, a one-byte
   integer, a struct, an array or `&T{...}`: `fmt.Println(g, g > 1, mut())` prints the old comparison and the new `g`.
 
@@ -65,6 +68,9 @@ A read is mutable when a call of the same statement can write what it reads (`op
 - an element of a slice or a map, or of an array behind a pointer;
 - an array or string element whose base or index is mutable, and a slice expression with a mutable part.
 
+An element of a composite literal is not a mutable read, since no call can write a value that does not exist yet;
+only its index can be one.
+
 **A plain local is never a mutable read**, and the reason matters. It is not that a call cannot reach it. It is that
 no call can WRITE it: a local that is neither captured nor address-taken can be changed only by the statement's own
 assignments, which run after its operands are evaluated. Its read is therefore the same in either order, and the
@@ -77,10 +83,24 @@ untouched.
 - An operand of `&&` or `||` on its own: the right one runs only after the left one. An `&&` or `||` that holds a
   call moves whole or not at all, so its short circuit stands.
 - A func literal's body, which is another function.
-- A map literal: gc reads its elements in place.
-- `&x`, which takes an address and reads no value a call can change.
+- An element of a map literal on its own: it moves with its literal.
 - A multi-value call, and a statement whose right side is one (`a, b = f()`) or a comma-ok form. A statement with
   such a call among its hoists keeps C#'s order.
+
+## Address-of
+
+`&T{...}` evaluates the literal's elements like any other operands: a call in it is ordered among the statement's
+calls and a mutable read in it is read after them, so `h(g, &T{x: g}, mut())` passes the new `g` twice. Any other
+`&x` evaluates only what locates `x`, the index and pointer operands an assignment's left side evaluates
+(`walkStore`): `&a[f()]` runs `f` among the calls and `&p.q[i]` reads `p.q`, and the address itself reads no value.
+
+## The fail-safe
+
+The walk records a call only where it knows the expression form that holds it. Behind it, `operandOrderCovers` reads
+every call, receive and early form of the statement with one `ast.Inspect`, skipping func literals. If one that comes
+before the statement's last hoist is neither an event of the walk nor inside a hoisted unit, the statement keeps C#'s
+order. A form the walk does not know can therefore cost a statement its hoists, and can never move a later call ahead
+of an earlier one.
 
 ## Statements and headers
 
@@ -120,6 +140,13 @@ a literal's hoist inside a statement that has one of its own takes the next numb
 reach lines it does not touch. A loop header learns that its condition spilled from `operandHoistCount`, as it learns
 of a tuple spread from `tupleTempIndex`.
 
+A hoist renders with no expression context (`convExpr(hoist, nil)`). That cannot change its text: a hoist is a call,
+a receive or an early form. A call's context carries only the lambda context; its other fields (the argument and
+parameter forms of a `go` or `defer` target, the deferred call itself) apply to the go or defer target, which is never
+hoisted. A pointer cast `(*T)(x)` is the one place a cast takes a context, and a conversion is transparent and never
+hoisted. A receive's context marks the comma-ok form, which is excluded. A capture declaration a hoist needs falls
+back to `v.hoistedDecls`, the same prelude the hoist is written to, so it still precedes the `var evalᴛN` line.
+
 The return statement's existing spill (`returnOperandOrder.go`, see
 [Multi-Assignment and Evaluation Order](ConversionStrategies-Reference/multi-assignment.md#a-multi-value-return-reads-its-plain-operands-after-its-calls))
 is the narrower special case of this rule for multi-value returns. The two compose: a call this rule hoists renders as
@@ -134,5 +161,5 @@ With the change, all nine match. A tenth project, OperandOrderStmtForms, covers 
 design review: a local `var` declaration, `defer` and `go` arguments, and a switch tag. OperandOrderEarly has one row
 per early form; at the base it reads 22 lines away from Go, and at the cut before the early forms were added it read
 23 lines away (it moved calls past early forms and the `&&` unit). OperandOrderLabels covers a `goto` to a labeled
-prelude, a labeled range with `continue`, a labeled `if`, an `else if` with an init, a func literal's prelude and a loop condition whose call moves into the body. MnLaterArg (`src/tools/mnspike2`) reads 1405 under all four arms: the plain and
+prelude, a labeled range with `continue`, a labeled `if`, an `else if` with an init, a func literal's prelude and a loop condition whose call moves into the body. OperandOrderAddrMap covers calls and reads under `&` and inside map and slice literals: at the cut before the walk reached them it read seven rows away from Go, four of them with two calls run in the opposite order, and its two controls and its slice-literal row matched. MnLaterArg (`src/tools/mnspike2`) reads 1405 under all four arms: the plain and
 twinned builds, each with M:N on and off.

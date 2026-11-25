@@ -1928,6 +1928,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
 
     [TestMethod]
+    public void CheckOperandOrderAddrMap() => CheckTarget("OperandOrderAddrMap");
+
+    [TestMethod]
     public void CheckOperandOrderAssign() => CheckTarget("OperandOrderAssign");
 
     [TestMethod]

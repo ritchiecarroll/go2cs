@@ -1040,6 +1040,7 @@
     <Project Path="tests/Behavioral/NonSelfConstraintSliceArg/NonSelfConstraintSliceArg.csproj" />
     <Project Path="tests/Behavioral/InitOrderNoInline/InitOrderNoInline.csproj" />
     <Project Path="tests/Behavioral/OpenGenericPointerImplement/OpenGenericPointerImplement.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderAddrMap/OperandOrderAddrMap.csproj" />
     <Project Path="tests/Behavioral/OperandOrderAssign/OperandOrderAssign.csproj" />
     <Project Path="tests/Behavioral/OperandOrderBinary/OperandOrderBinary.csproj" />
     <Project Path="tests/Behavioral/OperandOrderCallArgs/OperandOrderCallArgs.csproj" />
