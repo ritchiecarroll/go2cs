@@ -12698,7 +12698,7 @@ A Go `panic` becomes `throw panic(...)` ([Defer / Panic / Recover](#defer--panic
 straight to `panic` stays inline as a plain C# string instead of becoming a hoisted `ˢ` field. The tuple
 result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMult` shows both:
 
-<!-- source: src/core/crypto/elliptic/nistec.cs:242-245 -->
+<!-- source: src/core/crypto/elliptic/nistec.cs:262-265 -->
 ```csharp
     var (p, err) = curve.newPoint().ScalarBaseMult(scalar);
     if (err != nil) {
@@ -12712,7 +12712,7 @@ result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMul
      `crypto/elliptic: nistec rejected normalized scalar`. Checked against the Go 1.24.13 tree; go1.25
      removed nistec_p256.go, and at go1.26.9 (re-read at go1.26.10) P256OrdInverse's one caller is
      crypto/internal/fips140/ecdsa/ecdsa.go:384-386, which falls back on the error. The same panic literal
-     stands at ../src/core/crypto/elliptic/nistec.cs:244#98b070. The default (-tags=) build binds the
+     stands at ../src/core/crypto/elliptic/nistec.cs:264#98b070. The default (-tags=) build binds the
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting

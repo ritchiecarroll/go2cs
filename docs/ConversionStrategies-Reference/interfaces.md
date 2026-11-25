@@ -1449,7 +1449,7 @@ Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.
 where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner
 call is deconstructed into markers and passed expanded (`rangeˢ` is the hoisted `"range"` literal):
 
-<!-- source: src/core/text/template/parse/parse.cs:758-759 -->
+<!-- source: src/core/text/template/parse/parse.cs:759-760 -->
 ```csharp
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
