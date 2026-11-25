@@ -156,7 +156,7 @@ function Get-CorpusFlavorArch {
 # osx-arm64 because the leg built darwin/arm64). So an Apple-silicon host keeps darwin/amd64 here until D5, exactly as
 # before D2. One entry per pinned host: the key is the host's GOOS/GOARCH, the value the flavour arch it builds. The
 # sweep's own pin ($SweepInterimPlatformPins, _roster.ps1) is a separate fact and lasts to D7.
-$HostFlavorArchInterimPins = @{ 'darwin/arm64' = 'amd64' }
+$HostFlavorArchInterimPins = @{} # RED CONTROL (never lands): the interim pin removed, so osx-arm64 is a mixed leg again
 
 # The ARCH of the corpus flavor this host's instruments build: Get-CorpusFlavorArch for the host, unless the host is
 # pinned above. .github/flavour-probe.ps1 asks this same function, so a leg whose instruments would build another
