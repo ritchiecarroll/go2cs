@@ -100,10 +100,24 @@ namespace go.golib;
         if (Find(keys, Door.Other) is not null)
             throw BothDoors(function);
 
-        if (Find(keys, Door.Image) is { Image: { } shared })
-            return new GoCgoPin(shared, 0);
+        int length = (int)Math.Max(rootSize, size);
 
-        byte[] image = AllocationCounter.NewArray<byte>((int)Math.Max(rootSize, size));
+        if (Find(keys, Door.Image) is { Image: { } shared } existing)
+        {
+            // Share only the SAME root's image (P3's NIT 2): another root whose allocations overlap this one's has its own
+            // value, and one buffer at offset 0 cannot be both.
+            if (!ReferenceEquals(existing.Keys[0], keys[0]))
+                throw RuntimeErrorPanic.ErrorString($"cgo: two pointers handed to C.{function} view two Go values that share an allocation, each as an image; go2cs cannot hand C one image of both, so it refuses the call");
+
+            // The first view's buffer is already pinned and cannot grow. A second view whose C struct is larger would read
+            // and write past it (P3's MUST): refused by name rather than handed a short buffer.
+            if (shared.Length < length)
+                throw RuntimeErrorPanic.ErrorString($"cgo: two pointers handed to C.{function} view the same Go value as C structs of different sizes, and the larger comes second ({length} bytes against the first view's {shared.Length}); go2cs hands C one image per Go value and cannot grow it once pinned, so it refuses the call");
+
+            return new GoCgoPin(shared, 0);
+        }
+
+        byte[] image = AllocationCounter.NewArray<byte>(length);
 
         fixed (byte* at = image)
             NativeStructMarshal.EncodeValue(value, type, at);

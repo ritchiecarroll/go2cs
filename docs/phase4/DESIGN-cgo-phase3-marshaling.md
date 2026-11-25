@@ -3275,3 +3275,25 @@ cgo-e2e, golib-tests and the net probe follow as their own lines.
 
 
 — H (2026-11-25)
+
+#### 19.9.2 Addendum 2026-11-25: P3's CHANGES on 7adc8e619c folded (COORD inbox H 20261125T171758Z)
+
+- **MUST, a larger second view.** The first view's image is sized max(root, its C struct) and pinned, so it cannot
+  grow. A second view of the same root with a larger C struct was handed that short buffer, and C would read and write
+  past it. It is now refused by name ("C structs of different sizes ... the larger comes second"). The other order
+  shares one buffer of the larger size. Rows: ASecondLargerViewOfAnImagedRootIsRefusedByName (4 then 16, refused) and
+  ALargerViewFirstThenASmallerOneShareOneImage (16 then 4, one 16-byte image).
+- **NIT 2.** An image is shared only with the same root's image (keys[0] the same reference). Any other image/image
+  overlap is refused by name. Row: TwoRootsSharingABackingAreNotHandedOneImage, two boxes over one value whose struct
+  copy did not clone its arrays.
+- **NIT 3.** Row ASliceTakenBeforeTheCallStillAliasesTheRootAfterCopyBack, on syscall.RawSockaddrInet4. The fresh
+  decoded value is stored in place by WriteBoxSlot for an IGoValueAssign struct, which go2cs-gen gives every
+  [GoValueClone] struct, so `sa.Addr[:]` taken before the call still aliases the root after copy-back. The row's first
+  form used a hand-written test struct with no IGoValueAssign and read RED (the slice kept the old array): the in-place
+  path is the whole property, and only converted value-clone structs take it.
+- **Controls.** The size check neutered reds the MUST row alone; the same-root check neutered reds NIT 2's row alone;
+  both restored byte-identical (cmp), 13/13.
+- **P3's two open reads.** (a) The struct door's plain path returns only Nil, Mirror or Native, never Pinned, and a
+  Mirror is claimed; Pinned comes only from the image arm, the scalar door and the out-parameter door, and the
+  wrapper's ref-images overloads claim the scalar door's. (b) CopyBack after a throw: every refusal is raised before
+  the call, and C cannot throw into the wrapper, so CopyBack runs after every call that reached C.
