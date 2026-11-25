@@ -21,7 +21,7 @@ internal static Func<(Action, Action)> newNativeFlag;
 
 internal static Func<bool, (Action, Action)> newBracketedFlag;
 
-internal static Func<(int64, int64, int64, bool)> counters;
+internal static Func<(int64, int64, int64, int64, bool)> counters;
 
 internal static bool reading = Δos.Getenv("MN_INV_READING") == "1"u8;
 
@@ -64,8 +64,21 @@ internal static void v1(nint k) {
     if (mk == nil) {
         mk = channelEvent;
     }
+    var (ww, ws) = channelEvent();
+    blockAll(k, ww, ws);
+    int64 i0 = default;
+    int64 s0 = default;
+    if (counters != nil) {
+        (_, _, i0, s0, _) = counters();
+    }
     var (wait, set) = mk();
-    fmt.Println("V1 goroutines released from a managed wait:", blockAll(k, wait, set) == k);
+    var ok = blockAll(k, wait, set) == k;
+    if (counters != nil) {
+        var (_, _, i1, s1, on) = counters(); if (on) {
+            ok = ok && s1 > s0 && i1 == i0;
+        }
+    }
+    fmt.Println("V1 goroutines released from a managed wait, which the scheduler sensed:", ok);
 }
 
 internal static void v2(nint k) {
@@ -88,14 +101,14 @@ internal static bool bracketed(nint k, bool blocks) {
     int64 r0 = default;
     int64 i0 = default;
     if (counters != nil) {
-        (h0, r0, i0, _) = counters();
+        (h0, r0, i0, _, _) = counters();
     }
     var (wait, set) = mk(blocks);
     var released = blockAll(k, wait, set) == k;
     if (counters == nil) {
         return released;
     }
-    var (h1, r1, i1, on) = counters();
+    var (h1, r1, i1, _, on) = counters();
     switch (ᐧ) {
     case {} when !on: {
         return released;

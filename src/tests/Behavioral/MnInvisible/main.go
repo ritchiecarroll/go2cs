@@ -48,8 +48,8 @@ var newNativeFlag func() (wait func(), set func())
 // or MayBlock. nil under Go; hand_impl.cs sets it.
 var newBracketedFlag func(blocks bool) (wait func(), set func())
 
-// counters reads the scheduler's handoffs, retakes and injections, and whether it is on. nil under Go.
-var counters func() (handoffs, retakes, injections int64, on bool)
+// counters reads the scheduler's handoffs, retakes, injections and sensed waits, and whether it is on. nil under Go.
+var counters func() (handoffs, retakes, injections, sensed int64, on bool)
 
 var reading = os.Getenv("MN_INV_READING") == "1"
 
@@ -81,13 +81,26 @@ func blockAll(k int, wait func(), set func()) int {
 	return n
 }
 
+// v1: under GO2CS_MN=1 the scheduler must have SENSED the waits (N5 3a), not injected Ps for them.
 func v1(k int) {
 	mk := newManagedEvent
 	if mk == nil {
 		mk = channelEvent
 	}
+	ww, ws := channelEvent()
+	blockAll(k, ww, ws)
+	var i0, s0 int64
+	if counters != nil {
+		_, _, i0, s0, _ = counters()
+	}
 	wait, set := mk()
-	fmt.Println("V1 goroutines released from a managed wait:", blockAll(k, wait, set) == k)
+	ok := blockAll(k, wait, set) == k
+	if counters != nil {
+		if _, _, i1, s1, on := counters(); on {
+			ok = ok && s1 > s0 && i1 == i0
+		}
+	}
+	fmt.Println("V1 goroutines released from a managed wait, which the scheduler sensed:", ok)
 }
 
 func v2(k int) {
@@ -110,14 +123,14 @@ func bracketed(k int, blocks bool) bool {
 	blockAll(k, ww, ws)
 	var h0, r0, i0 int64
 	if counters != nil {
-		h0, r0, i0, _ = counters()
+		h0, r0, i0, _, _ = counters()
 	}
 	wait, set := mk(blocks)
 	released := blockAll(k, wait, set) == k
 	if counters == nil {
 		return released
 	}
-	h1, r1, i1, on := counters()
+	h1, r1, i1, _, on := counters()
 	switch {
 	case !on:
 		return released

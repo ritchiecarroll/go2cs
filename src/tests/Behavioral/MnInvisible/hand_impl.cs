@@ -47,7 +47,7 @@ internal static void InvisibleInit() {
 
     counters = () => {
         string reading = go.golib.GoScheduler.Reading();
-        return (Counter(reading, "handoffs"), Counter(reading, "retakes"), Counter(reading, "injections"), go.golib.GoScheduler.Enabled);
+        return (Counter(reading, "handoffs"), Counter(reading, "retakes"), Counter(reading, "injections"), Counter(reading, "sensed"), go.golib.GoScheduler.Enabled);
     };
 }
 
