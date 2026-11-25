@@ -1,9 +1,11 @@
 # DATA — M:N D2/T6: the linux roster against a twinned standard library (hosted, linux-x64)
 
 **Lane R, 2026-11-25.** COORD GO 20261125T080536Z, re-rule 095355Z (option (i)), GO wave 0 102335Z. Wave 0 ran at
-`ef7d136de7`, the same cut before the proof fix. Every other run is at `7d8e14c094`, which is master `08e113cb0b` (train 11) plus this branch's two files: `.github/workflows/os-matrix.yml`
-(the `;twins=` sweep-shard option and its proof) and `src/go2cs/internal/repoguard/stdlibTwinsDefaultOff_test.go`. The
-deal is the 1.26.11.1 bank's linux rows, sharded as
+`ef7d136de7`, the same cut before the proof fix. Every other run is at `7d8e14c094`, which is master `08e113cb0b`
+(train 11) plus two files on `claude/r-t6-linux`: `.github/workflows/os-matrix.yml` (the `;twins=` sweep-shard option
+and its proof) and `src/go2cs/internal/repoguard/stdlibTwinsDefaultOff_test.go`. That instrument stays on its branch,
+and this record lands alone off master `1c556c35a5` (COORD 20261125T155057Z). The deal is the 1.26.11.1 bank's linux
+rows, sharded as
 `docs/phase4/data/rebank-1.26.11.1/hosted-280a01952c/shards.tsv` (AR-1..AR-17). Those planned walls are the
 linux-arm64 deal, and these runs are linux-x64, so a plain arm's wall is the only wall baseline here.
 
@@ -119,17 +121,22 @@ the row is master drift, attributed to a finding.
 
 ## 6a. Findings this reading produced (plain, master 08e113cb0b, outside T6)
 
+Routing is COORD's as of 20261125T155057Z. The unrouted-at-reading items each have a BOARD row (2026-11-25, R).
+
 1. context: `go f(x)` on a named func-type value binds no `goǃ` rung since every defined func type is its own delegate
-   (d5796d7f4d). Routed to P2 by COORD 20261125T130502Z.
-2. net/url: `typeof(encoding.json_package)` inside `url_package` binds net/url's own `type encoding` (CS0426). Routed
-   to i9.
-3. sync TestPoolGC fails in C#. Routed to P1. runtime (TestStackGrowth's finalizer watchdog), weak, runtime/pprof,
-   fips140cache and unique read as the same finalizer and GC family. That is a reading, not rooted.
-4. testing TestTBHelper now passes, so its disclosure is orphaned. Routed to P1.
+   (d5796d7f4d). P2, reported cured.
+2. net/url: `typeof(encoding.json_package)` inside `url_package` binds net/url's own `type encoding` (CS0426). i9,
+   reported cured.
+3. sync TestPoolGC fails in C#. P1/P2, the optimized-host list.
+   - runtime (TestStackGrowth's finalizer watchdog), weak, runtime/pprof and crypto/internal/fips140cache read as one
+     finalizer and GC family. That is a reading, not rooted. P2, for an optimized-host A/B.
+   - unique (TestMakeAllocs, TestHandle) goes to P6.
+4. testing TestTBHelper now passes, so its disclosure is orphaned. Disclosure counts go to P1: this one, syscall's 8 that
+   no longer fire, and internal/zstd's 1 new one.
 5. internal/runtime/gc/scan: the converted `scan.CanAVX512()` reads false on hardware that has AVX-512, so the row fails
-   on any AVX-512 runner, whatever the stdlib build. Posted 20261125T154800Z, no owner.
-- Also reported, unrooted: reflect TestConvert, log/slog TestCallDepth, syscall's 8 disclosures that no longer fire,
-  internal/zstd's 1 new disclosure, and sort's CS0051 (with P2 on train 13).
+   on any AVX-512 runner, whatever the stdlib build. R: root it first, then cure it, so the verdict does not depend on
+   the runner.
+- Also: sort's CS0051 goes to i9, as a cut. reflect TestConvert and log/slog TestCallDepth go to i9.
 
 ## 7. Predictions, scored as worded (each written before its run)
 
