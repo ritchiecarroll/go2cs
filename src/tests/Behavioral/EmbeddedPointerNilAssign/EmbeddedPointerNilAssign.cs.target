@@ -49,9 +49,12 @@ internal static void main() {
     s.setting = p;
     fmt.Println(s.setting == nil);
 
-    s.setting = lookup("gcpacertrace");
+    var evalᴛ1 = lookup("gcpacertrace");
+    s.setting = evalᴛ1;
     fmt.Println(s.setting == nil);
-    fmt.Println(s.name, s.bump(), s.bump());
+    var evalᴛ2 = s.bump();
+    var evalᴛ3 = s.bump();
+    fmt.Println(s.name, evalᴛ2, evalᴛ3);
 
     var direct = lookup("other");
     s.setting = direct;

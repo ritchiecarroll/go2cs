@@ -664,11 +664,11 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		switch {
 		case context.deferredDecls != nil:
 			// go/defer/return thread an explicit builder for their own hoisting.
-			context.deferredDecls.WriteString(strings.TrimRight(decls, " "))
+			context.deferredDecls.WriteString(strings.TrimRight(v.afterOperandHoist(context.deferredDecls, decls), " "))
 		case v.hoistedDecls != nil:
 			// The enclosing statement (assignment RHS, composite-literal element, call argument)
 			// hoists these decls to a valid position before the statement.
-			v.hoistedDecls.WriteString(strings.TrimRight(decls, " "))
+			v.hoistedDecls.WriteString(strings.TrimRight(v.afterOperandHoist(v.hoistedDecls, decls), " "))
 		default:
 			result.WriteString(decls)
 		}
@@ -1544,4 +1544,14 @@ func numericLiteralConvertsTo(lit *ast.BasicLit, declared types.Type) bool {
 	}
 
 	return true
+}
+
+// afterOperandHoist drops the leading newline of capture declarations written straight after an operand-order hoist
+// into the same builder, since the hoist already ends its own line (operandOrder.go); otherwise it leaves them as is.
+func (v *Visitor) afterOperandHoist(sink *strings.Builder, decls string) string {
+	if sink == v.operandHoistSink && sink.Len() == v.operandHoistEnd {
+		return strings.TrimPrefix(decls, v.newline)
+	}
+
+	return decls
 }

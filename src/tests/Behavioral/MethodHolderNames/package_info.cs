@@ -60,7 +60,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("forms.go", "forms.cs", "ABUolpaigpSUgoKUgpSClIKUgpSUlMS2lKbcgoKC7oKCgqaCgpSCgpSCgg==")]
+[assembly: GoPositionMap("forms.go", "forms.cs", "ABUolpaigpSUgoKUgpSClIKUgpSUlMS2lLbcgoKC7oKCgqaCgpSCgpSCgg==")]
 [assembly: GoPositionMap("main.go", "main.cs", "AA4clNiUgoKmlIKCpoKUpKaCpqiClLSm7JSaAAYQxIKCgoKCgoKCgpSClJSCloKCopSCgg==", "", "103=main.Box.Scale")]
 [assembly: GoPositionMap("others.go", "others.cs", "AAscgoKUgpaU2pSUmIKCpoKClIKClII=")]
 [assembly: GoPositionMap("shadow.go", "shadow.cs", "AAoSgoKolpaUgoKC")]

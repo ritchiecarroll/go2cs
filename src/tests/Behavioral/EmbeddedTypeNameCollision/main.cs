@@ -26,16 +26,20 @@ internal static void main() {
     var p = Ꮡb;
     p.of(Buffer.ᏑΔBuffer).Bump();
     p.of(Buffer.ᏑΔBuffer).Bump();
-    fmt.Println(p.ΔBuffer.N, p.N, p.ΔBuffer.Describe());
+    var evalᴛ1 = p.ΔBuffer.Describe();
+    fmt.Println(p.ΔBuffer.N, p.N, evalᴛ1);
 
     p.ΔBuffer.Data = "beta";
     p.of(Buffer.ᏑΔBuffer).Append("!");
-    fmt.Println(p.Data, p.ΔBuffer.N, p.ΔBuffer.Describe());
+    var evalᴛ2 = p.ΔBuffer.Describe();
+    fmt.Println(p.Data, p.ΔBuffer.N, evalᴛ2);
 
     var z = @new<Buffer>();
     z.of(Buffer.ᏑΔBuffer).Append("gamma");
     z.Tag = "fresh";
-    fmt.Println(z.ΔBuffer.Describe(), z.ΔBuffer.N, Renamed(z.Value));
+    var evalᴛ3 = z.ΔBuffer.Describe();
+    var evalᴛ4 = Renamed(z.Value);
+    fmt.Println(evalᴛ3, z.ΔBuffer.N, evalᴛ4);
 }
 
 } // end main_package

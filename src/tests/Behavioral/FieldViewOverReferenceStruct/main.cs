@@ -219,13 +219,15 @@ internal static void main() {
     var raw = Ꮡ(new rawInet4(family: 2, port: 0x1234, addr: array<byte>([127, 0, 0, 1])));
 
     encodePort(raw, 8080);
-    fmt.Printf("encode: port=%#04x decode=%d family=%d addr=%v\n"u8, raw.port, decodePort(raw), raw.family, raw.addr);
+    var evalᴛ1 = decodePort(raw);
+    fmt.Printf("encode: port=%#04x decode=%d family=%d addr=%v\n"u8, raw.port, evalᴛ1, raw.family, raw.addr);
 
     raw.port = 0x1234;
     fmt.Printf("direct read: %#02x\n"u8, directRead(raw));
     directWrite(raw, 0xCD);
     directOpAssign(raw);
-    fmt.Printf("direct write: port=%#04x len=%d\n"u8, raw.port, directLen(raw));
+    var evalᴛ2 = directLen(raw);
+    fmt.Printf("direct write: port=%#04x len=%d\n"u8, raw.port, evalᴛ2);
 
     var (lo, hi, port) = aliasBothWays(raw);
     fmt.Printf("alias: %#02x %#02x port=%#04x\n"u8, lo, hi, port);
@@ -234,13 +236,16 @@ internal static void main() {
     var r = Ꮡ(new record(label: "r", word: 0x0A0B0C0D, both: new pair(a: 0x1111, b: 0x2222), tail: 0x5678));
     var (b0, b3) = wordBytes(r);
     fmt.Printf("word: %#02x %#02x word=%#08x\n"u8, b0, b3, r.word);
-    fmt.Printf("struct field: %#04x b=%#04x byte=%#02x tail=%#04x label=%s\n"u8, structHalves(r), r.both.b, structBytes(r), r.tail, r.label);
+    var evalᴛ3 = structHalves(r);
+    var evalᴛ4 = structBytes(r);
+    fmt.Printf("struct field: %#04x b=%#04x byte=%#02x tail=%#04x label=%s\n"u8, evalᴛ3, r.both.b, evalᴛ4, r.tail, r.label);
 
     raw.port = 0x1234;
     var v = wholeLoad(raw);
     fmt.Printf("whole load: %#02x %#02x port=%#04x\n"u8, v[0], v[1], raw.port);
     wholeStore(raw, array<byte>([1, 2]));
-    fmt.Printf("whole store: port=%#04x family=%d addr=%v rounds=%d\n"u8, raw.port, raw.family, raw.addr, countRounds(raw));
+    var evalᴛ5 = countRounds(raw);
+    fmt.Printf("whole store: port=%#04x family=%d addr=%v rounds=%d\n"u8, raw.port, raw.family, raw.addr, evalᴛ5);
 
     (lo, hi, port) = storeCollectRead(raw, 0x41);
     fmt.Printf("collect: %#02x %#02x port=%#04x addr=%v\n"u8, lo, hi, port, raw.addr);
@@ -249,7 +254,8 @@ internal static void main() {
     fmt.Printf("address: field=%v otherField=%v otherStruct=%v twoViews=%v\n"u8, sameAsItsField(raw), sameAsAnotherField(raw), sameAcrossStructs(raw, other), twoViewsAreOnePointer(raw));
 
     encodePort(Ꮡglobal, 443);
-    fmt.Printf("global: port=%#04x decode=%d addr=%v\n"u8, global.port, decodePort(Ꮡglobal), global.addr);
+    var evalᴛ6 = decodePort(Ꮡglobal);
+    fmt.Printf("global: port=%#04x decode=%d addr=%v\n"u8, global.port, evalᴛ6, global.addr);
 
     var structs = slice<rawInet4>([new(port: 1), new(port: 2)]);
     encodePort(Ꮡ(structs, 1), 0x0102);
@@ -257,7 +263,8 @@ internal static void main() {
 
     var sa = Ꮡ(new sockInet4(port: 8443, addr: array<byte>([192, 168, 0, 1])));
     sa.sockaddr();
-    fmt.Printf("two deep: raw.port=%#04x decode=%d raw.addr=%v\n"u8, sa.raw.port, anyToPort(sa), sa.raw.addr);
+    var evalᴛ7 = anyToPort(sa);
+    fmt.Printf("two deep: raw.port=%#04x decode=%d raw.addr=%v\n"u8, sa.raw.port, evalᴛ7, sa.raw.addr);
     fmt.Printf("two deep direct: %#02x raw.port=%#04x\n"u8, twoDeepDirect(sa), sa.raw.port);
     fmt.Printf("variable: %#04x package: %#04x\n"u8, variableRoot(), packageRoot());
     fmt.Printf("array field of a variable: %s\n"u8, arrayFieldOfVariable());

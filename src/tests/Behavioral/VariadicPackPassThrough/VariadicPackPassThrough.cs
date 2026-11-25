@@ -80,7 +80,8 @@ internal static void deferred(ж<nint> @out, params ꓸꓸꓸnint xsʗp) {
 
         var xsʗ1 = xs;
         defer([GoFunc("deferred.func1")] () => {
-            @out.Value = sum(xsʗ1.ꓸꓸꓸ);
+            var evalᴛ1 = sum(xsʗ1.ꓸꓸꓸ);
+            @out.Value = evalᴛ1;
         }, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

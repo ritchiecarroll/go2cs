@@ -129,12 +129,12 @@ func ParseOID(oid string) (OID, error) {
 ```csharp
 public static (OID, error) ParseOID(@string oid) {
     OID o = default;
-    var ᴛ1 = o.unmarshalOIDText(oid);
-    return (o, ᴛ1);
+    var evalᴛ1 = o.unmarshalOIDText(oid);
+    return (o, evalᴛ1);
 }
 ```
 
-(`ᴛ1 = o.unmarshalOIDText(oid)` is gc's own rewrite, emitted; the type renders as `ΔOID`, the converter's `Δ` collision rename of Go's `OID`.)
+(`evalᴛ1 = o.unmarshalOIDText(oid)` is gc's own rewrite, emitted; the type renders as `ΔOID`, the converter's `Δ` collision rename of Go's `OID`.)
 
 Without the spill this emits `return (o, o.unmarshalOIDText(oid));`, which copies the **empty** `o` and only then fills the original — so `crypto/x509`'s `ParseOID` returned a zero-length OID beside a nil error, and every parse "succeeded" with no bytes. Nothing about it is visible at compile time: both sides compile, both return two values, and only the *content* of the first differs.
 
@@ -148,15 +148,99 @@ The spill fires only where the ordering is **observable** — where a later oper
 
 Whether the read and the write actually *meet* is decided by comparing **access paths** — a root variable (`types.Object`, exactly as in `lhsReusedInLaterRhs`, so a same-named but distinct variable is never a false positive) plus the hops from it to the storage in question, where a field or element hop stays *inside* the previous location and a deref *leaves* it. Two locations conflict when they share a root, agree on every hop they both have, and the longer path's extra hops contain no deref.
 
-A root plus a single "indirect" flag is not enough, and the corpus says so. `net/http`'s `return n.handler, n.pattern.String(), n.pattern, matches` reads storage inside `*n` while the call writes `*(n.pattern)`; the flag model reads both as one location — "something behind `n`" — and spills a call that provably cannot touch what the first operand reads. The paths diverge at `.handler` versus `.pattern`, so they do not conflict and nothing spills. The model holds the case one hop over just as firmly: `return nd.pat.n, nd.pat.bump()` reads *through* the very pointer the call writes through, the write path is a prefix of the read path with no deref between them, and it spills. Where a hop cannot be spelled exactly — a field promoted through embedding — the path is **truncated** rather than abandoned, naming the larger enclosing location, so imprecision can only ever over-report a conflict and never miss one.
+A root plus a single "indirect" flag is not enough, and the corpus says so. `net/http`'s `return n.handler, n.pattern.String(), n.pattern, matches` reads storage inside `*n` while the call writes `*(n.pattern)`; the flag model reads both as one location — "something behind `n`" — and spills a call that provably cannot touch what the first operand reads. The paths diverge at `.handler` versus `.pattern`, so they do not conflict and this return-only rule spills nothing. The statement-wide rule in the next section runs first and spills that call anyway (net/http now emits `return (n.handler, evalᴛ1, n.pattern, matches);`): it orders every call after a read through a pointer without asking whether the paths meet, which is gc's order either way and changes no value here. The model holds the case one hop over just as firmly: `return nd.pat.n, nd.pat.bump()` reads *through* the very pointer the call writes through, the write path is a prefix of the read path with no deref between them, and it spills. Where a hop cannot be spelled exactly — a field promoted through embedding — the path is **truncated** rather than abandoned, naming the larger enclosing location, so imprecision can only ever over-report a conflict and never miss one.
 
-Every call-bearing operand at or **below** the hazardous index spills, not merely the hazardous one: the spec *does* fix the calls' order among themselves, so spilling `b.bump()` out of `return b.n, side(), b.bump()` while leaving `side()` in the tuple would run bump first. A channel **receive** spills with them, since the spec's sentence orders receives alongside calls. A type conversion and a pure builtin (`len(o.der)`) do not: both are calls syntactically and reads semantically, gc spills neither, and leaving them in the tuple is what puts their reads after the spilled calls — which is exactly where gc puts them. The temporaries are numbered from the file-monotonic `tupleTempIndex` the converter's other multi-value expansions already share, so two spills in one scope cannot collide.
+Every call-bearing operand at or **below** the hazardous index spills, not merely the hazardous one: the spec *does* fix the calls' order among themselves, so spilling `b.bump()` out of `return b.n, side(), b.bump()` while leaving `side()` in the tuple would run bump first. A channel **receive** spills with them, since the spec's sentence orders receives alongside calls. A type conversion and a pure builtin (`len(o.der)`) do not: both are calls syntactically and reads semantically, gc spills neither, and leaving them in the tuple is what puts their reads after the spilled calls — which is exactly where gc puts them. The temporaries are named `evalᴛ` and a number unique in the function, the names the statement-wide rule below gives its own spills, so two spills in one scope cannot collide.<!-- Before the statement-wide rule: numbered from the file-monotonic `tupleTempIndex` the converter's other multi-value expansions share. -->
 
-The scope is as much of the rule as the spill is: a rule that spilled every call-bearing operand would also be correct, and would rewrite most of the corpus for no correctness gain. Four controls therefore keep the call *in* the tuple — an operand that **is** the pointer (`return c, c.bump()`; both orders yield the same pointer, and the emitted pointer is the box rather than a copy), a call on unrelated storage (`return a.n, b.bump()`), a **value**-receiver method (`return c.n, c.peek()`; the receiver is a copy, so the caller can observe nothing), and the net/http pointer-field shape above. Deliberately *not* covered, each because deciding it needs more than the statement itself: an operand that contains a call of its own (`return o.f + g(), o.mutate()` — gc spills `g()` too and reads `o.f` last, so spilling the whole operand would re-create the problem rather than fix it; no corpus site), a pointer whose **pointee no path can name** (`f(getPtr())` — the interprocedural question one step removed), aliasing through a slice or map's **backing store** (`return s[0], fill(s)`, where no address is taken at the call site at all), and a call that reaches the operand through a package-level or captured variable, which is interprocedural outright.
+The scope is as much of the rule as the spill is: a rule that spilled every call-bearing operand would also be correct, and would rewrite most of the corpus for no correctness gain. Three controls therefore keep the call *in* the tuple — an operand that **is** the pointer (`return c, c.bump()`; both orders yield the same pointer, and the emitted pointer is the box rather than a copy), a call on unrelated storage (`return a.n, b.bump()`), and a **value**-receiver method (`return c.n, c.peek()`; the receiver is a copy, so the caller can observe nothing). The net/http pointer-field shape above was the fourth control until the statement-wide rule spilled it. Deliberately *not* covered, each because deciding it needs more than the statement itself: an operand that contains a call of its own (`return o.f + g(), o.mutate()` — gc spills `g()` too and reads `o.f` last, so spilling the whole operand would re-create the problem rather than fix it; no corpus site), a pointer whose **pointee no path can name** (`f(getPtr())` — the interprocedural question one step removed), aliasing through a slice or map's **backing store** (`return s[0], fill(s)`, where no address is taken at the call site at all), and a call that reaches the operand through a package-level or captured variable, which is interprocedural outright.
 
-**Corpus footprint** (measured when the spill was added, by an A/B of two seeded whole-stdlib reconverts)<!-- 2 production files; 10,260 files emitted per side --> — `crypto/x509/oid.cs`, where the spill is the bug fix, and `runtime/symtabinl.cs`'s `return u, u.resolveInternal(pc)`, where it is emission-only (the method reads its receiver and writes nothing, so gc's order and C#'s agree on the value; the spill simply stops relying on that). Their two `package_info.cs` position maps move with them, and nothing else in the corpus does.
+**Corpus footprint** (measured when the spill was added, by an A/B of two seeded whole-stdlib reconverts)<!-- 2 production files; 10,260 files emitted per side --> — `crypto/x509/oid.cs`, where the spill is the bug fix, and `runtime/symtabinl.cs`'s `return u, u.resolveInternal(pc)`, where it is emission-only (the method reads its receiver and writes nothing, so gc's order and C#'s agree on the value; the spill simply stops relying on that). Their two `package_info.cs` position maps move with them, and nothing else in the corpus did. The statement-wide rule in the next section now spills far more widely, and its footprint is stated there.
 
-(Guarded by the `MultiValueReturnOrder` behavioral test — all five hazard shapes, a three-operand call-order case, and the four controls, output-compared vs `go run`; before the fix every hazard reports the pre-mutation value. `returnOperandOrder.go` owns the analysis and `returnOperandOrder_test.go` pins the emission against three neuters: the rule forced off, the rule forced on everywhere, and `pathsConflict` reduced to the root-plus-indirect model — the last reporting exactly the two controls the access path exists to separate.)
+(Guarded by the `MultiValueReturnOrder` behavioral test — all five hazard shapes, a three-operand call-order case, and the controls, output-compared vs `go run`; before the fix every hazard reports the pre-mutation value. `returnOperandOrder.go` owns the analysis and `returnOperandOrder_test.go` pins the emission against three neuters: the rule forced off, the rule forced on everywhere, and `pathsConflict` reduced to the root-plus-indirect model — the last reporting exactly the two controls the access path exists to separate. Those neuters were read when the controls were four; the statement-wide rule now spills `pointerFieldUnrelated`, so the test carries it as a hazard and three controls remain.)
+
+## A call runs before the plain operands of its statement
+
+Go's specification orders a statement's calls and receives, left to right, and leaves the statement's other operands unordered against them. gc settles that the same way every time: it runs every call first and reads the plain operands (a variable, a field, a dereference, an element) after them. C# reads every operand left to right, so where a call writes something an operand to its left reads, C# reads the old value. The converter moves each call, up to the last one that follows such a read, into a prelude of `var evalᴛN` temps ahead of the statement, in the calls' own order, and leaves the reads where they are:
+
+<!-- source: src/tests/Behavioral/OperandOrderCallArgs/main.go:22-24 -->
+```go
+g = 1
+setG := func() int { g = 10; return 2 }
+fmt.Println("global:", pair(g, setG()))   // gc: setG runs, THEN g is read: "global: 10 2"
+```
+<!-- source: src/tests/Behavioral/OperandOrderCallArgs/main.cs.target:30-31 -->
+```csharp
+var evalᴛ2 = setG();
+fmt.Println("global:", pair(g, evalᴛ2));
+```
+
+(The temps are numbered per function; an earlier statement in the same function took `evalᴛ1`.)
+
+**Only a read a call can write counts.** That is a package variable; a local that a func literal captures or whose address is taken (`&x`, a pointer-method call or method value on it, or slicing it when it is an array); a dereference; a field through a pointer; an element of a slice or map; and a field, element or slice of an operand that is itself one of these. A plain local is never such a read: only the statement's own assignments can change it, and they run after its operands, so the two orders agree. `x := f(a, g(b))` over plain locals emits as it always has. A read inside an earlier call is evaluated when that call runs, so it does not count either: `two(f(g), mut())` is left alone.
+
+**gc also runs some forms at their place among the calls.** These EARLY forms read their own operands when they run: the builtins `len`, `cap`, `append`, `min`, `max`, `make`, `real`, `imag`, `complex` and `copy`; a conversion from a string to `[]byte` or `[]rune` and from a slice to an array; a type assertion; a slice expression; a map index keyed by `string(b)`; an `&&` or `||` that holds a call; and a value boxed to an interface that is not addressable and is a `bool`, a one-byte integer, a struct, an array or `&T{...}`. An early form never makes a call move, but when a call moves past it, it moves too, as its own temp:
+
+<!-- source: src/tests/Behavioral/OperandOrderEarly/main.go:54 -->
+```go
+fmt.Println("len:", ints(g, len(s), mut()))   // gc: "len: 2 1 0", len(s) before mut, g after
+```
+<!-- source: src/tests/Behavioral/OperandOrderEarly/main.cs.target:53-55 -->
+```csharp
+var evalᴛ1 = len(s);
+var evalᴛ2 = mut();
+fmt.Println("len:", ints(g, evalᴛ1, evalᴛ2));
+```
+
+A comparison passed to a `...any` parameter is boxed early, so the common formatting shape keeps C#'s order and moves nothing:
+
+<!-- source: src/tests/Behavioral/OperandOrderEarly/main.go:98 -->
+```go
+fmt.Println("printf comparison:", fmt.Sprintf("%v %d", h.got == 1, mut()))
+```
+<!-- source: src/tests/Behavioral/OperandOrderEarly/main.cs.target:140 -->
+```csharp
+fmt.Println("printf comparison:", fmt.Sprintf("%v %d"u8, h.got == 1, mut()));
+```
+
+An `&&` or `||` that holds a call moves whole or not at all, so its short circuit stands. A constant never moves.
+
+**Where the prelude goes.** Before an expression statement, a send, a `return`, an assignment and a local `var` declaration; before an `if`, in the block form an init statement uses; for an `else if`, inside a braced `else`; for a loop condition or post, into the body, where the converter already spills them, so it runs on every pass; before a `range` loop and a `switch` tag; and for `go` and `defer`, into the capture block that holds the arguments until the call runs (only the calls among the function value and the arguments move, never the deferred call). A label stays first, so it lands on the first prelude line and a `goto` runs the prelude again:
+
+<!-- source: src/tests/Behavioral/OperandOrderLabels/main.go:19-28 -->
+```go
+func gotoCase() {
+	n := 0
+again:
+	fmt.Println("goto target:", g, bump())
+	n++
+
+	if n < 2 {
+		goto again
+	}
+}
+```
+<!-- source: src/tests/Behavioral/OperandOrderLabels/main.cs.target:21-31 -->
+```csharp
+internal static void gotoCase() {
+    nint n = 0;
+again:
+    var evalᴛ1 = bump();
+    fmt.Println("goto target:", g, evalᴛ1);
+    n++;
+
+    if (n < 2) {
+        goto again;
+    }
+}
+```
+
+The temps are numbered per function, never from the file's tuple counter, so a hoist renumbers no other temp; a func literal shares its enclosing function's counter. The multi-value return spill above is the narrower case of this rule and composes with it: a call this rule moved renders as its temp, so the return spill sees an operand with no call in it.
+
+**Corpus footprint** (an A/B of two seeded whole-stdlib reconverts per target): about 1,500 hoisted lines in about 130 packages and 330 `.cs` files on each target, plus the position maps that move with them.<!-- Measured 2026-11-24, master converter against the cut: windows/amd64 1,515 hoist lines, 131 packages, 330 .cs; linux/amd64 1,500, 130, 328; darwin/amd64 1,495, 129, 326; linux/arm64 1,496, 129, 327. Predicted 700-1,800 hoists in 90-150 packages. Outside the predicted kinds: a lambda or expression-bodied method that gains a prelude becomes a block body. -->
+
+**Limits**, which keep C#'s left-to-right order: a `case` expression (Go evaluates cases lazily, so none can move ahead of the switch; the tag is covered); a package-level initializer, which has no statement to put a prelude before; a statement with a multi-value call or a comma-ok form among its moves (`x := g + sum(two())`); and an operation that can panic, such as `x/y`, which C# runs at its place where gc runs the statement's calls first. [Known issues](../KnownIssues.md#operand-order-limits) lists them for users; `docs/DESIGN-operand-order.md` has the design.
+
+(Guarded by the behavioral tests `OperandOrderCallArgs`, `OperandOrderAssign`, `OperandOrderReturn`, `OperandOrderIf`, `OperandOrderSend`, `OperandOrderCompositeLit`, `OperandOrderMultiAssign`, `OperandOrderBinary`, `OperandOrderStmtForms`, `OperandOrderEarly` and `OperandOrderLabels`, each output-compared against `go run`, and the control `OperandOrderInPlace`, which must keep matching. `operandOrder.go` owns the rule.)
 
 ## A SELECTOR left-hand side counts as a reassignment — a field swap must stay simultaneous
 

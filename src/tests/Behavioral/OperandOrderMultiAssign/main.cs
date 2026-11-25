@@ -10,14 +10,16 @@ internal static void main() {
         b = 10;
         return 2;
     }
+    var evalᴛ1 = setB();
     nint m1 = b;
-    nint m2 = setB();
+    nint m2 = evalᴛ1;
     fmt.Println("define:", m1, m2);
 
     b = 1;
     nint n1 = default;
     nint n2 = default;
-    (n1, n2) = (b, setB());
+    var evalᴛ2 = setB();
+    (n1, n2) = (b, evalᴛ2);
     fmt.Println("assign:", n1, n2);
 
     nint x = 1;

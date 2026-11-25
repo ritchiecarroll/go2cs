@@ -166,7 +166,8 @@ internal static void main() {
         var p = new probe(Sensor: Ꮡs2, id: 7);
         fmt.Println(p.Name, (float64)p.Temp, p.id);
         p.Temp = 75D;
-        fmt.Println((float64)s2.Temp, s2.Hot());
+        var evalᴛ1 = s2.Hot();
+        fmt.Println((float64)s2.Temp, evalᴛ1);
 
         p.Sensor.Value.Calibrate(5D);
         fmt.Println((float64)s2.Temp);
@@ -222,7 +223,8 @@ internal static void main() {
         fmt.Println(g1.Code, c1);
         var mb = new meterBox(st: new CrossPkgLib.Status(Code: 3), sat: 1);
         fmt.Println(mb.st.Code + mb.sat);
-        fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At);
+        var evalᴛ2 = CrossPkgLib.Peek();
+        fmt.Println(CrossPkgLib.Latest.At, evalᴛ2.At);
 
         var sptr = Ꮡ(new CrossPkgLib.Status(Code: 10));
         var led = new ledger(cur: statusPtr(sptr));

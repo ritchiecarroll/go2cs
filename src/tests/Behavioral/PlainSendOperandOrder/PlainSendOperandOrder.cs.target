@@ -49,14 +49,16 @@ internal static partial void main() {
     var chanᴛ2 = chanFor(ch);
     var (ᴛ3, ᴛ4) = pair();
     chanᴛ2.ᐸꟷ(must(ᴛ3, ᴛ4));
-    fmt.Println("call:", log, ᐸꟷ(ch));
+    var evalᴛ1 = ᐸꟷ(ch);
+    fmt.Println("call:", log, evalᴛ1);
 
     log = default;
     var chans = slice<channel<nint>>([default, ch]);
     var chanᴛ3 = chans[idx()];
     var (ᴛ5, ᴛ6) = pair();
     chanᴛ3.ᐸꟷ(must(ᴛ5, ᴛ6));
-    fmt.Println("index:", log, ᐸꟷ(ch));
+    var evalᴛ2 = ᐸꟷ(ch);
+    fmt.Println("index:", log, evalᴛ2);
 
     log = default;
     var done = new channel<bool>(0);
@@ -69,16 +71,19 @@ internal static partial void main() {
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
-    fmt.Println("go:", log, ᐸꟷ(ch));
+    var evalᴛ3 = ᐸꟷ(ch);
+    fmt.Println("go:", log, evalᴛ3);
 
     log = default;
     deferredSend(ch);
-    fmt.Println("defer:", log, ᐸꟷ(ch));
+    var evalᴛ4 = ᐸꟷ(ch);
+    fmt.Println("defer:", log, evalᴛ4);
 
     log = default;
     var (ᴛ9, ᴛ10) = pair();
     ch.ᐸꟷ(must(ᴛ9, ᴛ10));
-    fmt.Println("bare:", log, ᐸꟷ(ch));
+    var evalᴛ5 = ᐸꟷ(ch);
+    fmt.Println("bare:", log, evalᴛ5);
 }
 
 } // end main_package

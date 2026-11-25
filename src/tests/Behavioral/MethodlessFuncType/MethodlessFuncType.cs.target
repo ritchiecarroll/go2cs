@@ -11,7 +11,8 @@ internal delegate (@string path, bool ok) lookup(@string _);
 internal static releaser makeReleaser(@string tag, ж<slice<@string>> log) {
     return [GoFunc("makeReleaser.func1")] (error err) => {
         if (err != nil) {
-            log.ValueSlot = append(log.ValueSlot, tag + ":"u8 + err.Error());
+            var evalᴛ1 = err.Error();
+            log.ValueSlot = append(log.ValueSlot, tag + ":"u8 + evalᴛ1);
         } else {
             log.ValueSlot = append(log.ValueSlot, tag + ":ok"u8);
         }

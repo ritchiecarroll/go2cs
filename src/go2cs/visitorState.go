@@ -620,6 +620,19 @@ type Visitor struct {
 	// tupleTempIndex numbers the multi-value-call expansion temp markers monotonically per
 	// file (see convExprList's tuple-arg expansion).
 	tupleTempIndex int
+	// operandTemps maps each call or receive the current statement hoisted into its prelude to the temp that holds
+	// its result (operandOrder.go); convExpr renders the temp in its place.
+	operandTemps map[ast.Expr]string
+	// operandHoistCount counts the hoists beginOperandOrder has written, so a loop header can tell that its condition
+	// spilled a prelude (visitForStmt), as it tells a tuple spread by tupleTempIndex.
+	operandHoistCount int
+	// operandHoistSink and operandHoistEnd mark where the last hoist ended, so a capture declaration written straight
+	// after it does not open with a blank line.
+	operandHoistSink *strings.Builder
+	operandHoistEnd  int
+	// operandSharedLocals caches, for operandSharedLocalsFile, the locals a call can write (operandOrderSharedLocals).
+	operandSharedLocals     map[*types.Var]bool
+	operandSharedLocalsFile *ast.File
 	// inForPost is set while emitting a for-loop's POST statement. A deref-aliased pointer
 	// param/box repointed in the post (`for ; scope != nil; scope = scope.Outer`) expands to a
 	// box-repoint PLUS a value re-alias (`Ꮡscope = scope.Outer; scope = ref Ꮡscope…`). The

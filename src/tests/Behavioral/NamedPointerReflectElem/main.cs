@@ -29,7 +29,9 @@ internal static void main() {
     var pp = new pubPtr(Ꮡ(new pub(2)));
     var f = reflect.ValueOf(pp).Elem().Field(0);
     f.SetInt(5);
-    fmt.Println("field write through:", (pp.Value).I, f.Addr().Type());
+    var evalᴛ1 = f.Addr();
+    var evalᴛ2 = evalᴛ1.Type();
+    fmt.Println("field write through:", (pp.Value).I, evalᴛ2);
 
     var ap = new arrPtr(Ꮡ(array<nint>([1, 2, 3])));
     reflect.ValueOf(ap).Elem().Index(1).SetInt(9);

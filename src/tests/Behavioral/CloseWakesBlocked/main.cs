@@ -24,7 +24,8 @@ internal static partial void main() {
         var resʗ1 = res;
         goǃ([GoFunc("main.func1")] () => {
             var (v, ok) = ᐸꟷ(chʗ1, ꟷ);
-            resʗ1.ᐸꟷ(fmt.Sprintf("recv %d %t"u8, v, ok));
+            var evalᴛ1 = fmt.Sprintf("recv %d %t"u8, v, ok);
+            resʗ1.ᐸꟷ(evalᴛ1);
         });
     }
     close(ch);
@@ -42,7 +43,8 @@ internal static partial void main() {
             var res2ʗ2 = res2ʗ1;
             defer([GoFunc("main.func2.1")] () => {
                 var r = recover(); if (r != nil) {
-                    res2ʗ2.ᐸꟷ(fmt.Sprintf("sender panicked: %v"u8, r));
+                    var evalᴛ2 = fmt.Sprintf("sender panicked: %v"u8, r);
+                    res2ʗ2.ᐸꟷ(evalᴛ2);
                 }
             }, ref ᒐ);
             ch2ʗ1.ᐸꟷ(1);
@@ -65,11 +67,13 @@ internal static partial void main() {
         var otherᴛ1 = otherʗ1;
         switch (select(ᐸꟷ(ch3ᴛ1, ꓸꓸꓸ), ᐸꟷ(otherᴛ1, ꓸꓸꓸ))) {
         case 0 when ch3ᴛ1.ꟷᐳ(out var v, out var ok): {
-            res3ʗ1.ᐸꟷ(fmt.Sprintf("select recv %d %t"u8, v, ok));
+            var evalᴛ3 = fmt.Sprintf("select recv %d %t"u8, v, ok);
+            res3ʗ1.ᐸꟷ(evalᴛ3);
             break;
         }
         case 1 when otherᴛ1.ꟷᐳ(out var v): {
-            res3ʗ1.ᐸꟷ(fmt.Sprintf("other %d (wrong)"u8, v));
+            var evalᴛ4 = fmt.Sprintf("other %d (wrong)"u8, v);
+            res3ʗ1.ᐸꟷ(evalᴛ4);
             break;
         }}
     });
@@ -88,7 +92,8 @@ internal static partial void main() {
             var res4ʗ2 = res4ʗ1;
             defer([GoFunc("main.func4.1")] () => {
                 var r = recover(); if (r != nil) {
-                    res4ʗ2.ᐸꟷ(fmt.Sprintf("select send panicked: %v"u8, r));
+                    var evalᴛ5 = fmt.Sprintf("select send panicked: %v"u8, r);
+                    res4ʗ2.ᐸꟷ(evalᴛ5);
                 }
             }, ref ᒐ);
             var ch4ᴛ1 = ch4ʗ1.ᐸꟷ(99, ꓸꓸꓸ);
@@ -99,7 +104,8 @@ internal static partial void main() {
                 break;
             }
             case 1 when other2ᴛ1.ꟷᐳ(out var v): {
-                res4ʗ1.ᐸꟷ(fmt.Sprintf("other %d (wrong)"u8, v));
+                var evalᴛ6 = fmt.Sprintf("other %d (wrong)"u8, v);
+                res4ʗ1.ᐸꟷ(evalᴛ6);
                 break;
             }}
         }

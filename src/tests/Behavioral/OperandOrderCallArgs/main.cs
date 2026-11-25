@@ -19,21 +19,24 @@ internal static partial void main() {
         x = 10;
         return 2;
     }
-    fmt.Println("local:", pair(x, setX()));
+    var evalᴛ1 = setX();
+    fmt.Println("local:", pair(x, evalᴛ1));
 
     g = 1;
     [GoFunc("main.func2")] nint setG() {
         g = 10;
         return 2;
     }
-    fmt.Println("global:", pair(g, setG()));
+    var evalᴛ2 = setG();
+    fmt.Println("global:", pair(g, evalᴛ2));
 
     ref var s = ref heap<box>(new box(1), out var Ꮡs);
     [GoFunc("main.func3")] nint setF() {
         Ꮡs.Value.f = 10;
         return 2;
     }
-    fmt.Println("field:", pair(s.f, setF()));
+    var evalᴛ3 = setF();
+    fmt.Println("field:", pair(s.f, evalᴛ3));
 
     ref var v = ref heap<nint>(1, out var Ꮡv);
     var p = Ꮡv;
@@ -42,7 +45,8 @@ internal static partial void main() {
         pʗ1.Value = 10;
         return 2;
     }
-    fmt.Println("deref:", pair(p.Value, setP()));
+    var evalᴛ4 = setP();
+    fmt.Println("deref:", pair(p.Value, evalᴛ4));
 
     var a = slice<nint>([1]);
     var aʗ1 = a;
@@ -50,7 +54,8 @@ internal static partial void main() {
         aʗ1[0] = 10;
         return 2;
     }
-    fmt.Println("element:", pair(a[0], setA()));
+    var evalᴛ5 = setA();
+    fmt.Println("element:", pair(a[0], evalᴛ5));
 
     var ptr = Ꮡ(new box(1));
     var ptrʗ1 = ptr;
@@ -58,7 +63,8 @@ internal static partial void main() {
         ptrʗ1.f = 10;
         return 2;
     }
-    fmt.Println("pointer field:", pair(ptr.f, setPtr()));
+    var evalᴛ6 = setPtr();
+    fmt.Println("pointer field:", pair(ptr.f, evalᴛ6));
 
     nint y = 1;
     var ch = new channel<nint>(0);
@@ -68,7 +74,8 @@ internal static partial void main() {
         y = 10;
         chʗ1.ᐸꟷ(2);
     });
-    fmt.Println("receive:", pair(y, ᐸꟷ(ch)));
+    var evalᴛ7 = ᐸꟷ(ch);
+    fmt.Println("receive:", pair(y, evalᴛ7));
 }
 
 } // end main_package

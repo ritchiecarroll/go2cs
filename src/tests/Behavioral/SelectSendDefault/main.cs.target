@@ -60,7 +60,8 @@ internal static partial void unbufferedWithReceiver() {
     var chʗ1 = ch;
     var gotʗ1 = got;
     goǃ([GoFunc("unbufferedWithReceiver.func1")] () => {
-        gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
+        var evalᴛ1 = ᐸꟷ(chʗ1);
+        gotʗ1.ᐸꟷ(evalᴛ1);
     });
 
     var sent = false;
@@ -199,7 +200,8 @@ internal static partial void blockingSendStillBlocks() {
     var gotʗ1 = got;
     goǃ([GoFunc("blockingSendStillBlocks.func1")] () => {
         time.Sleep(20 * time.Millisecond);
-        gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
+        var evalᴛ1 = ᐸꟷ(chʗ1);
+        gotʗ1.ᐸꟷ(evalᴛ1);
     });
 
     var chᴛ1 = ch.ᐸꟷ(42, ꓸꓸꓸ);

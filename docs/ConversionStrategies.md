@@ -440,7 +440,7 @@ code, and the section that explains it in full.
 | `Δ1` suffix | A second declaration of the same name: a variable that shadows an outer one, or a repeated `init` function | `hourΔ1`, `initΔ1` | [Shadowing](#short-variable-redeclaration-shadowing); repeated `init`: [Functions and Methods](#functions-and-methods) |
 | `ʗ1` suffix | A copy of a variable, taken for the lambda that uses it | `var f1ʗ1 = f1;` | [Function Values and Closures](#function-values-and-closures) |
 | `ʗp` suffix | The raw incoming parameter, when the body copies it into a local of the Go name: a variadic pack becomes a slice, or a value whose address is taken moves into a heap box with `heap(…)` | `params ꓸꓸꓸerror errsʗp`; `readOnlyParam(Rect rʗp)` then `ref var r = ref heap(rʗp, out var Ꮡr);` | [Slices and Arrays](#slices-and-arrays) (variadic); [Pointers](#pointers) (address taken, the same `heap(…)` pattern as a local) |
-| `ᴛ` | A name the converter makes up: a temporary, a lambda parameter, an init helper, a lazy var's holder class, or the class that holds a type's method forwarders | `ᴛ1`, `chᴛ2`, `initᴛsingle`, `lazyᴛ_Lu`, `timeᴛTime` | [Multi-Assignment](#multi-assignment-and-evaluation-order); init helpers: [Initialization Order](#package-level-variable-initialization-order); method holders: [Functions and Methods](#functions-and-methods) |
+| `ᴛ` | A name the converter makes up: a temporary, a lambda parameter, an init helper, a lazy var's holder class, or the class that holds a type's method forwarders | `ᴛ1`, `evalᴛ1`, `chᴛ2`, `initᴛsingle`, `lazyᴛ_Lu`, `timeᴛTime` | [Multi-Assignment](#multi-assignment-and-evaluation-order); init helpers: [Initialization Order](#package-level-variable-initialization-order); method holders: [Functions and Methods](#functions-and-methods) |
 | `⁔` suffix | A Go method's body, in its package class beside its type. No Go identifier can spell U+2054, so the body's name never meets a Go name; the Go-named method is a one-line forwarder to it, in `package_info.cs` | `Month⁔(/*this*/ Time t)`, `len⁔(/*this*/ ref box b)` | [Functions and Methods](#functions-and-methods) |
 | `ˢ`, `ᶜ` suffix | A string literal (`ˢ`) or a local constant (`ᶜ`), stored once in a static field whose declaration sits in the same file | `namedStringConversionˢ`, `fnAtoiᶜ` | [Strings](#strings-string-and-sstring) |
 | `ꓸ` | A dot inside one name, such as a package-qualified alias | `driverꓸValue` | [Type Aliasing](#type-aliasing) |
@@ -3756,7 +3756,7 @@ A Go function with several results returns a C# tuple, so its call deconstructs 
 
 **A multi-value `return` runs its calls before it reads plain operands.** Go's spec runs the calls in a `return` left to right, but leaves open when a plain operand such as `c.n` is read. The standard Go compiler, gc, always runs the calls first and reads the plain operands after. go2cs matches gc, because that is what Go programs observe.
 
-A C# tuple reads strictly left to right. So when a call can change an earlier operand, the converter first moves the call into a temporary. The temporary is a local whose name starts with `ᴛ`, the glyph go2cs uses for names it makes up ([Reading Converted Code](#reading-converted-code-names-and-glyphs)). Its number is only a counter that keeps names unique in the file; it has no other meaning.
+A C# tuple reads strictly left to right. So when a call can change an earlier operand, the converter first moves the call into a temporary. The temporary is a local named `evalᴛ` and a number; `ᴛ` is the glyph go2cs uses for names it makes up ([Reading Converted Code](#reading-converted-code-names-and-glyphs)). The number is only a counter that keeps the names unique in the function; it has no other meaning.
 
 Here `bump` has a pointer receiver, so it changes the caller's `c`.
 
@@ -3790,8 +3790,8 @@ internal static nint bump(this ref counter c) {
 
 internal static (nint, nint) readThenBump() {
     counter c = default;
-    var ᴛ2 = c.bump();
-    return (c.n, ᴛ2);
+    var evalᴛ1 = c.bump();
+    return (c.n, evalᴛ1);
 }
 ```
 
@@ -3799,7 +3799,7 @@ Go's `readThenBump` returns `1 1`. Without the temporary, `return (c.n, c.bump()
 
 In the C#, a pointer-receiver method becomes an extension method on `ref counter`; the `ref` is what lets `bump` change the caller's `c` ([Functions and Methods](#functions-and-methods)). `default!` is C#'s default value, here Go's zero `counter`. The `!` matters only for reference types, where it tells the compiler a null is intended; the converter writes it everywhere ([Nil and Zero Values](#nil-and-zero-values)).
 
-**Most returns stay one tuple, as written in Go.** The converter moves a call only when the `return` statement itself shows that the call can reach an earlier operand: through a pointer-receiver method on it, an `&x` argument, or a pointer the operand is read through. A call that changes the operand some other way, such as through a package-level variable or a variable captured by a closure, is not detected. When the call works on something else, as here, nothing moves.
+**Most returns stay one tuple, as written in Go.** The converter moves a call only when an earlier operand is a read a call can write: a package-level variable, a local that a closure captures or whose address is taken (as `c` is, by the pointer-receiver call), a dereference, or a field or element reached through one. A plain local that nothing can reach stays put. When the call works on something else, as here, nothing moves.
 
 <!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.go:93-98 -->
 ```go
@@ -3821,7 +3821,21 @@ internal static (nint, nint) unrelatedOperand() {
 
 A method with a value receiver never moves either: it works on a copy, so the caller cannot see any change.
 
-**Full detail:** [Reference → Multi-Assignment and Evaluation Order](ConversionStrategies-Reference/multi-assignment.md#multi-assignment-and-evaluation-order) — the full rules for which targets make a tuple, the edge cases of a mixed `:=`, and exactly when a `return` moves its calls into temporaries.
+**Every statement orders its calls this way, not only `return`.** gc runs a statement's calls before it reads the statement's plain operands, so `fmt.Println(g, bump())` prints the value `bump` left in `g`. The converter moves such calls into `var evalᴛN` temps just ahead of an expression statement, an assignment, a send, a local `var`, an `if` or loop condition, a `switch` tag, a `range` expression, or the arguments of `go` and `defer`. A few builtins and conversions that gc runs at their place among the calls, such as `len` and `append`, move with them. Case expressions, package-level initializers and comma-ok forms are not reordered; [Known Issues](KnownIssues.md#operand-order-limits) lists them.
+
+<!-- source: src/tests/Behavioral/OperandOrderCallArgs/main.go:22-24 -->
+```go
+g = 1
+setG := func() int { g = 10; return 2 }
+fmt.Println("global:", pair(g, setG()))   // prints "global: 10 2"
+```
+<!-- source: src/tests/Behavioral/OperandOrderCallArgs/main.cs.target:30-31 -->
+```csharp
+var evalᴛ2 = setG();
+fmt.Println("global:", pair(g, evalᴛ2));
+```
+
+**Full detail:** [Reference → Multi-Assignment and Evaluation Order](ConversionStrategies-Reference/multi-assignment.md#multi-assignment-and-evaluation-order) — the full rules for which targets make a tuple, the edge cases of a mixed `:=`, and exactly when a `return` moves its calls into temporaries; [A call runs before the plain operands of its statement](ConversionStrategies-Reference/multi-assignment.md#a-call-runs-before-the-plain-operands-of-its-statement) covers every other statement.
 
 ---
 
@@ -4235,8 +4249,8 @@ func raise(n *int) int {
 ```csharp
 internal static (nint, nint) addressArgument() {
     nint n = 0;
-    var ᴛ5 = raise(ref n);
-    return (n, ᴛ5);
+    var evalᴛ1 = raise(ref n);
+    return (n, evalᴛ1);
 }
 
 internal static nint raise(ref nint n) {
@@ -7163,8 +7177,8 @@ VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 -> .cs.target:12 `foreach (var i in range(len(xs))) {`.
 The string control: src/go2cs/rangeIndexOnly_test.go:281 `expect("overString", "foreach (var (i, _) in str)")`;
 the nil pointer: :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
-<!-- The count range: src/go2cs/visitRangeStmt.go:870-871 `case isArrayPointee && rangedThroughPointer && derefdValue:`
-then `foreach (%s%s in range(%d))`, and :883 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
+<!-- The count range: src/go2cs/visitRangeStmt.go:873-874 `case isArrayPointee && rangedThroughPointer && derefdValue:`
+then `foreach (%s%s in range(%d))`, and :886 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
 src/go2cs/rangeIndexOnly_test.go:267 `expect("overPointerParam", "foreach (var i in range(2))")` and :269
 `expect("setAll", "foreach (var i in range(4))")`; src/go2cs/rangeNilPointerArray_test.go:24
 `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`; the behavioral PointerArrayRange ranges a nil
@@ -7225,8 +7239,8 @@ foreach (var (iᴛ1, vᴛ1) in range(nums)) {
 `slice<nint>([…])` builds a golib [slice](#slices-and-arrays), Go's `int` becomes `nint`, and
 `default!` is Go's zero value ([Nil and Zero Values](#nil-and-zero-values)).
 
-<!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:418#c54fd4);
-the copy-back fires when the body writes i or the variable is heap-boxed (visitForStmt.go:434#8ec6f5; golden
+<!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:419#c54fd4);
+the copy-back fires when the body writes i or the variable is heap-boxed (visitForStmt.go:435#8ec6f5; golden
 src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:56-59#b74efc, where the body only takes &i). -->
 **Loop variables are per-iteration.** Go gives each iteration of `for i := …` its own `i`. A C# `for`
 shares one variable across all iterations, so closures made in the loop would all see its last value.

@@ -11,20 +11,24 @@ internal static partial void main() {
         x = 10;
         return 2;
     }
-    fmt.Println("plus:", x + setX());
+    var evalᴛ1 = setX();
+    fmt.Println("plus:", x + evalᴛ1);
 
     x = 1;
-    fmt.Println("times:", x * setX());
+    var evalᴛ2 = setX();
+    fmt.Println("times:", x * evalᴛ2);
 
     x = 1;
-    fmt.Println("equal:", x == setX() * 5);
+    var evalᴛ3 = setX();
+    fmt.Println("equal:", x == evalᴛ3 * 5);
 
     @string s = "a";
     [GoFunc("main.func2")] @string setS() {
         s = "Z";
         return "b";
     }
-    fmt.Println("concat:", s + setS());
+    var evalᴛ4 = setS();
+    fmt.Println("concat:", s + evalᴛ4);
 
     nint y = 1;
     var ch = new channel<nint>(0);
@@ -34,7 +38,8 @@ internal static partial void main() {
         y = 10;
         chʗ1.ᐸꟷ(2);
     });
-    fmt.Println("receive:", y + ᐸꟷ(ch));
+    var evalᴛ5 = ᐸꟷ(ch);
+    fmt.Println("receive:", y + evalᴛ5);
 
     nint q = 1;
     [GoFunc("main.func4")] bool setQ() {

@@ -368,7 +368,8 @@ internal static partial void main() {
     }, [GoFunc("main.func19")] () => {
         pkʗ1.v = 19;
     });
-    fmt.Println("param-later-call", readCellK(ref (pk).DerefOrNull(), parkK()));
+    var evalᴛ1 = parkK();
+    fmt.Println("param-later-call", readCellK(ref (pk).DerefOrNull(), evalᴛ1));
 
     cell sv = default;
     sv.v = 1;

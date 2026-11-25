@@ -14,16 +14,20 @@ internal static void main() {
         a = 10;
         return 2;
     }
-    fmt.Println("slice:", slice<nint>([a, setA()]));
+    var evalᴛ1 = setA();
+    fmt.Println("slice:", slice<nint>([a, evalᴛ1]));
 
     a = 1;
-    fmt.Println("array:", array<nint>([a, setA()]));
+    var evalᴛ2 = setA();
+    fmt.Println("array:", array<nint>([a, evalᴛ2]));
 
     a = 1;
-    fmt.Println("struct:", new pt(A: a, B: setA()));
+    var evalᴛ3 = setA();
+    fmt.Println("struct:", new pt(A: a, B: evalᴛ3));
 
     a = 1;
-    fmt.Println("nested:", slice<slice<nint>>([[a], slice<nint>([setA()])]));
+    var evalᴛ4 = setA();
+    fmt.Println("nested:", slice<slice<nint>>([[a], slice<nint>([evalᴛ4])]));
 
     a = 1;
     fmt.Println("map (in place in Go):", new map<@string, nint>{["a"] = a, ["b"] = setA()});

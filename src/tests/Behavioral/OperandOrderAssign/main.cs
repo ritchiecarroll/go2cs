@@ -11,7 +11,8 @@ internal static void main() {
         i = 2;
         return 7;
     }
-    arr[i] = setI();
+    var evalᴛ1 = setI();
+    arr[i] = evalᴛ1;
     fmt.Println("left index:", arr);
 
     ref var v1 = ref heap<nint>(out var Ꮡv1);
@@ -23,7 +24,8 @@ internal static void main() {
         Ꮡp.ValueSlot = Ꮡv2;
         return 7;
     }
-    p.Value = setP();
+    var evalᴛ2 = setP();
+    p.Value = evalᴛ2;
     fmt.Println("left dereference:", v1, v2);
 
     nint x = 1;
@@ -32,7 +34,8 @@ internal static void main() {
         return 2;
     }
     nint y = default;
-    y = x + setX();
+    var evalᴛ3 = setX();
+    y = x + evalᴛ3;
     fmt.Println("right operand:", y);
 
     var m = new map<nint, nint>{};
@@ -41,7 +44,8 @@ internal static void main() {
         k = 5;
         return 7;
     }
-    m[k] = setK();
+    var evalᴛ4 = setK();
+    m[k] = evalᴛ4;
     fmt.Println("left map key:", m);
 }
 

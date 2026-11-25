@@ -159,7 +159,8 @@ internal static void probe(@string label, Func<@string> f) {
             }
         }, ref ᒐ);
 
-        fmt.Printf("%s: %s\n"u8, label, f());
+        var evalᴛ1 = f();
+        fmt.Printf("%s: %s\n"u8, label, evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

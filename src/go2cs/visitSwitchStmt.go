@@ -349,6 +349,13 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt, label string) 
 		v.visitStmt(switchStmt.Init, []StmtContext{})
 	}
 
+	// Go evaluates the tag once, before the cases, reading its operands after the calls in it
+	// (operandOrder.go), so its prelude goes before the switch.
+	if tag != nil {
+		endOperandOrder := v.beginOperandOrderPrelude(tag)
+		defer endOperandOrder()
+	}
+
 	v.outputBuilder.WriteString(v.newline)
 
 	if hasFallthroughs || (!allConst && tag != nil) {

@@ -62,7 +62,9 @@ internal static void main() {
     var chᴛ3 = ch;
     switch (select(ᐸꟷ(chᴛ3, ꓸꓸꓸ))) {
     case 0 when chᴛ3.ꟷᐳ(out a[idxDefault(2)]): {
-        fmt.Println("outer fired: a[2] =", a[2], "len(ch) =", len(ch), "next =", ᐸꟷ(ch));
+        var evalᴛ1 = len(ch);
+        var evalᴛ2 = ᐸꟷ(ch);
+        fmt.Println("outer fired: a[2] =", a[2], "len(ch) =", evalᴛ1, "next =", evalᴛ2);
         break;
     }}
 

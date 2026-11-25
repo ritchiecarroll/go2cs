@@ -54,6 +54,14 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	// LambdaContext) — not only when the deferred CALLEE is itself a func literal.
 	lambdaContext.deferredDecls = &strings.Builder{}
 
+	// Go evaluates the function value and the arguments at the statement, reading their operands after the calls
+	// in them (operandOrder.go); the prelude joins the statement's other hoisted declarations.
+	savedOperandHoist := v.hoistedDecls
+	v.hoistedDecls = lambdaContext.deferredDecls
+	endOperandOrder := v.beginOperandOrder(nil, false, append([]ast.Expr{deferStmt.Call.Fun}, deferStmt.Call.Args...)...)
+	v.hoistedDecls = savedOperandHoist
+	defer endOperandOrder()
+
 	paramCount := len(deferStmt.Call.Args)
 
 	var renderLambdaParams bool

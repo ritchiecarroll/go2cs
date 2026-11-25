@@ -72,7 +72,8 @@ internal static partial nint drive(Parker p, nint n, time.Duration hold) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                resultsʗ1.ᐸꟷ(p.Park(hold));
+                var evalᴛ1 = p.Park(hold);
+                resultsʗ1.ᐸꟷ(evalᴛ1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }

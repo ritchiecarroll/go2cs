@@ -123,7 +123,8 @@ internal static void main() {
 
     var s = Ꮡ(new sized(new @base(3), 9));
     s.Value.Len++;
-    fmt.Println("shadow:", (~s).Len, s.Ꮡbase.Len());
+    var evalᴛ1 = s.Ꮡbase.Len();
+    fmt.Println("shadow:", (~s).Len, evalᴛ1);
 
     var g = Ꮡ(new pair<@string>(First: "a"));
     fmt.Println("generic:", bump(ref (g).DerefOrNull(), (@string)"b"), g.First, g.Count);
@@ -132,7 +133,8 @@ internal static void main() {
     m["k"].X = 4;
     var ps = slice<ж<point>>([Ꮡ(new point(2, 2))]);
     ps[0].Y *= 3;
-    fmt.Println("containers:", m["k"].X, ps[0].Y, mk(5).Y);
+    var evalᴛ2 = mk(5);
+    fmt.Println("containers:", m["k"].X, ps[0].Y, evalᴛ2.Y);
 
     var px = p.ᏑX;
     px.Value = 42;

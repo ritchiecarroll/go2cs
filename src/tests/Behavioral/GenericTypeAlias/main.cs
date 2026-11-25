@@ -30,7 +30,8 @@ internal static void main() {
     var sp = new Pair<@string, bool>(Key: "b", Val: true);
     Pair<@string, bool> sp2 = sp;
     var m = new map<nint, @string>{[1] = "one"};
-    fmt.Println("local:", p, sp, sp2, m[1], swap<nint>(new Pair<nint, nint>(Key: 1, Val: 2)));
+    var evalᴛ1 = swap<nint>(new Pair<nint, nint>(Key: 1, Val: 2));
+    fmt.Println("local:", p, sp, sp2, m[1], evalᴛ1);
 
     Pair<@string, nint> pair = p;
     p = pair;

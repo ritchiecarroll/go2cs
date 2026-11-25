@@ -34,14 +34,16 @@ internal static slice<@string> initNames;
         if (e > 100) {
             fmt.Println("unreachable");
         }
-        initNames = append(initNames, here());
+        var evalᴛ1 = here();
+        initNames = append(initNames, evalᴛ1);
     }
     f();
 }
 
 [GoInit] internal static void initΔ1() {
     [GoFunc("init.1.func1")] void g() {
-        initNames = append(initNames, here());
+        var evalᴛ1 = here();
+        initNames = append(initNames, evalᴛ1);
     }
     g();
 }

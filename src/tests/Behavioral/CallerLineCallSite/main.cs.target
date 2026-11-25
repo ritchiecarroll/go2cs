@@ -69,7 +69,8 @@ internal static void main() {
 
     e.Bare();
     e.n++;
-    report("S3 method, no args, then a non-call:", got, line() - 2);
+    var evalᴛ1 = line();
+    report("S3 method, no args, then a non-call:", got, evalᴛ1 - 2);
 
     nint r = e.Value((@string)"y");
     report("S4 method, result used:", r, line() - 1);

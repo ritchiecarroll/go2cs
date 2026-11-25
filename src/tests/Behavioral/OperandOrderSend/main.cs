@@ -21,7 +21,8 @@ internal static void main() {
         v = 10;
         return 2;
     }
-    c.ᐸꟷ(v + setV());
+    var evalᴛ1 = setV();
+    c.ᐸꟷ(v + evalᴛ1);
     fmt.Println("value with a call:", ᐸꟷ(c));
 
     nint u = 1;
@@ -29,7 +30,8 @@ internal static void main() {
         u = 10;
         return 2;
     }
-    var cᴛ1 = c.ᐸꟷ(u + setU(), ꓸꓸꓸ);
+    var evalᴛ2 = setU();
+    var cᴛ1 = c.ᐸꟷ(u + evalᴛ2, ꓸꓸꓸ);
     switch (select(cᴛ1)) {
     case 0: {
         break;

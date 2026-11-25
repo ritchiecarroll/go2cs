@@ -16,7 +16,8 @@ internal static (nint, nint) local() {
         r = 10;
         return 2;
     }
-    return (r, setR());
+    var evalᴛ1 = setR();
+    return (r, evalᴛ1);
 }
 
 internal static (nint, nint) global() {
@@ -25,7 +26,8 @@ internal static (nint, nint) global() {
         g = 10;
         return 2;
     }
-    return (g, setG());
+    var evalᴛ1 = setG();
+    return (g, evalᴛ1);
 }
 
 internal static (nint, nint) field(ж<box> Ꮡb) {
@@ -35,7 +37,8 @@ internal static (nint, nint) field(ж<box> Ꮡb) {
         Ꮡb.Value.f = 10;
         return 2;
     }
-    return (b.f, setF());
+    var evalᴛ1 = setF();
+    return (b.f, evalᴛ1);
 }
 
 internal static (nint a, nint b) named() {
@@ -46,7 +49,8 @@ internal static (nint a, nint b) named() {
         a = 10;
         return 2;
     }
-    return (a, setA());
+    var evalᴛ1 = setA();
+    return (a, evalᴛ1);
 }
 
 internal static void main() {

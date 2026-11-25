@@ -17,7 +17,8 @@ partial struct compilerOptionsParser {
 }
 
 internal static bool ParseOption(this ref compilerOptionsParser p, @string key, any value) {
-    p.seen = append(p.seen, fmt.Sprintf("%s=%v"u8, key, value));
+    var evalᴛ1 = fmt.Sprintf("%s=%v"u8, key, value);
+    p.seen = append(p.seen, evalᴛ1);
     return key != "bad"u8;
 }
 
@@ -147,7 +148,9 @@ internal static void main() {
     }}
 
     var l = Ꮡ(new label(name: "a"));
-    fmt.Println("foreign:", ((ж<label>)(show<labelжStringerᴾ>(l))).name, ((ж<label>)(show<labelжStringerᴾ>(l))) == l);
+    var evalᴛ1 = ((ж<label>)(show<labelжStringerᴾ>(l)));
+    var evalᴛ2 = ((ж<label>)(show<labelжStringerᴾ>(l)));
+    fmt.Println("foreign:", evalᴛ1.name, evalᴛ2 == l);
     fmt.Println("embedded:", ((ж<label>)(describe<labelжnamedᴾ>(l))).name);
 
     var t = Ꮡ(new temp(c: 21));

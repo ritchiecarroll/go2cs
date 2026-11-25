@@ -624,6 +624,19 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	lhsLen := len(lhsExprs)
 	rhsLen := len(rhsExprs)
 
+	// Go reads the statement's operands, its left side's included, after its calls (operandOrder.go). A multi-value
+	// right side (a, b = f()) and a comma-ok form keep C#'s order.
+	if lhsLen == rhsLen {
+		var stores []ast.Expr
+
+		if assignStmt.Tok != token.DEFINE {
+			stores = lhsExprs
+		}
+
+		endOperandOrder := v.beginOperandOrder(stores, assignStmt.Tok != token.ASSIGN && assignStmt.Tok != token.DEFINE, rhsExprs...)
+		defer endOperandOrder()
+	}
+
 	// A store through a read-only slice view panics by name, in place of the store (readOnlySliceViewStore). A for
 	// statement's init or post clause is emitted inside the C# `for (…; …; …)` header, where a throw statement cannot
 	// stand, so there the conversion of the file stops by name instead (a dropped file, GO2CS2008), as

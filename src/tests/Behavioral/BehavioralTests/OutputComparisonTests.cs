@@ -1010,6 +1010,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
 
     [TestMethod]
+    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
+
+    [TestMethod]
     public void CheckGoDeferConstArgs() => CheckTarget("GoDeferConstArgs");
 
     [TestMethod]
@@ -1463,6 +1466,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
 
     [TestMethod]
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
+
+    [TestMethod]
     public void CheckMnGoMaxProcs() => CheckTarget("MnGoMaxProcs");
 
     [TestMethod]
@@ -1475,6 +1481,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
+    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
+
+    [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
@@ -1485,15 +1494,6 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
-
-    [TestMethod]
-    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
-
-    [TestMethod]
-    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
-
-    [TestMethod]
-    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
@@ -1926,6 +1926,42 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
+
+    [TestMethod]
+    public void CheckOperandOrderAssign() => CheckTarget("OperandOrderAssign");
+
+    [TestMethod]
+    public void CheckOperandOrderBinary() => CheckTarget("OperandOrderBinary");
+
+    [TestMethod]
+    public void CheckOperandOrderCallArgs() => CheckTarget("OperandOrderCallArgs");
+
+    [TestMethod]
+    public void CheckOperandOrderCompositeLit() => CheckTarget("OperandOrderCompositeLit");
+
+    [TestMethod]
+    public void CheckOperandOrderEarly() => CheckTarget("OperandOrderEarly");
+
+    [TestMethod]
+    public void CheckOperandOrderIf() => CheckTarget("OperandOrderIf");
+
+    [TestMethod]
+    public void CheckOperandOrderInPlace() => CheckTarget("OperandOrderInPlace");
+
+    [TestMethod]
+    public void CheckOperandOrderLabels() => CheckTarget("OperandOrderLabels");
+
+    [TestMethod]
+    public void CheckOperandOrderMultiAssign() => CheckTarget("OperandOrderMultiAssign");
+
+    [TestMethod]
+    public void CheckOperandOrderReturn() => CheckTarget("OperandOrderReturn");
+
+    [TestMethod]
+    public void CheckOperandOrderSend() => CheckTarget("OperandOrderSend");
+
+    [TestMethod]
+    public void CheckOperandOrderStmtForms() => CheckTarget("OperandOrderStmtForms");
 
     [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");

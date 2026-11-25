@@ -34,6 +34,14 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	// CS1003 ×4).
 	lambdaContext.deferredDecls = &strings.Builder{}
 
+	// Go evaluates the function value and the arguments at the statement, reading their operands after the calls
+	// in them (operandOrder.go); the prelude joins the statement's other hoisted declarations.
+	savedOperandHoist := v.hoistedDecls
+	v.hoistedDecls = lambdaContext.deferredDecls
+	endOperandOrder := v.beginOperandOrder(nil, false, append([]ast.Expr{goStmt.Call.Fun}, goStmt.Call.Args...)...)
+	v.hoistedDecls = savedOperandHoist
+	defer endOperandOrder()
+
 	var renderLambdaParams bool
 
 	// If we have a function literal, only prepare captures there, not on the GoStmt. A PARENTHESIZED

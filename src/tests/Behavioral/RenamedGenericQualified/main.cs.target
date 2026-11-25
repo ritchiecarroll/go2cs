@@ -34,9 +34,12 @@ internal static void main() {
     h.seen.Add((@string)"b");
     fmt.Println(h.seen.Len(), count(Ꮡh.Ꮡseen), h.seen.Has((@string)"b"), h.seen.Has((@string)"z"));
 
-    h.pairs = append(h.pairs, makePair("x", 1), new coll.Pair<@string, nint>(Key: "y", Val: 2));
+    var evalᴛ1 = makePair("x", 1);
+    h.pairs = append(h.pairs, evalᴛ1, new coll.Pair<@string, nint>(Key: "y", Val: 2));
     h.byKey = new map<@string, ж<coll.Set<nint>>>{["odd"] = coll.NewSet((nint)1, (nint)3, (nint)5)};
-    fmt.Println(len(h.pairs), h.pairs[1].Key, h.pairs[1].Val, h.byKey["odd"].Len());
+    var evalᴛ2 = len(h.pairs);
+    var evalᴛ3 = h.byKey["odd"].Len();
+    fmt.Println(evalᴛ2, h.pairs[1].Key, h.pairs[1].Val, evalᴛ3);
 
     coll.OrderedMap<@string, nint> o = default;
     o.Set((@string)"k", 7);

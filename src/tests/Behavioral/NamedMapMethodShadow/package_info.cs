@@ -52,7 +52,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAkiut6CgoKmgoKCuLq6goKCAAYQgoIABhTUgoKCgoKUgoKClIKCgoKClIKCloKCgoKCgoKUgoKCgpSClIKClIKC")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAkiut6CgoKmgoKCuLqA2oKCggAGEIKCAAYU1IKCgoKClIKCgpSCgoKCgpSCgpaCgoKCgoKClIKCgoKUgpSCgqSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

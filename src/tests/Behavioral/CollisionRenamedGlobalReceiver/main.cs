@@ -52,10 +52,15 @@ internal static void main() {
     fmt.Println(Ꮡtid.Load(), p.Load());
 
     count.bump();
-    fmt.Println(count.bump(), count.n, tls.count());
+    var evalᴛ1 = count.bump();
+    var evalᴛ2 = tls.count();
+    fmt.Println(evalᴛ1, count.n, evalᴛ2);
 
     Ꮡcount.self().bump();
-    fmt.Println(Ꮡcount.self().bump(), count.n, Ꮡcount.self() == Ꮡcount);
+    var evalᴛ3 = Ꮡcount.self();
+    var evalᴛ4 = evalᴛ3.bump();
+    var evalᴛ5 = Ꮡcount.self();
+    fmt.Println(evalᴛ4, count.n, evalᴛ5 == Ꮡcount);
 
     var before = Ꮡtid.Load();
     fmt.Println(before, shadow(), Ꮡtid.Load());

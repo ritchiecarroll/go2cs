@@ -16,7 +16,8 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         defer([GoFunc("(*Tally).Add.func1")] () => {
-            Ꮡt.Value.log = fmt.Sprintf("%s+%d"u8, Ꮡt.Value.log, n);
+            var evalᴛ1 = fmt.Sprintf("%s+%d"u8, Ꮡt.Value.log, n);
+            Ꮡt.Value.log = evalᴛ1;
         }, ref ᒐ);
         t.total += n;
     }
