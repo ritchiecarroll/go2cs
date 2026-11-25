@@ -71,7 +71,8 @@
     testing.AllocsPerRun body stops inlining the call it measures, so a box the JIT used to elide is allocated again
     (context's TestAllocs: Background() boxes backgroundCtx into Context, 24 bytes a run); and a spill slot of the
     unoptimized frame keeps a value live that Go lets the collector take (sync's TestPoolGC: 98 of 100 pooled values
-    cleaned up, where Go allows one survivor; P1's root). [MethodImpl(AggressiveOptimization)] on the measured
+    cleaned up, where Go allows one survivor; P1's root; and unique's TestHandle: Handles held in frame locals keep the
+    canonical copy reachable past the collection, P6's root). [MethodImpl(AggressiveOptimization)] on the measured
     closure does not help: in an assembly marked DisableOptimizations the JIT still compiles it MinOpts.
 
     A host joins this list only when both arms are read for its row: as built it is not EQUAL its bank because of an
@@ -81,7 +82,7 @@
     -p:GoTestOptimize=false still builds a listed host unoptimized, for the A/B arm.
   -->
   <PropertyGroup>
-    <GoOptimizedTestHosts>context.tests=TestAllocs;sync.tests=TestPoolGC</GoOptimizedTestHosts>
+    <GoOptimizedTestHosts>context.tests=TestAllocs;sync.tests=TestPoolGC;unique.tests=TestHandle</GoOptimizedTestHosts>
   </PropertyGroup>
   <PropertyGroup Condition="'$(GoTestOptimize)' == '' and '$(RootNamespace)' == 'go' and $([System.String]::Copy(';$(GoOptimizedTestHosts);').Contains(';$(MSBuildProjectName)='))">
     <GoTestOptimize>true</GoTestOptimize>

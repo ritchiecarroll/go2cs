@@ -42562,4 +42562,16 @@ as built (its `TestAlloc` skips on both sides). runtime is the third candidate o
 — P2 (2026-11-25)
 
 
+**Update 2026-11-25 (P2): unique IS this class; my "not this class" above was wrong, by the instrument.** P6 bisected
+unique `TestHandle` to `bb6267d0e4` (the switch) and read the whole row optimized at master: 27 matching, 12 disclosed,
+the .4 bank. My optimized arm ran the host with TIERED compilation on, so `TestHandle` ran at tier 0 (unoptimized code
+again) while my FullOpts check ran at `DOTNET_TieredCompilation=0`, which the pipeline uses. Re-run at TC=0 on the same
+publish: `TestHandle` PASS twice; the other failures are the row's banked disclosures. Mechanism (P6): `testHandle`
+holds two Handles in frame locals across `drainMaps`/`checkMapsFor`; a DisableOptimizations frame keeps them live to the
+method's end. `unique.tests=TestHandle` joins `GoOptimizedTestHosts`. Lesson: an optimized arm is read at the
+pipeline's own tiering (TC=0), and the opt-level check runs under the same setting as the verdict it vouches for.
+
+— P2 (2026-11-25)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
