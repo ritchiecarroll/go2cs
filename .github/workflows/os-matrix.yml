@@ -2147,6 +2147,7 @@ jobs:
           }
 
           $log = Join-Path $art "stack-probe-$goos-$rid.log"
+          # The sweep pins osx-arm64 rows to darwin/amd64 by itself until D7 (Resolve-SweepPlatforms, src/_roster.ps1).
           & ./src/run-validated-sweep.ps1 -Filter $row -Exact -TestTimeout $env:SWEEP_TEST_TIMEOUT -TestOracleGoarch $oracleGoarch -TestFilter $env:PROBE_TEST -IgnoreDiskPreflight *>&1 |
               Tee-Object -FilePath $log
           $sweepExit = $LASTEXITCODE
@@ -2876,6 +2877,9 @@ jobs:
           # so its oracle runs at arm64 too, not as amd64 under Rosetta (COORD's osx-arm64 oracle seat, ruling (A); the
           # converter's -test-oracle-goarch). Every other leg's host runs at the target's own arch: nothing is passed.
           $oracleGoarch = if ($env:RID -eq 'osx-arm64') { 'arm64' } else { '' }
+          # The row TARGET is the sweep's own (-Platforms; Resolve-SweepPlatforms, src/_roster.ps1): on osx-arm64 it pins
+          # darwin/amd64, the flavour every darwin row is banked on, until D7 of docs/phase4/DESIGN-darwin-arm64-flavour.md
+          # re-banks the osx-arm64 cells and removes the pin. Each row's verdict line names it ([platforms=...]).
           $failedRows = [System.Collections.Generic.List[string]]::new()
 
           foreach ($name in $names) {
