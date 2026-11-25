@@ -92,6 +92,13 @@ func cgoPseudoPackageKind(kind cgoDeclKind) bool {
 // package state like the rest.
 var cgoEmittingPseudoPackage bool
 
+// cgoPseudoPackageReferenced records that the file being visited wrote a pseudo-package member through `C.`, which
+// needs the file's `using C` alias. A file can do so without naming any cmd/cgo declaration in its syntax: net's
+// cgo_unix.go converts to _C_socklen_t, an alias another file declares as C.socklen_t, and the cast renders the alias's
+// target, C.@uint (cgo Phase 3, increment 3.4, DESIGN-cgo-phase3-marshaling 19.6). visitFile resets it per file and
+// reads it beside namesCgoPseudoPackageMember.
+var cgoPseudoPackageReferenced bool
+
 // cgoPseudoPackageReference is how a Go name is written when it names a pseudo-package member: `C.@int` outside the
 // pseudo-package and `@int` inside it, or a typedef's `Cꓸdiv_t` anywhere.
 func cgoPseudoPackageReference(goName string) (string, bool) {
@@ -104,6 +111,8 @@ func cgoPseudoPackageReference(goName string) (string, bool) {
 	if cgoEmittingPseudoPackage || strings.HasPrefix(member, cgoPseudoPackageAlias+TypeAliasDot) {
 		return member, true
 	}
+
+	cgoPseudoPackageReferenced = true
 
 	return cgoPseudoPackageAlias + "." + member, true
 }
@@ -193,6 +202,13 @@ func cgoPseudoPackageQualifier() string {
 // docs/PLAN-marker-comment-parity.md). It is written once per package here, since an attribute on a partial class
 // cannot repeat across the files that declare parts of it (CS0579). mergeExisting keeps a persisted block's records, as
 // the package class's section does on a single-file conversion.
+// cgoPseudoPackageStampElsewhere is set while a metadata file is written whose assembly takes the stamp from ANOTHER
+// file: the internal test unit (package_info_internal_test.cs), which the test assembly compiles beside
+// package_test_info.cs. Both went through applyCgoPseudoPackageStamp, so a cgo-on package's test host read CS0579,
+// "Duplicate 'GoPackage' attribute" on its C pseudo-package class (net's, cgo Phase 3 increment 3.4, 19.6). While it
+// is set the file keeps its `using C` alias and carries no stamped declaration.
+var cgoPseudoPackageStampElsewhere bool
+
 func applyCgoPseudoPackageStamp(lines []string, mergeExisting bool) []string {
 	className := getSanitizedImport(cgoPseudoPackageClass(packageName))
 	declaration := "partial class " + className
@@ -233,7 +249,7 @@ func applyCgoPseudoPackageStamp(lines []string, mergeExisting bool) []string {
 		kept = append(kept, lines[i])
 	}
 
-	if len(cgoPseudoPackageNames) == 0 {
+	if len(cgoPseudoPackageNames) == 0 || cgoPseudoPackageStampElsewhere {
 		return kept
 	}
 

@@ -157,7 +157,7 @@ For go2cs development: convert the Go standard library, or only the packages nam
 
 Common option, converting.
 
-Converts a single cgo package. It loads the package with cgo on (`CGO_ENABLED=1`, which needs a C compiler) and converts it when every use of C it makes is one go2cs binds: calls of C functions a shared library defines ([Limitations](Limitations.md#cgo)). Any other use is refused by name (`GO2CS2001`, see [Diagnostic codes](DiagnosticCodes.md)), with its reason, before anything is written.<!-- 2026-11-23 .5 docs pass (P1), UX-10 follow-on: no cgo refusal text names a phase (src/go2cs/cgoRoute.go). --> It converts for the machine's own operating system and architecture, or for another `-platforms` target when `CC` names that target's C compiler (for example `zig cc -target <triple>`); without one, any other `-platforms` is refused, for a package with no C in it too. Not combinable with `-stdlib` or `-tests`. With `-recurse`, every package of the module outside the standard library loads with cgo on, and each cgo package converts this way. A package that imports `runtime/cgo` or `plugin` is refused by name (`GO2CS2001`); one that imports `net` or `os/user` uses their standard-library builds without cgo, as Go does with `CGO_ENABLED=0` ([Limitations](Limitations.md#cgo)). More of cgo is on the [Roadmap](Roadmap.md#cgo).<!-- the [cgo interop plan](PLAN-cgo-interop.md) lays out the bridge (internal record, unlinked 2026-10-26, OQ-1) -->
+Converts a single cgo package. It loads the package with cgo on (`CGO_ENABLED=1`, which needs a C compiler) and converts it when every use of C it makes is one go2cs binds: calls of C functions a shared library defines ([Limitations](Limitations.md#cgo)). Any other use is refused by name (`GO2CS2001`, see [Diagnostic codes](DiagnosticCodes.md)), with its reason, before anything is written.<!-- 2026-11-23 .5 docs pass (P1), UX-10 follow-on: no cgo refusal text names a phase (src/go2cs/cgoRoute.go). --> It converts for the machine's own operating system and architecture, or for another `-platforms` target when `CC` names that target's C compiler (for example `zig cc -target <triple>`); without one, any other `-platforms` is refused, for a package with no C in it too. Not combinable with `-stdlib`. With `-tests`, it converts ONE package with its tests into a scratch root seeded from `src/core`, which the seed step marks with a `.go2cs-cgo-scratch-root` file at the root: a root without the marker, and an output inside a repository's `src/core` (symlinks resolved), are refused by name. The package's own test loads and the `go test` oracle run with cgo on, and every other package keeps its build without cgo. With `-recurse`, every package of the module outside the standard library loads with cgo on, and each cgo package converts this way. A package that imports `runtime/cgo` or `plugin` is refused by name (`GO2CS2001`); one that imports `net` or `os/user` uses their standard-library builds without cgo, as Go does with `CGO_ENABLED=0` ([Limitations](Limitations.md#cgo)). More of cgo is on the [Roadmap](Roadmap.md#cgo).<!-- the [cgo interop plan](PLAN-cgo-interop.md) lays out the bridge (internal record, unlinked 2026-10-26, OQ-1) -->
 
 #### <a id="option-tests"></a>`-tests`
 
@@ -199,6 +199,7 @@ Options that change a default, tune a run, or drive a maintainer's instrument. `
 | [<code>-test-publish-binlog</code>](#option-test-publish-binlog) | Testing | With -tests: keep an MSBuild binary log of a failed test-host publish. |
 | [<code>-test-oracle-vet-off</code>](#option-test-oracle-vet-off) | Testing | With -tests: run go test with -vet=off. |
 | [<code>-test-oracle-goarch &lt;arch&gt;</code>](#option-test-oracle-goarch) | Testing | With -tests: the GOARCH go test runs at, when it must differ from the target. |
+| [<code>-cgo-removals-dry-run</code>](#option-cgo-removals-dry-run) | Testing | With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none. |
 | [<code>-test-allow-handown</code>](#option-test-allow-handown) | Testing | With -tests: convert a package -stdlib skips, into a bare scratch root. |
 | [<code>-module-disclosures &lt;dir&gt;</code>](#option-module-disclosures) | Testing | With -tests on a module: the tree of committed disclosure manifests. |
 | [<code>-module-version &lt;version&gt;</code>](#option-module-version) | Testing | With -module-disclosures: the version a copied module source is. |
@@ -319,6 +320,12 @@ With `-tests`: run `go test` with `-vet=off`, for a package whose own `go test` 
 Advanced option, testing.
 
 With `-tests`: the `GOARCH` that `go test` runs at, when it must differ from the conversion's target. For example, an Apple silicon host validating the `darwin/amd64` conversion sets `arm64`, so Go does not run under Rosetta. Empty by default, which is the target's own; when set, it is recorded in the comparison record.
+
+#### <a id="option-cgo-removals-dry-run"></a>`-cgo-removals-dry-run`
+
+Advanced option, testing.
+
+With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this flag each such file is removed and printed with its reason, but only when it carries go2cs's own emission header for its source; any other file there, and a hand-owned one, is refused by name.
 
 #### <a id="option-test-allow-handown"></a>`-test-allow-handown`
 
