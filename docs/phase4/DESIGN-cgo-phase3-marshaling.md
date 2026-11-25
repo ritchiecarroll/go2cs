@@ -3164,3 +3164,59 @@ Questions for COORD and P3:
 Lean: in 3.4, since it is net's own shape and the last red between the seven and Go.
 
 — H (2026-11-25)
+
+### 19.8 Record 2026-11-25: P3's verdict on 4a and 4c folded (COORD: not seated until folded), and P3's three questions answered
+
+P3's verdict on 4a/4c (relayed in COORD inbox H 20261124T232124Z) was missed at first: the inbox watcher was not
+running when it arrived. COORD held both seats (inbox H 20261125T021805Z). It is folded at `bb3bdc99e3`:
+- **MUST 1 (4a).** checkCgoTestsOutput judged the ROOT. It now judges the OUTPUT.
+  - repositoryCorpusOf resolves every symlink on the path (the longest existing prefix), then refuses an ancestor named
+    `core` whose grandparent holds .git (a directory or a worktree's file).
+  - Route (a), an explicit -go2cspath elsewhere with the output inside a repository's src/core, and route (b), a scratch
+    src that is a symlink to a repository's src, each have a row. Both read red with the predicate neutered.
+  - 4c's removal asks the same predicate for each file, with its own row.
+- **SHOULD 2, ruled in.** -cgo -tests refuses a root without `.go2cs-cgo-scratch-root`, which the seed step writes. The
+  repository's src and a deployed %GOPATH%/src/go2cs both lack it. Row; red when neutered.
+  - The hosted rows seed their own marked scratch root (seedCgoScratchRoot): core, gen, the two props, go2cs-gen's
+    collision list, and the marker.
+- **MUST 3 (4c).** Candidates are looked for only in the folders this target resolves to (its key folders that hold
+  sources, and flat), and every folder holding one is checked. Rows: darwin's same-name copy stays when linux's goes
+  (red when darwin is let in); a key-folder copy and a flat copy are both removed.
+- **SHOULD 4.** An `<stem>_impl.cs` companion beside the file refuses by name. Row; red when neutered.
+- **SHOULD 5.** The set's three conditions are written at cgoDeselectedOutputs:
+  - production GoFiles only;
+  - both loads at the same GOOS, GOARCH and flags;
+  - compared by cleaned SOURCE paths, never CompiledGoFiles. The comparison is by cleaned full path now, not base name.
+- **SHOULD 6.** The removal makes a scratch root one-way, so 4b's leg seeds one fresh root per arm: the cgo-on arm and
+  the cgo-off control never share one. The probe and both hosted rows already seed per run.
+- **NIT 7, a named limit.** The stack-append harvest pins CGO_ENABLED=0 (stackAppendHints.go:702). An append in a file
+  the cgo-on load selects (net's cgo_unix.go) gets no harvested capacity hint under -cgo -tests. That is a performance
+  limit; behaviour is unchanged.
+
+**P3's three could-not-confirms:**
+1. **resolveGo2CSPath keeps an explicit root: CONFIRMED.** It returns before any self-location when the configured root
+   is a working go2cs root (isGo2CSRoot), so route (a) was real, and MUST 1 closes it.
+2. **The neutered-arm rows.** Each was read red with its arm neutered, then restored byte-identical (cmp):
+   - the corpus predicate (routes a, b and the per-file arm);
+   - the marker;
+   - darwin let into the folder set;
+   - the companion check;
+   - the scope guard;
+   - the header check;
+   - the stamp switch;
+   - the removal's record of the stale path.
+3. **A stale _test.cs from the seed cannot compile into the host: CONFIRMED by reading.** A `.tests.csproj` sets
+   EnableDefaultCompileItems=false and lists its compile items, and each -tests conversion rewrites that list for its own
+   target, so a seeded _test.cs not selected this run is never listed. The production project excludes test artifacts.
+
+**Readings at `bb3bdc99e3`.**
+- Hosted (45534235178): TestACgoPackageConvertsWithItsTestsAndMatchesGo,
+  TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub and TestACgoTestsConversionNeverWritesTheRepositorysCorpus
+  (all six arms, route (b) included) PASS on linux.
+- net probe (45534257167): unchanged, 4 of 7 passing. The PTR pair is refused at the struct door; CNAME is unmeasured.
+- Battery on H at `bb3bdc99e3`: converter go test ./... 11 ok, 0 FAIL, 0 cached; CNR NO REGRESSION, 1171
+  byte-identical, 0 NOT MEASURED.
+
+The PTR door is ruled into 3.4 (image and copy-back). Before code, P3 reads 19.7 and the wrapper golden count is posted.
+
+— H (2026-11-25)
