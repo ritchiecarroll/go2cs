@@ -61,7 +61,7 @@ allocate a wrapper and read their arguments. Nothing else runs. The rule admits 
 generated adapter (a type go2cs-gen emits for an interface implementation; how the rewriter recognizes one is settled
 in the code against go2cs-gen's own output, never by the glyph in the name) and whose every argument is a pure read. Any other object creation stays a blocker, including the
 slice-to-array conversion that gc runs before the call.
-Probe owed before code: a Go interface conversion of a variable, followed by a call that reassigns the variable
+Probe (run, 3.3): a Go interface conversion of a variable, followed by a call that reassigns the variable
 (`fmt.Fprintf(w, "%v", f())` with f setting w). If gc reads w BEFORE f, M2 is wrong and is dropped. The probe goes in
 MnGoOrder beside row 7's.
 
@@ -74,7 +74,7 @@ the rewriter treats a `TupleExpressionSyntax` exactly like an argument list: eac
 `in:AddAssignmentExpression`. In Go, `s += f()` is `s = s + f()`, and the read of s is unordered against f(). The rule
 extends the existing assignment case: a compound assignment whose left side is a plain local or parameter (not a ref,
 not a field, not an element) moves, and the left side is read after the call.
-Probe owed before code: `s += f()` with f writing s. The rule's direction (read after) is what gc does for `b + f()`
+Probe (run, 3.3): `s += f()` with f writing s. The rule's direction (read after) is what gc does for `b + f()`
 in row 7. If gc reads s first in the compound form, M4 is dropped.
 
 **M5. A throw statement is movable.** `throw panic(errors.New("…"u8 + v.Type().String()));` blocks on
@@ -157,6 +157,26 @@ Rows (COORD 2026-11-25 11:46Z), each red first and checked by value:
 
 Size: about 40 to 60 generator lines plus the rows. It clears gob's three class-6 rows.
 
+### 3.3 The two gc probes, run 2026-11-25 (go1.26.11, linux/amd64)
+
+Run in scratch before this note was read. They go into `src/tools/mnspike2/MnGoOrder` with the seat's code.
+
+**M4 holds.** `s += f()` with f writing s reads s AFTER the call in every form tried: a package variable with f
+inlinable and with f marked `//go:noinline`, a closure-captured string local, and a closure-captured int local
+(`n := 1; n += g()` with g setting n to 100 and returning 10 gives 110). The same with `-gcflags=-l`.
+
+**M2 holds as Go-legal, but gc's own order varies with inlining.** The spec leaves the order of an operand's
+conversion against a later call unspecified, and gc shows both orders:
+- A variable of interface type (`fmt.Fprintf(w, "%s", setW())` with setW reassigning w, a package variable or a
+  closure-captured local) is read AFTER the call.
+- A package variable of concrete pointer type converted to `io.Writer` at the call is read AFTER the call.
+- A closure-captured LOCAL of concrete pointer type converted to `io.Writer` is read BEFORE the call when gc inlines
+  the closure, and AFTER it with `-gcflags=-l`.
+
+So M2's direction (read after) is gc's order whenever the later call is not inlined, and a legal Go order always. The
+twin's later call is a parking call and is never inlined into the statement, so M2 gives gc's non-inlined order. M2's
+row compares against that value, and its comment names the inlined case as the place where gc itself differs.
+
 ## 4. What does not change
 
 - Default mode (owner D4): only the twin generator changes. With GoTwins off it emits nothing, so plain bodies are
@@ -199,7 +219,8 @@ class 6 (3). The 5 left are group H. With M8, 4.
 What can miss, ranked by what a miss would mean:
 1. A second blocker. The census shows only the first. A site in A–G can fail on a second blocker that no rule covers.
    That reads as a smaller drop with a NEW first blocker on the same row, and the post names each one.
-2. A probe failing (M2 or M4). Groups A and C stay (13 rows), and the prediction becomes 54 → 18.
+2. A probe failing (M2 or M4). Both were run (3.3) and both rules hold, so this risk is closed. Had either failed,
+   groups A or C would have stayed.
 3. Ruling 2 moving the block instead of clearing it (3.1's falsifier). Then 5 rows change blocker instead of
    disappearing.
 4. Build errors. Any wrong move fails to compile (CS4007, CS9217, CS8178) in the 358-report build, so a wrong rule
