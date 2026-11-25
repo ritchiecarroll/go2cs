@@ -35,7 +35,8 @@ type cgoWrapperSet struct {
 	mirrors   *cgoMirrorBuilder
 	copies    map[string]string
 	copyOrder []string
-	allocates bool // a helper or C.malloc allocates, so the pseudo-package binds the package's own malloc
+	allocates bool   // a helper or C.malloc allocates, so the pseudo-package binds the package's own malloc
+	class     string // the pseudo-package class, whose assembly a C variable's lookup names (cgo item 3)
 }
 
 func newCgoWrapperSet(target cgoBindingTarget, sizes types.Sizes) *cgoWrapperSet {
@@ -329,6 +330,10 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		if cgoBuiltinNames[function] {
 			return set.helper(declaration)
 		}
+	}
+
+	if declaration.kind == cgoVar {
+		return set.variable(declaration)
 	}
 
 	// Anything not a C function is the scalar binding's to take or refuse.
@@ -958,4 +963,53 @@ func indentCSharp(text string) string {
 	}
 
 	return strings.Join(lines, "\n") + "\n"
+}
+
+// variable writes C.x for a C global variable (cgo item 3). cmd/cgo declares _Cvar_x as the variable's address, of
+// type *T, and writes every use as *_Cvar_x. The pseudo-package holds a box over the address the library exports for
+// the symbol, looked up on first use (GoCgoLibraries.Variable), as Ꮡx, and x is a ref property over the box's value, so
+// C.x reads and writes the variable in place, as Go does, and &C.x is the same box on every use. T is a C scalar or a
+// C struct; any other C type is refused by name.
+func (set *cgoWrapperSet) variable(declaration cgoDeclaration) (string, error) {
+	name := declaration.cName
+	pointer, ok := declaration.object.Type().(*types.Pointer)
+
+	if !ok {
+		return "", fmt.Errorf("cgo wrapper: C.%s is a C variable cmd/cgo did not declare as an address", name)
+	}
+
+	named, ok := types.Unalias(pointer.Elem()).(*types.Named)
+	cType := ""
+
+	if ok {
+		cType, ok = strings.CutPrefix(named.Obj().Name(), "_Ctype_")
+	}
+
+	if !ok {
+		return "", fmt.Errorf("cgo wrapper: C.%s is a C variable of type %s, which is not a C scalar or struct; go2cs reads and writes only those C variables", name, strings.ReplaceAll(types.TypeString(pointer.Elem(), func(*types.Package) string { return "" }), "_Ctype_", "C."))
+	}
+
+	switch underlying := named.Underlying().(type) {
+	case *types.Basic:
+		if underlying.Kind() == types.UnsafePointer || underlying.Kind() == types.String {
+			return "", fmt.Errorf("cgo wrapper: C.%s is a C variable of type C.%s, a pointer; go2cs reads and writes only C scalar and struct variables", name, cType)
+		}
+	case *types.Struct:
+	default:
+		return "", fmt.Errorf("cgo wrapper: C.%s is a C variable of type C.%s, which is not a C scalar or struct; go2cs reads and writes only those C variables", name, cType)
+	}
+
+	member := getCoreSanitizedIdentifier(name)
+	goSide := getCoreSanitizedIdentifier(cType)
+	library := set.libraryOf(name)
+	box := AddressPrefix + member
+
+	var text strings.Builder
+
+	fmt.Fprintf(&text, "    // C.%s, a C variable in %s, read and written in place through a box over its address.\n", name, library)
+	fmt.Fprintf(&text, "    private static ж<%s>? %sᴍvariable;\n\n", goSide, member)
+	fmt.Fprintf(&text, "    internal static ж<%s> %s => %sᴍvariable ??= global::go.golib.GoCgoLibraries.Variable<%s>(typeof(%s).Assembly, %q, %q);\n\n", goSide, box, member, goSide, set.class, library, name)
+	fmt.Fprintf(&text, "    internal static ref %s %s => ref %s.Value;\n", goSide, member, box)
+
+	return text.String(), nil
 }
