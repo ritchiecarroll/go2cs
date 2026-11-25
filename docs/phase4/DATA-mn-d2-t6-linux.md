@@ -1,4 +1,5 @@
 # DATA — M:N D2/T6: the linux roster against a twinned standard library (hosted, linux-x64)
+<!-- {% raw %} — Jekyll/Liquid guard: the record quotes GitHub Actions expressions (${{ }}) that Liquid would otherwise publish as empty text. -->
 
 **Lane R, 2026-11-25.** COORD GO 20261125T080536Z, re-rule 095355Z (option (i)), GO wave 0 102335Z. Wave 0 ran at
 `ef7d136de7`, the same cut before the proof fix. Every other run is at `7d8e14c094`, which is master `08e113cb0b`
@@ -162,3 +163,5 @@ Routing is COORD's as of 20261125T155057Z. The unrouted-at-reading items each ha
 - A local hand build of a committed test host is not an instrument for this reading. The sweep reconverts the test
   sources, and the committed ones did not build by hand (CS1929 on bufio.tests), so the count is read only in the
   hosted sweep.
+
+<!-- {% endraw %} -->
