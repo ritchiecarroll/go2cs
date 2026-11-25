@@ -122,6 +122,13 @@ public class TwinMovabilityTests
                     return show("b"u8, 1, Set(Ꮡa, 2, false));
                 return 0;
             }
+
+            // M3: a tuple literal's elements evaluate left to right, as a Go multi-value return's operands do.
+            public static (nint, nint) tupleElems()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return (a, show("u"u8, 1, Set(Ꮡa, 2, false)));
+            }
         }
         """;
 
@@ -175,6 +182,15 @@ public class TwinMovabilityTests
         StringAssert.Contains(twins, "|braceless|Set|ref-like-before|nested:ReturnStatement", "a brace-less body is no statement-list member\n" + twins);
         Assert.AreEqual((nint)1, Twin(assembly, "elseIf"));
         Assert.AreEqual((nint)13, Twin(assembly, "braceless"));
+    }
+
+    [TestMethod]
+    public void ATupleElementIsOrderedLikeAnArgument_M3()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.IsFalse(twins.Contains("|tupleElems|Set|"), "no ref-blocked row names tupleElems\n" + twins);
+        Assert.AreEqual(((nint)2, (nint)13), Twin(assembly, "tupleElems"), "gc reads a after the call: (2, 1*10+3)");
     }
 
     private static readonly CSharpParseOptions Options = new(LanguageVersion.CSharp13);

@@ -551,6 +551,19 @@ public sealed partial class TwinGenerator
                             Block("multi-declarator");
 
                         break;
+                    // M:N row 19, M3: a tuple literal's elements evaluate left to right, as a Go multi-value return's
+                    // operands do, so the elements before the call are earlier exactly as arguments are. A deconstruction
+                    // TARGET is not a literal and stays under the store rules.
+                    case TupleExpressionSyntax tuple when child is ArgumentSyntax && !(tuple.Parent is AssignmentExpressionSyntax target && target.Left == tuple):
+                        foreach (ArgumentSyntax element in tuple.Arguments)
+                        {
+                            if (element == child)
+                                break;
+
+                            Earlier(element.Expression);
+                        }
+
+                        break;
                     case BaseArgumentListSyntax list:
                         m_boxCalls.TryGetValue(list.Parent!, out string?[]? handed);
 
