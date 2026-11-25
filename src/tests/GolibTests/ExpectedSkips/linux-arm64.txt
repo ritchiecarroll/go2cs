@@ -30,6 +30,8 @@ Arm4_ARealAddress_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q4
 EachCandidateOneMillisecondWaitIsMeasured  # the candidates are darwin's; this probe measures them on macOS only
 ForegroundPlacesTheChildsGroupInTheTerminalsForeground  # no controlling terminal: run under a pty (util-linux `script -qfc`) to measure the transfer
 GotracebackWerAtStartReachesEnableWerAndClearsTheFaultBox  # enableWER acts only on Windows; elsewhere it is Go's own empty stub
+LiveFcntlSetsTheVariadicFlag  # calls libSystem's fcntl; macOS only (the osx-arm64 leg measures the stack slot, osx-x64 the register)
+LiveOpenCreatesTheFileWithTheVariadicMode  # calls libSystem's open; macOS only (the osx-arm64 leg measures the stack slot, osx-x64 the register)
 OnWindowsTheSameLibraryInTheApplicationDirectoryLoads  # only windows searches the application directory, as a Go binary's loader does: NOT MEASURED here
 RuntimeX86FlagsMatchInternalCpu  # not an x86 host: Go copies other flags there
 RuntimeX86HasAVXIsTrueOnAnAVXHost  # not an x86 host: Go copies other flags there
