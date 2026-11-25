@@ -5264,6 +5264,17 @@ partial class runtime_package
             body.Module == callee.Module && body.MetadataToken == callee.MetadataToken)
             return true;
 
+        // A call names a RecvGenerator `this ж<T>` overload of a pointer-receiver method, and the frame inside it is the
+        // method it forwards to: the Go-named `this ref T` forwarder, or that forwarder's suffix-form body where the JIT
+        // inlined the forwarder (goRecvForwardee answers the body when there is one). log/slog's TestCallDepth: a
+        // `logger.Log(...)` call on a `ж<Logger>` reported its own offset, which this test did not relate to the
+        // `ref Logger` forwarder frame, so the line fell to the next statement at TieredCompilation=0.
+        if (goRecvForwardee(target) is { } forwardee &&
+            ((forwardee.Module == callee.Module && forwardee.MetadataToken == callee.MetadataToken) ||
+             (callee is System.Reflection.MethodInfo calleeForwarder && glyphBodyOf(calleeForwarder) is { } calleeBody &&
+              calleeBody.Module == forwardee.Module && calleeBody.MetadataToken == forwardee.MetadataToken)))
+            return true;
+
         // A virtual or interface call names the slot; the frame is the override or the implementation.
         return (target.IsVirtual || target.IsAbstract) &&
             (callee.Name == target.Name || callee.Name.EndsWith("." + target.Name, StringComparison.Ordinal));
