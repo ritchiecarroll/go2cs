@@ -155,7 +155,7 @@ function Get-CorpusFlavorArch {
 # 'windows' is for GoTargetOS: it IS the csproj default. A pre-set variable or an explicit `-p:GoTargetArch`
 # still wins: run-validated-sweep.ps1's interim pin re-sets both variables to darwin/amd64 on an Apple-silicon
 # host until the bank re-reads the osx-arm64 cells (D7; Resolve-SweepPlatforms in _roster.ps1).
-if ([string]::IsNullOrEmpty($env:GoTargetArch) -and $HostGoos) {
+if ([string]::IsNullOrEmpty($env:GoTargetArch) -and $HostGoos -and $HostGoos -ne 'darwin') { # CONTROL (never lands): darwin/amd64 on Apple silicon
     $hostFlavorArch = Get-CorpusFlavorArch -Goos $HostGoos -Goarch $HostGoarch
 
     if ($hostFlavorArch -and $hostFlavorArch -ne 'amd64') {
