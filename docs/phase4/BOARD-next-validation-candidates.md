@@ -42102,4 +42102,32 @@ already records cross-package renames for type references: foreignAliasedTypeNam
 
 — R (2026-11-24)
 
+## 2026-11-25 — R (M:N row 13, N5; COORD's I4 ruling 20261125T015518Z): on R-LAPTOP (Windows) one wake in a few runs waits most of a CPU step under the M:N scheduler (host-only)
+
+**OPEN, Windows host only, not rooted to a fix.** MnInvisible's V4 row (P goroutines in CPU steps of 200 ms between
+parks, one goroutine woken every 25 ms, 200 wakes) at GO2CS_MN_PROCS=8 on R-LAPTOP (16 hardware threads, Windows 11) reads
+p50 11-17 ms and p99 46-83 ms, and in 3 to 4 of every 5 runs one wake waits 150-225 ms. The same build in WSL (10 cores)
+reads p99 10-15 ms and a max of 11-23 ms at P = 4 and P = 8, and the default-mode floor on this host is p99 17-44 ms with
+an occasional 105-132 ms max of its own. So the tail belongs to this host. The hosted linux P = 4 run is the gate of record.
+
+**What it is not** (one axis each, 3-5 runs, all at row 13's branch, uncommitted arms):
+- the run-next slot: GO2CS_MN_RUNNEXT=0 leaves the max at 183-191 ms;
+- the monitor's priority: ThreadPriority.AboveNormal leaves 182-187 ms in 3 of 5;
+- the monitor starting carrier threads itself: a starter thread that starts them leaves 165-183 ms in 3 of 5;
+- idle carriers retiring after 100 ms: never retiring them leaves 117-183 ms, with no carrier re-created.
+
+**What the traces show.** In each long wait the monitor's tick spends 130-200 ms in its injection loop, in AddCarrier
+(27-64 ms each, several per tick: Thread.Start while 16 CPU-bound threads hold the 16 hardware threads); s_p.Release and
+s_carriersLock never reached 20 ms. Deferring the start moves the wait onto the queued wake rather than removing it.
+The injections come mostly from the CPU goroutines' own Gosched requeues (about 860 per 200 wakes at P = 8), which
+oversubscribe the host: Go would preempt instead, and go2cs cannot.
+
+**Likely seat.** The injection policy under CPU-bound load on a host with as many runnable threads as cores (an injection
+budget relative to idle hardware threads, or not injecting for a requeued Gosched), weighed against what 3c buys (V2 and
+MnSpinCap's spinners complete). Not cut.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

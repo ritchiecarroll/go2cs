@@ -2385,6 +2385,45 @@ jobs:
           fi
           exit 0
 
+      # -------------------------------------------------------------------------------------
+      # M:N N5, I4 (docs/phase4/DESIGN-mn-n5-invisible-blocking.md section 6; COORD's ruling of 2026-11-25: the gate of
+      # record is a hosted linux runner at its own P, p99 <= 25 ms). MnInvisible's V4 row: P goroutines in CPU steps of
+      # 200 ms (and 2 s) between parks while one goroutine sleeps 25 ms 200 times; its wake-to-run latency goes to stderr.
+      # Three runs per arm: default mode (the runner's floor, a reading only), then twinned under GO2CS_MN=1. A twinned
+      # run whose p99 passes 25 ms, or that does not finish, fails the step by name.
+      # -------------------------------------------------------------------------------------
+      - name: M:N — N5 wake latency (I4)
+        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnInvisible' && needs.plan.outputs.mn == '1'
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set +e
+          set +o pipefail
+          dll=src/tests/Behavioral/MnInvisible/bin/Release/net10.0/MnInvisible.dll
+          if [ ! -f "$dll" ]; then echo "::error::N5 I4: no build output at $dll"; exit 1; fi
+          if command -v timeout > /dev/null; then limit="timeout 120"; else limit=""; fi
+          echo "READING n5-i4 cores=$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
+          fail=0
+          for arm in floor:0:200 twinned:1:200 twinned:1:2000; do
+            IFS=: read -r label mn step <<< "$arm"
+            for r in 1 2 3; do
+              if [ "$mn" = "1" ]; then export GO2CS_MN=1; else unset GO2CS_MN; fi
+              MN_INV_ONLY=V4 MN_INV_READING=1 MN_INV_STEP_MS=$step $limit dotnet "$dll" > "$RUNNER_TEMP/n5-out.txt" 2> "$RUNNER_TEMP/n5-err.txt"
+              code=$?
+              line=$(grep -a '^reading: V4' "$RUNNER_TEMP/n5-err.txt" | tr -d '\r')
+              p99=$(echo "$line" | sed -n 's/.*p99_ms=\([0-9.]*\).*/\1/p')
+              echo "READING n5-i4 arm=$label step_ms=$step run=$r exit=$code $line"
+              if [ "$label" = "twinned" ]; then
+                if [ "$code" != "0" ] || [ -z "$p99" ] || python3 -c "import sys; sys.exit(0 if float('$p99') > 25 else 1)"; then
+                  echo "::error::N5 I4: arm=$label step_ms=$step run=$r exit=$code p99_ms=${p99:-none} (the bar: p99 <= 25 ms)"
+                  fail=1
+                fi
+              fi
+            done
+          done
+          unset GO2CS_MN
+          exit $fail
+
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'
         # A STEP limit under the job's: a wedged timeout arm once held both mac runners to the job's
