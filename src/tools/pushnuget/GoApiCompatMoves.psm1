@@ -712,6 +712,17 @@ namespace Go2cs.ApiCompatMoves
             return pack == null ? null : property.RefKind + " " + pack;
         }
 
+        // Whether a parameter is params. A params collection (params System.Span<X>, params go.variadic<X>) is marked in
+        // metadata by System.Runtime.CompilerServices.ParamCollectionAttribute, which only a Roslyn that knows C# 13
+        // reads as params: the one PowerShell 7.4 ships for Add-Type predates it, reports IsParams false and keeps the
+        // attribute as an ordinary one, so a variadic tail read there was refused (train 11, COORD 2026-11-24T23:14:29Z).
+        // The attribute is matched by name, since each assembly is loaded alone and nothing resolves it.
+        private static bool IsParams(IParameterSymbol parameter)
+        {
+            return parameter.IsParams ||
+                   parameter.GetAttributes().Any(attribute => attribute.AttributeClass != null && attribute.AttributeClass.Name == "ParamCollectionAttribute");
+        }
+
         // A delegate by its base type's name, for the reason IsStruct gives.
         private static bool IsDelegate(INamedTypeSymbol type)
         {
@@ -757,7 +768,7 @@ namespace Go2cs.ApiCompatMoves
                         same = false;
                     else if (had != hasType)
                     {
-                        if (AsPack(had) == hasType && (has.IsParams || i == beginInvokeTail))
+                        if (AsPack(had) == hasType && (IsParams(has) || i == beginInvokeTail))
                             changed++;
                         else
                             same = false;
