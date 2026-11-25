@@ -2770,29 +2770,29 @@ type record struct {
 partial class main_package {
 …
     var blob = new slice<byte>(24);
-    var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
+    var rec = Ꮡ(blob, 0).Reinterpret<byte, Δrecord>();
 
     rec.Kind = 0x01020304;
     rec.Length = 0x0506;
     rec.Off = 7;
     rec.Off += 1;
-    rec.of(record.ᏑPath).ElementRef(1) = 0x0a0b;
-    nint n = copy(rec.of(record.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
+    rec.of(main_package.Δrecord.ᏑPath).ElementRef(1) = 0x0a0b;
+    nint n = copy(rec.of(main_package.Δrecord.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
     rec.tail.B = 0x1112;
 ```
 
-`rec.Kind` is a C# 14 extension PROPERTY on `ж<record>` that go2cs-gen emits, a `ref` with `ж<T>.field`'s two
+`rec.Kind` is a C# 14 extension PROPERTY on `ж<Δrecord>` that go2cs-gen emits, a `ref` with `ж<T>.field`'s two
 arms:
 
 <!-- illustration: not converter output -->
 ```csharp
-extension(global::go.ж<global::go.main_package.@record> ʗp)
+extension(global::go.ж<global::go.main_package.Δrecord> ʗp)
 {
     public ref uint Kind
     {
         [GeneratedCode("go2cs-gen", …), MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => ref ʗp is global::go.NativeBox<global::go.main_package.@record>
-            ? ref ʗp.field(global::go.main_package.@record.ᏑKind)
+        get => ref ʗp is global::go.NativeBox<global::go.main_package.Δrecord>
+            ? ref ʗp.field(global::go.main_package.Δrecord.ᏑKind)
             : ref ʗp.Value.Kind;
     }
     …

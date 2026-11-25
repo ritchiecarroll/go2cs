@@ -10291,7 +10291,7 @@ type record struct {
 ```
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:9-14 -->
 ```csharp
-partial struct record {
+partial struct Δrecord {
     public nint Version;
     public @string Name; /*`json:"name" asn1:"optional,explicit,tag:0"`*/
     public slice<byte> Data; /*`json:"data,omitempty"`*/
@@ -10324,7 +10324,7 @@ func main() {
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:48-60, 90 -->
 ```csharp
 internal static void main() {
-    var t = reflect.TypeOf(new record());
+    var t = reflect.TypeOf(new Δrecord());
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
@@ -10347,8 +10347,9 @@ A few names in that C# need a word:
   `fmt.Println`, whose arguments are Go `any`, as a Go string ([Strings](#strings-string-and-sstring),
   [Empty Interface](#empty-interface-any)).
 - `"…"u8` is a C# UTF-8 literal, which golib reads as a Go string.
-- `new record()` is Go's empty literal `record{}`. It calls the constructor the generator adds to every
-  struct for the zero value ([Struct Types](#struct-types)).
+- `new Δrecord()` is Go's empty literal `record{}`. It calls the constructor the generator adds to every
+  struct for the zero value ([Struct Types](#struct-types)). The type is `Δrecord` because `record` cannot
+  begin a C# member declaration, so the name takes the `Δ` prefix ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 - `fΔ1` is the loop's `f`. It is renamed because the function declares another `f` after the loop, and C#
   does not allow an inner block to reuse a name its enclosing block declares
   ([Shadowing](#short-variable-redeclaration-shadowing)).
@@ -11145,7 +11146,7 @@ call that returns one over a byte array or byte slice, also reaches an array fie
 ([`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr)).
 <!-- the rule: src/go2cs/fieldAccess.go:24 `// FIELD ACCESS THROUGH A REINTERPRETED POINTER`,
      the step across a return :45 `// ONE STEP ACROSS A RETURN`.
-     In-function: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:53 `Reinterpret<byte, record>();`;
+     In-function: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:53 `Reinterpret<byte, Δrecord>();`;
      across a return: FieldAccessReinterpret/main.go:90 `got, err := readReparse(0x0201, false)` ->
      main.cs.target:81 `fmt.Println("returned:", got.Flags, got.Path[0], err);`: since I0 D3 reparse holds Path inline, so the
      element is read through the inline array's indexer, not a field view; the field-view step across a return is the guard's.
@@ -11561,7 +11562,7 @@ src/tests/Behavioral/FieldAccessReinterpret/main.go:90 (`got, err := readReparse
 <!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:52-58 -->
 ```csharp
     var blob = new slice<byte>(24);
-    var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
+    var rec = Ꮡ(blob, 0).Reinterpret<byte, Δrecord>();
 
     rec.Kind = 0x01020304;
     rec.Length = 0x0506;
@@ -11569,8 +11570,8 @@ src/tests/Behavioral/FieldAccessReinterpret/main.go:90 (`got, err := readReparse
     rec.Off += 1;
 ```
 
-`rec` is a `ж<record>`, and `rec.Kind` writes the four bytes at Go's offset 0 of `blob`. An element of an
-array field reads through the field's view, `rec.of(record.ᏑPath).ElementRef(1)`.
+`rec` is a `ж<Δrecord>`, and `rec.Kind` writes the four bytes at Go's offset 0 of `blob`. An element of an
+array field reads through the field's view, `rec.of(main_package.Δrecord.ᏑPath).ElementRef(1)`.
 
 **A slice or string header stored through its fields commits to the variable it views.** Go code can view
 a slice variable as its header, `hdr := (*sliceHeader)(unsafe.Pointer(&alias))`, where `sliceHeader` is an
