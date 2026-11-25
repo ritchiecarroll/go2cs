@@ -42523,4 +42523,43 @@ mid-call assert. No product cause: the hang was the test's collector starving th
 
 — P6 (2026-11-25)
 
+## 2026-11-25 — P2 (COORD rulings 20261125T145958Z, 150830Z, 151334Z): unoptimized test hosts change allocation and liveness verdicts (CURED for context and sync)
+
+**Class.** Since `de46ae4938` (11-23) every converted stdlib test assembly is compiled `Optimize=false`, so
+`runtime.Caller` reads per-call lines. That also changes what a test can OBSERVE of the code it measures. Two kinds:
+- **Allocation.** A want-0 `testing.AllocsPerRun` body no longer inlines the call it measures, so a box the JIT elided
+  is allocated again. context `TestAllocs`: `Background()` boxes `backgroundCtx` into `Context`, 24 B a run (2,400 B
+  over 100). JitDisasmSummary: every `go.context.tests` method MinOpts, `Background()` FullOpts but not inlined.
+- **Liveness.** A spill slot of the unoptimized frame keeps a value live that Go lets the collector take. sync
+  `TestPoolGC`: 98 of 100 pooled values cleaned up where Go allows one survivor (P1's root and bisect, first bad
+  `bb6267d0e4`, the train that carried the switch).
+
+**Both arms, linux-x64, same sources.** context at `a3bf724219` (its host does not compile at master before that cut):
+as built FAIL x2, `-p:GoTestOptimize=true` PASS x2; with the list below the whole row reads 62/62, EQUAL its bank. sync
+at master `1c556c35a5`: P1's arms (FAIL 6/6, PASS 3/3, the rest of the suite identical); with the list, 48 matching and
+9 disclosed, EQUAL its bank.
+
+**Probe of the cheaper cure, NO.** `[MethodImpl(MethodImplOptions.AggressiveOptimization)]` on the measured lambda, on a
+static local function or on a static method: 24 B a run each, at TieredCompilation 1 and 0, all compiled MinOpts. The
+assembly's DisableOptimizations wins. Control, the same source with `Optimize=true`: 0 B (AO arms 0 at TC=1 too).
+
+**Cure.** `GoOptimizedTestHosts` in golib's `go.lib.symbols.targets`, beside the switch: `context.tests=TestAllocs;
+sync.tests=TestPoolGC`. A listed stdlib host (root namespace `go`) builds with `GoTestOptimize=true`; an explicit
+`-p:GoTestOptimize=false` still builds it unoptimized for the A/B arm. `testOptimizedHosts_test.go` holds the admission
+rule: each entry names a test its package has, and no listed package reads caller lines (`runtime.Caller`,
+`Callers`, `CallersFrames`, or an expected `x_test.go:N` string). Made to fail: a misnamed test and a `testing.tests`
+entry each red by name; its control asserts the predicate fires on `testing` and `log`.
+
+**Reach (census, go/parser over the 269 roster ids, go1.26.11).** 110 test functions call `AllocsPerRun`, in 48 banked
+rows. R's waves 0-2 read the whole linux roster at `7d8e14c094` (which carries the switch): every one of the 48 reads
+EQUAL there except context (masked by CS1503), sort (masked by CS0051, i9's cut; `TestSearchWrappersDontAlloc` unread),
+runtime (host died first; its want-0 alloc tests unread at master), unique and internal/zstd. Measured locally, NOT this
+class: unique `TestHandle` fails with the test assembly optimized as well (FullOpts confirmed); internal/zstd validates
+as built (its `TestAlloc` skips on both sides). runtime is the third candidate once its finalizer death is attributed.
+
+**Owner.** P2 (this seat). Not listed: testing (its `TestTBHelper` reads caller lines and is cured by the switch).
+
+— P2 (2026-11-25)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
