@@ -39,6 +39,12 @@ public sealed partial class TwinGenerator
         // A call inside one of its arguments is judged against that moved statement, not the original one.
         private readonly HashSet<SyntaxNode> m_moving = [];
 
+        // M:N row 19, M1 (DESIGN-mn-row19-movability.md): the earlier calls the plan pass (PlanEarlierSpills) found
+        // blocking a parking call that could otherwise move, each spilled ahead in text order when it is visited; and,
+        // while the plan pass runs RefLikeBefore, the list Earlier adds such calls to instead of blocking on them.
+        private readonly HashSet<SyntaxNode> m_spillEarlier = [];
+        private List<InvocationExpressionSyntax>? m_plan;
+
         public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
         // The ref-blocked census (row 7, DATA-mn-row7-refblock.md): one row per call left plain because it could not
@@ -281,7 +287,7 @@ public sealed partial class TwinGenerator
         public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             if (m_passive > 0 || !m_run.Sites.TryGetValue(node, out Site? site))
-                return base.VisitInvocationExpression(node);
+                return m_passive == 0 && m_spillEarlier.Contains(node) ? SpillEarlier(node) : base.VisitInvocationExpression(node);
 
             if (site.Go == GoKind.Literal)
                 return m_run.LiteralLaunches(site) ? GoLiteral(node) : base.VisitInvocationExpression(node);
@@ -324,13 +330,18 @@ public sealed partial class TwinGenerator
                 if (site.Active && !site.PairBody && m_run.IsBoxTwinTarget(site.Target) && !m_run.BoxCallable(site))
                     m_run.NoteBoxPlain(node, site.Target!, text: site.ArgPlain);
 
-                return base.VisitInvocationExpression(node);
+                return m_spillEarlier.Contains(node) ? SpillEarlier(node) : base.VisitInvocationExpression(node);
             }
 
             // A ref struct value evaluated before the await (a u8 literal passed as a format, say) cannot live
             // across it. Where everything evaluated earlier is inert, the awaited call moves ahead of its
             // statement; anywhere else the call stays a blocking one, which hands its P off as a thread park does.
             bool spill = RefLikeBefore(node, out bool movable);
+
+            // M:N row 19, M1: a parking call the plan pass spills ahead of a later one moves even when nothing ref-like
+            // pins it, so it keeps its place in Go's call order before the later call.
+            if (m_spillEarlier.Contains(node) && movable)
+                spill = true;
 
             // Row 7, inline re-derivation (DATA-mn-row7-refblock.md): a call that cannot move only because a ref local is read
             // after it in the same evaluation (an if, else-if or while header, a case guard) is awaited in place, and each
@@ -462,7 +473,7 @@ public sealed partial class TwinGenerator
                 inert = false;
             }
 
-            void Earlier(ExpressionSyntax expression)
+            void Earlier(ExpressionSyntax expression, bool receiver = false)
             {
                 TypeInfo info = m_model.GetTypeInfo(expression);
                 // M:N row 19, rule 2: the value C# holds is the CONVERTED one. A u8 literal handed to an @string
@@ -490,9 +501,18 @@ public sealed partial class TwinGenerator
                 while (core is ParenthesizedExpressionSyntax or CastExpressionSyntax)
                     core = core is ParenthesizedExpressionSyntax inner ? inner.Expression : ((CastExpressionSyntax)core).Expression;
 
-                if (!m_spilled.Contains(bare) && !m_spilled.Contains(core) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue &&
-                    !IsConvertedConstant(bare) && !IsPureRead(bare))
-                    Block("earlier:" + bare.Kind());
+                if (m_spilled.Contains(bare) || m_spilled.Contains(core) || bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) || m_model.GetConstantValue(bare).HasValue ||
+                    IsConvertedConstant(bare) || IsPureRead(bare))
+                    return;
+
+                // M:N row 19, M1: while the plan pass runs, an earlier call that can spill by value is planned, not a blocker.
+                if (m_plan is not null && core is InvocationExpressionSyntax call && SpillableEarlier(call, receiver))
+                {
+                    m_plan.Add(call);
+                    return;
+                }
+
+                Block("earlier:" + bare.Kind());
             }
 
             SyntaxNode? moved = null;
@@ -587,7 +607,7 @@ public sealed partial class TwinGenerator
                         {
                             ExpressionSyntax receiver = invocation.Expression is MemberAccessExpressionSyntax access ? access.Expression : invocation.Expression;
                             refLike |= ByRefReceiver(receiver);
-                            Earlier(receiver);
+                            Earlier(receiver, receiver: true);
                         }
 
                         // The spill's second rule (12.4): the enclosing call moves ahead of its statement, so this call
@@ -695,6 +715,74 @@ public sealed partial class TwinGenerator
             static bool IsNumeric(ITypeSymbol? type) =>
                 type is { SpecialType: >= SpecialType.System_Char and <= SpecialType.System_Double or SpecialType.System_IntPtr or SpecialType.System_UIntPtr } ||
                 type is { TypeKind: TypeKind.Enum };
+        }
+
+        // M:N row 19, M1 (DESIGN-mn-row19-movability.md): an earlier call spills in Go order. Before a statement is
+        // visited, each parking call in it that would spill is judged with the earlier calls that block it planned
+        // instead (m_plan); where nothing else blocks, those calls are spilled ahead in text order, which is C#'s
+        // evaluation order and Go's call order, and the parking call then moves after them. A pure read between them
+        // stays in place and reads after both, as in gc. The walk only reaches positions evaluated unconditionally, and
+        // what is evaluated before each planned call is judged by the same walk, so the rule is recursive.
+        private void PlanEarlierSpills(StatementSyntax statement)
+        {
+            foreach (InvocationExpressionSyntax call in statement.DescendantNodes(node => node == statement || node is not (StatementSyntax or AnonymousFunctionExpressionSyntax))
+                         .OfType<InvocationExpressionSyntax>())
+            {
+                if (!m_run.Sites.TryGetValue(call, out Site? site) || site.Go != GoKind.None || !m_run.ShouldAwait(site))
+                    continue;
+
+                List<InvocationExpressionSyntax> plan = [];
+                bool spill, movable;
+
+                m_plan = plan;
+
+                try
+                {
+                    spill = RefLikeBefore(call, out movable);
+                }
+                finally
+                {
+                    m_plan = null;
+                }
+
+                if (spill && movable && plan.Count > 0)
+                    m_spillEarlier.UnionWith(plan);
+            }
+        }
+
+        // M1's by-value test (P3, MUST 1 and SHOULD 4a): a spill copies the call's result into a temporary, so the call
+        // must not return by ref (`ref` or `ref readonly`) nor be used by ref (a `ref`, `in` or `out` argument, or the
+        // receiver of a struct member, which takes `this` by reference); its result must not be ref-like (a ref struct
+        // cannot live across the await, CS4007); and it must declare no variable (an `out var` or a pattern designation
+        // would move to the spill's scope).
+        private bool SpillableEarlier(InvocationExpressionSyntax call, bool receiver)
+        {
+            if (m_model.GetSymbolInfo(call).Symbol is not IMethodSymbol { ReturnsVoid: false, ReturnsByRef: false, ReturnsByRefReadonly: false } method ||
+                method.ReturnType.IsRefLikeType || receiver && method.ReturnType.IsValueType)
+                return false;
+
+            SyntaxNode? parent = call.Parent;
+
+            while (parent is ParenthesizedExpressionSyntax or CastExpressionSyntax)
+                parent = parent.Parent;
+
+            if (parent is ArgumentSyntax argument && !argument.RefKindKeyword.IsKind(SyntaxKind.None))
+                return false;
+
+            return !call.DescendantNodes().Any(node => node is DeclarationExpressionSyntax or DeclarationPatternSyntax or RecursivePatternSyntax or VarPatternSyntax or StackAllocArrayCreationExpressionSyntax);
+        }
+
+        // M1: a planned call that does not park, spilled ahead into its own temporary.
+        private SyntaxNode SpillEarlier(InvocationExpressionSyntax node)
+        {
+            ExpressionSyntax visited = (ExpressionSyntax)base.VisitInvocationExpression(node)!;
+            string temp = "ᴛtwin" + ++m_temps;
+
+            m_spilled.Add(node);
+            m_spills.Add(ParseStatement("var " + temp + " = " + visited.WithoutTrivia().ToFullString() + ";"));
+            Spills++;
+
+            return IdentifierName(temp).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
         }
 
         // M:N row 19, M2 (DESIGN-mn-row19-movability.md): the converter's form of a Go interface conversion of a variable,
@@ -1471,6 +1559,8 @@ public sealed partial class TwinGenerator
 
                 m_current = statement;
                 m_spills = [];
+
+                PlanEarlierSpills(statement);
 
                 StatementSyntax visited = (StatementSyntax)Visit(statement)!;
                 List<StatementSyntax> spills = m_spills;

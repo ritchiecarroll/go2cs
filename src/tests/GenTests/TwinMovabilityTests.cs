@@ -199,6 +199,50 @@ public class TwinMovabilityTests
                 ref var a = ref heap<nint>(1, out var Ꮡa);
                 return useW("c"u8, new BufжWriter(pick(Ꮡb1)), Set(Ꮡa, 2, false));
             }
+
+            // M1: an earlier call spills in Go order, into its own temporary, and the parking call moves after it.
+            internal static nint show3(ReadOnlySpan<byte> format, nint x, nint y, nint z) => x * 100 + y * 10 + z;
+
+            internal static nint bump(ж<nint> Ꮡp) { Ꮡp.DerefOrNull() += 1; return 7; }
+
+            internal static nint mul(ж<nint> Ꮡp, nint k) { ref var p = ref Ꮡp.DerefOrNull(); p *= k; return p; }
+
+            // Go: bump runs, then Set, and a is read after both: 7, 5, 3. C# order reads a between them: 7, 2, 3.
+            public static nint earlierCall()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return show3("m"u8, bump(Ꮡa), a, Set(Ꮡa, 5, false));
+            }
+
+            // Two earlier calls keep their text order (Go's call order): 2, then 6.
+            public static nint twoEarlier()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return show3("o"u8, mul(Ꮡa, 2), mul(Ꮡa, 3), Set(Ꮡa, 4, false));
+            }
+
+            // The M1 near-misses: an earlier call whose result is used by ref (a spill would copy it) and one whose result
+            // is ref-like (it cannot live across the await) stay blockers, by name.
+            internal static ref nint slot(ж<nint> Ꮡp) => ref Ꮡp.DerefOrNull();
+
+            internal static nint showR(ReadOnlySpan<byte> format, ref nint x, nint b) { x += 100; return b; }
+
+            public static nint refArg()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                nint r = showR("r"u8, ref slot(Ꮡa), Set(Ꮡa, 2, false));
+                return a * 10 + r;
+            }
+
+            internal static ReadOnlySpan<byte> spanOf() => "xy"u8;
+
+            internal static nint showSpan(ReadOnlySpan<byte> format, ReadOnlySpan<byte> s, nint b) => s.Length * 10 + b;
+
+            public static nint spanArg()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return showSpan("y"u8, spanOf(), Set(Ꮡa, 2, false));
+            }
         }
         """;
 
@@ -288,6 +332,28 @@ public class TwinMovabilityTests
 
         StringAssert.Contains(twins, "|adapterOverCall|Set|ref-like-before|earlier:ObjectCreationExpression", "an adapter over a call is ordered\n" + twins);
         Assert.AreEqual((nint)13, Twin(assembly, "adapterOverCall"));
+    }
+
+    [TestMethod]
+    public void AnEarlierCallSpillsInGoOrder_M1()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.IsFalse(twins.Contains("|earlierCall|Set|") || twins.Contains("|twoEarlier|Set|"), "no ref-blocked row names the M1 rows\n" + twins);
+        Assert.AreEqual((nint)753, Twin(assembly, "earlierCall"), "gc: bump, Set, then the read of a: 7, 5, 3");
+        Assert.AreEqual((nint)723, Plain(assembly, "earlierCall"), "the plain method reads a between the calls, C# order");
+        Assert.AreEqual((nint)263, Twin(assembly, "twoEarlier"), "the spills keep text order: 2, 6, 3");
+    }
+
+    [TestMethod]
+    public void AnEarlierCallUsedByRefOrRefLikeStaysABlocker_M1NearMiss()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        StringAssert.Contains(twins, "|refArg|Set|ref-like-before|earlier:InvocationExpression", "a by-ref result would be copied\n" + twins);
+        StringAssert.Contains(twins, "|spanArg|Set|ref-like-before|earlier:InvocationExpression", "a ref-like result cannot cross the await\n" + twins);
+        Assert.AreEqual((nint)1023, Twin(assembly, "refArg"), "Set wrote 2, the ref parameter added 100 to a: 102*10+3");
+        Assert.AreEqual((nint)23, Twin(assembly, "spanArg"));
     }
 
     private static readonly CSharpParseOptions Options = new(LanguageVersion.CSharp13);

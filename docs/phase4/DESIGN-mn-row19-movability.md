@@ -79,6 +79,12 @@ A call is spilled only when all of these hold. Otherwise it stays a blocker, as 
   passes these same tests.
 Rows: the spill in Go order, checked by value; a near-miss with an earlier ref-returning call used by ref, which stays
 blocked by name and keeps Go's value.
+As coded, a call is spilled only when it is itself the earlier operand (under parentheses or casts at most): an
+argument, a tuple element, a receiver, or a binary operator's left operand. A call nested inside a larger earlier
+operand (`other() + d`) still blocks, by name, which is row 7's residual row. A plan pass runs before each statement
+is visited and marks the calls to spill; a parking call so marked spills even where nothing ref-like pins it, so it
+keeps its place before the later call. Near-miss rows: a ref-returning call passed by `ref`, and a call returning a
+ref struct.
 
 **M2. An adapter construction over pure reads is a pure read.** `new bytes_BufferжWriter(Ꮡbuf)` and
 `new fmt_StateᴠWriter(s)` are the converter's form of a Go interface conversion of a variable, `io.Writer(&buf)`. They
