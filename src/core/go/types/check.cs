@@ -487,7 +487,9 @@ internal static void handleBailout⁔(/*this*/ ж<Checker> Ꮡcheck, ж<error> �
             if (len(check.posStack) > 0) {
                 [GoFunc("(*Checker).handleBailout.func1")] void doPrint(slice<positioner> ps) {
                     for (nint i = len(ps) - 1; i >= 0; i--) {
-                        fmt.Fprintf(new os.FileжWriter(os.Stderr), "\t%v\n"u8, Ꮡcheck.Value.fset.Position(ps[i].Pos()));
+                        var evalᴛ1 = ps[i].Pos();
+                        var evalᴛ2 = Ꮡcheck.Value.fset.Position(evalᴛ1);
+                        fmt.Fprintf(new os.FileжWriter(os.Stderr), "\t%v\n"u8, evalᴛ2);
                     }
                 }
 

@@ -176,7 +176,8 @@ internal static void Init⁔(/*this*/ ref Scanner s, ж<token.File> Ꮡfile, sli
 
 internal static void error⁔(/*this*/ ref Scanner s, nint offs, @string msg) {
     if (s.err != nil) {
-        s.err(s.@file.Position(s.@file.Pos(offs)), msg);
+        var evalᴛ1 = s.@file.Pos(offs);
+        s.err(s.@file.Position(evalᴛ1), msg);
     }
     s.ErrorCount++;
 }
@@ -319,7 +320,8 @@ internal static void updateLineInfo⁔(/*this*/ ref Scanner s, nint next, nint o
     // an empty filename means to use the previous filename.
     @string filename = (@string)(text.slice(0, i - 1)); // lop off ":line", and trim white space
     if (filename == ""u8 && ok2) {
-        filename = s.@file.Position(s.@file.Pos(offs)).Filename;
+        var evalᴛ1 = s.@file.Pos(offs);
+        filename = s.@file.Position(evalᴛ1).Filename;
     } else if (filename != ""u8) {
         // Put a relative filename in the current directory.
         // This is for compatibility with earlier releases.
@@ -502,14 +504,16 @@ internal static (token.Token, @string) scanNumber⁔(/*this*/ ref Scanner s) {
     if (s.ch == '.') {
         tok = token.FLOAT;
         if (prefix == 'o' || prefix == 'b') {
-            s.error(s.offset, "invalid radix point in "u8 + litname(prefix));
+            var evalᴛ1 = litname(prefix);
+            s.error(s.offset, "invalid radix point in "u8 + evalᴛ1);
         }
         s.next();
         digsep |= (nint)(s.digits(@base, Ꮡinvalid));
     }
 
     if ((digsep & 1) == 0) {
-        s.error(s.offset, litname(prefix) + " has no digits"u8);
+        var evalᴛ2 = litname(prefix);
+        s.error(s.offset, evalᴛ2 + " has no digits"u8);
     }
 
     // exponent
@@ -545,7 +549,8 @@ internal static (token.Token, @string) scanNumber⁔(/*this*/ ref Scanner s) {
 
     @string lit = (@string)(s.src.slice(offs, s.offset));
     if (tok == token.INT && invalid >= 0) {
-        s.errorf(invalid, "invalid digit %q in %s", lit[invalid - offs], litname(prefix));
+        var evalᴛ3 = litname(prefix);
+        s.errorf(invalid, "invalid digit %q in %s", lit[invalid - offs], evalᴛ3);
     }
     if ((digsep & 2) != 0) {
         nint i = invalidSep(lit); if (i >= 0) {

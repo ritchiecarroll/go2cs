@@ -108,7 +108,8 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<Event> events
                 if ((UtilFlags)(flags & UtilPerProc) != 0) {
                     // End each P's series.
                     foreach (var (_, p) in range(ps.slice(gomaxprocs))) {
-                        @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)ev.Time(), 0D));
+                        var evalᴛ1 = ev.Time();
+                        @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)evalᴛ1, 0D));
                     }
                 }
                 ps = ps.slice(0, gomaxprocs);
@@ -288,7 +289,9 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<Event> events
                 if (stw > 0 || p.gc > 0) {
                     util = 0.0D;
                 }
-                @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)ev.Time(), util));
+                var evalᴛ2 = ev.Time();
+                var evalᴛ3 = addUtil(@out[p.series], new MutatorUtil((int64)evalᴛ2, util));
+                @out[p.series] = evalᴛ3;
             }
         }
     }
@@ -304,7 +307,8 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<Event> events
     // but using 0 is symmetric with the start of the trace.
     var mu = new MutatorUtil((int64)lastEv.Time(), 0D);
     foreach (var i in range(len(ps))) {
-        @out[ps[i].series] = addUtil(@out[ps[i].series], mu);
+        var evalᴛ4 = addUtil(@out[ps[i].series], mu);
+        @out[ps[i].series] = evalᴛ4;
     }
     @out = move2heap(outᴷ, @out);
     return @out;

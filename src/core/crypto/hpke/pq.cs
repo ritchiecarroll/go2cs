@@ -247,7 +247,8 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) enca
         (ssPQ, ctPQ) = testingOnlyEncapsulate();
     }
 
-    var ss = pk.kem.sharedSecret(ssPQ, ssT, ctT, pk.t.Bytes());
+    var evalᴛ1 = pk.t.Bytes();
+    var ss = pk.kem.sharedSecret(ssPQ, ssT, ctT, evalᴛ1);
     var ct = appendꓸꓸꓸ(ctPQ, ctT);
     return (ss, ct, default);
 }
@@ -416,7 +417,9 @@ internal static (slice<byte>, error) decap⁔(/*this*/ ж<hybridPrivateKey> Ꮡk
     if (err != nil) {
         return (default, err);
     }
-    var ss = k.kem.sharedSecret(ssPQ, ssT, ctT, k.t.PublicKey().Bytes());
+    var evalᴛ1 = k.t.PublicKey();
+    var evalᴛ2 = evalᴛ1.Bytes();
+    var ss = k.kem.sharedSecret(ssPQ, ssT, ctT, evalᴛ2);
     return (ss, default);
 }
 

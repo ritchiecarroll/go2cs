@@ -269,10 +269,12 @@ internal static void startParse⁔(/*this*/ ref Tree t, slice<map<@string, any>>
     t.funcs = funcs;
     t.treeSet = treeSet;
     t.stackDepth = 0;
+    var evalᴛ1 = t.hasFunction(breakˢ2);
+    var evalᴛ2 = t.hasFunction(continueˢ2);
     lex.options = new lexOptions(
         emitComment: (Mode)(t.Mode & ParseComments) != 0,
-        breakOK: !t.hasFunction(breakˢ2),
-        continueOK: !t.hasFunction(continueˢ2)
+        breakOK: !evalᴛ1,
+        continueOK: !evalᴛ2
     );
 }
 
@@ -605,13 +607,15 @@ decls:
         case {} when (next.typ == itemAssign) || (next.typ == itemDeclare): {
             pipe.IsAssign = next.typ == itemAssign;
             t.nextNonSpace();
-            pipe.Decl = append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
+            var evalᴛ1 = Ꮡt.newVariable(v.pos, v.val);
+            pipe.Decl = append(pipe.Decl, evalᴛ1);
             t.vars = append(t.vars, v.val);
             break;
         }
         case {} when next.typ == itemChar && next.val == ","u8: {
             t.nextNonSpace();
-            pipe.Decl = append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
+            var evalᴛ2 = Ꮡt.newVariable(v.pos, v.val);
+            pipe.Decl = append(pipe.Decl, evalᴛ2);
             t.vars = append(t.vars, v.val);
             if (context == "range"u8 && len(pipe.Decl) < 2) {
                 switch (t.peekNonSpace().typ) {

@@ -800,7 +800,9 @@ internal static (nint, element) eatTagName(slice<byte> s, nint i) {
         }
         break;
     }
-    return (j, elementNameMap[strings.ToLower((@string)(s.slice(i, j)))]);
+    var evalᴛ1 = s.slice(i, j);
+    var evalᴛ2 = strings.ToLower((@string)(evalᴛ1));
+    return (j, elementNameMap[evalᴛ2]);
 }
 
 // eatWhiteSpace returns the largest j such that s[i:j] is white space.

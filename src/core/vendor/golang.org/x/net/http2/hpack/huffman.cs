@@ -162,7 +162,8 @@ internal static void buildRootHuffmanNode() {
             codeLen -= 8;
             var i = (uint8)(code.Rsh((uint64)(codeLen)));
             if (cur.children.Value[i] == nil) {
-                cur.children.Value[i] = newInternalNode();
+                var evalᴛ1 = newInternalNode();
+                cur.children.Value[i] = evalᴛ1;
             }
             cur = cur.children.Value[i];
         }

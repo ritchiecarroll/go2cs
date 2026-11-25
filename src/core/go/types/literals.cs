@@ -100,8 +100,10 @@ internal static void funcLit⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx,
         var (sig, ok) = Ꮡcheck.typ(new ast.FuncTypeжExpr(e.Type))._<ж<Signature>>(ᐧ); if (ok) {
             // Set the Scope's extent to the complete "func (...) {...}"
             // so that Scope.Innermost works correctly.
-            sig.scope.pos = e.Pos();
-            sig.scope.end = endPos(new ast.FuncLitжNode(Ꮡe));
+            var evalᴛ1 = e.Pos();
+            sig.scope.pos = evalᴛ1;
+            var evalᴛ2 = endPos(new ast.FuncLitжNode(Ꮡe));
+            sig.scope.end = evalᴛ2;
             if (!check.conf.IgnoreFuncBodies && e.Body != nil) {
                 // Anonymous functions are considered part of the
                 // init expression/func declaration which contains

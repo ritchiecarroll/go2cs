@@ -151,8 +151,11 @@ internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFi
 // Horner's rule. There must be a multiple of gcmBlockSize bytes in blocks.
 internal static void updateBlocks(ref array<gcmFieldElement> productTable, ref gcmFieldElement y, slice<byte> blocks) {
     while (len(blocks) > 0) {
-        y.low ^= (uint64)(byteorder.BEUint64(blocks));
-        y.high ^= (uint64)(byteorder.BEUint64(blocks[8..]));
+        var evalᴛ1 = byteorder.BEUint64(blocks);
+        y.low ^= (uint64)(evalᴛ1);
+        var evalᴛ2 = blocks[8..];
+        var evalᴛ3 = byteorder.BEUint64(evalᴛ2);
+        y.high ^= (uint64)(evalᴛ3);
         ghashMul(ref productTable, ref y);
         blocks = blocks[(int)(gcmBlockSize)..];
     }

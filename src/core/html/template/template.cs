@@ -129,7 +129,8 @@ internal static error escape⁔(/*this*/ ж<Template> Ꮡt) {
             if (t.Tree == nil) {
                 return fmt.Errorf("template: %q is an incomplete or empty template"u8, t.Name());
             }
-            var err = escapeTemplate(Ꮡt, new parse.ListNodeжNode(t.text.Root), t.Name()); if (err != nil) {
+            var evalᴛ1 = t.Name();
+            var err = escapeTemplate(Ꮡt, new parse.ListNodeжNode(t.text.Root), evalᴛ1); if (err != nil) {
                 return err;
             }
         } else if (!AreEqual(t.escapeErr, escapeOK)) {
@@ -321,7 +322,8 @@ internal static (ж<Template>, error) Clone⁔(/*this*/ ж<Template> Ꮡt) {
             textClone.Tree,
             ns
         ));
-        ret.set[ret.Name()] = ret;
+        var evalᴛ1 = ret.Name();
+        ret.set[evalᴛ1] = ret;
         foreach (var (_, x) in range(textClone.Templates())) {
             @string name = x.Name();
             var src = t.set[name];
@@ -337,7 +339,8 @@ internal static (ж<Template>, error) Clone⁔(/*this*/ ж<Template> Ꮡt) {
             ));
         }
         // Return the template associated with the name of this template.
-        return (ret.set[ret.Name()], default);
+        var evalᴛ2 = ret.Name();
+        return (ret.set[evalᴛ2], default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }

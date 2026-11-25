@@ -744,7 +744,8 @@ internal static ж<List> list⁔(/*this*/ ж<parseDoc> Ꮡd, slice<@string> line
             flush();
             continue;
         }
-        text = append(textᴷ, text, strings.TrimSpace(line));
+        var evalᴛ1 = strings.TrimSpace(line);
+        text = append(textᴷ, text, evalᴛ1);
     }
     flush();
     return list;
@@ -941,7 +942,8 @@ internal static slice<Text> parseText⁔(/*this*/ ref parseDoc d, slice<Text> @o
     [GoFunc("(*parseDoc).parseText.func2")] void flush(nint i) {
         writeUntilʗ1(i);
         if (Ꮡw.Value.Len() > 0) {
-            @out = append(@out, (Text)((Plain)Ꮡw.Value.String()));
+            var evalᴛ1 = Ꮡw.Value.String();
+            @out = append(@out, (Text)((Plain)evalᴛ1));
             Ꮡw.Value.Reset();
         }
     }

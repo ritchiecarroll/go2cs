@@ -1809,7 +1809,8 @@ partial struct parseDurationError {
 }
 
 internal static @string Error⁔(/*this*/ ref parseDurationError e) {
-    return "time: "u8 + e.message + " "u8 + quote(e.value);
+    var evalᴛ1 = quote(e.value);
+    return "time: "u8 + e.message + " "u8 + evalᴛ1;
 }
 
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{

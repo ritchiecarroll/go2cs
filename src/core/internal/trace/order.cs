@@ -817,7 +817,8 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall⁔(/*this*/ ref 
             return (curCtx, false, fmt.Errorf("found invalid proc %d during %s"u8, curCtx.P, o.evName(ev.typ)));
         }
         if (pState.status != tracev2.ProcSyscall) {
-            return (curCtx, false, fmt.Errorf("proc %d in unexpected state %s during %s"u8, curCtx.P, pState.status, o.evName(ev.typ)));
+            var evalᴛ1 = o.evName(ev.typ);
+            return (curCtx, false, fmt.Errorf("proc %d in unexpected state %s during %s"u8, curCtx.P, pState.status, evalᴛ1));
         }
         // See the go122-create-syscall-reuse-thread-id test case for more details.
         pState.status = tracev2.ProcSyscallAbandoned;
@@ -1069,7 +1070,8 @@ internal static (schedCtx, bool, error) advanceGCSweepBegin⁔(/*this*/ ref orde
         }
     }
     {
-        var err = o.pStates[curCtx.P].of(pState.ᏑrangeState).beginRange(makeRangeType(ev.typ, 0)); if (err != nil) {
+        var evalᴛ1 = makeRangeType(ev.typ, 0);
+        var err = o.pStates[curCtx.P].of(pState.ᏑrangeState).beginRange(evalᴛ1); if (err != nil) {
             return (curCtx, false, err);
         }
     }

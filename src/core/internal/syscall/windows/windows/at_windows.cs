@@ -173,7 +173,8 @@ public static (syscall.Handle, error e1) Openat(syscall.Handle dirfd, @string na
         (h, err) = openatFallback(name, (uint32)SYNCHRONIZE | access, objAttrs.Value, fileAttrs, disposition, (uint32)FILE_OPEN_FOR_BACKUP_INTENT | options);
     }
     if (err != nil) {
-        return (h, ntCreateFileError(err, flag));
+        var evalᴛ1 = ntCreateFileError(err, flag);
+        return (h, evalᴛ1);
     }
 
     if ((flag & (uint64)syscall.O_TRUNC) != 0) {

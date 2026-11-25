@@ -1523,8 +1523,10 @@ internal static void gcMarkTermination(worldStop stw) {
 
         array<byte> sbuf = new(24);
         printlock();
+        var evalᴛ1 = sbuf[..];
+        var evalᴛ2 = itoaDiv(evalᴛ1, (uint64)(work.tSweepTerm - runtimeInitTime) / 1000000, 3);
         print((@string)"gc ", memstats.numgc,
-            (@string)" @", (@string)itoaDiv(sbuf[..], (uint64)(work.tSweepTerm - runtimeInitTime) / 1000000, 3), (@string)"s ",
+            (@string)" @", (@string)evalᴛ2, (@string)"s ",
             util, (@string)"%");
         if (goroutineLeakDone) {
             print((@string)" (checking for goroutine leaks)");
@@ -1539,11 +1541,15 @@ internal static void gcMarkTermination(worldStop stw) {
             prev = ns;
         }
         print((@string)" ms clock, ");
+        var evalᴛ3 = ᏑgcController.ᏑassistTime.Load();
+        var evalᴛ4 = ᏑgcController.ᏑdedicatedMarkTime.Load();
+        var evalᴛ5 = ᏑgcController.ᏑfractionalMarkTime.Load();
+        var evalᴛ6 = ᏑgcController.ᏑidleMarkTime.Load();
         foreach (var (i, ns) in range(slice<int64>([
             (int64)work.stwprocs * (work.tMark - work.tSweepTerm),
-            ᏑgcController.ᏑassistTime.Load(),
-            ᏑgcController.ᏑdedicatedMarkTime.Load() + ᏑgcController.ᏑfractionalMarkTime.Load(),
-            ᏑgcController.ᏑidleMarkTime.Load(),
+            evalᴛ3,
+            evalᴛ4 + evalᴛ5,
+            evalᴛ6,
             (int64)work.stwprocs * (work.tEnd - work.tMarkTerm)
         ]))) {
             if (i == 2 || i == 3) {
@@ -1554,11 +1560,13 @@ internal static void gcMarkTermination(worldStop stw) {
             }
             print((@string)fmtNSAsMS(sbuf[..], (uint64)ns));
         }
+        var evalᴛ7 = ᏑgcController.ᏑlastStackScan.Load();
+        var evalᴛ8 = ᏑgcController.ᏑglobalsScan.Load();
         print((@string)" ms cpu, ",
             work.heap0 >> 20, (@string)"->", work.heap1 >> 20, (@string)"->", work.heap2 >> 20, (@string)" MB, ",
             gcController.lastHeapGoal >> 20, (@string)" MB goal, ",
-            ᏑgcController.ᏑlastStackScan.Load() >> 20, (@string)" MB stacks, ",
-            ᏑgcController.ᏑglobalsScan.Load() >> 20, (@string)" MB globals, ",
+            evalᴛ7 >> 20, (@string)" MB stacks, ",
+            evalᴛ8 >> 20, (@string)" MB globals, ",
             work.maxprocs, (@string)" P");
         if (work.userForced) {
             print((@string)" (forced)");
@@ -2110,7 +2118,9 @@ internal static void gcResetMarkState() {
     var arenas = mheap_.heapArenas;
     unlock(Ꮡmheap_.Ꮡlock);
     foreach (var (_, ai) in range(arenas)) {
-        var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
+        var evalᴛ1 = ai.l1();
+        var evalᴛ2 = ai.l2();
+        var ha = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
         clear(ha.pageMarks[..]);
     }
 

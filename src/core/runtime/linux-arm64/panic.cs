@@ -552,7 +552,8 @@ internal static void deferprocat(Action fn, any frame) {
     d1.Value.fn = fn;
     for (;;) {
         d1.Value.link = head.Load();
-        if ((~d1).link == badDefer()) {
+        var evalᴛ1 = badDefer();
+        if ((~d1).link == evalᴛ1) {
             @throw(deferAfterRangeFuncˢ);
         }
         if (head.CompareAndSwap((~d1).link, d1)) {

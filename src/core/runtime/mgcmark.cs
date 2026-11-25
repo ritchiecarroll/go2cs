@@ -197,8 +197,9 @@ internal static void gcMarkRootCheck() {
         }
 
         if (!(~gp).gcscandone) {
+            var evalᴛ1 = readgstatus(gp);
             println((@string)"gp", gp.OrTypedNil(), (@string)"goid", (~gp).goid,
-                (@string)"status", readgstatus(gp),
+                (@string)"status", evalᴛ1,
                 (@string)"gcscandone", (~gp).gcscandone);
             @throw(scanMissedAGˢ);
         }
@@ -236,14 +237,16 @@ internal static int64 markroot(ж<gcWork> gcw, uint32 i, bool flushBgCredit) {
     case {} when work.baseData <= i && i < work.baseBSS: {
         workCounter = ᏑgcController.ᏑglobalsScanWork;
         foreach (var (_, datap) in range(activeModules())) {
-            workDone += markrootBlock(datap.data, datap.edata - datap.data, datap.gcdatamask.bytedata, gcw, (nint)(i - work.baseData));
+            var evalᴛ1 = markrootBlock(datap.data, datap.edata - datap.data, datap.gcdatamask.bytedata, gcw, (nint)(i - work.baseData));
+            workDone += evalᴛ1;
         }
         break;
     }
     case {} when work.baseBSS <= i && i < work.baseSpans: {
         workCounter = ᏑgcController.ᏑglobalsScanWork;
         foreach (var (_, datap) in range(activeModules())) {
-            workDone += markrootBlock(datap.bss, datap.ebss - datap.bss, datap.gcbssmask.bytedata, gcw, (nint)(i - work.baseBSS));
+            var evalᴛ2 = markrootBlock(datap.bss, datap.ebss - datap.bss, datap.gcbssmask.bytedata, gcw, (nint)(i - work.baseBSS));
+            workDone += evalᴛ2;
         }
         break;
     }
@@ -320,7 +323,8 @@ internal static int64 markroot(ж<gcWork> gcw, uint32 i, bool flushBgCredit) {
             if ((~gpʗ1).gcscandone) {
                 @throw(gAlreadyScannedˢ);
             }
-            workDone += scanstack(gpʗ1, gcw);
+            var evalᴛ3 = scanstack(gpʗ1, gcw);
+            workDone += evalᴛ3;
             gpʗ1.Value.gcscandone = true;
             resumeG(stopped);
 
@@ -401,7 +405,8 @@ internal static void markrootFreeGStacks() {
         }
     }
 
-    var q = new gQueue(list.head, tail.guintptr(), list.size);
+    var evalᴛ1 = tail.guintptr();
+    var q = new gQueue(list.head, evalᴛ1, list.size);
 
     // Put Gs back on the free list.
     @lock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
@@ -439,7 +444,9 @@ internal static void markrootSpans(ж<gcWork> gcw, nint shard) {
 
     // Find the arena and page index into that arena for this shard.
     arenaIdx ai = mheap_.markArenas[shard / (nint)(pagesPerArena / pagesPerSpanRoot)];
-    var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
+    var evalᴛ1 = ai.l1();
+    var evalᴛ2 = ai.l2();
+    var ha = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
     nuint arenaPage = (nuint)((uintptr)shard * (uintptr)pagesPerSpanRoot % (uintptr)pagesPerArena);
 
     // Construct slice of bitmap which we'll iterate over.
@@ -966,13 +973,15 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> gcw) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     if ((readgstatus(Ꮡgp) & (uint32)_Gscan) == 0) {
-        print((@string)"runtime:scanstack: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", (hex)(uint64)readgstatus(Ꮡgp), (@string)"\n");
+        var evalᴛ1 = readgstatus(Ꮡgp);
+        print((@string)"runtime:scanstack: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", (hex)(uint64)evalᴛ1, (@string)"\n");
         @throw(scanstackBadStatusˢ);
     }
 
     switch ((readgstatus(Ꮡgp) & ~(uint32)_Gscan)) {
     default: {
-        print((@string)"runtime: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", readgstatus(Ꮡgp), (@string)"\n");
+        var evalᴛ2 = readgstatus(Ꮡgp);
+        print((@string)"runtime: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", evalᴛ2, (@string)"\n");
         @throw(markBadStatusˢ);
         break;
     }
@@ -980,7 +989,8 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> gcw) {
         return 0;
     }
     case var ᴛ when ᴛ == _Grunning: {
-        print((@string)"runtime: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", readgstatus(Ꮡgp), (@string)"\n");
+        var evalᴛ3 = readgstatus(Ꮡgp);
+        print((@string)"runtime: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", evalᴛ3, (@string)"\n");
         @throw(scanstackGoroutineNotˢ);
         break;
     }

@@ -195,7 +195,9 @@ internal static stateFn emitItem⁔(/*this*/ ref lexer l, item i) {
 // It tracks newlines in the ignored text, so use it only
 // for text that is skipped without calling l.next.
 internal static void ignore⁔(/*this*/ ref lexer l) {
-    l.line += strings.Count(l.input.slice(l.start, l.pos), "\n");
+    var evalᴛ1 = l.input.slice(l.start, l.pos);
+    var evalᴛ2 = strings.Count(evalᴛ1, "\n");
+    l.line += evalᴛ2;
     l.start = l.pos;
     l.startLine = l.line;
 }
@@ -221,7 +223,8 @@ internal static void acceptRun⁔(/*this*/ ref lexer l, @string valid) {
 internal static stateFn errorf⁔(/*this*/ ref lexer l, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    l.item = new item(itemError, l.start, fmt.Sprintf(format, args.ꓸꓸꓸ), l.startLine);
+    var evalᴛ1 = fmt.Sprintf(format, args.ꓸꓸꓸ);
+    l.item = new item(itemError, l.start, evalᴛ1, l.startLine);
     l.start = 0;
     l.pos = 0;
     l.input = l.input[..0];
@@ -290,7 +293,9 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
                 trimLength = rightTrimLength(l.input.slice(l.start, l.pos));
             }
             l.pos -= trimLength;
-            l.line += strings.Count(l.input.slice(l.start, l.pos), "\n");
+            var evalᴛ1 = l.input.slice(l.start, l.pos);
+            var evalᴛ2 = strings.Count(evalᴛ1, "\n");
+            l.line += evalᴛ2;
             var i = l.thisItem(itemText);
             l.pos += trimLength;
             l.ignore();
@@ -303,7 +308,9 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
     l.pos = (Pos)len(l.input);
     // Correctly reached EOF.
     if (l.pos > l.start) {
-        l.line += strings.Count(l.input.slice(l.start, l.pos), "\n");
+        var evalᴛ3 = l.input.slice(l.start, l.pos);
+        var evalᴛ4 = strings.Count(evalᴛ3, "\n");
+        l.line += evalᴛ4;
         return l.emit(itemText);
     }
     return l.emit(itemEOF);
@@ -368,14 +375,18 @@ internal static stateFn lexComment(ж<lexer> Ꮡl) {
     if (!delim) {
         return l.errorf("comment ends before closing delimiter");
     }
-    l.line += strings.Count(l.input.slice(l.start, l.pos), "\n");
+    var evalᴛ1 = l.input.slice(l.start, l.pos);
+    var evalᴛ2 = strings.Count(evalᴛ1, "\n");
+    l.line += evalᴛ2;
     var i = l.thisItem(itemComment);
     if (trimSpace) {
         l.pos += trimMarkerLen;
     }
     l.pos += ((Pos)len(l.rightDelim));
     if (trimSpace) {
-        l.pos += leftTrimLength(l.input.slice(l.pos));
+        var evalᴛ3 = l.input.slice(l.pos);
+        var evalᴛ4 = leftTrimLength(evalᴛ3);
+        l.pos += evalᴛ4;
     }
     l.ignore();
     if (l.options.emitComment) {
@@ -396,7 +407,9 @@ internal static stateFn lexRightDelim(ж<lexer> Ꮡl) {
     l.pos += ((Pos)len(l.rightDelim));
     var i = l.thisItem(itemRightDelim);
     if (trimSpace) {
-        l.pos += leftTrimLength(l.input.slice(l.pos));
+        var evalᴛ1 = l.input.slice(l.pos);
+        var evalᴛ2 = leftTrimLength(evalᴛ1);
+        l.pos += evalᴛ2;
         l.ignore();
     }
     l.insideAction = false;

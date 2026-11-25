@@ -66,7 +66,8 @@ internal static ж<error_> newError⁔(/*this*/ ж<Checker> Ꮡcheck, errors.Cod
 internal static void addf⁔(/*this*/ ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    err.desc = append(err.desc, new errorDesc(at, err.check.sprintf(format, args.ꓸꓸꓸ)));
+    var evalᴛ1 = err.check.sprintf(format, args.ꓸꓸꓸ);
+    err.desc = append(err.desc, new errorDesc(at, evalᴛ1));
 }
 
 // addAltDecl is a specialized form of addf reporting another declaration of obj.
@@ -106,7 +107,8 @@ internal static @string msg⁔(/*this*/ ref error_ err) {
         if (i > 0) {
             fmt.Fprint(new strings_BuilderжWriter(Ꮡbuf), "\n\t");
             if (p.posn.Pos().IsValid()) {
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "%s: "u8, err.check.fset.Position(p.posn.Pos()));
+                var evalᴛ1 = p.posn.Pos();
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "%s: "u8, err.check.fset.Position(evalᴛ1));
             }
         }
         Ꮡbuf.WriteString(p.msg);
@@ -165,7 +167,9 @@ internal static void report⁔(/*this*/ ref error_ err) {
             check.handleError(i, p.posn, err.code, p.msg, err.soft);
         }
     } else {
-        check.handleError(0, err.posn(), err.code, err.msg(), err.soft);
+        var evalᴛ1 = err.posn();
+        var evalᴛ2 = err.msg();
+        check.handleError(0, evalᴛ1, err.code, evalᴛ2, err.soft);
     }
 
     // make sure the error is not reported twice
@@ -209,10 +213,11 @@ internal static void handleError⁔(/*this*/ ref Checker check, nint index, posi
     }
 
     var span = spanOf(posn);
+    var evalᴛ1 = stripAnnotations(msg);
     var e = new Error(
         Fset: check.fset,
         Pos: span.pos,
-        Msg: stripAnnotations(msg),
+        Msg: evalᴛ1,
         Soft: soft,
         go116code: code,
         go116start: span.start,

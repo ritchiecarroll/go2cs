@@ -375,8 +375,14 @@ internal static void ensurePipelineContains(ж<parse.PipeNode> Ꮡp, slice<@stri
                     // Convert this into the equivalent form
                     // {{ _eval_args_ arg1 arg2 ... argN | esc }}, so that esc can be easily
                     // merged with the escapers in s.
-                    lastCmd.Args[0] = new parse.IdentifierNodeжNode(parse.NewIdentifier(evalArgsˢ).SetTree(nil).SetPos(lastCmd.Args[0].Position()));
-                    p.Cmds = appendCmd(p.Cmds, newIdentCmd(esc, p.Position()));
+                    var evalᴛ1 = parse.NewIdentifier(evalArgsˢ);
+                    var evalᴛ2 = evalᴛ1.SetTree(nil);
+                    var evalᴛ3 = lastCmd.Args[0].Position();
+                    var evalᴛ4 = evalᴛ2.SetPos(evalᴛ3);
+                    lastCmd.Args[0] = new parse.IdentifierNodeжNode(evalᴛ4);
+                    var evalᴛ5 = p.Position();
+                    var evalᴛ6 = newIdentCmd(esc, evalᴛ5);
+                    p.Cmds = appendCmd(p.Cmds, evalᴛ6);
                     pipelineLen++;
                 }
                 // If any of the commands in s that we are about to insert is equivalent
@@ -768,9 +774,10 @@ internal static context computeOutCtx⁔(/*this*/ ref escaper e, context c, ж<t
         // Use c1 as the error context if neither assumption worked.
     }
     if (!ok && c1.state != stateError) {
+        var evalᴛ1 = t.Name();
         return new context(
             state: stateError,
-            err: errorf(ErrOutputContext, new parse.ListNodeжNode(t.Tree.Root), 0, "cannot compute output context for template %s", t.Name())
+            err: errorf(ErrOutputContext, new parse.ListNodeжNode(t.Tree.Root), 0, "cannot compute output context for template %s", evalᴛ1)
         );
     }
     return c1;
@@ -788,7 +795,8 @@ internal static (context, bool) escapeTemplateBody⁔(/*this*/ ref escaper e, co
             // Do not update the input escaper, e.
             return false;
         }
-        if (!e1.called[Ꮡt.Value.Name()]) {
+        var evalᴛ1 = Ꮡt.Value.Name();
+        if (!e1.called[evalᴛ1]) {
             // If t is not recursively called, then c1 is an
             // accurate output context.
             return true;
@@ -800,7 +808,8 @@ internal static (context, bool) escapeTemplateBody⁔(/*this*/ ref escaper e, co
     // take the fast path out of escapeTree instead of infinitely recurring.
     // Naively assuming that the input context is the same as the output
     // works >90% of the time.
-    e.output[t.Name()] = c;
+    var evalᴛ2 = t.Name();
+    e.output[evalᴛ2] = c;
     return e.escapeListConditionally(c, t.Tree.Root, filter);
 }
 

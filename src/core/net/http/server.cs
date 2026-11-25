@@ -1051,16 +1051,20 @@ internal static (ж<response> w, error err) readRequest⁔(/*this*/ ж<conn> Ꮡ
         {
             var d = c.server.WriteTimeout; if (d > 0) {
                 defer([GoFunc("(*conn).readRequest.func1")] () => {
-                    Ꮡc.Value.rwc.SetWriteDeadline(time.Now().Add(d));
+                    var evalᴛ1 = time.Now();
+                    var evalᴛ2 = evalᴛ1.Add(d);
+                    Ꮡc.Value.rwc.SetWriteDeadline(evalᴛ2);
                 }, ref ᒐ);
             }
         }
 
-        c.r.setReadLimit(c.server.initialReadLimitSize());
+        var evalᴛ3 = c.server.initialReadLimitSize();
+        c.r.setReadLimit(evalᴛ3);
         if (c.lastMethod == "POST"u8) {
             // RFC 7230 section 3 tolerance for old buggy clients.
             var (peek, _) = c.bufr.Peek(4); // ReadRequest will get err below
-            c.bufr.Discard(numLeadingCRorLF(peek));
+            var evalᴛ4 = numLeadingCRorLF(peek);
+            c.bufr.Discard(evalᴛ4);
         }
         (var req, err) = readRequest(c.bufr);
         if (err != nil) {
@@ -1227,12 +1231,14 @@ internal static void WriteHeader⁔(/*this*/ ж<response> Ꮡw, nint code) {
 
     if (w.conn.hijacked()) {
         var caller = relevantCaller();
-        w.conn.server.logf("http: response.WriteHeader on hijacked connection from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
+        var evalᴛ1 = path.Base(caller.File);
+        w.conn.server.logf("http: response.WriteHeader on hijacked connection from %s (%s:%d)", caller.Function, evalᴛ1, caller.Line);
         return;
     }
     if (w.wroteHeader) {
         var caller = relevantCaller();
-        w.conn.server.logf("http: superfluous response.WriteHeader call from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
+        var evalᴛ2 = path.Base(caller.File);
+        w.conn.server.logf("http: superfluous response.WriteHeader call from %s (%s:%d)", caller.Function, evalᴛ2, caller.Line);
         return;
     }
     checkWriteHeaderCode(code);
@@ -1248,7 +1254,8 @@ internal static void WriteHeader⁔(/*this*/ ж<response> Ꮡw, nint code) {
     // We shouldn't send any further headers after 101 Switching Protocols,
     // so it takes the non-informational path.
     if (code >= 100 && code <= 199 && code != StatusSwitchingProtocols) {
-        writeStatusLine(w.conn.bufw, w.req.ProtoAtLeast(1, 1), code, w.statusBuf[..]);
+        var evalᴛ3 = w.req.ProtoAtLeast(1, 1);
+        writeStatusLine(w.conn.bufw, evalᴛ3, code, w.statusBuf[..]);
 
         // Per RFC 8297 we must not clear the current header map
         w.handlerHeader.WriteSubset(new bufio_WriterжWriter(w.conn.bufw), excludedHeadersNoBody);
@@ -1619,7 +1626,8 @@ internal static void writeHeader⁔(/*this*/ ref chunkWriter cw, slice<byte> p) 
         }
     }
 
-    writeStatusLine(w.conn.bufw, w.req.ProtoAtLeast(1, 1), code, w.statusBuf[..]);
+    var evalᴛ1 = w.req.ProtoAtLeast(1, 1);
+    writeStatusLine(w.conn.bufw, evalᴛ1, code, w.statusBuf[..]);
     cw.header.WriteSubset(new bufio_WriterжWriter(w.conn.bufw), excludeHeader);
     setHeader.Write(w.conn.bufw);
     w.conn.bufw.Write(crlf);
@@ -1729,7 +1737,8 @@ internal static (nint n, error err) write⁔(/*this*/ ж<response> Ꮡw, nint le
     if (w.conn.hijacked()) {
         if (lenData > 0) {
             var caller = relevantCaller();
-            w.conn.server.logf("http: response.Write on hijacked connection from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
+            var evalᴛ1 = path.Base(caller.File);
+            w.conn.server.logf("http: response.Write on hijacked connection from %s (%s:%d)", caller.Function, evalᴛ1, caller.Line);
         }
         return (0, ErrHijacked);
     }
@@ -2032,9 +2041,11 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
         ref var c = ref Ꮡc.DerefOrNull();
 
         var ra = c.rwc.RemoteAddr(); if (ra != nil) {
-            c.remoteAddr = ra.String();
+            var evalᴛ1 = ra.String();
+            c.remoteAddr = evalᴛ1;
         }
-        ctx = context.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), c.rwc.LocalAddr());
+        var evalᴛ2 = c.rwc.LocalAddr();
+        ctx = context.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), evalᴛ2);
         ref var inFlightResponse = ref heap<ж<response>>(out var ᏑinFlightResponse);
         defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*conn).serve.func1")] () => {
             var err = recover(); if (err != nil && !AreEqual(err, ErrAbortHandler)) {
@@ -2076,7 +2087,8 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
                 } else {
                     reason = err.Error();
                 }
-                c.server.logf("http: TLS handshake error from %s: %v", c.rwc.RemoteAddr(), reason);
+                var evalᴛ3 = c.rwc.RemoteAddr();
+                c.server.logf("http: TLS handshake error from %s: %v", evalᴛ3, reason);
                 return;
             }
             // Restore Conn-level deadlines.
@@ -2085,7 +2097,8 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
                 c.rwc.SetWriteDeadline(new time.Time());
             }
             c.tlsState = @new<tls.ConnectionState>();
-            c.tlsState.Value = tlsConn.ConnectionState();
+            var evalᴛ4 = tlsConn.ConnectionState();
+            c.tlsState.Value = evalᴛ4;
             @string proto = c.tlsState.NegotiatedProtocol; if (validNextProto(proto)) {
                 var fn = c.server.TLSNextProto[proto]; if (fn != nil) {
                     var h = new initALPNRequest(ctx, tlsConn, new serverHandler(c.server));
@@ -2105,7 +2118,8 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
         if (c.tlsState == nil) {
             var (tc, ok) = c.rwc._<connectionStater>(ᐧ); if (ok) {
                 c.tlsState = @new<tls.ConnectionState>();
-                c.tlsState.Value = tc.ConnectionState();
+                var evalᴛ5 = tc.ConnectionState();
+                c.tlsState.Value = evalᴛ5;
             }
         }
 
@@ -2115,12 +2129,17 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
         defer(() => cancelCtxʗ1(), ref ᒐ, recovers: true);
 
         c.r = Ꮡ(new connReader(conn: Ꮡc, rwc: c.rwc));
-        c.bufr = newBufioReader(new connReaderжReader(c.r));
-        c.bufw = newBufioWriterSize(new checkConnErrorWriter(Ꮡc), 4 << 10);
+        var evalᴛ6 = newBufioReader(new connReaderжReader(c.r));
+        c.bufr = evalᴛ6;
+        var evalᴛ7 = new checkConnErrorWriter(Ꮡc);
+        var evalᴛ8 = newBufioWriterSize(evalᴛ7, 4 << 10);
+        c.bufw = evalᴛ8;
 
         {
             var d = c.server.readHeaderTimeout(); if (d > 0) {
-                c.rwc.SetReadDeadline(time.Now().Add(d));
+                var evalᴛ9 = time.Now();
+                var evalᴛ10 = evalᴛ9.Add(d);
+                c.rwc.SetReadDeadline(evalᴛ10);
             }
         }
 
@@ -2136,7 +2155,8 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
 
         for (;;) {
             var (w, err) = Ꮡc.readRequest(ctx);
-            if (c.r.remain != c.server.initialReadLimitSize()) {
+            var evalᴛ11 = c.server.initialReadLimitSize();
+            if (c.r.remain != evalᴛ11) {
                 // If we read any bytes off the wire, we're active.
                 Ꮡc.setState(c.rwc, StateActive, runHooks);
             }
@@ -2167,7 +2187,8 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
 
                     // We purposefully aren't echoing back the transfer-encoding's value,
                     // so as to mitigate the risk of cross side scripting by an attacker.
-                    fmt.Fprintf(new net_ConnᴠWriter(c.rwc), "HTTP/1.1 %d %s%sUnsupported transfer encoding"u8, code, StatusText(code), errorHeaders);
+                    var evalᴛ12 = StatusText(code);
+                    fmt.Fprintf(new net_ConnᴠWriter(c.rwc), "HTTP/1.1 %d %s%sUnsupported transfer encoding"u8, code, evalᴛ12, errorHeaders);
                     return;
                 }
                 case {} when isCommonNetReadError(err): {
@@ -2175,7 +2196,9 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
                 }
                 default: {
                     var (v, ok) = err._<statusError>(ᐧ); if (ok) {
-                        fmt.Fprintf(new net_ConnᴠWriter(c.rwc), "HTTP/1.1 %d %s: %s%s%d %s: %s"u8, v.code, StatusText(v.code), v.text, errorHeaders, v.code, StatusText(v.code), v.text);
+                        var evalᴛ13 = StatusText(v.code);
+                        var evalᴛ14 = StatusText(v.code);
+                        fmt.Fprintf(new net_ConnᴠWriter(c.rwc), "HTTP/1.1 %d %s: %s%s%d %s: %s"u8, v.code, evalᴛ13, v.text, errorHeaders, v.code, evalᴛ14, v.text);
                         return;
                     }
                     @string publicErr = publicErrᶜ1;
@@ -2245,7 +2268,9 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
 
             {
                 var d = c.server.idleTimeout(); if (d > 0) {
-                    c.rwc.SetReadDeadline(time.Now().Add(d));
+                    var evalᴛ15 = time.Now();
+                    var evalᴛ16 = evalᴛ15.Add(d);
+                    c.rwc.SetReadDeadline(evalᴛ16);
                 } else {
                     c.rwc.SetReadDeadline(new time.Time());
                 }
@@ -2261,7 +2286,9 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
 
             {
                 var d = c.server.readHeaderTimeout(); if (d > 0) {
-                    c.rwc.SetReadDeadline(time.Now().Add(d));
+                    var evalᴛ17 = time.Now();
+                    var evalᴛ18 = evalᴛ17.Add(d);
+                    c.rwc.SetReadDeadline(evalᴛ18);
                 } else {
                     c.rwc.SetReadDeadline(new time.Time());
                 }
@@ -2324,7 +2351,9 @@ internal static bool maybeServeUnencryptedHTTP2⁔(/*this*/ ж<conn> Ꮡc, conte
         return false;
     }
     [GoFunc("(*conn).maybeServeUnencryptedHTTP2.func1")] bool hasPreface(ж<conn> cΔ1, slice<byte> preface) {
-        cΔ1.r.setReadLimit((int64)len(preface) - (int64)cΔ1.bufr.Buffered());
+        var evalᴛ1 = len(preface);
+        var evalᴛ2 = cΔ1.bufr.Buffered();
+        cΔ1.r.setReadLimit((int64)evalᴛ1 - (int64)evalᴛ2);
         var (got, err) = cΔ1.bufr.Peek(len(preface));
         cΔ1.r.setInfiniteReadLimit();
         return err == nil && bytes.Equal(got, preface);
@@ -2339,7 +2368,8 @@ internal static bool maybeServeUnencryptedHTTP2⁔(/*this*/ ж<conn> Ꮡc, conte
     c.rwc.SetReadDeadline(new time.Time());
     c.rwc.SetWriteDeadline(new time.Time());
     var h = new unencryptedHTTP2Request(ctx, c.rwc, new serverHandler(c.server));
-    fn(c.server, unencryptedTLSConn(c.rwc), h);
+    var evalᴛ3 = unencryptedTLSConn(c.rwc);
+    fn(c.server, evalᴛ3, h);
     return true;
 }
 
@@ -2897,7 +2927,8 @@ internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches)
         }
         return (NotFoundHandler(), "", default, default);
     }
-    return (n.handler, n.pattern.String(), n.pattern, matches);
+    var evalᴛ1 = n.pattern.String();
+    return (n.handler, evalᴛ1, n.pattern, matches);
 }
 
 // matchOrRedirect looks up a node in the tree that matches the host, method and path.
@@ -3127,7 +3158,8 @@ internal static partial error registerErr⁔(/*this*/ ж<ServeMux> Ꮡmux, @stri
         if (!ok) {
             pat.loc = unknownLocationˢ;
         } else {
-            pat.loc = fmt.Sprintf("%s:%d"u8, @file, line);
+            var evalᴛ1 = fmt.Sprintf("%s:%d"u8, @file, line);
+            pat.loc = evalᴛ1;
         }
 
         Ꮡmux.Ꮡmu.Lock();
@@ -3383,7 +3415,8 @@ internal static partial error Shutdown⁔(/*this*/ ж<Server> Ꮡs, context.Cont
         var pollIntervalBase = time.Millisecond;
         [GoFunc("(*Server).Shutdown.func1")] time.Duration nextPollInterval() {
             // Add 10% jitter.
-            var interval = pollIntervalBase + ((time.Duration)(int64)rand.Intn((nint)(pollIntervalBase / 10)));
+            var evalᴛ1 = rand.Intn((nint)(pollIntervalBase / 10));
+            var interval = pollIntervalBase + ((time.Duration)(int64)evalᴛ1);
             // Double and clamp for next time.
             pollIntervalBase *= 2;
             if (pollIntervalBase > shutdownPollIntervalMax) {
@@ -3569,7 +3602,8 @@ public static Handler AllowQuerySemicolons(Handler h) {
             r2.Value = r.Value;
             r2.URL = @new<urlpkg.URL>();
             r2.URL.Value = r.URL.Value;
-            r2.URL.RawQuery = strings.ReplaceAll(r.URL.RawQuery, ";", "&");
+            var evalᴛ1 = strings.ReplaceAll(r.URL.RawQuery, ";", "&");
+            r2.URL.RawQuery = evalᴛ1;
             h.ServeHTTP(w, r2);
         } else {
             h.ServeHTTP(w, r);
@@ -3748,7 +3782,8 @@ internal static error ServeTLS⁔(/*this*/ ж<Server> Ꮡs, net.Listener l, @str
     }
 
     var config = cloneTLSConfig(s.TLSConfig);
-    config.NextProtos = adjustNextProtos(config.NextProtos, s.protocols());
+    var evalᴛ1 = s.protocols();
+    config.NextProtos = adjustNextProtos(config.NextProtos, evalᴛ1);
 
     var configHasCert = len(config.Certificates) > 0 || config.GetCertificate != nil || config.GetConfigForClient != nil;
     if (!configHasCert || certFile != ""u8 || keyFile != ""u8) {
@@ -4259,7 +4294,8 @@ internal static void writeHeaderLocked⁔(/*this*/ ref timeoutWriter tw, nint co
     case {} when tw.wroteHeader: {
         if (tw.req != nil) {
             var caller = relevantCaller();
-            logf(tw.req, "http: superfluous response.WriteHeader call from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
+            var evalᴛ1 = path.Base(caller.File);
+            logf(tw.req, "http: superfluous response.WriteHeader call from %s (%s:%d)", caller.Function, evalᴛ1, caller.Line);
         }
         break;
     }
@@ -4348,7 +4384,8 @@ internal static void ServeHTTP⁔(/*this*/ initALPNRequest h, ResponseWriter rw,
 
     if (req.TLS == nil) {
         req.TLS = Ꮡ(new tls.ConnectionState());
-        req.TLS.Value = h.c.ConnectionState();
+        var evalᴛ1 = h.c.ConnectionState();
+        req.TLS.Value = evalᴛ1;
     }
     if (req.Body == nil) {
         req.Body = NoBody;

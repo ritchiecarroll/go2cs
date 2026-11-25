@@ -76,7 +76,8 @@ internal static void evictOldest⁔(/*this*/ ref headerFieldTable t, nint n) {
     for (nint k = t.len() - n; k < t.len(); k++) {
         t.ents[k] = new HeaderField(); // so strings can be garbage collected
     }
-    t.ents = t.ents.slice(0, t.len() - n);
+    var evalᴛ1 = t.len();
+    t.ents = t.ents.slice(0, evalᴛ1 - n);
     if (t.evictCount + (uint64)n < t.evictCount) {
         throw panic("evictCount overflow");
     }

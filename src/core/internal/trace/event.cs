@@ -416,7 +416,10 @@ public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
                 // The stack for the main execution context is always the
                 // first stack listed in StackIDs. Subtract one from this
                 // because we've peeled away the timestamp argument.
-                e.@base.args[spec.StackIDs[0] - 1] = (uint64)addStack(e.table, slices.Collect(cʗ1.Stack.Frames()));
+                var evalᴛ1 = cʗ1.Stack.Frames();
+                var evalᴛ2 = slices.Collect(evalᴛ1);
+                var evalᴛ3 = addStack(e.table, evalᴛ2);
+                e.@base.args[spec.StackIDs[0] - 1] = (uint64)evalᴛ3;
             }
 
             e.table.Ꮡstrings.compactify();
@@ -916,10 +919,12 @@ internal static stackID addStack(ж<evTable> Ꮡtable, slice<StackFrame> frames)
 
     slice<uint64> pcs = default;
     foreach (var (_, f) in range(frames)) {
+        var evalᴛ1 = table.strings.append(f.Func);
+        var evalᴛ2 = table.strings.append(f.File);
         table.pcs[f.PC] = new frame(
             pc: f.PC,
-            funcID: table.strings.append(f.Func),
-            fileID: table.strings.append(f.File),
+            funcID: evalᴛ1,
+            fileID: evalᴛ2,
             line: f.Line
         );
         pcs = append(pcs, f.PC);
@@ -1177,7 +1182,8 @@ internal static Task Task⁔(/*this*/ Event e) {
     }
     case var ᴛ when ᴛ == tracev2.EvUserTaskEnd: {
         parentID = (TaskID)e.@base.extra(version.Go122)[0];
-        typ = e.table.getExtraString((extraStringID)e.@base.extra(version.Go122)[1]);
+        var evalᴛ1 = e.@base.extra(version.Go122);
+        typ = e.table.getExtraString((extraStringID)evalᴛ1[1]);
         break;
     }
     default: {
@@ -1262,7 +1268,8 @@ internal static StateTransition StateTransition⁔(/*this*/ Event e) {
     }
     case var ᴛ when ᴛ == tracev2.EvProcStatus: {
         // N.B. ordering.advance populates e.base.extra.
-        s = MakeProcStateTransition((ProcID)(int64)e.@base.args[0], (ProcState)(uint8)e.@base.extra(version.Go122)[0], tracev2ProcStatus2ProcState[e.@base.args[1]]);
+        var evalᴛ1 = e.@base.extra(version.Go122);
+        s = MakeProcStateTransition((ProcID)(int64)e.@base.args[0], (ProcState)(uint8)evalᴛ1[0], tracev2ProcStatus2ProcState[e.@base.args[1]]);
         break;
     }
     case var ᴛ when ᴛ == tracev2.EvGoCreate || ᴛ == tracev2.EvGoCreateBlocked: {
@@ -1592,10 +1599,11 @@ internal static @string String⁔(/*this*/ Event e) {
         var s = e.Sync();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " N=%d"u8, s.N);
         if (s.ClockSnapshot != nil) {
+            var evalᴛ1 = s.ClockSnapshot.Wall.Format(time.RFC3339Nano);
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Trace=%d Mono=%d Wall=%s"u8,
                 s.ClockSnapshot.Trace,
                 s.ClockSnapshot.Mono,
-                s.ClockSnapshot.Wall.Format(time.RFC3339Nano));
+                evalᴛ1);
         }
         break;
     }}

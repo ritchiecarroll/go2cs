@@ -654,7 +654,8 @@ internal static (nint n, error err) Write⁔(/*this*/ ж<sparseFileWriter> Ꮡsw
     var endPos = sw.pos + (int64)len(b);
     while (endPos > sw.pos && err == nil) {
         nint nf = default; // Bytes written in fragment
-        var (dataStart, dataEnd) = (sw.sp[0].Offset, sw.sp[0].endOffset());
+        var evalᴛ1 = sw.sp[0].endOffset();
+        var (dataStart, dataEnd) = (sw.sp[0].Offset, evalᴛ1);
         if (sw.pos < dataStart) { // In a hole fragment
             var bf = b.slice(0, (nint)(min((int64)len(b), dataStart - sw.pos)));
             (nf, err) = new zeroWriter().Write(bf);
@@ -707,7 +708,8 @@ internal static (int64 n, error err) ReadFrom⁔(/*this*/ ж<sparseFileWriter> �
     var pos0 = sw.pos;
     while (Ꮡsw.logicalRemaining() > 0 && !readLastByte && err == nil) {
         int64 nf = default; // Size of fragment
-        var (dataStart, dataEnd) = (sw.sp[0].Offset, sw.sp[0].endOffset());
+        var evalᴛ1 = sw.sp[0].endOffset();
+        var (dataStart, dataEnd) = (sw.sp[0].Offset, evalᴛ1);
         if (sw.pos < dataStart) { // In a hole fragment
             nf = dataStart - sw.pos;
             if (Ꮡsw.physicalRemaining() == 0) {

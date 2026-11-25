@@ -38,10 +38,12 @@ internal static void preEncode⁔(/*this*/ ref Profile p) {
         foreach (var (_, k) in range(keys)) {
             var vs = s.Label[k];
             foreach (var (_, v) in range(vs)) {
+                var evalᴛ1 = addString(strings, k);
+                var evalᴛ2 = addString(strings, v);
                 s.labelX = append(s.labelX,
                     new Label(
-                        keyX: addString(strings, k),
-                        strX: addString(strings, v)
+                        keyX: evalᴛ1,
+                        strX: evalᴛ2
                     ));
             }
         }
@@ -53,9 +55,10 @@ internal static void preEncode⁔(/*this*/ ref Profile p) {
         foreach (var (_, k) in range(numKeys)) {
             var vs = s.NumLabel[k];
             foreach (var (_, v) in range(vs)) {
+                var evalᴛ3 = addString(strings, k);
                 s.labelX = append(s.labelX,
                     new Label(
-                        keyX: addString(strings, k),
+                        keyX: evalᴛ3,
                         numX: v
                     ));
             }

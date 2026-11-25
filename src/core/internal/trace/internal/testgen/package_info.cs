@@ -66,7 +66,7 @@ using static go.@internal.trace.@internal.testgen_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/internal/testgen/trace.go", "trace.cs", "ABoutIKClLampoK0ABg0kgAHFKKCqJKs0qyyruLugqiUkoKCuIK4griCgrgABxCigoKCpgAOHgAPKNK4goKuwoKUgpSCgq7CgpSClIKCgoKUgoKuwoKUABIg1IKUgoKCgoKCuIK4goKCgriCgqKCgoKUpoKCpqaCgoKmgoKmpoLuooKCAAse0oKClIKCgoKClJSUgoKUgpSmgoKCgpSClLS0tLS0tLS0tLSkrNKmgoKClIKCuKiyyoK6koKC", "", "", "77=Specs/1/2/1,EventNames/1/1/1,Specs/2/2/2;157=Bytes/1/1/3", "36:21")]
+[assembly: GoPositionMap("internal/trace/internal/testgen/trace.go", "trace.cs", "ABoutIKClLampoK0ABg0kgAHFKKCqJKs0ryyruLugqiUkoKCuIK4griCgrgABxCigoKCpgAOHgAPKNK4goKuwoKUgpSCgq7CgpSClIKCgoKUgoKuwoKUABIg1IKUgoKCgoKCuIK4goKCgriCgqKCgoKUpoKCpqaCgoKmgoKmpoLuooKCAAse0oKClIKCgoKClJSUgoKUgpSmgoKCgpSClLS0tLS0tLS0tLSkrNKmgoKCtIKyuKiyyoK6koKC", "", "", "77=Specs/1/2/1,EventNames/1/1/1,Specs/2/2/2;158=Bytes/1/1/3", "36:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace.@internal;

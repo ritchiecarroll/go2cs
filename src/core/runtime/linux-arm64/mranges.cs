@@ -270,7 +270,8 @@ internal static nint findSucc⁔(/*this*/ ref addrRanges a, uintptr addr) {
     nint top = len(a.ranges);
     while (top - bot > iterMax) {
         nint i = (nint)((nuint)(bot + top) >> 1);
-        if (a.ranges[i].contains(@base.addr())) {
+        var evalᴛ1 = @base.addr();
+        if (a.ranges[i].contains(evalᴛ1)) {
             // a.ranges[i] contains base, so
             // its successor is the next index.
             return i + 1;

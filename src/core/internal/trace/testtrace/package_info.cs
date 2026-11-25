@@ -72,11 +72,11 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgpSokoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
+[assembly: GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgqSokoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
 [assembly: GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAikoKClIKUgpSClIKClIKCgpSCgoKUgpSCpoKClA==")]
 [assembly: GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABookoKUuILulIK4uIKUgoKUgoKClIKCgpSClIKmpqKUgoKClJKClA==", "", "", "", "93:21")]
 [assembly: GoPositionMap("internal/trace/testtrace/platforms.go", "platforms.cs", "AA0cooKUqqLalA==")]
-[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoLGgoLGgoIAEhyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgoKUAAkQpKaCgqaCgoKmgoKmgoKClIKClKbCyIKUgpSCgpSClIKClIKCgoKUprSCuJSCAAgSoqaC", "368-384:1")]
+[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoLGgoLGgoIAEhyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKkgpSCppSCgoKkgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKCpIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgoKUAAkQpKaCgqaCgoKmgoKmgoKClIKClLbCyIKUgpSCgpSClIKClIKCgoKUprSCuJSCAAgSoraC", "368-384:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

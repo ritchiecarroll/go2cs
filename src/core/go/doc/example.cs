@@ -120,7 +120,8 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             // other top-level declarations, and no tests or
             // benchmarks, use the whole file as the example.
             flist[0].Code = new ast.FileжNode(@file);
-            flist[0].Play = playExampleFile(ref (@file).DerefOrNull());
+            var evalᴛ1 = playExampleFile(ref (@file).DerefOrNull());
+            flist[0].Play = evalᴛ1;
         }
         list = appendꓸꓸꓸ(list, flist);
     }
@@ -275,7 +276,8 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             ref var spec = ref heap<ast.ImportSpec>(s.Value, out var Ꮡspec);
             ref var path = ref heap<ast.BasicLit>(s.Path.Value, out var Ꮡpath);
             spec.Path = Ꮡpath;
-            updateBasicLitPos(spec.Path, groupStart(Ꮡspec));
+            var evalᴛ1 = groupStart(Ꮡspec);
+            updateBasicLitPos(spec.Path, evalᴛ1);
             namedImports = append(namedImports, (ast.Spec)(new ast.ImportSpecжSpec(Ꮡspec)));
             delete(unresolved, n);
         }

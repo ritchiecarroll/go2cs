@@ -1815,7 +1815,8 @@ internal static ref categoryAliasesᴛ1 categoryAliases => ref ((StaticBox<categ
 internal static void initCategoryAliases() {
     categoryAliases.m = new map<@string, @string>();
     foreach (var (name, actual) in unicode.CategoryAliases) {
-        categoryAliases.m[canonicalName(name)] = actual;
+        var evalᴛ1 = canonicalName(name);
+        categoryAliases.m[evalᴛ1] = actual;
     }
 }
 

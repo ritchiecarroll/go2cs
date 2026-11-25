@@ -68,7 +68,7 @@ using System.Runtime.CompilerServices;
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/keccakf.go", "keccakf.cs", "AA8e")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADNwgJaAlqSCgqaCgqiygqoACAq4lIKogILCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKUlKaCgsqCgoIADRiCpoKUtLS0tLaCgoIACgaCgqaCggANDKaCgoKmgpSSgpSCgpSU")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3_noasm.go", "sha3_noasm.cs", "AAgSgqaClIKUgg==")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoKCuJSCgqaCgoKCpqKCgoKCgoKCpoKcsJiQlIKmqLKCgrqSgqaCpoKCgpSCpoKClIKUgqiSqJIAAhDkgqaigoKUAAIQ5IKmooKClA==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoKCuJSCgqaCgoKCpqKCgqKCooKCpoKcsJiQlIKmqLKCgrqSgqaCpoKCgpSCpoKClIKUgqiSqJIAAhDkgqaigoKUAAIQ5IKmooKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

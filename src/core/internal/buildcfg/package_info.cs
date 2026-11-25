@@ -62,7 +62,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABkusqKioqKioqKioqKi1AAHEJKCgriCgpTmgqSkpKSUguaCgpSUgpSCqqKCgpSClIKUgpSClIKClIKUqqKCgpQABxCCgoKUlAAOBqKYgpSUlIKCgoKUgoKmlLS0tILIgpQADh6CgoKUgpQACgayqoKUgoKCgqaCgoKmppS2lLSUtuaigqq0gqaCpoamgpSCgpSU+IKklILmgqSUguaCpKSklILmgqSkpJSCgoaCAAUSsoLmooIADRC25oKmgoKCpqLcgpT6oqSkpKSkpKSkpJSmwqSkgoKUtIKClLSCgoKCpoKCpqSkpIKClLSCgpSClKSUlIKU", "326-328:1")]
+[assembly: GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABkusqKioqKioqKioqKi1AAHEJKCkriCgpTmgqSkpKSUguaCgpSUgpSCqqKCgpSClIKUgpSClIKClIKUqqKCgpQABxCCgoKUlAAOBqKYgpSUlIKCgoKUgoKmlLS0tILIgpQADh6CgoKUgpQACgayqoKUgoKCgqaCgoKmppS2lLSUtuaigqq0gqaCpoamgpSCgpSU+IKklILmgqSUguaCpKSklILmgqSkpJSCgoaCAAUSsoLmooIADRC25oKmgoKCpqLcgpT6oqSkpKSkpKSkpJSmwqSkgoKUtIKClLSCgoKCpoKCpqSkpIKClLSCgpSClKSUlIKU", "326-328:1")]
 [assembly: GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACA+goKCgpQAEBze2tKUgrQADBiU7gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpSqoq7CgoKCgpSCgoKCgoKUgoKUuKqiqqI=", "112-115:1", "105=reflect.Value.SetBool", "33=Invoke/1/1/7")]
 // </GoSourcePositionMaps>
 

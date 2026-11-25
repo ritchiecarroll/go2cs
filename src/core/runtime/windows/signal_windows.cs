@@ -35,14 +35,18 @@ internal static partial void sehtramp();
 internal static partial void sigresume();
 
 internal static void initExceptionHandler() {
-    stdcall(_AddVectoredExceptionHandler, 1, abi.FuncPCABI0(exceptiontramp));
+    var evalᴛ1 = abi.FuncPCABI0(exceptiontramp);
+    stdcall(_AddVectoredExceptionHandler, 1, evalᴛ1);
     if (GOARCH == "386"u8) {
         // use SetUnhandledExceptionFilter for windows-386.
         // note: SetUnhandledExceptionFilter handler won't be called, if debugging.
-        stdcall(_SetUnhandledExceptionFilter, abi.FuncPCABI0(lastcontinuetramp));
+        var evalᴛ2 = abi.FuncPCABI0(lastcontinuetramp);
+        stdcall(_SetUnhandledExceptionFilter, evalᴛ2);
     } else {
-        stdcall(_AddVectoredContinueHandler, 1, abi.FuncPCABI0(firstcontinuetramp));
-        stdcall(_AddVectoredContinueHandler, 0, abi.FuncPCABI0(lastcontinuetramp));
+        var evalᴛ3 = abi.FuncPCABI0(firstcontinuetramp);
+        stdcall(_AddVectoredContinueHandler, 1, evalᴛ3);
+        var evalᴛ4 = abi.FuncPCABI0(lastcontinuetramp);
+        stdcall(_AddVectoredContinueHandler, 0, evalᴛ4);
     }
 }
 
@@ -222,7 +226,8 @@ internal static int32 sigtrampgo(ж<windows.ExceptionPointers> Ꮡep, nint kind)
     }
     prepareContextForSigResume(ref (ep.Context).DerefOrNull());
     ep.Context.SetSP((~(~(~gp).m).g0).sched.sp);
-    ep.Context.SetPC(abi.FuncPCABI0(sigresume));
+    var evalᴛ1 = abi.FuncPCABI0(sigresume);
+    ep.Context.SetPC(evalᴛ1);
     return ret;
 }
 
@@ -312,11 +317,13 @@ internal static int32 sehhandler(ж<windows.ExceptionRecord> _Δp0, uint64 _Δp1
     ref var @base = ref heap(new uintptr(), out var Ꮡbase);
     ref var sp = ref heap(new uintptr(), out var Ꮡsp);
     for (;;) {
-        var entry = stdcall(_RtlLookupFunctionEntry, ctxt.PC(), (uintptr)@unsafe.Pointer.FromBox(Ꮡbase), 0);
+        var evalᴛ1 = ctxt.PC();
+        var entry = stdcall(_RtlLookupFunctionEntry, evalᴛ1, (uintptr)@unsafe.Pointer.FromBox(Ꮡbase), 0);
         if (entry == 0) {
             break;
         }
-        stdcall(_RtlVirtualUnwind, 0, @base, ctxt.PC(), entry, (uintptr)ctxt, 0, (uintptr)@unsafe.Pointer.FromBox(Ꮡsp), 0);
+        var evalᴛ2 = ctxt.PC();
+        stdcall(_RtlVirtualUnwind, 0, @base, evalᴛ2, entry, (uintptr)ctxt, 0, (uintptr)@unsafe.Pointer.FromBox(Ꮡsp), 0);
         if (sp < (~gp).stack.lo || (~gp).stack.hi <= sp) {
             break;
         }
@@ -392,7 +399,8 @@ internal static void winthrow(ж<windows.ExceptionRecord> Ꮡinfo, ж<windows.Co
     g0.Value.stackguard0 = (~g0).stack.lo + (uintptr)stackGuard;
     g0.Value.stackguard1 = g0.Value.stackguard0;
 
-    print((@string)"Exception ", (hex)(uint64)info.ExceptionCode, (@string)" ", (hex)(uint64)info.ExceptionInformation[0], (@string)" ", (hex)(uint64)info.ExceptionInformation[1], (@string)" ", (hex)(uint64)r.PC(), (@string)"\n");
+    var evalᴛ1 = r.PC();
+    print((@string)"Exception ", (hex)(uint64)info.ExceptionCode, (@string)" ", (hex)(uint64)info.ExceptionInformation[0], (@string)" ", (hex)(uint64)info.ExceptionInformation[1], (@string)" ", (hex)(uint64)evalᴛ1, (@string)"\n");
 
     print((@string)"PC=", (hex)(uint64)r.PC(), (@string)"\n");
     if ((~(~g0).m).incgo && Ꮡgp == (~(~g0).m).g0 && (~(~g0).m).curg != nil) {

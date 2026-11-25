@@ -94,7 +94,8 @@ partial struct handlerWriter {
 
 internal static partial (nint, error) Write⁔(/*this*/ ref handlerWriter w, slice<byte> buf) {
     Level level = w.level.Level();
-    if (!w.h.Enabled(context.Background(), level)) {
+    var evalᴛ1 = context.Background();
+    if (!w.h.Enabled(evalᴛ1, level)) {
         return (0, default);
     }
     uintptr pc = default;
@@ -109,7 +110,8 @@ internal static partial (nint, error) Write⁔(/*this*/ ref handlerWriter w, sli
     nint origLen = len(buf); // Report that the entire buf was written.
     buf = bytes.TrimSuffix(buf, [(byte)'\n']);
     var r = NewRecord(time.Now(), level, (@string)buf, pc);
-    return (origLen, w.h.Handle(context.Background(), r));
+    var evalᴛ2 = context.Background();
+    return (origLen, w.h.Handle(evalᴛ2, r));
 }
 
 // A Logger records structured information about each call to its
@@ -141,7 +143,8 @@ internal static ж<Logger> With⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany
         return Ꮡl;
     }
     var c = l.clone();
-    c.handler = l.handler.WithAttrs(argsToAttrSlice(args));
+    var evalᴛ1 = argsToAttrSlice(args);
+    c.handler = l.handler.WithAttrs(evalᴛ1);
     return c;
 }
 

@@ -108,7 +108,8 @@ partial struct LinkError {
 }
 
 internal static @string Error⁔(/*this*/ ref LinkError e) {
-    return e.Op + " "u8 + e.Old + " "u8 + e.New + ": "u8 + e.Err.Error();
+    var evalᴛ1 = e.Err.Error();
+    return e.Op + " "u8 + e.Old + " "u8 + e.New + ": "u8 + evalᴛ1;
 }
 
 internal static error Unwrap⁔(/*this*/ ref LinkError e) {
@@ -367,7 +368,10 @@ internal static (nint n, error err) WriteString⁔(/*this*/ ж<File> Ꮡf, @stri
 // If there is an error, it will be of type [*PathError].
 public static error Mkdir(@string name, FileMode perm) {
     @string longName = fixLongPath(name);
-    var e = ignoringEINTR([GoFunc("Mkdir.func1")] () => syscall.Mkdir(longName, syscallMode(perm)));
+    var e = ignoringEINTR([GoFunc("Mkdir.func1")] () => {
+        var evalᴛ1 = syscallMode(perm);
+        return syscall.Mkdir(longName, evalᴛ1);
+    });
 
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir", Path: name, Err: e)));

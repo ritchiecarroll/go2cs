@@ -158,14 +158,16 @@ internal static ж<Signature> /*res*/ instantiateSignature⁔(/*this*/ ж<Checke
             check.indent++;
             defer([GoFunc("(*Checker).instantiateSignature.func1")] () => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(pos, sUnderSˢ, res.OrTypedNil(), res.Underlying());
+                var evalᴛ1 = res.Underlying();
+                Ꮡcheck.trace(pos, sUnderSˢ, res.OrTypedNil(), evalᴛ1);
             }, ref ᒐ);
         }
 
         // For signatures, Checker.instance will always succeed because the type argument
         // count is correct at this point (see assertion above); hence the type assertion
         // to *Signature will always succeed.
-        var inst = Ꮡcheck.instance(pos, new SignatureжgenericType(Ꮡtyp), targs, nil, check.context())._<ж<Signature>>();
+        var evalᴛ2 = check.context();
+        var inst = Ꮡcheck.instance(pos, new SignatureжgenericType(Ꮡtyp), targs, nil, evalᴛ2)._<ж<Signature>>();
         assert(inst.TypeParams().Len() == 0); // signature is not generic anymore
         check.recordInstance(expr, targs, new SignatureжType(inst));
         assert(len(xlist) <= len(targs));
@@ -591,8 +593,12 @@ internal static ж<Signature> /*rsig*/ arguments⁔(/*this*/ ж<Checker> Ꮡchec
         }
         var err = Ꮡcheck.newError(WrongArgCount);
         err.addf(at, "%s arguments in call to %s", qualifier, call.Fun);
-        err.addf(noposn, "have %s", Ꮡcheck.typesSummary(operandTypes(args), false, ddd));
-        err.addf(noposn, "want %s", Ꮡcheck.typesSummary(varTypes(@params), sig.variadic, false));
+        var evalᴛ1 = operandTypes(args);
+        var evalᴛ2 = Ꮡcheck.typesSummary(evalᴛ1, false, ddd);
+        err.addf(noposn, "have %s", evalᴛ2);
+        var evalᴛ3 = varTypes(@params);
+        var evalᴛ4 = Ꮡcheck.typesSummary(evalᴛ3, sig.variadic, false);
+        err.addf(noposn, "want %s", evalᴛ4);
         err.report();
         return rsig;
     }
@@ -680,7 +686,9 @@ internal static ж<Signature> /*rsig*/ arguments⁔(/*this*/ ж<Checker> Ꮡchec
             //           Perhaps instantiate as much as we can, also for arguments.
             //           This will require changes to how infer returns its results.
             if (!err.empty()) {
-                Ꮡcheck.errorf(err.posn(), CannotInferTypeArgs, "in call to %s, %s", call.Fun, err.msg());
+                var evalᴛ5 = err.posn();
+                var evalᴛ6 = err.msg();
+                Ꮡcheck.errorf(evalᴛ5, CannotInferTypeArgs, "in call to %s, %s", call.Fun, evalᴛ6);
             }
             return rsig;
         }
@@ -805,7 +813,8 @@ internal static void selector⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                         var exps = pkg.scope.lookupIgnoringCase(sel, true);
                         if (len(exps) >= 1) {
                             // report just the first one
-                            Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s (but have %s)", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe), exps[0].Name());
+                            var evalᴛ1 = exps[0].Name();
+                            Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s (but have %s)", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe), evalᴛ1);
                         } else {
                             Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe));
                         }

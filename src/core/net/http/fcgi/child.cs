@@ -128,7 +128,10 @@ internal static void WriteHeader⁔(/*this*/ ref response r, nint code) {
         r.header.Del(transferEncodingˢ);
     }
     if (r.header.Get(dateˢ) == ""u8) {
-        r.header.Set(dateˢ, time.Now().UTC().Format(http.TimeFormat));
+        var evalᴛ1 = time.Now();
+        var evalᴛ2 = evalᴛ1.UTC();
+        var evalᴛ3 = evalᴛ2.Format(http.TimeFormat);
+        r.header.Set(dateˢ, evalᴛ3);
     }
 }
 
@@ -141,9 +144,11 @@ internal static void writeCGIHeader⁔(/*this*/ ref response r, slice<byte> p) {
         return;
     }
     r.wroteCGIHeader = true;
-    fmt.Fprintf(new bufWriterжWriter(r.w), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
+    var evalᴛ1 = http.StatusText(r.code);
+    fmt.Fprintf(new bufWriterжWriter(r.w), "Status: %d %s\r\n"u8, r.code, evalᴛ1);
     var (_, hasType) = r.header[contentTypeˢ, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
-        r.header.Set(contentTypeˢ, http.DetectContentType(p));
+        var evalᴛ2 = http.DetectContentType(p);
+        r.header.Set(contentTypeˢ, evalᴛ2);
     }
     r.header.Write(new bufWriterжWriter(r.w));
     r.w.Value.Writer.Value.WriteString("\r\n");
@@ -251,7 +256,8 @@ internal static partial error handleRecord⁔(/*this*/ ж<child> Ꮡc, ж<record
         // NOTE(eds): Technically a key-value pair can straddle the boundary
         // between two packets. We buffer until we've received all parameters.
         if (len(rec.content()) > 0) {
-            req.rawParams = appendꓸꓸꓸ(req.rawParams, rec.content());
+            var evalᴛ1 = rec.content();
+            req.rawParams = appendꓸꓸꓸ(req.rawParams, evalᴛ1);
             return default;
         }
         req.parseParams();
@@ -333,7 +339,8 @@ internal static void serveRequest⁔(/*this*/ ж<child> Ꮡc, ж<request> Ꮡreq
     if (err != nil) {
         // there was an error reading the request
         r.WriteHeader(http.StatusInternalServerError);
-        c.conn.writeRecord(typeStderr, req.reqId, slice<byte>(err.Error()));
+        var evalᴛ1 = err.Error();
+        c.conn.writeRecord(typeStderr, req.reqId, slice<byte>(evalᴛ1));
     } else {
         httpReq.Body = body;
         var withoutUsedEnvVars = filterOutUsedEnvVars(req.@params);

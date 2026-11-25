@@ -77,7 +77,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACpWgoKWkoKUgoKmgpSuwoKCgoKCgqa4goKCgoKClO6CpoKUgpSYgpSCgpSUppSAgoKClMiCgoKCgpSClIKCgpSUlKiSgoKUgpSssoKClKaCgpSCgpSClIKCpoKmgoKC3AAMFoKmgqaCpoLulJIACBKCgoKCgoKClIIACRSUlIKClIKUgoKmgti0pIKUgqaCgpSCgpQAChaCgoKmgoKClIKUgoKUgg==", "106-108:1")]
-[assembly: GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABYCgIKkgoKSgoKCpoKClIKUpqaigoKCgoKUgpSCgoKClJSCgqaClAAKGLKmgoKCgpSCgoKClAAMCvSCgoKUgoKCgqiSgpSUgoKUgrSCtIKkgoKClNi02oKCgoK4goKCgriCyqaClJKCgoKUpoKUkoKCgoKUgoKClIKClIKClIKCpqaCgoKClJSCgtyCgoKUlIKCuKKmkqiSqJKo0oKokoKCgoKCgoKUlLS0tLS2lMqCuIKCgoKClKaCpoKUlIKCgriCgoKUgqaCgqaCgpS0grSCtqqigoKClIKCgoKUgpSCpoKCgpSCpoKCpoKCyoKCgpSCgqaAgoKCgpSCgsiAgoKCgpSCgpSCgoLe0oKCgoKUyoKCpoKCgoKCgpSClJSCpoKmgoKUpgAMCNKmgoKCpoKCgoKmgsqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgrSkgoKC+rKCgoKUurK4gpSAgu6AggAHEIKC", "474-482:1;510-515:2;568-568:1;600-606:1", "", "", "244:21,257:21,676:21")]
+[assembly: GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABYCgIKkgoKSgoKCpoKClIKUpqaigoKCgoKUgpSCgoKClJSCgqaClAAKGLK2goKCgpSCgoKClAAMCvSCgoKUgoKCgqiSgpSUgoKUgrSCtIKkgoKClNi02oKCgoK4goKCgriCyqaClJKCgoKUpoKUkoKCgoKUgoKClIKClIKClIKCpqaCgoKClJSCgtyCgoKUlIKCuKKmkqiSqJKo0oKokoKCgoKCgoKUlLS0tLS2lMqCuIKCgoKClKaCpoKUlIKCgriCgoKUgqaCgqaCgpS0grSCtqqigoKClIKCgoKUgpSCpoKCgpSCpoKCpoKCyoKCgpSCgqaAgoKCgpSCgsiAgoKCgpSCgpSCgoLe0oKCgoKk2oKCpoKCgoKCgpSClJSCpoKmgoKUpgANCNKmgoKCpoKCgoKmgsqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgrSkgoKC+rKCgoKUurK4gpSAgu6AggAHEIKC", "474-482:1;510-515:2;568-568:1;600-606:1", "", "", "245:21,258:21,680:21")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

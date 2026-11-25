@@ -516,21 +516,26 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
         }
 
         if ((p.Director != nil) == (p.Rewrite != nil)) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, errors.New(reverseProxyMustHaveˢ));
+            var evalᴛ1 = Ꮡp.getErrorHandler();
+            var evalᴛ2 = errors.New(reverseProxyMustHaveˢ);
+            evalᴛ1(rw, Ꮡreq, evalᴛ2);
             return;
         }
 
         if (p.Director != nil) {
             p.Director(outreq);
             if (outreq.Form != nil) {
-                outreq.URL.RawQuery = cleanQueryParams(outreq.URL.RawQuery);
+                var evalᴛ3 = cleanQueryParams(outreq.URL.RawQuery);
+                outreq.URL.RawQuery = evalᴛ3;
             }
         }
         outreq.Close = false;
 
         @string reqUpType = upgradeType(outreq.Header);
         if (!ascii.IsPrint(reqUpType)) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("client tried to switch to invalid protocol %q"u8, reqUpType));
+            var evalᴛ4 = Ꮡp.getErrorHandler();
+            var evalᴛ5 = fmt.Errorf("client tried to switch to invalid protocol %q"u8, reqUpType);
+            evalᴛ4(rw, Ꮡreq, evalᴛ5);
             return;
         }
         removeHopByHopHeaders(outreq.Header);
@@ -561,7 +566,8 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
             outreq.Header.Del(xForwardedProtoˢ);
 
             // Remove unparsable query parameters from the outbound request.
-            outreq.URL.RawQuery = cleanQueryParams(outreq.URL.RawQuery);
+            var evalᴛ6 = cleanQueryParams(outreq.URL.RawQuery);
+            outreq.URL.RawQuery = evalᴛ6;
 
             var pr = Ꮡ(new ProxyRequest(
                 In: Ꮡreq,
@@ -672,7 +678,8 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
 
         rw.WriteHeader(res.StatusCode);
 
-        err = Ꮡp.copyResponse(rw, res.Body, p.flushInterval(res));
+        var evalᴛ7 = p.flushInterval(res);
+        err = Ꮡp.copyResponse(rw, res.Body, evalᴛ7);
         if (err != nil) {
             var resʗ1 = res;
             defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
@@ -947,24 +954,32 @@ internal static partial void handleUpgradeResponse⁔(/*this*/ ж<ReverseProxy> 
         @string reqUpType = upgradeType(req.Header);
         @string resUpType = upgradeType(res.Header);
         if (!ascii.IsPrint(resUpType)) { // We know reqUpType is ASCII, it's checked by the caller.
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("backend tried to switch to invalid protocol %q"u8, resUpType));
+            var evalᴛ1 = Ꮡp.getErrorHandler();
+            var evalᴛ2 = fmt.Errorf("backend tried to switch to invalid protocol %q"u8, resUpType);
+            evalᴛ1(rw, Ꮡreq, evalᴛ2);
             return;
         }
         if (!ascii.EqualFold(reqUpType, resUpType)) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("backend tried to switch protocol %q when %q was requested"u8, resUpType, reqUpType));
+            var evalᴛ3 = Ꮡp.getErrorHandler();
+            var evalᴛ4 = fmt.Errorf("backend tried to switch protocol %q when %q was requested"u8, resUpType, reqUpType);
+            evalᴛ3(rw, Ꮡreq, evalᴛ4);
             return;
         }
 
         var (backConn, ok) = res.Body._<io.ReadWriteCloser>(ᐧ);
         if (!ok) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("internal error: 101 switching protocols response with non-writable body"u8));
+            var evalᴛ5 = Ꮡp.getErrorHandler();
+            var evalᴛ6 = fmt.Errorf("internal error: 101 switching protocols response with non-writable body"u8);
+            evalᴛ5(rw, Ꮡreq, evalᴛ6);
             return;
         }
 
         var rc = http.NewResponseController(rw);
         var (conn, brw, hijackErr) = rc.Hijack();
         if (errors.Is(hijackErr, new http.ProtocolErrorжerror(http.ErrNotSupported))) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("can't switch protocols using non-Hijacker ResponseWriter type %T"u8, rw));
+            var evalᴛ7 = Ꮡp.getErrorHandler();
+            var evalᴛ8 = fmt.Errorf("can't switch protocols using non-Hijacker ResponseWriter type %T"u8, rw);
+            evalᴛ7(rw, Ꮡreq, evalᴛ8);
             return;
         }
 
@@ -988,7 +1003,9 @@ internal static partial void handleUpgradeResponse⁔(/*this*/ ж<ReverseProxy> 
         defer(ᴛ1 => close(ᴛ1), backConnCloseCh, ref ᒐ);
 
         if (hijackErr != nil) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("Hijack failed on protocol switch: %v"u8, hijackErr));
+            var evalᴛ9 = Ꮡp.getErrorHandler();
+            var evalᴛ10 = fmt.Errorf("Hijack failed on protocol switch: %v"u8, hijackErr);
+            evalᴛ9(rw, Ꮡreq, evalᴛ10);
             return;
         }
         var connʗ1 = conn;
@@ -999,11 +1016,15 @@ internal static partial void handleUpgradeResponse⁔(/*this*/ ж<ReverseProxy> 
         res.Header = rw.Header();
         res.Body = default; // so res.Write only writes the headers; we have res.Body in backConn above
         var errΔ1 = res.Write(new bufio_ReadWriterжWriter(brw)); if (errΔ1 != nil) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("response write: %v"u8, errΔ1));
+            var evalᴛ11 = Ꮡp.getErrorHandler();
+            var evalᴛ12 = fmt.Errorf("response write: %v"u8, errΔ1);
+            evalᴛ11(rw, Ꮡreq, evalᴛ12);
             return;
         }
         var errΔ2 = brw.Value.Writer.Value.Flush(); if (errΔ2 != nil) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("response flush: %v"u8, errΔ2));
+            var evalᴛ13 = Ꮡp.getErrorHandler();
+            var evalᴛ14 = fmt.Errorf("response flush: %v"u8, errΔ2);
+            evalᴛ13(rw, Ꮡreq, evalᴛ14);
             return;
         }
         var errc = new channel<error>(1);

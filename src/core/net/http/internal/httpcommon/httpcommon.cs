@@ -429,7 +429,8 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
         var hlSize = (uint64)0;
         enumerateHeaders([GoFunc("EncodeHeaders.func2")] (@string name, @string value) => {
             var hf = new hpack.HeaderField(Name: name, Value: value);
-            hlSize += (uint64)hf.Size();
+            var evalᴛ1 = hf.Size();
+            hlSize += (uint64)evalᴛ1;
         });
 
         if (hlSize > param.PeerMaxHeaderListSize) {

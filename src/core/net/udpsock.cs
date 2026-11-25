@@ -51,7 +51,8 @@ internal static @string String⁔(/*this*/ ж<UDPAddr> Ꮡa) {
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {
-        return JoinHostPort(ip + "%"u8 + a.Zone, strconv.Itoa(a.Port));
+        var evalᴛ1 = strconv.Itoa(a.Port);
+        return JoinHostPort(ip + "%"u8 + a.Zone, evalᴛ1);
     }
     return JoinHostPort(ip, strconv.Itoa(a.Port));
 }

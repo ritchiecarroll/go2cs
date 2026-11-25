@@ -241,7 +241,8 @@ internal static void synctestRun(Action fʗp) {
         var gpʗ2 = gp;
         systemstack([GoFunc("synctestRun.func2")] () => {
             var fv = ~Ꮡf.Reinterpret<Action, ж<funcval>>();
-            bubbleʗ1.main = newproc1(fv, gpʗ2, pc, false, waitReasonZero);
+            var evalᴛ1 = newproc1(fv, gpʗ2, pc, false, waitReasonZero);
+            bubbleʗ1.main = evalᴛ1;
             var pp = (~(~getg()).m).p.ptr();
             runqput(pp, bubbleʗ1.main, true);
             wakep();
@@ -285,7 +286,8 @@ internal static void synctestRun(Action fʗp) {
         if (raceenabled) {
             // Establish a happens-before relationship between bubbled goroutines exiting
             // and Run returning.
-            raceacquireg(ref (gp).DerefOrNull(), (~gp).bubble.raceaddr());
+            var evalᴛ2 = (~gp).bubble.raceaddr();
+            raceacquireg(ref (gp).DerefOrNull(), evalᴛ2);
         }
         if (total != 1) {
             @string reason = default;

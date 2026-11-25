@@ -73,7 +73,8 @@ internal static void Fatalf⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸ
     @string text = Ꮡa.Ꮡout.String();
     nint i = strings.LastIndex(text, textˢ);
     text = text.slice(i + 1);
-    throw panic("[" + a.Arch.Name + "] asmgen internal error: " + fmt.Sprintf(format, args.ꓸꓸꓸ) + "\n" + text);
+    var evalᴛ1 = fmt.Sprintf(format, args.ꓸꓸꓸ);
+    throw panic("[" + a.Arch.Name + "] asmgen internal error: " + evalᴛ1 + "\n" + text);
 }
 
 // hint returns the register name for the given hint.

@@ -245,7 +245,8 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder⁔(
 
         if (c.dnsDebugLevel > 1) {
             defer([GoFunc("(*conf).addrLookupOrder.func1")] () => {
-                print((@string)"go package net: addrLookupOrder(", addr, (@string)") = ", ret.String(), (@string)"\n");
+                var evalᴛ1 = ret.String();
+                print((@string)"go package net: addrLookupOrder(", addr, (@string)") = ", evalᴛ1, (@string)"\n");
             }, ref ᒐ);
         }
         (ret, dnsConf) = c.lookupOrder(r, ""u8);
@@ -267,7 +268,8 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder⁔(
 
         if (c.dnsDebugLevel > 1) {
             defer([GoFunc("(*conf).hostLookupOrder.func1")] () => {
-                print((@string)"go package net: hostLookupOrder(", hostname, (@string)") = ", ret.String(), (@string)"\n");
+                var evalᴛ1 = ret.String();
+                print((@string)"go package net: hostLookupOrder(", hostname, (@string)") = ", evalᴛ1, (@string)"\n");
             }, ref ᒐ);
         }
         (ret, dnsConf) = c.lookupOrder(r, hostname);

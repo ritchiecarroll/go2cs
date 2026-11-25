@@ -413,10 +413,12 @@ internal static partial error /*err*/ start⁔(/*this*/ ж<worker> Ꮡw) {
         w.termC = new channel<EmptyStruct>(0);
         var comm = new workerComm(fuzzIn: fuzzInW, fuzzOut: fuzzOutR, memMu: w.memMu);
         var m = newMutator();
-        w.client = newWorkerClient(comm, m);
+        var evalᴛ1 = newWorkerClient(comm, m);
+        w.client = evalᴛ1;
 
         goǃ([GoFunc("(*worker).start.func1")] () => {
-            Ꮡw.Value.waitErr = Ꮡw.Value.cmd.Wait();
+            var evalᴛ2 = Ꮡw.Value.cmd.Wait();
+            Ꮡw.Value.waitErr = evalᴛ2;
             close(Ꮡw.Value.termC);
         });
 
@@ -857,7 +859,8 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
                     copy(vals, originalVals);
                     ws.m.r.save(mem.header().ᏑrandState, mem.header().ᏑrandInc);
                 }
-                ws.m.mutate(vals, cap(mem.valueRef()));
+                var evalᴛ1 = mem.valueRef();
+                ws.m.mutate(vals, cap(evalᴛ1));
 
                 var entry = new CorpusEntry(Values: vals);
                 var (dur, cov, errMsg) = fuzzOnce(entry);
@@ -1204,7 +1207,8 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
                 }
             }
             if (args.Limit != 0) {
-                args.Limit -= mem.header().count;
+                var evalᴛ1 = mem.header();
+                args.Limit -= evalᴛ1.count;
                 if (args.Limit <= 0) {
                     break;
                 }
@@ -1275,12 +1279,15 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
             if (errΔ1 != nil) {
                 (entryOut, resp, isInternalError, err) = (new CorpusEntry(), new fuzzResponse(), true, fmt.Errorf("unmarshaling fuzz input value after call: %v"u8, errΔ1)); goto ᒐdone;
             }
-            wc.m.r.restore(mem.header().randState, mem.header().randInc);
+            var evalᴛ1 = mem.header();
+            var evalᴛ2 = mem.header();
+            wc.m.r.restore(evalᴛ1.randState, evalᴛ2.randInc);
             if (!args.Warmup) {
                 // Only mutate the valuesOut if fuzzing actually occurred.
                 var numMutations = ((resp.Count - 1) % (int64)chainedMutations) + 1;
                 for (var i = (int64)0; i < numMutations; i++) {
-                    wc.m.mutate(valuesOut, cap(mem.valueRef()));
+                    var evalᴛ3 = mem.valueRef();
+                    wc.m.mutate(valuesOut, cap(evalᴛ3));
                 }
             }
             var dataOut = marshalCorpusFile(valuesOut.ꓸꓸꓸ);

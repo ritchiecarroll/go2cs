@@ -208,8 +208,9 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
                 // start a new range.
                 var startTime = (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D);
                 var endTime = (time.Duration)(int64)(ev.Time * 1000D);
+                var evalᴛ1 = fmt.Sprintf("%v-%v"u8, startTime, endTime);
                 sʗ1.Ranges = append(sʗ1.Ranges, new Range(
-                    Name: fmt.Sprintf("%v-%v"u8, startTime, endTime),
+                    Name: evalᴛ1,
                     Start: start,
                     End: i + 1,
                     StartTime: (int64)startTime,
@@ -226,8 +227,9 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
             }
 
             nint end = len(Ꮡsizes.ValueSlot) - 1; if (start < end) {
+                var evalᴛ2 = fmt.Sprintf("%v-%v"u8, (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D), (time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D));
                 sʗ1.Ranges = append(sʗ1.Ranges, new Range(
-                    Name: fmt.Sprintf("%v-%v"u8, (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D), (time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)),
+                    Name: evalᴛ2,
                     Start: start,
                     End: end,
                     StartTime: (int64)(Ꮡsizes.ValueSlot[start].Time * 1000D),
@@ -741,7 +743,9 @@ internal static nint buildBranch⁔(/*this*/ ref Emitter e, frameNode parent, sl
         node.id = e.frameSeq;
         node.children = new map<uint64, frameNode>();
         parent.children[frame.PC] = node;
-        e.c.ConsumeViewerFrame(strconv.Itoa(node.id), new format.Frame(Name: fmt.Sprintf("%v:%v"u8, frame.Func, frame.Line), Parent: parent.id));
+        var evalᴛ1 = strconv.Itoa(node.id);
+        var evalᴛ2 = fmt.Sprintf("%v:%v"u8, frame.Func, frame.Line);
+        e.c.ConsumeViewerFrame(evalᴛ1, new format.Frame(Name: evalᴛ2, Parent: parent.id));
     }
     return e.buildBranch(node, stk);
 }

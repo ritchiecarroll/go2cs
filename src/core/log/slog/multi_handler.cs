@@ -41,7 +41,8 @@ internal static error Handle⁔(/*this*/ ref MultiHandler h, context.Context ctx
     slice<error> errs = default;
     foreach (var i in range(len(h.multi))) {
         if (h.multi[i].Enabled(ctx, r.Level)) {
-            var err = h.multi[i].Handle(ctx, r.Clone()); if (err != nil) {
+            var evalᴛ1 = r.Clone();
+            var err = h.multi[i].Handle(ctx, evalᴛ1); if (err != nil) {
                 errs = append(errsᴷ, errs, err);
             }
         }

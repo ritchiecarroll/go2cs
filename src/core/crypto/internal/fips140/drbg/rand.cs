@@ -76,7 +76,8 @@ public static void Read(slice<byte> b) {
                 // Section 9.3.2: if Generate reports a reseed is required, the
                 // additional input is passed to Reseed along with the entropy and
                 // then nulled before the next Generate call.
-                drbg.Reseed(getEntropy(), additionalInput);
+                var evalᴛ1 = getEntropy();
+                drbg.Reseed(evalᴛ1, additionalInput);
                 additionalInput = ж<array<byte>>.NilBoxOfDims(48L);
                 continue;
             }

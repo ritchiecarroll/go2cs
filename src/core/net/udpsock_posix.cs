@@ -67,7 +67,9 @@ internal static (nint, ж<UDPAddr>, error) readFrom⁔(/*this*/ ref UDPConn c, s
         (n, err) = c.fd.readFromInet6(b, Ꮡfrom);
         if (err == nil) {
             var ip = from.Addr.Clone(); // copy from.Addr; ip escapes, so this line allocates 16 bytes
-            addr = new UDPAddr(IP: ip[..], Port: from.Port, Zone: zoneCache.name((nint)from.ZoneId));
+            var evalᴛ1 = ip[..];
+            var evalᴛ2 = zoneCache.name((nint)from.ZoneId);
+            addr = new UDPAddr(IP: evalᴛ1, Port: from.Port, Zone: evalᴛ2);
         }
         break;
     }}

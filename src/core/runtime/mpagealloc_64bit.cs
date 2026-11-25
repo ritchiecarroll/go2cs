@@ -191,7 +191,8 @@ internal static void sysGrow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uint
         // Map and commit need.
         sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), p.sysStat, pageAllocˢ);
         sysUsed((@unsafe.Pointer)need.@base.addr(), need.size(), need.size());
-        p.summaryMappedReady += need.size();
+        var evalᴛ1 = need.size();
+        p.summaryMappedReady += evalᴛ1;
     }
 }
 

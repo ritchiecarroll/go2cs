@@ -322,7 +322,8 @@ internal static (ж<os.File>, error) dup⁔(/*this*/ ж<netFD> Ꮡfd) {
     // All WSASocket calls must be match with a syscall.Closesocket call,
     // but os.NewFile calls syscall.CloseHandle instead. We need to use
     // a hidden function so that the returned file is aware of this fact.
-    return (newWindowsFile(h, fd.name()), default);
+    var evalᴛ1 = fd.name();
+    return (newWindowsFile(h, evalᴛ1), default);
 }
 
 } // end net_package

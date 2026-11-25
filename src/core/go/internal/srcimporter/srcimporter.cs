@@ -292,7 +292,8 @@ internal static (ж<ast.File>, error) cgo⁔(/*this*/ ж<Importer> Ꮡp, ж<buil
             return (default, fmt.Errorf("go tool cgo: %w"u8, errΔ2));
         }
 
-        return parser.ParseFile(p.fset, filepath.Join(tmpdir, cgoGotypesGoˢ), default, parser.SkipObjectResolution);
+        var evalᴛ1 = filepath.Join(tmpdir, cgoGotypesGoˢ);
+        return parser.ParseFile(p.fset, evalᴛ1, default, parser.SkipObjectResolution);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }

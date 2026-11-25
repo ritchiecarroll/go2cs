@@ -118,7 +118,8 @@ partial struct fsTester {
 internal static void errorf⁔(/*this*/ ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    t.errors = append(t.errors, fmt.Errorf(format, args.ꓸꓸꓸ));
+    var evalᴛ1 = fmt.Errorf(format, args.ꓸꓸꓸ);
+    t.errors = append(t.errors, evalᴛ1);
 }
 
 internal static fs.ReadDirFile openDir⁔(/*this*/ ref fsTester t, @string dir) {
@@ -544,9 +545,11 @@ internal static void checkDirList⁔(/*this*/ ж<fsTester> Ꮡt, @string dir, @s
     [GoFunc("(*fsTester).checkDirList.func1")] void checkMode(fs.DirEntry entry) {
         if (entry.IsDir() != ((fs.FileMode)(entry.Type() & fs.ModeDir) != 0)) {
             if (entry.IsDir()) {
-                Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = true, Type() & ModeDir = 0", dir, entry.Name());
+                var evalᴛ1 = entry.Name();
+                Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = true, Type() & ModeDir = 0", dir, evalᴛ1);
             } else {
-                Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = false, Type() & ModeDir = ModeDir", dir, entry.Name());
+                var evalᴛ2 = entry.Name();
+                Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = false, Type() & ModeDir = ModeDir", dir, evalᴛ2);
             }
         }
     }
@@ -584,7 +587,8 @@ internal static void checkDirList⁔(/*this*/ ж<fsTester> Ꮡt, @string dir, @s
         return strings.Compare(fa[1] + " " + fb[0], fb[1] + " " + fa[0]);
     });
 
-    t.errorf("%s: diff %s:\n\t%s", dir, desc, strings.Join(diffs, "\n\t"));
+    var evalᴛ3 = strings.Join(diffs, "\n\t");
+    t.errorf("%s: diff %s:\n\t%s", dir, desc, evalᴛ3);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

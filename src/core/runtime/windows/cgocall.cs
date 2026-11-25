@@ -512,7 +512,8 @@ internal static void unwindm(ref bool restore) {
         // unwind of g's stack (see comment at top of file).
         var mp = acquirem();
         var sched = (~mp).g0.of(g.Ꮡsched);
-        sched.Value.sp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)((~sched).sp + alignUp(sys.MinFrameSize, sys.StackAlign)));
+        var evalᴛ1 = alignUp(sys.MinFrameSize, sys.StackAlign);
+        sched.Value.sp = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)((~sched).sp + evalᴛ1));
 
         // Do the accounting that cgocall will not have a chance to do
         // during an unwind.
@@ -618,7 +619,8 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer p, bool indir, 
             if (at.of(arraytype.ᏑLen).Value != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg(at.of(arraytype.ᏑElem).Value, p, !at.of(arraytype.ᏑElem).Value.IsDirectIface(), top, msg);
+            var evalᴛ1 = at.of(arraytype.ᏑElem).Value.IsDirectIface();
+            cgoCheckArg(at.of(arraytype.ᏑElem).Value, p, !evalᴛ1, top, msg);
             return;
         }
         for (var i = (uintptr)0; i < at.of(arraytype.ᏑLen).Value; i++) {
@@ -700,7 +702,8 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer p, bool indir, 
             if (len(st.Fields) != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg(st.Fields[0].Typ, p, !st.Fields[0].Typ.IsDirectIface(), top, msg);
+            var evalᴛ2 = st.Fields[0].Typ.IsDirectIface();
+            cgoCheckArg(st.Fields[0].Typ, p, !evalᴛ2, top, msg);
             return;
         }
         foreach (var (_, f) in range(st.Fields)) {
@@ -819,7 +822,8 @@ internal static void cgoCheckResult(any valʗp) {
     if (t == nil) {
         return;
     }
-    cgoCheckArg(t, (~ep).data, !t.IsDirectIface(), false, cgoResultFail);
+    var evalᴛ1 = t.IsDirectIface();
+    cgoCheckArg(t, (~ep).data, !evalᴛ1, false, cgoResultFail);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

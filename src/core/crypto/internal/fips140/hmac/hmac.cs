@@ -179,8 +179,10 @@ public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)
     where H : hash.Hash
 {
     var hm = Ꮡ(new HMAC(keyLen: len(key)));
-    hm.outer = h();
-    hm.inner = h();
+    var evalᴛ1 = h();
+    hm.outer = evalᴛ1;
+    var evalᴛ2 = h();
+    hm.inner = evalᴛ2;
     var unique = true;
     var hmʗ1 = hm;
     func([GoFunc("New[...].func1")] () => {

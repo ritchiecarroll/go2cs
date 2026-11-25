@@ -333,7 +333,8 @@ internal static void init⁔(/*this*/ ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock
     p.mheapLock = ᏑmheapLock;
 
     // Initialize the scavenge index.
-    p.summaryMappedReady += Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).init(test, ᏑsysStat);
+    var evalᴛ1 = Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).init(test, ᏑsysStat);
+    p.summaryMappedReady += evalᴛ1;
 
     // Set if we're in a test.
     p.test = test;
@@ -343,7 +344,8 @@ internal static void init⁔(/*this*/ ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock
 //
 // Returns nil if the chunk data has not been mapped.
 internal static ж<pallocData> tryChunkOf⁔(/*this*/ ref pageAlloc p, chunkIdx ci) {
-    var l2 = p.chunks[ci.l1()];
+    var evalᴛ1 = ci.l1();
+    var l2 = p.chunks[evalᴛ1];
     if (l2 == nil) {
         return default;
     }
@@ -380,7 +382,8 @@ internal static void grow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr
     Ꮡp.sysGrow(@base, limit);
 
     // Grow the scavenge index.
-    p.summaryMappedReady += Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).grow(@base, limit, p.sysStat);
+    var evalᴛ1 = Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).grow(@base, limit, p.sysStat);
+    p.summaryMappedReady += evalᴛ1;
 
     // Update p.start and p.end.
     // If no growth happened yet, start == 0. This is generally
@@ -412,7 +415,8 @@ internal static void grow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr
     // Newly-grown memory is always considered scavenged.
     // Set all the bits in the scavenged bitmaps high.
     for (chunkIdx c = chunkIndex(@base); c < chunkIndex(limit); c++) {
-        if (p.chunks[c.l1()] == nil) {
+        var evalᴛ2 = c.l1();
+        if (p.chunks[evalᴛ2] == nil) {
             // Create the necessary l2 entry.
             uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
             @unsafe.Pointer r = sysAlloc(l2Size, p.sysStat, vmaNamePageAllocIndex);

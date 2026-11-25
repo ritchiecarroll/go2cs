@@ -69,7 +69,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACVOAAgCAAwakgACEgALAoKmgpSCgriCuIKCgpTKlKaC2oK4goKUgoKokriC3IKmlIKCgpS4griCgpSUlKaC1rSCgoDGgpSCgoLSgoKCgpSCoqSmgoK4AA4G4oKClJSCgpSCgqS0toKCgoKCgoKUlIKCgpSCgoKm2ramgoKUpqKClKg=", "98-106:1;122-126:2;169-169:1;178-187:2", "", "47=SizesFor/1/1/3", "", "112:62,117:13")]
+[assembly: GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACVOAAgCAAwakgACEgALAoKmgpSCgriCuIKCgpTKlKaC2oK4goKUgoKokriC3IKmlIKCgpS4griCgpSUlKaC1rSCgoDGgpSCgoLSgoKCgpSCoqSmgoK4AA4G4oKClJSCgpSCgqS0toKCgoKCgoKUlIKCgpSCgoKm6ramgoKUpqKClKg=", "98-106:1;122-126:2;169-169:1;178-187:2", "", "47=SizesFor/1/1/3", "", "112:62,117:13")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

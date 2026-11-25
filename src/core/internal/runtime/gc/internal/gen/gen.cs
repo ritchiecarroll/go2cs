@@ -255,7 +255,8 @@ internal static bool cse⁔(/*this*/ ref Func fn) {
             binary.NativeEndian.PutUint64(bbuf[..], hashes[arg]);
             h.Write(bbuf[..]);
         }
-        hashes[op] = h.Sum64();
+        var evalᴛ1 = h.Sum64();
+        hashes[op] = evalᴛ1;
     }
 
     var canon = new map<uint64, slice<ж<op>>>();
@@ -592,7 +593,8 @@ internal static void emitConst⁔(/*this*/ ref File f, @string name, any data) {
     // Assume it's a numeric slice or array
     var rv = reflect.ValueOf(data);
     nint sz = (nint)rv.Type().Elem().Size();
-    fmt.Fprintf(f.w, "GLOBL %s(SB), RODATA, $%#x\n"u8, name, rv.Len() * sz);
+    var evalᴛ1 = rv.Len();
+    fmt.Fprintf(f.w, "GLOBL %s(SB), RODATA, $%#x\n"u8, name, evalᴛ1 * sz);
     for (nint wi = 0; wi < sz * rv.Len() / 8; wi++) { // Iterate over words
         uint64 word = default;
         for (nint j = 0; j < 8 / sz; j++) { // Iterate over elements in this word

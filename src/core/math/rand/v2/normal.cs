@@ -55,7 +55,9 @@ internal static float64 NormFloat64⁔(/*this*/ ref Rand r) {
             }
             return /* -rn */ -3.442619855899D - x;
         }
-        if (fn[i] + (float32)r.Float64() * (fn[i - 1] - fn[i]) < (float32)math.Exp(-.5D * x * x)) {
+        var evalᴛ1 = r.Float64();
+        var evalᴛ2 = math.Exp(-.5D * x * x);
+        if (fn[i] + (float32)evalᴛ1 * (fn[i - 1] - fn[i]) < (float32)evalᴛ2) {
             return x;
         }
     }

@@ -390,7 +390,8 @@ internal static token.Pos /*pos*/ expect2⁔(/*this*/ ж<parser> Ꮡp, token.Tok
     if (p.tok == tok) {
         pos = p.pos;
     } else {
-        Ꮡp.errorExpected(p.pos, "'"u8 + tok.String() + "'"u8);
+        var evalᴛ1 = tok.String();
+        Ꮡp.errorExpected(p.pos, "'"u8 + evalᴛ1 + "'"u8);
     }
     Ꮡp.next(); // make progress
     return pos;
@@ -2377,7 +2378,8 @@ internal static ast.Expr parsePrimaryExpr⁔(/*this*/ ж<parser> Ꮡp, ast.Expr 
                     return x;
                 }}
                 if (!AreEqual(t, x)) {
-                    Ꮡp.error(t.Pos(), cannotParenthesizeTypeInˢ);
+                    var evalᴛ1 = t.Pos();
+                    Ꮡp.error(evalᴛ1, cannotParenthesizeTypeInˢ);
                     // already progressed, no need to advance
                 }
                 x = Ꮡp.parseLiteralValue(x);

@@ -1078,7 +1078,8 @@ internal static error CheckCRLSignature⁔(/*this*/ ref Certificate c, ж<pkix.C
     ref var crl = ref Ꮡcrl.DerefOrNull();
 
     SignatureAlgorithm algo = getSignatureAlgorithmFromAI(crl.SignatureAlgorithm);
-    return c.CheckSignature(algo, crl.TBSCertList.Raw, crl.SignatureValue.RightAlign());
+    var evalᴛ1 = crl.SignatureValue.RightAlign();
+    return c.CheckSignature(algo, crl.TBSCertList.Raw, evalᴛ1);
 }
 
 partial struct UnhandledCriticalExtension {

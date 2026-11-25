@@ -71,8 +71,8 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABIglAAWLoIADxiigoKCgoKUyIKCgri4ggAMGoKCgpSClIKUyIKCgoIADBqCgoKUgpSClA==", "55-63:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABs4gqaCAAcQggAjPqKCgoKUgqakgriCpu6kgsqCptykgriCpgAHEKSCuIKmAA8a8oKCgoKUgpSCgpSClILqAAkIgpSCgpSo0oKUhoKm7oIAAhIACAKCgoIACximgpQABxCCgqaCABImAAoCgpSC7oKCAAgSlAACEAALAoKUgoKCqsKCggAIBsaCgpSCuIKUgoKUgoLcgqaClIKClIKCpoKmqNKClIKCgpTcqgAICoKCgqaCggADEtKClIKCgoKmAAYUAAwCgpSCggAKBsaCgqaCgpSClIKClIKmgqaCpoKCpoKCpoKCpoKCpoKU", "204-206:1;337-340:1", "", "242=Bytes/1/2/3,Bytes/2/2/5")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABIglAAWLoIADxiigoKigoKUyIKCgri4ggAMGoKCgpSClIKUyIKCgoIADBqigoKUgpSClA==", "55-63:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABs4gqaCAAcQggAjPqKCgoKUgqakgriCpu6kgsqCptykgriCpgAHEKSCuIKmAA8a8oKCgoKUgpSCgpSClILqAAkIgpSCgpSo0oKUhoKm7oIAAhIACAKCgoIACximgpQABxCCgqaCABImAAoCgpSC7oKCAAgSpAACEAALAoKUgoKSqsKCggAIBsaCgpSCuIKUgoKUgoLcgqaClIKClIKCpoKmqNKClIKCgpTcqgAICoKCgqaCggADEtKClIKCgoKmAAYUAAwCgpSCggAKBsaCgqaCgpSClIKClIKmgqaCpoKCpoKCpoKCpoKCpoKU", "204-206:1;337-340:1", "", "242=Bytes/1/2/3,Bytes/2/2/5")]
 [assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
 [assembly: GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACNO7ty0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoK6pJSCpoKmgqaCgoIACBKCgoKUgoKU", "57-59:1")]
 // </GoSourcePositionMaps>
