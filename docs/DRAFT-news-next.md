@@ -158,6 +158,14 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-23 (P1): train 2, merge 27edc19447 (claude/p4-lift-dedup 29f9c49496); the converter bdaa9df223 ("one
        lift per anonymous type; a public site reuses a lift declared public"); COORD ruling 2026-11-20 on board (jj),
        cited in PublicSurface.md tier 3. -->
+- **[QUEUED claude/i9-alias-keyword-escape (train 12)]** **A Go type named `record` is spelled `Δrecord`.** At the start
+  of a C# member, `record` begins a record declaration, so a Go type declared with that name now takes the `Δ` prefix,
+  like other names C# reserves. In the converted standard library this renames `net/http/fcgi`'s `record` type, and its
+  method holder `fcgiᴛrecord` becomes `fcgiᴛΔrecord`. C# source written by hand that names the old spelling names the new
+  one. See [Shadowing](ConversionStrategies-Reference/shadowing.md).
+  <!-- 2026-11-25 (i9): owner ruling COORD 020915Z ("Δrecord, as ruled"); the seat claude/i9-alias-keyword-escape
+       bf4cc3a23d; release-smoke's binary-compatibility guard read the holder's CP0001 on the train 12 union (417fd87146,
+       run 45583774592), suppressed in src/core/net/http/fcgi/CompatibilitySuppressions.xml (COORD 2026-11-25T12:24:43Z). -->
 
 **What changed.**
 

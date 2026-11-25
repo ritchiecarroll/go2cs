@@ -423,6 +423,19 @@ try {
     # entries, de-duplicated (a member both change is removed from the baseline once, and both name it alike): its
     # cap is the two counts added, and it cites both rulings.
     $known = @('go.lib') + @($variadicCaps.Keys) + @($retypeCaps.Keys | Where-Object { -not $variadicCaps.Contains($_) })
+    # The record rename (docs/ConversionStrategies-Reference/shadowing.md): a Go type named record is spelled Delta-record
+    # (record begins a C# member as a record declaration), so net/http/fcgi's method holder lost its old name. One CP0001,
+    # the one failure release-smoke read on the train 12 union (417fd87146, run 45583774592) against 1.26.11.1; it goes
+    # once .5 is published, as the other .5 files do. The ASCII spelling of the target: tee is [char]0x1D1B.
+    $known += 'go.net.http.fcgi'
+    if ($real.Contains('go.net.http.fcgi')) {
+        $fcgiRead = @(Read-GoApiCompatSuppressions $real['go.net.http.fcgi'])
+        $fcgiTarget = 'T:go.net.http.fcgi' + [char]0x1D1B + 'record'
+        $fcgiText = [System.IO.File]::ReadAllText($real['go.net.http.fcgi'])
+        Check 'fcgi carries only the record rename''s CP0001 and cites its section' (
+            $fcgiRead.Count -eq 1 -and $fcgiRead[0].DiagnosticId -ceq 'CP0001' -and $fcgiRead[0].Target -ceq $fcgiTarget -and
+            $fcgiText.Contains('shadowing.md')) "$($fcgiRead.Count) entries: $(@($fcgiRead | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" }) -join '; ')"
+    }
     $other = @($real.Keys | Where-Object { $known -cnotcontains $_ } | Sort-Object)
     Check 'no other package carries a suppression file' ($other.Count -eq 0) ($other -join ', ')
     $kinds = @('CP0002', 'CP0006')
