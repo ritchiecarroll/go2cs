@@ -42523,4 +42523,35 @@ mid-call assert. No product cause: the hang was the test's collector starving th
 
 — P6 (2026-11-25)
 
+
+## 2026-11-25 — R (finding 5; COORD 20261125T165433Z, R1 172300Z, same train 172751Z): CURED, internal/runtime/gc/scan's AVX-512 kernels run where Go runs them; nine CPU flags stay unmapped, each its own census (OPEN)
+
+**Cured: P2's row of 2026-10-16** ("three AVX512 tests skip in C# where Go runs them — FEATURE GAP"), re-met by D2/T6 as
+its finding 5. The cut follows that row's retirement path.
+- `internal/cpu/amd64/cpu_x86_impl.cs` reads `HasAVX512BITALG` from CPUID leaf 7, ECX bit 12, under `HasAVX512F`,
+  exactly as doinit does. .NET 10 has no `Avx512Bitalg`.
+- `internal/runtime/gc/scan/amd64/scan_amd64_impl.cs` gives `ExpandAVX512`, `scanSpanPackedAVX512` and `FilterNilAVX512`
+  managed bodies. Their contracts are read from the assembly: overwrite all 16 words; in order with zeros included;
+  an order-preserving compaction. Each returns what Go's kernel returns.
+- The row's count is host-dependent and annotated with the R1 family form: floor 3095 linux-x64 and 19 windows,
+  plus exactly `TestExpandAVX512/…` (+3076), `TestScanSpanPackedAVX512/…` (+3076), `TestFilterNilAVX512/…` (+14) on
+  an AVX-512 host. The sizes are derived from two hosted AVX-512 reads.
+- Design: [DESIGN-scan-avx512-kernels.md](DESIGN-scan-avx512-kernels.md), P3 APPROVE WITH CHANGES, folded.
+
+**OPEN: the nine flags `cpu_x86_impl.cs` still leaves false** (no System.Runtime.Intrinsics surface in .NET 10).
+Each one turned on is its own census: what reads it in the corpus, and whether a managed body exists behind it.
+
+| flag | what reads it in the corpus |
+|---|---|
+| `HasERMS`, `HasFSRM` | runtime's memmove choice (`cpuflags_amd64`, `useREPMOV = isERMSNiceCPU && HasERMS && HasFSRM`) |
+| `HasADX`, `HasSHA` | `crypto/internal/fips140deps/cpu` (`X86HasADX`, `X86HasSHA`): the bignum and SHA assembly paths. The corpus is the purego flavour, so a consumer census comes first |
+| `HasRDTSCP` | runtime's `cputicks` in asm_amd64.s, through `offsetX86HasRDTSCP` |
+| `HasVAES`, `HasAVX512VAES`, `HasAVX512VNNI`, `HasAVX512VPOPCNTDQ` | no reader outside `internal/cpu` today (vendored x/sys/cpu keeps its own flags) |
+
+Unmapped (false) is the conservative direction: a consumer gated on one takes its portable path. Turning one on where
+its gated path is assembly with no managed body would trade a skip for a throwing stub, which is the trap the scan
+kernels were.
+
+— R (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
