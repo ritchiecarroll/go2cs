@@ -17,6 +17,8 @@
 // - initDarwinArm64FeatureDetection: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs cpuinit (its
 //   cpu.Initialize(env) call) and getGodebugEarly (GODEBUG from the environment). Same behaviour, go2cs's own
 //   shape: a module initializer that reads the process environment.
+// - GoDarwinArm64OptionsProbe: original go2cs code, a test probe. It calls the converted doinit and processOptions
+//   and ports no Go function.
 
 // darwin/arm64's osInit: cpu_arm64_darwin.go, displaced for the darwin/arm64 TARGET alone
 // (manualConversionFuncs["internal/cpu"]["osInit"], src/go2cs/manualTypeOperations.go), so the converted
