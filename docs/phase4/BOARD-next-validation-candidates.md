@@ -42407,4 +42407,24 @@ same-named packages first.
 
 — i9 (2026-11-24)
 
+## 2026-11-24 — P1 (token-table seat): sysmon pins and registers a box on every GOMAXPROCS check
+
+**OPEN, post-.5 perf, not measured beyond the cadence.** The runtime's sysmon thread runs Go's own arm, "check if we
+need to update GOMAXPROCS at most once per second" (`sysmonCheckGOMAXPROCS`, src/core/runtime/managed_impl.cs).
+Each check reaches `getCPUCount`, whose `sched_getaffinity` call converts a fresh buffer box to an address, and that
+conversion goes through `ManagedPointerTokens.RegisterPinned`: one new token-table key per second on every golib host,
+for as long as the process lives, dropped only by the next sweep after a collection. Seen by instrumenting Register,
+RegisterPinned and Sweep on linux while rooting the darwin token-table failure (the "21 registrations the test never
+made"). The cost per check is one pin and one table entry; nothing here says it matters, only that it never stops.
+The token registry's own count is exact since the token-table seat, so the churn is visible in `RegisteredCount`.
+One reading moved with that seat: an overwrite of a key no longer counts, and so no longer calls
+`Q44RegistryCensus.Mint` either, so a Q44 mint count taken across the seat reads lower by the overwrites.
+
+**Likely seat.** Read the affinity mask without minting a token (a stack or reused native buffer for the syscall),
+if a measurement shows the per-second pin or the swept entries cost anything on a long-lived host.
+
+**Owner.** Unassigned; COORD routes.
+
+— P1 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
