@@ -42650,4 +42650,43 @@ tests run, and retiring them would turn a root host red.
 
 — P1 (2026-11-25)
 
+
+## 2026-11-25 — R (D2/T6 linux reading, COORD 20261125T155057Z): fifteen linux rows no longer read the 1.26.11.1 bank at master 08e113cb0b (OPEN, routed)
+
+**Measured, hosted linux-x64, go1.26.11.** The rows are from D2/T6's sweep of the 236 linux rows against a twinned
+standard library ([DATA-mn-d2-t6-linux.md](DATA-mn-d2-t6-linux.md)). Each non-EQUAL row was re-read twins-off and
+twins-on at the same tree, `7d8e14c094` (master `08e113cb0b` plus a CI-only cut).
+
+- 14 of the 15 fail the same way with twins off. They are master drift since the bank's tree `280a01952c`, and none is
+  caused by the twinned build.
+- 1 (internal/runtime/gc/scan) depends on the runner's CPU.
+- Matching counts are go == csharp per name in each row's `go2cs_test_comparison.json`, identical in both arms.
+
+| row | reading at 08e113cb0b (both arms) | owner (COORD 155057Z) |
+|---|---|---|
+| context | test host CS1503 at `goǃ(pcancelʗ1, cause)`: a named func-type value has no `goǃ` rung since d5796d7f4d | P2, reported cured |
+| net/url | test host CS0426, `typeof(encoding.json_package)` binds net/url's own `type encoding` | i9, reported cured |
+| sort | test host CS0051, `variadic<sort_test_package.lessFunc>` less accessible than `OrderedBy` (train 11's variadic<T>) | i9, cut |
+| sync | TestPoolGC Go=pass C#=fail; matched 47 | P1/P2, optimized-host list |
+| runtime | host exit 2, `panic: finalizer did not start` (TestStackGrowth's watchdog, stack_test.go:132); 227 divergences, the same names in both arms | P2, optimized-host A/B |
+| weak | TestPointer; matched 5 | P2, optimized-host A/B |
+| runtime/pprof | TestGoroutineProfileConcurrency/finalizer_present; matched 146 | P2, optimized-host A/B |
+| crypto/internal/fips140cache | TestCache hits the host's 15m per-test deadline; matched 0 | P2, optimized-host A/B |
+| unique | TestMakeAllocs, TestHandle; matched 16 | P6 |
+| testing | DISC 83: TestTBHelper passes, so its disclosure is orphaned | P1 |
+| syscall | DISC 50: 9 disclosed against the linux expectation of 17 | P1 |
+| internal/zstd | DISC 535: 1 disclosed against 0 | P1 |
+| reflect | TestConvert; matched 444 | i9 |
+| log/slog | TestCallDepth; matched 227. It fails twins-off too, so twin frames are not its cause | i9 |
+| internal/runtime/gc/scan | the converted `scan.CanAVX512()` reads false on AVX-512 hardware; C# results identical in all reads; the Go oracle runs 6,166 AVX512 rows only where the runner has AVX-512 | R |
+
+The finalizer and GC grouping (runtime, weak, runtime/pprof, fips140cache, beside sync) is a reading from the failing
+test names, not a root.
+
+gc/scan: on a runner without AVX-512, Go skips the AVX512 tests (`expand_amd64_test.go:16: no AVX512`) and the row
+PASSes at 3095. On one with AVX-512 the row FAILs, whatever the stdlib build. A cure makes the converted probe read the
+hardware as Go does, so the verdict does not depend on the runner.
+
+— R (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

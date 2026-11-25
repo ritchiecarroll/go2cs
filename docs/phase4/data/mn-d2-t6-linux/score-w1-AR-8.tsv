@@ -1,0 +1,19 @@
+# AR-8 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=106465
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-8	compress/zlib	ABSENT	-1	PASS	6	None	6	NO	yes	bank	reference	-1	5020	0	-1	31
+AR-8	crypto/rand	ABSENT	-1	PASS	314	None	314	NO	yes	bank	reference	-1	6998	0	-1	37
+AR-8	crypto/sha256	ABSENT	-1	PASS	29	None	29	NO	yes	bank	reference	-1	5444	0	-1	38
+AR-8	internal/diff	ABSENT	-1	PASS	13	None	13	NO	yes	bank	reference	-1	3939	0	-1	46
+AR-8	internal/runtime/maps	ABSENT	-1	PASS	19	None	19	NO	yes	bank	reference	-1	3654	0	-1	58
+AR-8	internal/runtime/math	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	3421	0	-1	453
+AR-8	internal/singleflight	ABSENT	-1	PASS	5	None	5	NO	yes	bank	reference	-1	3440	0	-1	19
+AR-8	internal/types/errors	ABSENT	-1	PASS	155	None	155	NO	yes	bank	reference	-1	12418	0	-1	126
+AR-8	math/big/internal/asmgen	ABSENT	-1	PASS	11	None	11	NO	yes	bank	reference	-1	4424	0	-1	25
+AR-8	math/bits	ABSENT	-1	PASS	26	None	26	NO	yes	bank	reference	-1	3421	0	-1	26
+AR-8	net/http/httptrace	ABSENT	-1	PASS	2	None	2	NO	yes	bank	reference	-1	11818	0	-1	117
+AR-8	net/rpc/jsonrpc	ABSENT	-1	PASS	9	None	9	NO	yes	bank	reference	-1	18798	4	-1	184
+AR-8	os	ABSENT	-1	PASS	3840	None	3840	NO	yes	bank	reference	-1	7640	0	-1	143
+AR-8	testing	ABSENT	-1	DISC	83	None	83	NO	NO	bank	reference	-1	5004	0	-1	68
+AR-8	testing/fstest	ABSENT	-1	PASS	8	None	8	NO	yes	bank	reference	-1	4476	0	-1	26
+AR-8	time	ABSENT	-1	PASS	176	None	176	NO	yes	bank	reference	-1	6550	4	-1	178
+# summary rows=16 plain PASS=0 twinned EQUAL-bank=15 twinned EQUAL-plain=0
