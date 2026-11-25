@@ -14,6 +14,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -118,8 +119,9 @@ func TestACgoPackageConvertsWithItsTestsAndMatchesGo(t *testing.T) {
 	writeCgoFixture(t, module, "cgot4_plain.go", cgoTestsFixturePlain)
 	writeCgoFixture(t, module, "cgot4_test.go", cgoTestsFixtureTest)
 
-	output := filepath.Join(t.TempDir(), "cgot4")
-	args := []string{"-go2cspath", treeSrc, "-cgo", "-tests", "-test-action", "all", "-test-timeout", "10m", module, output}
+	root := seedCgoScratchRoot(t, treeSrc)
+	output := filepath.Join(root, "core", "cgot4")
+	args := []string{"-go2cspath", root, "-cgo", "-tests", "-test-action", "all", "-test-timeout", "10m", module, output}
 
 	cmd := exec.Command(driverBinary(t), args...)
 	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1")
@@ -222,11 +224,12 @@ func TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub(t *testing.T) {
 	writeCgoFixture(t, module, "name_cgo.go", cgoSwapCgo)
 	writeCgoFixture(t, module, "name_test.go", cgoSwapTest)
 
-	output := filepath.Join(t.TempDir(), "cgot5")
+	root := seedCgoScratchRoot(t, treeSrc)
+	output := filepath.Join(root, "core", "cgot5")
 	stub := filepath.Join(output, "name_stub.cs")
 
 	// The seed: the package's cgo-off emission, with -comments as the corpus is emitted.
-	seed := exec.Command(driverBinary(t), "-go2cspath", treeSrc, "-comments", module, output)
+	seed := exec.Command(driverBinary(t), "-go2cspath", root, "-comments", module, output)
 	seed.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=0")
 
 	if out, err := seed.CombinedOutput(); err != nil {
@@ -237,7 +240,7 @@ func TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub(t *testing.T) {
 		t.Fatalf("premise: the cgo-off emission holds %s: %v", stub, err)
 	}
 
-	cmd := exec.Command(driverBinary(t), "-go2cspath", treeSrc, "-cgo", "-tests", "-test-action", "all", "-test-timeout", "10m", module, output)
+	cmd := exec.Command(driverBinary(t), "-go2cspath", root, "-cgo", "-tests", "-test-action", "all", "-test-timeout", "10m", module, output)
 	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1")
 	combined, err := cmd.CombinedOutput()
 
@@ -272,4 +275,71 @@ func TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub(t *testing.T) {
 	if record.Go["TestNameIsTheCgoFile"] != "pass" || record.CSharp["TestNameIsTheCgoFile"] != "pass" || !record.Matched {
 		t.Errorf("want TestNameIsTheCgoFile passing on both sides, matched; got go %q, go2cs %q, matched %v", record.Go["TestNameIsTheCgoFile"], record.CSharp["TestNameIsTheCgoFile"], record.Matched)
 	}
+}
+
+// seedCgoScratchRoot is a -cgo -tests scratch root's seed step, as the hosted leg runs it: a copy of this checkout's
+// src/core and src/gen, the two props files beside them, go2cs-gen's one input outside gen (the converter's
+// field-collision list), and the marker checkCgoTestsOutput asks for. Build output is not copied. It returns the root
+// (the -go2cspath directory).
+func seedCgoScratchRoot(t *testing.T, treeSrc string) string {
+	t.Helper()
+
+	root := filepath.Join(t.TempDir(), "src")
+
+	copyTree := func(from, to string) {
+		err := filepath.WalkDir(from, func(path string, entry fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			relative, _ := filepath.Rel(from, path)
+			target := filepath.Join(to, relative)
+
+			if entry.IsDir() {
+				switch entry.Name() {
+				case "bin", "obj", "Generated", ".vs":
+					return filepath.SkipDir
+				}
+
+				return os.MkdirAll(target, 0o755)
+			}
+
+			data, err := os.ReadFile(path)
+
+			if err != nil {
+				return err
+			}
+
+			return os.WriteFile(target, data, 0o644)
+		})
+
+		if err != nil {
+			t.Fatalf("seed %s: %v", from, err)
+		}
+	}
+
+	copyTree(filepath.Join(treeSrc, "core"), filepath.Join(root, "core"))
+	copyTree(filepath.Join(treeSrc, "gen"), filepath.Join(root, "gen"))
+
+	for _, file := range []string{"Directory.Build.props", "version.props", filepath.Join("go2cs", "fieldAccessCollisions.txt")} {
+		data, err := os.ReadFile(filepath.Join(treeSrc, file))
+
+		if err != nil {
+			t.Fatalf("seed %s: %v", file, err)
+		}
+
+		if err := os.MkdirAll(filepath.Dir(filepath.Join(root, file)), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filepath.Join(root, file), data, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := os.WriteFile(filepath.Join(root, cgoScratchRootMarker), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	return root
 }

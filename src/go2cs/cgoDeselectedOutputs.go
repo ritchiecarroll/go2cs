@@ -88,58 +88,92 @@ func isConverterEmissionOf(csPath, goPath string) (bool, error) {
 var cgoRemovalsDryRun bool
 
 // cgoDeselectedOutputs finds in packageOutputPath the C# file of each Go file in cgoOffFiles that cgoOnFiles does not
-// hold, wherever the layout routes it for target (flat or a key folder), and removes it unless dryRun. It returns the
-// paths it removed (or would remove). Names are compared by base name: both lists are one package directory's files. A
-// file that does not exist is skipped. A hand-owned file, or a file without the converter's emission header for its
-// source, is refused by name, and then nothing is removed at all.
+// hold, and removes each unless dryRun. It returns the paths it removed (or would remove).
+//
+// The set's three conditions (P3's SHOULD 5 on 4c):
+//   - both lists are the package's PRODUCTION GoFiles (go/packages fills GoFiles with the cgo files too, never with a
+//     _test.go: the -tests loads are separate);
+//   - both loads ran at the same GOOS, GOARCH and build flags, differing only in CGO_ENABLED;
+//   - files are compared by their cleaned SOURCE paths, never by CompiledGoFiles (cmd/cgo's generated files).
+//
+// A candidate is looked for only in the folders this conversion's own target resolves to (its key folders that hold
+// sources, and the package directory itself), never by name across the package: net/darwin/x.cs stays when
+// net/linux/x.cs is meant (P3's MUST 3). Each candidate is checked before anything is removed, and any of these
+// refuses by name, with nothing removed: it lies in a repository's corpus (repositoryCorpusOf, the output check's own
+// predicate; P3's MUST 1), it is hand-owned, it has an <stem>_impl.cs companion beside it (P3's SHOULD 4), or it does
+// not carry the converter's emission header for its source.
 func cgoDeselectedOutputs(packageOutputPath, target string, cgoOffFiles, cgoOnFiles []string, dryRun bool) ([]string, error) {
 	selected := map[string]bool{}
 
 	for _, file := range cgoOnFiles {
-		selected[filepath.Base(file)] = true
+		selected[filepath.Clean(file)] = true
 	}
+
+	var folders []string
+
+	for _, folder := range platformLayoutFolders(target) {
+		if isPlatformSourceFolder(packageOutputPath, folder) {
+			folders = append(folders, filepath.Join(packageOutputPath, folder))
+		}
+	}
+
+	folders = append(folders, packageOutputPath)
 
 	var stale []string
 
 	for _, file := range cgoOffFiles {
 		base := filepath.Base(file)
 
-		if selected[base] || !strings.HasSuffix(base, ".go") {
+		if selected[filepath.Clean(file)] || !strings.HasSuffix(base, ".go") {
 			continue
 		}
 
-		path := platformLayoutPath(packageOutputPath, target, strings.TrimSuffix(base, ".go")+".cs")
+		stem := strings.TrimSuffix(base, ".go")
 
-		if info, err := os.Stat(path); err != nil || !info.Mode().IsRegular() {
-			continue
+		for _, folder := range folders {
+			path := filepath.Join(folder, stem+".cs")
+
+			if info, err := os.Stat(path); err != nil || !info.Mode().IsRegular() {
+				continue
+			}
+
+			if corpus, inside := repositoryCorpusOf(path); inside {
+				return nil, fmt.Errorf("cgo: %s is in the repository's corpus (%s), which is emitted at CGO_ENABLED=0 by ruling: go2cs never removes a corpus file", path, corpus)
+			}
+
+			handOwned, err := containsManualConversionMarker(path)
+
+			if err != nil {
+				return nil, err
+			}
+
+			if handOwned {
+				return nil, fmt.Errorf("cgo: %s is hand-owned, and the cgo-on load deselects %s, which it stands for: go2cs never removes a hand-owned file, so convert into a root that does not hold it", path, base)
+			}
+
+			if companion := filepath.Join(folder, stem+"_impl.cs"); fileExists(companion) {
+				return nil, fmt.Errorf("cgo: %s has a hand-owned companion, %s, and the cgo-on load deselects %s: go2cs removes neither, so convert into a root that does not hold them", path, companion, base)
+			}
+
+			emitted, err := isConverterEmissionOf(path, file)
+
+			if err != nil {
+				return nil, err
+			}
+
+			if !emitted {
+				return nil, fmt.Errorf("cgo: %s does not carry go2cs's emission header for %s, which the cgo-on load deselects: go2cs removes only its own emission, so remove it by hand or convert into a root that does not hold it", path, base)
+			}
+
+			stale = append(stale, path)
 		}
-
-		handOwned, err := containsManualConversionMarker(path)
-
-		if err != nil {
-			return nil, err
-		}
-
-		if handOwned {
-			return nil, fmt.Errorf("cgo: %s is hand-owned, and the cgo-on load deselects %s, which it stands for: go2cs never removes a hand-owned file, so convert into a root that does not hold it", path, base)
-		}
-
-		emitted, err := isConverterEmissionOf(path, file)
-
-		if err != nil {
-			return nil, err
-		}
-
-		if !emitted {
-			return nil, fmt.Errorf("cgo: %s does not carry go2cs's emission header for %s, which the cgo-on load deselects: go2cs removes only its own emission, so remove it by hand or convert into a root that does not hold it", path, base)
-		}
-
-		stale = append(stale, path)
 	}
 
 	for _, path := range stale {
+		source := strings.TrimSuffix(filepath.Base(path), ".cs") + ".go"
+
 		if dryRun {
-			fmt.Printf("cgo: would remove %s: go2cs's emission of %s, which the cgo-on load deselects (-cgo-removals-dry-run)\n", path, strings.TrimSuffix(filepath.Base(path), ".cs")+".go")
+			fmt.Printf("cgo: would remove %s: go2cs's emission of %s, which the cgo-on load deselects (-cgo-removals-dry-run)\n", path, source)
 			continue
 		}
 
@@ -147,7 +181,7 @@ func cgoDeselectedOutputs(packageOutputPath, target string, cgoOffFiles, cgoOnFi
 			return nil, err
 		}
 
-		fmt.Printf("cgo: removed %s: go2cs's emission of %s, which the cgo-on load deselects\n", path, strings.TrimSuffix(filepath.Base(path), ".cs")+".go")
+		fmt.Printf("cgo: removed %s: go2cs's emission of %s, which the cgo-on load deselects\n", path, source)
 	}
 
 	return stale, nil
