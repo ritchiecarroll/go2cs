@@ -149,3 +149,44 @@ Each one turned on is its own census, of what reads it and whether a managed bod
 - The hosted linux reading (section 3.4).
 - Repoguard, at the cut's own tip.
 - `go test ./...` is not owed: no converter change.
+
+## 7. Folded from P3's read (APPROVE WITH CHANGES, COORD/20261125T172539Z-P3) and COORD's ruling (20261125T172751Z)
+
+These folds bind the cut. Where sections 2-4 above say otherwise, this section wins.
+
+1. **MUST 1: no window, and every amd64 cell.** R1 and the cut ride the SAME train, with R1 merged first, so no
+   hosted sweep ever reads the row red between them.
+   - They are two seats on one branch line: R1 (`claude/r-scan-avx512-r1`), then the kernels on top of it
+     (`claude/r-scan-avx512`).
+   - R1 covers EVERY amd64 OS cell of the row, not only linux. The banked windows count (19) moves on an AVX-512
+     runner too, since every amd64 flavour compiles the bodies. So does darwin's, if an AVX-512 Intel runner draws.
+2. **SHOULD 2: the family's exact size.** The annotation carries each family's size, derived from the evidence, e.g.
+   ``host-conditional (AVX-512 BITALG GFNI VBMI): `TestExpandAVX512/…` (+N), …``.
+   - The sweep accepts the floor, or the floor plus EXACTLY the sum of the family sizes, never any other k. Go runs
+     none of a family or all of it, so an in-between count is a host that ran part of one, and it fails.
+   - The parent row's only allowed change is skip to pass, on both sides.
+3. **SHOULD 3: a zero-word arm.** Go's test fills the span with non-zero words, so its 6,166 subtests cannot tell
+   "zeros included, then filtered" from "a nil test in the scan". GolibTests carries arms over a span with zero words
+   under set mask bits:
+   - the wrapped `ScanSpanPackedAVX512` equals `ScanSpanPackedReference` in order;
+   - the raw `scanSpanPackedAVX512` count equals the popcount of expand(objMarks) AND ptrMask, with the zeros in place
+     and in order. That reaches an internal method, so the scan test project's `InternalsVisibleTo` gains GolibTests,
+     or the arm goes through reflection. Whichever is smaller, stated in the cut.
+4. **NIT 4: which tail rule the scan body follows.** It follows the ASSEMBLY. Its word mask is objMarks EXPANDED (the
+   same expansion `ExpandAVX512` gives, bounded by nObj) and AND-ed with ptrMask. The reference's per-word `objI`
+   test is not bounded: for a mark bit at or past nObj, where the size does not divide the page (size 48: words
+   1020-1023, object 170), the reference would scan words the kernel does not. No test sets such a bit. The header's
+   "DERIVED FROM ScanSpanPackedReference" therefore names only the walk and the two-mask test; the mask itself is
+   INSPIRED BY scan_amd64.s.
+5. **SHOULD 5: getGOAMD64level.** `cpu_x86_impl.cs`'s block also names `getGOAMD64level`, INSPIRED BY `cpu_x86.s`
+   `getGOAMD64level`: its body is that TEXT's fall-through constant, which the file's own comment quotes. One line
+   says the flag set follows `doinit`'s.
+
+P3's "could not confirm": the second non-test reader, `runtime/mgcmark_greenteagc.cs:964`
+(`scan.HasFastScanSpanPacked()` in `scanSpan`).
+- It is reached only through Go's own collector: `mallocgc` calls `gcStart`, which leads through the mark workers to
+  `gcDrain` and then `scanSpan`.
+- The converted runtime does not run that collector. `runtime/managed_impl.cs` says of mallocgc "which this host does
+  not run (there is no Go heap)".
+- So the flag changes nothing there today. If that path ever becomes live, it reaches the managed bodies, which
+  return what Go's kernels return.
