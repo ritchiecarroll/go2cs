@@ -197,6 +197,13 @@ func cgoPseudoPackageQualifier() string {
 // docs/PLAN-marker-comment-parity.md). It is written once per package here, since an attribute on a partial class
 // cannot repeat across the files that declare parts of it (CS0579). mergeExisting keeps a persisted block's records, as
 // the package class's section does on a single-file conversion.
+// cgoPseudoPackageStampElsewhere is set while a metadata file is written whose assembly takes the stamp from ANOTHER
+// file: the internal test unit (package_info_internal_test.cs), which the test assembly compiles beside
+// package_test_info.cs. Both went through applyCgoPseudoPackageStamp, so a cgo-on package's test host read CS0579,
+// "Duplicate 'GoPackage' attribute" on its C pseudo-package class (net's, cgo Phase 3 increment 3.4, 19.6). While it
+// is set the file keeps its `using C` alias and carries no stamped declaration.
+var cgoPseudoPackageStampElsewhere bool
+
 func applyCgoPseudoPackageStamp(lines []string, mergeExisting bool) []string {
 	className := getSanitizedImport(cgoPseudoPackageClass(packageName))
 	declaration := "partial class " + className
@@ -237,7 +244,7 @@ func applyCgoPseudoPackageStamp(lines []string, mergeExisting bool) []string {
 		kept = append(kept, lines[i])
 	}
 
-	if len(cgoPseudoPackageNames) == 0 {
+	if len(cgoPseudoPackageNames) == 0 || cgoPseudoPackageStampElsewhere {
 		return kept
 	}
 

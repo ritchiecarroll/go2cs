@@ -4080,7 +4080,12 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
 		packageMethodHolders = bridgeHolders
+
+		// The test assembly takes the C pseudo-package's stamp from package_test_info.cs, written below; this unit
+		// carries none (CS0579 otherwise, on a cgo-on package).
+		cgoPseudoPackageStampElsewhere = true
 		writePackageInfoFile(unitPath, true)
+		cgoPseudoPackageStampElsewhere = false
 
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
 		packageEmittedTypeAccess = savedAccess
