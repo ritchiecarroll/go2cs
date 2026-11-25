@@ -42544,4 +42544,10 @@ the hosted run's render, and the roster row reads 83 + 2. `check-roster-format.p
 
 — P1 (2026-11-25)
 
+**Update 2026-11-25 (P1): darwin read.** os-matrix run 45643741101 at `1c556c35a5` read `testing` on both mac RIDs
+at 81 matched + 4 disclosed, TestTBHelper passing (the row's DISC word was only the old 80 + 5 expectation). The row
+banks `darwin: 81 + 4` (evidence `docs/phase4/rebank-1.26.10.3/darwin/reread/P1-TBH.tsv`). linux-arm64 stays pending.
+
+— P1 (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -283,4 +283,13 @@ seats merged with master ffaafa144f, go1.26.11), both RIDs.
   first read (run 43598839509 at 4c946e5cad) was 185 + 2 on osx-arm64 and 186 + 1 on osx-x64; banking that split
   made this read DISC, which is why the floor form is used.
 
+## testing after the TestTBHelper retirement at 1c556c35a5 (`reread/P1-TBH.tsv`, COORD 2026-11-25)
+
+TestTBHelper's `structural` disclosure retired once the test passed (bb6267d0e4 builds every `*.tests` host
+unoptimized, which is what the disclosure said cured it). Read on both RIDs at master `1c556c35a5`, os-matrix
+`sweep-shard` run 45643741101, filter `testing`, BEFORE the manifest change: both read "matched 81 of 85 Go / 85 C#
+verdicts; disclosed 4; undisclosed divergences 0", with TestTBHelper passing on both sides. The sweep word was DISC
+only because the expectation still read 80 + 5. The row banks `darwin: 81 + 4`; the cells are read from the run's
+artifacts (`sweep-darwin-<rid>-summary.md`).
+
 <!-- {% endraw %} -->
