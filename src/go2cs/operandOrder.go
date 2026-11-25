@@ -773,6 +773,13 @@ func operandOrderCovers(v *Visitor, events []operandOrderEvent, hoists []ast.Exp
 				return false
 			}
 
+			// A constant runs nothing, as the walk reads it: len("abc"), len of an array, unsafe.Sizeof(x).
+			if expr, ok := node.(ast.Expr); ok {
+				if tv, ok := v.info.Types[expr]; ok && tv.Value != nil {
+					return false
+				}
+			}
+
 			switch n := node.(type) {
 			case *ast.FuncLit:
 				return false

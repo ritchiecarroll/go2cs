@@ -97,7 +97,7 @@ calls and a mutable read in it is read after them, so `h(g, &T{x: g}, mut())` pa
 ## The fail-safe
 
 The walk records a call only where it knows the expression form that holds it. Behind it, `operandOrderCovers` reads
-every call, receive and early form of the statement with one `ast.Inspect`, skipping func literals. If one that comes
+every call, receive and early form of the statement with one `ast.Inspect`, skipping func literals and, as the walk does, constants (`len("abc")`, the length of an array, `unsafe.Sizeof`), which run nothing. If one that comes
 before the statement's last hoist is neither an event of the walk nor inside a hoisted unit, the statement keeps C#'s
 order. A form the walk does not know can therefore cost a statement its hoists, and can never move a later call ahead
 of an earlier one.

@@ -27,6 +27,7 @@ func operandOrderCoversFixture(t *testing.T) (*Visitor, []*ast.CallExpr) {
 	writeModuleFiles(t, dir, map[string]string{
 		"go.mod": "module example/operandorder\n\ngo 1.23\n",
 		"prod.go": "package operandorder\n" +
+			"import \"unsafe\"\n" +
 			"type T struct{ x int }\n" +
 			"var g int\n" +
 			"var arr [4]int\n" +
@@ -41,6 +42,7 @@ func operandOrderCoversFixture(t *testing.T) (*Visitor, []*ast.CallExpr) {
 			"\thm(g, map[string]int{\"k\": g}[\"k\"]+f(\"r\"))\n" +
 			"\th3(0, &T{x: g}, f(\"a\"))\n" +
 			"\th3(0, &T{x: f(\"only\")}, 0)\n" +
+			"\thm(g+len(\"abc\")+len(arr)+int(unsafe.Sizeof(g)), f(\"c\"))\n" +
 			"}\n",
 	})
 
@@ -58,8 +60,8 @@ func operandOrderCoversFixture(t *testing.T) (*Visitor, []*ast.CallExpr) {
 		}
 	}
 
-	if len(calls) != 6 {
-		t.Fatalf("the fixture's six statements were not found: %d", len(calls))
+	if len(calls) != 7 {
+		t.Fatalf("the fixture's seven statements were not found: %d", len(calls))
 	}
 
 	return &Visitor{info: production.TypesInfo}, calls
@@ -100,6 +102,7 @@ func TestOperandOrderWalksAddressAndMapOperands(t *testing.T) {
 		{"map", `"r"`},      // a map literal reading g in place moves whole, as an early form
 		{`"a"`},             // g inside &T{...} is read after f, as gc reads it
 		nil,                 // control: no call follows a read, nothing moves
+		{`"c"`},             // a constant call (len of a string or an array, unsafe.Sizeof) runs nothing and moves nothing
 	}
 
 	for i, call := range calls {

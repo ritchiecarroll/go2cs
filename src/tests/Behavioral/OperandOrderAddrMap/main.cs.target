@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using strings = strings_package;
+using @unsafe = unsafe_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
@@ -91,6 +92,12 @@ internal static void main() {
     var evalᴛ13 = f("s");
     fmt.Println(slice<nint>([g])[0], evalᴛ13);
     show("slice literal read");
+
+    var evalᴛ14 = g > 0 && f("and") > 0;
+    var evalᴛ15 = evalᴛ14;
+    var evalᴛ16 = f("c");
+    fmt.Println(g, len("abc"), len(arr), /* unsafe.Sizeof(g) */ (uintptr)8, evalᴛ15, evalᴛ16);
+    show("constant calls");
 
     var t = Ꮡ(new T(x: f("only")));
     show("control literal", t.x);

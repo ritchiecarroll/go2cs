@@ -8,6 +8,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"unsafe"
 )
 
 type T struct{ x int }
@@ -79,6 +80,11 @@ func main() {
 	// HAZARD: an element of a slice literal reads a variable a later call writes; gc reads it after the call.
 	fmt.Println([]int{g}[0], f("s"))
 	show("slice literal read")
+
+	// HAZARD: constant calls (len of a string or an array, unsafe.Sizeof) run nothing, so they never keep a later call
+	// from moving ahead of an earlier read.
+	fmt.Println(g, len("abc"), len(arr), unsafe.Sizeof(g), g > 0 && f("and") > 0, f("c"))
+	show("constant calls")
 
 	// CONTROL: a call inside &T{...} and no later call: nothing moves.
 	t := &T{x: f("only")}
