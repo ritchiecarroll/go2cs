@@ -1662,9 +1662,6 @@ partial class runtime_package
 
     public static int64 SetMemoryLimitManaged(int64 @in) => setMemoryLimit(@in);
 
-    // runtime/debug.SetMaxThreads: sched.maxmcount is the M:N scheduler's thread ceiling, which golib owns.
-    public static nint SetMaxThreadsManaged(nint @in) => global::go.golib.GoScheduler.SetMaxThreads(@in);
-
     // shrinkstack (stack.go) REFUSES BY NAME. Go's body copies a goroutine's stack into a smaller
     // one. A goroutine here is a CLR thread with no Go stack (g.stack.lo is 0), so the converted
     // body's first check threw "missing stack in shrinkstack", and a throw exits the process: the
@@ -7572,4 +7569,8 @@ partial class runtime_package
 
         private const string StateField = "<>1__state";
     }
+
+    // runtime/debug.SetMaxThreads: sched.maxmcount is the M:N scheduler's thread ceiling, which golib owns. Kept at the
+    // end of the class, so it moves no cited line above it.
+    public static nint SetMaxThreadsManaged(nint @in) => global::go.golib.GoScheduler.SetMaxThreads(@in);
 }
