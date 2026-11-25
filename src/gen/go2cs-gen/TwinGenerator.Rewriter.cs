@@ -624,6 +624,13 @@ public sealed partial class TwinGenerator
                             Block("store-left:" + assignment.Left.Kind());
 
                         break;
+                    // M:N row 19, M4: a COMPOUND store into a plain local or parameter (`s += " "u8 + t.String()`) is
+                    // `s = s op f()`, and the read of s is unordered against the call: gc reads it after (go1.26.11, every
+                    // form, with and without -l). The call moves ahead and the store reads s after it. A field, element
+                    // or any other target stays blocked by name.
+                    case AssignmentExpressionSyntax compound when child == compound.Right && !compound.IsKind(SyntaxKind.CoalesceAssignmentExpression) &&
+                                                                  m_model.GetSymbolInfo(compound.Left).Symbol is ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None }:
+                        break;
                     default:
                         foreach (SyntaxNode sibling in parent.ChildNodes())
                         {

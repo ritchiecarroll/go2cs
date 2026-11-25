@@ -129,6 +129,25 @@ public class TwinMovabilityTests
                 ref var a = ref heap<nint>(1, out var Ꮡa);
                 return (a, show("u"u8, 1, Set(Ꮡa, 2, false)));
             }
+
+            // M4: a compound store into a plain local reads the local after the call, as gc reads s in `s += f()`.
+            public static nint compoundLocal()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                nint n = 1;
+                n += show("c"u8, 1, Set(Ꮡa, 2, false));
+                return n;
+            }
+
+            // The M4 near-miss: a compound store into a field stays blocked by name.
+            internal static nint total;
+
+            public static nint compoundField()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                total += show("f"u8, 1, Set(Ꮡa, 2, false));
+                return total;
+            }
         }
         """;
 
@@ -191,6 +210,18 @@ public class TwinMovabilityTests
 
         Assert.IsFalse(twins.Contains("|tupleElems|Set|"), "no ref-blocked row names tupleElems\n" + twins);
         Assert.AreEqual(((nint)2, (nint)13), Twin(assembly, "tupleElems"), "gc reads a after the call: (2, 1*10+3)");
+    }
+
+    [TestMethod]
+    public void ACompoundStoreIntoAPlainLocalMoves_M4()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.IsFalse(twins.Contains("|compoundLocal|Set|"), "no ref-blocked row names compoundLocal\n" + twins);
+        Assert.AreEqual((nint)14, Twin(assembly, "compoundLocal"), "1 + 1*10+3");
+
+        StringAssert.Contains(twins, "|compoundField|Set|ref-like-before|in:AddAssignmentExpression", "a field target stays blocked by name\n" + twins);
+        Assert.AreEqual((nint)13, Twin(assembly, "compoundField"));
     }
 
     private static readonly CSharpParseOptions Options = new(LanguageVersion.CSharp13);
