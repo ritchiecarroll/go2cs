@@ -112,7 +112,10 @@ statement kinds `RefLikeBefore` accepts.
 condition runs once, before either branch. A call evaluated unconditionally in it (not inside the right operand of
 `&&`, `||` or `??`, not inside a conditional expression, not inside a lambda) moves ahead of the `if`, and the
 condition reads the temporary. This is the same move the row 7 inline re-derivation already makes for a ref read,
-applied to a ref-like value. The body is a nested statement and is unaffected.
+applied to a ref-like value. The body is a nested statement and is unaffected. As coded, the if is movable only
+when a ref-like value is evaluated before the call: a call blocked only by a ref read after it keeps row 7's inline
+re-derivation, unchanged. Row 19 rule 2's boundary row (a u8 literal handed to a ref struct parameter) moves from an
+if header, which M6 clears, to a while header, which runs again each iteration and stays blocked by name.
 
 **M7. A converted Go constant is a constant.** `r.trace(nodeTVˢ, node, node.Pos())` blocks on `earlier:IdentifierName`
 because the converter hoists a Go string constant into a static `ref readonly` property over a static readonly backing

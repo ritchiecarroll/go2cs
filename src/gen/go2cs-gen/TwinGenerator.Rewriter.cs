@@ -501,9 +501,16 @@ public sealed partial class TwinGenerator
             {
                 if (parent is StatementSyntax statement)
                 {
+                    // M:N row 19 (DESIGN-mn-row19-movability.md): a call moves only out of a statement that is a direct
+                    // member of a statement list (m_current), so an else-if's condition, which runs only when the first is
+                    // false, and a brace-less body stay blocked by name. M5: a throw evaluates its operand and then throws,
+                    // as a return does. M6: an if condition runs once, before either branch, so a ref-like value before a
+                    // call in it moves the call ahead of the if; a call blocked only by a ref read after it keeps row 7's
+                    // inline re-derivation.
                     if (!ReferenceEquals(statement, m_current))
                         Block("nested:" + statement.Kind());
-                    else if (statement is not (ExpressionStatementSyntax or LocalDeclarationStatementSyntax or ReturnStatementSyntax))
+                    else if (statement is not (ExpressionStatementSyntax or LocalDeclarationStatementSyntax or ReturnStatementSyntax or ThrowStatementSyntax) &&
+                             !(statement is IfStatementSyntax && refLike))
                         Block("stmt:" + statement.Kind());
 
                     break;

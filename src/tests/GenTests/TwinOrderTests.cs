@@ -147,16 +147,17 @@ public class TwinOrderTests
             }
 
             // Row 19 rule 2's boundary, fmt's Sprintf (whose format is an sstring): the same literal handed to a ref struct
-            // parameter IS held across the await, so the call stays plain and the site is ref-blocked by name.
+            // parameter IS held across the await, so the call stays plain and the site is ref-blocked by name. A while
+            // header, which runs again each iteration, keeps the call in place (an if header moves it: row 19 M6).
             public static nint spanned(ReadOnlySpan<byte> s, nint a, bool block) { if (block) { ᐸꟷ(ch); } return s.Length * 10 + a; }
 
             public static nint u8Spanned()
             {
                 ref var a = ref heap<nint>(1, out var Ꮡa);
-                if (spanned("ab"u8, Set(Ꮡa, 2, false), false) == 23) {
-                    return 1;
+                while (spanned("ab"u8, Set(Ꮡa, 2, false), false) != 23) {
+                    return 0;
                 }
-                return 0;
+                return 1;
             }
         }
         """;
