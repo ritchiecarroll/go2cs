@@ -19,8 +19,8 @@
 # one reads red by the line; adding one reads red until its line is added. GolibTests writes the lines with
 # GO2CS_PUBLIC_SURFACE_MEMBERS=<path>.
 #
-# A [go-tier2] addition, and any change to [tier1] or [tier1-members] outside the deprecation path, needs a COORD
-# ruling, cited in a comment line beside it.
+# A [go-tier2] addition, and any change to [tier1] or [tier1-members] outside the deprecation path, needs a
+# recorded ruling, cited in a comment line beside it.
 
 [tier1]
 go.array`1
@@ -113,7 +113,7 @@ go.GoExternalStubAttribute
 go.GoFieldAccessAttribute
 go.GoForeignMemory
 go.GoFrame
-# go.GoFuncAttribute: a function literal's Go name, the owner's option (a) of 2026-11-22 (commit 832b50c1e8).
+# go.GoFuncAttribute: a function literal's Go name, a decision of 2026-11-22 (commit 832b50c1e8).
 # A converter-emitted attribute on every function literal; it stays in namespace go, so emission does not move.
 go.GoFuncAttribute
 go.GoFuncCookie
@@ -136,8 +136,8 @@ go.GoMapKeyDimsAttribute
 go.GoMemProfile
 go.GoMemberFact
 go.GoMemberRecordAttribute
-# go.GoMethodHostAttribute: added 2026-11-12 with the method holders (OQ2), on each holder class in package_info.cs.
-# COORD 2026-11-12: a converter-emitted attribute, the GoPromotedHost class; [go-tier2] by ruling
+# go.GoMethodHostAttribute: added 2026-11-12 with the method holders, on each holder class in package_info.cs.
+# Ruled 2026-11-12: a converter-emitted attribute, the GoPromotedHost class; [go-tier2] by ruling
 go.GoMethodHostAttribute
 go.GoMethodText
 go.GoModInfoAttribute
@@ -151,7 +151,7 @@ go.GoRecvAttribute
 go.GoRefPrimaryAttribute
 go.GoReflect
 go.GoReflectCompanionAttribute
-# go.GoRefusalDowngradedAttribute: added 2026-11-12 on COORD's ruling (the public-surface review). A converter-emitted
+# go.GoRefusalDowngradedAttribute: added 2026-11-12 on the public-surface review's ruling. A converter-emitted
 # assembly attribute, like the other Go* attributes here; it stays in namespace go, so emission does not move.
 go.GoRefusalDowngradedAttribute
 go.GoRequiresUnsafeAttribute
@@ -1233,7 +1233,7 @@ go.ж<T> :: property T& ValueSlot { get; }
 go.ж<T> :: property go.PointerStorage StorageKind { get; }
 go.ж<T> :: property static go.ж<T> NilBox { get; }
 
-# [mn-frozen] The M:N surface frozen for L-min (decision of 2026-11-20 on M:N item 7b; the owner ruled L-min the same
+# [mn-frozen] The M:N surface frozen for L-min (decision of 2026-11-20 on M:N item 7b; L-min was ruled the same
 # day): every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated
 # code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
 # the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin, Goschedꞏtwin; channel`1 ᐸꟷꞏtwin), each
@@ -1274,7 +1274,7 @@ go.golib.GoFuncPair :: property abstract System.Delegate Twin { get; }
 go.golib.GoFuncPair :: shape abstract class; abstract-members get_Plain(), get_Twin()
 go.golib.GoParkForwarderAttribute :: ctor public ()
 go.golib.GoParkForwarderAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
-# GoParkWeakAttribute: N1, DESIGN-mn-nopark.md 3.2.
+# GoParkWeakAttribute: the no-park mark, DESIGN-mn-nopark.md 3.2.
 go.golib.GoParkWeakAttribute :: ctor public ()
 go.golib.GoParkWeakAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
 go.golib.GoTask :: method go.golib.GoTaskAwaiter GetAwaiter()
