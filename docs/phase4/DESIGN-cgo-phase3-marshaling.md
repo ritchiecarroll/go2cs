@@ -3084,3 +3084,83 @@ GOROOT's net, linux, cgo-e2e stage).
 - Q4 and Q5 are not reached yet.
 
 — H (2026-11-24)
+
+### 19.7 Record 2026-11-25: seat 4c as built, net's seven measured (Q4 scored), and the next door (design, before code)
+
+**4c, as built** (COORD's GO with four bounds, inbox H 20261124T231602Z). Each fix answers one red of net's cgo-on test
+host, read on a probe before the fix and named:
+- **The cgo-off file the cgo-on load deselects** (`ad25cb8b26`, bounded at `d737f336dc`; cgoDeselectedOutputs.go).
+  - Scope and printing: only on the -cgo -tests path. A file is removed only when its leading // lines equal its
+    source's, the converter's own emission header, //go:build included. That was read against the real pair first:
+    core/net/linux/cgo_stub.cs matches net/cgo_stub.go and not net/dial.go.
+  - Refusals: any other file in the set, and a hand-owned one, are refused by name.
+  - Every removal is printed; -cgo-removals-dry-run lists the set and removes none.
+  - Rows: unit arms for the key folder, flat, the dry run, an empty output, the hand-owned refusal, the
+    no-header refusal, and the -tests-only scope. Each neutered check read red.
+  - Hosted TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub: red without the removal (45510163430: CS0111 on
+    Name in name_stub.cs), green with it (45510136498 and later).
+- **A file that writes C.<member> gets its `using C`** (`2f93f8e971`).
+  - net's cgo_unix.go converts to _C_socklen_t, an alias another file declares as C.socklen_t, a TYPEDEF. The cast
+    rendered (C.@uint) in a file whose syntax names no cmd/cgo declaration, so it got no alias: CS0246 (probe
+    45510185924).
+  - cgoPseudoPackageReference now records a C.-qualified write, and visitFile adds the alias.
+  - Row: 4a's fixture gains csize = C.size_t and Pair(), a tuple returning csize(math.MaxInt8).
+  - Two shapes did not reproduce the red and are recorded: a variable's conversion, and a constant to a base type's
+    alias (45512989670, 45515592828). Both render the alias by name.
+  - The typedef shape read red on the old converter (45519513514: CS0246 in cgot4_plain.cs) and green with the fix
+    (45519537504).
+- **One C pseudo-package stamp per test assembly** (`6f5924f326`).
+  - package_test_info.cs and the internal test unit were both stamped: CS0579 on netꓸC_package (probe 45513467921).
+  - The unit now keeps its `using C` and drops the stamp (cgoPseudoPackageStampElsewhere, set around that write).
+  - Row: TestATestUnitCarriesNoSecondCgoPseudoPackageStamp (neutered: red).
+
+**The battery at the fold** (fd4b52323c, then fbcc065ba7). CNR NO REGRESSION, 1171 byte-identical, 0 NOT MEASURED.
+The converter's go test read two doc reds at fd4b52323c, fixed at fbcc065ba7: the new flag's row in CommandLine.md (and
+-cgo's text no longer says -tests is refused), and nine provenance notes the seat had moved. To move fewer of them, the
+dry-run flag sets a package-level variable rather than adding an Options field. At fbcc065ba7: 11 ok, 0 FAIL.
+
+**Q4 scored, MISSED as worded** (probe 45515647233; net, linux, -cgo -tests -test-filter '^TestCgoLookup'). The host
+builds with 0 errors. Go passes all seven.
+- go2cs passes TestCgoLookupIP, TestCgoLookupIPWithCancel, TestCgoLookupPort and TestCgoLookupPortWithCancel.
+- TestCgoLookupPTR and TestCgoLookupPTRWithCancel fail on a NAMED refusal: "the struct_sockaddr pointer handed to
+  C.getnameinfo is a native pointer minted from managed storage ..., which C must not write through".
+- TestCgoLookupCNAME is UNMEASURED: the refusal panicked on PTRWithCancel's goroutine, which ends the test binary
+  before CNAME runs. Go's own binary would end the same way on such a panic, so this is collateral, not a second red.
+- The prediction's named first red (the WithCancel pair) was wrong: both IPWithCancel and PortWithCancel pass.
+
+**The next door, PTR's (design for P3, before code).**
+
+The shape:
+- cgoSockaddrInet4 (cgo_socknew.go) returns `(*C.struct_sockaddr)(unsafe.Pointer(&sa))`, where sa is a Go
+  syscall.RawSockaddrInet4.
+- getnameinfo READS salen bytes through it. salen is the Go struct's size (16 for IPv4, 28 for IPv6), not
+  sizeof(struct sockaddr).
+- The pointer is a reinterpret view whose ROOT is a Go struct of another type, and StructPointer refuses every native
+  box not genuinely native.
+
+The proposed arm:
+- When the view's root (ReinterpretRoot, or the held source the walk reaches) is a Go value of a struct type S0 that
+  NativeStructMarshal can image (MarshalledSizeOf(S0) known: scalars and inline arrays, no Go pointer), the door
+  ENCODES the root into a native buffer of S0's Go size and hands C its address.
+- After the call it DECODES the buffer back into the root, so a C write lands in Go memory, as Go's does.
+- The buffer is sized by S0, not by T: C reads salen bytes, and for IPv6 that is past sizeof(struct sockaddr).
+- B-10 as for a mirror: a published unsafe.Pointer word over the root's bytes is cgo's panic.
+- A root holding a Go pointer stays refused by name.
+
+Why the converter changes too: StructPointer has no pin and no buffer today. The wrapper gains the arm the scalar door
+already has: an out GoCgoPin over the image, held in the existing `fixed` nesting, plus a copy-back call after it. The
+wrapper goldens move at every struct-pointer parameter; the count is in the plan before code.
+
+Rows:
+- e2e: getnameinfo over a Go sockaddr view for IPv4 and IPv6, printing as Go does.
+- The near-miss: a root with a Go pointer field, refused by name.
+- A C write through such a view landing in the Go struct.
+- GolibTests arms for encode, decode and the refusal.
+
+Questions for COORD and P3:
+- Is this arm in 3.4, or a seat of its own?
+- Image-and-copy-back, or refuse and disclose PTR?
+
+Lean: in 3.4, since it is net's own shape and the last red between the seven and Go.
+
+— H (2026-11-25)
