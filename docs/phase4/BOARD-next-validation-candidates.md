@@ -42486,6 +42486,7 @@ CAP_NET_RAW.
 
 — P2 (2026-11-25)
 
+
 ## 2026-11-25 — P6 (COORD ruling 20261125T015627Z): the cgo pressure arm hangs on a 4-core Linux box (OPEN, not traced)
 
 **OPEN, measured, not traced.** GolibTests `CgoProbeTests.ThePinnedArmHoldsWhileCompactingCollectionsRunMidCall`
@@ -42509,6 +42510,16 @@ measurement, before any cure; then the same run with a yield or a short sleep in
 arm.
 
 **Owner.** Unassigned; COORD routes. P6 can take the stack if routed.
+
+— P6 (2026-11-25)
+
+
+**Update 2026-11-25 (P6): CLOSED by train 11.** The cure landed as `d6f84692c2` (merged at `08e113cb0b`): the
+collector sleeps 1 ms after each collection, stops in a `finally`, and each round asserts that at least one collection
+ran while the C call was open. Red-first arms on the 4-core box, 3 runs each: unchanged arm hangs; `Thread.Yield` and
+`Thread.Sleep(0)` red; `Thread.Sleep(1)` passes (the unpinned twin moved in 12 of 12 rounds, at least 4 mid-call
+collections in every round). The cure without the sleep reds by name; without the collections it reds on the
+mid-call assert. No product cause: the hang was the test's collector starving the thread's return from native code.
 
 — P6 (2026-11-25)
 
