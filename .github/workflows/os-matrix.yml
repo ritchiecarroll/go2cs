@@ -2958,7 +2958,13 @@ jobs:
                       $count = 0; $testCount = Measure-TwinNames $testDll.FullName
                       foreach ($dll in $dlls) { $count += Measure-TwinNames $dll.FullName }
                       $twinTotal += $count
-                      Write-Host "READING t6-proof row=$name twins-option='$($env:SWEEP_TWINS)' twin-names=$count test-assembly=$testCount assemblies=$($dlls.Count)"
+                      # The host's model, from its REGENERATED project: a ProjectReference to the package's own project
+                      # (reference: it loads the package's assembly) or not (recompile: its own package is built in the host).
+                      $rowDir = Join-Path 'src/core' $name
+                      $ownProj = @(Get-ChildItem -Path $rowDir -File -Filter '*.csproj' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike '*.tests.csproj' })[0]
+                      $testProj = @(Get-ChildItem -Path $rowDir -File -Filter '*.tests.csproj' -ErrorAction SilentlyContinue)[0]
+                      $model = if (-not $ownProj -or -not $testProj) { 'unknown' } elseif (Select-String -Path $testProj.FullName -SimpleMatch "Include=`"$($ownProj.Name)`"" -Quiet) { 'reference' } else { 'recompile' }
+                      Write-Host "READING t6-proof row=$name twins-option='$($env:SWEEP_TWINS)' model=$model twin-names=$count test-assembly=$testCount assemblies=$($dlls.Count)"
                       if ($env:SWEEP_TWINS -eq '0' -and $count -gt 0) {
                           if ($rowExit -eq 0) { $rowExit = 3 }
                           Write-Host "::error::T6 twins proof: $name read $count twin names in the plain half (;twins=0)"
