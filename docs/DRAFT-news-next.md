@@ -137,13 +137,15 @@ and match Go's test results. C# written by hand against converted code may need 
        remarks ("A project that sets it keeps the generator's rule and loses only this net"), the GO2CS0016 row of
        DiagnosticCodes.md, PLAN-public-surface-stability.md (item 8, 2026-11-20). Disclosed in PublicSurface.md, tier 2,
        in the same pass. -->
-- **[LANDED e25362aedc]** **A Go name spelled with a letter go2cs uses in generated names refuses its package.** A
-  package that declares an identifier spelled with one of those letters (`Ꮡ`, `ᴛ`, `ж` and the others), a struct field,
-  method or named type whose name starts with `Δ`, or a `Δ` name equal to one go2cs generates in that package now stops
-  with error `GO2CS2015`, which names each identifier; such a name could bind silently to a generated one, and a
-  `Δ`-led field would reflect and encode under another name. Other `Δ` names (`Δt` as a local, a constant or a
-  function) convert unchanged. Rename the identifier; a struct tag keeps a field's encoded name
-  ([Known issues](KnownIssues.md#delta-led-field-method-type-refused)).
+- **[LANDED e25362aedc; the `Δ`-name cure <train-11 merge>]** **A Go name spelled with a letter go2cs uses in generated
+  names refuses its package.** A package that declares an identifier spelled with one of those letters (`Ꮡ`, `ᴛ`, `ж`
+  and the others), or a `Δ` name equal to one go2cs generates in that package, stops with error `GO2CS2015`, which
+  names each identifier: such a name could bind silently to a generated one. Every other `Δ` name converts, and a
+  struct field, method or type whose name starts with `Δ` keeps its Go name in reflection, encoding and `fmt` output.
+  Rename a refused identifier ([Diagnostic codes](DiagnosticCodes.md)).
+  <!-- 2026-11-24 (P2, .5 Δ cure seat claude/p2-delta-go-name): the cure retires the Δ-led field, method and type arm
+       and its KnownIssues entry (#delta-led-field-method-type-refused); this entry's link pointed there. Text
+       adjusted to the cured state; P4 owns this file and may reword. -->
   <!-- 2026-11-23 (P1): train 4, merge e25362aedc (claude/i9-marker-glyph-refusal b1105e20a5); the refusal a0806c5d38,
        the folds 577eb7138e, 7286bd1e0e, b1105e20a5; behavioral DeltaNameEdgeCases 1cea7c8bdb. The text: the GO2CS2015
        row of DiagnosticCodes.md and KnownIssues.md "A Go struct field, method or type whose name starts with `Δ`
@@ -341,13 +343,16 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-23 (P1): train 1, merge dcfc9c99a1 (claude/p4-probe-cache 7f14c1bb4d; board hh, COORD 2026-11-20
        09:41Z). The text: CommandLine.md's `-probe-cache` row and the KnownIssues.md entry. -->
 - **[LANDED 1c9c6a224e … e280cae69d]** **An experimental M:N scheduler, off by default.** go2cs can run goroutines
-  on a small pool of threads, as Go does, instead of one operating-system thread each. It is inert unless a project
-  is built with twins (an async copy of each function that can wait without holding a thread), which works only in a
-  project built inside a go2cs repository clone, and the program runs with `GO2CS_MN=1`. The published `go.*`
-  packages are not built with twins, and a program that does not opt in runs each goroutine on its own thread, as
-  before. The diagnostics
-  `GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0020` and `GO2CS0021` come only from a build with twins
-  ([Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)).
+  on a small pool of threads, as Go does, instead of one operating-system thread each. The technique is **async
+  twins**: a second copy of each function that waits by giving its thread back to the scheduler. It is opt-in: a
+  program gets it only when its projects are built with twins, which works only inside a go2cs repository clone, and
+  it runs with `GO2CS_MN=1`. <!-- (b)-dependent --> The published `go.*` packages are not built with twins, and a program that does not opt
+  in runs each goroutine on its own thread, as before. The diagnostics `GO2CS0014`, `GO2CS0015`, `GO2CS0017`,
+  `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` come only from a build with twins
+  ([Async twins](AsyncTwins.md), [Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)).
+  <!-- 2026-11-24 (P4, row 18): "async twins" named and docs/AsyncTwins.md linked (COORD 2026-11-21 15:49Z, step 0).
+       GO2CS0019 added: it landed with row 7's N1 (train 9, b2c9435159) and is reported only in a build with twins
+       (DiagnosticCodes.md row 0019 at cb6def82a2). -->
   <!-- 2026-11-23 (P1): the M:N rows, by first-parent merge: train 3 1c9c6a224e (claude/g-mn-proto-b1 1cfee4a63e, the
        scheduler, the twin generator, GO2CS0014/0015/0017/0018) and da3273f975 (claude/h-mn-origin-table 1fc98cd07c);
        train 4 467912f059 (g-mn-row6-parkstep), 817c346d85 (g-mn-gosched-park); train 5 13c748a241

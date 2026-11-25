@@ -14,7 +14,7 @@ using fs = io.fs_package;
 using slices = slices_package;
 using go.@internal;
 using io;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 
 partial class filepathlite_package {
 
@@ -53,7 +53,7 @@ internal static void append⁔(/*this*/ ref lazybuf b, byte c) {
 }
 
 internal static void prepend⁔(/*this*/ ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
-    var prefix = prefixʗp.sslice();
+    var prefix = prefixʗp.slice();
 
     b.buf = slices.Insert(b.buf, 0, prefix.ꓸꓸꓸ);
     b.w += len(prefix);

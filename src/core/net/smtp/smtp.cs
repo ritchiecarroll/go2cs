@@ -29,7 +29,7 @@ using crypto;
 using encoding;
 using go.net;
 using time = time_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class smtp_package {
 
@@ -127,7 +127,7 @@ internal static error Hello⁔(/*this*/ ж<Client> Ꮡc, @string localName) {
 internal static (nint, @string, error) cmd⁔(/*this*/ ж<Client> Ꮡc, nint expectCode, @string format, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
     try {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         ref var c = ref Ꮡc.DerefOrNull();
 
         var (id, err) = c.Text.Cmd(format, args.ꓸꓸꓸ);

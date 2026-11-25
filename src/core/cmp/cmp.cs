@@ -72,7 +72,7 @@ internal static bool isNaN<T>(T x)
 
 // Or returns the first of its arguments that is not equal to the zero value.
 // If no argument is non-zero, it returns the zero value.
-public static T Or<T>(params Span<T> valsʗp) {
+public static T Or<T>(params variadic<T> valsʗp) {
     var vals = valsʗp.sslice();
 
     T zero = GoZero<T>();

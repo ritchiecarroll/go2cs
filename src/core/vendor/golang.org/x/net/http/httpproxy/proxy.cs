@@ -22,7 +22,7 @@ using idna = go.vendor.golang.org.x.net.idna_package;
 using go.net;
 using go.vendor.golang.org.x.net;
 using unicode;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class httpproxy_package {
 

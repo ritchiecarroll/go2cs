@@ -1071,8 +1071,9 @@ variants refused, the production package not, and the pre-check naming each name
 go2cs-gen source or a golib identifier that is not listed fails, and a listed letter none of them writes fails),
 `TestDeltaMintedMemberNamesAreEveryFixedDeltaLiteral` (a fixed `Δ` name the converter writes must be listed), and the
 behavioral `DeltaNameEdgeCases`, whose output is compared with Go's: every `Δ` shape the rule lets through runs, each
-beside the generated name one spelling away (`xΔ1`, `Δw`, `Δunicode`, `TΔTexter`, `Δslice`, `Δarray`). The
-projection refusal is temporary: [KnownIssues](../KnownIssues.md#delta-led-field-method-type-refused).
+beside the generated name one spelling away (`xΔ1`, `Δw`, `Δunicode`, `TΔTexter`, `Δslice`, `Δarray`). A
+`Δ`-led field, method or type converts: go2cs stamps it `[GoName]`, and golib and go2cs-gen read the stamp before
+they drop a leading `Δ` (behavioral `DeltaNameProjection`).
 <!-- src/go2cs/markerGlyphRefusal.go. The i9 name-collision census of 2026-11-21 (inbox/COORD/20261121T160231Z-i9.md)
      found these classes latent: names containing a marker in its corpora were one, a ts local spelled `Δ` alone. Its
      probes showed the silent ones: a local beats a same-named field (the seedˢ shape), and an instance member beats an

@@ -141,7 +141,11 @@ internal static class ISliceTypeTemplate
 
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(nint start, nint length) => m_value.Slice(start, length);
 
-                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => m_value.ToSpan();
+                // The spread is a variadic pack carrying this slice, as golib's slice<T> spread is: Go's `f(s...)`
+                // hands f the slice itself, so a callee's writes reach s.
+                public global::go.variadic<{{targetTypeName}}> {{EllipsisOperator}} => m_value.{{EllipsisOperator}};
+
+                global::System.Span<{{targetTypeName}}> IArray<{{targetTypeName}}>.{{EllipsisOperator}} => m_value.ToSpan();
 
                 {{Claimable(goMethods, "ToSpan",
                     $"public global::System.Span<{targetTypeName}> ToSpan() => m_value.ToSpan();",

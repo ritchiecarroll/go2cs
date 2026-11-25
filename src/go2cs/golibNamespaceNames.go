@@ -70,6 +70,7 @@ var golibNamespaceTypes = nameSet(
 	"GoMethodHostAttribute",
 	"GoMethodText",
 	"GoModInfoAttribute",
+	"GoNameAttribute",
 	"GoPackageAttribute",
 	"GoParamDimsAttribute",
 	"GoPlatformExclusiveAttribute",
@@ -152,6 +153,7 @@ var golibNamespaceTypes = nameSet(
 	"UntypedComplex",
 	"UntypedFloat",
 	"UntypedInt",
+	"VariadicExtensions",
 	"builtin",
 	"channel",
 	"complex64",
@@ -216,6 +218,7 @@ var golibFriendNamespaceTypes = nameSet(
 	"NativeDerivation",
 	"PanicFaultKind",
 	"Q44RegistryCensus",
+	"ReadOnlyStringBacking",
 	"ReinterpretAliasing",
 	"RuntimeArrayViewCheck",
 	"SelectPending",
@@ -295,6 +298,7 @@ var golibGenericNamespaceTypes = nameSet(
 	"slice",
 	"sslice",
 	"stackAppend",
+	"variadic",
 	"ж",
 )
 

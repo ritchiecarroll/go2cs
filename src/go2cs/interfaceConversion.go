@@ -1038,13 +1038,25 @@ func (v *Visitor) whiteboxBridgeDeclaredType(name string) bool {
 		return false
 	}
 
-	name = strings.TrimPrefix(name, ShadowVarMarker)
-
-	if whiteboxBridgeTypeNames.Contains(name) {
+	if containsEmittedName(whiteboxBridgeTypeNames, name) {
 		return true
 	}
 
-	return v.options.testInlineTypeAccess && packageLiftedTypeNames.Contains(name)
+	return v.options.testInlineTypeAccess && packageLiftedTypeNames.Contains(strings.TrimPrefix(name, ShadowVarMarker))
+}
+
+// containsEmittedName reports whether a set of GO type names holds the type an EMITTED spelling names. The
+// spelling is the Go name itself, or a Go name the converter renamed with the Δ marker. A Go type name that
+// itself starts with Δ is emitted as written (testDeltaLedTypeNames), so its spelling is never read as a
+// rename: `ΔMatrix` does not answer for a `Matrix` in the set.
+func containsEmittedName(goNames hashset.HashSet[string], emitted string) bool {
+	if goNames.Contains(emitted) {
+		return true
+	}
+
+	trimmed, renamed := strings.CutPrefix(emitted, ShadowVarMarker)
+
+	return renamed && !testDeltaLedTypeNames.Contains(emitted) && goNames.Contains(trimmed)
 }
 
 // whiteboxVariantAdapterStructName qualifies a BARE struct spelling with the white-box variant class
@@ -1072,7 +1084,7 @@ func (v *Visitor) whiteboxVariantAdapterStructName(structTypeName string) string
 		return structTypeName
 	}
 
-	if !testAmbiguousLocalTypeNames.Contains(stripSanitizationMarkers(strings.TrimPrefix(structTypeName, ShadowVarMarker))) {
+	if !containsEmittedName(testAmbiguousLocalTypeNames, stripSanitizationMarkers(structTypeName)) {
 		return structTypeName
 	}
 

@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using ꓸꓸꓸжVar = Span<ж<types_package.Var>>;
+using ꓸꓸꓸжVar = variadic<ж<types_package.Var>>;
 
 partial class types_package {
 

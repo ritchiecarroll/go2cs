@@ -2,8 +2,8 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
-using ꓸꓸꓸжbox = Span<ж<main_package.box>>;
+using ꓸꓸꓸunsafeꓸPointer = variadic<unsafe_package.Pointer>;
+using ꓸꓸꓸжbox = variadic<ж<main_package.box>>;
 
 partial class main_package {
 
@@ -27,7 +27,7 @@ internal static nint countPtrs(params ꓸꓸꓸunsafeꓸPointer psʗp) {
     return len(ps);
 }
 
-internal static nint totalLens(params Span<slice<byte>> bssʗp) {
+internal static nint totalLens(params variadic<slice<byte>> bssʗp) {
     var bss = bssʗp.sslice();
 
     nint sum = 0;
@@ -38,7 +38,7 @@ internal static nint totalLens(params Span<slice<byte>> bssʗp) {
 }
 
 internal static void replaceFirst(params ꓸꓸꓸжbox bsʗp) {
-    var bs = bsʗp.sslice();
+    var bs = bsʗp.slice();
 
     bs[0] = Ꮡ(new box(v: 40));
 }
@@ -65,7 +65,7 @@ internal static nint deferredLen(params ꓸꓸꓸжbox bsʗp) {
 internal static void deferredReplaceFirst(params ꓸꓸꓸжbox bsʗp) {
     GoFrame ᒐ = default;
     try {
-        var bs = bsʗp.sslice();
+        var bs = bsʗp.slice();
 
         defer([GoFunc("deferredReplaceFirst.func1")] () => {
         }, ref ᒐ);

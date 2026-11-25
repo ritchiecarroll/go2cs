@@ -35,6 +35,17 @@ public sealed partial class Goroutine
     private bool m_savedGoexitStarted;
     private bool m_savedSplicesRefused;
 
+    // N10 (M:N row 11): golib's two other goroutine-scoped thread-statics, the allocation tally and the Gosched backoff
+    // streak, and the saved slots of the packages above golib (GoroutineThreadState.RegisterMounted: getg's cache, the
+    // held runtime locks, the lock-profile flag, SetPanicOnFault). The sleep timer stays a carrier's resource: only the
+    // blocking Sleep path uses it, and a goroutine blocked there stays mounted (P3's read of N10).
+    private long m_savedAllocationCount;
+    private int m_savedInertYields;
+    private object?[]? m_savedRegistered;
+
+    // TEST-ONLY: the saved slots, which MountedThreadStateTests reads (an all-default goroutine never allocates them).
+    internal object?[]? SavedRegisteredForTest => m_savedRegistered;
+
     // The step this goroutine runs next, while it waits in a carrier's run-next slot (GoScheduler.Ready): an Action, or
     // the box of the twin that parked (row 6).
     internal object? m_readyStep;
@@ -322,6 +333,9 @@ public sealed partial class Goroutine
         PanicException.SwapMounted(ref m_savedLastAdopted);
         GoexitException.SwapMounted(ref m_savedGoexitStarted);
         GoFrame.SwapMounted(ref m_savedActivation, ref m_savedThreadToken, ref m_savedSplicesRefused);
+        AllocationCounter.SwapMounted(ref m_savedAllocationCount);
+        GoschedBackoff.SwapMounted(ref m_savedInertYields);
+        GoroutineThreadState.SwapMounted(ref m_savedRegistered);
     }
 
     /// <summary>

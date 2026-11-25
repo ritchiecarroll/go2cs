@@ -118,6 +118,9 @@ type _Ctype_time_t = _Ctype_long
 
 func _Cfunc_gmtime_r(p0 *_Ctype_time_t, p1 *_Ctype_struct_tm) (r1 *_Ctype_struct_tm) { return }
 func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
+
+// strtol: its char ** parameter is the out-parameter (Phase 3 shape (i), 3.2 seat 1b), one stack word copied in and back.
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) { return }
 `
 
 const cgoDarwinStructs = `
@@ -165,6 +168,9 @@ type _Ctype_time_t = _Ctype_long
 
 func _Cfunc_gmtime_r(p0 *_Ctype_time_t, p1 *_Ctype_struct_tm) (r1 *_Ctype_struct_tm) { return }
 func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
+
+// strtol: its char ** parameter is the out-parameter (Phase 3 shape (i), 3.2 seat 1b), one stack word copied in and back.
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) { return }
 `
 
 const cgoWindowsStructs = `
@@ -225,6 +231,9 @@ type _Ctype___time64_t = _Ctype_longlong
 
 func _Cfunc__gmtime64_s(p0 *_Ctype_struct_tm, p1 *_Ctype___time64_t) (r1 _Ctype_int) { return }
 func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
+
+// strtol: its char ** parameter is the out-parameter (Phase 3 shape (i), 3.2 seat 1b), one stack word copied in and back.
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) { return }
 `
 
 // The probe library's declarations (increment 4d), as cmd/cgo gives them on every OS: src/tests/GolibTests/cgo-probe's
@@ -254,6 +263,9 @@ func _Cfunc_go2cs_probe_add_into(p0 *_Ctype_struct_go2cs_probe_pair, p1 *_Ctype_
 func _Cfunc_go2cs_probe_tagged_double(p0 *_Ctype_struct_go2cs_probe_tagged) (r1 _Ctype_int) { return }
 func _Cfunc_go2cs_probe_hfa_scale(p0 *_Ctype_struct_go2cs_probe_hfa, p1 _Ctype_double) (r1 _Ctype_double) { return }
 func _C2func_go2cs_probe_strtol(p0 *_Ctype_char, p1 _Ctype_int) (r1 _Ctype_long, r2 error) { return }
+
+// The pressure arm (3.2 seat 1b, design 18.1 COORD (b)): a slow fill of a pinned Go buffer while collections compact.
+func _Cfunc_go2cs_probe_slow_fill(p0 *_Ctype_char, p1 _Ctype_int, p2 _Ctype_int) (r1 _Ctype_int) { return }
 `
 
 // cgoProbeLibrary is the probe library's load-time name on goos, as the hosted leg builds it (its SONAME on linux, its
@@ -316,7 +328,7 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 		set.libraries = map[string]string{}
 	}
 
-	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol"} {
+	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol", "go2cs_probe_slow_fill"} {
 		set.libraries[symbol] = cgoProbeLibrary(target.goos)
 	}
 
@@ -510,9 +522,9 @@ func _C2func_find(p0 *_Ctype_struct_x) (r1 *_Ctype_int, r2 error) { return }
 				t.Fatalf("%s C.%s: %v", goos, declaration.cName, err)
 			}
 
-			// The pointer crosses as 3b2b's scalar pointer does, and errno is read inside the transition: by the binding
+			// The pointer crosses as a scalar pointer does (3b2b; the pinned class since 3.2 seat 1b), and errno is read inside the transition: by the binding
 			// on linux, through the C runtime's slot on windows.
-			for _, line := range []string{"internal static (@int, error) countꓸerrno(ж<@int> p0)", "StructPointer(p0, \"count\"", "return ((@int)(int32)r, err);"} {
+			for _, line := range []string{"internal static (@int, error) countꓸerrno(ж<@int> p0)", "ScalarPointer(p0, \"count\"", "return ((@int)(int32)r, err);"} {
 				if !strings.Contains(text, line) {
 					t.Errorf("%s C.count's errno form lacks %q:\n%s", goos, line, text)
 				}

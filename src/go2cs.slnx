@@ -525,6 +525,8 @@
     <Project Path="tests/Behavioral/DefinedTypeOverInterface/DefinedTypeOverInterface.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverPkgType/DefinedTypeOverPkgType.csproj" />
     <Project Path="tests/Behavioral/DeltaNameEdgeCases/DeltaNameEdgeCases.csproj" />
+    <Project Path="tests/Behavioral/DeltaNameProjection/DeltaNameProjection.csproj" />
+    <Project Path="tests/Behavioral/DeltaNameProjection/lib/DeltaNameProjection.lib.csproj" />
     <Project Path="tests/Behavioral/DerefPointerToField/DerefPointerToField.csproj" />
     <Project Path="tests/Behavioral/DerivedInterfaceStructuralProbe/DerivedInterfaceStructuralProbe.csproj" />
     <Project Path="tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
@@ -929,6 +931,7 @@
     <Project Path="tests/Behavioral/NamedArrayZeroValue/NamedArrayZeroValue.csproj" />
     <Project Path="tests/Behavioral/NamedPointerFieldAddress/NamedPointerFieldAddress.csproj" />
     <Project Path="tests/Behavioral/NamedPointerLocalSurface/NamedPointerLocalSurface.csproj" />
+    <Project Path="tests/Behavioral/NamedPointerNilInterface/NamedPointerNilInterface.csproj" />
     <Project Path="tests/Behavioral/NamedPointerParamArgument/NamedPointerParamArgument.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReflectElem/NamedPointerReflectElem.csproj" />
     <Project Path="tests/Behavioral/NamedPointerEquality/NamedPointerEquality.csproj" />
@@ -1454,6 +1457,7 @@
     <Project Path="tests/Behavioral/VariadicPromotedForwarder/VariadicPromotedForwarder.csproj" />
     <Project Path="tests/Behavioral/VariadicPromotedForwarder/varhostlib/go.varhost.csproj" />
     <Project Path="tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />
+    <Project Path="tests/Behavioral/VariadicSpreadHeapAlias/VariadicSpreadHeapAlias.csproj" />
     <Project Path="tests/Behavioral/VariableCapture/VariableCapture.csproj" />
     <Project Path="tests/Behavioral/VariadicClosureShadowParam/VariadicClosureShadowParam.csproj" />
     <Project Path="tests/Behavioral/VendoredPathModuleImport/VendoredPathModuleImport.csproj" />

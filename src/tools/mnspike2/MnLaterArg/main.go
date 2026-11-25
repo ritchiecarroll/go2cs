@@ -10,6 +10,16 @@
 //
 // A BOARD row (COORD 2026-11-16 15:12Z): a converter design for .5, not .4. Kept out of the behavioral corpus, where
 // its Output phase would be red under every arm.
+//
+// In the Q1 kit (run-q1-kit.sh) this project builds the twins arm only, so the kit makes no compare for it. 1505 is
+// the plain-path operand-order gap (BOARD row "Plain-path operand order"), the known baseline, and not a difference
+// the twins make. Measured 2026-11-24 (go1.26.11, linux/amd64, 4 cores, Release, 20 runs each):
+//   twins, GO2CS_MN=1:      1505 in 20 of 20
+//   plain, GO2CS_MN unset:  1505 in 17 of 20, 1405 in 3 of 20
+// The plain reading varies because the converted code reads pp BEFORE the receive, so the read races the goroutine
+// that writes pp; Go reads pp after the receive, which the write happens before, so Go has no race. A twin-vs-plain
+// compare of this program would therefore read EQUAL most runs and differ on some. Once the operand-order fix
+// lands, both arms read 1405, as go run does, every run.
 package main
 
 import "fmt"

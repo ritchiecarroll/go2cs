@@ -33,11 +33,9 @@ import (
 // a marker letter is therefore refused (GO2CS2015), with each identifier named.
 //
 // Δ is the exception. It is also an ordinary letter (`Δt`, `Δx` in numeric code), and such names convert correctly,
-// so a Δ name is refused only where go2cs or golib would read it as theirs:
-//   - A Δ-LED struct field, method or named type. golib drops one leading Δ when it projects a converted member's Go
-//     name (fields, GoReflect.FieldAccess.cs; type names, GoReflect.TypeNaming.cs; methods,
-//     TypeExtensions.GoMethodSets.cs), so `type P struct{ Δt float64 }` would reflect and json-encode as `t`.
-//     Locals, parameters, package variables, constants and functions are never projected and keep converting.
+// so a Δ name is refused only where go2cs would read it as its own. A Δ-led struct field, method or named type
+// converts: go2cs stamps it [GoName] (goNameAttr), and golib and go2cs-gen read the stamp before dropping a leading Δ.
+// The refused case:
 //   - A name EQUAL to one go2cs generates in that package (deltaMintedNames): the Δ rename of any name the package
 //     declares, in any scope (a C# local may shadow a static member silently, so a renamed local `slice` -> `Δslice`
 //     would capture a package-level `Δslice`); a fixed generated member (deltaMintedMemberNames); a type's shape
@@ -139,9 +137,8 @@ func (refusal *markerGlyphRefusal) report() {
 	}
 }
 
-// refuseMarkerGlyphIdentifiers finds every identifier pkg declares that contains a marker letter other than Δ, a Δ-led
-// field, method or type golib would project under another name, or a Δ name equal to one go2cs generates in pkg. It
-// returns nil when there is none.
+// refuseMarkerGlyphIdentifiers finds every identifier pkg declares that contains a marker letter other than Δ, or a Δ
+// name equal to one go2cs generates in pkg. It returns nil when there is none.
 func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 	if pkg.TypesInfo == nil || pkg.Types == nil {
 		return nil
@@ -178,6 +175,7 @@ func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 	sort.Slice(idents, func(i, j int) bool { return idents[i].Pos() < idents[j].Pos() })
 
 	sets := deltaMintedNames(pkg, declared, clauses)
+	sets.siblingSpelled = siblingSpelledFields(pkg)
 	var refusal *markerGlyphRefusal
 
 	for _, ident := range idents {
@@ -216,17 +214,22 @@ func markerGlyphReason(name string, obj types.Object, sets *deltaNameSets) strin
 		return ""
 	}
 
-	if reason := deltaProjectionReason(name, obj); reason != "" {
-		return reason
-	}
-
 	// ΔT is the type parameter of a converted Go interface, so it collides only with a type parameter declared on a generic
 	// interface; a function's or a struct's type parameter ΔT lives in another scope and converts.
 	if what, isMember := deltaMintedMemberNames[name]; isMember && (name != TypeT || !isTypeParam(obj) || sets.interfaceTypeParams[name]) {
 		return "is the name go2cs generates for " + what
 	}
 
-	if what, isMinted := sets.minted[name]; isMinted {
+	// A FIELD spelled like a name go2cs generates at package scope converts: the field lives in its struct's scope, and
+	// where its emitted spelling meets its own struct's (the field Δslice of a type slice emitted as Δslice) the converter
+	// renames the field and stamps its Go name ([GoName]), so reflection and fmt still read Δslice.
+	// The exemption ends where the field meets a SIBLING spelled the same in C#: `type X struct{ slice; Δslice int }`
+	// embeds slice as the field Δslice, so the two members would share one name (CS0102).
+	if what, isMinted := sets.minted[name]; isMinted && (!isStructField(obj) || sets.siblingSpelled[obj]) {
+		if isStructField(obj) {
+			return "is " + what + ", the C# name of another field of its struct"
+		}
+
 		return "is " + what
 	}
 
@@ -235,37 +238,6 @@ func markerGlyphReason(name string, obj types.Object, sets *deltaNameSets) strin
 	}
 
 	return deltaMintedShapeOf(name, sets)
-}
-
-// deltaProjectionReason refuses a Δ-led struct field, method or named type: golib drops one leading Δ when it projects
-// a converted member's Go name, reading it as the collision marker go2cs added, so the name Go reports would differ.
-// A bare Δ is refused as a field or a type, whose projections strip it to an empty name (GoReflect.FieldAccess.cs and
-// GoReflect.TypeNaming.cs strip unconditionally), and converts as a method, whose projections leave it alone
-// (TypeExtensions.GoMethodSets.cs: ProjectGoMethodName and GoMethodNameMatches strip only a longer name, and
-// UnexportedMethodPackageMatches reads the empty remainder as exported, which is Go's answer for an upper-case Δ).
-func deltaProjectionReason(name string, obj types.Object) string {
-	if !strings.HasPrefix(name, ShadowVarMarker) {
-		return ""
-	}
-
-	projected := strings.TrimPrefix(name, ShadowVarMarker)
-
-	switch declared := obj.(type) {
-	case *types.Var:
-		if declared.IsField() {
-			return fmt.Sprintf("is a struct field whose name starts with Δ: golib drops a leading Δ when it projects a converted field's Go name, so reflect, encoding/json and fmt would name it %q where Go names it %q", projected, name)
-		}
-	case *types.Func:
-		if signature, ok := declared.Type().(*types.Signature); ok && signature.Recv() != nil && projected != "" {
-			return fmt.Sprintf("is a method whose name starts with Δ: golib drops a leading Δ when it projects a converted method's Go name, so reflect and dynamic interface checks would see %q where Go sees %q", projected, name)
-		}
-	case *types.TypeName:
-		if _, isTypeParam := declared.Type().(*types.TypeParam); !isTypeParam {
-			return fmt.Sprintf("is a type whose name starts with Δ: golib drops a leading Δ when it names a converted type, so reflect and fmt's %%T would print %q where Go prints %q", projected, name)
-		}
-	}
-
-	return ""
 }
 
 // deltaMintedShapePatterns are the Δ local and parameter names go2cs generates by shape, each read against the
@@ -320,6 +292,7 @@ type deltaNameSets struct {
 	typeParams          map[string]bool
 	interfaceTypeParams map[string]bool
 	importedTypeNames   map[string]bool
+	siblingSpelled      map[types.Object]bool
 }
 
 // deltaMintedNames answers the Δ names go2cs generates from what pkg declares, in ANY scope, through the converter's
@@ -524,6 +497,85 @@ func refuseMarkerGlyphTestFiles(inputPath string, options Options) *markerGlyphR
 	}
 
 	return refusal
+}
+
+// isStructField reports whether obj is a struct field.
+// siblingSpelledFields answers the Δ-named struct fields whose name equals the C# spelling of another field of the same
+// struct: an embedded field is named by its type, so `type X struct{ slice; Δslice int }` emits the embed as Δslice.
+func siblingSpelledFields(pkg *packages.Package) map[types.Object]bool {
+	result := map[types.Object]bool{}
+
+	for _, file := range pkg.Syntax {
+		ast.Inspect(file, func(node ast.Node) bool {
+			structType, isStruct := node.(*ast.StructType)
+
+			if !isStruct || structType.Fields == nil {
+				return true
+			}
+
+			var idents []*ast.Ident
+
+			for _, field := range structType.Fields.List {
+				if len(field.Names) == 0 {
+					if ident := embeddedFieldIdent(field.Type); ident != nil {
+						idents = append(idents, ident)
+					}
+
+					continue
+				}
+
+				idents = append(idents, field.Names...)
+			}
+
+			for _, ident := range idents {
+				if !strings.Contains(ident.Name, ShadowVarMarker) {
+					continue
+				}
+
+				for _, sibling := range idents {
+					if sibling.Name == ident.Name || sibling.Name == "_" {
+						continue
+					}
+
+					if getCoreSanitizedIdentifier(sibling.Name) == ident.Name || getCollisionAvoidanceIdentifier(sibling.Name) == ident.Name {
+						if obj := pkg.TypesInfo.Defs[ident]; obj != nil {
+							result[obj] = true
+						}
+					}
+				}
+			}
+
+			return true
+		})
+	}
+
+	return result
+}
+
+// embeddedFieldIdent is the identifier that names an embedded field: the type's name, through a pointer, a package
+// qualifier or type arguments.
+func embeddedFieldIdent(expr ast.Expr) *ast.Ident {
+	switch typed := expr.(type) {
+	case *ast.Ident:
+		return typed
+	case *ast.StarExpr:
+		return embeddedFieldIdent(typed.X)
+	case *ast.SelectorExpr:
+		return typed.Sel
+	case *ast.IndexExpr:
+		return embeddedFieldIdent(typed.X)
+	case *ast.IndexListExpr:
+		return embeddedFieldIdent(typed.X)
+	case *ast.ParenExpr:
+		return embeddedFieldIdent(typed.X)
+	}
+
+	return nil
+}
+
+func isStructField(obj types.Object) bool {
+	field, isVar := obj.(*types.Var)
+	return isVar && field.IsField()
 }
 
 func isTypeParam(obj types.Object) bool {

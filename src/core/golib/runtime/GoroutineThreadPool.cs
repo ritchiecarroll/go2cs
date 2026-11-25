@@ -250,6 +250,80 @@ internal static class GoroutineThreadPool
         return true;
     }
 
+    /// <summary>
+    /// Exchanges a package's goroutine-scoped thread-statics with the goroutine's own saved copy (see
+    /// <see cref="RegisterMounted"/>).
+    /// </summary>
+    /// <param name="saved">
+    /// The goroutine's slot for this registration: null until the swap first stores something there. A swap may keep
+    /// a holder object in it and exchange fields with the holder in place, so a park allocates nothing.
+    /// </param>
+    public delegate void MountedSwap(ref object? saved);
+
+    private static readonly List<MountedSwap> s_mounted = [];
+    private static MountedSwap[] s_mountedSnapshot = [];
+
+    // TEST-ONLY: how many swaps are registered now (MountedThreadStateTests' growth row).
+    internal static int MountedSwapCountForTest => Volatile.Read(ref s_mountedSnapshot).Length;
+
+    /// <summary>
+    /// Registers a swap for a package's goroutine-scoped thread-statics, which then move with a MULTIPLEXED goroutine
+    /// from carrier to carrier (M:N); returns true so it can initialize a static field.
+    /// </summary>
+    /// <param name="swap">
+    /// Exchanges this thread's slots with the goroutine's saved copy. A carrier holds the defaults while no goroutine is
+    /// mounted on it, so one exchange serves both directions: at a mount it hands the goroutine its values and parks the
+    /// defaults in the slot, and at the unmount it does the reverse.
+    /// </param>
+    /// <remarks>
+    /// A goroutine bound to one thread (every goroutine with the scheduler off) is never mounted, so a swap never runs
+    /// there and a thread-static stays the exact, cheap per-goroutine slot; <see cref="Register"/>'s reset still clears
+    /// it between the goroutines a pooled thread runs. golib's own goroutine-scoped thread-statics are exchanged
+    /// directly (Goroutine.SwapLogicalState). The census is GolibTests' ThreadStateCensusTests; the move is
+    /// MountedThreadStateTests (M:N row 11, N10).
+    /// </remarks>
+    public static bool RegisterMounted(MountedSwap swap)
+    {
+        lock (s_lock)
+        {
+            s_mounted.Add(swap);
+            s_mountedSnapshot = [.. s_mounted];
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Runs every registered swap against a goroutine's saved slots, which grow to the number of registrations (a
+    /// package that registers between a goroutine's mount and its unmount gets a slot at the unmount). A goroutine
+    /// whose state is all defaults never allocates them: until a swap stores something, each runs against a local
+    /// null slot, which a swap leaves null when both sides hold the defaults.
+    /// </summary>
+    internal static void SwapMounted(ref object?[]? saved)
+    {
+        MountedSwap[] swaps = Volatile.Read(ref s_mountedSnapshot);
+
+        if (saved is null)
+        {
+            for (int i = 0; i < swaps.Length; i++)
+            {
+                object? slot = null;
+                swaps[i](ref slot);
+
+                if (slot is not null)
+                    (saved ??= new object?[swaps.Length])[i] = slot;
+            }
+
+            return;
+        }
+
+        if (saved.Length < swaps.Length)
+            Array.Resize(ref saved, swaps.Length);
+
+        for (int i = 0; i < swaps.Length; i++)
+            swaps[i](ref saved[i]);
+    }
+
     private static readonly List<Func<bool>> s_retires = [];
     private static Func<bool>[] s_retireSnapshot = [];
 

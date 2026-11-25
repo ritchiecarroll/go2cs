@@ -572,6 +572,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
 
     [TestMethod]
+    public void CheckDeltaNameProjection() => CheckTarget("DeltaNameProjection");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]
@@ -1662,6 +1665,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedPointerLocalSurface() => CheckTarget("NamedPointerLocalSurface");
+
+    [TestMethod]
+    public void CheckNamedPointerNilInterface() => CheckTarget("NamedPointerNilInterface");
 
     [TestMethod]
     public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
@@ -3090,6 +3096,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
+
+    [TestMethod]
+    public void CheckVariadicSpreadHeapAlias() => CheckTarget("VariadicSpreadHeapAlias");
 
     [TestMethod]
     public void CheckVendoredPathModuleImport() => CheckTarget("VendoredPathModuleImport");

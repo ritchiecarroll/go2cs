@@ -1,13 +1,13 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
 internal static void add(@string verb, slice<@string> args) {
     [GoFunc("add.func1")] void errorf(@string format, params ꓸꓸꓸany argsΔ1ʗp) {
-        var argsΔ1 = argsΔ1ʗp.sslice();
+        var argsΔ1 = argsΔ1ʗp;
         fmt.Println(fmt.Sprintf(format, argsΔ1.ꓸꓸꓸ));
     }
 

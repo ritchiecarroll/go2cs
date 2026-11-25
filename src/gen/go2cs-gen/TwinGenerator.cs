@@ -753,10 +753,13 @@ public sealed partial class TwinGenerator : ISourceGenerator
         internal static bool IsBoxedReceiver(IMethodSymbol symbol, int index) =>
             index == 0 && symbol.IsExtensionMethod && symbol.Parameters[0].RefKind == RefKind.Ref;
 
-        // F4: Go's `...T`, as the converter lowers it (`params ꓸꓸꓸT`, a Span<T> alias): its element type, or null. The
-        // forwarder takes `slice<T>` and spreads it back with `.ꓸꓸꓸ` (11.6).
+        // F4: Go's `...T`, as the converter lowers it (`params ꓸꓸꓸT`, an alias of golib's go.variadic<T> since wall E, of
+        // System.Span<T> before it), or a hand-written `params Span<T>` / `params ReadOnlySpan<T>`: its element type, or
+        // null. The forwarder takes `slice<T>` and spreads it back with `.ꓸꓸꓸ` (11.6), which is a variadic<T> pack.
         internal static ITypeSymbol? VariadicElement(IParameterSymbol parameter) =>
-            parameter is { IsParams: true, Type: INamedTypeSymbol { Name: "Span" or "ReadOnlySpan", TypeArguments: [{ } element], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } }
+            parameter is { IsParams: true, Type: INamedTypeSymbol { TypeArguments: [{ } element] } tail } &&
+            (tail is { Name: "Span" or "ReadOnlySpan", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } ||
+             tail is { Name: "variadic", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } })
                 ? element : null;
 
         internal static bool IsSString(ITypeSymbol type) =>

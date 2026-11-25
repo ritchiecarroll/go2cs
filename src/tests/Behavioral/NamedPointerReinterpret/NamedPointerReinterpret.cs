@@ -58,7 +58,7 @@ internal static void main() {
     fmt.Println(classify(boxed));
     ref var n = ref heap<int64>((int64)5, out var Ꮡn);
     intRef r = Ꮡn;
-    fmt.Println(r.Value, classify(r));
+    fmt.Println(r.Value, classify((r ?? (intRef)nil)));
 
     fmt.Println(consume("abcd"));
 

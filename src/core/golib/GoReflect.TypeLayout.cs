@@ -74,7 +74,7 @@ namespace go;
 //   result per element; anything else is one result. That rule is safe precisely because a
 //   converted Go struct is NEVER emitted as a `ValueTuple` — the converter mints a named struct —
 //   so a tuple in return position can only have come from a multi-return signature. Variadic is
-//   detected from the golib variadic delegate families, whose `params Span<T>` tail is reported as
+//   detected from the golib variadic delegate families, whose `params variadic<T>` tail is reported as
 //   Go's `[]T`.
 // ---------------------------------------------------------------------------------------------
 public static partial class GoReflect
@@ -1528,7 +1528,7 @@ public static partial class GoReflect
     /// a <c>void</c> return is zero results, a <c>ValueTuple</c> return is Go's multi-return
     /// (a converted Go struct is never a ValueTuple, so the rule is unambiguous), anything else
     /// one result. A golib variadic family delegate (<c>Funcꓸꓸꓸ</c>/<c>Actionꓸꓸꓸ</c>, whose tail
-    /// is <c>params Span&lt;T&gt;</c>) reports variadic with the tail as Go's <c>[]T</c>.
+    /// is <c>params variadic&lt;T&gt;</c>) reports variadic with the tail as Go's <c>[]T</c>.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotTypeOnlyJustification)]
     public static bool TryFuncShape(Type delegateType, [NotNullWhen(true)] out Type[]? ins, [NotNullWhen(true)] out Type[]? outs, out bool isVariadic)
@@ -1552,17 +1552,19 @@ public static partial class GoReflect
         for (int i = 0; i < parameters.Length; i++)
             ins[i] = parameters[i].ParameterType;
 
-        // A trailing `Span<T>` IS the variadic tail, and testing for it is what makes this exact.
+        // A trailing `variadic<T>` IS the variadic tail, and testing for it is what makes this exact.
         // The golib variadic delegate families (`Funcꓸꓸꓸ`/`Actionꓸꓸꓸ`) are only ONE of the shapes a
         // converted variadic func value takes: a declared `func(string, ...int)` used as a method
         // group in an `any` position acquires C#'s NATURAL delegate type instead, whose name carries
         // no family marker at all — so the name test reported it non-variadic and `In(1)` handed back
-        // a raw `Span<int>`, which then rendered as `func(string, Span\`1)`. A `Span<T>` parameter
+        // a raw `Span<int>`, which then rendered as `func(string, Span\`1)`. A `variadic<T>` parameter
         // cannot arise any other way in converted code (Go has no such type and the converter emits
         // one only for a variadic tail), so the shape test subsumes the name test rather than
         // widening it.
+        // The converter's tail is `variadic<T>` (golib variadicPack.cs), the one tail the invoke and make
+        // paths can carry; a hand-written `params Span<T>` reads as an ordinary trailing parameter.
         bool spanTail = ins.Length > 0 && ins[^1] is { IsGenericType: true } tail &&
-                        tail.GetGenericTypeDefinition() == typeof(Span<>);
+                        tail.GetGenericTypeDefinition() == typeof(variadic<>);
 
         string name = delegateType.Name;
         isVariadic = spanTail ||
@@ -1594,7 +1596,7 @@ public static partial class GoReflect
     /// round-trips through <c>NumIn</c>/<c>In</c>/<c>NumOut</c>/<c>Out</c>/<c>IsVariadic</c>
     /// unchanged. That is the whole contract, and it is why the two live together: parameters become
     /// the delegate's <c>Invoke</c> parameters; a variadic tail becomes the trailing
-    /// <c>Span&lt;T&gt;</c> that the read side tests for (never a <c>slice&lt;T&gt;</c>, which it
+    /// <c>variadic&lt;T&gt;</c> that the read side tests for (never a <c>slice&lt;T&gt;</c>, which it
     /// would report non-variadic); and the results become <c>void</c>, the single type, or a
     /// ValueTuple that nests past seven exactly as <c>FlattenValueTuple</c> unnests it.
     /// </para>
@@ -1623,7 +1625,7 @@ public static partial class GoReflect
             if (elem is null)
                 throw new ArgumentException($"variadic tail '{tail.Name}' is not a slice", nameof(ins));
 
-            parameters[^1] = typeof(Span<>).MakeGenericType(elem);
+            parameters[^1] = typeof(variadic<>).MakeGenericType(elem);
         }
 
         return MakeDelegateType(parameters, makeGoResultType(outs));
@@ -1730,7 +1732,7 @@ public static partial class GoReflect
         }
     }
 
-    // -------- variadic invocation (Value.Call over a `params Span<T>` tail) --------
+    // -------- variadic invocation (Value.Call over a `params variadic<T>` tail) --------
 
     /// <summary>
     /// The most fixed parameters a variadic func value can carry ahead of its tail — golib's
@@ -1756,7 +1758,7 @@ public static partial class GoReflect
 
     // One per delegate TYPE: the family type its instances rebind onto, and the closed trampoline
     // that performs the typed call. Both are functions of the type alone, so they cache together.
-    private sealed record VariadicInvoker(Type FamilyType, Func<Delegate, object?[], Array, object?> Call);
+    private sealed record VariadicInvoker(Type FamilyType, Func<Delegate, object?[], object?, object?> Call);
 
     private static readonly ConcurrentDictionary<Type, VariadicInvoker> s_variadicInvokers = new();
 
@@ -1769,7 +1771,7 @@ public static partial class GoReflect
     /// <remarks>
     /// <para>
     /// This exists because NO reflective invoke path can call one. A converted Go variadic lowers
-    /// its tail to <c>params Span&lt;TArg&gt;</c> (see golib variadic.cs), <c>Span&lt;T&gt;</c> is a
+    /// its tail to <c>params variadic&lt;TArg&gt;</c> (see golib variadic.cs), <c>variadic&lt;T&gt;</c> is a
     /// ref struct, and both <see cref="Delegate.DynamicInvoke"/> and <see cref="MethodBase.Invoke"/>
     /// marshal their arguments through <c>object?[]</c> — which a ref struct cannot enter. Nor can
     /// an expression tree stand in: <c>System.Linq.Expressions</c> rejects a byref-like type
@@ -1780,7 +1782,7 @@ public static partial class GoReflect
     /// So the call is made in TYPED code — one small generic trampoline per family arity, closed
     /// over the delegate's own parameter types by <c>MakeGenericMethod</c> and cached as an ordinary
     /// delegate (the idiom FieldAliasBox's makeFieldBox uses in GoReflect.FieldAccess.cs). Inside a trampoline
-    /// the tail is a <c>TArg[]</c> and its conversion to <c>Span&lt;TArg&gt;</c> is an ordinary
+    /// the tail is a <c>TArg[]</c> and its conversion to <c>variadic&lt;TArg&gt;</c> (a spread pack, see variadicTail) is an ordinary
     /// one, so nothing is ever boxed.
     /// </para>
     /// <para>
@@ -1809,7 +1811,19 @@ public static partial class GoReflect
     /// arriving wrapped in a <see cref="TargetInvocationException"/> the caller must unwrap.
     /// </para>
     /// </remarks>
-    public static object? InvokeVariadic(Delegate del, object?[] fixedArgs, Array tail)
+    public static object? InvokeVariadic(Delegate del, object?[] fixedArgs, Array tail) =>
+        invokeVariadic(del, fixedArgs, tail);
+
+    /// <summary>
+    /// Calls a converted Go VARIADIC func value with its tail passed as ONE slice — reflect's
+    /// <c>CallSlice</c>, Go's <c>f(fixed, s...)</c>. <paramref name="tailSlice"/> is a boxed
+    /// <c>slice&lt;TArg&gt;</c> (or null for the nil slice), and the callee receives that slice itself, so
+    /// its element writes are visible through the caller's slice exactly as in Go.
+    /// </summary>
+    public static object? InvokeVariadicSlice(Delegate del, object?[] fixedArgs, object? tailSlice) =>
+        invokeVariadic(del, fixedArgs, tailSlice);
+
+    private static object? invokeVariadic(Delegate del, object?[] fixedArgs, object? tail)
     {
         Type delegateType = del.GetType();
         VariadicInvoker invoker = s_variadicInvokers.GetOrAdd(delegateType, static t => buildVariadicInvoker(t));
@@ -1825,10 +1839,10 @@ public static partial class GoReflect
 
         if (invoke is null || parameters.Length == 0 ||
             parameters[^1].ParameterType is not { IsGenericType: true } tailParameter ||
-            tailParameter.GetGenericTypeDefinition() != typeof(Span<>))
+            tailParameter.GetGenericTypeDefinition() != typeof(variadic<>))
         {
             throw new NotImplementedException(
-                $"reflect: '{GoTypeName(delegateType)}' is not a variadic func value (its Invoke has no Span<T> tail)");
+                $"reflect: '{GoTypeName(delegateType)}' is not a variadic func value (its Invoke has no variadic<T> tail)");
         }
 
         int fixedCount = parameters.Length - 1;
@@ -1860,7 +1874,7 @@ public static partial class GoReflect
         if (registeredVariadic(familyType) is { } registered)
             return new VariadicInvoker(familyType, registered.Call);
 
-        return new VariadicInvoker(familyType, closeVariadicTrampoline<Func<Delegate, object?[], Array, object?>>(
+        return new VariadicInvoker(familyType, closeVariadicTrampoline<Func<Delegate, object?[], object?, object?>>(
             delegateType, familyDefinition, $"{(hasResult ? "callVariadicFunc" : "callVariadicAction")}{fixedCount}", typeArguments));
     }
 
@@ -1891,62 +1905,76 @@ public static partial class GoReflect
     }
 
     // The eighteen trampolines. Each makes the same three moves — cast to the family type, unbox the
-    // fixed arguments, hand the tail array over as a Span — and differs only in arity, so they are
+    // fixed arguments, hand the tail over as a variadic pack — and differs only in arity, so they are
     // written out rather than generated: the closed set IS golib's variadic family (variadic.cs).
 
-    private static object? callVariadicAction0<TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<TArg>)d)(new Span<TArg>((TArg[])t)); return null; }
+    // The tail as a SPREAD pack, so the callee receives a slice header exactly as Go's `f(s...)` hands
+    // one over. A Call tail is a fresh TArg[] (Go builds a new slice for it too); a CallSlice tail is
+    // the caller's own slice<TArg>, carried through so a callee's element writes reach the caller's
+    // backing array, as Go's CallSlice does. Null is the nil slice.
+    private static variadic<TArg> variadicTail<TArg>(object? t) => t switch
+    {
+        slice<TArg> spread => new variadic<TArg>(spread),
+        // A named slice type (`type S []T`) is assignable to the tail's []T: its window, shared.
+        ISlice<TArg> named => new variadic<TArg>(new slice<TArg>(named)),
+        TArg[] fresh => new variadic<TArg>(new slice<TArg>(fresh)),
+        null => new variadic<TArg>(default(slice<TArg>)),
+        _ => throw new ArgumentException($"variadic tail '{t.GetType().Name}' is neither a slice nor an array of '{typeof(TArg).Name}'", nameof(t))
+    };
 
-    private static object? callVariadicAction1<T1, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, TArg>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction0<TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<TArg>)d)(variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicAction2<T1, T2, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, T2, TArg>)d)((T1)a[0]!, (T2)a[1]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction1<T1, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, TArg>)d)((T1)a[0]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicAction3<T1, T2, T3, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, T2, T3, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction2<T1, T2, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, T2, TArg>)d)((T1)a[0]!, (T2)a[1]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicAction4<T1, T2, T3, T4, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction3<T1, T2, T3, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, T2, T3, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicAction5<T1, T2, T3, T4, T5, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction4<T1, T2, T3, T4, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicAction6<T1, T2, T3, T4, T5, T6, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction5<T1, T2, T3, T4, T5, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicAction7<T1, T2, T3, T4, T5, T6, T7, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction6<T1, T2, T3, T4, T5, T6, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicAction8<T1, T2, T3, T4, T5, T6, T7, T8, TArg>(Delegate d, object?[] a, Array t)
-    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, (T8)a[7]!, new Span<TArg>((TArg[])t)); return null; }
+    private static object? callVariadicAction7<T1, T2, T3, T4, T5, T6, T7, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicFunc0<TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<TArg, TResult>)d)(new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicAction8<T1, T2, T3, T4, T5, T6, T7, T8, TArg>(Delegate d, object?[] a, object? t)
+    { ((Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, (T8)a[7]!, variadicTail<TArg>(t)); return null; }
 
-    private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc0<TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<TArg, TResult>)d)(variadicTail<TArg>(t)); }
 
-    private static object? callVariadicFunc2<T1, T2, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, T2, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, variadicTail<TArg>(t)); }
 
-    private static object? callVariadicFunc3<T1, T2, T3, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, T2, T3, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc2<T1, T2, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, T2, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, variadicTail<TArg>(t)); }
 
-    private static object? callVariadicFunc4<T1, T2, T3, T4, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc3<T1, T2, T3, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, T2, T3, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, variadicTail<TArg>(t)); }
 
-    private static object? callVariadicFunc5<T1, T2, T3, T4, T5, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc4<T1, T2, T3, T4, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, variadicTail<TArg>(t)); }
 
-    private static object? callVariadicFunc6<T1, T2, T3, T4, T5, T6, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc5<T1, T2, T3, T4, T5, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, variadicTail<TArg>(t)); }
 
-    private static object? callVariadicFunc7<T1, T2, T3, T4, T5, T6, T7, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc6<T1, T2, T3, T4, T5, T6, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, variadicTail<TArg>(t)); }
 
-    private static object? callVariadicFunc8<T1, T2, T3, T4, T5, T6, T7, T8, TArg, TResult>(Delegate d, object?[] a, Array t)
-    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, (T8)a[7]!, new Span<TArg>((TArg[])t)); }
+    private static object? callVariadicFunc7<T1, T2, T3, T4, T5, T6, T7, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, variadicTail<TArg>(t)); }
+
+    private static object? callVariadicFunc8<T1, T2, T3, T4, T5, T6, T7, T8, TArg, TResult>(Delegate d, object?[] a, object? t)
+    { return ((Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg, TResult>)d)((T1)a[0]!, (T2)a[1]!, (T3)a[2]!, (T4)a[3]!, (T5)a[4]!, (T6)a[5]!, (T7)a[6]!, (T8)a[7]!, variadicTail<TArg>(t)); }
 
     /// <summary>
     /// The per-parameter Go array dimensions of a converted func VALUE — one entry per parameter,

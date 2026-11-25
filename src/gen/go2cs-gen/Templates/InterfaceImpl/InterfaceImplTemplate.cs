@@ -224,7 +224,8 @@ internal class InterfaceImplTemplate : TemplateBase
                 string embedField = EmbedField;
 
                 result.Append($"\r\n\r\n    // Go method set entry for the promoted '{GetSimpleName(InterfaceName)}.{simpleMethodName}()':\r\n");
-                result.Append($"    internal static {method.ReturnType} {EscapeCsKeyword(simpleMethodName)}{method.GetGenericSignature()}({parameterList}){method.GetWhereConstraints()} => ");
+                string goNameStamp = method.GoName is { } goName ? $"[global::go.GoName(\"{goName}\")] " : "";
+                result.Append($"    {goNameStamp}internal static {method.ReturnType} {EscapeCsKeyword(simpleMethodName)}{method.GetGenericSignature()}({parameterList}){method.GetWhereConstraints()} => ");
                 result.Append($"{receiver}.{embedField}.{simpleMethodName}{method.GetGenericSignature()}({callParameters});");
             }
 

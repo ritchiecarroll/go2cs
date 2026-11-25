@@ -41,7 +41,7 @@ using go.net.http;
 using go.net.http.@internal;
 using go.sync;
 using vendor.golang.org.x.net.http;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class http_package {
 
@@ -3357,7 +3357,7 @@ partial struct tLogKey {
 }
 
 internal static void logf⁔(/*this*/ ref transportRequest tr, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (logf, ok) = tr.Request.Context().Value(new tLogKey())._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
         logf(time.Now().Format(time.RFC3339Nano) + ": "u8 + format, args.ꓸꓸꓸ);

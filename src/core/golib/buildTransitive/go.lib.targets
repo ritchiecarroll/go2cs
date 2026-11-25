@@ -330,8 +330,9 @@
     its suppression files. Set GoAllowBelowBreakFloor=true to build anyway: each error becomes a warning with the same
     code, and the build goes on.
   -->
-  <!-- 1.26.11.2, the .5 release: the floor moves once for every .5 break together (the named-func-type break and
-       the variadic<T> spelling among them). A Go patch release before .5 ships moves it with that release's version. -->
+  <!-- 1.26.11.2, the .5 release: it moves the floor ONCE for every .5 break together, among them Tour 4's array
+       literals, the named-func-type break and wall E's go.variadic<T> (COORD 2026-11-20T13:50:29Z). A Go patch release
+       before .5 ships moves it with that release's version. -->
   <PropertyGroup>
     <GoBreakFloor>1.26.11.2</GoBreakFloor>
   </PropertyGroup>

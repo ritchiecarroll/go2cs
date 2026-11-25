@@ -8,8 +8,8 @@ using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
 using strings = strings_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸжastꓸIdent = Span<ж<global::go.go.ast_package.Ident>>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸжastꓸIdent = variadic<ж<global::go.go.ast_package.Ident>>;
 
 partial class parser_package {
 
@@ -87,13 +87,13 @@ partial struct resolver {
 }
 
 internal static void trace⁔(/*this*/ ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     fmt.Println(strings.Repeat(". ", r.depth) + r.sprintf(format, args.ꓸꓸꓸ));
 }
 
 internal static @string sprintf⁔(/*this*/ ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     foreach (var (i, arg) in range(args)) {
         switch (arg.type()) {
