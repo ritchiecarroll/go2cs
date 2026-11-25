@@ -214,6 +214,10 @@ stays in place keeps `a == 1 && (await …) == 3`.
 
 Run in scratch before this note was read. They go into `src/tools/mnspike2/MnGoOrder` with the seat's code.
 
+*As coded:* `src/tools/mnspike2/MnGoOrder/row19` (Go only; `go run ./row19`, then with `-gcflags=-l`). Re-run
+2026-11-25 on go1.26.11: every M4 line reads after the call both ways (`new+f`, 110), every M2 line reads after the
+call both ways except the closure-captured pointer local, which reads `first` inlined and `second` with `-l`.
+
 **M4 holds.** `s += f()` with f writing s reads s AFTER the call in every form tried: a package variable with f
 inlinable and with f marked `//go:noinline`, a closure-captured string local, and a closure-captured int local
 (`n := 1; n += g()` with g setting n to 100 and returning 10 gives 110). The same with `-gcflags=-l`.
