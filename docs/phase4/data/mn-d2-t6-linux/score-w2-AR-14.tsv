@@ -1,0 +1,20 @@
+# AR-14 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=99871
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-14	compress/flate	ABSENT	-1	PASS	64	None	64	NO	yes	bank	reference	-1	5069	0	-1	44
+AR-14	crypto/elliptic	ABSENT	-1	PASS	81	None	81	NO	yes	bank	reference	-1	5623	0	-1	22
+AR-14	crypto/internal/fips140/subtle	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	3724	0	-1	13
+AR-14	crypto/x509	ABSENT	-1	PASS	523	None	523	NO	yes	bank	reference	-1	13301	0	-1	186
+AR-14	debug/macho	ABSENT	-1	PASS	7	None	7	NO	yes	bank	reference	-1	4815	0	-1	39
+AR-14	encoding/ascii85	ABSENT	-1	PASS	9	None	9	NO	yes	bank	reference	-1	3705	0	-1	303
+AR-14	encoding/asn1	ABSENT	-1	PASS	55	None	55	NO	yes	bank	reference	-1	4791	0	-1	25
+AR-14	go/build	ABSENT	-1	PASS	57	None	57	NO	yes	bank	reference	-1	6842	0	-1	49
+AR-14	hash	ABSENT	-1	PASS	18	None	18	NO	yes	bank	reference	-1	4302	0	-1	21
+AR-14	hash/adler32	ABSENT	-1	PASS	9	None	9	NO	yes	bank	reference	-1	3869	0	-1	13
+AR-14	internal/trace/internal/tracev1	ABSENT	-1	PASS	3	None	3	NO	yes	bank	reference	-1	4060	0	-1	19
+AR-14	internal/trace/tracev2	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	4239	0	-1	16
+AR-14	io/fs	ABSENT	-1	PASS	21	None	21	NO	yes	bank	reference	-1	3947	0	-1	25
+AR-14	iter	ABSENT	-1	PASS	28	None	28	NO	yes	bank	reference	-1	3421	0	-1	12
+AR-14	net/http/fcgi	ABSENT	-1	PASS	12	None	12	NO	yes	bank	reference	-1	17145	0	-1	132
+AR-14	net/mail	ABSENT	-1	PASS	11	None	11	NO	yes	bank	reference	-1	5997	0	-1	38
+AR-14	regexp	ABSENT	-1	PASS	45	None	45	NO	yes	bank	reference	-1	5021	0	-1	66
+# summary rows=17 plain PASS=0 twinned EQUAL-bank=17 twinned EQUAL-plain=0

@@ -1,0 +1,19 @@
+# AR-7 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=84464
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-7	context	ABSENT	-1	FAIL	-1	None	None	yes	NO	bank	-	-1	-1	-1	-1	40
+AR-7	crypto	ABSENT	-1	PASS	8	None	8	NO	yes	bank	reference	-1	12088	0	-1	72
+AR-7	crypto/internal/fips140/aes	ABSENT	-1	PASS	5	None	5	NO	yes	bank	reference	-1	4060	0	-1	30
+AR-7	crypto/sha512	ABSENT	-1	PASS	44	None	44	NO	yes	bank	reference	-1	5492	0	-1	33
+AR-7	go/internal/gccgoimporter	ABSENT	-1	PASS	4	None	4	NO	yes	bank	reference	-1	10942	0	-1	137
+AR-7	go/types	ABSENT	-1	PASS	597	None	597	NO	yes	bank	reference	-1	12796	4	-1	223
+AR-7	image	ABSENT	-1	PASS	8	None	8	NO	yes	bank	reference	-1	5333	0	-1	39
+AR-7	internal/coverage/pods	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	4343	0	-1	23
+AR-7	internal/coverage/slicewriter	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	3421	0	-1	471
+AR-7	internal/godebugs	ABSENT	-1	PASS	2	None	2	NO	yes	bank	reference	-1	4837	0	-1	89
+AR-7	net/url	ABSENT	-1	FAIL	-1	None	None	yes	NO	bank	-	-1	-1	-1	-1	71
+AR-7	path	ABSENT	-1	PASS	9	None	9	NO	yes	bank	reference	-1	3421	0	-1	31
+AR-7	runtime/trace	ABSENT	-1	PASS	19	None	19	NO	yes	bank	reference	-1	5444	0	-1	62
+AR-7	sync/atomic	ABSENT	-1	PASS	108	None	108	NO	yes	bank	reference	-1	3759	0	-1	188
+AR-7	text/template/parse	ABSENT	-1	PASS	52	None	52	NO	yes	bank	reference	-1	4247	0	-1	30
+AR-7	unicode/utf16	ABSENT	-1	PASS	8	None	8	NO	yes	bank	reference	-1	4281	0	-1	30
+# summary rows=16 plain PASS=0 twinned EQUAL-bank=14 twinned EQUAL-plain=0
