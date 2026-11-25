@@ -20,7 +20,8 @@
 // The census rows (3d) run only when MN_INV_ONLY names one (C-pipe, C-accept, C-netread, C-exec, C-sleep, C-chan,
 // C-stdin, C-dns): K goroutines block in one standard-library call at once, main waits, then releases them. The
 // scheduler's READING line (GO2CS_MN_READING=1) says whether the blocks were seen: handoffs or retakes, or only
-// injections. MN_INV_ONLY=V<n> runs one V row alone.
+// injections. MN_INV_WARM=1 runs a census row's pass twice and reads the second (census, below). MN_INV_ONLY=V<n> runs
+// one V row alone.
 //
 // Each blocked goroutine first receives from a gate, a park point, so it has a hidden twin and runs on the scheduler
 // under GO2CS_MN=1. Deterministic by construction: nothing printed depends on the P count, the order or the timing.
@@ -413,6 +414,25 @@ func censusDNS(k int) int {
 	return n
 }
 
+// census runs one census row. With MN_INV_WARM=1 it runs the pass once first, so the measured pass does not count the
+// first pass's one-time costs (JIT, type initialization, the first timer and socket setup) as long steps; with
+// MN_INV_READING=1 it prints what the scheduler did during the measured pass alone.
+func census(row string, k int, pass func(int) int) {
+	if os.Getenv("MN_INV_WARM") == "1" {
+		pass(k)
+	}
+	var h0, r0, i0, s0 int64
+	if counters != nil {
+		h0, r0, i0, s0, _ = counters()
+	}
+	released := pass(k) == k
+	if counters != nil && reading {
+		h1, r1, i1, s1, _ := counters()
+		fmt.Fprintf(os.Stderr, "reading: %s handoffs=%d retakes=%d injections=%d sensed=%d\n", row, h1-h0, r1-r0, i1-i0, s1-s0)
+	}
+	fmt.Println(row, "released:", released)
+}
+
 func runs(row string) bool {
 	only := os.Getenv("MN_INV_ONLY")
 	return only == "" || only == row
@@ -429,23 +449,25 @@ func main() {
 
 	switch os.Getenv("MN_INV_ONLY") {
 	case "C-pipe":
-		fmt.Println("C-pipe released:", censusPipe(k) == k)
+		census("C-pipe", k, censusPipe)
 		return
 	case "C-accept":
-		fmt.Println("C-accept released:", censusAccept(k) == k)
+		census("C-accept", k, censusAccept)
 		return
 	case "C-netread":
-		fmt.Println("C-netread released:", censusNetRead(k) == k)
+		census("C-netread", k, censusNetRead)
 		return
 	case "C-exec":
-		fmt.Println("C-exec released:", censusExec(k) == k)
+		census("C-exec", k, censusExec)
 		return
 	case "C-sleep":
-		fmt.Println("C-sleep released:", censusSleep(k) == k)
+		census("C-sleep", k, censusSleep)
 		return
 	case "C-chan":
-		wait, set := channelEvent()
-		fmt.Println("C-chan released:", blockAll(k, wait, set) == k)
+		census("C-chan", k, func(k int) int {
+			wait, set := channelEvent()
+			return blockAll(k, wait, set)
+		})
 		return
 	case "C-stdin":
 		censusStdin(k)
@@ -455,7 +477,7 @@ func main() {
 		v2(k)
 		return
 	case "C-dns":
-		fmt.Println("C-dns released:", censusDNS(k) == k)
+		census("C-dns", k, censusDNS)
 		return
 	}
 

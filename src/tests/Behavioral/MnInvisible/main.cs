@@ -414,6 +414,25 @@ internal static partial nint censusDNS(nint k) {
     return n;
 }
 
+internal static void census(@string row, nint k, Func<nint, nint> pass) {
+    if (Δos.Getenv("MN_INV_WARM") == "1"u8) {
+        pass(k);
+    }
+    int64 h0 = default;
+    int64 r0 = default;
+    int64 i0 = default;
+    int64 s0 = default;
+    if (counters != nil) {
+        (h0, r0, i0, s0, _) = counters();
+    }
+    var released = pass(k) == k;
+    if (counters != nil && reading) {
+        var (h1, r1, i1, s1, _) = counters();
+        fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "reading: %s handoffs=%d retakes=%d injections=%d sensed=%d\n"u8, row, h1 - h0, r1 - r0, i1 - i0, s1 - s0);
+    }
+    fmt.Println(row, "released:", released);
+}
+
 internal static bool runs(@string row) {
     @string only = Δos.Getenv("MN_INV_ONLY");
     return only == ""u8 || only == row;
@@ -431,28 +450,30 @@ internal static void main() {
     var exprᴛ1 = Δos.Getenv("MN_INV_ONLY");
     switch (ᐧ) {
     case {} when exprᴛ1 == "C-pipe"u8: {
-        fmt.Println("C-pipe released:", censusPipe(k) == k);
+        census("C-pipe", k, censusPipe);
         return;
     }
     case {} when exprᴛ1 == "C-accept"u8: {
-        fmt.Println("C-accept released:", censusAccept(k) == k);
+        census("C-accept", k, censusAccept);
         return;
     }
     case {} when exprᴛ1 == "C-netread"u8: {
-        fmt.Println("C-netread released:", censusNetRead(k) == k);
+        census("C-netread", k, censusNetRead);
         return;
     }
     case {} when exprᴛ1 == "C-exec"u8: {
-        fmt.Println("C-exec released:", censusExec(k) == k);
+        census("C-exec", k, censusExec);
         return;
     }
     case {} when exprᴛ1 == "C-sleep"u8: {
-        fmt.Println("C-sleep released:", censusSleep(k) == k);
+        census("C-sleep", k, censusSleep);
         return;
     }
     case {} when exprᴛ1 == "C-chan"u8: {
-        var (wait, set) = channelEvent();
-        fmt.Println("C-chan released:", blockAll(k, wait, set) == k);
+        census("C-chan", k, [GoFunc("main.func1")] (nint kΔ2) => {
+            var (wait, set) = channelEvent();
+            return blockAll(kΔ2, wait, set);
+        });
         return;
     }
     case {} when exprᴛ1 == "C-stdin"u8: {
@@ -465,7 +486,7 @@ internal static void main() {
         return;
     }
     case {} when exprᴛ1 == "C-dns"u8: {
-        fmt.Println("C-dns released:", censusDNS(k) == k);
+        census("C-dns", k, censusDNS);
         return;
     }}
 
