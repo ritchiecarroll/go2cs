@@ -320,6 +320,37 @@ same with operand order merged locally (not pushed). Each arm reports total rows
 gained or lost against the other arm, matched by file, function, reason and blocker. A row the seat ADDS is a finding,
 posted before anything else.
 
+### 6.4 As measured, 2026-11-25 (linux, 358 reports each arm, 0 build errors each arm)
+
+The arms swap only the two generator files. Base A is master 08e113cb0b0 with the row 19 cut (033b8767567); base B is
+that with operand order (edce26dc89c) merged locally and not pushed. Before = the generator at 033b8767567, after =
+e751dd9aec6. No arm ADDS a row.
+
+| Base | Before | After | Predicted |
+|---|---|---|---|
+| B (operand order + cut) | 54 | 5 | 5, or 4 with M8 |
+| A (master + cut) | 89 | 25 | 30 |
+
+Scored against 6.1. M8 cleared mime. The 4 left from group H are common.cs:1011, 1120, fuzz.cs:1067 and exec.cs:990,
+as predicted. The fifth is a miss of kind 1 (a second blocker): of class 6's three gob rows, decode.cs:1255 stays, now
+blocked `inside-moving-call`, because the right operand of `&&` is a parking call whose own argument parks. Group E
+cleared although M6 was narrowed to the ref-like case: both of its if headers are ref-like.
+
+Scored against 6.2: 25 against 30 is five better, for named reasons. element-index cleared one row (h2_bundle.cs:10709,
+a call inside a literal left plain, the report fix below). Of the four "other object creations", three cleared
+(builtins.cs:912 is a pointer adapter over a pure read, M2; event.cs:1598 and decodefile.cs:182 cleared too and were
+not traced line by line); builtins.cs:922 stays, `earlier:ObjectCreationExpression`. runtime mgcwork.cs:223 cleared: the tuple is the RIGHT
+side of `(w.wbuf1, w.wbuf2) = (w.wbuf2, getempty())`, so its elements are M3's, and the store through the ref local is
+C2's existing spill; 6.2 misread it as a target. What stays (25): 13 element-index, 4 element access, gob's
+second-blocker row, the member-access argument passed by ref (net/http client.cs:776, P3's MUST 1 shape, which must
+stay), the unary minus, builtins.cs:922 and the four of group H.
+
+The first after arm on base A read 33. Two of its misses were the generator's, fixed in e751dd9aec6 with rows:
+ruling 2's five crypto/tls rows were report residue (the emission was right, `ExpandLabelꞏtwin(() => recv.New(), …)`
+with the literal plain, but PairLiteral's not-parks undo kept the rows its discarded visit recorded), and net
+udpsock_posix.cs:102 and 131 stayed because M1 kept a by-value struct result used as a receiver as a blocker. Ruling
+2's falsifier (the five rows changing blocker) did not fire: the rows disappear.
+
 ## 7. Size
 
 M1 is the largest piece: a spill list in text order in place of the current single-call move, with Rule S after each
