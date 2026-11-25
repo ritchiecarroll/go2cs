@@ -48,7 +48,7 @@ public static ref readonly @string GOARCH => ref GoProcessArch.Value;
 // itself could run after another initializer in the class that reads GOARCH.
 private static class GoProcessArch {
     // Any architecture but Arm64 keeps the converted target's "amd64": darwin ships x64 and arm64 alone.
-    internal static readonly @string Value = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : "amd64";
+    internal static readonly @string Value = "amd64"; // RED CONTROL (D3, never to land): the stand-in no longer reads the process
 }
 
 } // end runtime_package
