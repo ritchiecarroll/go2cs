@@ -187,6 +187,12 @@ public static class GoScheduler
     // DESIGN-mn-pin.md 15.3 (arms only): GO2CS_MN_RETAKE_UNPINNED=1 counts a retake as shared, as before 15.2.
     private static readonly bool s_retakeUnpinned = Environment.GetEnvironmentVariable("GO2CS_MN_RETAKE_UNPINNED") == "1";
     private static long s_retakes;
+
+    // N5 3a (DESIGN-mn-n5-invisible-blocking.md): a step whose thread is blocked in a managed wait golib does not know
+    // about (a lock, a .NET event, Task.Wait, Thread.Sleep) holds its P; the monitor senses it from the thread's state
+    // and retakes the P as it retakes a native call's. GO2CS_MN_SENSE=0 turns it off (an arm only).
+    private static readonly bool s_sense = Environment.GetEnvironmentVariable("GO2CS_MN_SENSE") != "0";
+    private static long s_sensed;
     private static int s_pWaiters;
 
     private static int ReadMaxInject()
@@ -574,7 +580,7 @@ public static class GoScheduler
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
                $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
                $" carrier-stack-mb={Volatile.Read(ref s_carrierStackSize) / (1024 * 1024)}" +
-               $" retakes={Interlocked.Read(ref s_retakes)}" +
+               $" retakes={Interlocked.Read(ref s_retakes)} sensed={Interlocked.Read(ref s_sensed)}" +
                $" off-carrier-resumes={Interlocked.Read(ref s_offCarrierResumes)}" +
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
@@ -859,17 +865,27 @@ public static class GoScheduler
             {
                 int retake = 0;
                 int retakePinned = 0;
+                int sensed = 0;
 
                 lock (s_carriersLock)
                 {
                     foreach (Carrier carrier in s_carriers)
                     {
-                        bool native = Volatile.Read(ref carrier.RunningSince) != 0 &&
-                                      carrier.Mounted is { } mounted && (Volatile.Read(ref mounted.m_nativeDepth) & 1) != 0;
+                        bool inStep = Volatile.Read(ref carrier.RunningSince) != 0 && carrier.Mounted is not null;
+                        bool native = inStep && carrier.Mounted is { } mounted && (Volatile.Read(ref mounted.m_nativeDepth) & 1) != 0;
+
+                        // N5 3a: in a step, holding its P (RunningSince is cleared at a hand-off, and a retaken step is
+                        // skipped by the exchange below), and its thread blocked in a managed wait.
+                        bool waiting = s_sense && inStep && !native && carrier.Thread is { } thread &&
+                                       (thread.ThreadState & System.Threading.ThreadState.WaitSleepJoin) != 0;
 
                         if (!native)
                             carrier.NativeTicks = 0;
-                        else if (++carrier.NativeTicks >= 2)
+
+                        if (!waiting)
+                            carrier.SensedTicks = 0;
+
+                        if ((native && ++carrier.NativeTicks >= 2) || (waiting && ++carrier.SensedTicks >= 2))
                         {
                             // DESIGN-mn-pin.md 15.2: the flag is set BEFORE the retake is published, so a step that releases
                             // the retake at once still lowers the pinned count it raises.
@@ -880,6 +896,9 @@ public static class GoScheduler
                             {
                                 retake++;
 
+                                if (!native)
+                                    sensed++;
+
                                 if (pinned)
                                     retakePinned++;
                             }
@@ -889,7 +908,11 @@ public static class GoScheduler
 
                 for (int i = 0; i < retake; i++)
                 {
-                    Interlocked.Increment(ref s_retakes);
+                    if (i < sensed)
+                        Interlocked.Increment(ref s_sensed);
+                    else
+                        Interlocked.Increment(ref s_retakes);
+
                     Interlocked.Increment(ref s_blocked);
 
                     if (i < retakePinned)
@@ -923,7 +946,8 @@ public static class GoScheduler
 
                     // A step the retake walk has seen inside a native call is answered by the retake alone (N5): on a
                     // host whose timer makes two ticks outlast the threshold it would otherwise be injected first.
-                    if (since == 0 || carrier.Injected || Volatile.Read(ref carrier.Retaken) != 0 || carrier.NativeTicks > 0)
+                    if (since == 0 || carrier.Injected || Volatile.Read(ref carrier.Retaken) != 0 || carrier.NativeTicks > 0 ||
+                        carrier.SensedTicks > 0)
                         continue;
 
                     long paused = (pauses - carrier.PauseAtStart) * Stopwatch.Frequency / TimeSpan.TicksPerSecond;
@@ -974,6 +998,11 @@ public static class GoScheduler
         // and how many ticks in a row the monitor has found it there.
         internal int Retaken;
         internal int NativeTicks;
+
+        // N5 3a: this carrier's thread, read by the monitor for its wait state, and how many ticks in a row the monitor
+        // has found it in a managed wait while in a step and holding its P.
+        internal Thread? Thread;
+        internal int SensedTicks;
 
         // The run-next slot (the goroutine carries its step), whether this carrier is inside a step, and
         // how many slot runs in a row it has made.
@@ -1095,6 +1124,7 @@ public static class GoScheduler
         internal void Loop()
         {
             t_carrier = this;
+            Thread = Thread.CurrentThread;
             m_baseContext = ExecutionContext.Capture();
 
             while (true)
