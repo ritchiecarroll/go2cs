@@ -51,13 +51,26 @@ func Parse(s string) float64 {
 // CS0246 at the first build of net's cgo-on test host (19.6, probe 45510185924).
 const cgoTestsFixturePlain = `package cgot4
 
+import "math"
+
 // Half halves x through the C type, from a file that does not import C.
 func Half(x float64) float64 { return float64(cdouble(x) / 2) }
+
+// Pair returns an untyped constant of another package converted to the C type's alias, in a tuple: net's cgoSockaddr
+// shape, whose cast rendered the alias's target (C.@uint) where Half's renders the alias by name (a variable's
+// conversion did not reproduce the defect: run 45512989670).
+func Pair() (int, cdouble) { return 1, cdouble(math.MaxInt8) }
 `
 
 const cgoTestsFixtureTest = `package cgot4
 
 import "testing"
+
+func TestPairThroughTheAliasConstant(t *testing.T) {
+	if one, got := Pair(); one != 1 || got != 127 {
+		t.Errorf("Pair() = %d, %v, want 1, 127", one, got)
+	}
+}
 
 func TestHalfThroughTheAlias(t *testing.T) {
 	if got := Half(3); got != 1.5 {
@@ -127,7 +140,7 @@ func TestACgoPackageConvertsWithItsTestsAndMatchesGo(t *testing.T) {
 
 	t.Logf("READING: status %q matched %v go %v csharp %v errors %v", record.Status, record.Matched, record.Go, record.CSharp, record.Errors)
 
-	for _, name := range []string{"TestParseCrossesToC", "TestParseOfNothing", "TestHalfThroughTheAlias"} {
+	for _, name := range []string{"TestParseCrossesToC", "TestParseOfNothing", "TestHalfThroughTheAlias", "TestPairThroughTheAliasConstant"} {
 		if record.Go[name] != "pass" || record.CSharp[name] != "pass" {
 			t.Errorf("%s: go %q, go2cs %q, want pass on both sides", name, record.Go[name], record.CSharp[name])
 		}
