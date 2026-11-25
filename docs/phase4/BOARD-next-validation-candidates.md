@@ -42102,8 +42102,6 @@ already records cross-package renames for type references: foreignAliasedTypeNam
 
 — R (2026-11-24)
 
-<!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
-
 ## 2026-11-25 — P2 (cgo item 4 census; COORD ruling 20261125T015543Z, option B): `unsafe.Pointer` of a method's own pointer receiver is refused when the receiver points into C memory (OPEN, named residual)
 
 **OPEN.** github.com/google/gopacket/afpacket v1.1.19 is the one package in the item 4 census (50 module refs) that
@@ -42130,3 +42128,5 @@ CAP_NET_RAW.
 **Owner.** Unassigned (post-.5). Census kit and the route log are P2's scratch, not committed.
 
 — P2 (2026-11-25)
+
+<!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
