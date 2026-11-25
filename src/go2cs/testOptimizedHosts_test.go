@@ -32,6 +32,20 @@ import (
 
 var goOptimizedTestHostsPattern = regexp.MustCompile(`<GoOptimizedTestHosts>([^<]*)</GoOptimizedTestHosts>`)
 
+// callerLineExceptions admits a listed host whose package reads caller lines, by NAME and with EVIDENCE (COORD 2026-11-25 18:27Z):
+// the row swept whole in both arms at the pipeline's DOTNET_TieredCompilation=0, every verdict equal, so optimizing the host moves
+// none of its caller-reading verdicts at that tree. A later caller-line test in the package can still move, which is why each
+// exception carries its dated sweep and is re-read when the package's tests change.
+var callerLineExceptions = map[string]string{
+	// runtime/pprof's tests call runtime.Callers (stack-shape checks). TestGoroutineCounts and
+	// TestGoroutineProfileConcurrency/finalizer_present set a finalizer, drop the local and collect; the unoptimized frame
+	// keeps the object alive (P1's root and bisect, first bad bb6267d0e4).
+	"runtime.pprof.tests": "2026-11-25 P1, full linux sweep at 89820c0df1 + this entry, TC0: 148 matching + 8 disclosed in both arms, equal to the bank, no verdict moved",
+}
+
+// callerLineCitationPattern is what an exception's citation must carry: a date and an equal sweep's counts.
+var callerLineCitationPattern = regexp.MustCompile(`\d{4}-\d{2}-\d{2}.*sweep.*\d+ matching.*equal`)
+
 var expectedTestLinePattern = regexp.MustCompile(`_test\.go:[0-9]+`)
 
 // optimizedTestHosts reads GoOptimizedTestHosts from golib's go.lib.symbols.targets as project name -> test name.
@@ -150,8 +164,26 @@ func TestOptimizedTestHostsKeepTheirAdmissionRule(t *testing.T) {
 			t.Errorf("%s: package %s has no %s, the test its entry names", project, pkg, test)
 		}
 
+		if citation, excepted := callerLineExceptions[project]; excepted {
+			if len(readers) == 0 {
+				t.Errorf("%s: excepted from the caller-line rule but its package reads no caller lines; drop the exception", project)
+			}
+
+			if !callerLineCitationPattern.MatchString(citation) {
+				t.Errorf("%s: its caller-line exception cites no dated equal sweep (%q)", project, citation)
+			}
+
+			continue
+		}
+
 		for _, reader := range readers {
 			t.Errorf("%s: package %s reads caller lines (%s); an optimized host loses them, so disclose its test instead", project, pkg, reader)
+		}
+	}
+
+	for project := range callerLineExceptions {
+		if _, listed := hosts[project]; !listed {
+			t.Errorf("%s: a caller-line exception for a host GoOptimizedTestHosts does not list; drop it", project)
 		}
 	}
 }

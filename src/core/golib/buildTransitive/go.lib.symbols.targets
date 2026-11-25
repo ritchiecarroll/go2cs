@@ -79,11 +79,12 @@
     A host joins this list only when both arms are read for its row: as built it is not EQUAL its bank because of an
     allocation or liveness assertion, and with GoTestOptimize=true it is. testOptimizedHosts_test.go holds the list to
     that: every entry names a test its package has, and no listed package reads caller lines (runtime.Caller and
-    kin), the fidelity the switch below exists for. Entries are <project name>=<test>; an explicit
+    kin), the fidelity the switch below exists for, unless the guard names an exception citing a dated sweep of the
+    whole row equal in both arms (runtime/pprof: TestGoroutineCounts and finalizer_present, P1's root). Entries are <project name>=<test>; an explicit
     -p:GoTestOptimize=false still builds a listed host unoptimized, for the A/B arm.
   -->
   <PropertyGroup>
-    <GoOptimizedTestHosts>context.tests=TestAllocs;sync.tests=TestPoolGC;unique.tests=TestHandle;weak.tests=TestPointer;crypto.internal.fips140cache.tests=TestCache</GoOptimizedTestHosts>
+    <GoOptimizedTestHosts>context.tests=TestAllocs;sync.tests=TestPoolGC;unique.tests=TestHandle;weak.tests=TestPointer;crypto.internal.fips140cache.tests=TestCache;runtime.pprof.tests=TestGoroutineCounts</GoOptimizedTestHosts>
   </PropertyGroup>
   <PropertyGroup Condition="'$(GoTestOptimize)' == '' and ('$(RootNamespace)' == 'go' or $(RootNamespace.StartsWith('go.'))) and $([System.String]::Copy(';$(GoOptimizedTestHosts);').Contains(';$(MSBuildProjectName)='))">
     <GoTestOptimize>true</GoTestOptimize>

@@ -42587,4 +42587,16 @@ project (made to fail on the narrow condition: it named fips140cache). runtime/p
 — P2 (2026-11-25)
 
 
+**Update 2026-11-25 (P2): runtime/pprof joins the list under a NAMED caller-line exception (COORD 182736Z).** P1 rooted
+TestGoroutineCounts (hangs on fingReady, 15 m deadline) and TestGoroutineProfileConcurrency/finalizer_present
+("finalizer did not run") to the same class: a finalizer on new(*T), the local dropped, runtime.GC(); the unoptimized
+frame keeps the object alive. Bisect at TC0: first bad bb6267d0e4. A/B at master, TC0: optimized PASS 3/3 and 2/2, as
+built FAIL 3/3 and TIMEOUT. pprof_test.go calls runtime.Callers, so the guard refuses the entry; P1's full linux sweep
+at 89820c0df1 + the entry, TC0, read 148 matching + 8 disclosed in both arms, equal to the bank (595 s; as built FAIL in
+1,510 s). The guard now admits a caller-reading package only through `callerLineExceptions`, whose citation must carry a
+date and an equal sweep's counts, and flags an exception with no readers or no listed host (made to fail both ways).
+
+— P2 (2026-11-25)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
