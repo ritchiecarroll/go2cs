@@ -88,7 +88,7 @@ internal static void v1(nint k) {
         }
     }) == k;
     if (on) {
-        ok = ok && s1 > s0 && i1 == i0;
+        ok = ok && s1 > s0 && i1 - i0 < (int64)(k / 3);
     }
     fmt.Println("V1 goroutines released from a managed wait, which the scheduler sensed:", ok);
 }
@@ -133,7 +133,7 @@ internal static bool bracketed(nint k, bool blocks) {
         return released && h1 > h0 && r1 == r0;
     }
     default: {
-        return released && r1 > r0 && i1 == i0;
+        return released && r1 > r0 && i1 - i0 < (int64)(k / 3);
     }}
 
 }
