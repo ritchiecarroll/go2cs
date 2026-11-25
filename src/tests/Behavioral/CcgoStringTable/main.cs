@@ -18,15 +18,13 @@ internal static uintptr ts = (Ꮡts1.Reinterpret<@string, reflect.StringHeader>(
 internal static slice<slice<byte>> sink;
 
 internal static @string goString(uintptr p) {
-    var bᴷ = new stackAppend<byte>();
-
     slice<byte> b = default;
     for (;;) {
         var c = ~@unsafe.Pointer.To<byte>((@unsafe.Pointer)p);
         if (c == 0) {
             break;
         }
-        b = append(bᴷ, b, c);
+        b = append(b, c);
         p++;
     }
     return (@string)b;

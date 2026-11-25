@@ -18,7 +18,7 @@ partial struct pair {
     internal uint16 b;
 }
 
-partial struct record {
+partial struct Δrecord {
     internal @string label;
     internal uint32 word;
     internal pair both;
@@ -73,19 +73,19 @@ internal static byte twoViews(ж<rawInet4> raw) {
     return p.ElementRef(0);
 }
 
-internal static (byte, byte) wordBytes(ж<record> r) {
+internal static (byte, byte) wordBytes(ж<Δrecord> r) {
     var p = @unsafe.ArrayPointer<byte>.Of(r.Ꮡword, 4);
     p.ElementRef(3) = 0x7F;
     return (p.ElementRef(0), p.ElementRef(3));
 }
 
-internal static uint16 structHalves(ж<record> r) {
+internal static uint16 structHalves(ж<Δrecord> r) {
     var p = @unsafe.ArrayPointer<uint16>.Of(r.Ꮡboth, 2);
     p.ElementRef(1) = 0x3333;
     return p.ElementRef(0);
 }
 
-internal static byte structBytes(ж<record> r) {
+internal static byte structBytes(ж<Δrecord> r) {
     var p = @unsafe.ArrayPointer<byte>.Of(r.Ꮡboth, 4);
     return p.ElementRef(3);
 }
@@ -231,7 +231,7 @@ internal static void main() {
     fmt.Printf("alias: %#02x %#02x port=%#04x\n"u8, lo, hi, port);
     fmt.Printf("two views: %#02x port=%#04x\n"u8, twoViews(raw), raw.port);
 
-    var r = Ꮡ(new record(label: "r", word: 0x0A0B0C0D, both: new pair(a: 0x1111, b: 0x2222), tail: 0x5678));
+    var r = Ꮡ(new Δrecord(label: "r", word: 0x0A0B0C0D, both: new pair(a: 0x1111, b: 0x2222), tail: 0x5678));
     var (b0, b3) = wordBytes(r);
     fmt.Printf("word: %#02x %#02x word=%#08x\n"u8, b0, b3, r.word);
     fmt.Printf("struct field: %#04x b=%#04x byte=%#02x tail=%#04x label=%s\n"u8, structHalves(r), r.both.b, structBytes(r), r.tail, r.label);

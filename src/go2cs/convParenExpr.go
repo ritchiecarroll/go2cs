@@ -34,6 +34,13 @@ func (v *Visitor) convParenExpr(parenExpr *ast.ParenExpr, context LambdaContext,
 		}
 	}
 
+	// cmd/cgo writes a C variable's use as `(*_Cvar_x)`: the parentheses are its too, around C.x (cgo item 3).
+	if star, ok := parenExpr.X.(*ast.StarExpr); ok {
+		if reference, isVariable := cgoVariableReference(star.X); isVariable {
+			return reference
+		}
+	}
+
 	starContext := DefaultStarExprContext()
 	starContext.inParenExpr = true
 	expr := v.convExpr(parenExpr.X, []ExprContext{starContext, litContext})

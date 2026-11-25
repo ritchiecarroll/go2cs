@@ -5,10 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static partial void run() {
-    var wᴷ = new stackAppend<uint32>();
-    var xᴷ = new stackAppend<uint32>();
-    var zᴷ = new stackAppend<uint32>();
-
     var @base = new slice<uint32>(6);
     var d = @base[2..5];
     copy(d, slice<uint32>([7, 8, 9]));
@@ -41,16 +37,16 @@ internal static partial void run() {
     fmt.Println(len(h), cap(h), @base[1]);
 
     var w = @base[2..4];
-    var x = append(wᴷ, w, (uint32)500);
+    var x = append(w, (uint32)500);
     x[0] = 501;
     fmt.Println(@base, len(x), cap(x));
 
-    var y = append(xᴷ, x, (uint32)1, (uint32)2, (uint32)3);
+    var y = append(x, (uint32)1, (uint32)2, (uint32)3);
     y[0] = 999;
     fmt.Println(@base[2], y[0], len(y), cap(y));
 
     var z = @base.slice(1, 3, 3);
-    var grown = append(zᴷ, z, (uint32)111);
+    var grown = append(z, (uint32)111);
     fmt.Println(@base[3], grown[2], len(grown), cap(grown));
 }
 

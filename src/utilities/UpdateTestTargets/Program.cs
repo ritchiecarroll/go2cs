@@ -341,7 +341,7 @@ if (args.Contains("--createTargetFiles"))
 
         string projPath = Path.GetFullPath(Path.Combine(behavioralRoot, targetTest));
 
-        // The project's go2cs.options (extra converter arguments; only -warn=<codes>), read through the shared reader as
+        // The project's go2cs.options (extra converter arguments; only -warn=<codes> and -stack-append=on), read through the shared reader as
         // at the other three converter call sites (TestBehavioralHarnessReadsConverterOptions).
         (string options, string? optionsError) = BehavioralPackages.ConverterOptions(projPath);
 

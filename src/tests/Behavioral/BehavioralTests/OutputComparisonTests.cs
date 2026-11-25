@@ -44,6 +44,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
+    public void CheckAliasKeywordPackage() => CheckTarget("AliasKeywordPackage");
+
+    [TestMethod]
     public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
 
     [TestMethod]
@@ -1968,6 +1971,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
+
+    [TestMethod]
+    public void CheckPackageSuffixCollision() => CheckTarget("PackageSuffixCollision");
 
     [TestMethod]
     public void CheckPackageVarFuncLitPointerParam() => CheckTarget("PackageVarFuncLitPointerParam");

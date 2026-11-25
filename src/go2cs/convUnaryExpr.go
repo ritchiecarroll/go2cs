@@ -509,6 +509,11 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 		// to the box first. The pointer constraints the erasure declines (`~*T`, a union, one with methods:
 		// pointerCoreConstraint) keep the old form here as they keep theirs everywhere.
 		if star, ok := ast.Unparen(unaryExpr.X).(*ast.StarExpr); ok {
+			// &C.x, which cmd/cgo writes &(*_Cvar_x): the C variable's box, never nil (cgo item 3).
+			if _, isVariable := cgoVariableReference(star.X); isVariable {
+				return v.convExpr(ast.Unparen(star.X), nil)
+			}
+
 			operandType := types.Unalias(v.getType(star.X, false))
 			pointerType, isBox := v.paramPointerType(operandType)
 

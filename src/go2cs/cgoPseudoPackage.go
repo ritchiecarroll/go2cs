@@ -69,6 +69,11 @@ func collectCgoPseudoPackageNames(pkg *types.Package) {
 	for goName, member := range cgoRouteFunctions {
 		cgoPseudoPackageNames[goName] = member
 	}
+
+	// A C variable's _Cvar_x is its address, C.Ꮡx (cgo item 3); *_Cvar_x is C.x (cgoVariableReference).
+	for goName, member := range cgoRouteVariables {
+		cgoPseudoPackageNames[goName] = AddressPrefix + member
+	}
 }
 
 // cgoPseudoPackageKind reports whether a declaration kind is emitted into the pseudo-package by this increment: the C
@@ -251,4 +256,26 @@ func applyCgoPseudoPackageStamp(lines []string, mergeExisting bool) []string {
 	}
 
 	return append(kept, "}")
+}
+
+// cgoVariableReference is how *_Cvar_x is written, cmd/cgo's spelling of a use of the C variable x (cgo item 3): C.x,
+// the pseudo-package's ref property over the variable, so it reads and is assigned as Go's C.x is.
+func cgoVariableReference(expr ast.Expr) (string, bool) {
+	ident, ok := ast.Unparen(expr).(*ast.Ident)
+
+	if !ok || !cgoRouteActive {
+		return "", false
+	}
+
+	member, found := cgoRouteVariables[ident.Name]
+
+	if !found {
+		return "", false
+	}
+
+	if cgoEmittingPseudoPackage {
+		return member, true
+	}
+
+	return cgoPseudoPackageAlias + "." + member, true
 }

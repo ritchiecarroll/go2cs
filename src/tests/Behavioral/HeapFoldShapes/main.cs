@@ -23,8 +23,6 @@ internal partial struct main_anon /*dyn*/ {
 }
 
 internal static void main() {
-    var keepᴷ = new stackAppend<ж<nint>>();
-
     ref var a = ref heap<nint>(10, out var Ꮡa);
     keptInts = append(keptInts, Ꮡa);
     bump(ref a);
@@ -77,7 +75,7 @@ internal static void main() {
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         ref var i = ref heap<nint>(out var Ꮡi);
         i = iᴛ1;
-        keep = append(keepᴷ, keep, Ꮡi);
+        keep = append(keep, Ꮡi);
         iᴛ1 = i;
     }
     fmt.Println("loop:", keep[0].Value, keep[1].Value, keep[2].Value);

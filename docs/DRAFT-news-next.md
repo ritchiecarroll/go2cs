@@ -342,6 +342,17 @@ and match Go's test results. C# written by hand against converted code may need 
   is reused across conversions and is safe to delete ([Known issues](KnownIssues.md#a-conversion-keeps-a-go-build-cache-of-its-own)).
   <!-- 2026-11-23 (P1): train 1, merge dcfc9c99a1 (claude/p4-probe-cache 7f14c1bb4d; board hh, COORD 2026-11-20
        09:41Z). The text: CommandLine.md's `-probe-cache` row and the KnownIssues.md entry. -->
+- **[QUEUED claude/p5-stackappend-optin (tip in its READY post)]** **The stack-append buffer is emitted only where it
+  is needed: `-stdlib` and `-tests`.** Go 1.25 and later give the first `append` to a slice that does not escape a
+  32-byte buffer, which only `cap()` can observe. go2cs 1.26.11.1 reproduced it in every conversion, at the cost of a
+  `go build -gcflags=-m` per package and target. The new option `-stack-append=on|off|auto` controls it; the default,
+  `auto`, keeps it on for `-stdlib` and `-tests`, whose converted tests compare against Go's own, and turns it off for
+  a plain or `-recurse` conversion, which then runs none of those builds and creates no probe cache. With it off,
+  `cap()` after such an `append` can read lower than Go's; pass `-stack-append=on` to reproduce Go's
+  ([Known issues](KnownIssues.md#by-default-cap-after-appending-to-a-slice-that-does-not-escape-can-differ-from-go)).
+  <!-- 2026-11-24 (P5, train 12): P3's review of 57f318f4b0, finding 3 (COORD 19:52Z). The owner's ruling: COORD
+       2026-11-24 17:50Z, option 2 of P5's scout. The text: CommandLine.md's -stack-append entry and the KnownIssues
+       entry. -->
 - **[LANDED 1c9c6a224e … e280cae69d]** **An experimental M:N scheduler, off by default.** go2cs can run goroutines
   on a small pool of threads, as Go does, instead of one operating-system thread each. The technique is **async
   twins**: a second copy of each function that waits by giving its thread back to the scheduler. It is opt-in: a
@@ -466,6 +477,14 @@ and match Go's test results. C# written by hand against converted code may need 
   ([Converting a module](ConvertingAModule.md)).
   <!-- 2026-11-23 (P1): train 1, merge cfec06486f (claude/p2-nugetgo-tools-12611 ffaebde09e; readmeValidationBadge.go
        go2csBadge). -->
+- **[QUEUED claude/p4-cli-help (tip in its READY post)]** **`go2cs -help` lists the ten options a first conversion
+  needs.** `go2cs -help all` lists every option, sorted into common, advanced and experimental, and
+  `go2cs -help <option>` explains one, for example `go2cs -help tests`. Help prints to standard output and exits 0. A
+  mistyped option names the nearest ones (`there is no option -test-actoin. Did you mean -test-action?`) instead of
+  printing every option. [Command line](CommandLine.md) is written from the same table: its common options link to
+  an option reference that explains every option.
+  <!-- 2026-11-24 (P4): the owner's CLI-help item, train 12; rulings: -stdlib and -cgo are common, the reference
+       covers all options sorted common, advanced, experimental. -->
 
 **Known issues.**
 

@@ -41333,6 +41333,15 @@ as the record: they are the only `go test -c` numbers for the harvest.
 
 — P1 (2026-11-21)
 
+**2026-11-24 (P5, train 12, `claude/p5-stackappend-optin`).** The harvest now runs only when `-stack-append`
+resolves on: by default for `-stdlib` and `-tests`, and for a plain or `-recurse` conversion only with
+`-stack-append=on` (the owner's ruling on P5's stack-append scout, COORD 2026-11-24 17:50Z). A module conversion at
+the default runs no `go build -gcflags=-m` and never creates the probe cache, so trap 13's disk advice applies only to
+a run that opts in. `TestStackAppendOffRunsNoProbe` guards it: with the gate removed, its default arm reads four
+harvests and the cache created.
+
+— P5 (2026-11-24)
+
 ## 2026-11-17 — C2 (ruling C item 3, scope b): the `-recurse` importer seed, measured — windows recovers its one crossing; linux trades 5 reuses for 5; a second-order loss is OPEN
 
 **The rule, as built.** In a `-recurse` run with no flag, the converter seeds an import with an alias when two things
@@ -42357,5 +42366,150 @@ work. Not started; nothing is owed.
 **Owner.** Unassigned (P5 sized it). Post-.5.
 
 — P5 (2026-11-24)
+
+## 2026-11-24 — i9 (M:N row 9, COORD 183002Z): a package named by a C# keyword gets a bare `using internal = …;` in package_info.cs, and the file fails to parse (CURED in claude/i9-alias-keyword-escape)
+
+**How found.** TS row 9 at master cb6def82a2: the PLAIN typescript-go build failed in
+go-json-experiment's jsonflags with CS1041 ("Identifier expected; 'internal' is a keyword") and a cascade, 28 errors
+in one project. Three package_info.cs files carried `using internal = go.github.com.go_json_experiment.json.internal_package;`
+twice each: in the `<ImportedTypeAliases>` block and in the repeat after the namespace.
+
+**Cause.** 187c6f88d0 ("a method with a holder takes the suffix form", 2026-11-21) walks every named type in a
+forwarder's signature through `recordConversionPackageUsing`, which keyed `conversionPackageUsings` by the raw Go package
+name. Its older callers (recorded conversions) never met a keyword-named package, so the spelling had never been wrong
+in practice. The TS gates at f36b6b0d48 (2026-11-17) emitted an empty block for these files.
+
+**Cure.** The qualifier is spelled through `getSanitizedImport`, as every other import alias is, at the one place the
+map is keyed; the block and the post-namespace repeat both inherit it. Guarded by the behavioral project
+AliasKeywordPackage (packages named `internal` and `checked`, each named in a method signature on a defined integer type,
+plus a type alias): with master's converter it fails to compile (CS1001/CS1002/CS1514/CS1525 on `using checked = …`),
+with the cure it compiles and prints Go's output. Stdlib reach: none (no committed package_info.cs declares a bare
+keyword alias; footprint read with the seat).
+
+— i9 (2026-11-24)
+
+## 2026-11-24 — i9 (P3's finding 2 on the alias-keyword escape, COORD 214534Z): two same-named packages in one converted package share one package_info.cs alias, and the later write wins silently (OPEN)
+
+**Shape.** `conversionPackageUsings` is keyed by the qualifier for the whole converted PACKAGE, and a later write
+replaces an earlier one with no check. Go imports are per file, so file one may import "m/a/internal" and file two
+"m/b/internal", both unaliased. If each declares a method on a defined type naming its `internal.T`, package_info.cs
+gets ONE `using @internal = ...`, for whichever file wrote last, and the other file's forwarder resolves to the wrong
+package: CS0234, or the wrong type if both packages declare T.
+
+**Why here.** `internal` is the package name most likely to repeat, so it sits beside the escape seat; the escape itself
+does not cause or change it (read by P3 from the code, not reproduced).
+
+**Candidate cure, not cut.** Spell the qualifier inline on a conflict, as the forwarder alias path already does for its own
+names (methodHolder.go, a name bound to another referent is spelled through its referent). Wants a behavioral row with two
+same-named packages first.
+
+**Owner.** Unassigned; COORD routes.
+
+— i9 (2026-11-24)
+
+## 2026-11-24 — P1 (token-table seat): sysmon pins and registers a box on every GOMAXPROCS check
+
+**OPEN, post-.5 perf, not measured beyond the cadence.** The runtime's sysmon thread runs Go's own arm, "check if we
+need to update GOMAXPROCS at most once per second" (`sysmonCheckGOMAXPROCS`, src/core/runtime/managed_impl.cs).
+Each check reaches `getCPUCount`, whose `sched_getaffinity` call converts a fresh buffer box to an address, and that
+conversion goes through `ManagedPointerTokens.RegisterPinned`: one new token-table key per second on every golib host,
+for as long as the process lives, dropped only by the next sweep after a collection. Seen by instrumenting Register,
+RegisterPinned and Sweep on linux while rooting the darwin token-table failure (the "21 registrations the test never
+made"). The cost per check is one pin and one table entry; nothing here says it matters, only that it never stops.
+The token registry's own count is exact since the token-table seat, so the churn is visible in `RegisteredCount`.
+One reading moved with that seat: an overwrite of a key no longer counts, and so no longer calls
+`Q44RegistryCensus.Mint` either, so a Q44 mint count taken across the seat reads lower by the overwrites.
+
+**Likely seat.** Read the affinity mask without minting a token (a stack or reused native buffer for the syscall),
+if a measurement shows the per-second pin or the swept entries cost anything on a long-lived host.
+
+**Owner.** Unassigned; COORD routes.
+
+— P1 (2026-11-24)
+
+
+## 2026-11-24 — P5 (darwin/arm64 sizing, risk 1): variadic libc calls on Apple silicon are GREEN, saved by golib's stack slot
+
+**CLOSED, measured.** Apple's arm64 ABI passes the variadic part of a call on the stack, not in registers. Go's own
+trampolines do this (runtime/sys_darwin_arm64.s, open and fcntl: "arg 3 is variadic, pass on stack"). The darwin/arm64
+sizing asked whether go2cs's libc dispatch does the same, since a register-only dispatch would hand libc a stale stack
+word for the mode of open(O_CREAT), the flags of fcntl(F_SETFL) and the argument of ioctl, on osx-arm64 today.
+
+**Who saves it.** `GoLibcCall.Call` (src/core/golib/GoLibcCall.cs) routes through `VariadicStackSlot`, which on
+darwin/arm64 picks the argument Go's `syscallN_trampoline` stores at [sp] (the third at arity 3, the fourth at
+arities 4 and 6), and `CallWithVariadicStackSlot` passes it as a ninth argument, which lands at [sp]. It has done so
+since S9 (2026-10-02), whose first red was os.WriteFile's 0o644 on osx-arm64.
+
+**Measured.** Two live rows in `DarwinArm64VariadicSlotTests` (claude/p5-variadic-live, e439efbd01), each with a
+near-miss control that keeps the real value in the register and puts something else at [sp]:
+- open(O_CREAT|O_EXCL, 0640) under umask 0: the file is created 0640. The near-miss (0 at [sp]) creates it with no
+  permission bits on Apple silicon and 0640 on Intel.
+- fcntl(F_SETFL, flags|O_NONBLOCK): F_GETFL then reads O_NONBLOCK. The near-miss (the old flags at [sp]) leaves it
+  clear on Apple silicon and sets it on Intel.
+
+So the callee reads the stack slot on Apple silicon (the controls discriminate), and the dispatcher fills it.
+Hosted run 45503405339 (golib-tests, filter DarwinArm64VariadicSlotTests): osx-arm64 10 passed, 1 skipped (the
+linux-only strtol row); osx-x64 10 passed, 1 skipped (the same row): the controls read the register value there, as predicted.
+
+**For the flavour.** No dispatcher seat is owed. The darwin/arm64 flavour changes what is compiled, not this path,
+and the rows stay in GolibTests as its guard. ioctl was not probed: it shares the path, and its pointer argument
+would turn a wrong reading into a write through a stale word.
+
+**Owner.** None; closed.
+
+— P5 (2026-11-24)
+
+## 2026-11-25 — P2 (cgo item 4 census; COORD ruling 20261125T015543Z, option B): `unsafe.Pointer` of a method's own pointer receiver is refused when the receiver points into C memory (OPEN, named residual)
+
+**OPEN.** github.com/google/gopacket/afpacket v1.1.19 is the one package in the item 4 census (50 module refs) that
+meets all of H's criteria: no compiled C, no C in the preamble, C struct types (`struct_tpacket_hdr`/`2`/`3`,
+`sockaddr_ll`, `tpacket_block_desc`, an anonymous union field), libc and kernel headers only, linux/amd64 and
+linux/arm64. The `-cgo` route on linux/amd64 refuses it in 4 sites of one class, before anything is written:
+
+    afpacket/header.go(97,27): error GO2CS2001: unsafe.Pointer of a pointer of the method's own receiver type, inside
+    that method: go2cs mints that address from a reference, as a bare number it cannot tell from C memory. ...
+
+(the others are 103,55, 123,28 and 130,55). The receivers are `*v1header` and `*v2header`, defined as
+`C.struct_tpacket_hdr` and `C.struct_tpacket2_hdr`, and every value of them points into the ring the package
+`mmap`s, so in Go the receiver IS C memory. The methods add `C.sizeof_struct_*` to the receiver's address to reach
+the `sockaddr_ll` that follows the header. The refusal is loud, so nothing runs on a wrong address, but the package
+does not convert. Read at master cb6def82a2 plus cgo item 3 (d59d7ebe84), which does not touch this route.
+
+**What a cure owes.** A receiver whose value came from C memory (here a pointer the package derived from the `mmap`
+result) keeps that provenance into the method, so `unsafe.Pointer(h)` yields the C address and pointer arithmetic
+from it stays in C memory, while a receiver minted from a Go reference keeps today's refusal. The near-miss is a
+method on the same type called through a Go-allocated value, which must still refuse by name. afpacket's own tests
+(TestParseOptions only) never reach C, so a proof is a fleet behaviour row over a ring, and opening one needs
+CAP_NET_RAW.
+
+**Owner.** Unassigned (post-.5). Census kit and the route log are P2's scratch, not committed.
+
+— P2 (2026-11-25)
+
+## 2026-11-25 — P6 (COORD ruling 20261125T015627Z): the cgo pressure arm hangs on a 4-core Linux box (OPEN, not traced)
+
+**OPEN, measured, not traced.** GolibTests `CgoProbeTests.ThePinnedArmHoldsWhileCompactingCollectionsRunMidCall`
+(cgo Phase 3 seat 1b's pressure arm, 08a2052141, on claude/h-cgo-1b-r8; not on master) reaches no verdict. Reading
+at the 1b base 0cd2bc81d0, with nothing of P6's in the tree: GolibTests built `-c Release -p:GoTargetOS=linux`
+(build rc 0), the probe library compiled from that tree's `cgo-probe/probe.c` (gcc 13, `-shared -O2 -fPIC`), the one
+test run alone under `timeout 900`: killed at 900 s, no pass, fail or READING line. Control in the same tree and
+probe: `StrtolsErrnoReachesTheErrnoForm` passed in 292 ms. The same test hung the same way on P6's own branch
+before the reading (P6's cut does not touch it). Box: a Linux cloud container, 4 vCPU (Xeon 2.1 GHz), 15 GiB,
+.NET SDK 10.0.404, go1.26.11.
+
+**What the arm does.** Twelve rounds; in each, a collector thread loops `GC.Collect(MaxGeneration, Forced,
+blocking: true, compacting: true)` with a 4 KB allocation between collections, while the test thread waits for
+`OnAGoroutine` around `C.go2cs_probe_slow_fill` (48 bytes at 500 µs each, about 24 ms per round). Where it stops,
+in which round, and whether the C call ever returns is not known: the run was killed with no stack taken.
+
+**Candidate reading, unproven.** The collector never yields between blocking compacting collections, so a thread
+returning from native code (which must wait for each collection to finish) or the goroutine handoff around it may
+never get a window on a box this small. A stack (`dotnet-stack` on the test host, or `createdump`) is the next
+measurement, before any cure; then the same run with a yield or a short sleep in the collector loop as the one-axis
+arm.
+
+**Owner.** Unassigned; COORD routes. P6 can take the stack if routed.
+
+— P6 (2026-11-25)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

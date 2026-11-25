@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace go.golib;
@@ -61,7 +62,36 @@ namespace go.golib;
         PinExtents.Activate();
 
         List<GoCgoLibrary> owned = [.. libraries];
+        s_registered.AddOrUpdate(assembly, new Registration(owned, target));
         NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target));
+    }
+
+    // What each cgo assembly registered, for a C variable's lookup (Variable), which loads its library by the same rules.
+    private sealed record Registration(List<GoCgoLibrary> Libraries, string Target);
+
+    private static readonly ConditionalWeakTable<Assembly, Registration> s_registered = new();
+
+    /// <summary>
+    /// A box over the C global variable <paramref name="symbol"/> that <paramref name="library"/> exports, for
+    /// <paramref name="assembly"/>'s bindings (cgo item 3, Go's <c>C.x</c>): Go reads and writes a C variable in place,
+    /// so the box aliases the symbol's address and owns no storage. The library loads as the assembly's own
+    /// <c>[LibraryImport]</c> bindings load it (<see cref="Resolve(string, Assembly, IReadOnlyList{GoCgoLibrary}, string)"/>),
+    /// never from the current directory; a symbol it does not export is refused by name.
+    /// </summary>
+    public static ж<T> Variable<T>(Assembly assembly, string library, string symbol)
+    {
+        if (!s_registered.TryGetValue(assembly, out Registration? registration))
+            throw new InvalidOperationException($"cgo: C.{symbol}: {assembly.GetName().Name} registered no C libraries, so no library is known to export the variable");
+
+        nint handle = Resolve(library, assembly, registration.Libraries, registration.Target);
+
+        if (handle == 0)
+            throw new DllNotFoundException($"cgo: C.{symbol}: {library} is not one of the libraries {assembly.GetName().Name} registered");
+
+        if (!NativeLibrary.TryGetExport(handle, symbol, out nint address) || address == 0)
+            throw new EntryPointNotFoundException($"cgo: C.{symbol}: {library} exports no variable of that name (docs/Limitations.md#cgo)");
+
+        return new NativeBox<T>((nuint)address);
     }
 
     /// <summary>The running process's target, as Go names it: <c>GOOS/GOARCH</c>.</summary>

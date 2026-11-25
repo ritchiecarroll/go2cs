@@ -511,7 +511,9 @@ foreach ($flavor in Get-NugetgoFlavors) {
         foreach ($flag in 'CGO_CFLAGS', 'CGO_CPPFLAGS', 'CGO_CXXFLAGS', 'CGO_LDFLAGS') { Remove-Item "env:$flag" -ErrorAction SilentlyContinue }
         Write-Host "  cgo: $flavor converts at $target with CC=$env:CC"
     }
-    try { & $converter -recurse=nuget @provenanceArgs -platforms $target @cgoArgs -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log; $convertCode = $LASTEXITCODE }
+    # -stack-append=on: the emission the module's -tests proof validated; -recurse=nuget alone resolves it off, and
+    # GoInputDigest records the mode (owner ruling, 2026-11-24).
+    try { & $converter -recurse=nuget -stack-append=on @provenanceArgs -platforms $target @cgoArgs -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log; $convertCode = $LASTEXITCODE }
     finally { foreach ($k in $savedCc.Keys) { if ($null -eq $savedCc[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } else { Set-Item "env:$k" $savedCc[$k] } } }
     if ($convertCode -ne 0) { Refuse "the $flavor flavor of $ModulePath did not convert at $target ($convertCode): $log" }
     $flavorSrc = Join-Path (Join-Path $root 'src') $ModulePath
