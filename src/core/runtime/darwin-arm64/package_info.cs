@@ -493,7 +493,7 @@ using static go.runtime_package;
 using abi = go.@internal.abi_package;
 using atomic = go.@internal.runtime.atomic_package;
 using tracev2 = go.@internal.trace.tracev2_package;
-using ꓸꓸꓸtraceArg = Span<runtime_package.traceArg>;
+using ꓸꓸꓸtraceArg = variadic<runtime_package.traceArg>;
 
 [GoPackage("runtime")]
 public static partial class runtime_package
