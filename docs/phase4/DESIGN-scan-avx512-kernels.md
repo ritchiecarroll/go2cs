@@ -50,6 +50,49 @@ the assembly returns, read from the assembly itself:
 Re-emission is untouched, so no corpus footprint and no CNR movement. Only the amd64 flavours compile the new file;
 linux-arm64 has no amd64 folder there.
 
+## 2a. Attribution: the owner's direction of 2026-11-25 (COORD 20261125T170034Z, standing rule 170054Z)
+
+Every file in the cut that takes code or behavior from Go source opens with three parts, in this order:
+1. Go's notice, verbatim from the source file.
+2. A provenance block that says "derived from" (a port of the algorithm) or "inspired by" (the same behavior in its own
+   shape), naming each Go file by its GOROOT-relative path, the Go version (go1.26.11) and the functions followed.
+3. go2cs's own header, which keeps the file's license and authorship for the parts that are original.
+
+LICENSES/BSD-3-Clause.txt is the license of record. Where a file mixes ported and original code, the block says which
+part is which.
+
+**`scan/amd64/scan_amd64_impl.cs` (new).** Go's notice is `Copyright 2025 The Go Authors. All rights reserved.` plus
+the BSD line, the same in all four source files below.
+
+| body | relation | Go source, go1.26.11 |
+|---|---|---|
+| `ExpandAVX512` | DERIVED FROM, the loop | `src/internal/runtime/gc/scan/expand_reference.go`, `ExpandReference` |
+| `ExpandAVX512` | INSPIRED BY, the overwrite-all-16-words contract | `src/internal/runtime/gc/scan/scan_amd64.s`, `ExpandAVX512` |
+| `scanSpanPackedAVX512` | DERIVED FROM, the per-word selection | `src/internal/runtime/gc/scan/scan_reference.go`, `ScanSpanPackedReference` |
+| `scanSpanPackedAVX512` | INSPIRED BY, in-order and zeros-included with no nil test | `src/internal/runtime/gc/scan/scan_amd64.s`, `scanSpanPackedAVX512` |
+| `FilterNilAVX512` | INSPIRED BY: the same order-preserving result, as a scalar loop | `src/internal/runtime/gc/scan/filter_amd64.s`, `FilterNilAVX512` |
+
+`FilterNilAVX512` is not derived from `filter.go`'s `FilterNil`, which swaps from the end and does not keep order.
+
+**`internal/cpu/amd64/cpu_x86_impl.cs` (edited).** Go's notice is `Copyright 2017 The Go Authors. All rights
+reserved.` plus the BSD line, from `src/internal/cpu/cpu_x86.go`. The file already mixes, and its block names the ported
+parts:
+- the new BITALG line: DERIVED FROM `doinit`'s `X86.HasAVX512BITALG = isSet(ecx7, cpuid_AVX512BITALG)` under
+  `HasAVX512F` (cpu_x86.go:178-185);
+- `registerX86Options`: DERIVED FROM `doinit`'s option table;
+- `deriveX86Features`: DERIVED FROM `doinit`'s `doDerived`;
+- `cpuid`'s managed body: INSPIRED BY `cpu_x86.s` `cpuid`.
+
+The rest is original: the intrinsics mapping, the module-initializer stand-in for `schedinit`, `GoCpuAppliesGodebug`
+and the GolibTests probe. The rule applies to any file a seat touches this way, so the block covers the whole file, not
+only the new line.
+
+**GolibTests' new class.** It calls the kernels and Go's references. Its object-mask shapes follow
+`src/internal/runtime/gc/scan/scan_test.go`'s `testObjs`, so it carries the same three parts, with `testObjs` named as
+INSPIRED BY.
+
+P3: please check each header against its source file: the notice text and year, the path, and the function names.
+
 ## 3. Red-first, and the near-miss
 
 1. **Kernels, locally.** This box has no AVX-512 (Ryzen 7 PRO 6850U), and the managed bodies need none. GolibTests gains
