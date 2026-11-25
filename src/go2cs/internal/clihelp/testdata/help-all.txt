@@ -27,8 +27,6 @@ Advanced options: converting:
   -probe-cache <dir>           The Go build cache the escape probe uses (env GO2CS_PROBE_CACHE)
 
 Advanced options: testing:
-  -cgo-removals-dry-run       With -cgo -tests: list the cgo-off files a cgo-on conversion would
-                              remove, and remove none
   -test-timeout <duration>    With -tests: the package deadline for build, run and compare
   -test-deadline <duration>   With -tests: the per-test deadline for the converted host (0 disables
                               it)
@@ -40,6 +38,8 @@ Advanced options: testing:
   -test-oracle-vet-off        With -tests: run go test with -vet=off
   -test-oracle-goarch <arch>  With -tests: the GOARCH go test runs at, when it must differ from the
                               target
+  -cgo-removals-dry-run       With -cgo -tests: list the cgo-off files a cgo-on conversion would
+                              remove, and remove none
   -test-allow-handown         With -tests: convert a package -stdlib skips, into a bare scratch root
   -module-disclosures <dir>   With -tests on a module: the tree of committed disclosure manifests
   -module-version <version>   With -module-disclosures: the version a copied module source is

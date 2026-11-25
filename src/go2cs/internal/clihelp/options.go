@@ -156,21 +156,6 @@ var options = []Option{
 			"interop plan](PLAN-cgo-interop.md) lays out the bridge (internal record, unlinked 2026-10-26, OQ-1) -->",
 	},
 	{
-		// Added by cgo 3.4 seat 4c (claude/h-cgo-res-4c-r10) after this table existed; its usage text before the table:
-		//   With -cgo -tests, list the C# files of the cgo-off selection that the cgo-on load deselects, and remove none.
-		//   Without it, each one that carries go2cs's emission header for its source is removed, and printed with its
-		//   reason (a file in an output seeded from the corpus, which would otherwise compile beside its cgo-on
-		//   replacement); any other file in that set is refused by name
-		Name: "cgo-removals-dry-run", Value: "", Class: Advanced, Group: "Testing",
-		Summary: "With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none",
-		Details: "" +
-			"With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. " +
-			"An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build " +
-			"swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this " +
-			"flag each such file is removed and printed with its reason, but only when it carries go2cs's own " +
-			"emission header for its source; any other file there, and a hand-owned one, is refused by name.",
-	},
-	{
 		// The flag's usage text before this table (main.go, master cb6def82a2), kept as history:
 		//   Convert eligible Go package tests and emit a runnable test host project (implies -tags
 		//   "+defaultStdLibTagList+" by default, as -stdlib does)
@@ -450,6 +435,21 @@ var options = []Option{
 			"For example, an Apple silicon host validating the `darwin/amd64` conversion sets `arm64`, so Go does " +
 			"not run under Rosetta. Empty by default, which is the target's own; when set, it is recorded in the " +
 			"comparison record.",
+	},
+	{
+		// Added by cgo 3.4 seat 4c (claude/h-cgo-res-4c-r10) after this table existed; its usage text before the table:
+		//   With -cgo -tests, list the C# files of the cgo-off selection that the cgo-on load deselects, and remove none.
+		//   Without it, each one that carries go2cs's emission header for its source is removed, and printed with its
+		//   reason (a file in an output seeded from the corpus, which would otherwise compile beside its cgo-on
+		//   replacement); any other file in that set is refused by name
+		Name: "cgo-removals-dry-run", Value: "", Class: Advanced, Group: "Testing",
+		Summary: "With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none",
+		Details: "" +
+			"With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. " +
+			"An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build " +
+			"swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this " +
+			"flag each such file is removed and printed with its reason, but only when it carries go2cs's own " +
+			"emission header for its source; any other file there, and a hand-owned one, is refused by name.",
 	},
 	{
 		// The flag's usage text before this table (main.go, master cb6def82a2), kept as history:

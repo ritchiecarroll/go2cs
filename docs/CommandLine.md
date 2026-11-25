@@ -167,7 +167,6 @@ Options that change a default, tune a run, or drive a maintainer's instrument. `
 
 | Option | Group | Description |
 |:--|:--|:--|
-| [`-cgo-removals-dry-run`](#option-cgo-removals-dry-run) | Testing | With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none. |
 | [`-goroot <dir>`](#option-goroot) | Converting | Override the detected Go root. |
 | [`-gopath <dir>`](#option-gopath) | Converting | Override the detected Go path. |
 | [`-module-safe-tag`](#option-module-safe-tag) | Converting | With -recurse: apply the safe, purego and noasm build tags (default on). |
@@ -184,6 +183,7 @@ Options that change a default, tune a run, or drive a maintainer's instrument. `
 | [`-test-publish-binlog`](#option-test-publish-binlog) | Testing | With -tests: keep an MSBuild binary log of a failed test-host publish. |
 | [`-test-oracle-vet-off`](#option-test-oracle-vet-off) | Testing | With -tests: run go test with -vet=off. |
 | [`-test-oracle-goarch <arch>`](#option-test-oracle-goarch) | Testing | With -tests: the GOARCH go test runs at, when it must differ from the target. |
+| [`-cgo-removals-dry-run`](#option-cgo-removals-dry-run) | Testing | With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none. |
 | [`-test-allow-handown`](#option-test-allow-handown) | Testing | With -tests: convert a package -stdlib skips, into a bare scratch root. |
 | [`-module-disclosures <dir>`](#option-module-disclosures) | Testing | With -tests on a module: the tree of committed disclosure manifests. |
 | [`-module-version <version>`](#option-module-version) | Testing | With -module-disclosures: the version a copied module source is. |
@@ -208,12 +208,6 @@ Options that change a default, tune a run, or drive a maintainer's instrument. `
 | [`-ref-census <file>`](#option-ref-census) | Multi-platform and census | With -stdlib: write the box-to-reference lowering census to this file. |
 | [`-tree`](#option-tree) | Diagnostics | Print each file's Go parse tree during conversion. |
 | [`-debug`](#option-debug) | Diagnostics | Let a conversion failure crash with a full stack trace. |
-
-#### <a id="option-cgo-removals-dry-run"></a>`-cgo-removals-dry-run`
-
-Advanced option, testing.
-
-With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this flag each such file is removed and printed with its reason, but only when it carries go2cs's own emission header for its source; any other file there, and a hand-owned one, is refused by name.
 
 #### <a id="option-goroot"></a>`-goroot <dir>`
 
@@ -310,6 +304,12 @@ With `-tests`: run `go test` with `-vet=off`, for a package whose own `go test` 
 Advanced option, testing.
 
 With `-tests`: the `GOARCH` that `go test` runs at, when it must differ from the conversion's target. For example, an Apple silicon host validating the `darwin/amd64` conversion sets `arm64`, so Go does not run under Rosetta. Empty by default, which is the target's own; when set, it is recorded in the comparison record.
+
+#### <a id="option-cgo-removals-dry-run"></a>`-cgo-removals-dry-run`
+
+Advanced option, testing.
+
+With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this flag each such file is removed and printed with its reason, but only when it carries go2cs's own emission header for its source; any other file there, and a hand-owned one, is refused by name.
 
 #### <a id="option-test-allow-handown"></a>`-test-allow-handown`
 
