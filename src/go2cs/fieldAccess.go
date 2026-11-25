@@ -821,7 +821,7 @@ var (
 // collectHandOwnedDecls records the types and vars declared by the files whose destination is a hand-owned `.cs`, and
 // the vars a hand-owned member supplies (manualConversionVars). The converter emits none of their declarations, so
 // nothing may assume the shape it would have emitted (lazyPackageVarOperations.go keeps such a var eager).
-func collectHandOwnedDecls(files []FileEntry, pkg *types.Package, info *types.Info, goos string) {
+func collectHandOwnedDecls(files []FileEntry, pkg *types.Package, info *types.Info, target string) {
 	for _, entry := range files {
 		for _, decl := range entry.file.Decls {
 			funcDecl, ok := decl.(*ast.FuncDecl)
@@ -830,7 +830,7 @@ func collectHandOwnedDecls(files []FileEntry, pkg *types.Package, info *types.In
 				continue
 			}
 
-			if entry.manualConversion || pkg != nil && isManualFuncDeclInPackage(pkg.Path(), goos, funcDecl) {
+			if entry.manualConversion || pkg != nil && isManualFuncDeclInPackage(pkg.Path(), target, funcDecl) {
 				if fn, ok := info.Defs[funcDecl.Name].(*types.Func); ok {
 					packageHandOwnedMethods[fn] = true
 				}
@@ -874,7 +874,7 @@ func collectHandOwnedDecls(files []FileEntry, pkg *types.Package, info *types.In
 	}
 
 	for _, name := range pkg.Scope().Names() {
-		if obj, ok := pkg.Scope().Lookup(name).(*types.Var); ok && isManualVarInPackage(pkg.Path(), goos, name) {
+		if obj, ok := pkg.Scope().Lookup(name).(*types.Var); ok && isManualVarInPackage(pkg.Path(), target, name) {
 			packageHandOwnedVars[obj] = true
 		}
 	}

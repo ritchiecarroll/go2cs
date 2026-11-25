@@ -403,7 +403,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		// ...and a manual-type conversion of a pointer receiver, which has no box to pass
 		// (manualTypeReceiverRefusal.go).
-		if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
+		if refusal := refuseManualTypeReceiverOperands(pkg, options.targetPlatform); refusal != nil {
 			refusal.report()
 			return refusePackage(options, diagnosticManualTypeReceiverRefused, refusal)
 		}
@@ -546,8 +546,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				performNameCollisionAnalysis(pkg)
 				collectCaptureModeMethods(pkg)
 				collectTypeSpecRHS(pkg)
-				collectHoistedLiterals(files, packageTypes, info, goosOfTarget(options.targetPlatform), nil, true)
-				collectHandOwnedDecls(files, packageTypes, info, goosOfTarget(options.targetPlatform))
+				collectHoistedLiterals(files, packageTypes, info, options.targetPlatform, nil, true)
+				collectHandOwnedDecls(files, packageTypes, info, options.targetPlatform)
 				collectMovedInitVars(fset, packageTypes, info, pkg.Syntax)
 				collectPackageLevelLiteralStructFieldTypes(files, packageTypes, info)
 				collectPublicizedTypes(packageTypes, fset)
@@ -650,7 +650,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// ("address-taken only into lowered positions → stack") is consulted by the escape
 		// analysis, and the signature/call-site emission reads the verdicts during the visits.
 		performRefLoweringAnalysis(files, packageTypes, info, options)
-		collectHandOwnedDecls(files, packageTypes, info, goosOfTarget(options.targetPlatform))
+		collectHandOwnedDecls(files, packageTypes, info, options.targetPlatform)
 
 		performEscapeAnalysis(files, fset, packageTypes, info)
 
@@ -666,7 +666,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// (Tier C — see hoistedLiteralOperations.go). A whole-package PRE-pass: pre-boxing needs
 		// every use of a literal before any file emits, and collectMovedInitVars below consults
 		// the reader set this produces, so it must run first.
-		collectHoistedLiterals(files, packageTypes, info, goosOfTarget(options.targetPlatform), nil, true)
+		collectHoistedLiterals(files, packageTypes, info, options.targetPlatform, nil, true)
 
 		// Find package-level var initializers whose Go dependency order cannot be reproduced by
 		// C#'s static-field-initializer order (cross-file / same-file forward reference /

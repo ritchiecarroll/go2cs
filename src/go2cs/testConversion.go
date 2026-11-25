@@ -3078,7 +3078,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		return nil, nil, refusal
 	}
 
-	if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
+	if refusal := refuseManualTypeReceiverOperands(pkg, options.targetPlatform); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal
 	}
@@ -3326,7 +3326,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// an empty result. Runs BEFORE escape analysis, which consults the reversion verdicts; the
 	// signature/call-site emission reads the lowered sets during the visits.
 	performRefLoweringAnalysis(prodEntries, pkg.Types, pkg.TypesInfo, options)
-	collectHandOwnedDecls(prodEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform))
+	collectHandOwnedDecls(prodEntries, pkg.Types, pkg.TypesInfo, options.targetPlatform)
 
 	performEscapeAnalysis(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo)
 	collectStackAppendHints(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
@@ -3364,9 +3364,9 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// suppressing test-file hoists in initializer-reachable functions is a pure (and tiny)
 	// allocation pessimization, never a correctness risk, and flipping the flag would drift the
 	// hoist claims of every banked *_test.cs for no behavioral gain.
-	collectHoistedLiterals(prodEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform), nil, true)
+	collectHoistedLiterals(prodEntries, pkg.Types, pkg.TypesInfo, options.targetPlatform, nil, true)
 	productionHoistSeed := packageHoistNames
-	collectHoistedLiterals(allEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform), productionHoistSeed, false)
+	collectHoistedLiterals(allEntries, pkg.Types, pkg.TypesInfo, options.targetPlatform, productionHoistSeed, false)
 	testAssemblyBoxesBareLiterals = testAssemblyBoxesBareLiterals || packageBoxesBareLiterals
 
 	// Find test-file package-level var initializers whose Go dependency order C#'s
@@ -9990,6 +9990,14 @@ func validateDisclosureRetirement(label, class, want, reading, plan string, floo
 func validateDisclosurePlatforms(label string, platforms goosScope) error {
 	seenPlatforms := map[string]bool{}
 	for _, platform := range platforms {
+		// A disclosure scope is GOOS-only: every caller measures it against the run's GOOS, and an
+		// `os/arch` entry (the form the hand-own registry also admits) would be measured against a
+		// bare GOOS, which goosScope.includes refuses.
+		if strings.Contains(platform, "/") {
+			return fmt.Errorf("disclosure %s names platform %q: a disclosure scope names a GOOS (one of %s), never an os/arch target",
+				label, platform, strings.Join(disclosurePlatformTargets, ", "))
+		}
+
 		if !disclosurePlatformTargets.includes(platform) {
 			return fmt.Errorf("disclosure %s names platform %q, which is not one of %s: a scope naming a target this corpus does not build could never be in scope on any run, so it would disable the entry's absorption silently and forever",
 				label, platform, strings.Join(disclosurePlatformTargets, ", "))
