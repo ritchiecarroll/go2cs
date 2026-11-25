@@ -72,7 +72,13 @@
   <PropertyGroup>
     <GoStdlibTwins Condition="'$(GoStdlibTwins)' == ''">false</GoStdlibTwins>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(GoStdlibTwins)' == 'true' And '$(MSBuildProjectName)' != 'golib' And !$(MSBuildProjectName.EndsWith('.tests'))">
+  <!-- D2/T6 (FLEET 20261121T230700Z; COORD's ruling, option (a), 2026-11-25): GoStdlibTwinsTests lifts the *.tests exclusion,
+       so a row's test host, which recompiles its package's production sources, is twinned too: the configuration a
+       twinned release is tested in. Off by default; only os-matrix's sweep-shard ;twins=1 sets it. -->
+  <PropertyGroup>
+    <GoStdlibTwinsTests Condition="'$(GoStdlibTwinsTests)' == ''">false</GoStdlibTwinsTests>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoStdlibTwins)' == 'true' And '$(MSBuildProjectName)' != 'golib' And (!$(MSBuildProjectName.EndsWith('.tests')) Or '$(GoStdlibTwinsTests)' == 'true')">
     <GoTwins>true</GoTwins>
   </PropertyGroup>
   <ItemGroup>

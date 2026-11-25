@@ -138,7 +138,7 @@ on:
           - reconvert-footprint
           - mn-platform
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;). Options on any other stage are refused.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;), sweep-shard (linux) ;twins=1 (D2/T6: the standard library built with twins, the host plain; a twins proof runs first). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -263,6 +263,7 @@ jobs:
       dns-servers: ${{ steps.derive.outputs.dns-servers }}
       dump-proof: ${{ steps.derive.outputs.dump-proof }}
       sweep-timeout: ${{ steps.derive.outputs.sweep-timeout }}
+      sweep-twins: ${{ steps.derive.outputs.sweep-twins }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
       mn: ${{ steps.derive.outputs.mn }}
@@ -339,9 +340,9 @@ jobs:
           # reconvert-footprint: base=SHA and changed=SHA, both required, both full 40-digit SHAs (C2, 2026-11-23): the two
           # converters whose emissions the stage diffs. A short SHA is refused rather than resolved, because the reading
           # names the commits it measured and a prefix can name a different commit tomorrow.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $mnMode = '0'; $feedRun = ''
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $sweepTwins = '0'; $mnMode = '0'; $feedRun = ''
           $footprintBase = ''; $footprintChanged = ''
-          $optionKeys = @(switch ($stage) { 'behavioral-smoke' { 'mn' } 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'cgo-nuget-e2e' { 'feedrun' } 'reconvert-footprint' { 'base', 'changed' } })
+          $optionKeys = @(switch ($stage) { 'behavioral-smoke' { 'mn' } 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout', 'twins' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'cgo-nuget-e2e' { 'feedrun' } 'reconvert-footprint' { 'base', 'changed' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -376,6 +377,15 @@ jobs:
                   $dnsServers = $seen['dns'] -replace '\s', ''
                   if ($dnsServers -notmatch '^\d{1,3}(\.\d{1,3}){3}(,\d{1,3}(\.\d{1,3}){3})*$') { throw "sweep-shard filter option dns= must be a comma-separated IPv4 list; got '$dnsServers'." }
                   Write-Host "sweep-shard: the job's resolver is set to $dnsServers before the sweep (opt-in; the effective resolver is logged)"
+              }
+              # sweep-shard ;twins=1 (linux): D2/T6 -- the standard library is built WITH twins (GoStdlibTwins=true) while the
+              # converted test host stays plain and GO2CS_MN stays unset: the default-mode user on a twinned stdlib
+              # (FLEET 20261121T230700Z, D2; COORD's GO 20261125T080536Z). A twins proof runs before the sweep.
+              if ($seen.ContainsKey('twins')) {
+                  if ($goos -ne 'linux') { throw "sweep-shard filter option twins= is D2/T6's linux reading and applies to goos linux only; got goos '$goos'." }
+                  if ($seen['twins'] -ne '1') { throw "sweep-shard filter option twins= takes 1; got '$($seen['twins'])'." }
+                  $sweepTwins = '1'
+                  Write-Host "sweep-shard: twins=1 -- the standard library is built with twins (GoStdlibTwins=true), the host plain, GO2CS_MN unset"
               }
               if ($seen.ContainsKey('dumpproof')) {
                   if ($goos -ne 'linux') { throw "sweep-shard filter option dumpproof= is the linux dump-suppression proof's red arm and applies to goos linux only; got goos '$goos'." }
@@ -446,7 +456,7 @@ jobs:
                   Write-Host "reconvert-footprint: base $footprintBase, changed $footprintChanged$(if ($footprintBase -eq $footprintChanged) { ' (the same commit: the determinism control, which must read 0 files)' })"
               }
           }
-          elseif ($filter -match '(^|;)\s*(mn|jit|test|at|dns|dumpproof|timeout|cc|sha|feedrun|base|changed)\s*=') { throw "filter options (;key=value) apply to stages behavioral-smoke, golib-tests, stack-probe, sweep-shard, converter-cgo, cgo-e2e, cgo-nuget-e2e and reconvert-footprint only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(mn|jit|test|at|dns|dumpproof|timeout|twins|cc|sha|feedrun|base|changed)\s*=') { throw "filter options (;key=value) apply to stages behavioral-smoke, golib-tests, stack-probe, sweep-shard, converter-cgo, cgo-e2e, cgo-nuget-e2e and reconvert-footprint only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -793,6 +803,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-twins=$sweepTwins" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "feed-run=$feedRun" -Encoding utf8
@@ -2843,6 +2854,11 @@ jobs:
         shell: pwsh
         env:
           SWEEP_FILTER: ${{ needs.plan.outputs.filter }}
+          # D2/T6: under ;twins=1 the standard library AND each row's test host are built with twins (MSBuild reads the
+          # variables as the properties src/core/Directory.Build.props declares); GO2CS_MN stays unset (default mode).
+          GoStdlibTwins: ${{ needs.plan.outputs.sweep-twins == '1' && 'true' || '' }}
+          GoStdlibTwinsTests: ${{ needs.plan.outputs.sweep-twins == '1' && 'true' || '' }}
+          SWEEP_TWINS: ${{ needs.plan.outputs.sweep-twins }}
           # Raises the sweep's 10m default for a 4-core hosted runner. The script's per-package
           # $longTimeouts entries are FLOORS, not overrides: a larger -TestTimeout raises them, a
           # smaller one still loses, so this value cannot under-budget the four long rows. 45m unless the
@@ -2901,11 +2917,49 @@ jobs:
           $oracleGoarch = if ($env:RID -eq 'osx-arm64') { 'arm64' } else { '' }
           $failedRows = [System.Collections.Generic.List[string]]::new()
 
+          # D2/T6 twins proof, per row, on the assemblies the row's own host loaded (src/core/<row>/bin/tests): the twin names
+          # (a method ending ꞏtwin) counted across every go.*.dll and the test assembly there, leaving out the packages whose
+          # hand-written twins are in every build (golib, runtime, sync, time). Under ;twins=1 the count must be above 0, and
+          # without it 0, or the row fails by name: a green row cannot be a plain build, and the scan cannot be blind.
+          $twinMarker = [System.Text.Encoding]::UTF8.GetBytes([string][char]0xA78F + 'twin')
+          function Measure-TwinNames([string]$path) {
+              $bytes = [System.IO.File]::ReadAllBytes($path); $n = 0
+              for ($i = 0; $i -le $bytes.Length - $twinMarker.Length; $i++) {
+                  if ($bytes[$i] -ne $twinMarker[0]) { continue }
+                  $j = 1
+                  while ($j -lt $twinMarker.Length -and $bytes[$i + $j] -eq $twinMarker[$j]) { $j++ }
+                  if ($j -eq $twinMarker.Length) { $n++ }
+              }
+              return $n
+          }
+          $wantTwins = $env:SWEEP_TWINS -eq '1'
+          Write-Host "READING t6-env GO2CS_MN='$($env:GO2CS_MN)' GoStdlibTwins='$($env:GoStdlibTwins)' GoStdlibTwinsTests='$($env:GoStdlibTwinsTests)'"
+          if ($env:GO2CS_MN) { throw "sweep-shard: GO2CS_MN is set ('$($env:GO2CS_MN)'); a sweep runs in default mode" }
+
           foreach ($name in $names) {
               & ./src/run-validated-sweep.ps1 -Filter $name -Exact -SkipBuild:$skipBuild -TestTimeout $env:SWEEP_TEST_TIMEOUT -TestOracleGoarch $oracleGoarch -IgnoreDiskPreflight *>&1 |
                   Tee-Object -FilePath $log -Append
 
               $rowExit = $LASTEXITCODE
+
+              if ($goos -eq 'linux') {
+                  $hostDir = Join-Path 'src/core' $name | Join-Path -ChildPath 'bin/tests'
+                  $testDll = @(Get-ChildItem -Path $hostDir -Recurse -File -Filter '*.tests.dll' -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending)[0]
+                  if (-not $testDll) {
+                      Write-Host "READING t6-proof row=$name host=none"
+                      if ($wantTwins -and $rowExit -eq 0) { $rowExit = 3; Write-Host "::error::T6 twins proof: $name has no test host under $hostDir" }
+                  } else {
+                      $skip = @('golib.dll', 'go.runtime.dll', 'go.sync.dll', 'go.time.dll')
+                      $dlls = @(Get-ChildItem -Path $testDll.DirectoryName -File -Filter '*.dll' | Where-Object { ($_.Name -like 'go.*.dll' -or $_.FullName -eq $testDll.FullName) -and $skip -notcontains $_.Name })
+                      $count = 0; $testCount = Measure-TwinNames $testDll.FullName
+                      foreach ($dll in $dlls) { $count += Measure-TwinNames $dll.FullName }
+                      Write-Host "READING t6-proof row=$name want-twins=$wantTwins twin-names=$count test-assembly=$testCount assemblies=$($dlls.Count)"
+                      if ($wantTwins -ne ($count -gt 0)) {
+                          if ($rowExit -eq 0) { $rowExit = 3 }
+                          Write-Host "::error::T6 twins proof: $name read $count twin names with want-twins=$wantTwins"
+                      }
+                  }
+              }
 
               if ($rowExit -ne 0 -and $sweepExit -eq 0) { $sweepExit = $rowExit }
               if ($rowExit -ne 0) { $failedRows.Add($name) }
