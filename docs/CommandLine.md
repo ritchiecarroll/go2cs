@@ -1,11 +1,6 @@
 # go2cs command-line options
 
-Every option the converter accepts. The [common options](#options) are the few a first conversion needs, and
-the [option reference](#option-reference) at the end of this page explains every option, common, advanced and
-experimental. `go2cs -help` prints the common options, `go2cs -help all` lists every option, and
-`go2cs -help <option>` prints one option's reference entry. The help and this page are written from one table,
-so they say the same thing. [Converting a real-world Go module](ConvertingAModule.md) walks through a whole
-conversion.
+Every option the converter accepts. The [common options](#options) are the few a first conversion needs, and the [option reference](#option-reference) at the end of this page explains every option, common, advanced and experimental. `go2cs -help` prints the common options, `go2cs -help all` lists every option, and `go2cs -help <option>` prints one option's reference entry. The help and this page are written from one table, so they say the same thing. [Converting a real-world Go module](ConvertingAModule.md) walks through a whole conversion.
 
 ## Usage
 
@@ -13,34 +8,53 @@ conversion.
 go2cs [options] <input_dir> [output_dir]
 ```
 
-Give the output directory whenever you convert a single package: without it the C# is written
-beside the Go input.
+Give the output directory whenever you convert a single package: without it the C# is written beside the Go input.
 
 Examples:
 
 ```shell
-go2cs package_dir out                  # convert a package
-go2cs -indent 2 -var=false package_dir out   # same, with 2-space indents and explicit types
-go2cs -stdlib                          # convert the entire Go standard library
-go2cs -stdlib fmt strings io           # convert specific standard library packages
-go2cs -recurse=nuget module_dir out    # convert a module + its third-party deps, stdlib from NuGet
-go2cs -recurse -go2cspath <gopath>/src/go2cs module_dir out   # same, against a standard library staged by deploy-core.ps1
-go2cs -recurse=module,nuget module_dir out   # convert only the module's own packages (deps referenced, not converted)
-go2cs -tests goroot_pkg_dir converted_pkg_dir   # convert a package plus its Go test suite
-go2cs -tests -test-action all goroot_pkg_dir converted_pkg_dir   # ...and build, run, and diff vs go test
-go2cs -tests -recurse -test-action all -go2cspath <go2cs_clone>/src module_dir out_root   # validate a whole module against its own tests
-go2cs toolchain env                    # the Go toolchain go2cs converts with (see below)
+# convert a package:
+go2cs package_dir out
+
+# same, with 2-space indents and explicit types:
+go2cs -indent 2 -var=false package_dir out
+
+# convert the entire Go standard library
+go2cs -stdlib
+
+# convert specific standard library packages:
+go2cs -stdlib fmt strings io
+
+# convert a module + its third-party deps, stdlib from NuGet:
+go2cs -recurse=nuget module_dir out
+
+# same, against a standard library staged by deploy-core.ps1:
+go2cs -recurse -go2cspath <gopath>/src/go2cs module_dir out
+
+# convert only the module's own packages (deps referenced, not converted):
+go2cs -recurse=module,nuget module_dir out
+
+# convert a package plus its Go test suite:
+go2cs -tests goroot_pkg_dir converted_pkg_dir
+
+# ...and build, run, and diff vs go test:
+go2cs -tests -test-action all goroot_pkg_dir converted_pkg_dir
+
+# validate a whole module against its own tests:
+go2cs -tests -recurse -test-action all -go2cspath <go2cs_clone>/src module_dir out_root
+
+# the Go toolchain go2cs converts with (see below):
+go2cs toolchain env
 ```
 
 ## Options
 
-The common options, with a short description each. Each name links to its full entry in the
-[option reference](#option-reference).
+The common options, each with a short description. Option names link to full entry in [option reference](#option-reference).
 
 <!-- BEGIN GENERATED common-options: written from src/go2cs/internal/clihelp/options.go by `go generate` in src/go2cs. Edit options.go, not this region; TestCommandLinePageInSync fails on a hand edit. -->
 | Option | Description |
 |:--|:--|
-| [`-recurse[=module,nuget]`](#option-recurse) | Convert a module and its third-party dependencies (=module: the module only; =nuget: standard library from NuGet). |
+| [`-recurse[="module, nuget"]`](#option-recurse) | Convert a module and its third-party dependencies (=module: the module only; =nuget: standard library from NuGet). |
 | [`-go2cspath <dir>`](#option-go2cspath) | Where the go2cs standard library and runtime are when not from NuGet, and where -stdlib writes. |
 | [`-platforms <os/arch>`](#option-platforms) | The target platform, os/arch (default: this machine's). |
 | [`-tags <list>`](#option-tags) | Build tags applied when loading packages, comma-separated. |
