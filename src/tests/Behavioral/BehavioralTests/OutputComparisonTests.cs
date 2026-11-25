@@ -1019,6 +1019,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
+
+    [TestMethod]
     public void CheckGoDeferConstArgs() => CheckTarget("GoDeferConstArgs");
 
     [TestMethod]

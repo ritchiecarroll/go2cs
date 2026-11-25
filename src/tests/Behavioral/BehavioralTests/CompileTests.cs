@@ -1054,6 +1054,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]

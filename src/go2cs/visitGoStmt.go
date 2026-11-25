@@ -329,6 +329,18 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 			if boxGroup := v.pointerReceiverBoxMethodGroup(goStmt.Call.Fun); boxGroup != "" {
 				callExpr = boxGroup
 			}
+
+			// The callee VALUE itself is handed to goǃ, whose overloads take the structural Action/Func
+			// delegates; a defined func type is a delegate of its own (context's `go f(cause)` through a
+			// CancelCauseFunc), so it converts to its underlying signature's -- exact mirror of the arm in
+			// visitDeferStmt. A nil value stays nil, as it does for a func value of an unnamed type.
+			if funType := v.getType(goStmt.Call.Fun, false); funType != nil {
+				if named, ok := types.Unalias(funType).(*types.Named); ok && named.TypeParams() == nil {
+					if sig, isSig := named.Underlying().(*types.Signature); isSig && !signatureMentionsTypeParams(sig) {
+						callExpr = fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", v.getCSharpTypeName(sig), v.getCSharpTypeName(funType), callExpr)
+					}
+				}
+			}
 		}
 
 		result.WriteString(callExpr)

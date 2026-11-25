@@ -1057,6 +1057,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
