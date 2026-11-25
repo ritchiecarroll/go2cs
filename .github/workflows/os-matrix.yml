@@ -636,6 +636,24 @@ jobs:
               Write-Host "mn-platform: one leg, $($targets[0].rid)"
           }
 
+          # darwin's ARCH binding (seat D5, DESIGN-darwin-arm64-flavour.md section 6). Once src/core holds a darwin-arm64/ folder
+          # (the darwin/arm64 flavour's own home, laid at D2), the instruments src/_paths.ps1 drives build darwin/arm64 on an
+          # Apple-silicon host, so the osx-arm64 leg carries arch = arm64 and the run job binds it as GoTargetArch: the job's
+          # own builds (census, golib-tests) then compile the flavour the behavioral steps read, and the flavour probe checks
+          # the three agree. Without the folder the leg carries no arch and builds darwin/amd64, a correct build on Apple
+          # silicon, which is why this is not refused the way linux's calibration was. The stages below are not bound: they
+          # are the flavour probe's skip list, and TestProbedStagesBindTheArchPathsGives (repoguard) holds the two lists equal.
+          # The four packed stages consume darwin/amd64 bytes until D6's RID map; reconvert-footprint takes its TARGET arch
+          # from GoTargetArch, so binding it would move darwin's footprint to darwin/arm64 (a darwin/arm64 arm is COORD's call).
+          $darwinArchUnbound = '["release-smoke","aot-smoke","nugetgo-behavior","cgo-nuget-e2e","reconvert-footprint"]' | ConvertFrom-Json
+          $darwinArmFlavour = @(Get-ChildItem -Path 'src/core' -Directory -Recurse -Filter 'darwin-arm64' -ErrorAction SilentlyContinue).Count -gt 0
+          if ($darwinArmFlavour -and $env:INPUT_STAGE -notin $darwinArchUnbound) {
+              $targets = @($targets | ForEach-Object { if ($_.rid -eq 'osx-arm64') { $_.arch = 'arm64' }; $_ })
+          }
+          if (@($targets | Where-Object { $_.rid -eq 'osx-arm64' }).Count -gt 0) {
+              Write-Host "darwin arch: osx-arm64 $(if ($darwinArmFlavour -and $env:INPUT_STAGE -notin $darwinArchUnbound) { 'binds arm64 (the darwin/arm64 flavour)' } elseif (-not $darwinArmFlavour) { 'carries no arch: no darwin-arm64/ folder under src/core, so darwin/amd64' } else { "carries no arch: $($env:INPUT_STAGE) is not bound (packed bytes, or footprint target darwin/amd64)" })"
+          }
+
           # aot-smoke dropped osx-arm64 from 2026-10-07 (COORD ruling) to 2026-10-14: on a hosted macos-15 (3-core arm64) runner the
           # Native AOT publish of the consumer's 31-assembly closure did not finish inside the 6 hours a hosted job may run
           # (37523439849, cancelled at 6h00m; osx-x64 read 293 min). Those hours were ILC's generic cycle in golib (array/ж/slice);
@@ -747,7 +765,8 @@ jobs:
               }
               # Only a calibration leg carries the key, so every other dispatch derives the matrix it derived before.
               if ($t.calibration) { $entry.calibration = $true }
-              # Likewise arch: only the linux-arm64 leg, once its flavour exists, carries one.
+              # Likewise arch: only the linux-arm64 leg, once its flavour exists, and the osx-arm64 leg on a bound stage
+              # (D5, above) carry one.
               if ($t.arch) { $entry.arch = $t.arch }
               [pscustomobject]$entry
           }
@@ -1099,7 +1118,8 @@ jobs:
       # is new, and it is what makes a darwin run a DARWIN run instead of a windows-flavor one.
       GoTargetOS: ${{ matrix.goos }}
       # The flavour's ARCH, the second axis of the same binding (seat S5b). `arm64` on the linux-arm64 leg once the
-      # linux/arm64 flavour exists (plan, arch); EMPTY on every other leg, because every arch-split csproj defaults an
+      # linux/arm64 flavour exists (plan, arch), and on the osx-arm64 leg once the darwin/arm64 flavour exists, on every
+      # stage the flavour probe reads (seat D5); EMPTY on every other leg, because every arch-split csproj defaults an
       # empty GoTargetArch to amd64, the arch every other flavour is converted at. So the other legs bind what they did.
       GoTargetArch: ${{ matrix.arch }}
       GOOS_TARGET: ${{ matrix.goos }}
@@ -1189,7 +1209,9 @@ jobs:
       # The flavour this leg builds, as MSBuild evaluates it, and a refusal when it is not the one the plan gave the leg
       # (seat S5b; .github/flavour-probe.ps1 explains the witness). The expected arch is the matrix's own arch field,
       # amd64 when it has none: the binding above is what is tested, so a leg whose GoTargetArch was not bound reads amd64
-      # where the plan said arm64, and stops before any stage reads it. Stages that build no corpus are not probed.
+      # where the plan said arm64, and stops before any stage reads it. Stages that build no corpus are not probed. The
+      # skip list below is also the list of stages the plan leaves the osx-arm64 leg unbound on (seat D5); repoguard's
+      # TestProbedStagesBindTheArchPathsGives holds the two equal.
       # -------------------------------------------------------------------------------------
       - name: Flavour probe — the arch this leg compiles
         if: ${{ !contains(fromJson('["release-smoke","aot-smoke","nugetgo-behavior","cgo-nuget-e2e","reconvert-footprint"]'), needs.plan.outputs.stage) }}
@@ -2029,7 +2051,8 @@ jobs:
           FOOTPRINT_CHANGED: ${{ needs.plan.outputs.footprint-changed }}
         run: |
           $art = Join-Path $PWD 'artifacts'
-          # The target arch is the leg's bound GoTargetArch: arm64 on the linux arm leg, empty (amd64) on every other.
+          # The target arch is the leg's bound GoTargetArch: arm64 on the linux arm leg, empty (amd64) on every other. The
+          # osx-arm64 leg is not bound on this stage (seat D5, plan), so darwin's footprint stays darwin/amd64.
           $goarch = if ($env:GoTargetArch) { $env:GoTargetArch } else { 'amd64' }
           $out = Join-Path $art "reconvert-footprint-$($env:GOOS_TARGET)-$goarch"
           $work = Join-Path $env:RUNNER_TEMP 'reconvert-footprint'
