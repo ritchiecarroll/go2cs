@@ -337,7 +337,7 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 			if funType := v.getType(goStmt.Call.Fun, false); funType != nil {
 				if named, ok := types.Unalias(funType).(*types.Named); ok && named.TypeParams() == nil {
 					if sig, isSig := named.Underlying().(*types.Signature); isSig && !signatureMentionsTypeParams(sig) {
-						callExpr = fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", v.getCSharpTypeName(sig), v.getCSharpTypeName(funType), callExpr)
+						callExpr = fmt.Sprintf("builtin.NilSafeDelegateConversion<%s, %s>(%s)", v.getCSharpTypeName(sig), v.getCSharpTypeName(funType), callExpr)
 					}
 				}
 			}
