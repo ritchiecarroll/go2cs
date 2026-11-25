@@ -34,8 +34,8 @@ says how to run them before you send a change.
 
 These focused checks run by hand when you change what they guard:
 
-- `src/check-warning-entries.sh`: the per-file warning entries the converter writes match the compiler's
-  warnings, in both directions.
+- `src/archived/scripts/check-warning-entries.sh` (archived: kept and still runnable, but no gate or CI job
+  runs it): the per-file warning entries the converter writes match the compiler's warnings, in both directions.
 - `src/tests/pack-paths-selftest.ps1`: the pack's path guard (`src/check-pack-paths.ps1`) names exactly
   the paths planted in fabricated packages.
 - `src/tools/nugetgo/Test-NugetgoSelfDescription.ps1`: the module pack's self-description, on a
