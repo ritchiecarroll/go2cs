@@ -30,7 +30,15 @@ var (
 	xmlComment           = regexp.MustCompile(`(?s)<!--.*?-->`)
 	stdlibTwinsOnInText  = regexp.MustCompile(`(?i)GoStdlibTwins\s*[=:]\s*["']?true`)
 	stdlibTwinsOnElement = regexp.MustCompile(`(?i)<GoStdlibTwins(\s[^>]*)?>\s*true\s*</GoStdlibTwins>`)
+	// A workflow environment entry whose value is a GitHub expression that can yield 'true'.
+	stdlibTwinsOnExpr = regexp.MustCompile(`(?i)GoStdlibTwins\s*:\s*\$\{\{([^}]*)\}\}`)
 )
+
+// The one tracked path allowed to turn GoStdlibTwins on: D2/T6 (FLEET 20261121T230700Z; COORD's GO 20261125T080536Z), the
+// default-mode roster swept against a twinned standard library. It is os-matrix's sweep-shard, which never packs, and only
+// when the plan read ;twins=1. Any other expression that can yield 'true' is refused like a literal.
+const stdlibTwinsAllowedWorkflow = ".github/workflows/os-matrix.yml"
+const stdlibTwinsAllowedCondition = "needs.plan.outputs.sweep-twins == '1'"
 
 // turnsStdlibTwinsOn reports whether a tracked file's text turns GoStdlibTwins on: an MSBuild element that sets it
 // true (comments stripped), or a script, workflow or command line that passes it true.
@@ -42,7 +50,23 @@ func turnsStdlibTwinsOn(rel, text string) bool {
 		return stdlibTwinsOnElement.MatchString(stripped) || stdlibTwinsOnInText.MatchString(stripped)
 	}
 
-	return stdlibTwinsOnInText.MatchString(text)
+	if stdlibTwinsOnInText.MatchString(text) {
+		return true
+	}
+
+	for _, m := range stdlibTwinsOnExpr.FindAllStringSubmatch(text, -1) {
+		if !strings.Contains(m[1], "'true'") {
+			continue
+		}
+
+		if lower == stdlibTwinsAllowedWorkflow && strings.Contains(m[1], stdlibTwinsAllowedCondition) {
+			continue
+		}
+
+		return true
+	}
+
+	return false
 }
 
 func TestStdlibTwinsDefaultOff(t *testing.T) {
@@ -126,6 +150,12 @@ func TestStdlibTwinsScannerFires(t *testing.T) {
 		{"push.ps1", "dotnet pack -p:GoStdlibTwins=true", true},
 		{"ci.yml", "args: /p:GoStdlibTwins='true'", true},
 		{"run.sh", "dotnet build -p:GoStdlibTwins=false", false},
+		// D2/T6's one allowed path, and its near misses.
+		{".github/workflows/os-matrix.yml", "GoStdlibTwins: ${{ needs.plan.outputs.sweep-twins == '1' && 'true' || '' }}", false},
+		{".github/workflows/os-matrix.yml", "GoStdlibTwins: ${{ needs.plan.outputs.mn == '1' && 'true' || '' }}", true},
+		{".github/workflows/ci-master.yml", "GoStdlibTwins: ${{ needs.plan.outputs.sweep-twins == '1' && 'true' || '' }}", true},
+		{".github/workflows/os-matrix.yml", "GoStdlibTwins: ${{ 'true' }}", true},
+		{".github/workflows/os-matrix.yml", "GoStdlibTwinsTests: ${{ needs.plan.outputs.sweep-twins == '1' && 'true' || '' }}", false},
 	}
 
 	for _, c := range cases {

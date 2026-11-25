@@ -378,14 +378,14 @@ jobs:
                   if ($dnsServers -notmatch '^\d{1,3}(\.\d{1,3}){3}(,\d{1,3}(\.\d{1,3}){3})*$') { throw "sweep-shard filter option dns= must be a comma-separated IPv4 list; got '$dnsServers'." }
                   Write-Host "sweep-shard: the job's resolver is set to $dnsServers before the sweep (opt-in; the effective resolver is logged)"
               }
-              # sweep-shard ;twins=1 (linux): D2/T6 -- the standard library is built WITH twins (GoStdlibTwins=true) while the
+              # sweep-shard ;twins=1 (linux): D2/T6 -- the standard library is built WITH twins (GoStdlibTwins set to true) while the
               # converted test host stays plain and GO2CS_MN stays unset: the default-mode user on a twinned stdlib
               # (FLEET 20261121T230700Z, D2; COORD's GO 20261125T080536Z). A twins proof runs before the sweep.
               if ($seen.ContainsKey('twins')) {
                   if ($goos -ne 'linux') { throw "sweep-shard filter option twins= is D2/T6's linux reading and applies to goos linux only; got goos '$goos'." }
                   if ($seen['twins'] -ne '1') { throw "sweep-shard filter option twins= takes 1; got '$($seen['twins'])'." }
                   $sweepTwins = '1'
-                  Write-Host "sweep-shard: twins=1 -- the standard library is built with twins (GoStdlibTwins=true), the host plain, GO2CS_MN unset"
+                  Write-Host "sweep-shard: twins=1 -- the standard library and each row's host are built with twins, GO2CS_MN unset"
               }
               if ($seen.ContainsKey('dumpproof')) {
                   if ($goos -ne 'linux') { throw "sweep-shard filter option dumpproof= is the linux dump-suppression proof's red arm and applies to goos linux only; got goos '$goos'." }
