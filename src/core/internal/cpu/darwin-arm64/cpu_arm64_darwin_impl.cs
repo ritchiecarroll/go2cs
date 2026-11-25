@@ -49,7 +49,7 @@ partial class cpu_package {
 /// </summary>
 [ModuleInitializer]
 internal static void initDarwinArm64FeatureDetection() {
-    Initialize(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
+    // RED CONTROL (never land): the initializer is neutered, so start-up never runs osInit.
 }
 
 /// <summary>
