@@ -226,6 +226,22 @@ func TestPathsCorpusFlavorArchMatchesTheConverter(t *testing.T) {
 		want[key] = expect(corpusLattice(), pair[0], pair[1])
 	}
 
+	// Get-HostFlavorArch is the arch a host's instruments build: the same answer, except for a host _paths.ps1 pins
+	// ($HostFlavorArchInterimPins). darwin/arm64 builds darwin/amd64 until D5 binds the hosted job's GoTargetArch and
+	// removes the pin (COORD ruling 2026-11-25); that cut changes this table too.
+	hostPins := map[string]string{"darwin/arm64": "amd64"}
+
+	for _, pair := range pairs {
+		key := fmt.Sprintf("host|%s|%s", pair[0], pair[1])
+		statements = append(statements, fmt.Sprintf("'%s=' + (Show-FlavorArch (Get-HostFlavorArch -Goos %s -Goarch %s))", key, quote(pair[0]), quote(pair[1])))
+
+		if pinned, found := hostPins[pair[0]+"/"+pair[1]]; found {
+			want[key] = pinned
+		} else {
+			want[key] = expect(corpusLattice(), pair[0], pair[1])
+		}
+	}
+
 	script := strings.Join(statements, "; ")
 
 	var env []string
