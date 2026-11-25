@@ -13,6 +13,10 @@
 //	   Exit: under GO2CS_MN=1 each hands its P off at once (handoffs rise by K, retakes do not);
 //	V6 the same bracketed with Enter(MayBlock): the scheduler retakes the Ps (retakes rise) and injects none.
 //
+// MN_INV_ONLY=V7 (never in the compared run: Go completes it) sets the thread ceiling with debug.SetMaxThreads(16),
+// prints the old ceiling, and then runs V2: under GO2CS_MN=1 the carriers V2 needs pass the ceiling, and the program
+// ends as Go's does past it ("runtime: program exceeds 16-thread limit", "fatal error: thread exhaustion", exit 2).
+//
 // The census rows (3d) run only when MN_INV_ONLY names one (C-pipe, C-accept, C-netread, C-exec, C-sleep, C-chan,
 // C-stdin, C-dns): K goroutines block in one standard-library call at once, main waits, then releases them. The
 // scheduler's READING line (GO2CS_MN_READING=1) says whether the blocks were seen: handoffs or retakes, or only
@@ -28,6 +32,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"time"
@@ -416,6 +421,10 @@ func main() {
 		return
 	case "C-stdin":
 		censusStdin(k)
+		return
+	case "V7":
+		fmt.Println("V7 SetMaxThreads returned the old ceiling:", debug.SetMaxThreads(16))
+		v2(k)
 		return
 	case "C-dns":
 		fmt.Println("C-dns released:", censusDNS(k) == k)

@@ -47,7 +47,7 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 340, 9, 7)]
+[assembly: GoBoundedGoroutine("main.cs", 342, 9, 7)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,7 +57,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABdilIKCsJC2goKCqIKCgoKUgoKCgoKUpoKCgpSCpoKCgpSCqIKCgpaCgqKClIKCgpSClKSkyIKCgoKmpoKCgoKkgsaCuIKCgpSCgoKUlIKCgoKClIKClIKSpqaagoKCgqaCgoKUgoKUgoKCgoKUpoKCgoKCgpSmooKClJKCgpSCgoKAgsaCgpTWgoKCgqbCgoKUkoKigoKCgpSmgoKCgpSUgoKUgoKClIKClNaCgoKClKaCgoKUgoKCgoKUlIKCgpSmgoKCpoKCgpSCgoKUpoKCgqiCgoKUgoKCpoKCgqaCgoKUgoKClKaCgqaCgoKmgpSkgqSCpIKkgqSCpIKCpIKkgqaClIKUgpSClII=", "53-53:1;53-53:2;101-101:1;175-175:1;262-271:1", "", "164=ms/1/3/1,ms/2/3/1,ms/3/3/1", "217:21,228:33,259:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABlslIKCsJC2goKCqIKCgoKUgoKCgoKUpoKCgpSCpoKCgpSCqIKCgpaCgqKClIKCgpSClKSkyIKCgoKmpoKCgoKkgsaCuIKCgpSCgoKUlIKCgoKClIKClIKSpqaagoKCgqaCgoKUgoKUgoKCgoKUpoKCgoKCgpSmooKClJKCgpSCgoKAgsaCgpTWgoKCgqbCgoKUkoKigoKCgpSmgoKCgpSUgoKUgoKClIKClNaCgoKClKaCgoKUgoKCgoKUlIKCgpSmgoKCpoKCgpSCgoKUpoKCgqiCgoKUgoKCpoKCgqaCgoKUgoKClKaCgqaCgoKmgpSkgqSCpIKkgqSCpIKCpIKkgoKkgqaClIKUgpSClII=", "58-58:1;58-58:2;106-106:1;180-180:1;267-276:1", "", "166=ms/1/3/1,ms/2/3/1,ms/3/3/1", "219:21,230:33,261:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -87,6 +87,7 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntimeꓸdebug() => builtin.initPackage(typeof(go.runtime.debug_package));
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));

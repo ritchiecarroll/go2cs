@@ -4,11 +4,13 @@ using fmt = fmt_package;
 using Δnet = net_package;
 using Δos = os_package;
 using exec = go.os.exec_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
+using debug = go.runtime.debug_package;
 using sort = sort_package;
 using strconv = strconv_package;
 using time = time_package;
 using go.os;
+using go.runtime;
 using Δio = io_package;
 
 partial class main_package {
@@ -131,7 +133,7 @@ internal static void cpu(channel<EmptyStruct> gate, channel<EmptyStruct> stop, t
             break;
         }}
         sink += busy(step);
-        runtime.Gosched();
+        Δruntime.Gosched();
     }
 }
 
@@ -394,7 +396,7 @@ internal static void main() {
         return;
     }
 
-    nint procs = runtime.GOMAXPROCS(0);
+    nint procs = Δruntime.GOMAXPROCS(0);
     nint k = 4 * procs;
 
     var exprᴛ1 = Δos.Getenv("MN_INV_ONLY");
@@ -426,6 +428,11 @@ internal static void main() {
     }
     case {} when exprᴛ1 == "C-stdin"u8: {
         censusStdin(k);
+        return;
+    }
+    case {} when exprᴛ1 == "V7"u8: {
+        fmt.Println("V7 SetMaxThreads returned the old ceiling:", debug.SetMaxThreads(16));
+        v2(k);
         return;
     }
     case {} when exprᴛ1 == "C-dns"u8: {
