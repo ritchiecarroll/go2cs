@@ -6,6 +6,7 @@
 // generated wrappers of GoCgoWrappers.<os>.golden.cs (src/go2cs's cgoProbeDecls declares it as cmd/cgo would), and
 // CgoProbeTests calls it.
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #if defined(_WIN32)
@@ -203,6 +204,12 @@ GO2CS_PROBE_EXPORT long go2cs_probe_sum(const void *bytes, int count)
 GO2CS_PROBE_EXPORT void *go2cs_probe_same(void *pointer)
 {
     return pointer;
+}
+
+// The word it was handed, so the caller sees what crossed (design 20.4 S4: a uintptr_t parameter).
+GO2CS_PROBE_EXPORT uintptr_t go2cs_probe_word(uintptr_t word)
+{
+    return word;
 }
 
 // An empty call log of 32 bytes, zeroed.

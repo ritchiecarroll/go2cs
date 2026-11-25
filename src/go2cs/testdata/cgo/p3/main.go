@@ -16,6 +16,7 @@
 package main
 
 /*
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,6 +25,7 @@ char *go2cs_probe_text_copy(const char *text);
 int go2cs_probe_text_fill(char *buffer, int size);
 long go2cs_probe_sum(const void *bytes, int count);
 void *go2cs_probe_same(void *pointer);
+uintptr_t go2cs_probe_word(uintptr_t word);
 char *go2cs_probe_log_new(void);
 void go2cs_probe_log_put(char *log, int value);
 void go2cs_probe_release(void *pointer);
@@ -299,6 +301,22 @@ func main() {
 		// The same address through a uintptr and back in one expression.
 		var x C.int = 7
 		fmt.Println("govoidexpr", C.go2cs_probe_same(unsafe.Pointer(uintptr(unsafe.Pointer(&x)))) != nil, int(x))
+	case "govoidnumberwrite":
+		// S4 (design 20.4), an offset inside: a number one byte into a Go array, through a variable, names the array's
+		// storage at that offset. memset writes two bytes there, and Go reads them back: [0 7 7 0].
+		var x [4]byte
+		n := uintptr(unsafe.Pointer(&x))
+		C.memset(unsafe.Pointer(n+1), 7, 2)
+		fmt.Println("govoidnumberwrite", x)
+	case "wordtoken":
+		// S4, P3's read: a uintptr_t parameter handed the number of a Go value whose type holds Go pointers. Go hands C
+		// its address; go2cs's number for it is a token that names no memory, so the call is refused by name.
+		s := []int{1}
+		u := uintptr(unsafe.Pointer(&s))
+		fmt.Println("wordtoken", uintptr(C.go2cs_probe_word(C.uintptr_t(u))) == u)
+	case "wordint":
+		// Its near-miss: an ordinary integer crosses a uintptr_t parameter as it is.
+		fmt.Println("wordint", uint64(C.go2cs_probe_word(C.uintptr_t(42))))
 	case "gobytes":
 		// C.GoBytes over Go memory: a Go function reads it, and C is not involved. go2cs refuses it until 3.2.
 		var x [4]C.char

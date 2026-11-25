@@ -339,6 +339,10 @@ const cgoP3FixtureDir = "testdata/cgo/p3"
 // cgoP3GoMemory is in every refusal increment 3.1 makes of a pointer into Go memory: the increment that admits it.
 const cgoP3GoMemory = "not supported yet, so go2cs refuses the call"
 
+// cgoP3WordToken is in the refusal of a pointer-sized integer that is go2cs's token for a Go value with no address
+// (GoCgoArgs.Word; design 20.4 S4).
+const cgoP3WordToken = "token for a Go value that has no address"
+
 // cgoP3WriteThrough is in the refusal of a typed pointer C would write through (GoCgoArgs.StructPointer, Phase 2's door
 // for every typed pointer parameter): a native box minted over managed storage. Its text names no increment.
 const cgoP3WriteThrough = "which C must not write through"
@@ -405,8 +409,13 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goinnerdefer"},
 		{name: "goinnergo"},
 		{name: "govoid"},
-		{name: "govoidnumber", csFails: cgoP3GoMemory},
-		{name: "govoidexpr", csFails: cgoP3GoMemory},
+		// S4 (design 20.4): a number of Go memory crosses through the record of its mint, in a variable or in one
+		// expression, and at an offset inside its storage; a uintptr_t handed a token is refused by name.
+		{name: "govoidnumber"},
+		{name: "govoidexpr"},
+		{name: "govoidnumberwrite"},
+		{name: "wordtoken", csFails: cgoP3WordToken},
+		{name: "wordint"},
 		{name: "gobytes"},
 		{name: "gostring"},
 		// Pointers DERIVED from a view of Go memory (the review of increment 3.1, §16.11).
