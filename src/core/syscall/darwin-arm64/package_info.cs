@@ -1,0 +1,456 @@
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
+
+// <ImportedTypeAliases>
+// </ImportedTypeAliases>
+
+using go;
+using static go.syscall_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
+
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
+
+// <InterfaceImplementations>
+[assembly: GoImplement<Errno, error>]
+[assembly: GoImplement<InterfaceAddrMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<InterfaceMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<InterfaceMulticastAddrMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<RouteMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<SockaddrDatalink, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet4, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
+// </InterfaceImplementations>
+
+// <ImplicitConversions>
+[assembly: GoImplicitConv<WaitStatus, Signal>(Inverted = true, ValueType = "uint32")]
+[assembly: GoImplicitConv<_C_int, WaitStatus>(Inverted = true, ValueType = "int32")]
+// </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Cmsghdr))]
+[assembly: GoFieldAccess(typeof(Credential))]
+[assembly: GoFieldAccess(typeof(InterfaceAddrMessage))]
+[assembly: GoFieldAccess(typeof(InterfaceMessage))]
+[assembly: GoFieldAccess(typeof(InterfaceMulticastAddrMessage))]
+[assembly: GoFieldAccess(typeof(RawSockaddr))]
+[assembly: GoFieldAccess(typeof(RawSockaddrDatalink))]
+[assembly: GoFieldAccess(typeof(RawSockaddrInet4))]
+[assembly: GoFieldAccess(typeof(RawSockaddrInet6))]
+[assembly: GoFieldAccess(typeof(RouteMessage))]
+[assembly: GoFieldAccess(typeof(SockaddrDatalink))]
+[assembly: GoFieldAccess(typeof(SockaddrInet4))]
+[assembly: GoFieldAccess(typeof(SockaddrInet6))]
+[assembly: GoFieldAccess(typeof(SockaddrUnix))]
+[assembly: GoFieldAccess(typeof(anyMessage))]
+[assembly: GoFieldAccess(typeof(parseLinkLayerAddr_linkLayerAddr))]
+
+// Go source positions are recorded here, one `GoPositionMap` attribute per converted
+// source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
+// can name the GO file and line a frame was converted from rather than the emitted C# one.
+// Each record carries the Go file's identity and an encoded C#-line to Go-line table
+// TOGETHER: a frame either has a record and reports a position that exists in the Go tree,
+// or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
+
+// <GoSourcePositionMaps>
+[assembly: GoPositionMap("syscall/bpf_bsd.go", "bpf_bsd.cs", "AAsgkqiSqJKCgoKUqLKCgpSokoKCgpSosoKClKiygoKUqJKCgpQABxKSgoKClKiSgoKCgpSokoKCgpSokoKClKiSgoKClKiygoKUqJKCgoKCgpSokoKCgpSClKiSgoKClKiygoKU")]
+[assembly: GoPositionMap("syscall/dirent.go", "dirent.cs", "AA4ikoKUgpSmgpSkpKSkyIKUpKSkpAAEEOKCgoKCgpSCgoKCuIKUgoKClIKCgoK4gpSCgpQ=")]
+[assembly: GoPositionMap("syscall/env_unix.go", "env_unix.cs", "ABY0lsSCgoKCgoKC3JTcopSClIKClILWwoKCpoKUgoKUgoKCpuaigoKUgoK4goKCyoKUgoKClIKUgoLWopSClJSCoqSigoKCgoKCpg==")]
+[assembly: GoPositionMap("syscall/exec_libc2.go", "exec_libc2.cs", "ACZQkoIAARwADgYACRLKgoKCgpSUuIKCgoKmlILcgoKClIKCyoKCgsqUgoK4poKCgoKUuKKC3KaCooLKgoKCgpSCgoKmgoKUgoLKgqKC3IKClIKClJSClIKUgoKClIKUgoKUlIKUgsqCgoKUpoKClLiCggAHEIK4goKCyoKCgsqC2PqEsoK6")]
+[assembly: GoPositionMap("syscall/exec_unix.go", "exec_unix.cs", "AEGQAdKCgpSCrLKCgoKUlIKCgoKCgpSmlKKCgpSClIKUlIIAG4oCkqjCgqiS")]
+[assembly: GoPositionMap("syscall/flock_bsd.go", "flock_bsd.cs", "AAoYkoI=")]
+[assembly: GoPositionMap("syscall/forkpipe.go", "forkpipe.cs", "AAgWooKClIKClIKmgqaC")]
+[assembly: GoPositionMap("syscall/rlimit.go", "rlimit.cs", "AA88AA4CgoKCAAcQlIK4gqaU")]
+[assembly: GoPositionMap("syscall/rlimit_darwin.go", "rlimit_darwin.cs", "AAwUtoKClII=")]
+[assembly: GoPositionMap("syscall/route_bsd.go", "route_bsd.cs", "AAwgmJKCpoKmgsqCpoKUqJKClIKClIKCgoIAFQoAAhqOgoKUgoKClKiSlIKUgqSClIKkAAYWABUogoK4lIKCpIKClJSkgoKkgoKUlAADEtKUgoCCpIKUgoCCpAAaNoKCgoKCgpSClIKClIK0goKUgoK0goKUgrYACxiCgoKUgoKUggALGIKCgoKCgpSClIKClIK0goKUgoK0goKUgrau8pKCgoKCgpSClJSmgpS+woKClA==")]
+[assembly: GoPositionMap("syscall/route_darwin.go", "route_darwin.cs", "AAkSopSCpIKkgqSClAALGIKCgoKClIKUgoKUgrSCgpSCtIKClIK2")]
+[assembly: GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipoIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
+[assembly: GoPositionMap("syscall/sockcmsg_unix_other.go", "sockcmsg_unix_other.cs", "AAockri26oLYgqaCyA==")]
+[assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACEMCasoKClAAHEJKokqiSqJKqkpaSmA==")]
+[assembly: GoPositionMap("syscall/syscall_bsd.go", "syscall_bsd.cs", "ABIsgoKCgpSCgpQAAhQACAKCgpSCuIKmgoKClIKClKaCgqaCgpSmisIAECiUgoKUppSCgoKUppSUlIKClKaY0oKCgpQAD1CigoKClIKCgpSmooKUgoKCgoKCgoIACMoBsoKCgqaygoKmgoKCgqaCgoKCpoKCgoKmgoKCggAHTMKCgoKCgoKUgpSCgpSClIKCgpSClKqSkoKUgpSmtIKCuIKClIK4goK4gpSmtIKCuIKCgpSClKqSgpSmgoKUgoK4uKqSgpQABxDcgqaC", "", "", "370=TimespecToNsec/1/2/1,NsecToTimeval/1/2/1,TimespecToNsec/2/2/2,NsecToTimeval/2/2/2")]
+[assembly: GoPositionMap("syscall/syscall_darwin.go", "syscall_darwin.cs", "ABMogoKClAANHsIAARLylIKCgsqClKaCpoKmgqaCmLKClIKCgoKUprKCgoKClKKCgpSmAAEqAA0AAAHCAQBeAqaygoKClKaYwqKCgpQABJoBwoKUrsKClK7CgpQAAjYAGgKCrPKCAAIaAA4CgqzyggACEAAJAoKuAAgCgq4ACAKCrgAIAoKs4oKsxg==")]
+[assembly: GoPositionMap("syscall/syscall_darwin_arm64.go", "syscall_darwin_arm64.cs", "AAsYgqaCAAIYAAoCgoKmgqaCpoKmsrS0lIKUppg=")]
+[assembly: GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "AB5EkoKUAAoY4oK4goK4poKCgoLm0oK4goKCgoK4gpSCABYmgoKCgqamgpSkpKSUpoKmggAIGqKUpKSklO6UgoKCgqamsoKCgpSCpoKUgpSmsoKUgoKCppSClIKUgpSmsoKCgpSCpoKUgpSmsoKUgoKUgpSClAAjbKKCgoIABB6ygpKClIKCgoKmsoKSgpSCgoKCgqbSgoKClIKCgoKm0oKCgpSCgoKCgqbigpSClKaiggAEHqKCgoKCgqamooKCgoKCpqaigoKUpqKCgpQABCKipoKipqKmgqaCpoKmgqaCgoKUpoKmsoKUgqaygoKCgpSmgoKU")]
+[assembly: GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
+[assembly: GoPositionMap("syscall/timestruct.go", "timestruct.cs", "AAgUgJaSgoKCgpSosKaSgoKCgoKU")]
+[assembly: GoPositionMap("syscall/zerrors_darwin_arm64.go", "zerrors_darwin_arm64.cs", "AIUKmBQAbdwB")]
+[assembly: GoPositionMap("syscall/zsyscall_darwin_arm64.go", "zsyscall_darwin_arm64.cs", "AAwcwqKCgpSmnMKigpSmnNLCgoKUppzSwoKClKacwqKClKacwqKClKac0oKCgpSmnMLCgpSmnMKigpSmnMLCgpSmnMLCgpSmnMKCgpSmnMKigpSmnNKCgpSU4oKClKacwoKClJTCgpSmnNKigoKUppzSooKClKac0uKCgpSmnMKCgoKUwoKUppzCooKUppzSgoKClKac0qKCgpSqsoKClKacwqKClAAFGpzCgoKClMKClKacwoKClKacwoKCgpSigpSmnMLCgpSmnMKCgoKUooKUppzCgoKClKKClKacwoKCgpSigpSmnMKCgoKUooKUppzCgoKClKKClKacwoKClKacwoKClKac0oKCgpSmnMKCgpSmnMKCgoKUgoKClMKClKacwoKClKacwoKClKacwoKClKacwoKClKacwoKClKac0oKCgpSmnMKCgpSmnMKCgpSmnMKCgqacwoKCppzCgoKmnMKCgqac0oKCgpSmnMKCgqacwoKCppzCgoKmnNKCgoKUppzCooKUppzCooKUppzSgoKClKacwoKCppzCgoKmnNKCgoKUppzCgoKClKKClKacwoKCgpSCgoKUwoKUppzCgoKUppzCgoKClKKClKacwoKCgpSigpSmnMKCgoKUooKUppzCgoKUlKKClKacwoKClKacwoKClJSigpSmnMKCgpSUooKUppzCgoKUlKKClKacwoKClKac0oKCgpSigoKUppzSgoKClKKCgpSmnNKCgpSUooKClKac0oKClJSigoKUppzSgoKUlKKCgpSmnMLCgqac0oKCgpSCgpSUwoKClKacwoKCgpSCgoKUwoKUppzCgoKClKKClKacwoKCgpSigpSmnNKCgoKUppzCAAgCgpSmnMKCgpSmnMKCgpSmnMKCgpSmnMKCgoKUooKUppzCgoKUppzCgoKUppzCgoKUppzCgoKUppzCgoKUppzCooKUppzSgoKClKacwqKClKacwoKClKacwoKCgpSCgoKUwoKUppzCgoKUppzCgoKClKKClKacwoKCppzCgoKClKKClKacwoKCgpSigpSmnMKCgoKUooKUppzSgoKUlKKCgpSmAAUqnNKCgoKUppzCgoKUppzSgoKClKacwuKClKacwoKClKacwoKClJQACAKClKacwoKCgpSigpSmnNKCgoKUooKClKac0oKClJSigoKUppzCooKUppzCooKUppzCooKUppzCgoKClMKClKacwoKCgpTCgpSmnMKCgoKUwoKUppzCgoKClMKClKacwoKUgoKUpg==")]
+// </GoSourcePositionMaps>
+
+// Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute
+// per `//go:cgo_import_dynamic` pragma this package binds to a trampoline declaration, so
+// that `abi.FuncPCABI0` of that trampoline resolves to the REAL address of the exported
+// symbol rather than to a token. The value is dereferenced by design - the trampoline's
+// caller jumps to it - which is why a stub carrying no record here is left a loud throw
+// instead: an address that is merely plausible is fatal at the first call.
+
+// <CgoDynamicImports>
+[assembly: GoCgoImportDynamic("libc_accept_trampoline", "accept", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_access_trampoline", "access", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_adjtime_trampoline", "adjtime", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_bind_trampoline", "bind", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_chdir_trampoline", "chdir", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_chflags_trampoline", "chflags", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_chmod_trampoline", "chmod", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_chown_trampoline", "chown", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_chroot_trampoline", "chroot", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_close_trampoline", "close", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_closedir_trampoline", "closedir", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_connect_trampoline", "connect", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_dup2_trampoline", "dup2", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_dup_trampoline", "dup", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_exchangedata_trampoline", "exchangedata", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_execve_trampoline", "execve", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_exit_trampoline", "exit", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fchdir_trampoline", "fchdir", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fchflags_trampoline", "fchflags", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fchmod_trampoline", "fchmod", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fchown_trampoline", "fchown", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fcntl_trampoline", "fcntl", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fdopendir_trampoline", "fdopendir", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_flock_trampoline", "flock", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fork_trampoline", "fork", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fpathconf_trampoline", "fpathconf", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fstat_trampoline", "fstat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fstatat_trampoline", "fstatat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fstatfs_trampoline", "fstatfs", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fsync_trampoline", "fsync", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_ftruncate_trampoline", "ftruncate", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_futimes_trampoline", "futimes", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getcwd_trampoline", "getcwd", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getdtablesize_trampoline", "getdtablesize", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getegid_trampoline", "getegid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_geteuid_trampoline", "geteuid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getfsstat_trampoline", "getfsstat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getgid_trampoline", "getgid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getgroups_trampoline", "getgroups", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getpeername_trampoline", "getpeername", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getpgid_trampoline", "getpgid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getpgrp_trampoline", "getpgrp", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getpid_trampoline", "getpid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getppid_trampoline", "getppid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getpriority_trampoline", "getpriority", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getrlimit_trampoline", "getrlimit", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getrusage_trampoline", "getrusage", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getsid_trampoline", "getsid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getsockname_trampoline", "getsockname", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getsockopt_trampoline", "getsockopt", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_gettimeofday_trampoline", "gettimeofday", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getuid_trampoline", "getuid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_ioctl_trampoline", "ioctl", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_issetugid_trampoline", "issetugid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_kevent_trampoline", "kevent", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_kill_trampoline", "kill", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_kqueue_trampoline", "kqueue", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_lchown_trampoline", "lchown", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_link_trampoline", "link", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_listen_trampoline", "listen", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_lseek_trampoline", "lseek", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_lstat_trampoline", "lstat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mkdir_trampoline", "mkdir", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mkfifo_trampoline", "mkfifo", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mknod_trampoline", "mknod", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mlock_trampoline", "mlock", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mlockall_trampoline", "mlockall", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mmap_trampoline", "mmap", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mprotect_trampoline", "mprotect", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_msync_trampoline", "msync", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_munlock_trampoline", "munlock", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_munlockall_trampoline", "munlockall", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_munmap_trampoline", "munmap", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_open_trampoline", "open", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_openat_trampoline", "openat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_pathconf_trampoline", "pathconf", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_pipe_trampoline", "pipe", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_pread_trampoline", "pread", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_ptrace_trampoline", "ptrace", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_pwrite_trampoline", "pwrite", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_read_trampoline", "read", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_readdir_r_trampoline", "readdir_r", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_readlink_trampoline", "readlink", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_recvfrom_trampoline", "recvfrom", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_recvmsg_trampoline", "recvmsg", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_rename_trampoline", "rename", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_revoke_trampoline", "revoke", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_rmdir_trampoline", "rmdir", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_select_trampoline", "select", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_sendfile_trampoline", "sendfile", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_sendmsg_trampoline", "sendmsg", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_sendto_trampoline", "sendto", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setegid_trampoline", "setegid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_seteuid_trampoline", "seteuid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setgid_trampoline", "setgid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setgroups_trampoline", "setgroups", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setlogin_trampoline", "setlogin", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setpgid_trampoline", "setpgid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setpriority_trampoline", "setpriority", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setprivexec_trampoline", "setprivexec", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setregid_trampoline", "setregid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setreuid_trampoline", "setreuid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setrlimit_trampoline", "setrlimit", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setsid_trampoline", "setsid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setsockopt_trampoline", "setsockopt", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_settimeofday_trampoline", "settimeofday", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_setuid_trampoline", "setuid", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_shutdown_trampoline", "shutdown", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_socket_trampoline", "socket", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_socketpair_trampoline", "socketpair", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_stat_trampoline", "stat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_statfs_trampoline", "statfs", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_symlink_trampoline", "symlink", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_sync_trampoline", "sync", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_sysctl_trampoline", "sysctl", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_truncate_trampoline", "truncate", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_umask_trampoline", "umask", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_undelete_trampoline", "undelete", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_unlink_trampoline", "unlink", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_unlinkat_trampoline", "unlinkat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_unmount_trampoline", "unmount", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_utimensat_trampoline", "utimensat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_utimes_trampoline", "utimes", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_wait4_trampoline", "wait4", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_write_trampoline", "write", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_writev_trampoline", "writev", "/usr/lib/libSystem.B.dylib")]
+// </CgoDynamicImports>
+
+namespace go;
+
+using static go.syscall_package;
+
+[GoPackage("syscall")]
+public static partial class syscall_package
+{
+    // C# nested types declared with no access modifier are always private, and the
+    // Go type declarations in this package's converted sources are deliberately
+    // bare so they read more like the original Go code. The real accessibility for
+    // the types - public for a Go-exported name, internal otherwise - are defined
+    // via declarations below.
+
+    // <TypeAccessibility>
+    internal partial struct _C_int {}
+    internal partial struct _C_long {}
+    internal partial struct _C_long_long {}
+    internal partial struct _C_short {}
+    internal partial struct _Gid_t {}
+    internal partial struct anyMessage {}
+    [GoValueClone("name")] internal partial struct ivalue {}
+    internal partial struct mmapper {}
+    [GoLocalName("linkLayerAddr")] internal partial struct parseLinkLayerAddr_linkLayerAddr {}
+    public partial interface Conn {}
+    public partial interface RawConn {}
+    public partial interface RoutingMessage {}
+    public partial interface Sockaddr {}
+    [GoValueClone("Pad_cgo_0")] public partial struct BpfHdr {}
+    public partial struct BpfInsn {}
+    [GoValueClone("Pad_cgo_0")] public partial struct BpfProgram {}
+    public partial struct BpfStat {}
+    public partial struct BpfVersion {}
+    public partial struct Cmsghdr {}
+    public partial struct Credential {}
+    [GoValueClone("Name", "Pad_cgo_0")] public partial struct Dirent {}
+    public partial struct Errno {}
+    public partial struct Fbootstraptransfer_t {}
+    [GoValueClone("Bits")] public partial struct FdSet {}
+    public partial struct Flock_t {}
+    [GoValueClone("Val")] public partial struct Fsid {}
+    public partial struct Fstore_t {}
+    [GoValueClone("Filt")] public partial struct ICMPv6Filter {}
+    [GoValueClone("Multiaddr", "Interface")] public partial struct IPMreq {}
+    [GoValueClone("Addr")] public partial struct IPv6MTUInfo {}
+    [GoValueClone("Multiaddr")] public partial struct IPv6Mreq {}
+    public partial struct IfData {}
+    [GoValueClone("Pad_cgo_0")] public partial struct IfMsghdr {}
+    [GoValueClone("Pad_cgo_0")] public partial struct IfaMsghdr {}
+    [GoValueClone("Pad_cgo_0")] public partial struct IfmaMsghdr {}
+    [GoValueClone("Pad_cgo_0")] public partial struct IfmaMsghdr2 {}
+    [GoValueClone("Spec_dst", "Addr")] public partial struct Inet4Pktinfo {}
+    [GoValueClone("Addr")] public partial struct Inet6Pktinfo {}
+    [GoValueClone("Header")] public partial struct InterfaceAddrMessage {}
+    [GoValueClone("Header")] public partial struct InterfaceMessage {}
+    [GoValueClone("Header")] public partial struct InterfaceMulticastAddrMessage {}
+    public partial struct Iovec {}
+    public partial struct Kevent_t {}
+    public partial struct Linger {}
+    public partial struct Log2phys_t {}
+    [GoValueClone("Pad_cgo_0", "Pad_cgo_1")] public partial struct Msghdr {}
+    public partial struct ProcAttr {}
+    [GoValueClone("Pad_cgo_0")] public partial struct Radvisory_t {}
+    [GoValueClone("Data")] public partial struct RawSockaddr {}
+    [GoValueClone("Addr", "Pad")] public partial struct RawSockaddrAny {}
+    [GoValueClone("Data")] public partial struct RawSockaddrDatalink {}
+    [GoValueClone("Addr", "Zero")] public partial struct RawSockaddrInet4 {}
+    [GoValueClone("Addr")] public partial struct RawSockaddrInet6 {}
+    [GoValueClone("Path")] public partial struct RawSockaddrUnix {}
+    public partial struct Rlimit {}
+    [GoValueClone("Header")] public partial struct RouteMessage {}
+    [GoValueClone("Filler")] public partial struct RtMetrics {}
+    [GoValueClone("Pad_cgo_0", "Rmx")] public partial struct RtMsghdr {}
+    [GoValueClone("Utime", "Stime")] public partial struct Rusage {}
+    public partial struct Signal {}
+    [GoValueClone("Data", "raw")] public partial struct SockaddrDatalink {}
+    [GoValueClone("Addr", "raw")] public partial struct SockaddrInet4 {}
+    [GoValueClone("Addr", "raw")] public partial struct SockaddrInet6 {}
+    [GoValueClone("raw")] public partial struct SockaddrUnix {}
+    public partial struct SocketControlMessage {}
+    [GoValueClone("Pad_cgo_0", "Qspare")] public partial struct Stat_t {}
+    [GoValueClone("Fsid", "Fstypename", "Mntonname", "Mntfromname", "Reserved")] public partial struct Statfs_t {}
+    public partial struct SysProcAttr {}
+    [GoValueClone("Cc", "Pad_cgo_0")] public partial struct Termios {}
+    public partial struct Timespec {}
+    [GoValueClone("Pad_cgo_0")] public partial struct Timeval {}
+    public partial struct Timeval32 {}
+    public partial struct WaitStatus {}
+    public partial struct _Socklen {}
+    // </TypeAccessibility>
+
+    // Go initializes an imported package before the importing package, for every import
+    // form - not only the blank one. .NET would never load an assembly nothing has touched
+    // yet, so each import that initializes anything is forced below: once per assembly, and
+    // ahead of this package's own `init` functions, which this file being the first compile
+    // item of the project guarantees.
+
+    // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(@internal.abi_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸbytealg() => builtin.initPackage(typeof(@internal.bytealg_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸoserror() => builtin.initPackage(typeof(@internal.oserror_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(@internal.strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
+    // </ImportInitializers>
+}
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(syscall_package.Cmsghdr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛCmsghdr;
+[GoMethodHost(typeof(syscall_package.Errno)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
+[GoMethodHost(typeof(syscall_package.InterfaceAddrMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceAddrMessage;
+[GoMethodHost(typeof(syscall_package.InterfaceMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceMessage;
+[GoMethodHost(typeof(syscall_package.InterfaceMulticastAddrMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceMulticastAddrMessage;
+[GoMethodHost(typeof(syscall_package.Iovec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛIovec;
+[GoMethodHost(typeof(syscall_package.Msghdr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛMsghdr;
+[GoMethodHost(typeof(syscall_package.RouteMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛRouteMessage;
+[GoMethodHost(typeof(syscall_package.Signal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
+[GoMethodHost(typeof(syscall_package.SockaddrDatalink)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrDatalink;
+[GoMethodHost(typeof(syscall_package.SockaddrInet4)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
+[GoMethodHost(typeof(syscall_package.SockaddrInet6)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
+[GoMethodHost(typeof(syscall_package.SockaddrUnix)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
+[GoMethodHost(typeof(syscall_package.Timespec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
+[GoMethodHost(typeof(syscall_package.Timeval)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
+[GoMethodHost(typeof(syscall_package.WaitStatus)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
+[GoMethodHost(typeof(syscall_package.anyMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛanyMessage;
+[GoMethodHost(typeof(syscall_package.mmapper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛmmapper;
+// </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class syscallᴛCmsghdr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static unsafe_package.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) => syscall_package.data⁔(Ꮡh, offset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLen(this ref Cmsghdr cmsg, nint length) => syscall_package.SetLen⁔(ref cmsg, length);
+}
+partial class syscallᴛErrno {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this Errno e) => syscall_package.Error⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Is(this Errno e, error target) => syscall_package.Is⁔(e, target);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Temporary(this Errno e) => syscall_package.Temporary⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this Errno e) => syscall_package.Timeout⁔(e);
+}
+partial class syscallᴛInterfaceAddrMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage m) => syscall_package.sockaddr⁔(ref m);
+}
+partial class syscallᴛInterfaceMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) => syscall_package.sockaddr⁔(ref m);
+}
+partial class syscallᴛInterfaceMulticastAddrMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAddrMessage m) => syscall_package.sockaddr⁔(ref m);
+}
+partial class syscallᴛIovec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLen(this ref Iovec iov, nint length) => syscall_package.SetLen⁔(ref iov, length);
+}
+partial class syscallᴛMsghdr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetControllen(this ref Msghdr msghdr, nint length) => syscall_package.SetControllen⁔(ref msghdr, length);
+}
+partial class syscallᴛRouteMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) => syscall_package.sockaddr⁔(ref m);
+}
+partial class syscallᴛSignal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Signal(this Signal s) => syscall_package.Signal⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Signal s) => syscall_package.String⁔(s);
+}
+partial class syscallᴛSockaddrDatalink {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (unsafe_package.Pointer, _Socklen, error) sockaddr(this ж<SockaddrDatalink> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
+}
+partial class syscallᴛSockaddrUnix {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (unsafe_package.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
+}
+partial class syscallᴛTimespec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) => syscall_package.Unix⁔(ref ts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timespec ts) => syscall_package.Nano⁔(ref ts);
+}
+partial class syscallᴛTimeval {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) => syscall_package.Unix⁔(ref tv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timeval tv) => syscall_package.Nano⁔(ref tv);
+}
+partial class syscallᴛWaitStatus {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Exited(this WaitStatus w) => syscall_package.Exited⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint ExitStatus(this WaitStatus w) => syscall_package.ExitStatus⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Signaled(this WaitStatus w) => syscall_package.Signaled⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal Signal(this WaitStatus w) => syscall_package.Signal⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CoreDump(this WaitStatus w) => syscall_package.CoreDump⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Stopped(this WaitStatus w) => syscall_package.Stopped⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Continued(this WaitStatus w) => syscall_package.Continued⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal StopSignal(this WaitStatus w) => syscall_package.StopSignal⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint TrapCause(this WaitStatus w) => syscall_package.TrapCause⁔(w);
+}
+partial class syscallᴛanyMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slice<byte> b) => syscall_package.toRoutingMessage⁔(Ꮡany, b);
+}
+partial class syscallᴛmmapper {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) => syscall_package.Mmap⁔(Ꮡm, fd, offset, length, prot, flags);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) => syscall_package.Munmap⁔(Ꮡm, data);
+}
+// </MethodForwarders>

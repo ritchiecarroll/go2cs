@@ -379,7 +379,8 @@ func displacedConstMissing(coreDir string, pkg string, entry string, member *reg
 // TestDisplacedConstDestinationReadsTheLayoutKeyFolders plants a const's hand-owned destination in layout key folders.
 // A windows scope is supplied by a body in pkg/amd64/, which the windows/amd64 build compiles; a linux scope whose
 // only body sits in pkg/linux-amd64/ has none at linux/arm64. Read from pkg/<goos>/ alone, the first is a false red
-// and the second names a folder rather than the target that lacks the body.
+// and the second names a folder rather than the target that lacks the body. A darwin scope has no body at
+// darwin/arm64, which does not compile amd64/, while the darwin/amd64 TARGET scope is met there.
 func TestDisplacedConstDestinationReadsTheLayoutKeyFolders(t *testing.T) {
 	coreDir := t.TempDir()
 
@@ -407,7 +408,9 @@ func TestDisplacedConstDestinationReadsTheLayoutKeyFolders(t *testing.T) {
 		want       []string
 	}{
 		{"archConst", "windows", nil},
-		{"archConst", "darwin", nil},
+		{"archConst", "darwin", []string{"darwin/arm64"}},
+		{"archConst", "darwin/amd64", nil},
+		{"archConst", "darwin/arm64", []string{"darwin/arm64"}},
 		{"archConst", "linux", []string{"linux/arm64"}},
 		{"pairConst", "linux", []string{"linux/arm64"}},
 		{"pairConst", "windows", []string{"windows/amd64"}},

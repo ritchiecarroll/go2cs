@@ -70,7 +70,7 @@ architecture-specific path in the standard library.
      only. The heading was "On Apple silicon, `runtime.GOARCH` reports `amd64`"; its old id is kept explicitly, because
      NEWS.md (1.26.10.3) links it. runtime.GOARCH and internal/buildcfg's defaultGOARCH are displaced for darwin
      (src/go2cs/manualTypeOperations.go manualConversionConsts) and read the process architecture
-     (src/core/runtime/darwin/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin/zbootstrap_darwin_impl.cs).
+     (src/core/runtime/darwin-amd64/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin-amd64/zbootstrap_darwin_impl.cs).
      The census of record: docs/phase4/DESIGN-comparator-arms.md §5, layer 2, plus census E (consts folded from
      runtime.GOARCH: defaultGOARCH incoherent, 4 inert or equivalent). The linux and windows flavours still read amd64 on an
      arm64 host (BOARD 2026-11-09), and no package ships for those. -->

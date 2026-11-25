@@ -8278,7 +8278,7 @@ func oracleOptions(options Options) Options {
 // convertedHostOptions is the options the converted test HOST runs under (its child environment): the oracle's,
 // so the host sees the GOARCH Go's own test binary sees. Go's test binary inherits GOARCH from the oracle's `go test`
 // child, and reads it through buildcfg.GOARCH (go/build's default context) and every `go` command it runs. The darwin
-// host reads runtime.GOARCH from the process (runtime/darwin/goarch_darwin_impl.cs), so on osx-arm64 it is arm64; with
+// host reads runtime.GOARCH from the process (runtime/darwin-amd64/goarch_darwin_impl.cs), so on osx-arm64 it is arm64; with
 // the target's GOARCH=amd64 in its environment, go/build's default context and gcimporter's `go list std` read amd64
 // beside it (TestMatch, TestGoodOSArch, and gcimporter's two amd64-only subtests on the osx-arm64 runner, run
 // 42645179767). Unchanged wherever -test-oracle-goarch is unset or equals the target.

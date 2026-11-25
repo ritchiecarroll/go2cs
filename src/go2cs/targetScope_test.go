@@ -49,6 +49,16 @@ func TestTargetScopeRowsAtEveryTarget(t *testing.T) {
 		}
 	}
 
+	// internal/cpu osInit: the darwin/arm64 target alone. windows/amd64 and linux/arm64 never, and darwin/amd64 is the
+	// same-GOOS near-miss (its arm64 detection is the classic partial osInitArm64, not osInit).
+	osInit := &ast.FuncDecl{Name: ast.NewIdent("osInit")}
+
+	for _, target := range fiveTargets {
+		if got, want := isManualFuncDeclInPackage("internal/cpu", target, osInit), target == "darwin/arm64"; got != want {
+			t.Errorf("internal/cpu.osInit displaced at %s = %v, want %v", target, got, want)
+		}
+	}
+
 	// The scope itself, read directly, answers the same table.
 	for _, target := range fiveTargets {
 		if got, want := goosWindowsDarwinAmd64.includes(target), goarchDisplaced[target]; got != want {

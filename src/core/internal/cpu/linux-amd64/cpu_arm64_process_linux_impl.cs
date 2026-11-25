@@ -21,9 +21,10 @@
 //
 // TWO DEPARTURES FROM GO:
 //
-//   - HasDIT stays FALSE, the darwin ruling (COORD, 2026-11-06; darwin/cpu_arm64_darwin_impl.cs states
-//     the cause). The .NET runtime exposes no control for PSTATE.DIT, so a true flag would be a false
-//     security claim. Go would set it from HWCAP_DIT.
+//   - HasDIT stays FALSE, the darwin ruling (COORD, 2026-11-06;
+//     darwin-amd64/cpu_arm64_process_darwin_impl.cs states the cause). The .NET runtime exposes no
+//     control for PSTATE.DIT, so a true flag would be a false security claim. Go would set it from
+//     HWCAP_DIT.
 //
 //   - MIDR comes from sysfs. Go's getMIDR executes MRS MIDR_EL1, which the kernel traps and emulates
 //     when HWCAP_CPUID is set. Managed code cannot issue that instruction, so this reads the same

@@ -39,6 +39,7 @@ var classicPartialErasedOnPurpose = map[string]string{
 	"internal/poll prepayPlatformDeadlinePath linux/amd64":  "only Windows has a platform deadline path to prepay (deadline_prepay_impl.cs)",
 	"internal/poll prepayPlatformDeadlinePath darwin/amd64": "only Windows has a platform deadline path to prepay (deadline_prepay_impl.cs)",
 	"internal/poll prepayPlatformDeadlinePath linux/arm64":  "only Windows has a platform deadline path to prepay (deadline_prepay_impl.cs)",
+	"internal/poll prepayPlatformDeadlinePath darwin/arm64": "only Windows has a platform deadline path to prepay (deadline_prepay_impl.cs)",
 }
 
 var (

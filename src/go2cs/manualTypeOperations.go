@@ -1237,6 +1237,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 	// guard into an infrastructure-error where Go reads 1 and walks on to a matching skip.
 	"internal/cpu": {
 		"getGOAMD64level": goosAny,
+		// osInit (cpu_arm64_darwin.go), for the darwin/arm64 TARGET alone: Go's body reads every Apple-silicon
+		// feature through sysctlbyname, and darwin-arm64/cpu_arm64_darwin_impl.cs carries it with one ruled
+		// departure, HasDIT stays false (COORD 2026-11-06: .NET cannot set PSTATE.DIT, so Go's DIT-dependent
+		// paths must not be told it is there). darwin/amd64 compiles no osInit: on an arm64 process its option
+		// table fills cpu.ARM64 through the classic partial osInitArm64, whose body is
+		// darwin-amd64/cpu_arm64_process_darwin_impl.cs (DESIGN-darwin-arm64-flavour.md section 5, ruling R6).
+		"osInit": goosScope{"darwin/arm64"},
 	},
 	// internal/runtime/atomic's Loadp — *(*unsafe.Pointer)(ptr) over a BARE unsafe.Pointer (the I5
 	// ruling, 2026-08-26). Go's body is real (atomic_amd64.go), but its converted form round-trips

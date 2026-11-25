@@ -30,7 +30,7 @@ import (
 
 // layoutUniverse is the (GOOS, GOARCH) pairs the corpus is laid out for, the converter's platformUniverse
 // (src/go2cs/platformLattice.go); TestLayoutUniverseIsTheConvertersUniverse holds the two equal.
-var layoutUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
+var layoutUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64", "darwin/arm64"}
 
 // layoutKeyRank ranks the layout key folders a package's sources can sit in, `<goos>`, `<goarch>` and
 // `<goos>-<goarch>` per target, in the universe's order: the first target's folders, then the next one's

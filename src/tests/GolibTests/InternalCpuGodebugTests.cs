@@ -20,7 +20,7 @@ namespace GolibTests;
 /// registered on every OS and GODEBUG's cpu.* options are applied only off Windows, as Go's
 /// getGodebugEarly does. An empty or non-cpu GODEBUG leaves every flag alone, and cpu.aes=off clears
 /// HasAES and nothing else. On an arm64 process the table is cpu_arm64.go's and the flags are cpu.ARM64,
-/// filled by the OS's osInit (cpu_arm64_process_impl.cs; darwin/cpu_arm64_darwin_impl.cs from sysctl,
+/// filled by the OS's osInit (cpu_arm64_process_impl.cs; darwin-amd64/cpu_arm64_process_darwin_impl.cs from sysctl,
 /// linux/cpu_arm64_process_linux_impl.cs from the kernel's AT_HWCAP), with HasDIT held false by ruling; on an
 /// x64 process cpu.ARM64 stays unfilled, as before.
 /// </summary>

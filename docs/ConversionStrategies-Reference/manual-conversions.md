@@ -25,7 +25,7 @@ when it emits the declaration itself.
 A package-level **const** can be displaced too, through `manualConversionConsts`, when the converted program must
 compute at run time what Go's toolchain fixes per build. Its first members are darwin's `runtime.GOARCH` and
 `internal/buildcfg`'s `defaultGOARCH` (Go's `const defaultGOARCH = runtime.GOARCH`). The darwin flavour is converted
-once, for `darwin/amd64`, and serves Intel and Apple-silicon Macs, so `runtime/darwin/goarch_darwin_impl.cs` reads the
+once, for `darwin/amd64`, and serves Intel and Apple-silicon Macs, so `runtime/darwin-amd64/goarch_darwin_impl.cs` reads the
 process architecture: `runtime.GOARCH` is `arm64` on Apple silicon, as in Go's own binary there. **The asymmetry is
 deliberate and visible:** only `runtime.GOARCH` moves. `internal/goarch` (`GOARCH`, `IsAmd64`, `IsArm64`,
 `ArchFamily`), the files Go selected for `darwin/amd64`, and every constant folded at conversion keep `amd64`, so they

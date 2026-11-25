@@ -25,9 +25,10 @@
 // So this file is cpu_arm64.go's doinit (the option table below, verbatim) and the stand-in for
 // Initialize's slot, keyed on the PROCESS architecture rather than on the converted GOARCH constant:
 // it runs only when RuntimeInformation.ProcessArchitecture is Arm64, so an x64 process on any OS is
-// unchanged. osInit is per-OS in Go: darwin's is darwin/cpu_arm64_darwin_impl.cs, and linux's (an
-// arm64 process running the linux flavour, which is converted at amd64) is
-// linux/cpu_arm64_process_linux_impl.cs. Windows has none: on a win-arm64 process the partial below
+// unchanged. osInit is per-OS in Go: darwin's is darwin-amd64/cpu_arm64_process_darwin_impl.cs, and
+// linux's (an arm64 process running the linux flavour, which is converted at amd64) is
+// linux/cpu_arm64_process_linux_impl.cs. The darwin/arm64 flavour does not compile this file; its osInit is
+// Go's own call from the converted doinit (darwin-arm64/cpu_arm64_darwin_impl.cs). Windows has none: on a win-arm64 process the partial below
 // reaches the generated stub, which throws at module init. win-arm64 is not a shipped RID.
 //
 // THE NAME HAS NO PRINCIPAL, ON PURPOSE (docs/phase4/DESIGN-linux-arm64-flavour.md §2.7). A hand-own
@@ -79,7 +80,7 @@ partial class cpu_package
             processOptions(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
     }
 
-    // The OS half of Go's arm64 doinit: darwin/cpu_arm64_darwin_impl.cs on darwin,
+    // The OS half of Go's arm64 doinit: darwin-amd64/cpu_arm64_process_darwin_impl.cs on darwin,
     // linux/cpu_arm64_process_linux_impl.cs on linux.
     static partial void osInitArm64();
 
