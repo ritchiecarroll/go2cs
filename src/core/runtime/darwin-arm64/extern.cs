@@ -372,6 +372,6 @@ private static readonly @string GOOSᵇ = "darwin";
 // GOARCH is the running program's architecture target:
 // one of 386, amd64, arm, s390x, and so on.
 public static ref readonly @string GOARCH => ref GOARCHᵇ;
-private static readonly @string GOARCHᵇ = "arm64";
+private static readonly @string GOARCHᵇ = "amd64"; // RED CONTROL (never lands): the darwin/arm64 flavour neutered
 
 } // end runtime_package
