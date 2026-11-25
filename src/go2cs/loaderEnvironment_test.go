@@ -218,53 +218,81 @@ func TestOnlyTheConvertedPackagesTestLoadsAndTheOracleTurnCgoOn(t *testing.T) {
 	}
 }
 
-// -cgo -tests never writes into the repository's corpus (stop line S-D): an output under the core directory of a go2cs
-// root whose parent holds git metadata is refused by name. A scratch root seeded by copying src/core holds no git
-// metadata and is accepted, as is any output outside the corpus. Without -cgo, or without -tests, nothing is checked.
+// -cgo -tests never writes into a repository's corpus (stop line S-D), judged at the OUTPUT with symlinks resolved, and
+// only into a root its seed step marked (P3's verdict on 4a, inbox H 20261124T232124Z):
+//   - a root with no marker is refused (the repository's src, a deployed root);
+//   - route (a): an explicit -go2cspath elsewhere, the output inside a repository's src/core, is refused;
+//   - route (b): a scratch src that is a symlink to a repository's src is refused;
+//   - a marked scratch root, the output in its own core, is accepted;
+//   - without -cgo, or without -tests, nothing is checked.
 func TestACgoTestsConversionNeverWritesTheRepositorysCorpus(t *testing.T) {
 	repository := t.TempDir()
-	root := filepath.Join(repository, "src")
+	repoSrc := filepath.Join(repository, "src")
 	scratch := filepath.Join(t.TempDir(), "src")
 
-	for _, dir := range []string{filepath.Join(root, "core", "net"), filepath.Join(scratch, "core", "net")} {
+	for _, dir := range []string{filepath.Join(repoSrc, "core", "net"), filepath.Join(scratch, "core", "net")} {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	// A worktree's .git is a FILE; the check reads either.
-	if err := os.WriteFile(filepath.Join(repository, ".git"), []byte("gitdir: elsewhere\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(repository, ".git"), []byte("gitdir: elsewhere"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(scratch, cgoScratchRootMarker), nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
 
 	cgoTests := Options{parseCgoTargets: true, convertTests: true}
 
-	cases := []struct {
-		name    string
-		options Options
-		root    string
-		output  string
-		refused bool
-	}{
-		{name: "the repository's corpus", options: cgoTests, root: root, output: filepath.Join(root, "core", "net"), refused: true},
-		{name: "a scratch root seeded from it", options: cgoTests, root: scratch, output: filepath.Join(scratch, "core", "net")},
-		{name: "outside the corpus", options: cgoTests, root: root, output: filepath.Join(repository, "out", "net")},
-		{name: "no -cgo", options: Options{convertTests: true}, root: root, output: filepath.Join(root, "core", "net")},
-		{name: "no -tests", options: Options{parseCgoTargets: true}, root: root, output: filepath.Join(root, "core", "net")},
+	check := func(t *testing.T, options Options, root, output, refusal string) {
+		t.Helper()
+		options.go2csPath = root
+		err := checkCgoTestsOutput(options, output)
+
+		switch {
+		case refusal != "" && (err == nil || !strings.Contains(err.Error(), refusal)):
+			t.Errorf("want a refusal naming %q, got %v", refusal, err)
+		case refusal == "" && err != nil:
+			t.Errorf("refused: %v", err)
+		}
 	}
 
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			options := c.options
-			options.go2csPath = c.root
-			err := checkCgoTestsOutput(options, c.output)
+	t.Run("a root with no marker", func(t *testing.T) {
+		check(t, cgoTests, repoSrc, filepath.Join(t.TempDir(), "net"), cgoScratchRootMarker)
+	})
 
-			switch {
-			case c.refused && (err == nil || !strings.Contains(err.Error(), "CGO_ENABLED=0 by ruling")):
-				t.Errorf("want a refusal naming the ruling, got %v", err)
-			case !c.refused && err != nil:
-				t.Errorf("refused: %v", err)
-			}
-		})
-	}
+	t.Run("route (a): an explicit root elsewhere, the output in a repository's core", func(t *testing.T) {
+		check(t, cgoTests, scratch, filepath.Join(repoSrc, "core", "net"), "CGO_ENABLED=0 by ruling")
+	})
+
+	t.Run("route (b): a scratch src that is a symlink to a repository's src", func(t *testing.T) {
+		link := filepath.Join(t.TempDir(), "src")
+
+		if err := os.Symlink(repoSrc, link); err != nil {
+			t.Skipf("NOT RUN: this host cannot create a symlink (%v); the hosted linux leg runs this arm", err)
+		}
+
+		if err := os.WriteFile(filepath.Join(repoSrc, cgoScratchRootMarker), nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		defer os.Remove(filepath.Join(repoSrc, cgoScratchRootMarker))
+
+		check(t, cgoTests, link, filepath.Join(link, "core", "net"), "CGO_ENABLED=0 by ruling")
+	})
+
+	t.Run("a marked scratch root", func(t *testing.T) {
+		check(t, cgoTests, scratch, filepath.Join(scratch, "core", "net"), "")
+	})
+
+	t.Run("no -cgo", func(t *testing.T) {
+		check(t, Options{convertTests: true}, repoSrc, filepath.Join(repoSrc, "core", "net"), "")
+	})
+
+	t.Run("no -tests", func(t *testing.T) {
+		check(t, Options{parseCgoTargets: true}, repoSrc, filepath.Join(repoSrc, "core", "net"), "")
+	})
 }

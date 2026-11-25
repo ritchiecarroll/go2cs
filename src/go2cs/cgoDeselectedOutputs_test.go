@@ -111,6 +111,63 @@ func TestACgoOnConversionRemovesTheCgoOffFileItDeselects(t *testing.T) {
 		}
 	})
 
+	t.Run("only this target's folders: darwin's copy stays", func(t *testing.T) {
+		out := filepath.Join(t.TempDir(), "net")
+		linux := filepath.Join(out, "linux", "cgo_stub.cs")
+		darwin := filepath.Join(out, "darwin", "cgo_stub.cs")
+		write(t, linux, emitted)
+		write(t, darwin, emitted)
+
+		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false)
+
+		if err != nil || len(removed) != 1 || exists(linux) || !exists(darwin) {
+			t.Fatalf("want linux's copy removed and darwin's kept, got %v (err %v, linux there %v, darwin there %v)", removed, err, exists(linux), exists(darwin))
+		}
+	})
+
+	t.Run("every folder the target resolves to: key folder and flat", func(t *testing.T) {
+		out := filepath.Join(t.TempDir(), "net")
+		key := filepath.Join(out, "linux", "cgo_stub.cs")
+		flat := filepath.Join(out, "cgo_stub.cs")
+		write(t, key, emitted)
+		write(t, flat, emitted)
+
+		if removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false); err != nil || len(removed) != 2 || exists(key) || exists(flat) {
+			t.Fatalf("want both copies removed, got %v (err %v)", removed, err)
+		}
+	})
+
+	t.Run("an _impl.cs companion is refused", func(t *testing.T) {
+		out := filepath.Join(t.TempDir(), "net")
+		stub := filepath.Join(out, "linux", "cgo_stub.cs")
+		write(t, stub, emitted)
+		write(t, filepath.Join(out, "linux", "cgo_stub_impl.cs"), "// hand-owned")
+
+		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false)
+
+		if err == nil || !strings.Contains(err.Error(), "companion") || len(removed) != 0 || !exists(stub) {
+			t.Fatalf("want a refusal naming the companion and the file kept, got %v (err %v)", removed, err)
+		}
+	})
+
+	t.Run("a file in a repository's corpus is refused", func(t *testing.T) {
+		repository := t.TempDir()
+
+		if err := os.WriteFile(filepath.Join(repository, ".git"), []byte("gitdir: elsewhere"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		out := filepath.Join(repository, "src", "core", "net")
+		stub := filepath.Join(out, "linux", "cgo_stub.cs")
+		write(t, stub, emitted)
+
+		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false)
+
+		if err == nil || !strings.Contains(err.Error(), "repository's corpus") || len(removed) != 0 || !exists(stub) {
+			t.Fatalf("want a refusal naming the corpus and the file kept, got %v (err %v)", removed, err)
+		}
+	})
+
 	t.Run("a file without the emission header is refused", func(t *testing.T) {
 		out := filepath.Join(t.TempDir(), "net")
 		stub := filepath.Join(out, "linux", "cgo_stub.cs")

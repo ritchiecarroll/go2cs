@@ -84,37 +84,83 @@ func cgoOracleEnv(options Options) []string {
 	return nil
 }
 
-// checkCgoTestsOutput refuses a -cgo -tests conversion whose output lies in the REPOSITORY's corpus: the corpus is
-// emitted at CGO_ENABLED=0 by ruling, so a cgo-on package goes to a scratch root seeded from it, never into src/core
-// (stop line S-D). The corpus is the core directory of the go2cs root in use; it is the repository's when the root's
-// parent holds git metadata (a .git directory, or a worktree's .git file). A scratch root seeded by copying src/core
-// holds none.
+// cgoScratchRootMarker is the file a scratch root's seed step writes at the root (the -go2cspath directory, beside
+// core), and -cgo -tests refuses a root without it: the repository's src and a deployed root (%GOPATH%/src/go2cs) are
+// shared corpora emitted at CGO_ENABLED=0, and neither holds it (P3's SHOULD 2 on 4a, ruled in by COORD, inbox H
+// 20261124T232124Z).
+const cgoScratchRootMarker = ".go2cs-cgo-scratch-root"
+
+// checkCgoTestsOutput refuses a -cgo -tests conversion whose root is not a seeded scratch root (no
+// cgoScratchRootMarker), or whose OUTPUT lies in a repository's corpus (repositoryCorpusOf). The output is judged
+// itself, symlinks resolved, never through the root: an explicit -go2cspath elsewhere with the output inside a
+// repository's src/core, or a scratch src that is a symlink to one, both passed a root-side check, and with 4c's
+// removal both would delete a tracked file (P3's MUST 1 on 4a). The corpus is emitted at CGO_ENABLED=0 by ruling, so a
+// cgo-on package goes to a scratch root seeded from it, never into it (stop line S-D).
 func checkCgoTestsOutput(options Options, outputPath string) error {
-	if !options.parseCgoTargets || !options.convertTests || options.go2csPath == "" {
+	if !options.parseCgoTargets || !options.convertTests {
 		return nil
 	}
 
-	root, err := filepath.Abs(options.go2csPath)
+	if _, err := os.Stat(filepath.Join(options.go2csPath, cgoScratchRootMarker)); err != nil {
+		return fmt.Errorf("-cgo -tests converts into a scratch root seeded from src/core, which its seed step marks with %s; the root %q holds none (the repository's src and a deployed root are corpora emitted at CGO_ENABLED=0, and are refused)", cgoScratchRootMarker, options.go2csPath)
+	}
+
+	if corpus, inside := repositoryCorpusOf(outputPath); inside {
+		return fmt.Errorf("-cgo -tests writes a cgo-on conversion, and %s is in the repository's corpus (%s), which is emitted at CGO_ENABLED=0 by ruling: convert into a scratch root seeded from src/core instead", outputPath, corpus)
+	}
+
+	return nil
+}
+
+// repositoryCorpusOf reports the repository corpus a path lies in, if any: the path is resolved through every symlink
+// on it (the longest prefix that exists), and an ancestor named `core` whose grandparent holds git metadata (a .git
+// directory, or a worktree's .git file) is a repository's src/core. It is the one predicate both the -cgo -tests output
+// check and 4c's per-file removal ask.
+func repositoryCorpusOf(path string) (string, bool) {
+	resolved := resolveExistingSymlinks(path)
+
+	for dir := resolved; ; {
+		if filepath.Base(dir) == "core" {
+			if _, err := os.Stat(filepath.Join(filepath.Dir(filepath.Dir(dir)), ".git")); err == nil {
+				return dir, true
+			}
+		}
+
+		parent := filepath.Dir(dir)
+
+		if parent == dir {
+			return "", false
+		}
+
+		dir = parent
+	}
+}
+
+// resolveExistingSymlinks is filepath.EvalSymlinks over the longest prefix of path that exists, with the rest joined
+// back on: an output directory a conversion has not created yet still resolves through a symlinked parent.
+func resolveExistingSymlinks(path string) string {
+	absolute, err := filepath.Abs(path)
 
 	if err != nil {
-		return nil
+		return path
 	}
 
-	output, err := filepath.Abs(outputPath)
+	var rest []string
 
-	if err != nil {
-		return nil
+	for dir := absolute; ; {
+		if resolved, err := filepath.EvalSymlinks(dir); err == nil {
+			return filepath.Join(append([]string{resolved}, rest...)...)
+		}
+
+		parent := filepath.Dir(dir)
+
+		if parent == dir {
+			return absolute
+		}
+
+		rest = append([]string{filepath.Base(dir)}, rest...)
+		dir = parent
 	}
-
-	if _, statErr := os.Stat(filepath.Join(root, "..", ".git")); statErr != nil {
-		return nil
-	}
-
-	if !isPathUnder(output, filepath.Join(root, "core")) {
-		return nil
-	}
-
-	return fmt.Errorf("-cgo -tests writes a cgo-on conversion, and %s is in the repository's corpus (%s), which is emitted at CGO_ENABLED=0 by ruling: convert into a scratch root seeded from src/core instead", output, filepath.Join(root, "core"))
 }
 
 // checkCgoFlag refuses a -cgo the converter cannot honour. -cgo makes the conversion's loads cgo-on: the
