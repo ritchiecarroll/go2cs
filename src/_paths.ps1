@@ -147,16 +147,38 @@ function Get-CorpusFlavorArch {
     return $null
 }
 
+# THE darwin/arm64 HOST INTERIM PIN (COORD ruling 2026-11-25 12:02Z; D5 REMOVES IT, in the same cut that binds the
+# hosted job's GoTargetArch). From D2, which adds darwin/arm64 to the universe, an Apple-silicon host's own flavour is
+# darwin/arm64. But until D5 the os-matrix job still binds GoTargetArch EMPTY on its mac legs, so the flavour probe,
+# the census build and every step that reads only the job's environment build darwin/amd64. Left unpinned, this file
+# would set arm64 on that same leg, and every instrument that dot-sources it would build the OTHER flavour: one leg,
+# two flavours, and a green that no longer says which one it read (measured: D3's red control on the stand-in passed on
+# osx-arm64 because the leg built darwin/arm64). So an Apple-silicon host keeps darwin/amd64 here until D5, exactly as
+# before D2. One entry per pinned host: the key is the host's GOOS/GOARCH, the value the flavour arch it builds. The
+# sweep's own pin ($SweepInterimPlatformPins, _roster.ps1) is a separate fact and lasts to D7.
+$HostFlavorArchInterimPins = @{ 'darwin/arm64' = 'amd64' }
+
+# The ARCH of the corpus flavor this host's instruments build: Get-CorpusFlavorArch for the host, unless the host is
+# pinned above. .github/flavour-probe.ps1 asks this same function, so a leg whose instruments would build another
+# arch than the probe reads fails there by name.
+function Get-HostFlavorArch {
+    param([string] $Goos, [string] $Goarch, [hashtable] $Pins = $HostFlavorArchInterimPins, [string[]] $Universe = $CorpusPlatformUniverse)
+
+    if ($Pins -and $Pins.ContainsKey("$Goos/$Goarch")) { return $Pins["$Goos/$Goarch"] }
+
+    return Get-CorpusFlavorArch -Goos $Goos -Goarch $Goarch -Universe $Universe
+}
+
 # The corpus flavor's ARCH, pinned like GoTargetOS above and for the same reason: an L3 csproj with arch
 # folders defaults `GoTargetArch` to `amd64` when the property is EMPTY, so a host whose flavor was
 # converted at another arch would otherwise build the amd64 folders. GoTargetArch names the arch the
-# flavor was CONVERTED at, never the host's: a linux/arm64 host gets `arm64`, and since darwin/arm64 joined
-# the universe (D2) an Apple-silicon host gets `arm64` too. 'amd64' is excluded by the value, exactly as
+# flavor was CONVERTED at, never the host's: a linux/arm64 host gets `arm64`; an Apple-silicon host gets
+# nothing (darwin/amd64) until D5, by the interim pin above. 'amd64' is excluded by the value, exactly as
 # 'windows' is for GoTargetOS: it IS the csproj default. A pre-set variable or an explicit `-p:GoTargetArch`
 # still wins: run-validated-sweep.ps1's interim pin re-sets both variables to darwin/amd64 on an Apple-silicon
 # host until the bank re-reads the osx-arm64 cells (D7; Resolve-SweepPlatforms in _roster.ps1).
 if ([string]::IsNullOrEmpty($env:GoTargetArch) -and $HostGoos) {
-    $hostFlavorArch = Get-CorpusFlavorArch -Goos $HostGoos -Goarch $HostGoarch
+    $hostFlavorArch = Get-HostFlavorArch -Goos $HostGoos -Goarch $HostGoarch
 
     if ($hostFlavorArch -and $hostFlavorArch -ne 'amd64') {
         $env:GoTargetArch = $hostFlavorArch
