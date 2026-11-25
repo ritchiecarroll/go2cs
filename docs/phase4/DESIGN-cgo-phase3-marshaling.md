@@ -3444,3 +3444,64 @@ S5b as a separate half seat, because it touches the route and not the door. S5a 
 - **Q4. S5b's form.** A hand-own of `runtime/cgo`'s handle (lean), or a refusal narrowed to the Handle API.
 
 — H (2026-11-25)
+
+### 20.8 Record 2026-11-25: P3's read folded, COORD's rulings, and S4 as built
+
+P3 read section 20 at `3c0207a893`: APPROVE WITH CHANGES (inbox/COORD/20261125T193346Z-P3.md). COORD ruled the same day
+(inbox H 20261125T193518Z): Q3 both number forms, with P3's conditions; Q4 the narrowed refusal, not a hand-own; S4 split
+out as its own seat and coded now; S3 waits for the third-party counts (Q1).
+
+**P3's points, folded (they amend 20.4 to 20.6 where those read otherwise):**
+- **MUST, S3's copy-back.** "A nil pointer field C sets non-zero decodes to a refusal by name" is withdrawn. C storing a
+  malloc'd pointer into a Go struct's pointer field (`C.fill(unsafe.Pointer(&v))`) is the ordinary out-parameter idiom,
+  and a refusal after C ran would leave its side effects done and its memory leaked where Go continues. A non-zero word
+  decodes as a pointer into C memory, as a C result does, and is refused only when it resolves to Go memory. On encode,
+  a non-nil pointer into C memory crosses as its address. One row each, in S3's seat.
+- **SHOULD, the offset into an image.** 3.4 refuses any non-zero offset (B4, `ImageRoot`). S3 derives the Go offset per
+  way in, bounded by the root's Go size: a field box (its field's Go offset); an element of an inline array (today 1b
+  pins the array's own backing, so `&sa.Addr[0]` never reaches the image, and stays so); S4's number plus offset. One
+  row per way in. A number into an S3 root is refused by name until S3 lands.
+- **SHOULD, strings.** Go admits a string whose bytes are a literal (cgocall.go: read-only data is not a Go pointer).
+  go2cs cannot tell a literal's bytes from a heap string's, so S3 refuses every non-empty string inside a void pointer's
+  root; that stricter case goes into Limitations.md with S3.
+- **SHOULD, the case for S3.** The three false refusals of 20.2 are not Go test verdicts: test.go:1195 and :1201 sit
+  inside a benchmark's `b.Run`, and `twoargsF` has no caller (compile-only, issue 28540). The two number arms are
+  go2cs's own. So S3's case rests on the third-party counts (Q1), not on GOROOT. 20.6's sentence is withdrawn.
+- **Sizing.** S3 and S4 are two seats, not one: S4 first, alone; S3 its own full seat (an offset into an image, the
+  by-value encode, the decode of pointer fields, every void-pointer wrapper golden). S5b (Q4: the narrowed refusal, so
+  runtime/cgo's handle.go converts as ordinary Go and keeps in step at every hop) moves no row alone, since both Handle
+  sites in Go's suite call back into Go (testx.go:594, test.go:2360): it is seated with or just before `//export`.
+
+**Q1.** The owner's yes was relayed by COORD (inbox H 20261125T195912Z); H asked for it in the owner's own chat, as its
+session rules require for a download. The census, its module paths and versions, and the cache's removal are recorded
+here when it runs.
+
+**S4 as built** (on `claude/h-cgo-b10-design-r2`, docs, then two commits):
+- `PinVoidPointer`, after the token test, asks `PinNumber`. A number the registry resolves to a live box crosses as that
+  box's storage, pinned for the call by the wrapper's `fixed` like any void pointer (TryPinTarget, RequireCrossable: the
+  storage holds no Go pointer). An interior number inside a pin golib holds crosses at its offset in that pin's storage,
+  bounded by the pin's extent. A number whose box has been collected is refused by name: the table keeps the dead entry
+  until it is next read, and `ManagedPointerTokens.HoldsCollectedEntry` is asked before `Resolve` removes it.
+- **One deviation from P3's four rows, for COORD:** "an offset past the end" is answered by pinning nothing rather than
+  refusing. A number carries no provenance, so past a pin's extent it is indistinguishable from C memory; the pin-extent
+  index rules one past the end end-exclusive (docs/phase4/DESIGN-cgo-pin-extents.md), and refusing it would break the
+  begin/end cursor idiom, whose begin pins the same storage. The row asserts that the number is never pinned as Go
+  memory and crosses as its number.
+- **Residue, stated:** a number further past a pin, or one whose dead entry the opportunistic sweep has already removed,
+  names nothing golib can see and crosses as C memory, as a wild pointer does under Go. A token id reused after its box
+  died can name another live box (ids wrap at 2^29): remote, and no worse than Go's use-after-free.
+- **The uintptr_t parameter** (P3's note): a `uintptr_t` or `intptr_t` parameter goes through `GoCgoArgs.Word`, which
+  refuses go2cs's TOKEN for a Go value with no address by name (Go would hand C that value's address; a token names no
+  memory). Any other integer crosses, a real address of Go memory included. The word types are read off the outermost
+  alias name, since cmd/cgo declares a typedef as an alias of its base type; `size_t`, an alias of the same `ulong`, is
+  not a word type.
+- **Rows.** GolibTests `GoCgoArgsTests.Numbers`: a live box (the address is the box's own slot, and C's write lands), an
+  offset inside (the write lands in the element), past the end (pins nothing), a dead box (refused), and `Word` (a token
+  refused; an address, 42 and `(uintptr_t)-1` cross). `GoCgoArgsTests.Pinned`: exactly the predicted 20 number and
+  bare-mint forms flip from refused to crossing; every token form keeps cgo's refusal. Converter:
+  `TestCgoWordParametersGoThroughTheWordCheck`. e2e (p3): `govoidnumber` and `govoidexpr` pass; `govoidnumberwrite`
+  (memset through `n+1` into a Go array, `[0 7 7 0]`); `wordtoken` refused by name; `wordint` crosses.
+- **Controls, each red, each restored byte-identical (cmp):** the collected-entry check off (the dead-box row); the
+  number pin off (three rows); `Word`'s check off (its row); the alias read off (the converter row).
+
+— H (2026-11-25)
