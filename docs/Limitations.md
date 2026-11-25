@@ -475,6 +475,17 @@ or never was. In each, the call goes ahead, and the memory may move while C uses
      DESIGN-cgo-phase3-marshaling.md section 16.9, whose direct form the cgo route refuses at conversion. Moved into
      the cgo section at the batch-308 merge, where P4 gave cgo a section of its own. -->
 
+**A Go array of C pointers costs its whole length on every call.** `C.f(&argv[0])` lets C read or fill every
+pointer in the array, as in Go. go2cs holds such an array as Go pointers rather than as machine words, so for the
+call it copies every element of the array into a word array, hands C that, and copies every word C changed back
+afterwards. The copy covers the whole array behind the slice, not only the part C uses: `argv[2:]` of a long array
+copies the long array, on every call. A word C writes that points into the Go memory the call handed it, the array
+itself included (`argv[0] = &argv[2]`), is refused by name, where Go would keep it. An array of C pointers that
+lives in C memory crosses by its own address, with no copy.
+<!-- cgo Phase 3, .5 cgo item 2 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.12.3, H's verdict (A), the word
+     mirror): GoCgoWordMirror in golib, emitted for the out-parameter door and the void door. Rows: GolibTests
+     CgoArgvTests and the cgo-e2e argv arms. -->
+
 **Platforms.** A converted cgo program was built and run against the Go build of the same program on
 linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64, and printed what Go printed apart from the
 differences above.
