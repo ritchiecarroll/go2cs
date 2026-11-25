@@ -42574,4 +42574,17 @@ pipeline's own tiering (TC=0), and the opt-level check runs under the same setti
 — P2 (2026-11-25)
 
 
+**Update 2026-11-25 (P2): weak and crypto/internal/fips140cache join the list (COORD 155114Z, the finalizer/GC
+family).** Both arms at master `1c556c35a5`, linux-x64, optimized arm at `DOTNET_TieredCompilation=0` with FullOpts
+confirmed: weak as built fails TestPointer, TestPointerEquality, TestImmortalPointer, TestIssue69210, TestIssue70739 and
+TestPointerCleanup (in flight at the deadline), optimized PASS on the whole suite; fips140cache as built TestCache
+abandoned at the 15 m per-test deadline, optimized PASS. With the list, through `-tests all`: weak validated 9/9,
+fips140cache 1/1, unique 27 matching + 12 disclosed (its bank). The list's condition first read only root namespace
+`go`, which a nested package's host (`go.crypto.@internal`) does not have, so fips140cache's entry changed nothing; it
+now matches `go` or `go.*`, as the switch does, and `TestOptimizedTestHostsEvaluateOptimized` evaluates every listed
+project (made to fail on the narrow condition: it named fips140cache). runtime/pprof is P1's; runtime is still open.
+
+— P2 (2026-11-25)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

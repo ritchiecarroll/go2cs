@@ -14,6 +14,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -151,6 +152,35 @@ func TestOptimizedTestHostsKeepTheirAdmissionRule(t *testing.T) {
 
 		for _, reader := range readers {
 			t.Errorf("%s: package %s reads caller lines (%s); an optimized host loses them, so disclose its test instead", project, pkg, reader)
+		}
+	}
+}
+
+// Every listed host must actually evaluate Optimize=true: an entry the condition misses (a nested package's host has the root
+// namespace go.<parent>, not go) would sit in the list and change nothing. An explicit GoTestOptimize=false keeps the A/B arm.
+func TestOptimizedTestHostsEvaluateOptimized(t *testing.T) {
+	if testing.Short() {
+		t.Skip("evaluates MSBuild projects")
+	}
+
+	if _, err := exec.LookPath("dotnet"); err != nil {
+		t.Skipf("the .NET SDK is not on PATH: %v", err)
+	}
+
+	for project := range optimizedTestHosts(t) {
+		pkg := strings.ReplaceAll(strings.TrimSuffix(project, ".tests"), ".", "/")
+		path, err := filepath.Abs(filepath.Join("..", "core", filepath.FromSlash(pkg), project+".csproj"))
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got := evaluatedOptimize(t, path); !strings.EqualFold(got, "true") {
+			t.Errorf("%s: Optimize is %q, want true (listed in GoOptimizedTestHosts)", project, got)
+		}
+
+		if got := evaluatedOptimize(t, path, "-p:GoTestOptimize=false"); !strings.EqualFold(got, "false") {
+			t.Errorf("%s with GoTestOptimize=false: Optimize is %q, want false", project, got)
 		}
 	}
 }
