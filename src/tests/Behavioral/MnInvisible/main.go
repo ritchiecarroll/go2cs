@@ -337,18 +337,13 @@ func waiter(gate chan struct{}, cmd *exec.Cmd, done chan<- int) {
 }
 
 func censusExec(k int) int {
-	self, err := os.Executable()
-	if err != nil {
-		return -1
-	}
 	gate, done := make(chan struct{}), make(chan int, k)
 	for i := 0; i < k; i++ {
-		// Off windows the child is sleep(1): a converted program runs under the dotnet host there, so os.Executable
-		// names dotnet, which exits at once with no program to run.
+		// The child is a system command that waits about a second: a converted program may run under the dotnet host,
+		// where os.Executable names dotnet, which exits at once with no program to run.
 		cmd := exec.Command("sleep", "0.3")
 		if runtime.GOOS == "windows" {
-			cmd = exec.Command(self)
-			cmd.Env = append(os.Environ(), "MN_INV_CHILD=1", "GO2CS_MN=")
+			cmd = exec.Command("cmd", "/c", "ping -n 2 127.0.0.1 > nul")
 		}
 		if cmd.Start() != nil {
 			return -1
@@ -444,11 +439,6 @@ func runs(row string) bool {
 }
 
 func main() {
-	if os.Getenv("MN_INV_CHILD") == "1" {
-		time.Sleep(300 * time.Millisecond)
-		return
-	}
-
 	procs := runtime.GOMAXPROCS(0)
 	k := 4 * procs
 

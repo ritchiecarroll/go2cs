@@ -2430,8 +2430,13 @@ jobs:
               line=$(grep -a '^reading: V4' "$RUNNER_TEMP/n5-err.txt" | tr -d '\r')
               p99=$(echo "$line" | sed -n 's/.*p99_ms=\([0-9.]*\).*/\1/p')
               echo "READING n5-i4 arm=$label step_ms=$step run=$r exit=$code $line"
+              # The 25 ms bar is the gate of record on linux (COORD 2026-11-25); elsewhere the latency is a reading, and only
+              # a run that does not finish fails.
               if [ "$label" = "twinned" ]; then
-                if [ "$code" != "0" ] || [ -z "$p99" ] || python3 -c "import sys; sys.exit(0 if float('$p99') > 25 else 1)"; then
+                if [ "$code" != "0" ] || [ -z "$p99" ]; then
+                  echo "::error::N5 I4: arm=$label step_ms=$step run=$r exit=$code p99_ms=${p99:-none} (the run did not finish)"
+                  fail=1
+                elif [ "$RUNNER_OS" = "Linux" ] && python3 -c "import sys; sys.exit(0 if float('$p99') > 25 else 1)"; then
                   echo "::error::N5 I4: arm=$label step_ms=$step run=$r exit=$code p99_ms=${p99:-none} (the bar: p99 <= 25 ms)"
                   fail=1
                 fi

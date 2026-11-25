@@ -338,16 +338,11 @@ internal static void waiter(channel<EmptyStruct> gate, ж<exec.Cmd> cmd, channel
 }
 
 internal static partial nint censusExec(nint k) {
-    var (self, err) = Δos.Executable();
-    if (err != nil) {
-        return -1;
-    }
     var (gate, done) = (new channel<EmptyStruct>(0), new channel<nint>(k));
     for (nint i = 0; i < k; i++) {
         var cmd = exec.Command("sleep", "0.3");
         if (Δruntime.GOOS == "windows"u8) {
-            cmd = exec.Command(self);
-            cmd.Env = append(Δos.Environ(), (@string)"MN_INV_CHILD=1", (@string)"GO2CS_MN=");
+            cmd = exec.Command("cmd", "/c", "ping -n 2 127.0.0.1 > nul");
         }
         if (cmd.Start() != nil) {
             return -1;
@@ -442,11 +437,6 @@ internal static bool runs(@string row) {
 }
 
 internal static void main() {
-    if (Δos.Getenv("MN_INV_CHILD") == "1"u8) {
-        time.Sleep(300 * time.Millisecond);
-        return;
-    }
-
     nint procs = Δruntime.GOMAXPROCS(0);
     nint k = 4 * procs;
 

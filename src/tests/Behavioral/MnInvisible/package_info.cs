@@ -41,13 +41,9 @@ using static go.main_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
-// go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
-
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 374, 9, 7)]
+[assembly: GoBoundedGoroutine("main.cs", 369, 9, 7)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABlulIKCsJC2goKCqIKqgoKCgpSCgoKUgoKClKyCgoKUgoKygoKUgoKCpoKUpoKCgpSCqIKCgpaCgtKCgpSCgoKmlKSkyIKCgoKmpoKCgoKkgsaCuIKCgpSCgoKUlIKCgoKClIKClIKSpqaagoKCgqaCgoKUgoKUgoKCgoKUpoKCgoKCgpSmooKClJKCgpSCgoKAgsaCgpTWgoKCgqbCgoKUkoKigoKCgpSmgoKCgpSUgoKUgoKClIKClNaCgoKClKaCgoKUgoaCgoKUgpSUgoKClKaCgoKmgoKClIKCgpSmgoKCqIKCgpSCgoKmgoKCpoKCgpSCgoKUrIKClLKClIKCgpSmgoKmgoKCpoKUpIKkgqSCpIKkgqSCgpSkgqSCgqSCpoKUgpSClIKUgg==", "59-59:1;59-59:2;110-114:1;134-134:1;145-149:2;209-209:1;296-305:1;472-475:1", "", "195=ms/1/3/1,ms/2/3/1,ms/3/3/1", "248:21,259:33,290:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABlulIKCsJC2goKCqIKqgoKCgpSCgoKUgoKClKyCgoKUgoKygoKUgoKCpoKUpoKCgpSCqIKCgpaCgtKCgpSCgoKmlKSkyIKCgoKmpoKCgoKkgsaCuIKCgpSCgoKUlIKCgoKClIKClIKSpqaagoKCgqaCgoKUgoKUgoKCgoKUpoKCgoKCgpSmooKClJKCgpSCgoKAgsaCgpTWgoKCgqbCgoKUkoKigoKCgpSmgoKCgpSUgoKUgoKClIKClNaCgoKClKaCgoaCgpSClJSCgoKUpoKCgqaCgoKUgoKClKaCgoKogoKClIKCgqaCgoKmgoKClIKCgpSsgoKUsoKUgoKClKaCgqaCgpSkgqSCpIKkgqSCpIKClKSCpIKCpIKmgpSClIKUgpSC", "59-59:1;59-59:2;110-114:1;134-134:1;145-149:2;209-209:1;296-305:1;462-465:1", "", "195=ms/1/3/1,ms/2/3/1,ms/3/3/1", "248:21,259:33,290:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
