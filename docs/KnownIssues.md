@@ -273,6 +273,31 @@ on one carrier and run out of stack at half of it on another, depending on which
 <!-- Source: src/core/golib/runtime/GoScheduler.cs, CarrierThread (a halved size is published for later carriers only);
      P3's row 4 read, 2026-11-24, NIT 4. -->
 
+**A wait the scheduler cannot see holds its thread, and the scheduler adds threads around it, up to a ceiling.** A
+goroutine built with twins can still block somewhere golib does not see: a .NET wait in hand-written C# (`lock`, an
+event, `Task.Wait`, `Thread.Sleep`), or a native call. The scheduler notices a .NET wait that lasts two of its ticks and
+gives the goroutine's processor to other work. For anything else it starts more threads while work waits. In all it
+starts at most 10,000 threads (Go's default; set it with `debug.SetMaxThreads` or `GO2CS_MN_MAXTHREADS`). A program
+that needs more ends as Go's does: `runtime: program exceeds 10000-thread limit`, then `fatal error: thread exhaustion`
+and exit status 2.
+<!-- Source: src/core/golib/runtime/GoScheduler.cs, the monitor's sensed retake (N5 3a), re-armed injection and
+     ThreadExhaustion (3c, COORD's Q1 ruling 2026-11-23); docs/phase4/DESIGN-mn-n5-invisible-blocking.md section 9.
+     Behavioral MnInvisible V1, V2 and V7. -->
+
+**C# that blocks in its own native call says so with `GoNativeCall`.** Code you write in C# that calls a native
+function which can block (a P/Invoke that waits on a device, a socket or a lock) brackets the call, so the scheduler
+can give the goroutine's processor away while it waits:
+`GoNativeCall.Enter(NativeCallHint.Blocks); try { Call(); } finally { GoNativeCall.Exit(); }`. `Blocks` gives the
+processor away at once, as Go's `entersyscallblock` does; `MayBlock`, the default, keeps it and lets the scheduler take
+it back if the call lasts. Call `Exit` exactly once for each `Enter`, on the same goroutine, and read the call's error
+(`Marshal.GetLastPInvokeError`) before `Exit`. `GoNativeCall` is an advanced member of `go.golib`: hidden from
+completion, and frozen, so a program that uses it keeps working across releases. Without twins or without
+`GO2CS_MN=1` it does nothing.
+<!-- Source: src/core/golib/runtime/GoNativeCall.cs (3b: Enter(Blocks) hands the P off, Exit takes one back); COORD's
+     Q2 ruling 2026-11-23 (DESIGN-mn-n5-invisible-blocking.md section 9): a documented consumer contract, in
+     PublicSurface.golib.txt's [mn-frozen] section. Behavioral MnInvisible V5 (Blocks) and V6 (MayBlock), from the
+     fixture's hand_impl.cs. -->
+
 ## A nugetgo package built on 1.26.10.3 beside the go.* 1.26.11.1 packages fails at restore {#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore}
 
 **Symptom.** `dotnet restore`, or the restore a `dotnet build` starts with, stops with `NU1107`, a version conflict

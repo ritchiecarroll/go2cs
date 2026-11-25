@@ -24,6 +24,11 @@ namespace go.golib;
 /// </summary>
 /// <remarks>
 /// <para>
+/// <b>Advanced: also the consumer contract.</b> C# that blocks in its own native call brackets it with
+/// <see cref="Enter"/> and <see cref="Exit"/> (docs/KnownIssues.md, the M:N section), so the M:N scheduler sees the block.
+/// Hidden from completion, and frozen (PublicSurface.golib.txt, [mn-frozen]): a change needs a recorded decision.
+/// </para>
+/// <para>
 /// <b>Who calls it.</b> A native-call funnel's bottom (or the runtime's entersyscall family, for a funnel whose Go
 /// original goes through it) calls <see cref="Enter"/> immediately before the native call and <see cref="Exit"/> in a
 /// <c>finally</c> after it. A native-to-managed entry point calls <see cref="ReenterManaged"/> before any Go code runs
