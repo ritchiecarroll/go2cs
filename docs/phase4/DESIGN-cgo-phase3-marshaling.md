@@ -3198,3 +3198,39 @@ running when it arrived. COORD held both seats (inbox H 20261125T021805Z). It is
 The PTR door is ruled into 3.4 (image and copy-back). Before code, P3 reads 19.7 and the wrapper golden count is posted.
 
 — H (2026-11-25)
+
+### 19.9 Record 2026-11-25: the struct image door as built (P3's B4 to B8)
+
+The door is cut from the A fold (`2bc39a6265`). Prediction posted before the goldens were regenerated: 39 StructPointer
+sites in 27 wrappers move, and nothing else. MET exactly (linux: gmtime_r, add_into, hfa_scale, tagged_double, uname;
+windows: GetSystemTime, PtInRect, UnionRect, _gmtime64_s, add_into, hfa_scale, tagged_double; the arm64 and darwin
+goldens likewise).
+
+As built:
+- **golib.** `GoCgoImages` (one per call, declared by every wrapper that takes a struct pointer) holds the roots a call
+  hands C. New `StructPointer` and `ScalarPointer` overloads take it by ref. The image arm runs only for a NativeBox that
+  is not genuinely native and aliases an order token whose root `ManagedPointerTokens` resolves.
+- **B4.** The root is found through the token. A view at a non-zero offset into it is refused by name. P3's field shape
+  (`&sa.Addr`) never reaches the arm: a field view aliases the field's own storage and takes the mirror of exactly its
+  bytes; unsafe.Add over the whole view's token is refused upstream as pointer arithmetic. Row asserts both.
+- **B5.** One image per root per call, keyed by ReferentObject; a second view shares the first buffer. A root handed as
+  an image and through the mirror or the scalar door, in either order, is refused by name ("name the same Go value").
+- **B6 / B7.** Decoded back only when C changed the image (byte compare against the encoded copy), so an untouched image
+  decodes nothing and a goroutine's write during the call survives.
+- **B8.** The buffer is max(root's Go size, T's C size), the tail zeroed. Seam: GoCgoPin.StorageLength.
+- B-10 as for the mirror; a root holding a Go pointer is refused by name.
+- **Converter.** cgoStructWrappers emits the images local, `ref images` at every struct and scalar pointer door, the
+  struct parameters inside the existing `fixed` nesting, and `images.CopyBack()` after the mirror copy-backs.
+- **Limit.** C's writes land at copy-back, not live: docs/Limitations.md, beside the scalar door.
+
+Rows:
+- GolibTests GoCgoImagesTests, 8 rows, all pass. Neutered controls, each red, restored byte-identical (cmp): the image
+  arm, B6 (decode unconditionally), B5 sharing, B5 mixed, B8 (root size only).
+- e2e (testdata/cgo/p3): `imgaddinto` hands one Go value as three views (dst == x == y); Go prints `imgaddinto 1 4 7`,
+  where three copies would print 0 4 5. `imgmixed` hands a view and a pointer into the same value; refused by name.
+- probe.c gains go2cs_probe_pair_and_int for imgmixed.
+
+Readings (offline, H): converter `go test -run Cgo` ok; GolibTests cgo slice 246 passed, 0 failed, 9 skipped. Hosted
+cgo-e2e, golib-tests and the net probe follow as their own lines.
+
+— H (2026-11-25)

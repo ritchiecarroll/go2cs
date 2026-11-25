@@ -61,6 +61,15 @@ GO2CS_PROBE_EXPORT int go2cs_probe_add_into(struct go2cs_probe_pair *dst, const 
     return dst == x;
 }
 
+// The struct image door's mixed case (cgo Phase 3, increment 3.4, DESIGN-cgo-phase3-marshaling 19.9): a struct and an
+// int that may name one Go value. Go hands C one memory; go2cs refuses rather than hand C two copies of it.
+GO2CS_PROBE_EXPORT int go2cs_probe_pair_and_int(struct go2cs_probe_pair *dst, int *n)
+{
+    dst->a += *n;
+    *n = dst->b;
+    return dst->a;
+}
+
 // Doubles the union's member the tag names, and returns the tag.
 GO2CS_PROBE_EXPORT int go2cs_probe_tagged_double(struct go2cs_probe_tagged *tagged)
 {
