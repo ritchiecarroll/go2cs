@@ -254,6 +254,8 @@ public sealed partial class TwinGenerator
 
         // Row 19 ruling 2: awaits of a weak target (a member that never parks, such as crypto's Hash.New) do not make a
         // literal park, so PairLiteral leaves a literal whose only awaits are weak target calls plain.
+        // The two counts are disjoint: m_pairAwaits counts func-value pair tests, m_weakAwaits the two site awaits of a
+        // direct call, so no await is subtracted twice.
         private int m_weakAwaits;
 
         // N2: the box twin's receiver (`this ref T t` becomes `this ж<T> Ꮡt`), whose ref the prologue declares; Rule R

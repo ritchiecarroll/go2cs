@@ -341,6 +341,14 @@ public class TwinMovabilityTests
                 return a == 1 && Set(Ꮡa, 2, false) == 3;
             }
 
+            // The await in the LEFT operand of the outer operator: Lowerable searches only right operands, so this stays
+            // blocked by name, and runs in C# order (a read first: 1*10+3).
+            public static bool leftChain()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return (a == 1 && show("l"u8, a, Set(Ꮡa, 2, false)) == 13) || counter < 0;
+            }
+
             // A right operand with a side effect, and one that panics, behind a left operand that short-circuits.
             internal static nint boom() => throw new InvalidOperationException("boom");
 
@@ -546,6 +554,8 @@ public class TwinMovabilityTests
         Assert.AreEqual(true, Twin(assembly, "andNoAwait"));
         Assert.AreEqual(true, Twin(assembly, "andInPlace"));
         Assert.AreEqual(true, Twin(assembly, "bracelessAnd"));
+        StringAssert.Contains(twins, "|leftChain|Set|ref-like-before|", "an await in the outer operator's left operand stays blocked by name\n" + twins);
+        Assert.AreEqual(true, Twin(assembly, "leftChain"));
     }
 
     private static readonly CSharpParseOptions Options = new(LanguageVersion.CSharp13);
