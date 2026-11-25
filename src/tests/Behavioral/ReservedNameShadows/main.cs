@@ -32,7 +32,7 @@ partial struct @scoped {
     internal nint b;
 }
 
-partial struct record {
+partial struct Δrecord {
     internal nint a;
 }
 
@@ -71,11 +71,11 @@ internal static nint nilShadow() {
 
 internal static nint keywordLocals() {
     nint @__arglist = 5;
-    nint record = 1;
+    nint Δrecord = 1;
     nint @scoped = 2;
     nint @required = 3;
     nint nuint = 4;
-    return @__arglist + record + @scoped + @required + nuint;
+    return @__arglist + Δrecord + @scoped + @required + nuint;
 }
 
 internal static (nint, @string) predeclLocals() {
@@ -110,7 +110,7 @@ internal static void main() {
     var sv = new Δsstring(n: 7);
     var rq = new @required(c: 3);
     var sc = new @scoped(b: 2);
-    var rc = new record(a: 1);
+    var rc = new Δrecord(a: 1);
     var bx = new box(items: [4, 5]);
     fmt.Println(a.x, len(vals), vals[1], (nint)c, r.r, n.d, bi.z, sv.n, rq.c, sc.b, rc.a);
     var (pd, es) = predeclLocals();

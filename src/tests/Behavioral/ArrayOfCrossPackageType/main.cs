@@ -19,15 +19,13 @@ internal static ж<atomic.Int32> last(any vals) {
 }
 
 internal static void main() {
-    var ptrsᴷ = new stackAppend<ж<atomic.Int32>>();
-
     ref var x = ref heap(new counters(), out var Ꮡx);
     touch(ref x.c[0]);
     touch(ref x.c[2]);
 
     slice<ж<atomic.Int32>> ptrs = default;
     foreach (var i in range(len(x.c))) {
-        ptrs = append(ptrsᴷ, ptrs, Ꮡx.at(counters.Ꮡc, i));
+        ptrs = append(ptrs, Ꮡx.at(counters.Ꮡc, i));
     }
     last(ptrs).Store(7);
     fmt.Println(len(x.c), len(x.d), Ꮡx.at(counters.Ꮡc, 2).Load());

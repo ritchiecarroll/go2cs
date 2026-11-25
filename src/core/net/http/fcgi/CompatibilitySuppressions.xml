@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- A Go type named record is spelled Δrecord (docs/ConversionStrategies-Reference/shadowing.md): record begins a record declaration at the start of a C# member, so a declared Go type of that name takes the Δ prefix, and net/http/fcgi's method holder fcgiᴛrecord became fcgiᴛΔrecord. The one entry is the failure release-smoke's binary-compatibility guard read on the train 12 union (417fd87146, run 45583774592) against 1.26.11.1, written exactly as the guard named it (COORD 2026-11-25T12:24:43Z). Announced in the release notes of the .5 release, where GoBreakFloor moves. Delete this file once .5 is published: the release after it compares with .5, and this entry matches nothing. -->
+<Suppressions>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:go.net.http.fcgiᴛrecord</Target>
+    <Left>lib/net10.0/go.net.http.fcgi.dll</Left>
+    <Right>lib/net10.0/go.net.http.fcgi.dll</Right>
+  </Suppression>
+</Suppressions>

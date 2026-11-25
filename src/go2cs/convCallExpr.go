@@ -1225,10 +1225,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// a bare type parameter).
 		if targetTP, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.TypeParam); ok && typeParamIsInteger(targetTP) {
 			if argTP, ok := types.Unalias(v.info.TypeOf(arg)).(*types.TypeParam); ok && typeParamIsInteger(argTP) {
-				return fmt.Sprintf("ConvertToType<%s>(ConvertToUInt64<%s>(%s))", targetTypeName, v.getCSharpTypeName(argTP), expr)
+				return fmt.Sprintf("builtin.ConvertToType<%s>(builtin.ConvertToUInt64<%s>(%s))", targetTypeName, v.getCSharpTypeName(argTP), expr)
 			}
 
-			return fmt.Sprintf("ConvertToType<%s>(%s)", targetTypeName, expr)
+			return fmt.Sprintf("builtin.ConvertToType<%s>(%s)", targetTypeName, expr)
 		}
 
 		// The MIRROR: a conversion FROM an integer-constrained type parameter TO a basic integer
@@ -1237,7 +1237,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// numeric cast when the target is not uint64 itself.
 		if targetBasic, ok := v.info.TypeOf(callExpr).(*types.Basic); ok && targetBasic.Info()&types.IsInteger != 0 {
 			if argTP, ok := types.Unalias(v.info.TypeOf(arg)).(*types.TypeParam); ok && typeParamIsInteger(argTP) {
-				inner := fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(argTP), expr)
+				inner := fmt.Sprintf("builtin.ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(argTP), expr)
 
 				if targetBasic.Kind() == types.Uint64 {
 					return inner
@@ -1254,10 +1254,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// helper so an integer rounds once, never through float64.
 		if targetBasic, ok := v.info.TypeOf(callExpr).(*types.Basic); ok && targetBasic.Info()&types.IsFloat != 0 {
 			if argTP, ok := types.Unalias(v.info.TypeOf(arg)).(*types.TypeParam); ok && typeParamIsNumericWithFloat(argTP) {
-				helper := "ConvertToFloat64"
+				helper := "builtin.ConvertToFloat64"
 
 				if targetBasic.Kind() == types.Float32 {
-					helper = "ConvertToFloat32"
+					helper = "builtin.ConvertToFloat32"
 				}
 
 				return fmt.Sprintf("%s<%s>(%s)", helper, v.getCSharpTypeName(argTP), expr)
@@ -1311,7 +1311,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// non-null source pays for construction.
 				sourceTypeName := v.getCSharpTypeName(v.info.TypeOf(arg))
 
-				return fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", targetTypeName, sourceTypeName, expr)
+				return fmt.Sprintf("builtin.NilSafeDelegateConversion<%s, %s>(%s)", targetTypeName, sourceTypeName, expr)
 			}
 		}
 
@@ -2253,7 +2253,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							replacementArgs = make([]string, params.Len())
 						}
 
-						replacementArgs[i] = fmt.Sprintf("widen<%s, %s>(%s, %s => %s)",
+						replacementArgs[i] = fmt.Sprintf("builtin.widen<%s, %s>(%s, %s => %s)",
 							v.getCSharpTypeName(ptrElem), target, DynamicCastArgMarker, elemVar, wrapped)
 					}
 				}
@@ -2287,7 +2287,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								paramSig, isFunc := params.At(i).Type().Underlying().(*types.Signature)
 
 								if isFunc && paramSig.Params().Len() == 1 && paramSig.Results().Len() == 2 {
-									replacementArgs[i] = fmt.Sprintf("widen<%s, %s, %s>(%s, %s => %s)",
+									replacementArgs[i] = fmt.Sprintf("builtin.widen<%s, %s, %s>(%s, %s => %s)",
 										v.getCSharpTypeName(paramSig.Params().At(0).Type()),
 										v.getCSharpTypeName(ptr), v.getCSharpTypeName(constraint),
 										DynamicCastArgMarker, elemVar, wrapped)
@@ -2298,10 +2298,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 									// closed type — mlkem reaches this position through
 									// `generateKey func() (D, error)` and it was CS0407 ×8 while only
 									// the one-argument form existed.
-									replacementArgs[i] = fmt.Sprintf("widenResult<%s, %s>(%s, %s => %s)",
+									replacementArgs[i] = fmt.Sprintf("builtin.widenResult<%s, %s>(%s, %s => %s)",
 										v.getCSharpTypeName(ptr), v.getCSharpTypeName(constraint), DynamicCastArgMarker, elemVar, wrapped)
 								} else {
-									replacementArgs[i] = fmt.Sprintf("widen<%s, %s>(%s, %s => %s)",
+									replacementArgs[i] = fmt.Sprintf("builtin.widen<%s, %s>(%s, %s => %s)",
 										v.getCSharpTypeName(ptr), v.getCSharpTypeName(constraint), DynamicCastArgMarker, elemVar, wrapped)
 								}
 							}
@@ -3227,7 +3227,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 
 				if isTypeParam {
-					return v.withSliceElemDims(fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs), typeParam)
+					return v.withSliceElemDims(fmt.Sprintf("%s<%s>(%s)", v.golibCall("make"), typeName, remainingArgs), typeParam)
 				}
 
 				// `make(chan<- T[, n])` is where a DIRECTIONAL channel value is born, and the one
@@ -3522,11 +3522,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if site, ok := packageRecoverForms[callExpr]; ok {
 				switch site.form {
 				case recoverFormFlagged:
-					return fmt.Sprintf("recover(%s)", site.local)
+					return fmt.Sprintf("%s(%s)", v.golibCall("recover"), site.local)
 				case recoverFormChecked:
-					return "recoverChecked()"
+					return "builtin.recoverChecked()"
 				case recoverFormNeverDeferred:
-					return fmt.Sprintf("recover(%s: false)", recoverFlagLocalName)
+					return fmt.Sprintf("%s(%s: false)", v.golibCall("recover"), recoverFlagLocalName)
 				}
 			}
 		}
@@ -3599,10 +3599,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 				deferCallArgs[0] = panicValue
 
-				return fmt.Sprintf("throw panic(%s1)", TempVarMarker)
+				return fmt.Sprintf("throw %s(%s1)", v.golibCall("panic"), TempVarMarker)
 			}
 
-			return fmt.Sprintf("throw panic(%s)", panicValue)
+			return fmt.Sprintf("throw %s(%s)", v.golibCall("panic"), panicValue)
 		}
 	}
 
@@ -5345,12 +5345,17 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 				// rendered through THIS FILE's alias (getCSharpTypeName prefers
 				// importPathAliases), so the using must declare that alias too: go-cmp's test
 				// imports `ts "…/internal/teststructs"`, records `ts.AssignB`, and the
-				// package-name using left `ts` undeclared (CS0246).
+				// package-name using left `ts` undeclared (CS0246). The alias is spelled as every
+				// other import alias is (getSanitizedImport): a package named by a C# keyword
+				// (go-json-experiment's `internal`) declares `using @internal = …;`, where the bare
+				// keyword fails CS1041 and every following directive in the file cascades.
 				qualifier := importQualifier(pkg.Name())
 
 				if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
 					qualifier = fileAlias
 				}
+
+				qualifier = getSanitizedImport(qualifier)
 
 				packageLock.Lock()
 				conversionPackageUsings[qualifier] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)

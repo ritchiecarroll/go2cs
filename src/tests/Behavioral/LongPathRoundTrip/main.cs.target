@@ -19,8 +19,6 @@ internal partial struct main_probes /*dyn*/ {
 internal static void main() {
     GoFrame ᒐ = default;
     try {
-        var namesᴷ = new stackAppend<@string>();
-
         var (@base, err) = os.MkdirTemp("", "go2cs-longpath");
 
         if (err != nil) {
@@ -85,7 +83,7 @@ internal static void main() {
         var names = new slice<@string>(0, len(entries));
 
         foreach (var (_, entry) in range(entries)) {
-            names = append(namesᴷ, names, fmt.Sprintf("%s:%v"u8, entry.Name(), entry.IsDir()));
+            names = append(names, fmt.Sprintf("%s:%v"u8, entry.Name(), entry.IsDir()));
         }
 
         sort.Strings(names);

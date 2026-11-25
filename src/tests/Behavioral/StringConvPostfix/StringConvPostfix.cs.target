@@ -5,8 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void main() {
-    var wᴷ = new stackAppend<byte>();
-
     slice<byte> b = default;
     for (var ch = (rune)'A'; ch <= 'E'; ch++) {
         b = append(b, ((@string)ch).ꓸꓸꓸ);
@@ -32,7 +30,7 @@ internal static void main() {
     fmt.Println((@string)("a" + "b" + "c"));
 
     sink w = default;
-    w = append(wᴷ, w, (byte)'h', (byte)'i');
+    w = append(w, (byte)'h', (byte)'i');
     fmt.Println((@string)(slice<byte>)w, len(w));
 
     var glyphs = new map<@string, rune>{

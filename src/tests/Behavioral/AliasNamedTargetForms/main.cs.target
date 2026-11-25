@@ -58,7 +58,7 @@ internal static void main() {
             }
         }
     };
-    var s = NilSafeDelegateConversion<SeqInt, Action<Func<nint, bool>>>(f);
+    var s = builtin.NilSafeDelegateConversion<SeqInt, Action<Func<nint, bool>>>(f);
     s([GoFunc("main.func2")] (nint i) => {
         fmt.Println("seq", i);
         return i < 1;

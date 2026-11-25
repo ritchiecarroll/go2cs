@@ -27,8 +27,6 @@ internal static fermat norm(this fermat z) {
 }
 
 internal static void main() {
-    var nilFᴷ = new stackAppend<uint64>();
-
     var z = new fermat(3, 5);
     z[0] = 7;
     z[2] = 19;
@@ -47,7 +45,7 @@ internal static void main() {
     fmt.Println(len(l), z, ((fermat)l).norm());
 
     fermat nilF = default;
-    fmt.Println(nilF == nil, len(nilF), fmt.Sprintf("%v %d"u8, ((nat)nilF) == nil, len(append(nilFᴷ, nilF, (uint64)1))));
+    fmt.Println(nilF == nil, len(nilF), fmt.Sprintf("%v %d"u8, ((nat)nilF) == nil, len(append(nilF, (uint64)1))));
 
     foreach (var (i, w) in range<uint64>(z[..2])) {
         fmt.Print(i, ":", w, " ");

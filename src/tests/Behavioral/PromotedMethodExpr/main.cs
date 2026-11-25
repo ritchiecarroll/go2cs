@@ -50,7 +50,7 @@ partial struct own {
 internal static @string Say(this own o, @string p) { return p + o.s; }
 
 internal static void main() {
-    var write = ((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)));
+    var write = ((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => builtin.wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)));
     ref var m = ref heap(new myType(), out var Ꮡm);
     var (n, err) = write(Ꮡm, slice<byte>("expr"u8));
     fmt.Println("(*myType).Write:", n, err, Ꮡm.of(myType.ᏑBuffer).String());
@@ -74,7 +74,7 @@ internal static void main() {
     var get = ((Func<outer, nint>)(mainᴛouterᴛpkg.Get));
     fmt.Println("outer.Get:", get(o));
     
-    var getp = ((Func<ж<outer>, nint>)([GoWrapper("(*outer).Get")] (p0) => wrapperRecv(p0).Get()));
+    var getp = ((Func<ж<outer>, nint>)([GoWrapper("(*outer).Get")] (p0) => builtin.wrapperRecv(p0).Get()));
     fmt.Println("(*outer).Get:", getp(Ꮡo));
     
     var oʗ1 = o;
@@ -105,7 +105,7 @@ internal static void main() {
         ref var t = ref heap(new myType(), out var Ꮡt);
         var (k, _) = f(Ꮡt, slice<byte>("xyz"u8));
         return k + Ꮡt.of(myType.ᏑBuffer).Len();
-    })(((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)))))));
+    })(((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => builtin.wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)))))));
 }
 
 } // end main_package

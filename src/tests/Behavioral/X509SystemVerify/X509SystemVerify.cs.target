@@ -20,8 +20,6 @@ using Δio = io_package;
 partial class main_package {
 
 internal static void main() {
-    var namesᴷ = new stackAppend<@string>();
-
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != nil) {
         fmt.Println("generate key error:", err);
@@ -75,7 +73,7 @@ internal static void main() {
     foreach (var (_, chain) in range(chains)) {
         slice<@string> names = default;
         foreach (var (_, c) in range(chain)) {
-            names = append(namesᴷ, names, c.Subject.CommonName);
+            names = append(names, c.Subject.CommonName);
         }
         fmt.Println("public chain:", strings.Join(names, " -> "));
     }

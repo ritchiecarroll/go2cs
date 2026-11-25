@@ -11,7 +11,7 @@ partial struct profBuf {
 internal static void push(this ж<profBuf> Ꮡb, nint v) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    appendInt(ref nonnil(ref b).data, v);
+    appendInt(ref builtin.nonnil(ref b).data, v);
 }
 
 internal static void appendInt(ref slice<nint> s, nint v) { s = append(s, v); }

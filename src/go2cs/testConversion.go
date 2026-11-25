@@ -7497,9 +7497,11 @@ func classifyTestSources(inputPath string, included hashset.HashSet[string], com
 // digest (F7): any option that changes emitted C# invalidates the manifest. Machine-specific
 // paths (goRoot/goPath/go2csPath) are deliberately excluded so digests stay machine-portable.
 func conversionOptionsDigest(options Options) string {
-	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t",
+	// stack-append is the resolved mode: a package converted with -stack-append=off and then compared without it is
+	// stale, not a default run, because its emission has no stack-append buffers.
+	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t;stack-append=%t",
 		options.useChannelOperators, options.preferVarDecl, options.indentSpaces,
-		options.includeComments, options.parseCgoTargets)
+		options.includeComments, options.parseCgoTargets, stackAppendEnabled(options))
 }
 
 // runtimeSourcesDigest hashes the hand-owned runtime the converted tests build against (golib +
@@ -8283,6 +8285,11 @@ type testEnvironmentRecord struct {
 	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
 	OracleGOARCH string `json:"oracleGoarch,omitempty"`
 
+	// StackAppend is "off" when the run's -stack-append mode resolved off: its emission has no stack-append buffers, so
+	// cap() after a non-escaping append, and an allocation count that reads it, can differ from a default -tests run.
+	// Omitted when the mode resolved on, the -tests default, so every default record is unchanged.
+	StackAppend string `json:"stackAppend,omitempty"`
+
 	// OracleBuildTags is the oracle `go test` child's build tags, recorded only when they differ from the
 	// conversion's (oracleBuildTagsRecord): every row but math/big's own drops math_big_pure_go, so Go ran
 	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise. A POINTER so an
@@ -8341,6 +8348,10 @@ func testEnvironmentFromOptions(options Options) testEnvironmentRecord {
 
 	if oracle := oracleOptions(options); oracle.targetPlatform != options.targetPlatform {
 		_, record.OracleGOARCH, _ = strings.Cut(oracle.targetPlatform, "/")
+	}
+
+	if !stackAppendEnabled(options) {
+		record.StackAppend = "off"
 	}
 
 	return record

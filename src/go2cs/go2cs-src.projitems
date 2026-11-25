@@ -141,6 +141,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoStructWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoVariables_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chainedCallScaling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chanDirComment_test.go" />
@@ -153,7 +154,8 @@
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)commandLineDocFlags_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)commandLineHelp.go" />
+    <None Include="$(MSBuildThisFileDirectory)commandLineHelp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />
@@ -336,6 +338,8 @@
     <None Include="$(MSBuildThisFileDirectory)goTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)golibCall.go" />
+    <None Include="$(MSBuildThisFileDirectory)golibCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)golibNamespaceNames.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFileSpelling_other_test.go" />
@@ -347,7 +351,6 @@
     <None Include="$(MSBuildThisFileDirectory)handOwnTypeAccessibility_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handPackageReadme_test.go" />
     <None Include="$(MSBuildThisFileDirectory)headerDataPointer_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)helpDefaultTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostFatalClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostFatalModuleEvidence_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostLaunchLoadTime_test.go" />
@@ -402,6 +405,13 @@
     <None Include="$(MSBuildThisFileDirectory)interfaceInheritedMemberDoc_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceEmbedMergedMethod_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceMethodDiamond_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\clihelp\clihelp_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\clihelp\options.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\clihelp\page.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\clihelp\render.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\clihelp\testdata\help-all.txt" />
+    <None Include="$(MSBuildThisFileDirectory)internal\clihelp\testdata\help-common.txt" />
+    <None Include="$(MSBuildThisFileDirectory)internal\clihelp\testdata\help-tests.txt" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\corpus_test.go" />
@@ -423,6 +433,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\bad\prelude\prelude.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\good\prelude\prelude.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\goroot\src\prelude\prelude.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\gencommandline\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gencorpusrelease\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genpopulation\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensourcemeta\main.go" />
@@ -784,6 +795,8 @@
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendMove2heap_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendOption.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendOption_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendProbeCache_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendProbeCacheLazy_unix_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendProbeCacheOwner_notunix.go" />

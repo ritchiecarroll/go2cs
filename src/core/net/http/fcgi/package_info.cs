@@ -63,8 +63,8 @@ using System.Runtime.CompilerServices;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(conn))]
 [assembly: GoFieldAccess(typeof(go.net.http_package.Request))]
-[assembly: GoFieldAccess(typeof(record))]
 [assembly: GoFieldAccess(typeof(request))]
+[assembly: GoFieldAccess(typeof(Δrecord))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -100,10 +100,10 @@ public static partial class fcgi_package
     internal partial struct conn {}
     internal partial struct envVarsContextKey {}
     internal partial struct header {}
-    [GoValueClone("buf")] internal partial struct record {}
     [GoValueClone("buf")] internal partial struct request {}
     internal partial struct response {}
     internal partial struct streamWriter {}
+    [GoValueClone("buf")] internal partial struct Δrecord {}
     public partial struct recType {}
     // </TypeAccessibility>
 
@@ -143,10 +143,10 @@ public static partial class fcgi_package
 [GoMethodHost(typeof(fcgi_package.child)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛchild;
 [GoMethodHost(typeof(fcgi_package.conn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛconn;
 [GoMethodHost(typeof(fcgi_package.header)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛheader;
-[GoMethodHost(typeof(fcgi_package.record)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛrecord;
 [GoMethodHost(typeof(fcgi_package.request)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛrequest;
 [GoMethodHost(typeof(fcgi_package.response)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛresponse;
 [GoMethodHost(typeof(fcgi_package.streamWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛstreamWriter;
+[GoMethodHost(typeof(fcgi_package.Δrecord)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛΔrecord;
 // </MethodHolders>
 
 // A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
@@ -162,7 +162,7 @@ partial class fcgiᴛbufWriter {
 }
 partial class fcgiᴛchild {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void serve(this ж<child> Ꮡc) => fcgi_package.serve⁔(Ꮡc);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) => fcgi_package.handleRecord⁔(Ꮡc, Ꮡrec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error handleRecord(this ж<child> Ꮡc, ж<Δrecord> Ꮡrec) => fcgi_package.handleRecord⁔(Ꮡc, Ꮡrec);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) => fcgi_package.serveRequest⁔(Ꮡc, Ꮡreq, body);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cleanUp(this ref child c) => fcgi_package.cleanUp⁔(ref c);
 }
@@ -174,10 +174,6 @@ partial class fcgiᴛconn {
 }
 partial class fcgiᴛheader {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref header h, recType recType, uint16 reqId, nint contentLength) => fcgi_package.init⁔(ref h, recType, reqId, contentLength);
-}
-partial class fcgiᴛrecord {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) => fcgi_package.read⁔(Ꮡrec, r);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> content(this ref record r) => fcgi_package.content⁔(ref r);
 }
 partial class fcgiᴛrequest {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseParams(this ref request r) => fcgi_package.parseParams⁔(ref r);
@@ -193,5 +189,9 @@ partial class fcgiᴛresponse {
 partial class fcgiᴛstreamWriter {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) => fcgi_package.Write⁔(ref w, p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref streamWriter w) => fcgi_package.Close⁔(ref w);
+}
+partial class fcgiᴛΔrecord {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ read(this ж<Δrecord> Ꮡrec, io.Reader r) => fcgi_package.read⁔(Ꮡrec, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> content(this ref Δrecord r) => fcgi_package.content⁔(ref r);
 }
 // </MethodForwarders>

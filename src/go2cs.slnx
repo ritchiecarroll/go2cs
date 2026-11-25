@@ -291,6 +291,15 @@
     <Project Path="tests/Behavioral/AddressOfParenthesizedOperand/AddressOfParenthesizedOperand.csproj" />
     <Project Path="tests/Behavioral/AliasImport/AliasImport.csproj" />
     <Project Path="tests/Behavioral/AliasImportLib/AliasImportLib.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/AliasKeywordPackage.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/checked/AliasKeywordPackage.checked.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/flags/AliasKeywordPackage.flags.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/internal/AliasKeywordPackage.internal.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/opts/AliasKeywordPackage.opts.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/partial/AliasKeywordPackage.partial.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/record/AliasKeywordPackage.record.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/tokens/AliasKeywordPackage.tokens.csproj" />
+    <Project Path="tests/Behavioral/AliasKeywordPackage/union/AliasKeywordPackage.union.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/AliasNamespaceShadow.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/inner/AliasNamespaceShadow.inner.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/sort/AliasNamespaceShadow.sort.csproj" />
@@ -704,6 +713,7 @@
     <Project Path="tests/Behavioral/GoHostModuleShadow/GoHostModuleShadow.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/consumer/GoHostModuleShadow.consumer.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/hostlib/go.shadowlib.in.lib.csproj" />
+    <Project Path="tests/Behavioral/GolibIntrinsicShadow/GolibIntrinsicShadow.csproj" />
     <Project Path="tests/Behavioral/GoNamespaceShadow/GoNamespaceShadow.csproj" />
     <Project Path="tests/Behavioral/GoNamespaceShadow/nsshadowlib/go.nsshadow.csproj" />
     <Project Path="tests/Behavioral/GoOnlyFloatLiteralForms/GoOnlyFloatLiteralForms.csproj" />
@@ -1055,6 +1065,12 @@
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />
     <Project Path="tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />
+    <Project Path="tests/Behavioral/PackageSuffixCollision/PackageSuffixCollision.csproj" />
+    <Project Path="tests/Behavioral/PackageSuffixCollision/ownc/PackageSuffixCollision.ownc.csproj" />
+    <Project Path="tests/Behavioral/PackageSuffixCollision/ownf/PackageSuffixCollision.ownf.csproj" />
+    <Project Path="tests/Behavioral/PackageSuffixCollision/ownt/PackageSuffixCollision.ownt.csproj" />
+    <Project Path="tests/Behavioral/PackageSuffixCollision/ownv/PackageSuffixCollision.ownv.csproj" />
+    <Project Path="tests/Behavioral/PackageSuffixCollision/shadow/PackageSuffixCollision.shadow.csproj" />
     <Project Path="tests/Behavioral/PackageVarFuncLitPointerParam/PackageVarFuncLitPointerParam.csproj" />
     <Project Path="tests/Behavioral/PackageVarFuncLitTypeLift/PackageVarFuncLitTypeLift.csproj" />
     <Project Path="tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />

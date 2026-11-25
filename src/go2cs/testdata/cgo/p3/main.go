@@ -43,6 +43,46 @@ struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
 int go2cs_probe_next_family(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
+
+struct go2cs_probe_pair
+{
+    int a;
+    int b;
+};
+
+struct go2cs_probe_cursor
+{
+    int n;
+    char *cur;
+};
+
+struct go2cs_probe_node
+{
+    int value;
+    struct go2cs_probe_node *next;
+};
+
+int go2cs_probe_cursor_set(struct go2cs_probe_cursor *cursor, char *buffer, int k);
+struct go2cs_probe_cursor go2cs_probe_cursor_at(char *buffer, int k);
+int go2cs_probe_pick(int *a, int **out);
+int go2cs_probe_pick_b(struct go2cs_probe_pair *pair, int **out);
+void go2cs_probe_node_ring(struct go2cs_probe_node *node);
+int go2cs_probe_pick_as_char(int *a, char **out);
+int go2cs_probe_argv_count(char **argv);
+int go2cs_probe_argv_count_void(void *argv);
+int go2cs_probe_argv_fill(char **argv, int n);
+void go2cs_probe_argv_self(char **argv);
+
+struct go2cs_probe_gauge
+{
+	int count;
+	long long total;
+};
+
+extern int go2cs_probe_counter;
+extern struct go2cs_probe_gauge go2cs_probe_gauge_now;
+extern int go2cs_probe_last_error;
+int go2cs_probe_bump(int step);
 */
 import "C"
 
@@ -74,6 +114,13 @@ type goCHeader struct {
 	pad  int32
 	n    int32
 	name [8]C.char
+}
+
+// goArgvHost holds an array of C pointers as a FIELD, so &h.ptrs[0] is item 2's argv shape inside a Go struct (P3's
+// unconfirmed row, carried by item 2).
+type goArgvHost struct {
+	n    int32
+	ptrs [4]*C.char
 }
 
 // goRefHost holds a Go reference, so no door can pin a view of one of its fields: its storage is a managed object
@@ -631,6 +678,144 @@ func main() {
 		s := h.name[:]
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
 		fmt.Printf("cviewnamedata %d %q\n", int(n), string(s[:n]))
+	// The .5 cgo items 1(a) and 1(b) (DESIGN-cgo-phase3-marshaling 18.12.3): pointers C hands BACK, inside a struct it
+	// was handed, inside a struct it returns, and through an out-parameter. Go prints each; go2cs maps a stack copy's
+	// own address to the argument and refuses an address inside Go memory or inside a copy, by name.
+	case "membergo":
+		// C writes &b[3] into a member of a Go struct: a pointer into the Go memory the call pinned.
+		b := make([]byte, 8)
+		var c C.struct_go2cs_probe_cursor
+		k := C.go2cs_probe_cursor_set(&c, (*C.char)(unsafe.Pointer(&b[0])), 3)
+		fmt.Println("membergo", int(k), int(c.n), c.cur == (*C.char)(unsafe.Pointer(&b[3])))
+	case "memberc":
+		// Its near-miss over C memory: the member is a C pointer.
+		buf := (*C.char)(C.malloc(8))
+		defer C.free(unsafe.Pointer(buf))
+		var c C.struct_go2cs_probe_cursor
+		k := C.go2cs_probe_cursor_set(&c, buf, 3)
+		fmt.Println("memberc", int(k), int(c.n), c.cur == (*C.char)(unsafe.Add(unsafe.Pointer(buf), 3)))
+	case "resultmembergo":
+		// The same cursor returned by value, its member pointing into the Go buffer.
+		b := make([]byte, 8)
+		c := C.go2cs_probe_cursor_at((*C.char)(unsafe.Pointer(&b[0])), 5)
+		fmt.Println("resultmembergo", int(c.n), c.cur == (*C.char)(unsafe.Pointer(&b[5])))
+	case "resultmemberc":
+		buf := (*C.char)(C.malloc(8))
+		defer C.free(unsafe.Pointer(buf))
+		c := C.go2cs_probe_cursor_at(buf, 5)
+		fmt.Println("resultmemberc", int(c.n), c.cur == (*C.char)(unsafe.Add(unsafe.Pointer(buf), 5)))
+	case "outself":
+		// *out = a: out == &a, and a write through out is a write to a.
+		a := C.int(41)
+		var out *C.int
+		r := C.go2cs_probe_pick(&a, &out)
+		same := out == &a
+		*out = 42
+		fmt.Println("outself", int(r), same, int(a))
+	case "outc":
+		// Its near-miss: a in C memory, so out is that C pointer.
+		ca := (*C.int)(C.malloc(4))
+		defer C.free(unsafe.Pointer(ca))
+		*ca = 7
+		var out *C.int
+		r := C.go2cs_probe_pick(ca, &out)
+		fmt.Println("outc", int(r), out == ca)
+	case "outothertype":
+		// H's near-miss: *out is a's own address, through char * rather than int *. Go's answer is that address; go2cs has
+		// no box of a's that names a char there, so it refuses by name rather than mapping.
+		a := C.int(41)
+		var out *C.char
+		r := C.go2cs_probe_pick_as_char(&a, &out)
+		fmt.Println("outothertype", int(r), unsafe.Pointer(out) == unsafe.Pointer(&a))
+	case "outinterior":
+		// *out = &pair.b, inside the struct C was handed: Go's answer is &pair.b, which go2cs refuses by name.
+		pair := C.struct_go2cs_probe_pair{a: 1, b: 2}
+		var out *C.int
+		r := C.go2cs_probe_pick_b(&pair, &out)
+		fmt.Println("outinterior", int(r), out == &pair.b)
+	case "ringself":
+		// node->next = node: the member is the node's own address.
+		var n C.struct_go2cs_probe_node
+		n.value = 9
+		C.go2cs_probe_node_ring(&n)
+		fmt.Println("ringself", int(n.value), n.next == &n)
+	// The .5 cgo item 2, the argv shape (18.12.3; H's verdict (A), the word mirror): C reads or fills a whole Go array of
+	// C pointers it was handed the first of. Go runs each; go2cs mirrors the backing array as words, pins it for the
+	// call and copies it back, and refuses a Go pointer among the words (cgo's own panic) and a word C stores INTO the
+	// array (inside the pin), by name.
+	case "argvgo":
+		a, bb := C.CString("a"), C.CString("bb")
+		defer C.free(unsafe.Pointer(a))
+		defer C.free(unsafe.Pointer(bb))
+		argv := []*C.char{a, bb, nil}
+		fmt.Println("argvgo", int(C.go2cs_probe_argv_count(&argv[0])))
+	case "argvfill":
+		z := C.CString("z")
+		defer C.free(unsafe.Pointer(z))
+		argv := []*C.char{nil, nil, z}
+		n := C.go2cs_probe_argv_fill(&argv[0], 2)
+		fmt.Println("argvfill", int(n), C.GoString(argv[0]), C.GoString(argv[1]), argv[2] == z)
+	case "argvgoptr":
+		// A Go pointer among the words: cgo's panic on both sides.
+		b := []byte("g\x00")
+		argv := []*C.char{(*C.char)(unsafe.Pointer(&b[0])), nil}
+		fmt.Println("argvgoptr", int(C.go2cs_probe_argv_count(&argv[0])))
+	case "argvself":
+		// C stores &argv[2] into argv[0]. Go keeps it; go2cs refuses by name, since the mirror is one of the call's pins.
+		argv := make([]*C.char, 3)
+		C.go2cs_probe_argv_self(&argv[0])
+		fmt.Println("argvself", unsafe.Pointer(argv[0]) == unsafe.Pointer(&argv[2]))
+	case "argvc":
+		// The near-miss: an argv in C memory, viewed as a Go slice, crosses by its own address.
+		p := (**C.char)(C.malloc(C.size_t(3 * unsafe.Sizeof(uintptr(0)))))
+		defer C.free(unsafe.Pointer(p))
+		s := unsafe.Slice(p, 3)
+		abc := C.CString("abc")
+		defer C.free(unsafe.Pointer(abc))
+		s[0], s[1], s[2] = abc, nil, nil
+		fmt.Println("argvc", int(C.go2cs_probe_argv_count(&s[0])))
+	case "argvfield":
+		// The array as a field of a Go struct (P3's row).
+		x, yy := C.CString("x"), C.CString("yy")
+		defer C.free(unsafe.Pointer(x))
+		defer C.free(unsafe.Pointer(yy))
+		var h goArgvHost
+		h.ptrs[0], h.ptrs[1] = x, yy
+		fmt.Println("argvfield", int(C.go2cs_probe_argv_count(&h.ptrs[0])))
+	case "argvvoid":
+		// The void door.
+		x, yy, zzz := C.CString("x"), C.CString("yy"), C.CString("zzz")
+		defer C.free(unsafe.Pointer(x))
+		defer C.free(unsafe.Pointer(yy))
+		defer C.free(unsafe.Pointer(zzz))
+		argv := []*C.char{x, yy, zzz, nil}
+		fmt.Println("argvvoid", int(C.go2cs_probe_argv_count_void(unsafe.Pointer(&argv[0]))))
+	case "cvar":
+		// A C int global: read, written from Go, then changed by C and read again.
+		before := int(C.go2cs_probe_counter)
+		C.go2cs_probe_counter = 10
+		after := int(C.go2cs_probe_bump(5))
+		fmt.Println("cvar", before, after, int(C.go2cs_probe_counter))
+	case "cvarstruct":
+		// A C struct global: whole-value read, field write from Go, a write by C, and a whole-value write from Go.
+		g := C.go2cs_probe_gauge_now
+		C.go2cs_probe_gauge_now.total = 1000
+		C.go2cs_probe_bump(2)
+		h := C.go2cs_probe_gauge_now
+		C.go2cs_probe_gauge_now = C.struct_go2cs_probe_gauge{count: 40, total: 41}
+		fmt.Println("cvarstruct", int(g.count), int64(g.total), int(h.count), int64(h.total),
+			int(C.go2cs_probe_gauge_now.count), int64(C.go2cs_probe_gauge_now.total))
+	case "cvarerrno":
+		// An errno-style global: C sets it on a refused call and clears it on the next good one.
+		r := int(C.go2cs_probe_bump(-1))
+		bad := int(C.go2cs_probe_last_error)
+		C.go2cs_probe_bump(1)
+		fmt.Println("cvarerrno", r, bad, int(C.go2cs_probe_last_error))
+	case "cvaraddr":
+		// The global's address: a Go pointer to C memory, the same address on each use, written through.
+		p := &C.go2cs_probe_counter
+		*p = 77
+		fmt.Println("cvaraddr", p == &C.go2cs_probe_counter, int(C.go2cs_probe_counter))
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)

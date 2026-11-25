@@ -528,8 +528,8 @@ func (v *Visitor) inlineArrayCopyEmission(call *ast.CallExpr) (string, bool) {
 	other := v.convExpr(call.Args[1-position], nil)
 
 	if position == 0 {
-		return fmt.Sprintf("copy(%s, %s)", window, other), true
+		return fmt.Sprintf("%s(%s, %s)", v.golibCall("copy"), window, other), true
 	}
 
-	return fmt.Sprintf("copy(%s, %s)", other, window), true
+	return fmt.Sprintf("%s(%s, %s)", v.golibCall("copy"), other, window), true
 }

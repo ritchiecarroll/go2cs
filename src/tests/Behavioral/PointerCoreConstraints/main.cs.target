@@ -77,7 +77,7 @@ internal static T orZero<T>(ж<T> Ꮡp)
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil) {
-        T z = GoZero<T>();
+        T z = builtin.GoZero<T>();
         return z;
     }
     return p;

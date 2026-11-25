@@ -505,6 +505,293 @@ static unsafe partial class cgotestꓸC_package
         return (@int)(int32)r;
     }
 
+    // C.go2cs_probe_argv_count, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_argv_count")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_argv_countᴍnative(nint p0);
+
+    internal static @int go2cs_probe_argv_count(ж<ж<@char>> p0)
+    {
+        nint m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.OutParameter(p0, "go2cs_probe_argv_count", out nuint n0, out ж<@char>? q0, out global::go.golib.GoCgoPin g0, out global::go.golib.GoCgoWordMirror? w0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (nint)n0;
+            a0 = (nint)(&m0);
+        }
+
+        int r;
+
+        fixed (byte* f0 = g0)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_argv_countᴍnative(a0);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m0, g0, f0, "go2cs_probe_argv_count");
+
+            w0?.RequireWordsOutsidePin(g0, f0, "go2cs_probe_argv_count");
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(nint), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m0, q0, n0, copies, "go2cs_probe_argv_count");
+
+        w0?.CopyBack(copies, "go2cs_probe_argv_count");
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_argv_fill, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_argv_fill")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_argv_fillᴍnative(nint p0, int p1);
+
+    internal static @int go2cs_probe_argv_fill(ж<ж<@char>> p0, @int p1)
+    {
+        nint m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.OutParameter(p0, "go2cs_probe_argv_fill", out nuint n0, out ж<@char>? q0, out global::go.golib.GoCgoPin g0, out global::go.golib.GoCgoWordMirror? w0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (nint)n0;
+            a0 = (nint)(&m0);
+        }
+
+        int r;
+
+        fixed (byte* f0 = g0)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_argv_fillᴍnative(a0, (int32)p1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m0, g0, f0, "go2cs_probe_argv_fill");
+
+            w0?.RequireWordsOutsidePin(g0, f0, "go2cs_probe_argv_fill");
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(nint), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m0, q0, n0, copies, "go2cs_probe_argv_fill");
+
+        w0?.CopyBack(copies, "go2cs_probe_argv_fill");
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_argv_self, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_argv_self")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial void go2cs_probe_argv_selfᴍnative(nint p0);
+
+    internal static @void go2cs_probe_argv_self(ж<ж<@char>> p0)
+    {
+        nint m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.OutParameter(p0, "go2cs_probe_argv_self", out nuint n0, out ж<@char>? q0, out global::go.golib.GoCgoPin g0, out global::go.golib.GoCgoWordMirror? w0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (nint)n0;
+            a0 = (nint)(&m0);
+        }
+
+        fixed (byte* f0 = g0)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                go2cs_probe_argv_selfᴍnative(a0);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m0, g0, f0, "go2cs_probe_argv_self");
+
+            w0?.RequireWordsOutsidePin(g0, f0, "go2cs_probe_argv_self");
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(nint), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m0, q0, n0, copies, "go2cs_probe_argv_self");
+
+        w0?.CopyBack(copies, "go2cs_probe_argv_self");
+
+        return default;
+    }
+
+    // C.go2cs_probe_cursor_at, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_cursor_at")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial _Ctype_struct_go2cs_probe_cursorᴍ go2cs_probe_cursor_atᴍnative(nint p0, int p1);
+
+    internal static struct_go2cs_probe_cursor go2cs_probe_cursor_at(ж<@char> p0, @int p1)
+    {
+        _Ctype_struct_go2cs_probe_cursorᴍ.CheckLayoutᴍ();
+
+        sbyte m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.ScalarPointer(p0, "go2cs_probe_cursor_at", out nuint n0, out global::go.golib.GoCgoPin g0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (int8)p0.Value;
+            a0 = (nint)(&m0);
+        }
+
+        _Ctype_struct_go2cs_probe_cursorᴍ r;
+
+        fixed (byte* f0 = g0)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_cursor_atᴍnative(a0, (int32)p1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            ᴍpin__Ctype_struct_go2cs_probe_cursorᴍ(in r, g0, f0, "go2cs_probe_cursor_at");
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(sbyte), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.Value = (@char)(int8)m0;
+
+        struct_go2cs_probe_cursor result = new();
+        ᴍout__Ctype_struct_go2cs_probe_cursorᴍ(ref result, r, copies, "go2cs_probe_cursor_at");
+
+        return result;
+    }
+
+    // C.go2cs_probe_cursor_set, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_cursor_set")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_cursor_setᴍnative(nint p0, nint p1, int p2);
+
+    internal static @int go2cs_probe_cursor_set(ж<struct_go2cs_probe_cursor> p0, ж<@char> p1, @int p2)
+    {
+        _Ctype_struct_go2cs_probe_cursorᴍ.CheckLayoutᴍ();
+
+        global::go.golib.GoCgoImages images = default;
+
+        _Ctype_struct_go2cs_probe_cursorᴍ m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_cursor_set", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_go2cs_probe_cursorᴍ(ref m0, p0.Value);
+            a0 = (nint)(&m0);
+        }
+
+        sbyte m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.ScalarPointer(p1, "go2cs_probe_cursor_set", ref images, out nuint n1, out global::go.golib.GoCgoPin g1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (int8)p1.Value;
+            a1 = (nint)(&m1);
+        }
+
+        int r;
+
+        fixed (byte* f0 = g0)
+        fixed (byte* f1 = g1)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_cursor_setᴍnative(a0, a1, (int32)p2);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            {
+                ᴍpin__Ctype_struct_go2cs_probe_cursorᴍ(in m0, g0, f0, "go2cs_probe_cursor_set");
+                ᴍpin__Ctype_struct_go2cs_probe_cursorᴍ(in m0, g1, f1, "go2cs_probe_cursor_set");
+            }
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(_Ctype_struct_go2cs_probe_cursorᴍ), p0) : default,
+            k1 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m1, (nuint)sizeof(sbyte), p1) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_go2cs_probe_cursorᴍ(ref p0.Value, m0, copies, "go2cs_probe_cursor_set");
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.Value = (@char)(int8)m1;
+
+        images.CopyBack();
+
+        return (@int)(int32)r;
+    }
+
     // C.go2cs_probe_hfa_scale, bound to go2csprobe.dll.
     [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_hfa_scale")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
@@ -551,6 +838,62 @@ static unsafe partial class cgotestꓸC_package
         images.CopyBack();
 
         return (@double)(float64)r;
+    }
+
+    // C.go2cs_probe_node_ring, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_node_ring")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial void go2cs_probe_node_ringᴍnative(nint p0);
+
+    internal static @void go2cs_probe_node_ring(ж<struct_go2cs_probe_node> p0)
+    {
+        _Ctype_struct_go2cs_probe_nodeᴍ.CheckLayoutᴍ();
+
+        global::go.golib.GoCgoImages images = default;
+
+        _Ctype_struct_go2cs_probe_nodeᴍ m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_node_ring", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_go2cs_probe_nodeᴍ(ref m0, p0.Value);
+            a0 = (nint)(&m0);
+        }
+
+        fixed (byte* f0 = g0)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                go2cs_probe_node_ringᴍnative(a0);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            {
+                ᴍpin__Ctype_struct_go2cs_probe_nodeᴍ(in m0, g0, f0, "go2cs_probe_node_ring");
+            }
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(_Ctype_struct_go2cs_probe_nodeᴍ), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_go2cs_probe_nodeᴍ(ref p0.Value, m0, copies, "go2cs_probe_node_ring");
+
+        images.CopyBack();
+
+        return default;
     }
 
     // C.go2cs_probe_pair, bound to go2csprobe.dll.
@@ -603,6 +946,228 @@ static unsafe partial class cgotestꓸC_package
         {
             global::go.runtime_package.syscallExitsyscall();
         }
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_pick, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_pick")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_pickᴍnative(nint p0, nint p1);
+
+    internal static @int go2cs_probe_pick(ж<@int> p0, ж<ж<@int>> p1)
+    {
+        int m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.ScalarPointer(p0, "go2cs_probe_pick", out nuint n0, out global::go.golib.GoCgoPin g0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (int32)p0.Value;
+            a0 = (nint)(&m0);
+        }
+
+        nint m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.OutParameter(p1, "go2cs_probe_pick", out nuint n1, out ж<@int>? q1, out global::go.golib.GoCgoPin g1, out global::go.golib.GoCgoWordMirror? w1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (nint)n1;
+            a1 = (nint)(&m1);
+        }
+
+        int r;
+
+        fixed (byte* f0 = g0)
+        fixed (byte* f1 = g1)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_pickᴍnative(a0, a1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g0, f0, "go2cs_probe_pick");
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g1, f1, "go2cs_probe_pick");
+
+            w1?.RequireWordsOutsidePin(g0, f0, "go2cs_probe_pick");
+            w1?.RequireWordsOutsidePin(g1, f1, "go2cs_probe_pick");
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(int), p0) : default,
+            k1 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m1, (nuint)sizeof(nint), p1) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.Value = (@int)(int32)m0;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@int>((nuint)m1, q1, n1, copies, "go2cs_probe_pick");
+
+        w1?.CopyBack(copies, "go2cs_probe_pick");
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_pick_as_char, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_pick_as_char")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_pick_as_charᴍnative(nint p0, nint p1);
+
+    internal static @int go2cs_probe_pick_as_char(ж<@int> p0, ж<ж<@char>> p1)
+    {
+        int m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.ScalarPointer(p0, "go2cs_probe_pick_as_char", out nuint n0, out global::go.golib.GoCgoPin g0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (int32)p0.Value;
+            a0 = (nint)(&m0);
+        }
+
+        nint m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.OutParameter(p1, "go2cs_probe_pick_as_char", out nuint n1, out ж<@char>? q1, out global::go.golib.GoCgoPin g1, out global::go.golib.GoCgoWordMirror? w1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (nint)n1;
+            a1 = (nint)(&m1);
+        }
+
+        int r;
+
+        fixed (byte* f0 = g0)
+        fixed (byte* f1 = g1)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_pick_as_charᴍnative(a0, a1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g0, f0, "go2cs_probe_pick_as_char");
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g1, f1, "go2cs_probe_pick_as_char");
+
+            w1?.RequireWordsOutsidePin(g0, f0, "go2cs_probe_pick_as_char");
+            w1?.RequireWordsOutsidePin(g1, f1, "go2cs_probe_pick_as_char");
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(int), p0) : default,
+            k1 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m1, (nuint)sizeof(nint), p1) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.Value = (@int)(int32)m0;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m1, q1, n1, copies, "go2cs_probe_pick_as_char");
+
+        w1?.CopyBack(copies, "go2cs_probe_pick_as_char");
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_pick_b, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_pick_b")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_pick_bᴍnative(nint p0, nint p1);
+
+    internal static @int go2cs_probe_pick_b(ж<struct_go2cs_probe_pair> p0, ж<ж<@int>> p1)
+    {
+        _Ctype_struct_go2cs_probe_pairᴍ.CheckLayoutᴍ();
+
+        global::go.golib.GoCgoImages images = default;
+
+        _Ctype_struct_go2cs_probe_pairᴍ m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_pick_b", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref m0, p0.Value);
+            a0 = (nint)(&m0);
+        }
+
+        nint m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.OutParameter(p1, "go2cs_probe_pick_b", out nuint n1, out ж<@int>? q1, out global::go.golib.GoCgoPin g1, out global::go.golib.GoCgoWordMirror? w1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (nint)n1;
+            a1 = (nint)(&m1);
+        }
+
+        int r;
+
+        fixed (byte* f0 = g0)
+        fixed (byte* f1 = g1)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_pick_bᴍnative(a0, a1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g0, f0, "go2cs_probe_pick_b");
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g1, f1, "go2cs_probe_pick_b");
+
+            w1?.RequireWordsOutsidePin(g0, f0, "go2cs_probe_pick_b");
+            w1?.RequireWordsOutsidePin(g1, f1, "go2cs_probe_pick_b");
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(_Ctype_struct_go2cs_probe_pairᴍ), p0) : default,
+            k1 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m1, (nuint)sizeof(nint), p1) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_go2cs_probe_pairᴍ(ref p0.Value, m0);
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@int>((nuint)m1, q1, n1, copies, "go2cs_probe_pick_b");
+
+        w1?.CopyBack(copies, "go2cs_probe_pick_b");
+
+        images.CopyBack();
 
         return (@int)(int32)r;
     }
@@ -809,7 +1374,7 @@ static unsafe partial class cgotestꓸC_package
         }
 
         nint m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.OutParameter(p1, "strtol", out nuint n1, out ж<@char>? q1);
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.OutParameter(p1, "strtol", out nuint n1, out ж<@char>? q1, out global::go.golib.GoCgoPin g1, out global::go.golib.GoCgoWordMirror? w1);
         nint a1 = (nint)n1;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -821,9 +1386,12 @@ static unsafe partial class cgotestꓸC_package
         int r;
 
         fixed (byte* f0 = g0)
+        fixed (byte* f1 = g1)
         {
             if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
                 a0 = g0.Address(f0);
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
 
             global::go.runtime_package.syscallEntersyscall();
 
@@ -837,13 +1405,25 @@ static unsafe partial class cgotestꓸC_package
             }
 
             global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g0, f0, "strtol");
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g1, f1, "strtol");
+
+            w1?.RequireWordsOutsidePin(g0, f0, "strtol");
+            w1?.RequireWordsOutsidePin(g1, f1, "strtol");
         }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(sbyte), p0) : default,
+            k1 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m1, (nuint)sizeof(nint), p1) : default
+        ];
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
             p0.Value = (@char)(int8)m0;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
-            p1.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m1, q1, n1);
+            p1.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m1, q1, n1, copies, "strtol");
+
+        w1?.CopyBack(copies, "strtol");
 
         return (@long)(int32)r;
     }
@@ -1002,6 +1582,25 @@ static unsafe partial class cgotestꓸC_package
     }
 
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 16)]
+    internal struct _Ctype_struct_go2cs_probe_cursorᴍ
+    {
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public int n;
+        [global::System.Runtime.InteropServices.FieldOffset(8)] public nint cur;
+
+        internal static void CheckLayoutᴍ()
+        {
+            Holdᴍ("n", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("cur", "nint", global::System.Runtime.CompilerServices.Unsafe.SizeOf<nint>(), 8);
+        }
+
+        private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
+        {
+            if (clrSize != cSize)
+                throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_go2cs_probe_cursor: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
+        }
+    }
+
+    [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 16)]
     internal struct _Ctype_struct_go2cs_probe_hfaᴍ
     {
         [global::System.Runtime.InteropServices.FieldOffset(0)] public double x;
@@ -1017,6 +1616,25 @@ static unsafe partial class cgotestꓸC_package
         {
             if (clrSize != cSize)
                 throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_go2cs_probe_hfa: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
+        }
+    }
+
+    [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 16)]
+    internal struct _Ctype_struct_go2cs_probe_nodeᴍ
+    {
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public int value;
+        [global::System.Runtime.InteropServices.FieldOffset(8)] public nint next;
+
+        internal static void CheckLayoutᴍ()
+        {
+            Holdᴍ("value", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("next", "nint", global::System.Runtime.CompilerServices.Unsafe.SizeOf<nint>(), 8);
+        }
+
+        private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
+        {
+            if (clrSize != cSize)
+                throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_go2cs_probe_node: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
         }
     }
 
@@ -1114,6 +1732,25 @@ static unsafe partial class cgotestꓸC_package
         v.rem = (@int)(int32)m.rem;
     }
 
+    // _Ctype_struct_go2cs_probe_cursor's copy-in and copy-out, member by member.
+    private static void ᴍin__Ctype_struct_go2cs_probe_cursorᴍ(ref _Ctype_struct_go2cs_probe_cursorᴍ m, in struct_go2cs_probe_cursor v)
+    {
+        m.n = (int32)v.n;
+        m.cur = (nint)global::go.golib.GoCgoArgs.PointerMember(v.cur);
+    }
+
+    private static void ᴍout__Ctype_struct_go2cs_probe_cursorᴍ(ref struct_go2cs_probe_cursor v, in _Ctype_struct_go2cs_probe_cursorᴍ m, global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> c, string function)
+    {
+        v.n = (@int)(int32)m.n;
+        v.cur = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.cur, v.cur, global::go.golib.GoCgoArgs.PointerMember(v.cur), c, function);
+    }
+
+    // _Ctype_struct_go2cs_probe_cursor's pointer members, each checked against one pinned argument inside the wrapper's `fixed`.
+    private static void ᴍpin__Ctype_struct_go2cs_probe_cursorᴍ(in _Ctype_struct_go2cs_probe_cursorᴍ m, in global::go.golib.GoCgoPin g, byte* f, string function)
+    {
+        global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m.cur, g, f, function);
+    }
+
     // _Ctype_struct_go2cs_probe_hfa's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_go2cs_probe_hfaᴍ(ref _Ctype_struct_go2cs_probe_hfaᴍ m, in struct_go2cs_probe_hfa v)
     {
@@ -1125,6 +1762,25 @@ static unsafe partial class cgotestꓸC_package
     {
         v.x = (@double)(float64)m.x;
         v.y = (@double)(float64)m.y;
+    }
+
+    // _Ctype_struct_go2cs_probe_node's copy-in and copy-out, member by member.
+    private static void ᴍin__Ctype_struct_go2cs_probe_nodeᴍ(ref _Ctype_struct_go2cs_probe_nodeᴍ m, in struct_go2cs_probe_node v)
+    {
+        m.value = (int32)v.value;
+        m.next = (nint)global::go.golib.GoCgoArgs.PointerMember(v.next);
+    }
+
+    private static void ᴍout__Ctype_struct_go2cs_probe_nodeᴍ(ref struct_go2cs_probe_node v, in _Ctype_struct_go2cs_probe_nodeᴍ m, global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> c, string function)
+    {
+        v.value = (@int)(int32)m.value;
+        v.next = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.next, v.next, global::go.golib.GoCgoArgs.PointerMember(v.next), c, function);
+    }
+
+    // _Ctype_struct_go2cs_probe_node's pointer members, each checked against one pinned argument inside the wrapper's `fixed`.
+    private static void ᴍpin__Ctype_struct_go2cs_probe_nodeᴍ(in _Ctype_struct_go2cs_probe_nodeᴍ m, in global::go.golib.GoCgoPin g, byte* f, string function)
+    {
+        global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m.next, g, f, function);
     }
 
     // _Ctype_struct_go2cs_probe_pair's copy-in and copy-out, member by member.
