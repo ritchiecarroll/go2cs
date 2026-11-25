@@ -334,7 +334,7 @@ public class ImplementGenerator : ISourceGenerator
                         Parameters = info.method.Parameters.ToParameterInfos(withRefKind: true),
                         GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
                         TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray()),
-                        IsInaccessibleMarker = GetScope(info.method.Name) == "internal" &&
+                        IsInaccessibleMarker = GetStampedScope(info.method) == "internal" &&
                             !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly)
                     })
                     .Distinct()
@@ -468,6 +468,8 @@ public class ImplementGenerator : ISourceGenerator
                     // The DECLARED name to forward to, when the collision pass renamed it away from
                     // the interface member's own name — see the note above.
                     ForwardName = ResolveForwardMemberName(GetSimpleName(EscapeCsKeyword(info.method.Name)), localImplNames),
+                    // The interface method's [GoName] stamp, which the promoted extension below repeats (a Go name starting with Δ).
+                    GoName = GetGoNameStamp(info.method),
                     ReturnType = GlobalQualify(info.method.ReturnType.ToDisplayString()),
                     // Carry the parameter REF KIND: an interface member declared with an `in`
                     // param (the hand-finished io stub's Reader.Read(in slice<byte>)) is a
@@ -493,7 +495,7 @@ public class ImplementGenerator : ISourceGenerator
                     // marshal(source) returned an empty buffer with no diagnostic anywhere. Require the
                     // absence of a local implementation as well, which leaves the genuine markers (a
                     // FOREIGN struct never declares the sealing method) stubbed exactly as before.
-                    IsInaccessibleMarker = GetScope(info.method.Name) == "internal" &&
+                    IsInaccessibleMarker = GetStampedScope(info.method) == "internal" &&
                         !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly) &&
                         !localImplNames.Contains(GetSimpleName(EscapeCsKeyword(info.method.Name)))
                 })
@@ -1066,7 +1068,7 @@ public class ImplementGenerator : ISourceGenerator
                 // was collision-renamed (`m_box.Value.ΔHandler` binds nothing, CS1061 — slogtest).
                 if (promoted || promotedPairs.Contains($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"))
                 {
-                    string interfaceFieldName = GetSimpleName(interfaceName, dropCollisionPrefix: true);
+                    string interfaceFieldName = GetDeltaLedGoName(interfaceType) ?? GetSimpleName(interfaceName, dropCollisionPrefix: true);
 
                     foreach (MethodInfo method in methods)
                     {
@@ -2246,7 +2248,7 @@ public class ImplementGenerator : ISourceGenerator
             .OfType<IFieldSymbol>()
             .Where(field => !field.IsStatic && field.Type.TypeKind == TypeKind.Interface &&
                             field.Type is INamedTypeSymbol &&
-                            (field.Name == field.Type.Name || ShadowVarMarker + field.Name == field.Type.Name ||
+                            (field.Name == field.Type.Name || ShadowVarMarker + field.Name == field.Type.Name && GetGoNameStamp(field.Type) is null ||
                              GetGoLocalName(field.Type) == field.Name))
             .Select(field => (field.Name, new HashSet<string>(((INamedTypeSymbol)field.Type).AllInterfaces
                 .Concat([(INamedTypeSymbol)field.Type])
@@ -2268,7 +2270,9 @@ public class ImplementGenerator : ISourceGenerator
     /// </remarks>
     private static string? ResolveEmbedFieldName(ITypeSymbol structType, ITypeSymbol interfaceType)
     {
-        string? localName = GetGoLocalName(interfaceType);
+        // An interface whose Go name starts with Δ is embedded under that name, which its [GoName] stamp carries:
+        // dropping the marker as a rename's would address a field the struct does not declare.
+        string? localName = GetGoLocalName(interfaceType) ?? GetDeltaLedGoName(interfaceType);
 
         if (string.IsNullOrEmpty(localName))
             return null;

@@ -278,7 +278,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 			if named, ok := collisionType.(*types.Named); ok {
 				obj := named.Obj()
 
-				if obj.Pkg() != nil && obj.Parent() == obj.Pkg().Scope() && getSanitizedIdentifier(keyIdent.Name) == getSanitizedIdentifier(obj.Name()) {
+				if obj.Pkg() != nil && obj.Parent() == obj.Pkg().Scope() && fieldCollidesWithTypeName(keyIdent.Name, obj.Name()) {
 					key = removeLeadingSanitizationMarker(typeCollidingFieldName(getCoreSanitizedIdentifier(keyIdent.Name)))
 				}
 			}

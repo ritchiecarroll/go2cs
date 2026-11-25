@@ -76,6 +76,10 @@ public readonly struct @string :
     // print, range) instead of throwing NRE. Mirrors the nil-map / nil-slice null-safe approach.
     internal ReadOnlySpan<byte> Bytes => m_value is null ? default : new ReadOnlySpan<byte>(m_value, m_offset, m_length);
 
+    // The array the string's bytes live in and where they start: the storage the cgo doors ask the unsafe.Pointer word
+    // table about before C.CString copies the bytes into C memory (cgo Phase 3, increment 3.2, seat 1b, B-10).
+    internal (byte[]? array, int offset) Backing => (m_value, m_offset);
+
     // The canonical window constructor — every other constructor funnels here or assigns the three
     // fields directly. Not public: a caller handing in a backing array it can still write through
     // would break the immutability the sharing depends on.
@@ -118,8 +122,8 @@ public readonly struct @string :
     // (runtime/string.go:144-150). Scoped to this conversion only: `string(byte)` and `string(rune)`
     // are Go's intstring, which allocates when its result escapes, so they do not come here. Sharing
     // one backing per byte value is sound because no @string hands out a writable view of its bytes
-    // (ToSpan, Slice and the spread are read-only; unsafe.StringData's pointer carries Go's own
-    // must-not-modify contract, the same one staticuint64s relies on).
+    // (ToSpan, Slice and the spread are read-only, and unsafe.StringData over this table points into
+    // a private copy, ReadOnlyStringBacking, so a write through it reaches no other string).
     public @string(in slice<byte> value)
     {
         if (value.Length == 1)
@@ -139,6 +143,13 @@ public readonly struct @string :
     // The 256 one-byte backings, built once. Plain allocations, not charged to AllocationCounter: they
     // are process-wide static data, as staticuint64s is in Go, not an allocation of any conversion.
     private static readonly byte[][] s_oneByteStrings = BuildOneByteStrings();
+
+    // Whether a backing array is one of the 256 above: static data, which unsafe.StringData copies before it hands out a
+    // pointer (ReadOnlyStringBacking).
+    internal static bool IsOneByteTableBacking(byte[] backing)
+    {
+        return backing.Length == 1 && ReferenceEquals(s_oneByteStrings[backing[0]], backing);
+    }
 
     private static byte[][] BuildOneByteStrings()
     {

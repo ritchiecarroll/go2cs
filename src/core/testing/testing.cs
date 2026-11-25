@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using go.testing_runtime;
 using any = System.Object;
-using ꓸꓸꓸany = System.Span<System.Object>;
+using ꓸꓸꓸany = go.variadic<System.Object>;
 
 // go2cs HAND-OWNED (whole file). This is the Phase-4 test host's public `testing` shim — the
 // structural replacement stdLibConverter.go's skip list names, not a conversion of Go's testing.go.

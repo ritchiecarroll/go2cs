@@ -110,8 +110,8 @@ using static global::go.@internal.fuzz_package;
 using binary = global::go.encoding.binary_package;
 using context = global::go.context_package;
 using time = global::go.time_package;
-using ꓸꓸꓸCorpusEntry = Span<CorpusEntry>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸCorpusEntry = variadic<CorpusEntry>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("fuzz")]
 public static partial class fuzz_package

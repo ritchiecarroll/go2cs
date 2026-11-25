@@ -33,10 +33,10 @@ public static partial class GoReflect
         int fixedCount = parameters.Length - 1;
         Type tailParameter = parameters[^1].ParameterType;
 
-        if (fixedCount < 0 || !tailParameter.IsGenericType || tailParameter.GetGenericTypeDefinition() != typeof(Span<>))
+        if (fixedCount < 0 || !tailParameter.IsGenericType || tailParameter.GetGenericTypeDefinition() != typeof(variadic<>))
         {
             throw new NotImplementedException(
-                $"reflect: MakeFunc of '{GoTypeName(delegateType)}' -- its tail is not a Span<T> variadic tail");
+                $"reflect: MakeFunc of '{GoTypeName(delegateType)}' -- its tail is not a variadic<T> tail");
         }
 
         if (fixedCount > MaxVariadicFixedParameters)
@@ -66,62 +66,67 @@ public static partial class GoReflect
             delegateType, familyDefinition, $"{(hasResult ? "makeVariadicFunc" : "makeVariadicAction")}{fixedCount}", typeArguments);
     }
 
-    // The make family: a lambda per (arity, Action/Func) that carries the Span<TArg> tail a
+    // The make family: a lambda per (arity, Action/Func) that carries the variadic<TArg> tail a
     // delegate factory cannot, packs it into slice<TArg>, and forwards to the invoker -- the
     // reverse of callVariadicFunc{N}/callVariadicAction{N} one file over.
 
+    // A spread call `f(s...)` hands the implementation the caller's slice itself, as Go does; a literal
+    // argument list is packed into a fresh slice exactly as before (non-nil, even when empty).
+    private static slice<TArg> packSlice<TArg>(variadic<TArg> tail) =>
+        tail.IsSpread ? tail.Spread : new slice<TArg>(tail.Elements);
+
     private static Delegate makeVariadicFunc0<TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<TArg, TResult>)((Span<TArg> tail) => (TResult)invoker([new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<TArg, TResult>)((variadic<TArg> tail) => (TResult)invoker([packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc1<T1, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, TArg, TResult>)((T1 a1, Span<TArg> tail) => (TResult)invoker([a1, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, TArg, TResult>)((T1 a1, variadic<TArg> tail) => (TResult)invoker([a1, packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc2<T1, T2, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, T2, TArg, TResult>)((T1 a1, T2 a2, Span<TArg> tail) => (TResult)invoker([a1, a2, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, T2, TArg, TResult>)((T1 a1, T2 a2, variadic<TArg> tail) => (TResult)invoker([a1, a2, packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc3<T1, T2, T3, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, T2, T3, TArg, TResult>)((T1 a1, T2 a2, T3 a3, Span<TArg> tail) => (TResult)invoker([a1, a2, a3, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, T2, T3, TArg, TResult>)((T1 a1, T2 a2, T3 a3, variadic<TArg> tail) => (TResult)invoker([a1, a2, a3, packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc4<T1, T2, T3, T4, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, Span<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, variadic<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc5<T1, T2, T3, T4, T5, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, Span<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, variadic<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc6<T1, T2, T3, T4, T5, T6, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, Span<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, a6, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, variadic<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, a6, packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc7<T1, T2, T3, T4, T5, T6, T7, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, Span<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, a6, a7, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, variadic<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, a6, a7, packSlice(tail)])!); }
 
     private static Delegate makeVariadicFunc8<T1, T2, T3, T4, T5, T6, T7, T8, TArg, TResult>(Func<object?[], object?> invoker)
-    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, Span<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, a6, a7, a8, new slice<TArg>(tail)])!); }
+    { return (Funcꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg, TResult>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, variadic<TArg> tail) => (TResult)invoker([a1, a2, a3, a4, a5, a6, a7, a8, packSlice(tail)])!); }
 
     private static Delegate makeVariadicAction0<TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<TArg>)((Span<TArg> tail) => invoker([new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<TArg>)((variadic<TArg> tail) => invoker([packSlice(tail)])); }
 
     private static Delegate makeVariadicAction1<T1, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, TArg>)((T1 a1, Span<TArg> tail) => invoker([a1, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, TArg>)((T1 a1, variadic<TArg> tail) => invoker([a1, packSlice(tail)])); }
 
     private static Delegate makeVariadicAction2<T1, T2, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, T2, TArg>)((T1 a1, T2 a2, Span<TArg> tail) => invoker([a1, a2, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, T2, TArg>)((T1 a1, T2 a2, variadic<TArg> tail) => invoker([a1, a2, packSlice(tail)])); }
 
     private static Delegate makeVariadicAction3<T1, T2, T3, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, T2, T3, TArg>)((T1 a1, T2 a2, T3 a3, Span<TArg> tail) => invoker([a1, a2, a3, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, T2, T3, TArg>)((T1 a1, T2 a2, T3 a3, variadic<TArg> tail) => invoker([a1, a2, a3, packSlice(tail)])); }
 
     private static Delegate makeVariadicAction4<T1, T2, T3, T4, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, Span<TArg> tail) => invoker([a1, a2, a3, a4, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, variadic<TArg> tail) => invoker([a1, a2, a3, a4, packSlice(tail)])); }
 
     private static Delegate makeVariadicAction5<T1, T2, T3, T4, T5, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, Span<TArg> tail) => invoker([a1, a2, a3, a4, a5, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, variadic<TArg> tail) => invoker([a1, a2, a3, a4, a5, packSlice(tail)])); }
 
     private static Delegate makeVariadicAction6<T1, T2, T3, T4, T5, T6, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, Span<TArg> tail) => invoker([a1, a2, a3, a4, a5, a6, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, variadic<TArg> tail) => invoker([a1, a2, a3, a4, a5, a6, packSlice(tail)])); }
 
     private static Delegate makeVariadicAction7<T1, T2, T3, T4, T5, T6, T7, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, Span<TArg> tail) => invoker([a1, a2, a3, a4, a5, a6, a7, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, variadic<TArg> tail) => invoker([a1, a2, a3, a4, a5, a6, a7, packSlice(tail)])); }
 
     private static Delegate makeVariadicAction8<T1, T2, T3, T4, T5, T6, T7, T8, TArg>(Func<object?[], object?> invoker)
-    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, Span<TArg> tail) => invoker([a1, a2, a3, a4, a5, a6, a7, a8, new slice<TArg>(tail)])); }
+    { return (Actionꓸꓸꓸ<T1, T2, T3, T4, T5, T6, T7, T8, TArg>)((T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, variadic<TArg> tail) => invoker([a1, a2, a3, a4, a5, a6, a7, a8, packSlice(tail)])); }
 
 }

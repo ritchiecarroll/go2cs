@@ -61,7 +61,7 @@ public class GoMethodSetTests
 
             public static nint get(this Plain p) => p.n;
 
-            public static nint Sum(this Plain p, params Span<nint> more) => p.n + more.Length;
+            public static nint Sum(this Plain p, params variadic<nint> more) => p.n + more.Length;
 
             public static nint Wide(this Plain p, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8,
                 nint a9, nint a10, nint a11, nint a12, nint a13, nint a14, nint a15, nint a16) => p.n * 100 + a1 + a16;

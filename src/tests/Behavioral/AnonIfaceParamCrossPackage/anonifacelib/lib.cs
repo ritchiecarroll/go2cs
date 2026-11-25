@@ -1,7 +1,7 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class anonifacedbg_package {
 
@@ -12,7 +12,7 @@ public partial interface Fail_n /*dyn*/ {
 }
 
 public static @string Fail(Fail_n n, params ꓸꓸꓸany messageʗp) {
-    var message = messageʗp.sslice();
+    var message = messageʗp;
 
     return "fail:"u8 + n.KindString() + fmt.Sprint(message.ꓸꓸꓸ);
 }

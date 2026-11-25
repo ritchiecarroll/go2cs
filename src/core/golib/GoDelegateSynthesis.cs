@@ -24,7 +24,7 @@ namespace go;
 //   assembles a funcType record (GoReflect.MakeGoFuncType, TryFuncShape's exact inverse). Composing
 //   means NAMING a declared delegate family, and every family is finite: System.Func/Action stop at
 //   16 parameters, golib's own ladder continues them to 24 (funcArity.cs), and the variadic families
-//   carry 8 fixed parameters ahead of the `params Span<T>` tail (variadic.cs). Go's own limit is 128
+//   carry 8 fixed parameters ahead of the `params variadic<T>` tail (variadic.cs). Go's own limit is 128
 //   (`reflect.FuncOf: too many arguments`) and its reflect suite drives past every one of those
 //   ceilings — all_test.go's TestFuncOf builds a 51-parameter func for issue #54669. Past the
 //   declared rungs there is no type to name, so one is minted: the same answer, and the same

@@ -114,7 +114,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here), cgo-nuget-e2e (OPT-IN: cgo against go.* INC 4''s hosted proof, never scheduled -- J1 is release-smoke''s own windows pack of every go.* package; J2 packs github.com/mattn/go-pointer v0.0.1 with nugetgo-pack -Cgo -LocalClosure against that pack on linux and reads R-c, master refusing it; J3 consumes it on all five shipped RIDs, each against go run on its own OS, with R-b (osx-arm64 refused NUGETGOCGO001) and R-a (win-x64 refusing a doctored runtime at load, A6). Nothing leaves the run''s artifacts, each named with the run''s rehearsal suffix. goos and filter are ignored), reconvert-footprint (a converter change''s corpus footprint on this GOOS: two -stdlib reconverts, by the converter at base= and at changed=, both seeded from base, diffed against each other; filter is ;base=SHA;changed=SHA, both 40 hex digits; one leg per GOOS), mn-platform (the M:N platform read: src/tools/mnspike2/run-q1-kit.sh, the Q1 kit''s twin, plain and ifhall builds with each twin run compared to its plain run, then run-mn-closure.sh, MnHttpClosure built with twins and compared with go run; one leg per GOOS, darwin on osx-arm64; filter is extra MSBuild properties for the closure build, -p:Name=value separated by spaces, which is how a dispatch twins the standard library under it: no tracked file may turn that switch on)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here), cgo-nuget-e2e (OPT-IN: cgo against go.* INC 4''s hosted proof, never scheduled -- J1 is release-smoke''s own windows pack of every go.* package; J2 packs github.com/mattn/go-pointer v0.0.1 with nugetgo-pack -Cgo -LocalClosure against that pack on linux and reads R-c, master refusing it; J3 consumes it on all five shipped RIDs, each against go run on its own OS, with R-b (osx-arm64 refused NUGETGOCGO001) and R-a (win-x64 refusing a doctored runtime at load, A6). Nothing leaves the run''s artifacts, each named with the run''s rehearsal suffix. goos and filter are ignored), reconvert-footprint (a converter change''s corpus footprint on this GOOS: two -stdlib reconverts, by the converter at base= and at changed=, both seeded from base, diffed against each other; filter is ;base=SHA;changed=SHA, both 40 hex digits; one leg per GOOS, and on linux arch arm64 measures linux/arm64, both the two), mn-platform (the M:N platform read: src/tools/mnspike2/run-q1-kit.sh, the Q1 kit''s twin, plain and ifhall builds with each twin run compared to its plain run, then run-mn-closure.sh, MnHttpClosure built with twins and compared with go run; one leg per GOOS, darwin on osx-arm64; filter is extra MSBuild properties for the closure build, -p:Name=value separated by spaces, which is how a dispatch twins the standard library under it: no tracked file may turn that switch on)'
         type: choice
         required: true
         default: census
@@ -196,7 +196,7 @@ on:
         required: false
         default: ''
       arch:
-        description: 'goos linux only: which linux legs run. x64 (the default) is the ubuntu-latest leg every linux dispatch ran before this input existed; arm64 runs the ubuntu-24.04-arm leg (rid linux-arm64) instead; both runs the two. Until the linux/arm64 flavour exists (no linux-arm64/ folder under src/core), the arm leg runs census and golib-tests only, against the linux/amd64 flavour, as a CALIBRATION reading that banks nothing (runner walls, and that flavour on the arm64 ABI); every other stage refuses it.'
+        description: 'goos linux only: which linux legs run. x64 (the default) is the ubuntu-latest leg every linux dispatch ran before this input existed; arm64 runs the ubuntu-24.04-arm leg (rid linux-arm64) instead; both runs the two. Until the linux/arm64 flavour exists (no linux-arm64/ folder under src/core), the arm leg runs census and golib-tests only, against the linux/amd64 flavour, as a CALIBRATION reading that banks nothing (runner walls, and that flavour on the arm64 ABI); every other stage refuses it. reconvert-footprint takes it as the TARGET arch: arm64 measures the linux/arm64 emission, both measures linux/amd64 and linux/arm64, one leg each.'
         type: choice
         options:
           - x64
@@ -568,9 +568,6 @@ jobs:
           if ($arch -notin 'x64', 'arm64', 'both') { throw "Unknown arch '$arch' (x64, arm64 or both)." }
           if ($arch -ne 'x64') {
               if ($env:INPUT_GOOS -ne 'linux') { throw "arch '$arch' applies to goos linux only; got goos '$($env:INPUT_GOOS)'." }
-              if ($env:INPUT_STAGE -eq 'reconvert-footprint') {
-                  throw "arch '$arch' does not apply to reconvert-footprint, which converts at linux/amd64 on the one linux leg; the corpus's linux/arm64 emission is not yet a -stdlib target of this stage."
-              }
               if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior', 'cgo-nuget-e2e') {
                   throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack, linux-arm64 included (seat S5c): its leg is already in that stage's list."
               }
@@ -621,11 +618,17 @@ jobs:
               Write-Host "$($env:INPUT_STAGE): all five shipped RIDs (goos '$($env:INPUT_GOOS)' does not narrow it)"
           }
 
-          # reconvert-footprint measures the converter's EMISSION for one GOOS, which is the same bytes on either mac, so
-          # darwin takes its first leg (osx-arm64) alone: a second leg would be the same footprint read twice.
-          if ($env:INPUT_STAGE -eq 'reconvert-footprint') {
+          # reconvert-footprint measures the converter's EMISSION for one target, which is the same bytes on either mac, so
+          # darwin takes its first leg (osx-arm64) alone: a second leg would be the same footprint read twice. On linux the
+          # arch input names the TARGET arch, not only the runner: the arm leg carries arch = arm64, which the step hands
+          # the script as -Goarch, so linux/arm64 (the fourth flavour, which no other leg converts) is measured on it, and
+          # arch both keeps the two legs, linux/amd64 and linux/arm64. (Until 2026-11-24 the stage refused arch and measured
+          # linux/amd64 only.)
+          if ($env:INPUT_STAGE -eq 'reconvert-footprint' -and $arch -ne 'both') {
               $targets = @($targets | Select-Object -First 1)
-              Write-Host "reconvert-footprint: one leg, $($targets[0].rid)"
+          }
+          if ($env:INPUT_STAGE -eq 'reconvert-footprint') {
+              Write-Host "reconvert-footprint: $(@($targets).Count) leg(s), $(@($targets | ForEach-Object { $_.rid }) -join ', ')"
           }
           # mn-platform reads the M:N kit and closure on linux/amd64 and osx-arm64 (G's row 15): the first leg of each.
           if ($env:INPUT_STAGE -eq 'mn-platform') {
@@ -1618,14 +1621,32 @@ jobs:
                   $runExit = 1
               }
               else {
-                  $expected = @(Get-Content -LiteralPath $manifest | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Where-Object { $_ } | Sort-Object)
+                  # A line that starts with '?' is a MAY-SKIP entry: a test that decides its own skip from a measurement
+                  # near its floor on this RID, so either outcome is accepted. It must stay rare: at most one per manifest,
+                  # its reason must start "MAY SKIP:", and the test must appear in the run (ran or skipped). Each breach
+                  # fails the leg by name.
+                  $entries = @(Get-Content -LiteralPath $manifest | Where-Object { ($_ -replace '#.*$', '').Trim() })
+                  $maySkipLines = @($entries | Where-Object { $_.TrimStart().StartsWith('?') })
+                  $maySkip = @($maySkipLines | ForEach-Object { ($_ -replace '#.*$', '').Trim().TrimStart('?').Trim() } | Sort-Object)
+                  $expected = @($entries | Where-Object { -not $_.TrimStart().StartsWith('?') } | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Sort-Object)
+                  $present = @($doc.TestRun.Results.UnitTestResult | ForEach-Object { "$($_.testName)" })
                   # Plain membership, not Compare-Object, which refuses an empty side.
-                  $newly = @($skipped | Where-Object { $expected -notcontains $_ } | Sort-Object -Unique)
+                  $newly = @($skipped | Where-Object { $expected -notcontains $_ -and $maySkip -notcontains $_ } | Sort-Object -Unique)
                   $nowRun = @($expected | Where-Object { $skipped -notcontains $_ } | Sort-Object -Unique)
-                  $skipCheck = @("expected skips: $($skipped.Count) skipped, $($expected.Count) listed in $manifest; newly skipped $($newly.Count), listed but ran $($nowRun.Count)")
+                  $maySkipBad = @()
+                  if ($maySkipLines.Count -gt 1) { $maySkipBad += "$($maySkipLines.Count) MAY-SKIP entries, the limit is 1" }
+                  foreach ($line in $maySkipLines) {
+                      $name = ($line -replace '#.*$', '').Trim().TrimStart('?').Trim()
+                      $reason = if ($line -match '#\s*(.*)$') { $Matches[1] } else { '' }
+                      if (-not $reason.StartsWith('MAY SKIP:')) { $maySkipBad += "$name has no reason starting 'MAY SKIP:'" }
+                      if ($present -notcontains $name) { $maySkipBad += "$name is a MAY-SKIP entry and did not run" }
+                  }
+                  $skipCheck = @("expected skips: $($skipped.Count) skipped, $($expected.Count) listed and $($maySkip.Count) may skip in $manifest; newly skipped $($newly.Count), listed but ran $($nowRun.Count)")
+                  foreach ($t in $maySkip) { $skipCheck += "  MAY SKIP $t -- $(if ($skipped -contains $t) { 'skipped' } elseif ($present -contains $t) { 'ran' } else { 'absent' })" }
                   foreach ($t in $newly) { $skipCheck += "  NEWLY SKIPPED $t"; Write-Host "::error::GolibTests on ${rid}: $t is skipped and $manifest does not list it" }
                   foreach ($t in $nowRun) { $skipCheck += "  LISTED BUT RAN $t"; Write-Host "::error::GolibTests on ${rid}: $manifest lists $t as skipped, and it ran" }
-                  if ($newly.Count -or $nowRun.Count) { $runExit = 1 }
+                  foreach ($b in $maySkipBad) { $skipCheck += "  MAY-SKIP MISUSED: $b"; Write-Host "::error::GolibTests on ${rid}: $manifest MAY-SKIP misused: $b" }
+                  if ($newly.Count -or $nowRun.Count -or $maySkipBad.Count) { $runExit = 1 }
               }
           }
 
@@ -2008,19 +2029,21 @@ jobs:
           FOOTPRINT_CHANGED: ${{ needs.plan.outputs.footprint-changed }}
         run: |
           $art = Join-Path $PWD 'artifacts'
-          $out = Join-Path $art "reconvert-footprint-$($env:GOOS_TARGET)"
+          # The target arch is the leg's bound GoTargetArch: arm64 on the linux arm leg, empty (amd64) on every other.
+          $goarch = if ($env:GoTargetArch) { $env:GoTargetArch } else { 'amd64' }
+          $out = Join-Path $art "reconvert-footprint-$($env:GOOS_TARGET)-$goarch"
           $work = Join-Path $env:RUNNER_TEMP 'reconvert-footprint'
           $runExit = 0
           try {
-              & ./.github/reconvert-footprint.ps1 -Base $env:FOOTPRINT_BASE -Changed $env:FOOTPRINT_CHANGED -Goos $env:GOOS_TARGET -Work $work -OutDir $out
+              & ./.github/reconvert-footprint.ps1 -Base $env:FOOTPRINT_BASE -Changed $env:FOOTPRINT_CHANGED -Goos $env:GOOS_TARGET -Goarch $goarch -Work $work -OutDir $out
               $runExit = $LASTEXITCODE
           }
           catch { Write-Host "::error::$($_.Exception.Message)"; $runExit = 1 }
 
           $summary = @(Get-Content -LiteralPath (Join-Path $out 'summary.md') -ErrorAction SilentlyContinue)
-          if (-not $summary) { $summary = @("## Reconvert footprint -- $($env:GOOS_TARGET)", '', "the script stopped before its summary (exit $runExit); the job log holds why") }
+          if (-not $summary) { $summary = @("## Reconvert footprint -- $($env:GOOS_TARGET)/$goarch", '', "the script stopped before its summary (exit $runExit); the job log holds why") }
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
-          & ./.github/annotate-summary.ps1 -Title "reconvert-footprint $($env:GOOS_TARGET)" -Lines @($summary | Select-Object -Last 1)
+          & ./.github/annotate-summary.ps1 -Title "reconvert-footprint $($env:GOOS_TARGET)/$goarch" -Lines @($summary | Select-Object -Last 1)
 
           exit $runExit
 

@@ -99,6 +99,27 @@ private static readonly bool s_heldLocksReset = GoroutineThreadState.Register(st
     t_runtimeLockProfilePending = false;
 });
 
+// M:N (row 11, N10): the held locks, their count and the pending lock-profile record are the GOROUTINE's, so they move
+// with a multiplexed goroutine from carrier to carrier: an unlock on the carrier a goroutine resumed on finds the locks it
+// took on another.
+private sealed class HeldLocksMountedState
+{
+    internal ж<mutex>[]? held;
+    internal int count;
+    internal bool profilePending;
+}
+
+private static readonly bool s_heldLocksMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>
+{
+    if (saved is null && t_heldLocks is null && t_heldCount == 0 && !t_runtimeLockProfilePending)
+        return;
+
+    HeldLocksMountedState state = (HeldLocksMountedState)(saved ??= new HeldLocksMountedState());
+    (state.held, t_heldLocks) = (t_heldLocks, state.held);
+    (state.count, t_heldCount) = (t_heldCount, state.count);
+    (state.profilePending, t_runtimeLockProfilePending) = (t_runtimeLockProfilePending, state.profilePending);
+});
+
 private static void pushHeld(ж<mutex> Ꮡl) {
     ж<mutex>[]? held = t_heldLocks;
     if (held is null) {

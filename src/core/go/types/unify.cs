@@ -37,7 +37,7 @@ using fmt = fmt_package;
 using sort = sort_package;
 using strings = strings_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class types_package {
 
@@ -153,7 +153,7 @@ internal static bool unify⁔(/*this*/ ж<unifier> Ꮡu, Type x, Type y, unifyMo
 }
 
 internal static void tracef⁔(/*this*/ ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     fmt.Println(strings.Repeat(".  ", u.depth) + sprintf(nil, default, true, format, args.ꓸꓸꓸ));
 }

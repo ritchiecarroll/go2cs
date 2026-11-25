@@ -1028,10 +1028,13 @@ func (v *Visitor) shapeWitnessSignature(method *types.Func) (string, string, str
 
 		name = getSanitizedIdentifier(name)
 
-		// The witness declarations sit inside the package class, where a package type named Span hides System.Span.
+		// A variadic tail is go.variadic<T>, as on the method it forwards to, so a spread passes the caller's slice
+		// through whole (Go's f(s...)): a Span tail re-packed it into a fresh array, and the callee's writes were lost.
+		// The name is spelled in full: the witness declarations sit inside the package class, where a package type
+		// could be named variadic, as one named Span hides System.Span.
 		if i == sig.Params().Len()-1 && sig.Variadic() {
 			if slice, ok := param.Type().(*types.Slice); ok {
-				params = append(params, fmt.Sprintf("params global::System.Span<%s> %s", v.shapeWitnessDeclType(slice.Elem()), name))
+				params = append(params, fmt.Sprintf("params global::go.variadic<%s> %s", v.shapeWitnessDeclType(slice.Elem()), name))
 				args = append(args, name)
 				continue
 			}

@@ -1,13 +1,13 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 
 internal static void bump(params ꓸꓸꓸnint xsʗp) {
-    var xs = xsʗp.sslice();
+    var xs = xsʗp.slice();
 
     foreach (var i in range(len(xs))) {
         xs[i] += 10;
@@ -15,7 +15,7 @@ internal static void bump(params ꓸꓸꓸnint xsʗp) {
 }
 
 internal static void forward(params ꓸꓸꓸnint xsʗp) {
-    var xs = xsʗp.sslice();
+    var xs = xsʗp;
 
     bump(xs.ꓸꓸꓸ);
 }
@@ -43,7 +43,7 @@ internal static nint fill(slice<nint> dst, params ꓸꓸꓸnint xsʗp) {
 }
 
 internal static @string describe(@string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return fmt.Sprintf(format, args.ꓸꓸꓸ);
 }

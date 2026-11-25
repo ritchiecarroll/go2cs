@@ -14,7 +14,7 @@ using errors = errors_package;
 using io = io_package;
 using utf8 = unicode.utf8_package;
 using unicode;
-using ꓸꓸꓸTransformer = Span<transform_package.Transformer>;
+using ꓸꓸꓸTransformer = variadic<transform_package.Transformer>;
 
 partial class transform_package {
 

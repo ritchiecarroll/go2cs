@@ -5,7 +5,7 @@ namespace go.log;
 
 using context = context_package;
 using errors = errors_package;
-using ꓸꓸꓸHandler = Span<slog_package.Handler>;
+using ꓸꓸꓸHandler = variadic<slog_package.Handler>;
 
 partial class slog_package {
 

@@ -495,6 +495,15 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// A spread operand's pack (<c>append(s, v.ꓸꓸꓸ)</c>, golib's <see cref="variadic{T}"/>): append only reads
+    /// it, so its elements are appended as they stand.
+    /// </summary>
+    public static slice<T> append<T>(slice<T> slice, variadic<T> elems)
+    {
+        return go.slice<T>.Append(slice, elems.Elements);
+    }
+
+    /// <summary>
     /// The read-only twin of the span form above: Go's <c>append(b, s...)</c> with a STRING operand,
     /// whose spread is a <see cref="ReadOnlySpan{T}"/> because no view of a string's bytes may be
     /// writable (see <see cref="@string.ToSpan"/>).
@@ -1437,6 +1446,15 @@ public static partial class builtin
     public static S append<S, T>(S s, params Span<T> items) where S : ISlice<T>, ISliceWrap<S, T>
     {
         return S.Wrap(go.slice<T>.Append(new slice<T>(s), items));
+    }
+
+    /// <summary>
+    /// The constrained form for a spread operand's pack (golib's <see cref="variadic{T}"/>), whose element type the
+    /// span form above could not infer through the pack's conversion.
+    /// </summary>
+    public static S append<S, T>(S s, variadic<T> items) where S : ISlice<T>, ISliceWrap<S, T>
+    {
+        return S.Wrap(go.slice<T>.Append(new slice<T>(s), items.Elements));
     }
 
     /// <summary>

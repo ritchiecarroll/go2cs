@@ -13,7 +13,7 @@ namespace go;
 
 using bytealg = @internal.bytealg_package;
 using @internal;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class path_package {
 

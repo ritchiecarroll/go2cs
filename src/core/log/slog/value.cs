@@ -12,7 +12,7 @@ using strings = strings_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using io = io_package;
-using ꓸꓸꓸAttr = Span<slog_package.Attr>;
+using ꓸꓸꓸAttr = variadic<slog_package.Attr>;
 
 partial class slog_package {
 

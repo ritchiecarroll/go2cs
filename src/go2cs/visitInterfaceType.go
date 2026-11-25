@@ -418,7 +418,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 				memberModifier = dynamicNewMarker(interfaceTypeName)
 			}
 
-			result.WriteString(fmt.Sprintf("%s%s%s %s(%s);", innerIndent, memberModifier, resultSignature, csMethodName, parameterSignature))
+			// A method whose Go name starts with Δ keeps it for golib's method-set matching in a [GoName] stamp.
+			goNameStamp := goNameAttr(goMethodName, csMethodName)
+			typeLenDeviation += token.Pos(len(goNameStamp))
+
+			result.WriteString(fmt.Sprintf("%s%s%s%s %s(%s);", innerIndent, goNameStamp, memberModifier, resultSignature, csMethodName, parameterSignature))
 			v.writeCommentString(result, method.Comment, method.Type.End()+typeLenDeviation)
 			result.WriteString(v.newline)
 		} else if method.Type != nil {
@@ -615,6 +619,9 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		if named, ok := identType.(*types.Named); ok {
 			localNameAttr = fmt.Sprintf("[GoLocalName(\"%s\")] ", named.Obj().Name())
 		}
+	} else if !v.inFunction {
+		// A package-level interface whose Go name starts with Δ keeps it in a [GoName] stamp (localNameAttrFor).
+		localNameAttr = v.localNameAttrFor(identType)
 	}
 
 	// In the internal white-box test bridge (testInlineTypeAccess) no metadata file receives the record:
@@ -880,7 +887,7 @@ func (v *Visitor) writeMergedEmbeddedMethods(result *strings.Builder, interfaceT
 		signature := method.Signature()
 		parameterSignature, _ := v.generateParametersSignature(signature, false)
 
-		result.WriteString(fmt.Sprintf("%snew %s %s(%s);%s", indent, v.generateResultSignature(signature), getSanitizedFunctionName(method.Name()), parameterSignature, v.newline))
+		result.WriteString(fmt.Sprintf("%s%snew %s %s(%s);%s", indent, goNameAttr(method.Name(), getSanitizedFunctionName(method.Name())), v.generateResultSignature(signature), getSanitizedFunctionName(method.Name()), parameterSignature, v.newline))
 	}
 }
 

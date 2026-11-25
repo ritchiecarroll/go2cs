@@ -78,7 +78,7 @@ using static global::go.go.@internal.srcimporter_package;
 using ast = global::go.go.ast_package;
 using build = global::go.go.build_package;
 using types = global::go.go.types_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 [GoPackage("srcimporter")]
 public static partial class srcimporter_package

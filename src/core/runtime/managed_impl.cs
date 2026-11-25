@@ -2095,8 +2095,8 @@ partial class runtime_package
     //
     // Three of Go's header decorations are omitted rather than invented: ` (scan)` (no GC of ours to
     // be scanned by), `, N minutes` (nothing records when a park began), and `, locked to thread`
-    // (LockOSThread is a no-op here because every goroutine already owns its thread, so the note
-    // would be true of every goroutine and therefore say nothing).
+    // (not printed: LockOSThread keeps Go's lock count, but the header does not read it; the docs say
+    // the same, ConversionStrategies-Reference/manual-conversions.md, runtime.Stack).
     //
     // A goroutine with no identity — Stack called on a host thread that never ran Go code — has no
     // goid to print, and Go has no such state at all. It reports id 0, which is not a goid Go's
@@ -2621,7 +2621,7 @@ partial class runtime_package
 
         foreach (System.Reflection.MethodBase callee in callees(lambda))
         {
-            if (callee.Name.TrimStart('Δ') == methodName)
+            if (goCalleeName(callee) == methodName)
                 return (null, methodValue);
         }
 
@@ -2646,7 +2646,7 @@ partial class runtime_package
         if (goLine <= 0 || record.MethodValuesFor(goLine) is not string[] names || singleCallee(lambda) is not System.Reflection.MethodBase callee)
             return null;
 
-        string calleeName = callee.Name.TrimStart('Δ');
+        string calleeName = goCalleeName(callee);
 
         foreach (string name in names)
         {
@@ -2706,12 +2706,12 @@ partial class runtime_package
                 is not [System.CodeDom.Compiler.GeneratedCodeAttribute { Tool: "go2cs-gen" }])
                 return depth == 0 ? null : method;
 
-            string name = method.Name.TrimStart('Δ');
+            string name = goCalleeName(method);
             System.Reflection.MethodBase? next = null;
 
             foreach (System.Reflection.MethodBase callee in callees(method))
             {
-                if (callee.Name.TrimStart('Δ') == name)
+                if (goCalleeName(callee) == name)
                 {
                     next = callee;
                     break;
@@ -3344,9 +3344,12 @@ partial class runtime_package
     }
 
     // The Go name a call target is recorded under: its method name less the converter's `@` keyword
-    // escape (never in metadata) and `Δ` collision or reserved-word prefix.
+    // escape (never in metadata) and `Δ` collision or reserved-word prefix. A function or method the Go
+    // source names with a leading `Δ` carries that name in a [GoName] stamp, which is read instead.
     private static string goCalleeName(System.Reflection.MethodBase target) =>
-        target.Name.TrimStart('Δ');
+        target.Name.StartsWith('Δ') && target.GetCustomAttributes(typeof(GoNameAttribute), inherit: false) is [GoNameAttribute stamp]
+            ? stamp.Name
+            : target.Name.TrimStart('Δ');
 
     // The mapping itself, from a C# position however it was read: a live frame's file info, or a PDB
     // sequence point read at print time (goCreatorPosition).

@@ -16,7 +16,7 @@ using go.io;
 partial class net_package {
 
 partial struct @file {
-    internal ж<os.File> ΔΔfile;
+    [GoName("file")] internal ж<os.File> ΔΔfile;
     internal slice<byte> data;
     internal bool atEOF;
 }

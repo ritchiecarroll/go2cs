@@ -10,12 +10,12 @@ using go.unicode;
 
 partial class main_package {
 
-internal static float64 Δx = 2.5D;
+public static float64 Δx = 2.5D;
 public static nint Δ = 7;
 
 public static UntypedInt ΔK => 3;
 
-internal static partial @string Δf() {
+[GoName("Δf")] public static partial @string Δf() {
     var (pc, _, _, ok) = runtime.Caller(0);
 
     if (!ok) {
@@ -108,13 +108,13 @@ internal static (pair<T>, @string) keep<T, TΔTexter>(T v)
 partial struct Q {
 }
 
-internal static partial @string Δ⁔(/*this*/ Q _Δp0) {
+[GoName("Δ")] internal static partial @string Δ⁔(/*this*/ Q _Δp0) {
     var (pc, _, _, _) = runtime.Caller(0);
     return "Q.Δ in "u8 + runtime.FuncForPC(pc).Name();
 }
 
 internal partial interface bareDeltaMethod_type /*dyn*/ {
-    @string Δ();
+    [GoName("Δ")] @string Δ();
 }
 
 internal static void bareDeltaMethod() {
@@ -127,12 +127,12 @@ internal static void bareDeltaMethod() {
 
 internal static nint yΔ1 = 11;
 internal static nint yΔp = 12;
-internal static @string Δbytes = "not an import";
+public static @string Δbytes = "not an import";
 public static nint QΔTexter = 21;
 public static nint TΔOther = 22;
-internal static nint Δp = 31;
-internal static nint Δpx = 32;
-internal static nint Δe = 33;
+public static nint Δp = 31;
+public static nint Δpx = 32;
+public static nint Δe = 33;
 
 partial struct R {
     internal nint tΔ;

@@ -533,7 +533,7 @@ describes both forms.
 By default, each goroutine other than `main` runs on its own thread, and the thread reserves a fixed stack, because a .NET stack
 cannot grow the way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot
 recurse ([how](ConversionStrategies.md#goroutines)). `main` runs on a thread that reserves 1 GiB, Go's own limit,
-and the settings below do not change it. It is address space, not memory, but it is what a thread start pays for:
+and the settings below do not change it (under the M:N scheduler they can; see below). It is address space, not memory, but it is what a thread start pays for:
 on `win-x64`, parking 100,000 goroutines at once took roughly five times as long with the 256 MiB reserve as with
 16 MiB. On `linux-x64`, at 10,000 goroutines, the reserve made no measurable difference, and a kernel limit on
 memory mappings, not the reserve, stopped thread creation at around 16,000.
@@ -543,11 +543,52 @@ count with an optional `KiB`, `MiB` or `GiB` suffix; `0` takes .NET's default th
 for a program that starts many goroutines at once and never recurses deeply in one: recursion past the reserve ends
 the process with no panic and no deferred calls ([Limitations](Limitations.md)).
 
+Under the experimental M:N scheduler ([Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)),
+goroutines built with twins, and `main`, run on carrier threads instead: one per `GOMAXPROCS`, plus one beside each
+step that runs long and one for each carrier blocked in a call (17 to 32 for 1,000 goroutines at 16). Any carrier may
+run `main`, so each reserves 1 GiB, or the goroutine reserve when that is larger. A set `GO2CS_GOROUTINE_STACK` sizes
+the carriers instead, lower or higher, never below 1 MiB, and then bounds `main`'s recursion too. Set it on a host that
+charges each thread's full reserve to a commit limit, such as linux with `vm.overcommit_memory=2`.
+<!-- Source: src/core/golib/runtime/GoScheduler.cs, DefaultCarrierStackSize and CarrierStackSizeFor (M:N row 4, P3 and
+     COORD 2026-11-24). The carrier count: MnMixedStorm (MN_STORM_N=1000) on R-LAPTOP, 16 Ps, the scheduler's READING
+     peak-carriers=17-32 over nine runs at the row 4 tip 2d2c52a70f. -->
+
 <!-- Source: BOARD, R's 1.26.10.2 seat #3 row (2026-10-27), ParkStorm, Release, one run at a time. win-x64 (R-LAPTOP,
      16 hardware threads), N=100,000, time to park / private MB: 256 MiB 361 s / 5,900; 16 MiB 70 s / 5,650 (1 MiB
      67 s, 4 MiB 66 s, 64 MiB 86 s). linux-x64 (WSL Ubuntu 22.04, 10 cores): N=10,000 parks in 5.7 s (default) /
      6.4 s (16 MiB); N=20,000 stops at about 16,200 threads at both reserves (vm.max_map_count 65,530). The variables
      and their syntax: src/core/golib/runtime/Goroutine.cs, ResolveStackReserve and BoundedReserve. -->
+
+### Checking writes through string data
+
+`GO2CS_CHECK_STRING_WRITES=1` turns on a diagnostic for converted code that writes through `unsafe.StringData`'s
+pointer into a string literal or a one-byte string. Go faults on that write; by default go2cs lets it change every
+string sharing those bytes ([Limitations](Limitations.md)). With the check on, the write lands in a private copy and
+the program panics by name at the next read through the pointer or the next `unsafe.StringData` over that string.
+
+The switch is read once, at start-up. Off, the default, it costs nothing: no literal is recorded and
+`unsafe.StringData` makes no lookup. On, each string literal is recorded the first time the program uses it, and
+each `unsafe.StringData` looks its string up. On `linux-x64`, a program using 50,000 distinct literals read these
+medians over seven runs:
+
+| | Off (the default) | On |
+|:--|--:|--:|
+| First use of the 50,000 literals | 32 ms | 43 ms |
+| Gen-2 garbage collection pause | 3.4 ms | 6.0 ms |
+| Gen-0 garbage collection pause | 0.65 ms | 1.9 ms |
+| `unsafe.StringData` of a literal | 19 ns | 38 ns |
+| `unsafe.StringData` of a heap string | 20 ns | 26 ns |
+
+Turn it on to debug, not in production.
+
+<!-- Source: P5's D5 seat, 2026-11-24 (owner ruling via COORD 20261124T133212Z: an opt-in diagnostic, zero work when
+     off). Bench: 50,000 distinct C# literals converted through StringLiteralCache, then 30 forced blocking gen-2
+     collections and 20 M small allocations; 20 M StringData calls each on a heap string and on one literal; Release,
+     linux box, seven interleaved runs per arm. Medians [min-max], master golib b2c9435159 / the seat with the switch
+     off / on: first use 34.1 [25.8-39.8] / 31.8 [26.0-34.2] / 42.6 [34.3-47.4] ms; gen-2 pause 3.50 [2.76-3.66] /
+     3.44 [2.69-3.77] / 6.04 [5.02-6.45] ms; gen-0 pause 708 [643-746] / 646 [555-740] / 1,929 [1,804-2,646] us;
+     StringData literal 18.5 [16.0-21.4] / 18.6 [15.4-20.1] / 38.3 [33.7-41.5] ns; heap 20.0 [18.2-22.6] / 19.9
+     [16.2-20.7] / 26.3 [23.5-31.5] ns. The switch: src/core/golib/ReadOnlyStringBacking.cs, Enabled. -->
 
 ### Options that do not change run-time cost
 

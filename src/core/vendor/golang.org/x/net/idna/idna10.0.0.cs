@@ -25,7 +25,7 @@ using norm = go.vendor.golang.org.x.text.unicode.norm_package;
 using go.vendor.golang.org.x.text.secure;
 using go.vendor.golang.org.x.text.unicode;
 using unicode;
-using ꓸꓸꓸOption = Span<idna_package.Option>;
+using ꓸꓸꓸOption = variadic<idna_package.Option>;
 
 partial class idna_package {
 
