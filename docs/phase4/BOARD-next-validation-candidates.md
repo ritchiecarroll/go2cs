@@ -42523,4 +42523,34 @@ mid-call assert. No product cause: the hang was the test's collector starving th
 
 — P6 (2026-11-25)
 
+
+## 2026-11-25 — i9 (COORD 20261125T182241Z): at TieredCompilation=0 a frame reported at IL offset 0 settles at the method's first line (OPEN, older than train 4)
+
+**OPEN, measured.** The return-site resolver in `src/core/runtime/managed_impl.cs` (returnSiteILOffset,
+suspendedAtReportedCall, calleeSettledCallSite) misplaces a caller frame's line when the optimizing JIT reports that
+frame at IL offset 0. returnSiteILOffset reads the first call at or after offset 0, which is the method's first
+statement. calleeSettledCallSite searches only the statement holding the reported offset, which holds no call of
+the callee, so nothing settles. Go names the line of the call the frame is suspended in.
+
+**Reading.** The reduced probe in `docs/phase4/data/tc0-offset0-probe/` (Go source, `go.out`, and the readings with
+the resolver's own view). Built `-c Release` on windows/amd64 at master 1c556c35a5 and run with
+`DOTNET_TieredCompilation=0`: `main`'s frame reads line 10 (its first statement) for method calls on lines 11 and
+13, and the leaf frame calling `runtime.Callers` reads one line early. The package-level call reads right. Tiered,
+and tiered with TieredPGO=0, every line equals Go's. Byte-identical readings on 1f2a9afdfc (train 4 before the
+glyph-methods merge), so this predates the forwarder chain. A one-axis A/B with the forwarders flipped to
+NoInlining left it unchanged.
+
+**Scope.** TC0 only, so the `-tests` hosts (Release, tiering off) and a user program run that way. Production
+stays optimized and exact caller lines are opt-in (owner ruling 2026-11-22), so a cure must cost production nothing.
+No banked row is known to reach it: the probe finds it, and log/slog's TestCallDepth was a DIFFERENT TC0 case (the
+frame reported AT its call, refused because the callee was a forwarder of a `ж` overload; cured on
+claude/i9-slog-calldepth-recv, which does not reach this one).
+
+**Next measurement, not a design.** Read what the JIT's debug info records for `main` at TC0 (the native-to-IL map
+around each call), to learn whether offset 0 is all the frame carries or the resolver drops a better mapping.
+
+**Owner.** Unassigned; COORD routes.
+
+— i9 (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
