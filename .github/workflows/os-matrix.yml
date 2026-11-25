@@ -138,7 +138,7 @@ on:
           - reconvert-footprint
           - mn-platform
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;), sweep-shard (linux) ;twins=1 (D2/T6: the standard library built with twins, the host plain; each row''s twins proof must read above 0) or ;twins=0 (the plain half: it must read 0). Options on any other stage are refused.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;), sweep-shard (linux) ;twins=1 (D2/T6: the standard library built with twins, the host plain; the shard''s twins proof must read above 0) or ;twins=0 (the plain half: every row must read 0). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -2919,9 +2919,10 @@ jobs:
 
           # D2/T6 twins proof, per row, on the assemblies the row's own host loaded (src/core/<row>/bin/tests): the twin names
           # (a method ending ꞏtwin) counted across every go.*.dll and the test assembly there, leaving out the packages whose
-          # hand-written twins are in every build (runtime, sync, time). Under ;twins=1 the count must be above 0, and under
-          # ;twins=0 (the pair's plain half) it must be 0, or the row fails by name. With no twins option it is a reading only,
-          # so a routine linux row never fails for another seat's twin.
+          # hand-written twins are in every build (runtime, sync, time). Under ;twins=0 (the pair's plain half) every row must
+          # read 0, or it fails by name. Under ;twins=1 the SHARD must read above 0 in total: a row whose whole closure holds no
+          # code that can park reads 0 even when twinned, while a build the property never reached reads 0 on every row. With no
+          # twins option it is a reading only, so a routine linux row never fails for another seat's twin.
           $twinMarker = [System.Text.Encoding]::UTF8.GetBytes([string][char]0xA78F + 'twin')
           function Measure-TwinNames([string]$path) {
               $bytes = [System.IO.File]::ReadAllBytes($path); $n = 0
@@ -2935,6 +2936,7 @@ jobs:
           }
           $wantTwins = $env:SWEEP_TWINS -eq '1'
           $checkTwins = $env:SWEEP_TWINS -in '0', '1'
+          $twinTotal = 0
           Write-Host "READING t6-env GO2CS_MN='$($env:GO2CS_MN)' GoStdlibTwins='$($env:GoStdlibTwins)' twins-option='$($env:SWEEP_TWINS)'"
           if ($env:GO2CS_MN) { throw "sweep-shard: GO2CS_MN is set ('$($env:GO2CS_MN)'); a sweep runs in default mode" }
 
@@ -2955,10 +2957,11 @@ jobs:
                       $dlls = @(Get-ChildItem -Path $testDll.DirectoryName -File -Filter '*.dll' | Where-Object { ($_.Name -like 'go.*.dll' -or $_.FullName -eq $testDll.FullName) -and $skip -notcontains $_.Name })
                       $count = 0; $testCount = Measure-TwinNames $testDll.FullName
                       foreach ($dll in $dlls) { $count += Measure-TwinNames $dll.FullName }
+                      $twinTotal += $count
                       Write-Host "READING t6-proof row=$name twins-option='$($env:SWEEP_TWINS)' twin-names=$count test-assembly=$testCount assemblies=$($dlls.Count)"
-                      if ($checkTwins -and $wantTwins -ne ($count -gt 0)) {
+                      if ($env:SWEEP_TWINS -eq '0' -and $count -gt 0) {
                           if ($rowExit -eq 0) { $rowExit = 3 }
-                          Write-Host "::error::T6 twins proof: $name read $count twin names with want-twins=$wantTwins"
+                          Write-Host "::error::T6 twins proof: $name read $count twin names in the plain half (;twins=0)"
                       }
                   }
               }
@@ -2967,6 +2970,14 @@ jobs:
               if ($rowExit -ne 0) { $failedRows.Add($name) }
 
               $skipBuild = $true
+          }
+
+          if ($wantTwins) {
+              Write-Host "READING t6-proof shard twin-names=$twinTotal"
+              if ($twinTotal -eq 0) {
+                  Write-Host "::error::T6 twins proof: no row of this shard loaded a twinned assembly under ;twins=1 (the property did not reach the build)"
+                  if ($sweepExit -eq 0) { $sweepExit = 3 }
+              }
           }
 
           # ---- per-row evidence ---------------------------------------------------------------
