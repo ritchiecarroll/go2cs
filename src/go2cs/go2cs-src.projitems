@@ -842,6 +842,7 @@
     <None Include="$(MSBuildThisFileDirectory)testingDecoratorFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testManifestEmbedDigest_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testOnlyPackageEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testOptimizedHosts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testProjectCandidateReferences_integration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testRefsFootprintClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testRefsFootprint_test.go" />

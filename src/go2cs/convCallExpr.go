@@ -2726,12 +2726,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 				}
 
+				// A variadic slot receives every trailing argument, and each is wrapped on its own (the loop only
+				// iterates the declared parameters): sort's `OrderedBy(user, increasingLines)` wrapped `user` and
+				// passed `increasingLines` bare, CS1503. A spread call passes the slice whole.
+				lastDelegateArg := i
+
+				if funcSignature.Variadic() && i == params.Len()-1 && !callExprContext.hasSpreadOperator {
+					lastDelegateArg = len(callExpr.Args) - 1
+				}
+
 				if paramNamed, ok := types.Unalias(delegateParamType).(*types.Named); ok {
 					if _, isSig := paramNamed.Underlying().(*types.Signature); isSig {
-						if argType := v.getType(callExpr.Args[i], false); argType != nil && !types.Identical(types.Unalias(argType), types.Unalias(delegateParamType)) {
-							if _, argIsSig := argType.Underlying().(*types.Signature); argIsSig {
-								if _, isLit := callExpr.Args[i].(*ast.FuncLit); !isLit && !typeContainsTypeParams(delegateParamType) {
-									v.recordDelegateArgWrap(callExprContext, i, delegateParamType, callExpr.Args[i], argType)
+						for j := i; j <= lastDelegateArg; j++ {
+							if argType := v.getType(callExpr.Args[j], false); argType != nil && !types.Identical(types.Unalias(argType), types.Unalias(delegateParamType)) {
+								if _, argIsSig := argType.Underlying().(*types.Signature); argIsSig {
+									if _, isLit := callExpr.Args[j].(*ast.FuncLit); !isLit && !typeContainsTypeParams(delegateParamType) {
+										v.recordDelegateArgWrap(callExprContext, j, delegateParamType, callExpr.Args[j], argType)
+									}
 								}
 							}
 						}
@@ -2766,7 +2777,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 
 				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && paramHasArg && structuralParamType != nil && !typeContainsTypeParams(paramType) {
-					if argType := v.getType(callExpr.Args[i], false); argType != nil {
+					for j := i; j <= lastDelegateArg; j++ {
+						argType := v.getType(callExpr.Args[j], false)
+
+						if argType == nil {
+							continue
+						}
+
 						argRendersNamedDelegate := false
 
 						if argNamed, ok := types.Unalias(argType).(*types.Named); ok {
@@ -2774,14 +2791,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								argRendersNamedDelegate = true
 							}
 						} else if argSig, ok := types.Unalias(argType).(*types.Signature); ok {
-							if argIdent, ok := callExpr.Args[i].(*ast.Ident); ok &&
+							if argIdent, ok := callExpr.Args[j].(*ast.Ident); ok &&
 								v.namedFuncTypeNameForSignature(argSig) != "" && v.identDeclaredFromMethodGroup(argIdent) {
 								argRendersNamedDelegate = true
 							}
 						}
 
 						if argRendersNamedDelegate {
-							v.recordDelegateArgWrap(callExprContext, i, structuralParamType, callExpr.Args[i], argType)
+							v.recordDelegateArgWrap(callExprContext, j, structuralParamType, callExpr.Args[j], argType)
 						}
 					}
 				}

@@ -1,0 +1,4 @@
+# AR-1 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=5449
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-1	internal/poll	ABSENT	-1	PASS	12	None	12	NO	yes	bank	reference	-1	5449	0	-1	1980
+# summary rows=1 plain PASS=0 twinned EQUAL-bank=1 twinned EQUAL-plain=0
