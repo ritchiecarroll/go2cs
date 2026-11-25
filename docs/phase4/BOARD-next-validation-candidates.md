@@ -42689,4 +42689,14 @@ hardware as Go does, so the verdict does not depend on the runner.
 
 — R (2026-11-25)
 
+**Update 2026-11-25 (P2): runtime joins the list under a named caller-line exception (COORD 205136Z).** Hosted linux
+sweeps, one axis (the same tree with and without `runtime.tests=TestStackGrowth`): optimized, run 45690857278 at
+932aa2dcc8, "PASS runtime 11094 [1949s]", equal to the bank; as built, run 45690862879 at fa2531cc3b, "FAIL runtime
+[4483s]": the host died on "panic: finalizer did not start" from TestStackGrowth's watchdog (stack_test.go:132),
+11161 Go rows against 11025 C# (truncated). runtime's tests read caller lines in seven files, and as built the row cannot
+complete, so the exception cites the whole row optimized equal to the bank rather than a both-arms verdict comparison.
+
+— P2 (2026-11-25)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
