@@ -336,7 +336,7 @@ Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; 
 ᶠ is FuncValueMarker (symbols.json:200-211#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:13#ee6601).
 _ΔpN: src/go2cs/visitFuncDecl.go:1467-1481#03b3c7 and :3063-3071#701c82; :60-68#c625cd and :2147#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:17 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:22 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2148 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:517 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:38 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
 Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:678#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
-`main` -> `Main` until C46 (2026-11-11); since then `main` keeps its name and go2cs-gen's MainEntryGenerator writes `Main`. A Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:370-378#95eaaa).
+`main` -> `Main` until C46 (2026-11-11); since then `main` keeps its name and go2cs-gen's MainEntryGenerator writes `Main`. A Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:375-383#95eaaa).
 A member golib adds itself: src/core/golib/array.cs:589 `public array<T> ΔClone()`.
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:93-97#b0ed6c and :151#d96a98.
 Set‿ example: NamedMapMethodShadow/main.cs.target:90#7fd7fe (a user package, so plain literals).
@@ -499,7 +499,7 @@ partial struct Outer {
 For example, `GoFrame` is the golib type of the local that runs a function's deferred calls
 ([Defer / Panic / Recover](#defer--panic--recover)), so a Go struct named `GoFrame` becomes `ΔGoFrame`:
 
-<!-- reserved-name list: src/go2cs/identifierNaming.go:172-182#79aa67; a type named like a method keeps its name: src/core/time/time.cs:326 `partial struct Month /*num:nint*/;` (Go type Month; the method Time.Month's body is :839 `internal static Month Month⁔(/*this*/ Time t) {`, and its forwarder src/core/time/linux/package_info.cs:223 `public static Month Month(this Time t) => time_package.Month⁔(t);`); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:43-54#68c7e9) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
+<!-- reserved-name list: src/go2cs/identifierNaming.go:177-187#79aa67; a type named like a method keeps its name: src/core/time/time.cs:326 `partial struct Month /*num:nint*/;` (Go type Month; the method Time.Month's body is :839 `internal static Month Month⁔(/*this*/ Time t) {`, and its forwarder src/core/time/linux/package_info.cs:223 `public static Month Month(this Time t) => time_package.Month⁔(t);`); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:43-54#68c7e9) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
 <!-- source: src/tests/Behavioral/ReservedNameShadows/main.go:45 -->
 ```go
 type GoFrame struct{ k int }
@@ -545,7 +545,7 @@ exported type, or an unexported type that an exported signature exposes
 struct such as `accum` shows no modifier, because the [source generator](#source-generators) adds it on the
 generated half of the `partial` type.
 
-<!-- receiver clamp: src/go2cs/visitFuncDecl.go:921-929#d781c1 (receiverAccess from :2147-2164#b773d4; getAccess at src/go2cs/identifierNaming.go:383#c6c426); example src/core/errors/package_info.cs:129 `internal static @string Error(this ref joinError e)`, the forwarder of the body src/core/errors/join.cs:47 `internal static @string Error⁔(/*this*/ ref joinError e) {` -->
+<!-- receiver clamp: src/go2cs/visitFuncDecl.go:921-929#d781c1 (receiverAccess from :2147-2164#b773d4; getAccess at src/go2cs/identifierNaming.go:388#c6c426); example src/core/errors/package_info.cs:129 `internal static @string Error(this ref joinError e)`, the forwarder of the body src/core/errors/join.cs:47 `internal static @string Error⁔(/*this*/ ref joinError e) {` -->
 <!-- generator adds the modifier: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:173 (`{{Scope}} partial struct`), Templates/InterfaceType/InterfaceTypeTemplate.cs:50 (`{{Scope}} partial interface`). "usually": lifted local types carry `internal` (LiftedLocalTypes/main.cs.target:38#24371b) and an unexported type an exported field exposes carries `public` (PublicizedFieldType/main.cs.target:9#6ba0fc); package-level declarations otherwise emit `partial` bare (src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5 `partial struct reg {`). A named function type becomes a delegate that carries its own modifier: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go main.go:23 `type Handler func(int)`); GenericTypeInstantiation.cs.target:45 `public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);` -->
 <!-- new accum(): the generated parameterless constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2453#065f38, whose body is the NilType constructor's (:2439#a988bf); "an empty struct literal reads new T()" is the Struct Types section's rule (parity seat #21). Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
 
@@ -10320,7 +10320,7 @@ type record struct {
 ```
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:9-14 -->
 ```csharp
-partial struct record {
+partial struct Δrecord {
     public nint Version;
     public @string Name; /*`json:"name" asn1:"optional,explicit,tag:0"`*/
     public slice<byte> Data; /*`json:"data,omitempty"`*/
@@ -10353,7 +10353,7 @@ func main() {
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:48-60, 90 -->
 ```csharp
 internal static void main() {
-    var t = reflect.TypeOf(new record());
+    var t = reflect.TypeOf(new Δrecord());
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
@@ -10376,8 +10376,9 @@ A few names in that C# need a word:
   `fmt.Println`, whose arguments are Go `any`, as a Go string ([Strings](#strings-string-and-sstring),
   [Empty Interface](#empty-interface-any)).
 - `"…"u8` is a C# UTF-8 literal, which golib reads as a Go string.
-- `new record()` is Go's empty literal `record{}`. It calls the constructor the generator adds to every
-  struct for the zero value ([Struct Types](#struct-types)).
+- `new Δrecord()` is Go's empty literal `record{}`. It calls the constructor the generator adds to every
+  struct for the zero value ([Struct Types](#struct-types)). The type is `Δrecord` because `record` cannot
+  begin a C# member declaration, so the name takes the `Δ` prefix ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 - `fΔ1` is the loop's `f`. It is renamed because the function declares another `f` after the loop, and C#
   does not allow an inner block to reuse a name its enclosing block declares
   ([Shadowing](#short-variable-redeclaration-shadowing)).
@@ -11174,7 +11175,7 @@ call that returns one over a byte array or byte slice, also reaches an array fie
 ([`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr)).
 <!-- the rule: src/go2cs/fieldAccess.go:24 `// FIELD ACCESS THROUGH A REINTERPRETED POINTER`,
      the step across a return :45 `// ONE STEP ACROSS A RETURN`.
-     In-function: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:53 `Reinterpret<byte, record>();`;
+     In-function: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:53 `Reinterpret<byte, Δrecord>();`;
      across a return: FieldAccessReinterpret/main.go:90 `got, err := readReparse(0x0201, false)` ->
      main.cs.target:81 `fmt.Println("returned:", got.Flags, got.Path[0], err);`: since I0 D3 reparse holds Path inline, so the
      element is read through the inline array's indexer, not a field view; the field-view step across a return is the guard's.
@@ -11590,7 +11591,7 @@ src/tests/Behavioral/FieldAccessReinterpret/main.go:90 (`got, err := readReparse
 <!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:52-58 -->
 ```csharp
     var blob = new slice<byte>(24);
-    var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
+    var rec = Ꮡ(blob, 0).Reinterpret<byte, Δrecord>();
 
     rec.Kind = 0x01020304;
     rec.Length = 0x0506;
@@ -11598,8 +11599,8 @@ src/tests/Behavioral/FieldAccessReinterpret/main.go:90 (`got, err := readReparse
     rec.Off += 1;
 ```
 
-`rec` is a `ж<record>`, and `rec.Kind` writes the four bytes at Go's offset 0 of `blob`. An element of an
-array field reads through the field's view, `rec.of(record.ᏑPath).ElementRef(1)`.
+`rec` is a `ж<Δrecord>`, and `rec.Kind` writes the four bytes at Go's offset 0 of `blob`. An element of an
+array field reads through the field's view, `rec.of(main_package.Δrecord.ᏑPath).ElementRef(1)`.
 
 **A slice or string header stored through its fields commits to the variable it views.** Go code can view
 a slice variable as its header, `hdr := (*sliceHeader)(unsafe.Pointer(&alias))`, where `sliceHeader` is an

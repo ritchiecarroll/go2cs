@@ -19,7 +19,7 @@ partial struct reading {
     public celsius Temp;
 }
 
-partial struct record {
+partial struct Δrecord {
     public nint N;
     public @string Name;
 }
@@ -38,10 +38,10 @@ internal static void main() {
     var (b, err) = json.Marshal(new reading("lab", 21.5D));
     fmt.Println((@string)b, err);
 
-    (var der, err) = asn1.Marshal(new record(7, "seven"));
+    (var der, err) = asn1.Marshal(new Δrecord(7, "seven"));
     fmt.Printf("%x %v\n"u8, der, err);
 
-    ref var back = ref heap(new record(), out var Ꮡback);
+    ref var back = ref heap(new Δrecord(), out var Ꮡback);
     (_, err) = asn1.Unmarshal(der, Ꮡback);
     fmt.Println(back.N, back.Name, err);
 
