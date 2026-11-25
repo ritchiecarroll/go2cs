@@ -86,6 +86,15 @@ or retaken on Windows. Section 3's "INVISIBLE" and "PARTLY INVISIBLE" readings, 
 this block: each was the first pass's JIT, type initialization and first timer or socket setup, read as long steps while
 work was queued. No bracket seat is owed for them.
 
+### 4.1 Hosted readings, 2026-11-25 (COORD 20261125T065713Z: the platform of record is a hosted runner)
+
+At claude/r-mn-n5-sleep aff3727dc4, hosted linux (4 cores), behavioral-smoke in M:N mode:
+- os/exec Wait, warmed (run 45565158258): released 3/3, retakes 15/16/15, handoffs 0, injections 0. Visible through the
+  native retake, as in WSL. The same run's I4 step passed again (twinned p99 7.2-14.0 ms).
+- The storm gate, row 13's last NOT RUN (run 45565162745, 'MnMixedStorm;mn=1;reps=50'): MnMixedStorm twinned at
+  n=100,000, 50 of 50 ok (0 hangs, 0 non-zero exits, 0 outputs differing from Go's), wall 6.0-6.4 s, peak carriers
+  10-17, sampled peak OS threads 24-35 (row 7's linux band 37-44; the design's stop line, +25%, is 55).
+
 ## Appendix: the predictions as written, with their scores
 
 ### row13/PREDICTIONS-base.md
@@ -281,4 +290,19 @@ linux C-exec warmed, 3 runs: released true, handoffs or retakes >= K (40), injec
 SCORED linux C-exec warmed (52efd141c2): released true 3/3, retakes 33/31/34, handoffs 0, injections 1/0/1. As worded
 (">= K (40)") MISSED: about K - P waiters are retaken, and the last few are not because no work waits by then (the retake
 runs only while work waits). Read: os/exec Wait on linux is visible, through the native-call retake (MayBlock).
+GATES at 2247f5922c (fixture + docs), written before them: repoguard rc 0; MnInvisible default mode 4 phases PASS;
+MnInvisible --mn 4 phases PASS (Output equal to Go's).
+SCORED gates: repoguard rc 0; MnInvisible default PASS; --mn PASS -- MET.
+
+HOSTED READINGS (COORD 20261125T065713Z), written before the dispatches, at the commit that adds the two CI pieces:
+(a) behavioral-smoke 'MnInvisible;mn=1' on linux: the I4 step passes as before (twinned p99 <= 25 ms), and its new C-exec
+    reading, 3 runs warmed: released true, retakes (or handoffs) between K - P and K (hosted P = 4, K = 16: 12-16), injections 0-2.
+(b) behavioral-smoke 'MnMixedStorm;mn=1;reps=50' on linux (the storm gate, I7's last NOT RUN): 50 of 50 pass (0 HANG,
+    0 EXIT, 0 OUTPUT); wall per twinned n=100,000 run 2-15 s; sampled peak OS threads 30-55 (row 7's linux band 37-44,
+    the design's stop line +25% = 55); READING peak-carriers 4-30.
+SCORED (a), hosted linux run 45565158258 at aff3727dc4, 4 cores: I4 step PASS (twinned p99 11.0/12.0/14.0 at 200 ms,
+10.0/11.9/7.2 at 2 s); C-exec warmed: released true 3/3, retakes 15/16/15 (12-16 predicted), handoffs 0, injections 0 -- MET.
+SCORED (b), hosted linux run 45565162745 at aff3727dc4, the storm gate: 50 of 50 ok (0 HANG, 0 EXIT, 0 OUTPUT;
+failures=0) MET; wall 6.0-6.4 s (median 6.4) MET; READING peak-carriers 10-17 MET; sampled peak OS threads 24-35 --
+as worded (30-55) MISSED LOW by up to 6, below row 7's linux band (37-44) and well inside the stop line (55).
 ```
