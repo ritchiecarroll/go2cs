@@ -66,6 +66,26 @@ Linux's small injection counts beside a full handoff count are main's own spawni
 20-60 ms). Owners per Q3: time.Sleep on linux and DNS lookup on both are bracket-seat candidates (default: the lane on
 row 13); os/exec Wait on linux needs a reading with an apphost (hosted runner) before it is routed.
 
+## 4. Amendment, 2026-11-25 (R, COORD's routing 20261125T054618Z): the census's "invisible" rows were first-pass costs
+
+COORD routed linux time.Sleep, then DNS lookup, as bracket seats, and asked for a hosted linux reading of os/exec Wait.
+Before cutting a bracket, a trace of the linux C-sleep row showed the injected steps were the sleepers' own FIRST steps
+(11-13 ms, with about 30 goroutines queued), and their steps end at the twin park: no hand-off, nothing blocked. The census
+rows now take MN_INV_WARM=1 (one pass, then a measured one) and print the measured pass's counters (39725718c1), and the
+exec row's child is sleep(1) off windows, where os.Executable names the dotnet host (52efd141c2). Three runs each:
+
+| call | linux, one pass | linux, warmed | Windows, one pass | Windows, warmed |
+|---|---|---|---|---|
+| time.Sleep | inj 31/31/31, handoffs 0 | inj 0/0/1, handoffs 0 | inj 18/16/2 | inj 0/0/0 |
+| DNS lookup | handoffs 331-339, inj 46-61 | handoffs 178-204, inj 0/0/0 | handoffs 127, inj 50-51 | handoffs 64, inj 0/0/0 |
+| os/exec Wait | (not measurable before 52efd141c2) | retakes 31-34, inj 0-1 | handoffs 832-838, retakes 49-63, inj 1-8 | handoffs 832, retakes 16-48, inj 0 |
+
+So none of the three is invisible. time.Sleep is a park on both OSes (Sleepꞏtwin; the plain Sleep hands off); DNS lookup
+blocks in calls the seam already brackets (handoffs); os/exec Wait is retaken on linux (the native retake) and handed off
+or retaken on Windows. Section 3's "INVISIBLE" and "PARTLY INVISIBLE" readings, and its routing note, are superseded by
+this block: each was the first pass's JIT, type initialization and first timer or socket setup, read as long steps while
+work was queued. No bracket seat is owed for them.
+
 ## Appendix: the predictions as written, with their scores
 
 ### row13/PREDICTIONS-base.md
@@ -240,3 +260,25 @@ SCORED (04:28-05:22Z at 1f3210616b, dirty=0 at both ends), every item MET: repog
 3250 total); --mn subset 91 pass, Output 88 compared, 0 failed, 3 NOT COMPARED; default subset 3/3 all phases.
 ```
 
+### sleep/PREDICTIONS.md (the amendment's readings, 2026-11-25)
+
+```text
+Sleep seat (COORD 20261125T054618Z item 1), the first reading, written before the runs (2026-11-25). Tree: claude/r-mn-n5-sleep
+(stacked on row 13 e166c04d76) + the uncommitted MN_INV_WARM census mode. Linux = WSL, P = 10, K = 40.
+Hypothesis: linux time.Sleep is already a park (Sleepꞏtwin); row 13's census read the sleepers' FIRST steps (11-13 ms of
+JIT, type initialization and first timer setup on 10 carriers at once, with 30 goroutines queued) as long steps.
+- linux C-sleep cold (one pass), 3 runs: injections > 0 in at least 2 of 3, handoffs 0 (reproduces row 13).
+- linux C-sleep MN_INV_WARM=1, the measured pass, 3 runs: injections 0 to 2, handoffs 0, sensed 0.
+- linux C-dns warmed: injections drop below a third of the cold reading (row 13: 46-51).
+- Windows C-sleep warmed: 0 injections (as cold). Windows C-dns warmed: injections below half of cold (row 13: 49).
+Falsifier: warmed linux C-sleep injections >= 10 in 2 of 3 -- then the sleep path does block somewhere on linux.
+SCORED (one pass vs warmed, 3 runs each): linux C-sleep cold injections 31/31/31, warmed 0/0/1, handoffs 0 -- MET.
+linux C-dns cold 61/54/46, warmed 0/0/0 (handoffs 178-204) -- MET. Windows C-sleep cold 18/16/2, warmed 0/0/0; Windows
+C-dns cold 51/50/50, warmed 0/0/0 (handoffs 64) -- MET. Windows C-exec warmed: handoffs 832, retakes 16-48, injections 0.
+So no census call is invisible: row 13's "invisible" readings were first-pass costs. Falsifier did not fire.
+os/exec Wait on linux: the child becomes sleep 0.3 off windows (os.Executable is dotnet there). Written before the run:
+linux C-exec warmed, 3 runs: released true, handoffs or retakes >= K (40), injections 0 to 2.
+SCORED linux C-exec warmed (52efd141c2): released true 3/3, retakes 33/31/34, handoffs 0, injections 1/0/1. As worded
+(">= K (40)") MISSED: about K - P waiters are retaken, and the last few are not because no work waits by then (the retake
+runs only while work waits). Read: os/exec Wait on linux is visible, through the native-call retake (MayBlock).
+```
