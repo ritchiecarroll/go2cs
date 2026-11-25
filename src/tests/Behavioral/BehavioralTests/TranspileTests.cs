@@ -1081,6 +1081,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoUntypedConstArg() => CheckTarget("GoUntypedConstArg");
 
     [TestMethod]
+    public void CheckGoarchDefaultContext() => CheckTarget("GoarchDefaultContext");
+
+    [TestMethod]
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]

@@ -1084,6 +1084,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGoUntypedConstArg() => CheckTarget("GoUntypedConstArg");
 
     [TestMethod]
+    public void CheckGoarchDefaultContext() => CheckTarget("GoarchDefaultContext");
+
+    [TestMethod]
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]
