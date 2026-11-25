@@ -244,6 +244,88 @@ public unsafe class GoCgoImagesTests
         }
     }
 
+    private struct four
+    {
+        public uint16 A;
+        public uint16 B;
+    }
+
+    // P3's MUST on 7adc8e619c: the first view's image is sized max(root, its C struct) and pinned, so it cannot grow. A
+    // second, LARGER view of the same root would get that short buffer and C would read and write past it. It is refused
+    // by name. The other order shares one buffer of the larger size, as Go's one memory does.
+    [TestMethod]
+    public void ASecondLargerViewOfAnImagedRootIsRefusedByName()
+    {
+        ж<small> root = new StandardBox<small>(new small { Family = 2 });
+        GoCgoImages images = default;
+
+        GoCgoArgs.StructPointer(root.Reinterpret<small, four>(), "f", ref images, out _, out GoCgoPin first);
+        Assert.AreEqual(4, first.StorageLength, "the first view's buffer is the 4-byte root");
+
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.StructPointer(root.Reinterpret<small, sockAny>(), "f", ref images, out _, out _)), "C structs of different sizes");
+    }
+
+    [TestMethod]
+    public void ALargerViewFirstThenASmallerOneShareOneImage()
+    {
+        ж<small> root = new StandardBox<small>(new small { Family = 2 });
+        GoCgoImages images = default;
+
+        GoCgoArgs.StructPointer(root.Reinterpret<small, sockAny>(), "f", ref images, out _, out GoCgoPin large);
+        GoCgoArgs.StructPointer(root.Reinterpret<small, four>(), "f", ref images, out _, out GoCgoPin smaller);
+
+        Assert.AreEqual(1, images.ImageCount, "one image for one root");
+        Assert.AreEqual(16, large.StorageLength);
+        Assert.AreEqual(16, smaller.StorageLength, "the smaller view shares the 16-byte image");
+
+        fixed (byte* a = large)
+        fixed (byte* b = smaller)
+            Assert.AreEqual(large.Address(a), smaller.Address(b), "both views hand C the same buffer");
+    }
+
+    // P3's NIT 2: an image is shared only with the SAME root's image. Two distinct roots whose values share a backing (a
+    // struct copy that did not clone its arrays) are refused by name, not handed one buffer at offset 0.
+    [TestMethod]
+    public void TwoRootsSharingABackingAreNotHandedOneImage()
+    {
+        sockIn4 value = new() { Family = 2 };
+        ж<sockIn4> one = new StandardBox<sockIn4>(value);
+        ж<sockIn4> two = new StandardBox<sockIn4>(value);
+        Assert.IsTrue(ReferenceEquals(GoCgoImages.ImageKeys(one, one.Value)[1], GoCgoImages.ImageKeys(two, two.Value)[1]), "the premise: the two roots share Addr's backing");
+
+        GoCgoImages images = default;
+        GoCgoArgs.StructPointer(one.Reinterpret<sockIn4, sockAny>(), "f", ref images, out _, out _);
+
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.StructPointer(two.Reinterpret<sockIn4, sockAny>(), "f", ref images, out _, out _)), "share an allocation");
+    }
+
+    // P3's NIT 3: copy-back decodes a FRESH value (new backing arrays) and WriteBoxSlot stores it IN PLACE for a value
+    // that owns array storage (IGoValueAssign, which go2cs-gen gives every [GoValueClone] struct), so a slice of an
+    // inline array taken BEFORE the call still aliases the root's array after C changed the image. The root is net's own
+    // syscall.RawSockaddrInet4: a hand-written test struct has no IGoValueAssign and would be stored by replacement.
+    [TestMethod]
+    public void ASliceTakenBeforeTheCallStillAliasesTheRootAfterCopyBack()
+    {
+        Assert.IsTrue(typeof(IGoValueAssign<syscall_package.RawSockaddrInet4>).IsAssignableFrom(typeof(syscall_package.RawSockaddrInet4)), "the premise: the converted root assigns in place");
+
+        syscall_package.RawSockaddrInet4 value = new() { Family = 2, Port = 1 };
+        value.Addr[0] = 127;
+        ж<syscall_package.RawSockaddrInet4> root = new StandardBox<syscall_package.RawSockaddrInet4>(value);
+        slice<byte> addr = root.Value.Addr[..];
+        GoCgoImages images = default;
+
+        GoCgoArgs.StructPointer(root.Reinterpret<syscall_package.RawSockaddrInet4, sockAny>(), "f", ref images, out _, out GoCgoPin pin);
+
+        fixed (byte* pinned = pin)
+            ((byte*)pin.Address(pinned))[4] = 10; // C writes Addr[0]
+
+        images.CopyBack();
+        Assert.AreEqual((byte)10, root.Value.Addr[0], "C's write landed");
+
+        addr[0] = 42;
+        Assert.AreEqual((byte)42, root.Value.Addr[0], "the slice taken before the call still aliases the root's array");
+    }
+
     // The plain door keeps its answers: a struct in its own box still takes the mirror through the overload.
     [TestMethod]
     public void AStructInItsOwnBoxStillTakesTheMirror()
