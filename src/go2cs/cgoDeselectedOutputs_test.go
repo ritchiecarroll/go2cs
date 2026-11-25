@@ -150,6 +150,19 @@ func TestACgoOnConversionRemovesTheCgoOffFileItDeselects(t *testing.T) {
 		}
 	})
 
+	t.Run("A3: a companion in another folder of the target's set is refused", func(t *testing.T) {
+		out := filepath.Join(t.TempDir(), "net")
+		stub := filepath.Join(out, "linux", "cgo_stub.cs")
+		write(t, stub, emitted)
+		write(t, filepath.Join(out, "cgo_stub_impl.cs"), "// hand-owned")
+
+		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false)
+
+		if err == nil || !strings.Contains(err.Error(), "companion") || len(removed) != 0 || !exists(stub) {
+			t.Fatalf("want a refusal naming the flat companion and the file kept, got %v (err %v)", removed, err)
+		}
+	})
+
 	t.Run("a file in a repository's corpus is refused", func(t *testing.T) {
 		repository := t.TempDir()
 

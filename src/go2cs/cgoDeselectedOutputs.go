@@ -151,8 +151,11 @@ func cgoDeselectedOutputs(packageOutputPath, target string, cgoOffFiles, cgoOnFi
 				return nil, fmt.Errorf("cgo: %s is hand-owned, and the cgo-on load deselects %s, which it stands for: go2cs never removes a hand-owned file, so convert into a root that does not hold it", path, base)
 			}
 
-			if companion := filepath.Join(folder, stem+"_impl.cs"); fileExists(companion) {
-				return nil, fmt.Errorf("cgo: %s has a hand-owned companion, %s, and the cgo-on load deselects %s: go2cs removes neither, so convert into a root that does not hold them", path, companion, base)
+			// The companion is looked for in every folder of the target's set, not only beside the file (P3's A3).
+			for _, companionFolder := range folders {
+				if companion := filepath.Join(companionFolder, stem+"_impl.cs"); fileExists(companion) {
+					return nil, fmt.Errorf("cgo: %s has a hand-owned companion, %s, and the cgo-on load deselects %s: go2cs removes neither, so convert into a root that does not hold them", path, companion, base)
+				}
 			}
 
 			emitted, err := isConverterEmissionOf(path, file)
