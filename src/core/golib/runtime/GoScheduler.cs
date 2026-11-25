@@ -921,7 +921,9 @@ public static class GoScheduler
 
                     long since = Volatile.Read(ref carrier.RunningSince);
 
-                    if (since == 0 || carrier.Injected || Volatile.Read(ref carrier.Retaken) != 0)
+                    // A step the retake walk has seen inside a native call is answered by the retake alone (N5): on a
+                    // host whose timer makes two ticks outlast the threshold it would otherwise be injected first.
+                    if (since == 0 || carrier.Injected || Volatile.Read(ref carrier.Retaken) != 0 || carrier.NativeTicks > 0)
                         continue;
 
                     long paused = (pauses - carrier.PauseAtStart) * Stopwatch.Frequency / TimeSpan.TicksPerSecond;

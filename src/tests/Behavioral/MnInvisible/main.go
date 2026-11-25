@@ -8,7 +8,10 @@
 //	V1 K = 4P goroutines block in a managed wait (a ManualResetEventSlim) that main sets after a sleep;
 //	V2 the same, blocked in a native sleep-poll loop (a 1 ms native sleep per poll) on a flag main sets;
 //	V4 P goroutines run CPU steps of MN_INV_STEP_MS (default 200) ms between parks while one goroutine sleeps 25 ms
-//	   200 times: the wakes all complete; their latency goes to stderr with MN_INV_READING=1.
+//	   200 times: the wakes all complete; their latency goes to stderr with MN_INV_READING=1;
+//	V5 K goroutines block in a native sleep-poll loop that consumer C# brackets with GoNativeCall.Enter(Blocks) and
+//	   Exit: under GO2CS_MN=1 each hands its P off at once (handoffs rise by K, retakes do not);
+//	V6 the same bracketed with Enter(MayBlock): the scheduler retakes the Ps (retakes rise) and injects none.
 //
 // The census rows (3d) run only when MN_INV_ONLY names one (C-pipe, C-accept, C-netread, C-exec, C-sleep, C-chan,
 // C-stdin, C-dns): K goroutines block in one standard-library call at once, main waits, then releases them. The
@@ -35,6 +38,13 @@ var newManagedEvent func() (wait func(), set func())
 
 // newNativeFlag returns a wait that polls in native code until set is called. nil under Go; hand_impl.cs sets it.
 var newNativeFlag func() (wait func(), set func())
+
+// newBracketedFlag is newNativeFlag with the native call bracketed by GoNativeCall.Enter / Exit, with the Blocks hint
+// or MayBlock. nil under Go; hand_impl.cs sets it.
+var newBracketedFlag func(blocks bool) (wait func(), set func())
+
+// counters reads the scheduler's handoffs, retakes and injections, and whether it is on. nil under Go.
+var counters func() (handoffs, retakes, injections int64, on bool)
 
 var reading = os.Getenv("MN_INV_READING") == "1"
 
@@ -82,6 +92,35 @@ func v2(k int) {
 	}
 	wait, set := mk()
 	fmt.Println("V2 goroutines released from a native wait:", blockAll(k, wait, set) == k)
+}
+
+// bracketed runs V5 or V6: k goroutines blocked in a bracketed native wait, and what the scheduler did about them.
+func bracketed(k int, blocks bool) bool {
+	mk := newBracketedFlag
+	if mk == nil {
+		mk = func(bool) (func(), func()) { return channelEvent() }
+	}
+	// A warm-up pass first, so main's own first steps (which start k goroutines) run before the counters are read.
+	ww, ws := channelEvent()
+	blockAll(k, ww, ws)
+	var h0, r0, i0 int64
+	if counters != nil {
+		h0, r0, i0, _ = counters()
+	}
+	wait, set := mk(blocks)
+	released := blockAll(k, wait, set) == k
+	if counters == nil {
+		return released
+	}
+	h1, r1, i1, on := counters()
+	switch {
+	case !on:
+		return released
+	case blocks:
+		return released && h1-h0 >= int64(k) && r1 == r0
+	default:
+		return released && r1 > r0 && i1 == i0
+	}
 }
 
 func busy(d time.Duration) int {
@@ -391,5 +430,11 @@ func main() {
 	}
 	if runs("V4") {
 		v4(procs)
+	}
+	if runs("V5") {
+		fmt.Println("V5 a Blocks native call hands its P off at once:", bracketed(k, true))
+	}
+	if runs("V6") {
+		fmt.Println("V6 a MayBlock native call has its P retaken, not injected:", bracketed(k, false))
 	}
 }

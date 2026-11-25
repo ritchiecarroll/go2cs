@@ -28,6 +28,37 @@ internal static void InvisibleInit() {
                 NativeSleepMilliseconds(1);
         }, () => Volatile.Write(ref flag[0], 1));
     };
+
+    // The consumer contract (GoNativeCall, DESIGN-mn-n5-invisible-blocking.md 9, Q2): consumer C# that blocks in its
+    // own native call brackets it, so the scheduler sees the block.
+    newBracketedFlag = blocks => {
+        int[] flag = [0];
+        return (() => {
+            go.golib.GoNativeCall.Enter(blocks ? go.golib.NativeCallHint.Blocks : go.golib.NativeCallHint.MayBlock);
+            try {
+                while (Volatile.Read(ref flag[0]) == 0)
+                    NativeSleepMilliseconds(1);
+            }
+            finally {
+                go.golib.GoNativeCall.Exit();
+            }
+        }, () => Volatile.Write(ref flag[0], 1));
+    };
+
+    counters = () => {
+        string reading = go.golib.GoScheduler.Reading();
+        return (Counter(reading, "handoffs"), Counter(reading, "retakes"), Counter(reading, "injections"), go.golib.GoScheduler.Enabled);
+    };
+}
+
+private static long Counter(string reading, string name) {
+    int at = reading.IndexOf(" " + name + "=", StringComparison.Ordinal);
+    if (at < 0)
+        return -1;
+    int start = at + name.Length + 2, end = start;
+    while (end < reading.Length && char.IsAsciiDigit(reading[end]))
+        end++;
+    return long.Parse(reading.AsSpan(start, end - start));
 }
 
 // A native sleep that does not pass through GoNativeCall: the scheduler sees a thread that is running.

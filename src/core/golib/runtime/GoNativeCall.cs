@@ -46,8 +46,13 @@ namespace go.golib;
 /// <b>Under today's 1:1 model</b> there is no P to release, so a transition does golib's blocked accounting
 /// (the marks <see cref="Goroutine.EnterBlocked"/> / <see cref="Goroutine.ExitBlocked"/> make, which it COMPOSES over:
 /// those also mark the execution tracer's waits, which are not native calls) and nothing else. It reads the current
-/// goroutine once per transition. The <paramref name="hint"/> of
-/// <see cref="Enter"/> is carried for the M:N scheduler and read by nothing yet.
+/// goroutine once per transition.
+/// </para>
+/// <para>
+/// <b>Under the M:N scheduler</b> (GO2CS_MN=1), a multiplexed goroutine that enters with <see cref="NativeCallHint.Blocks"/>
+/// hands its P off at once, as Go's <c>entersyscallblock</c> does, and the matching <see cref="Exit"/> takes one back
+/// before Go code runs on. <see cref="NativeCallHint.MayBlock"/> keeps the P, and the scheduler's monitor retakes it from a
+/// call that lasts two of its ticks (DESIGN-mn-n5-invisible-blocking.md 3b).
 /// </para>
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)] public static class GoNativeCall
@@ -64,6 +69,11 @@ namespace go.golib;
 
         goroutine.m_nativeDepth++;
         goroutine.EnterBlockedOn();
+
+        // M:N (N5 3b): a call known to block gives its P away now. GoScheduler.Enabled is a static readonly, so with the
+        // scheduler off this branch is gone.
+        if (GoScheduler.Enabled && hint == NativeCallHint.Blocks && goroutine.IsMultiplexed && GoScheduler.EnterBlocked())
+            goroutine.m_nativeHandedOff = true;
     }
 
     /// <summary>The native call <see cref="Enter"/> opened has returned: Go's <c>exitsyscall</c>.</summary>
@@ -78,6 +88,13 @@ namespace go.golib;
 
         goroutine.m_nativeDepth--;
         goroutine.ExitBlockedOn();
+
+        // The P a Blocks call gave away is taken back before Go code runs on.
+        if (GoScheduler.Enabled && goroutine.m_nativeHandedOff)
+        {
+            goroutine.m_nativeHandedOff = false;
+            GoScheduler.ExitBlocked();
+        }
     }
 
     /// <summary>Native code calls back into Go: <c>cgocallbackg</c>'s <c>exitsyscall</c>.</summary>

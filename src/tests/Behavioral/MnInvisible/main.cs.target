@@ -17,6 +17,10 @@ internal static Func<(Action, Action)> newManagedEvent;
 
 internal static Func<(Action, Action)> newNativeFlag;
 
+internal static Func<bool, (Action, Action)> newBracketedFlag;
+
+internal static Func<(int64, int64, int64, bool)> counters;
+
 internal static bool reading = Δos.Getenv("MN_INV_READING") == "1"u8;
 
 internal static (Action wait, Action set) channelEvent() {
@@ -69,6 +73,38 @@ internal static void v2(nint k) {
     }
     var (wait, set) = mk();
     fmt.Println("V2 goroutines released from a native wait:", blockAll(k, wait, set) == k);
+}
+
+internal static bool bracketed(nint k, bool blocks) {
+    var mk = newBracketedFlag;
+    if (mk == nil) {
+        mk = [GoFunc("bracketed.func1")] (bool _Δp0) => channelEvent();
+    }
+    var (ww, ws) = channelEvent();
+    blockAll(k, ww, ws);
+    int64 h0 = default;
+    int64 r0 = default;
+    int64 i0 = default;
+    if (counters != nil) {
+        (h0, r0, i0, _) = counters();
+    }
+    var (wait, set) = mk(blocks);
+    var released = blockAll(k, wait, set) == k;
+    if (counters == nil) {
+        return released;
+    }
+    var (h1, r1, i1, on) = counters();
+    switch (ᐧ) {
+    case {} when !on: {
+        return released;
+    }
+    case {} when blocks: {
+        return released && h1 - h0 >= (int64)k && r1 == r0;
+    }
+    default: {
+        return released && r1 > r0 && i1 == i0;
+    }}
+
 }
 
 internal static nint busy(time.Duration d) {
@@ -405,6 +441,12 @@ internal static void main() {
     }
     if (runs("V4")) {
         v4(procs);
+    }
+    if (runs("V5")) {
+        fmt.Println("V5 a Blocks native call hands its P off at once:", bracketed(k, true));
+    }
+    if (runs("V6")) {
+        fmt.Println("V6 a MayBlock native call has its P retaken, not injected:", bracketed(k, false));
     }
 }
 
