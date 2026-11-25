@@ -34,8 +34,11 @@ import "C"
 import "unsafe"
 
 // cdouble is net's shape (_C_socklen_t = C.socklen_t): an alias of a C type, declared in the file that imports C and
-// named from a plain file of the same package (cgot4_plain.go).
+// named from a plain file of the same package (cgot4_plain.go). csize aliases a C TYPEDEF, as socklen_t is: a base type's
+// alias did not reproduce the defect (45512989670, 45515592828 passed on the old converter).
 type cdouble = C.double
+
+type csize = C.size_t
 
 // Parse is C's strtod over a C copy of s, through the cgo route.
 func Parse(s string) float64 {
@@ -59,7 +62,7 @@ func Half(x float64) float64 { return float64(cdouble(x) / 2) }
 // Pair returns an untyped constant of another package converted to the C type's alias, in a tuple: net's cgoSockaddr
 // shape, whose cast rendered the alias's target (C.@uint) where Half's renders the alias by name (a variable's
 // conversion did not reproduce the defect: run 45512989670).
-func Pair() (int, cdouble) { return 1, cdouble(math.MaxInt8) }
+func Pair() (int, csize) { return 1, csize(math.MaxInt8) }
 `
 
 const cgoTestsFixtureTest = `package cgot4
