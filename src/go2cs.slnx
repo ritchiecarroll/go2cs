@@ -696,6 +696,7 @@
     <Project Path="tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="tests/Behavioral/GuardedNilPointerParamDeref/GuardedNilPointerParamDeref.csproj" />
     <Project Path="tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
+    <Project Path="tests/Behavioral/GoCallNamedFuncType/GoCallNamedFuncType.csproj" />
     <Project Path="tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="tests/Behavioral/GoDeferConstArgs/GoDeferConstArgs.csproj" />
     <Project Path="tests/Behavioral/GoImageCopyThroughView/GoImageCopyThroughView.csproj" />

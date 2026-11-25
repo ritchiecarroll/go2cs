@@ -1045,6 +1045,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
 
     [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
