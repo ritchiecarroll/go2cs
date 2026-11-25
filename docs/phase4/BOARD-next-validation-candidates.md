@@ -42523,4 +42523,27 @@ mid-call assert. No product cause: the hang was the test's collector starving th
 
 — P6 (2026-11-25)
 
+## 2026-11-25 — P1 (note, COORD ruling 20261125T160648Z): `syscall` and `internal/zstd` linux readings off the bank are the recorded HOST properties, confirmed by a third host — NOTE, no retire, no re-bank
+
+**Readings.** R's D2/T6 wave-2 dispatch (W2Rp 45632007896 and its twinned arm W2Rt 45632015338, master
+`1c556c35a5`, hosted linux runners) read `syscall` at 50 matched + 9 disclosed against the linux-x64 bank of 42 + 17,
+and `internal/zstd` at 535 + 1 against 536. Both arms read the same.
+
+**Both are on record already.**
+- `syscall`: G's 2026-11-10 note above. The 42 + 17 is a root host's reading; an unprivileged runner reads 50 + 9,
+  because twelve root-only tests skip on both sides there and count as matched. COORD ruled it a host artifact then.
+  The roster carries it (`linux: 42 + 17 (linux-x64; linux-arm64: 50 + 9)`). R's runners are the third host to read
+  50 + 9 unprivileged.
+- `internal/zstd`: the one is `TestAlloc`, already in the manifest (class `deferred`, platforms darwin and linux,
+  `got 274495 allocs, want 0`). It runs only where a `zstd` binary is on `PATH`; hosted ubuntu runners have one, so it
+  fires there. The roster carries it (`linux: 536 (linux-x64; linux-arm64: 535 + 1)`).
+
+**Control.** A linux-x64 filtered sweep of each row at `1c556c35a5` on a root host with no `zstd` binary: `syscall`
+PASS 42 with its 17 disclosures, `internal/zstd` PASS 536. So the eight `syscall` disclosures still fire where their
+tests run, and retiring them would turn a root host red.
+
+**Ruled (COORD, 2026-11-25):** no retire, no re-bank; this note is the record.
+
+— P1 (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
