@@ -653,6 +653,12 @@ public sealed partial class TwinGenerator
                         // again (Rule S), and the store runs after: every store still lands in the box the Go variable
                         // names. Go's two-phase assignment leaves the order between reading a plain variable on the
                         // left and the call on the right unspecified, so reading the left after the call is Go-legal.
+                        // M:N row 19, M8: a deconstruction into new locals (`var (r, errΔ1) = d.CharsetReader(…)`) stores into
+                        // fresh locals, as a local declaration does, so it moves as one. A deconstruction that mixes a new
+                        // local with an existing target is a tuple on the left and stays blocked by name.
+                        if (assignment.Left is DeclarationExpressionSyntax { Designation: ParenthesizedVariableDesignationSyntax })
+                            break;
+
                         if (WritesThroughRef(assignment.Left))
                             refTarget = true;
                         else if (m_model.GetSymbolInfo(assignment.Left).Symbol is not (ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None }))

@@ -154,6 +154,25 @@ public class TwinMovabilityTests
                 return total;
             }
 
+            // M8: a deconstruction into new locals moves as a local declaration does (mime's `var (r, errΔ1) = …`).
+            internal static (nint, nint) pairS(ReadOnlySpan<byte> format, nint a, nint b) => (a, b);
+
+            public static nint deconNew()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                var (r, e) = pairS("d"u8, 1, Set(Ꮡa, 2, false));
+                return r * 100 + e * 10 + a;
+            }
+
+            // The M8 near-miss: a deconstruction that mixes a new local with an existing target stays blocked by name.
+            public static nint deconMixed()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                nint e = 0;
+                (var r, e) = pairS("m"u8, 1, Set(Ꮡa, 2, false));
+                return r * 100 + e * 10 + a;
+            }
+
             // M2: the converter's form of a Go interface conversion of a variable is a generated adapter over it.
             public partial struct Buf { public nint id; }
 
@@ -407,6 +426,18 @@ public class TwinMovabilityTests
 
         StringAssert.Contains(twins, "|compoundField|Set|ref-like-before|in:AddAssignmentExpression", "a field target stays blocked by name\n" + twins);
         Assert.AreEqual((nint)13, Twin(assembly, "compoundField"));
+    }
+
+    [TestMethod]
+    public void ADeconstructionIntoNewLocalsMoves_M8()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.IsFalse(twins.Contains("|deconNew|Set|"), "no ref-blocked row names deconNew\n" + twins);
+        Assert.AreEqual((nint)132, Twin(assembly, "deconNew"), "r=1, e=3, a=2");
+
+        StringAssert.Contains(twins, "|deconMixed|Set|ref-like-before|store-left:TupleExpression", "a mixed deconstruction stays blocked by name\n" + twins);
+        Assert.AreEqual((nint)132, Twin(assembly, "deconMixed"));
     }
 
     [TestMethod]
