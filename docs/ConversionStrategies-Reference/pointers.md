@@ -1117,7 +1117,7 @@ func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Sockl
 }
 ```
 
-<!-- source: src/core/syscall/darwin/zsyscall_darwin_amd64.cs:236-258 -->
+<!-- source: src/core/syscall/darwin-amd64/zsyscall_darwin_amd64.cs:236-258 -->
 ```csharp
 internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags, ж<RawSockaddrAny> from, ж<_Socklen> fromlen) {
     nint n = default;

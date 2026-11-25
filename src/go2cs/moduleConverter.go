@@ -1167,9 +1167,10 @@ func (m *ModuleConverter) writeRecurseBuildFile(path string, lines []string) {
 
 // compileRuntimeIdentifierForTarget maps a conversion target (`os/arch`) to the RID whose go.* compile
 // asset matches the metadata the conversion read: the RID push-nuget.ps1 ships the corpus flavour serving the
-// target under (corpusFlavourOf). Each flavour has its own RID: win-x64, linux-x64, and linux-arm64, which
-// is a flavour of its own and not linux-x64's twin. darwin ships its one build under both Mac RIDs, so either
-// would compile identically; the target's arch picks the one that names it. A target outside the universe
+// target under (corpusFlavourOf). Each flavour has its own RID: win-x64, linux-x64, linux-arm64, osx-x64 and
+// osx-arm64. Until D6 of the darwin/arm64 flavour packs it, the osx-arm64 asset still carries the darwin/amd64
+// build (DESIGN-darwin-arm64-flavour.md section 3), and osx-arm64 is still the RID that names the target. A
+// target outside the universe
 // takes its GOOS's flavour (linux/riscv64 compiles against linux-x64); a GOOS no flavour serves returns "",
 // leaving the property unset.
 func compileRuntimeIdentifierForTarget(targetPlatform string) string {
@@ -1181,11 +1182,9 @@ func compileRuntimeIdentifierForTarget(targetPlatform string) string {
 	case "linux/arm64":
 		return "linux-arm64"
 	case "darwin/amd64":
-		if archOfTarget(targetPlatform) == "arm64" {
-			return "osx-arm64"
-		}
-
 		return "osx-x64"
+	case "darwin/arm64":
+		return "osx-arm64"
 	default:
 		return ""
 	}

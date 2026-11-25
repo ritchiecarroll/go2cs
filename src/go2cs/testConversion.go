@@ -8051,7 +8051,7 @@ func testPublishTimeout(options Options) time.Duration {
 //
 // Right after it rides the corpus flavour's GOARCH (-p:GoTargetArch=, testHostPlatformProperties), always: an
 // explicit -p: beats an inherited environment variable exactly as for GoTargetOS, and the arch is the one the
-// flavour was converted at, not the target's or the host's (darwin/arm64 builds against darwin/amd64's).
+// flavour was converted at, not the target's or the host's (windows/arm64 builds against windows/amd64's).
 //
 // The publish also states its build output (-getProperty:TargetPath), which publishBuildOutput reads. MSBuild prints
 // the value after the build and, asked for a property, writes no build log to the console: errors still reach the
