@@ -343,8 +343,13 @@ func censusExec(k int) int {
 	}
 	gate, done := make(chan struct{}), make(chan int, k)
 	for i := 0; i < k; i++ {
-		cmd := exec.Command(self)
-		cmd.Env = append(os.Environ(), "MN_INV_CHILD=1", "GO2CS_MN=")
+		// Off windows the child is sleep(1): a converted program runs under the dotnet host there, so os.Executable
+		// names dotnet, which exits at once with no program to run.
+		cmd := exec.Command("sleep", "0.3")
+		if runtime.GOOS == "windows" {
+			cmd = exec.Command(self)
+			cmd.Env = append(os.Environ(), "MN_INV_CHILD=1", "GO2CS_MN=")
+		}
 		if cmd.Start() != nil {
 			return -1
 		}

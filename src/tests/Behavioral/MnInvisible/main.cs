@@ -344,8 +344,11 @@ internal static partial nint censusExec(nint k) {
     }
     var (gate, done) = (new channel<EmptyStruct>(0), new channel<nint>(k));
     for (nint i = 0; i < k; i++) {
-        var cmd = exec.Command(self);
-        cmd.Env = append(Δos.Environ(), (@string)"MN_INV_CHILD=1", (@string)"GO2CS_MN=");
+        var cmd = exec.Command("sleep", "0.3");
+        if (Δruntime.GOOS == "windows"u8) {
+            cmd = exec.Command(self);
+            cmd.Env = append(Δos.Environ(), (@string)"MN_INV_CHILD=1", (@string)"GO2CS_MN=");
+        }
         if (cmd.Start() != nil) {
             return -1;
         }
