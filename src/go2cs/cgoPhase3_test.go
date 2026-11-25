@@ -556,6 +556,22 @@ func TestCgoPhase3ProgramRunsAsGoDoes(t *testing.T) {
 	}
 
 	output = cgoBuildDir(t, output)
+	// PROBE (never lands): the emitted wrapper and call site of the image door's mixed arm.
+	nl, cr := string(rune(10)), string(rune(13))
+	filepath.WalkDir(output, func(path string, d os.DirEntry, _ error) error {
+		if d == nil || d.IsDir() || !strings.HasSuffix(path, ".cs") {
+			return nil
+		}
+		data, _ := os.ReadFile(path)
+		lines := strings.Split(strings.ReplaceAll(string(data), cr, ""), nl)
+		for i, line := range lines {
+			if strings.Contains(line, "pair_and_int(") || strings.Contains(line, "imgmixed") {
+				lo, hi := max(0, i-4), min(len(lines), i+45)
+				t.Logf("PROBE %s:%d%s%s", filepath.Base(path), i+1, nl, strings.Join(lines[lo:hi], nl))
+			}
+		}
+		return nil
+	})
 	projects, err := filepath.Glob(filepath.Join(output, "*.csproj"))
 
 	if err != nil || len(projects) != 1 {
