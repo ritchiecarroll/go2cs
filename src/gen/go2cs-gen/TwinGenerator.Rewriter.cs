@@ -491,7 +491,7 @@ public sealed partial class TwinGenerator
                     core = core is ParenthesizedExpressionSyntax inner ? inner.Expression : ((CastExpressionSyntax)core).Expression;
 
                 if (!m_spilled.Contains(bare) && !m_spilled.Contains(core) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue &&
-                    !IsPureRead(bare))
+                    !IsConvertedConstant(bare) && !IsPureRead(bare))
                     Block("earlier:" + bare.Kind());
             }
 
@@ -649,9 +649,9 @@ public sealed partial class TwinGenerator
                 case ParenthesizedExpressionSyntax parenthesized:
                     return IsPureRead(parenthesized.Expression);
                 case IdentifierNameSyntax identifier:
-                    return m_model.GetSymbolInfo(identifier).Symbol is ILocalSymbol or IParameterSymbol or IFieldSymbol or IPropertySymbol { ReturnsByRef: true };
+                    return m_model.GetSymbolInfo(identifier).Symbol is ILocalSymbol or IParameterSymbol or IFieldSymbol or IPropertySymbol { ReturnsByRef: true } or IPropertySymbol { ReturnsByRefReadonly: true };
                 case MemberAccessExpressionSyntax member when member.IsKind(SyntaxKind.SimpleMemberAccessExpression):
-                    return m_model.GetSymbolInfo(member).Symbol is IFieldSymbol or IPropertySymbol { ReturnsByRef: true } &&
+                    return m_model.GetSymbolInfo(member).Symbol is IFieldSymbol or IPropertySymbol { ReturnsByRef: true } or IPropertySymbol { ReturnsByRefReadonly: true } &&
                            (IsPureRead(member.Expression) || member.Expression is ThisExpressionSyntax ||
                             m_model.GetSymbolInfo(member.Expression).Symbol is INamedTypeSymbol or INamespaceSymbol);
                 case CastExpressionSyntax cast:
@@ -666,6 +666,38 @@ public sealed partial class TwinGenerator
             static bool IsNumeric(ITypeSymbol? type) =>
                 type is { SpecialType: >= SpecialType.System_Char and <= SpecialType.System_Double or SpecialType.System_IntPtr or SpecialType.System_UIntPtr } ||
                 type is { TypeKind: TypeKind.Enum };
+        }
+
+        // M:N row 19, M7 (DESIGN-mn-row19-movability.md): a converted Go constant is a constant. The converter emits a typed
+        // Go constant as a static expression-bodied property over a literal (go/types' `VarKind LocalVar => 2`), for which
+        // Roslyn reports no constant value; reading it runs no code a call could observe. A `default` literal is the
+        // zero value and runs no code either. A Go string constant is a ref readonly property over a static readonly field
+        // (`nodeTVˢ => ref nodeTVˢᵇ`, and time's `RFC3339` across assemblies): IsPureRead admits that as a read.
+        private bool IsConvertedConstant(ExpressionSyntax expression)
+        {
+            if (expression.IsKind(SyntaxKind.DefaultLiteralExpression) || expression is DefaultExpressionSyntax)
+                return true;
+
+            if (expression is not (IdentifierNameSyntax or MemberAccessExpressionSyntax) ||
+                m_model.GetSymbolInfo(expression).Symbol is not IPropertySymbol { IsStatic: true, SetMethod: null, ReturnsByRef: false, ReturnsByRefReadonly: false } property)
+                return false;
+
+            foreach (SyntaxReference reference in property.DeclaringSyntaxReferences)
+            {
+                if (reference.GetSyntax() is PropertyDeclarationSyntax { ExpressionBody.Expression: { } body } && IsLiteral(body))
+                    return true;
+            }
+
+            return false;
+
+            static bool IsLiteral(ExpressionSyntax body) => body switch
+            {
+                LiteralExpressionSyntax => true,
+                ParenthesizedExpressionSyntax parenthesized => IsLiteral(parenthesized.Expression),
+                CastExpressionSyntax cast => IsLiteral(cast.Expression),
+                PrefixUnaryExpressionSyntax unary => IsLiteral(unary.Operand),
+                _ => false
+            };
         }
 
         // Stage (c): whether a ref local is read LATER in the call's statement than the call (math/big's
