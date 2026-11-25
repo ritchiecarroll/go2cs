@@ -84,6 +84,9 @@ func isConverterEmissionOf(csPath, goPath string) (bool, error) {
 	return slices.Equal(source, emitted), nil
 }
 
+// cgoRemovalsDryRun is -cgo-removals-dry-run: list the set, remove nothing (main.go sets it from the flag).
+var cgoRemovalsDryRun bool
+
 // cgoDeselectedOutputs finds in packageOutputPath the C# file of each Go file in cgoOffFiles that cgoOnFiles does not
 // hold, wherever the layout routes it for target (flat or a key folder), and removes it unless dryRun. It returns the
 // paths it removed (or would remove). Names are compared by base name: both lists are one package directory's files. A
@@ -176,7 +179,7 @@ func removeCgoDeselectedOutputs(pkg *packages.Package, packageOutputPath string,
 		return fmt.Errorf("cgo: load %s at CGO_ENABLED=0, to find the files the cgo-on load deselects: %v", pkg.PkgPath, err)
 	}
 
-	_, err = cgoDeselectedOutputs(packageOutputPath, options.targetPlatform, loaded[0].GoFiles, pkg.GoFiles, options.cgoRemovalsDryRun)
+	_, err = cgoDeselectedOutputs(packageOutputPath, options.targetPlatform, loaded[0].GoFiles, pkg.GoFiles, cgoRemovalsDryRun)
 
 	return err
 }
