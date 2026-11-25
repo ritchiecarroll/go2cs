@@ -598,6 +598,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
 
     [TestMethod]
+    public void CheckDeltaNameProjection() => CheckTarget("DeltaNameProjection");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]
@@ -1046,6 +1049,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
+
+    [TestMethod]
+    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
@@ -1513,6 +1519,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
 
     [TestMethod]
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
+
+    [TestMethod]
     public void CheckMnGoMaxProcs() => CheckTarget("MnGoMaxProcs");
 
     [TestMethod]
@@ -1525,6 +1534,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
+    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
+
+    [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
@@ -1535,15 +1547,6 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
-
-    [TestMethod]
-    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
-
-    [TestMethod]
-    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
-
-    [TestMethod]
-    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
