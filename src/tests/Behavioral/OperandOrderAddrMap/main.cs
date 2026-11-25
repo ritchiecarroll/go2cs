@@ -3,7 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using strings = strings_package;
 using @unsafe = unsafe_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 

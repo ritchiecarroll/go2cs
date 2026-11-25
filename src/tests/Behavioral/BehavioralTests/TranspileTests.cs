@@ -598,6 +598,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
 
     [TestMethod]
+    public void CheckDeltaNameProjection() => CheckTarget("DeltaNameProjection");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]

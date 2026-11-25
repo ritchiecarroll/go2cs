@@ -181,7 +181,8 @@ internal static void main() {
 
     ref var r = ref heap<lib.Rec>(new lib.Rec(Δt: 9), out var Ꮡr);
     var (rb, _) = json.Marshal(r);
-    fmt.Println("other package:", r.Δt, lib.ΔF(5), (nint)(lib.ΔK), lib.ΔV, (@string)rb);
+    var evalᴛ1 = lib.ΔF(5);
+    fmt.Println("other package:", r.Δt, evalᴛ1, (nint)(lib.ΔK), lib.ΔV, (@string)rb);
 
     var sl = new Δslice(ΔΔslice: 10);
     sl.ΔΔslice++;
@@ -198,11 +199,18 @@ internal static void main() {
     m.Bump();
     var pm = Ꮡm;
     pm.Bump();
-    fmt.Println("pointer methods:", m.n, pm.Name(), methodNames(reflect.TypeOf(pm.OrTypedNil())), methodNames(reflect.TypeOf(m)));
+    var evalᴛ2 = pm.Name();
+    var evalᴛ3 = reflect.TypeOf(pm.OrTypedNil());
+    var evalᴛ4 = methodNames(evalᴛ3);
+    var evalᴛ5 = reflect.TypeOf(m);
+    var evalᴛ6 = methodNames(evalᴛ5);
+    fmt.Println("pointer methods:", m.n, evalᴛ2, evalᴛ4, evalᴛ6);
 
     var pp = Ꮡ(new P(2D));
     pp.ΔScale(3D);
-    fmt.Println("Δ pointer method:", pp.Δt, methodNames(reflect.TypeOf(pp.OrTypedNil())));
+    var evalᴛ7 = reflect.TypeOf(pp.OrTypedNil());
+    var evalᴛ8 = methodNames(evalᴛ7);
+    fmt.Println("Δ pointer method:", pp.Δt, evalᴛ8);
 
     var o = new Outer(ΔEmb: new ΔEmb(30));
     fmt.Println("promoted Δ method:", o.ΔHello(), methodNames(reflect.TypeOf(o)));
@@ -249,8 +257,12 @@ internal static void main() {
     xp.Value++;
     x.Δslicex++;
     var xf = reflect.TypeOf(x);
-    fmt.Println("embed named Δslice in C#:", x.ΔΔslice, x.Δslice.ΔΔslice, x.Δslicex, xf.Field(0).Name, xf.Field(0).Anonymous,
-        xf.Field(1).Name, fmt.Sprintf("%+v"u8, x));
+    var evalᴛ9 = xf.Field(0);
+    var evalᴛ10 = xf.Field(0);
+    var evalᴛ11 = xf.Field(1);
+    var evalᴛ12 = fmt.Sprintf("%+v"u8, x);
+    fmt.Println("embed named Δslice in C#:", x.ΔΔslice, x.Δslice.ΔΔslice, x.Δslicex, evalᴛ9.Name, evalᴛ10.Anonymous,
+        evalᴛ11.Name, evalᴛ12);
     lib.ΔFn dbl = [GoFunc("main.func1")] (nint n) => n * 2;
     Δg g = [GoFunc("main.func2")] () => "Δg called";
     lib.Δfn lf = [GoFunc("main.func3")] () => "lib.Δfn called";
@@ -260,13 +272,10 @@ internal static void main() {
 }
 
 internal static slice<@string> methodNames(reflect.Type t) {
-    var namesᴷ = new stackAppend<@string>(moves: true);
-
     slice<@string> names = default;
     foreach (var i in range(t.NumMethod())) {
-        names = append(namesᴷ, names, t.Method(i).Name);
+        names = append(names, t.Method(i).Name);
     }
-    names = move2heap(namesᴷ, names);
     return names;
 }
 

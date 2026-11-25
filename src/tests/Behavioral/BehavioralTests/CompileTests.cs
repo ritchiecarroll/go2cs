@@ -598,6 +598,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
 
     [TestMethod]
+    public void CheckDeltaNameProjection() => CheckTarget("DeltaNameProjection");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]

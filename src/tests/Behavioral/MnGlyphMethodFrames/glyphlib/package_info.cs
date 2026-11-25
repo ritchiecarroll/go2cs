@@ -52,7 +52,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA0igqiCqIKClKaCrIKogoKClJSClIKmlIK4")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0igqiCqIKCpKaCrIKogoKClJSClIKmlIK4")]
 // </GoSourcePositionMaps>
 
 namespace go.MnGlyphMethodFrames;

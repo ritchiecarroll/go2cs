@@ -108,7 +108,8 @@ public static (ж<Graph>, error) Parse(@string dag) {
     ref var errors = ref heap<slice<@string>>(out var Ꮡerrors);
     [GoFunc("Parse.func1")] void errorf(@string format, params ꓸꓸꓸany aʗp) {
         var a = aʗp;
-        Ꮡerrors.ValueSlot = append(Ꮡerrors.ValueSlot, fmt.Sprintf(format, a.ꓸꓸꓸ));
+        var evalᴛ1 = fmt.Sprintf(format, a.ꓸꓸꓸ);
+        Ꮡerrors.ValueSlot = append(Ꮡerrors.ValueSlot, evalᴛ1);
     }
     foreach (var (_, r) in range(rules)) {
         if (r.op == "!<"u8) {
