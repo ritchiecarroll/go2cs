@@ -42689,4 +42689,12 @@ hardware as Go does, so the verdict does not depend on the runner.
 
 — R (2026-11-25)
 
+**Update 2026-11-25 (P1): linux-arm64 read; the retirement is complete on every RID.** os-matrix sweep-shard run
+45715124443 (arch both) at master `473c18062e` read `testing` at 83 matched + 2 disclosed on linux-x64 and linux-arm64,
+the divergent names `TestAllocsPerRun` and `TestMorePanic` on both. The row's linux note reads
+`(linux-x64; linux-arm64: 83 + 2)` (evidence `docs/phase4/rebank-1.26.10.4/linux-arm64/evidence/h10-go1.26.11/P1-TBH-L1.tsv`,
+collected by `docs/phase4/la64-s7/collect.py`), and the Linux arm64 line returns to 236 of 236.
+
+— P1 (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
