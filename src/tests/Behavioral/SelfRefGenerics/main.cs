@@ -24,7 +24,7 @@ public static A Sum<A>(params variadic<A> xsʗp)
 {
     var xs = xsʗp.sslice();
 
-    A total = GoZero<A>();
+    A total = builtin.GoZero<A>();
     foreach (var (_, x) in range(xs)) {
         total = total.Add(x);
     }

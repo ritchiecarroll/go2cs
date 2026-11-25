@@ -47,7 +47,7 @@ internal static partial void main() {
 
     fmt.Println("method expression, value receiver:   ", nameOf(((Func<T, nint>)(main_package.valueMethod))));
     fmt.Println("method expression, pointer receiver: ", nameOf(((Func<ж<T>, nint>)(main_package.pointerMethod))));
-    fmt.Println("method expression, promoted to *T:   ", nameOf(((Func<ж<T>, nint>)([GoWrapper("(*T).valueMethod")] (p0) => main_package.valueMethod(panicwrapRecv(p0, "value method main.T.valueMethod called using nil *T pointer").Value)))));
+    fmt.Println("method expression, promoted to *T:   ", nameOf(((Func<ж<T>, nint>)([GoWrapper("(*T).valueMethod")] (p0) => main_package.valueMethod(builtin.panicwrapRecv(p0, "value method main.T.valueMethod called using nil *T pointer").Value)))));
 
     fmt.Println("method value, pointer receiver:      ", nameOf(p.pointerMethod));
     fmt.Println("method value, &t pointer receiver:   ", nameOf((Ꮡt).pointerMethod));

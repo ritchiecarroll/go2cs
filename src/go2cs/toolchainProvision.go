@@ -140,6 +140,11 @@ func argsNeedNoToolchain(args []string) bool {
 		return true
 	}
 
+	// Help needs no Go, whatever option it is asked about (commandLineHelp.go).
+	if _, ok := helpRequest(args); ok {
+		return true
+	}
+
 	for _, arg := range args {
 		switch strings.TrimLeft(arg, "-") {
 		case "version", "h", "help":

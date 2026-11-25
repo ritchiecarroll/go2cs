@@ -69,8 +69,6 @@ partial struct holder {
 internal static ж<point> mk(nint x) { return Ꮡ(new point(x, x + 1)); }
 
 internal static partial @string goFrames() {
-    var namesᴷ = new stackAppend<@string>();
-
     var pcs = new slice<uintptr>(32);
     var frames = runtime.CallersFrames(pcs.slice(0, runtime.Callers(2, pcs)));
     slice<@string> names = default;
@@ -79,7 +77,7 @@ internal static partial @string goFrames() {
         var (frame, more) = frames.Next();
 
         if (!strings.HasPrefix(frame.Function, "runtime.")) {
-            names = append(namesᴷ, names, frame.Function);
+            names = append(names, frame.Function);
         }
 
         if (!more || frame.Function == "main.main"u8) {

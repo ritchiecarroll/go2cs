@@ -393,7 +393,7 @@ check runs at the package's first C call rather than when it loads.
        the host only (this section's text at the tag: "One package, one machine").
      - The net resolver: no merge in trains 1 to 7 converts it. -->
 
-<!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way"); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name.** Each of these is not supported yet; [the Roadmap](Roadmap.md#cgo) says what is planned.
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`.
@@ -404,7 +404,10 @@ check runs at the package's first C call rather than when it loads.
 - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
   compiled C;
 - `//export`;
-- a C variable, a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
+- a C variable whose type is not a C scalar or struct (an array, a pointer, a function pointer or a union);
+  `C.x` of a scalar or struct type reads and writes the variable in place, as Go does, once a library the
+  package links exports it;
+- a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
 - a C function Go's own cgo build does not import by its C name: one a header renames (macOS on x64 makes
   `fstat` the symbol `fstat$INODE64`), or one the C compiler inlines. go2cs cannot tell the two apart, so it
   refuses both rather than bind a function C would not call:
@@ -471,6 +474,17 @@ or never was. In each, the call goes ahead, and the memory may move while C uses
      row 11 is asserted as disclosed in PinExtentsChildTests; row 8 is the receiver-type FromRef arm of
      DESIGN-cgo-phase3-marshaling.md section 16.9, whose direct form the cgo route refuses at conversion. Moved into
      the cgo section at the batch-308 merge, where P4 gave cgo a section of its own. -->
+
+**A Go array of C pointers costs its whole length on every call.** `C.f(&argv[0])` lets C read or fill every
+pointer in the array, as in Go. go2cs holds such an array as Go pointers rather than as machine words, so for the
+call it copies every element of the array into a word array, hands C that, and copies every word C changed back
+afterwards. The copy covers the whole array behind the slice, not only the part C uses: `argv[2:]` of a long array
+copies the long array, on every call. A word C writes that points into the Go memory the call handed it, the array
+itself included (`argv[0] = &argv[2]`), is refused by name, where Go would keep it. An array of C pointers that
+lives in C memory crosses by its own address, with no copy.
+<!-- cgo Phase 3, .5 cgo item 2 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.12.3, H's verdict (A), the word
+     mirror): GoCgoWordMirror in golib, emitted for the out-parameter door and the void door. Rows: GolibTests
+     CgoArgvTests and the cgo-e2e argv arms. -->
 
 **Platforms.** A converted cgo program was built and run against the Go build of the same program on
 linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64, and printed what Go printed apart from the

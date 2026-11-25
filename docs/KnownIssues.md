@@ -605,8 +605,11 @@ A publish that is not a single file never makes a composite image, so it is not 
      from GOCACHE.
      Measured the same day on one very large package of another module: its probe entries took about 2,273 MB
      (about 200 MB of compiled object per target). Plain-statement ask from COORD 10:19Z. -->
-For each package it converts, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
-targets, so it emits the same escape decisions Go makes. Those builds go into their own cache, not your `GOCACHE`:
+When `-stack-append` is on, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
+targets for each package it converts, so it emits the same stack-append buffers Go makes. The option is on by
+default only for `-stdlib` and `-tests`; a plain or `-recurse` conversion runs none of these builds and never
+creates the cache unless you pass `-stack-append=on`
+([`-stack-append`](CommandLine.md#option-stack-append)). Those builds go into their own cache, not your `GOCACHE`:
 `go2cs/probe-cache` under the user cache directory, or the directory named by `-probe-cache` or `GO2CS_PROBE_CACHE`.
 The first conversion builds the standard library there for each target, about 60 MB each, and later conversions of
 any module reuse it. Each converted package adds its own entries, which grow with the size of its compiled code: about 5 MB
@@ -630,9 +633,39 @@ directory owned by you that no other user can open; otherwise the run stops befo
 
 The separate cache is on the master branch. go2cs 1.26.11.1 runs the same builds in your own `GOCACHE`, so they take
 the same space there, and it has neither `-probe-cache` nor `GO2CS_PROBE_CACHE`.
+`-stack-append` is new on the master branch: go2cs 1.26.11.1 runs these builds for every conversion.
 <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the probe cache landed in train 1 (claude/p4-probe-cache,
      merge dcfc9c99a1). At nuget-1.26.11.1, src/go2cs has no probe-cache flag or GO2CS_PROBE_CACHE, and the escape
      probe's go build runs with the caller's environment, so its entries go to the default GOCACHE. -->
+<!-- 2026-11-24 (P5, train 12): the owner ruled the stack-append hint on by default only for -stdlib and -tests and off
+     for plain and -recurse conversions, with -stack-append=on|off|auto (COORD 2026-11-24 17:50Z, on P5's scout). With
+     the hint off, collectStackAppendHints returns before any harvest, so no probe build runs and the cache directory is
+     never created (TestStackAppendOffRunsNoProbe, with the gate removed it reads 4 harvests and the cache created). -->
+
+
+## By default, `cap()` after appending to a slice that does not escape can differ from Go {#by-default-cap-after-appending-to-a-slice-that-does-not-escape-can-differ-from-go}
+
+**Symptom.** In a program converted without `-stdlib` or `-tests`, `cap()` of a slice built by `append` inside one
+function can read lower than Go's. Go 1.25 and later give the first `append` to an empty slice that does not escape a
+32-byte buffer, so after `var x []int64; x = append(x, 1)` Go reads `cap(x)` as 4 where the converted program reads 1.
+The slice's contents and length are always the same; only its capacity, and code that reads the capacity, differ.
+
+**Cause.** Reproducing the buffer needs the Go compiler's escape decision for each `append`, which go2cs reads from a
+`go build -gcflags=-m` per package and target. `-stack-append` controls it, and its default `auto` turns it on only for
+`-stdlib` and `-tests`, where converted tests compare against Go's own, because those builds cost time and disk (see
+[A conversion keeps a Go build cache of its own](#a-conversion-keeps-a-go-build-cache-of-its-own)). The buffer is a
+heap array in the converted program, so turning it on changes what a program can observe, not its speed or its
+allocations.
+
+**Workaround.** Convert with `-stack-append=on` ([`-stack-append`](CommandLine.md#option-stack-append)) to reproduce
+Go's capacities. A single standard-library package converted without `-stdlib` takes the same default; convert it with
+`-stdlib <package>` or `-stack-append=on` to get the standard library's emission.
+
+The default is new on the master branch. go2cs 1.26.11.1 emits the buffer for every conversion.
+<!-- 2026-11-24 (P5, train 12), P3 review of 57f318f4b0 finding 3 and NIT 4, COORD 19:52Z: the owner's ruling
+     (COORD 17:50Z) made the hint off by default for plain and -recurse conversions, and only the reference page said
+     what that changes. Measured on P5's scout (COORD 2026-11-24 17:43Z, P5): of 42 behavioral projects with a buffer,
+     41 printed identically with the hint off, and StackAppendBackingStore's 11 differing lines were all cap(). -->
 
 ## In optimized code, `runtime.Caller` can report an earlier line of the calling function {#in-optimized-code-runtimecaller-can-report-an-earlier-line-of-the-calling-function}
 

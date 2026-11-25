@@ -16,7 +16,7 @@ partial interface Greetable {
 }
 
 internal static Greetable wrap(Action<@string> handler) {
-    return new GreeterᴠGreetable(NilSafeDelegateConversion<Greeter, Action<@string>>(handler));
+    return new GreeterᴠGreetable(builtin.NilSafeDelegateConversion<Greeter, Action<@string>>(handler));
 }
 
 internal static void @try(@string label, Action f) {

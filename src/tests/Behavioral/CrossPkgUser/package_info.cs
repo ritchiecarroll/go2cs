@@ -81,7 +81,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAognIIAByKiggAGGgAKHgAFEgAMKoIADyyCAAUWAA0egoKCAAoilJSAvgABEJyCsoKCuJTSlIKCgpaCgpaCloKCnoKCgoKegpaCgoKcgp6CgoKCgp6CgoKCgpqCgoKIioKalLS0upSCgoKCgpyCgpiCgoIAARSCgoKChoKCgoKCgoKUgpSCgpSCnIKCgpqClIKUgoKCgpqCgpSCnIKcgpyCggABEIIAARCCmoKCgoKalgABFIKYgoIAARCCgoKCAAEUgoKCAAEQgoKCgoKCgqIACiaCgpQAAhSCABBEAA4q", "196-200:1;435-435:1", "", "", "147:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAognIIAByKiggAGGgAKHgAFEgAMKoIADyyCAAUWAA0egoKCAAoilJSAvgABEJyCsoKCuJSilIKCgpaCgpaCloKCnoKCgoKegpaCgoKcgp6CgoKCgp6CgoKCgpqCgoKIioKalLS0upSCgoKCgpyCgpiCgoIAARSCgoKChoKCgoKCgoKUgpSCgpSCnIKCgpqClIKUgoKCgpqCgpSCnIKcgpyCggABEIIAARCCmoKCgoKalgABFIKYgoIAARCCgoKCAAEUgoKCAAEQgoKCgoKCgqIACiaCgpQAAhSCABBEAA4q", "196-200:1;435-435:1", "", "", "144:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

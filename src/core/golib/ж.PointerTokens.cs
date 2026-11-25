@@ -175,10 +175,15 @@ namespace go;
     // A RUNNING count, never ConcurrentDictionary.Count on a registration: Count takes EVERY bucket lock,
     // and the lock array grows with the table and never shrinks, so reading it per registration cost
     // ~14-15 us once a process had registered a few thousand pointers (i9 sizing, ledger 6e59daa04c).
-    // Registrations Interlocked-increment it, a removal decrements it, and Sweep re-syncs it. It may
-    // OVER-count (an overwrite of a live key increments it; Sweep corrects that) but it never reads BELOW
-    // the table, which is the one direction that matters: the `== 0` fast paths below must not skip a
-    // live entry. Non-volatile, written only through Interlocked and read through Volatile.Read.
+    // It is EXACT once the writers settle: a registration increments it before it stores, and takes the
+    // increment back when the store only OVERWROTE a key (Store says which); every removal that succeeds
+    // decrements it after the key is gone, in Resolve and in Sweep alike. A compare-exchange re-sync in Sweep
+    // used to stand in for those decrements; it failed whenever a registration landed during the walk, and the
+    // count then kept every swept entry until the next collection (a darwin golib leg read 4,375 against a
+    // table of a few hundred). Because adds count before they are visible and removals after they happen, the
+    // count never reads BELOW the table, the one direction that matters: the `== 0` fast paths below can then
+    // only answer "nothing registered" when no key is there to find. It can read above the table while a
+    // registration is in flight. Non-volatile, written only through Interlocked and read through Volatile.Read.
     private static int s_count;
 
     // Guards Sweep alone — registration and resolution never take it. Sweeping is rare and its
@@ -200,8 +205,8 @@ namespace go;
     internal static int RegisteredCount => Volatile.Read(ref s_count);
 
     /// <summary>
-    /// The table's EXACT size. <c>ConcurrentDictionary.Count</c> takes every bucket lock, so this is for
-    /// the sweep's re-sync and the running-count guard (GolibTests) only, never a hot path.
+    /// The table's EXACT size. <c>ConcurrentDictionary.Count</c> takes every bucket lock, so this is a
+    /// test-only reading, never a hot path; nothing in the registry itself reads it.
     /// </summary>
     internal static int TableCount => s_table.Count;
 
@@ -471,6 +476,24 @@ namespace go;
         return Resolve(allocationBase);
     }
 
+    // Stores registrant under key and reports whether it ADDED the key, so a caller counts only a new entry.
+    // An existing entry is replaced by compare, and a key removed meanwhile is added, never lost.
+    private static bool Store(nuint key, WeakReference<object> registrant)
+    {
+        while (true)
+        {
+            if (s_table.TryGetValue(key, out WeakReference<object>? current))
+            {
+                if (s_table.TryUpdate(key, registrant, current))
+                    return false;
+            }
+            else if (s_table.TryAdd(key, registrant))
+            {
+                return true;
+            }
+        }
+    }
+
     public static void Register(nuint token, object box)
     {
         if (token == 0 || box is null)
@@ -488,7 +511,10 @@ namespace go;
             return;
         }
 
-        s_table[token] = new WeakReference<object>(box);
+        // Count BEFORE the key is visible, and uncount an overwrite after: the count never reads below the
+        // table, so the `== 0` fast paths cannot skip a key this thread has just stored.
+        int count = Interlocked.Increment(ref s_count);
+        bool added = Store(token, new WeakReference<object>(box));
 
         // Remember a delegate's METHOD strongly beside the weak box, so the token still answers its
         // name after every delegate sharing it has been collected. Written before the weak store is
@@ -501,8 +527,12 @@ namespace go;
                 s_methodValueTokens.TryAdd(token, 0);
         }
 
-        // Only a genuinely new entry counts; the idempotent early return must stay before it.
-        int count = Interlocked.Increment(ref s_count);
+        // Only a new key counts: an overwrite replaces an entry the count already holds.
+        if (!added)
+        {
+            Interlocked.Decrement(ref s_count);
+            return;
+        }
 
         if (Q44RegistryCensus.Enabled)
             Q44RegistryCensus.Mint();
@@ -560,10 +590,14 @@ namespace go;
                 KeepDisplaced(address, existing);
         }
 
-        s_table[address] = new WeakReference<object>(box);
-
-        // Only a genuinely new entry counts; the idempotent early return must stay before it.
+        // Counted before the key is visible; only a new key keeps the count (as in Register).
         int count = Interlocked.Increment(ref s_count);
+
+        if (!Store(address, new WeakReference<object>(box)))
+        {
+            Interlocked.Decrement(ref s_count);
+            return;
+        }
 
         if (count >= s_sweepAt)
             Sweep();
@@ -883,13 +917,15 @@ namespace go;
                 return;
 
             Volatile.Write(ref s_sweptAtCollection, collections);
-            int counted = Volatile.Read(ref s_count);
 
             foreach ((nuint token, WeakReference<object> weak) in s_table)
             {
                 // By compare, and never while an earlier registrant of the address is alive and pinned there.
-                if (!weak.TryGetTarget(out _) && (Volatile.Read(ref s_displacedCount) == 0 || Promote(token, weak) is null))
-                    s_table.TryRemove(new System.Collections.Generic.KeyValuePair<nuint, WeakReference<object>>(token, weak));
+                if (!weak.TryGetTarget(out _) && (Volatile.Read(ref s_displacedCount) == 0 || Promote(token, weak) is null) &&
+                    s_table.TryRemove(new System.Collections.Generic.KeyValuePair<nuint, WeakReference<object>>(token, weak)))
+                {
+                    Interlocked.Decrement(ref s_count);
+                }
             }
 
             // And the kept registrants: the dead go, and a list left empty goes with them.
@@ -904,15 +940,9 @@ namespace go;
                 }
             }
 
-            // Re-sync the running count to the table, EXACTLY when nothing else moved it meanwhile: the
-            // compare-exchange fails if a registration or a Resolve removal changed it during the walk,
-            // and then the count keeps its over-count (never an under-count) until the next sweep.
-            int actual = s_table.Count;
-            Interlocked.CompareExchange(ref s_count, actual, counted);
-
             // Re-arm above the surviving population so a table that is legitimately large does not
-            // sweep on every registration.
-            s_sweepAt = actual + SweepThreshold;
+            // sweep on every registration. The count needs no re-sync: each removal above decremented it.
+            s_sweepAt = Volatile.Read(ref s_count) + SweepThreshold;
         }
         finally
         {

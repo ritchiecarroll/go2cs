@@ -161,7 +161,7 @@ internal static partial slice<byte> movedBytes(nint n) {
     foreach (var i in range(n)) {
         r = append(rᴷ, r, (byte)i);
     }
-    r = move2heap(rᴷ, r);
+    r = builtin.move2heap(rᴷ, r);
     return r;
 }
 
@@ -179,7 +179,7 @@ internal static partial void movedPtrs(nint n, ref slice<ж<nint>> p) {
     foreach (var _ᴛ1 in range(n)) {
         r = append(rᴷ, r, (ж<nint>)(nil));
     }
-    r = move2heap(rᴷ, r);
+    r = builtin.move2heap(rᴷ, r);
     p = r;
 }
 
@@ -204,8 +204,8 @@ internal static partial (slice<byte>, slice<nint>) capSeq(nint n) {
             seq = append(seqᴷ, seq, cap(r));
         }
     }
-    r = move2heap(rᴷ, r);
-    seq = move2heap(seqᴷ, seq);
+    r = builtin.move2heap(rᴷ, r);
+    seq = builtin.move2heap(seqᴷ, seq);
     return (r, seq);
 }
 
@@ -222,7 +222,7 @@ internal static partial slice<byte> /*r*/ movedNamed(nint n) {
     foreach (var i in range(n)) {
         r = append(rᴷ, r, (byte)i);
     }
-    r = move2heap(rᴷ, r);
+    r = builtin.move2heap(rᴷ, r);
     return r;
 }
 
@@ -233,7 +233,7 @@ internal static partial nint movedIfInit(nint n) {
     foreach (var _ᴛ1 in range(n)) {
         p = append(pᴷ, p, (ж<nint>)(nil));
     }
-    p = move2heap(pᴷ, p);
+    p = builtin.move2heap(pᴷ, p);
     var t = p; if (len(t) > 0) {
         return cap(t);
     }
@@ -250,8 +250,8 @@ internal static partial (slice<byte>, slice<int16>) movedPair(nint n) {
         a = append(aᴷ, a, (byte)i);
         w = append(wᴷ, w, (int16)i);
     }
-    a = move2heap(aᴷ, a);
-    w = move2heap(wᴷ, w);
+    a = builtin.move2heap(aᴷ, a);
+    w = builtin.move2heap(wᴷ, w);
     return (a, w);
 }
 

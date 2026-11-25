@@ -8,7 +8,7 @@ partial class main_package {
 
 internal static float64 localInf() {
     uint64 bits = 0x7FF0000000000000UL;
-    return bitcast<uint64, float64>(bits);
+    return builtin.bitcast<uint64, float64>(bits);
 }
 
 internal static ж<uint32> kept;
@@ -17,13 +17,13 @@ internal static float32 alsoAddressed(uint32 bʗp) {
     ref var b = ref heap(bʗp, out var Ꮡb);
 
     kept = Ꮡb;
-    return bitcast<uint32, float32>(b);
+    return builtin.bitcast<uint32, float32>(b);
 }
 
 internal static float32 orBits(float32 xʗp, float32 y) {
     ref var x = ref heap(xʗp, out var Ꮡx);
 
-    (Ꮡx.Reinterpret<float32, uint32>()).Value |= bitcast<float32, uint32>(y);
+    (Ꮡx.Reinterpret<float32, uint32>()).Value |= builtin.bitcast<float32, uint32>(y);
     return x;
 }
 

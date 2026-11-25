@@ -19,7 +19,7 @@ public static void Push<T>(this ref Stack<T> s, T element)
 public static (T, bool) Pop<T>(this ref Stack<T> s)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     if (len(s.elements) == 0) {
         return (zero, false);
     }
@@ -49,7 +49,7 @@ internal static bool consume<K, V>(Seq2Like<K, V> s, K k, V v) {
 }
 
 internal static @string describe<T>(@string label) {
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     _ = zero;
     return label;
 }

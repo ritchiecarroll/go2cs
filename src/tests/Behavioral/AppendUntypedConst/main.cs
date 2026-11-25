@@ -9,24 +9,19 @@ internal static UntypedInt marker => 0xFFFD;
 partial struct words /*[]uint16*/;
 
 internal static void main() {
-    var aᴷ = new stackAppend<uint16>();
-    var wᴷ = new stackAppend<uint16>();
-    var intsᴷ = new stackAppend<nint>();
-    var anysᴷ = new stackAppend<any>();
-
     slice<uint16> a = default;
-    a = append(aᴷ, a, (uint16)(marker));
+    a = append(a, (uint16)(marker));
     a = append(a, (uint16)7, (uint16)8);
     uint16 v = 9;
     a = append(a, v);
     fmt.Println(len(a), a[0], a[1], a[2], a[3]);
 
     words w = default;
-    w = append(wᴷ, w, (uint16)(marker), (uint16)1);
+    w = append(w, (uint16)(marker), (uint16)1);
     fmt.Println(w[0], w[1]);
 
     slice<nint> ints = default;
-    ints = append(intsᴷ, ints, (nint)(-1));
+    ints = append(ints, (nint)(-1));
     ints = append(ints, (nint)(+2));
     ints = append(ints, (nint)(~0));
     fmt.Println(ints[0], ints[1], ints[2]);
@@ -34,7 +29,7 @@ internal static void main() {
     slice<any> anys = default;
     var data = slice<byte>([7, 8, 9]);
     anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));
-    anys = append(anysᴷ, anys, (any)((nint)5));
+    anys = append(anys, (any)((nint)5));
     fmt.Println(len(anys), len(anys[0]._<slice<byte>>()), anys[1]);
 }
 

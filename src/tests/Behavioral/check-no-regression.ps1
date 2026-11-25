@@ -414,8 +414,8 @@ if ($skippedExclusive.Count -gt 0) {
 }
 
 # go2cs.options: a behavioral project's EXTRA converter arguments, one per line, mirrored from the C# instruments' one
-# shared reader (tests/BehavioralPackages.cs, ConverterOptions). It may carry -warn=<codes> and nothing else; any other
-# line stops the run by name. A nested sub-library takes its PROJECT's options (the file sits at the project root).
+# shared reader (tests/BehavioralPackages.cs, ConverterOptions). It may carry -warn=<codes> and -stack-append=on and
+# nothing else; any other line stops the run by name. A nested sub-library takes its PROJECT's options (the file sits at the project root).
 # repoguard's TestBehavioralHarnessReadsConverterOptions fails by name if this call site stops reading it.
 function Get-ConverterOptions([string]$packageDir) {
     $relative = [IO.Path]::GetRelativePath($behavioral, $packageDir)
@@ -426,8 +426,8 @@ function Get-ConverterOptions([string]$packageDir) {
     foreach ($raw in Get-Content -LiteralPath $file) {
         $line = $raw.Trim()
         if ($line.Length -eq 0) { continue }
-        if ($line -notmatch '^-warn=GO2CS\d{4}(,GO2CS\d{4})*$') {
-            throw "${file}: `"$line`" is not an allowed converter option (only -warn=<code>[,<code>...])"
+        if ($line -notmatch '^(-warn=GO2CS\d{4}(,GO2CS\d{4})*|-stack-append=on)$') {
+            throw "${file}: `"$line`" is not an allowed converter option (only -warn=<code>[,<code>...] and -stack-append=on)"
         }
         $options.Add($line)
     }

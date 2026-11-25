@@ -522,23 +522,28 @@ func TestFilteredRunPublishesNoRosterArtifacts(t *testing.T) {
 // terminal context when the record observed one, in the same sentence as the configuration and
 // the oracle, and nothing at all when the record carries no observation — so a page from a
 // Windows run, or one regenerated from a record written before the field existed, is unchanged.
-// The fixture record predates the field, which is exactly the third case.
+// The fixture record predates the field, which is exactly the third case. A record whose -stack-append
+// mode resolved off says so in the same sentence; one that carries no "off" is unchanged.
 func TestValidationProofPageStatesTheTerminalContext(t *testing.T) {
 	comparison, disclosures := loadProofFixture(t)
 
 	cases := []struct {
-		name     string
-		config   string
-		tiered   bool
-		oracle   string
-		terminal string
-		want     string
+		name        string
+		config      string
+		tiered      bool
+		oracle      string
+		terminal    string
+		stackAppend string
+		want        string
 	}{
 		{name: "not probed (the fixture as committed)", want: "Measured at `Debug`."},
 		{name: "controlling terminal present", terminal: driverTerminalPresent, want: "Measured at `Debug`, under a controlling terminal."},
 		{name: "controlling terminal absent", terminal: driverTerminalAbsent, want: "Measured at `Debug`, with no controlling terminal."},
 		{name: "release, oracle and terminal in one sentence", config: "Release", oracle: "go version go1.23.12 linux/amd64", terminal: driverTerminalPresent,
 			want: "Measured at `Release` (tiered JIT off), oracle `go version go1.23.12 linux/amd64`, under a controlling terminal."},
+		{name: "stack-append buffer off", stackAppend: "off", want: "Measured at `Debug`, with the stack-append buffer off."},
+		{name: "release, terminal and stack-append off in one sentence", config: "Release", terminal: driverTerminalAbsent, stackAppend: "off",
+			want: "Measured at `Release` (tiered JIT off), with no controlling terminal, with the stack-append buffer off."},
 	}
 
 	for _, c := range cases {
@@ -548,6 +553,7 @@ func TestValidationProofPageStatesTheTerminalContext(t *testing.T) {
 			variant.Environment.Tiered = c.tiered
 			variant.Environment.OracleGoVersion = c.oracle
 			variant.Environment.Terminal = c.terminal
+			variant.Environment.StackAppend = c.stackAppend
 
 			page := renderValidationProofPage(fixtureProvenance(), variant, disclosures, nil)
 			lines := strings.Split(page, "\n")
