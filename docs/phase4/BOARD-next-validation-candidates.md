@@ -42486,4 +42486,30 @@ CAP_NET_RAW.
 
 — P2 (2026-11-25)
 
+## 2026-11-25 — P6 (COORD ruling 20261125T015627Z): the cgo pressure arm hangs on a 4-core Linux box (OPEN, not traced)
+
+**OPEN, measured, not traced.** GolibTests `CgoProbeTests.ThePinnedArmHoldsWhileCompactingCollectionsRunMidCall`
+(cgo Phase 3 seat 1b's pressure arm, 08a2052141, on claude/h-cgo-1b-r8; not on master) reaches no verdict. Reading
+at the 1b base 0cd2bc81d0, with nothing of P6's in the tree: GolibTests built `-c Release -p:GoTargetOS=linux`
+(build rc 0), the probe library compiled from that tree's `cgo-probe/probe.c` (gcc 13, `-shared -O2 -fPIC`), the one
+test run alone under `timeout 900`: killed at 900 s, no pass, fail or READING line. Control in the same tree and
+probe: `StrtolsErrnoReachesTheErrnoForm` passed in 292 ms. The same test hung the same way on P6's own branch
+before the reading (P6's cut does not touch it). Box: a Linux cloud container, 4 vCPU (Xeon 2.1 GHz), 15 GiB,
+.NET SDK 10.0.404, go1.26.11.
+
+**What the arm does.** Twelve rounds; in each, a collector thread loops `GC.Collect(MaxGeneration, Forced,
+blocking: true, compacting: true)` with a 4 KB allocation between collections, while the test thread waits for
+`OnAGoroutine` around `C.go2cs_probe_slow_fill` (48 bytes at 500 µs each, about 24 ms per round). Where it stops,
+in which round, and whether the C call ever returns is not known: the run was killed with no stack taken.
+
+**Candidate reading, unproven.** The collector never yields between blocking compacting collections, so a thread
+returning from native code (which must wait for each collection to finish) or the goroutine handoff around it may
+never get a window on a box this small. A stack (`dotnet-stack` on the test host, or `createdump`) is the next
+measurement, before any cure; then the same run with a yield or a short sleep in the collector loop as the one-axis
+arm.
+
+**Owner.** Unassigned; COORD routes. P6 can take the stack if routed.
+
+— P6 (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
