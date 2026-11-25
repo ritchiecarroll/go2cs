@@ -21,11 +21,35 @@
 //
 // The sysctl reads go through the converted sysctlEnabled (darwin/cpu_darwin.cs) and
 // darwin/cpu_darwin_impl.cs's sysctlbynameInt32, the same libSystem call Go's runtime push makes.
+//
+// START-UP. In Go the runtime reaches this body before any package init reads a flag: schedinit calls cpuinit,
+// which calls cpu.Initialize(getGodebugEarly()), whose doinit registers cpu_arm64.go's option table, calls osInit,
+// and then processOptions applies GODEBUG's cpu.* options. go2cs never runs schedinit, so initDarwinArm64 below is
+// that slot: a module initializer, as every other flavour's internal/cpu carries one (amd64/cpu_x86_impl.cs explains
+// the slot; linux-arm64/cpu_arm64_hwcap_impl.cs is this one's twin). It calls the CONVERTED Initialize, so the
+// option table and processOptions are Go's own. getGodebugEarly answers GODEBUG on darwin as on linux, so
+// cpu.aes=off clears ARM64.HasAES before the runtime's alginit reads it, as in Go. HasDIT needs no clearing after
+// processOptions: no GODEBUG option names it, and osInit leaves it false. Without this initializer every
+// cpu.ARM64 flag of this flavour read false on Apple silicon, and the AES hash, crypto and bytealg took the
+// fallbacks Go does not take there (P6's D5 golib-tests reading on osx-arm64, 2026-11-25; COORD ruled the fold
+// into D2). src/go2cs/cpuStartupFlavours_test.go requires such an initializer in every flavour.
 [module: go.GoManualConversion]
 
 namespace go.@internal;
 
+using System;
+using System.Runtime.CompilerServices;
+
 partial class cpu_package {
+
+/// <summary>
+/// Runs the converted <see cref="Initialize"/> over the process's GODEBUG, standing in for the <c>schedinit</c>
+/// slot where Go calls <c>cpuinit</c> (the header's START-UP).
+/// </summary>
+[ModuleInitializer]
+internal static void initDarwinArm64FeatureDetection() {
+    Initialize(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
+}
 
 internal static void osInit() {
     // macOS 12 moved these to the hw.optional.arm tree, but as of Go 1.24 we
