@@ -16,7 +16,7 @@ internal static int32 bump(ref int32 p, int32 delta) {
 public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    return bump(ref nonnil(ref c).n, delta);
+    return bump(ref builtin.nonnil(ref c).n, delta);
 }
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) { (Ꮡc.Ꮡn).Value = v; }

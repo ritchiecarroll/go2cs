@@ -10,7 +10,7 @@ internal static channel<nint> innerCh = new channel<nint>(1);
 
 internal static nint idxDefault(nint i) {
     var innerChᴛ1 = innerCh;
-    switch (trySelect(ᐸꟷ(innerChᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(innerChᴛ1, ꓸꓸꓸ))) {
     case 0 when innerChᴛ1.ꟷᐳ(out var v): {
         fmt.Println("  inner recv:", v);
         break;
@@ -76,7 +76,7 @@ internal static void main() {
 
     ch.ᐸꟷ(47);
     var chᴛ5 = ch;
-    switch (trySelect(ᐸꟷ(chᴛ5, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(chᴛ5, ꓸꓸꓸ))) {
     case 0 when chᴛ5.ꟷᐳ(out a[idxDefault(0)]): {
         fmt.Println("outer default-form fired: a[0] =", a[0], "len(ch) =", len(ch));
         break;

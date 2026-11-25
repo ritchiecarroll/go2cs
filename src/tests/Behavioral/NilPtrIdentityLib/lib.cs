@@ -17,7 +17,7 @@ public static T OrElse<T>(T value, T orElse) {
 }
 
 public static bool IsZero<T>(T value) {
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     return AreEqual(value, zero);
 }
 

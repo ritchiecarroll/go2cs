@@ -120,14 +120,14 @@ func TestMethodExpressionWrapperMark(t *testing.T) {
 		// Each wrapper reads its receiver through a golib helper that raises the wrapper's OWN panic on a
 		// nil receiver, the marker runtime.Callers keys the wrapper frame on: Go's panicwrap (with Go's
 		// message) only for a DIRECT value method off *T, and a plain wrapper fault otherwise.
-		{"ifaceExpr", `[GoWrapper("I.M")] (p0, p1) => wrapperRecv(p0).M(p1)`},
+		{"ifaceExpr", `[GoWrapper("I.M")] (p0, p1) => builtin.wrapperRecv(p0).M(p1)`},
 		// A method of package main whose name hides nothing stays in the package class, where the wrapper
 		// names it bare, as it would a function.
-		{"ptrOfValueExpr", `[GoWrapper("(*S).value")] (p0, p1) => main_package.value(panicwrapRecv(p0, "value method main.S.value called using nil *S pointer").Value, p1)`},
+		{"ptrOfValueExpr", `[GoWrapper("(*S).value")] (p0, p1) => main_package.value(builtin.panicwrapRecv(p0, "value method main.S.value called using nil *S pointer").Value, p1)`},
 		// A method promoted through a same-package embed has its forwarder in a class of the struct's own
 		// (go2cs-gen). Where no forwarder has the expression's receiver, the wrapper calls it as the extension
 		// method it is.
-		{"promotedExpr", `[GoWrapper("(*Outer).value")] (p0, p1) => wrapperRecv(p0).value(p1)`},
+		{"promotedExpr", `[GoWrapper("(*Outer).value")] (p0, p1) => builtin.wrapperRecv(p0).value(p1)`},
 		{"promotedPtrEmbedExpr", `[GoWrapper("PtrOuter.pointer")] (p0, p1) => p0.pointer(p1)`},
 		{"valueExpr", ""},
 		{"ptrExpr", ""},

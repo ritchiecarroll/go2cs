@@ -90,7 +90,7 @@ partial interface RecordUnion<ΔT> {
 internal static T firstOf<T>(slice<T> p)
     where T : /* RecordUnion = recordA | recordB | recordC */ new()
 {
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
 
     if (len(p) == 0) {
         return zero;

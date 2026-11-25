@@ -84,7 +84,7 @@ func main() {
 
 	output := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "tuplecomment", "main.cs"))
 
-	const conversion = "release = NilSafeDelegateConversion<Action<error>, releaseFunc>(releaseᴛ"
+	const conversion = "release = builtin.NilSafeDelegateConversion<Action<error>, releaseFunc>(releaseᴛ"
 
 	var calls, conversions []string
 

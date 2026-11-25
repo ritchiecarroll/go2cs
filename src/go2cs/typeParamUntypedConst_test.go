@@ -89,28 +89,28 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "tpconst", "main.cs"))
 
 	for _, want := range []string{
-		"return ConvertToType<T>(1);",
-		"return ConvertToType<T>(five);",
-		"return ConvertToType<T>(1 << 3);",
+		"return builtin.ConvertToType<T>(1);",
+		"return builtin.ConvertToType<T>(five);",
+		"return builtin.ConvertToType<T>(1 << 3);",
 		// The shift takes the type parameter's guard, with the materialized constant as its receiver.
-		"return ConvertToType<T>(1).Lsh(n);",
-		"return ConvertToType<T>(1).Lsh((int64)(n));",
-		"return ConvertToType<T>(1).Lsh(n) - ConvertToType<T>(1);",
-		"T x = ConvertToType<T>(1).Lsh(n);",
-		"x |= ConvertToType<T>(1).Lsh(n);",
-		"x = ConvertToType<T>(7);",
-		"return pair(x, ConvertToType<T>(2));",
-		"return [ConvertToType<T>(1), ConvertToType<T>(2)];",
+		"return builtin.ConvertToType<T>(1).Lsh(n);",
+		"return builtin.ConvertToType<T>(1).Lsh((int64)(n));",
+		"return builtin.ConvertToType<T>(1).Lsh(n) - builtin.ConvertToType<T>(1);",
+		"T x = builtin.ConvertToType<T>(1).Lsh(n);",
+		"x |= builtin.ConvertToType<T>(1).Lsh(n);",
+		"x = builtin.ConvertToType<T>(7);",
+		"return pair(x, builtin.ConvertToType<T>(2));",
+		"return [builtin.ConvertToType<T>(1), builtin.ConvertToType<T>(2)];",
 		// Controls: the two places that already materialized the constant do so once.
-		"return AreEqual(x, ConvertToType<T>(0));",
-		"return ConvertToType<T>(4);",
+		"return AreEqual(x, builtin.ConvertToType<T>(0));",
+		"return builtin.ConvertToType<T>(4);",
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("expected %q in the emission:\n%s", want, mainCs)
 		}
 	}
 
-	if strings.Contains(mainCs, "ConvertToType<T>(ConvertToType<T>(") {
+	if strings.Contains(mainCs, "builtin.ConvertToType<T>(builtin.ConvertToType<T>(") {
 		t.Errorf("a constant was materialized twice:\n%s", mainCs)
 	}
 }

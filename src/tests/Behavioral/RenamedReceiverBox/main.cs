@@ -20,7 +20,7 @@ partial struct counter {
 internal static void add(this ж<counter> Ꮡc, nint d) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    addInt(ref nonnil(ref c).n, d);
+    addInt(ref builtin.nonnil(ref c).n, d);
 }
 
 internal static void addInt(ref nint x, nint d) { x += d; }

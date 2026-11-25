@@ -224,7 +224,7 @@ internal static @string firstMsg(channel<@string> a, channel<@string> b) {
 
 internal static @string poll(channel<EmptyStruct> done) {
     var doneᴛ1 = done;
-    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
     case 0 when doneᴛ1.ꟷᐳ(out _): {
         return "done";
     }

@@ -8,7 +8,7 @@ internal static void main() {
     channel<nint> nilRecv = default;
 
     var nilRecvᴛ1 = nilRecv;
-    switch (trySelect(ᐸꟷ(nilRecvᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(nilRecvᴛ1, ꓸꓸꓸ))) {
     case 0 when nilRecvᴛ1.ꟷᐳ(out var v): {
         fmt.Println("nil recv took case", v);
         break;
@@ -21,7 +21,7 @@ internal static void main() {
     fmt.Println("nil len:", len(nilRecv), "nil cap:", cap(nilRecv));
 
     var nilRecvᴛ2 = nilRecv;
-    switch (trySelect(ᐸꟷ(nilRecvᴛ2, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(nilRecvᴛ2, ꓸꓸꓸ))) {
     case 0 when nilRecvᴛ2.ꟷᐳ(out var v, out var ok): {
         fmt.Println("nil comma-ok took case", v, ok);
         break;
@@ -34,7 +34,7 @@ internal static void main() {
     var ready = new channel<nint>(1);
 
     var readyᴛ1 = ready;
-    switch (trySelect(ᐸꟷ(readyᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(readyᴛ1, ꓸꓸꓸ))) {
     case 0 when readyᴛ1.ꟷᐳ(out var v): {
         fmt.Println("real recv took case", v);
         break;
@@ -47,7 +47,7 @@ internal static void main() {
     ready.ᐸꟷ(7);
 
     var readyᴛ2 = ready;
-    switch (trySelect(ᐸꟷ(readyᴛ2, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(readyᴛ2, ꓸꓸꓸ))) {
     case 0 when readyᴛ2.ꟷᐳ(out var v): {
         fmt.Println("real recv", v);
         break;

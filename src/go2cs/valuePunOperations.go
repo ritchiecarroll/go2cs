@@ -199,5 +199,5 @@ func (v *Visitor) valuePunEmission(star *ast.StarExpr) (string, bool) {
 		return "", false
 	}
 
-	return fmt.Sprintf("bitcast<%s, %s>(%s)", v.getCSharpTypeName(pun.src), v.getCSharpTypeName(pun.dst), v.convExpr(pun.x, nil)), true
+	return fmt.Sprintf("builtin.bitcast<%s, %s>(%s)", v.getCSharpTypeName(pun.src), v.getCSharpTypeName(pun.dst), v.convExpr(pun.x, nil)), true
 }

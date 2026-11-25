@@ -32,7 +32,7 @@ public static nint DeferredCount<T>(params variadic<T> valsʗp) {
 public static T Or<T>(params variadic<T> valsʗp) {
     var vals = valsʗp.sslice();
 
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     foreach (var (_, v) in range(vals)) {
         if (!AreEqual(v, zero)) {
             return v;

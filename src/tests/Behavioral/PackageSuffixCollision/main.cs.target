@@ -24,7 +24,7 @@ internal static nint Δfmt_package⁔(/*this*/ holder h) { return h.n + 1; }
 
 internal static nint ΔFmt_package(this Δmain_package m) { return m.Δfmt_package * 3; }
 
-internal static nint Δfmt_package = 1;
+public static nint Δfmt_package = 1;
 
 internal static @string local() {
     @string Δstrings_package = "local";

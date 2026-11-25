@@ -360,7 +360,7 @@ func (v *Visitor) refLoweredAddressArg(arg ast.Expr) string {
 			return v.refLoweredBoxedFallback(arg)
 		}
 
-		return fmt.Sprintf("ref nonnil(ref %s)%s", base, rest)
+		return fmt.Sprintf("ref builtin.nonnil(ref %s)%s", base, rest)
 
 	default:
 		return v.refLoweredBoxedFallback(arg)
@@ -529,7 +529,7 @@ func (v *Visitor) refLoweredPtrConvArg(arg ast.Expr, deferredDecls *strings.Buil
 			return v.refLoweredBoxedFallback(arg)
 		}
 
-		chainValue = fmt.Sprintf("nonnil(ref %s)%s", base, rest)
+		chainValue = fmt.Sprintf("builtin.nonnil(ref %s)%s", base, rest)
 
 	default:
 		return v.refLoweredBoxedFallback(arg)

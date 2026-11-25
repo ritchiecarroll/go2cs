@@ -162,56 +162,6 @@ func (v *Visitor) signedDividendCannotOverflow(dividend ast.Expr) bool {
 	return true
 }
 
-// signedDivisionHelperName spells golib's quo or rem, qualified as `builtin.<name>` wherever a Go
-// name would bind first in C#: a package-level declaration of that name (go/constant declares its own
-// `quo`), a method of that name on the holder the code is emitted into, or any object of that name
-// declared anywhere in the enclosing function -- a variable, a
-// constant, a type, or a type-switch binding (whose per-clause objects live in info.Implicits). A C#
-// local is in scope in its whole block, including before its declaration, so `r := a % b; const rem =
-// 10` needs the qualification even though Go's scope for rem starts after it.
-func (v *Visitor) signedDivisionHelperName(name string) string {
-	shadowed := v.funcScopeVarNames.Contains(name) ||
-		v.pkg != nil && v.pkg.Scope().Lookup(name) != nil ||
-		v.funcDeclaresName(name)
-
-	if shadowed {
-		return "builtin." + name
-	}
-
-	return name
-}
-
-// funcDeclaresName reports whether the function being converted declares an object named name at
-// any depth, of any kind.
-func (v *Visitor) funcDeclaresName(name string) bool {
-	if v.currentFuncDecl == nil {
-		return false
-	}
-
-	found := false
-
-	ast.Inspect(v.currentFuncDecl, func(n ast.Node) bool {
-		if found {
-			return false
-		}
-
-		switch node := n.(type) {
-		case *ast.Ident:
-			if obj := v.info.Defs[node]; obj != nil && obj.Name() == name {
-				found = true
-			}
-		case *ast.CaseClause:
-			if obj := v.info.Implicits[node]; obj != nil && obj.Name() == name {
-				found = true
-			}
-		}
-
-		return !found
-	})
-
-	return found
-}
-
 // signedDivisionExpr renders a governed division (quotient true) or remainder of left by right, or
 // returns false when the operation keeps the plain C# operator. dividend is the Go dividend, whose
 // evaluation a folded remainder must keep when it can panic or has an effect.
@@ -229,7 +179,7 @@ func (v *Visitor) signedDivisionExpr(quotient bool, resultType types.Type, divid
 		return fmt.Sprintf("unchecked(-%s)", v.parenthesizedOperand(dividend, left)), true
 	case minusOne && class == signedDivisionTypeParam:
 		// A type parameter has no literal zero to fold to; the helper evaluates the dividend once.
-		return fmt.Sprintf("%s(%s, %s)", v.signedDivisionHelperName("rem"), left, right), true
+		return fmt.Sprintf("%s(%s, %s)", v.golibCall("rem"), left, right), true
 	case minusOne && v.isFoldableDividend(dividend):
 		return fmt.Sprintf("(%s)0", convertToCSTypeName(v.getAliasQualifiedTypeName(resultType, false))), true
 	case minusOne:
@@ -246,7 +196,7 @@ func (v *Visitor) signedDivisionExpr(quotient bool, resultType types.Type, divid
 		name = "quo"
 	}
 
-	return fmt.Sprintf("%s(%s, %s)", v.signedDivisionHelperName(name), left, right), true
+	return fmt.Sprintf("%s(%s, %s)", v.golibCall(name), left, right), true
 }
 
 // parenthesizedOperand wraps a rendered operand in parentheses unless it is a single primary term.
@@ -375,7 +325,7 @@ func (v *Visitor) signedCompoundAssign(assignStmt *ast.AssignStmt) (signedCompou
 	case !guard && !minusOne:
 		return signedCompoundForm{}, false
 	case readTwice:
-		return signedCompoundForm{operator: fmt.Sprintf(" = %s(%s, ", v.signedDivisionHelperName(name), v.convExpr(lhs, nil)), close: true}, true
+		return signedCompoundForm{operator: fmt.Sprintf(" = %s(%s, ", v.golibCall(name), v.convExpr(lhs, nil)), close: true}, true
 	case class == signedDivisionTypeParam:
 		return signedCompoundForm{}, false
 	}

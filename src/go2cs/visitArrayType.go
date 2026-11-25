@@ -360,7 +360,7 @@ func (v *Visitor) typeParamZero(t types.Type) string {
 		return fmt.Sprintf("GoArrayZero.Of<%s, %s>()", v.getCSharpTypeName(t), companion)
 	}
 
-	return fmt.Sprintf("GoZero<%s>()", v.getCSharpTypeName(t))
+	return fmt.Sprintf("builtin.GoZero<%s>()", v.getCSharpTypeName(t))
 }
 
 // arrayElemFactory renders the target-typed construction expression for one element of a

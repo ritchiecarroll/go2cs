@@ -568,7 +568,7 @@ func (v *Visitor) nativeBackedArrayPointerStore(lhs ast.Expr, rhs ast.Expr) (str
 	// write site happens to know it here (l2Size is one line up), but the TYPE knows it everywhere.
 	elemType := convertToCSTypeName(v.getAliasQualifiedTypeName(destArray.Elem(), false))
 
-	return fmt.Sprintf("%s.Value = NativeArrayPointer<%s>((nuint)(%s), %d);",
+	return fmt.Sprintf("%s.Value = builtin.NativeArrayPointer<%s>((nuint)(%s), %d);",
 		v.convExpr(unary, nil), elemType, v.convExpr(rhs, nil), destArray.Len()), true
 }
 
@@ -642,7 +642,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					v.outputBuilder.WriteString(v.indent(v.indentLevel))
 				}
 
-				v.outputBuilder.WriteString(fmt.Sprintf("throw panic(%q);", message))
+				v.outputBuilder.WriteString(fmt.Sprintf("throw %s(%q);", v.golibCall("panic"), message))
 				return
 			}
 		}
@@ -1557,7 +1557,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					if lhsType := v.info.TypeOf(lhs); lhsType != nil {
 						if targetName, sourceName, ok := v.funcConversion(lhs, lhsType, nil, tuple.At(i).Type()); ok {
 							tupleTemp = v.getTempVarName(valueAssignTempRoot(lhs))
-							tupleInPlaceAssigns = append(tupleInPlaceAssigns, fmt.Sprintf("%s = NilSafeDelegateConversion<%s, %s>(%s)", lhsExpr, targetName, sourceName, tupleTemp))
+							tupleInPlaceAssigns = append(tupleInPlaceAssigns, fmt.Sprintf("%s = builtin.NilSafeDelegateConversion<%s, %s>(%s)", lhsExpr, targetName, sourceName, tupleTemp))
 
 							if tupleInForPost {
 								if v.hoistedDecls.Len() == 0 {

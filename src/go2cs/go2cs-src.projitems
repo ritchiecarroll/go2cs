@@ -334,6 +334,8 @@
     <None Include="$(MSBuildThisFileDirectory)goTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)golibCall.go" />
+    <None Include="$(MSBuildThisFileDirectory)golibCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)golibNamespaceNames.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFileSpelling_other_test.go" />

@@ -13,7 +13,7 @@ public static void Enqueue<T>(this ref Queue<T> q, T item) {
 }
 
 public static (T, bool) Dequeue<T>(this ref Queue<T> q) {
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     if (len(q.items) == 0) {
         return (zero, false);
     }
