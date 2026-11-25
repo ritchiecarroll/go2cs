@@ -1,6 +1,20 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// Provenance: derived from src/reflect/value.go, Go go1.26.11 (license of record: LICENSES/BSD-3-Clause.txt).
+// This file is a hand-owned companion ([module: GoManualConversion]) and MIXES ported and original code. Each member
+// the converted value.cs displaces here follows the Go function of the same name in value.go: Addr, Append,
+// AppendSlice, Bool, Bytes, Call, CallSlice, Cap, Clear, Close, Complex, Convert, Copy, Elem, Field, Float, Grow,
+// Index, Int, Interface, InterfaceData, IsNil, IsZero, Len, MakeChan, MakeMap, MakeMapWithSize, MakeSlice, Method,
+// New, NewAt, NumField, Pointer, Select, Set, SetBool, SetBytes, SetCap, SetComplex, SetFloat, SetInt, SetLen,
+// SetString, SetUint, SetZero, Slice, SliceAt, String, Type, TypeAssert, Uint, UnsafeAddr, UnsafePointer, ValueOf,
+// Zero, extendSlice, mustBe, mustBeAssignable, mustBeAssignableSlow, mustBeExported, mustBeExportedSlow, recv,
+// runes, send, setRunes, unpackEface, valueInterface and valueMethodName. Where a member's body departs from Go's
+// shape, its own comment says so (valueMethodName threads the caller's name through [CallerMemberName] in place of
+// Go's runtime.Callers climb). The managed-model machinery the members call (golib's GoReflect bridge, the box and
+// token helpers) is original go2cs code and not a port.
+
 using go;
 using go.@internal;
 using System;
@@ -2696,6 +2710,15 @@ internal static @string valueMethodName(string method) {
     // `reflect.Value.` prefix from the FIRST PARAMETER'S TYPE, so `Append(ΔValue s, ...)` -- a package
     // function the emission gives a ΔValue first parameter -- matched, and it manufactured
     // "reflect.Value.Append" where Go says "unknown method".
+    //
+    // A Go method's body is the C# method `<name>⁔` (the converter's glyph suffix; U+2054 is connector
+    // punctuation, which no Go identifier can spell), and its extension forwarder `<name>` is a
+    // [StackTraceHidden] one-liner, so [CallerMemberName] captures the BODY's name. The Go method is the name
+    // without the suffix, as golib's frame naming reads it (GoSyntheticPC): reflect's TestValuePanic printed
+    // "call of reflect.Value.Recv⁔ on string Value".
+    if (method.Length > 1 && method[^1] == '\u2054')
+        method = method[..^1];
+
     return method.Length != 0 && char.IsUpper(method[0])
         ? (@string)("reflect.Value." + method)
         : "unknown method"u8;
