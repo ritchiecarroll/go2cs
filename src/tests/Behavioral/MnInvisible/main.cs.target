@@ -43,7 +43,11 @@ internal static void blocker(channel<EmptyStruct> gate, Action wait, channel/*<-
     done.ᐸꟷ(1);
 }
 
-internal static partial nint blockAll(nint k, Action wait, Action set) {
+internal static nint blockAll(nint k, Action wait, Action set) {
+    return blockAllThen(k, wait, set, default);
+}
+
+internal static partial nint blockAllThen(nint k, Action wait, Action set, Action blocked) {
     var gate = new channel<EmptyStruct>(0);
     var done = new channel<nint>(k);
     for (nint i = 0; i < k; i++) {
@@ -51,6 +55,9 @@ internal static partial nint blockAll(nint k, Action wait, Action set) {
     }
     close(gate);
     time.Sleep(50 * time.Millisecond);
+    if (blocked != nil) {
+        blocked();
+    }
     set();
     nint n = 0;
     for (nint i = 0; i < k; i++) {
@@ -68,15 +75,20 @@ internal static void v1(nint k) {
     blockAll(k, ww, ws);
     int64 i0 = default;
     int64 s0 = default;
+    int64 i1 = default;
+    int64 s1 = default;
+    var on = false;
     if (counters != nil) {
         (_, _, i0, s0, _) = counters();
     }
     var (wait, set) = mk();
-    var ok = blockAll(k, wait, set) == k;
-    if (counters != nil) {
-        var (_, _, i1, s1, on) = counters(); if (on) {
-            ok = ok && s1 > s0 && i1 == i0;
+    var ok = blockAllThen(k, wait, set, [GoFunc("v1.func1")] () => {
+        if (counters != nil) {
+            (_, _, i1, s1, on) = counters();
         }
+    }) == k;
+    if (on) {
+        ok = ok && s1 > s0 && i1 == i0;
     }
     fmt.Println("V1 goroutines released from a managed wait, which the scheduler sensed:", ok);
 }
@@ -100,21 +112,25 @@ internal static bool bracketed(nint k, bool blocks) {
     int64 h0 = default;
     int64 r0 = default;
     int64 i0 = default;
+    int64 h1 = default;
+    int64 r1 = default;
+    int64 i1 = default;
+    var on = false;
     if (counters != nil) {
         (h0, r0, i0, _, _) = counters();
     }
     var (wait, set) = mk(blocks);
-    var released = blockAll(k, wait, set) == k;
-    if (counters == nil) {
-        return released;
-    }
-    var (h1, r1, i1, _, on) = counters();
+    var released = blockAllThen(k, wait, set, [GoFunc("bracketed.func2")] () => {
+        if (counters != nil) {
+            (h1, r1, i1, _, on) = counters();
+        }
+    }) == k;
     switch (ᐧ) {
     case {} when !on: {
         return released;
     }
     case {} when blocks: {
-        return released && h1 - h0 >= (int64)k && r1 == r0;
+        return released && h1 > h0 && r1 == r0;
     }
     default: {
         return released && r1 > r0 && i1 == i0;

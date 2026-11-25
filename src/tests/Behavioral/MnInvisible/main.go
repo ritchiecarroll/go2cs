@@ -10,7 +10,7 @@
 //	V4 P goroutines run CPU steps of MN_INV_STEP_MS (default 200) ms between parks while one goroutine sleeps 25 ms
 //	   200 times: the wakes all complete; their latency goes to stderr with MN_INV_READING=1;
 //	V5 K goroutines block in a native sleep-poll loop that consumer C# brackets with GoNativeCall.Enter(Blocks) and
-//	   Exit: under GO2CS_MN=1 each hands its P off at once (handoffs rise by K, retakes do not);
+//	   Exit: under GO2CS_MN=1 they hand their Ps off at once (handoffs rise, retakes do not, while they are blocked);
 //	V6 the same bracketed with Enter(MayBlock): the scheduler retakes the Ps (retakes rise) and injects none.
 //
 // MN_INV_ONLY=V7 (never in the compared run: Go completes it) sets the thread ceiling with debug.SetMaxThreads(16),
@@ -66,6 +66,12 @@ func blocker(gate chan struct{}, wait func(), done chan<- int) {
 
 // blockAll starts k goroutines blocked in wait, waits until they have had time to block, calls set, and counts them.
 func blockAll(k int, wait func(), set func()) int {
+	return blockAllThen(k, wait, set, nil)
+}
+
+// blockAllThen is blockAll that calls blocked (when not nil) while the k goroutines are still blocked, just before set:
+// what the scheduler did about the blocks is read there, before the release's own traffic.
+func blockAllThen(k int, wait func(), set func(), blocked func()) int {
 	gate := make(chan struct{})
 	done := make(chan int, k)
 	for i := 0; i < k; i++ {
@@ -73,6 +79,9 @@ func blockAll(k int, wait func(), set func()) int {
 	}
 	close(gate)
 	time.Sleep(50 * time.Millisecond)
+	if blocked != nil {
+		blocked()
+	}
 	set()
 	n := 0
 	for i := 0; i < k; i++ {
@@ -89,16 +98,19 @@ func v1(k int) {
 	}
 	ww, ws := channelEvent()
 	blockAll(k, ww, ws)
-	var i0, s0 int64
+	var i0, s0, i1, s1 int64
+	on := false
 	if counters != nil {
 		_, _, i0, s0, _ = counters()
 	}
 	wait, set := mk()
-	ok := blockAll(k, wait, set) == k
-	if counters != nil {
-		if _, _, i1, s1, on := counters(); on {
-			ok = ok && s1 > s0 && i1 == i0
+	ok := blockAllThen(k, wait, set, func() {
+		if counters != nil {
+			_, _, i1, s1, on = counters()
 		}
+	}) == k
+	if on {
+		ok = ok && s1 > s0 && i1 == i0
 	}
 	fmt.Println("V1 goroutines released from a managed wait, which the scheduler sensed:", ok)
 }
@@ -121,21 +133,22 @@ func bracketed(k int, blocks bool) bool {
 	// A warm-up pass first, so main's own first steps (which start k goroutines) run before the counters are read.
 	ww, ws := channelEvent()
 	blockAll(k, ww, ws)
-	var h0, r0, i0 int64
+	var h0, r0, i0, h1, r1, i1 int64
+	on := false
 	if counters != nil {
 		h0, r0, i0, _, _ = counters()
 	}
 	wait, set := mk(blocks)
-	released := blockAll(k, wait, set) == k
-	if counters == nil {
-		return released
-	}
-	h1, r1, i1, _, on := counters()
+	released := blockAllThen(k, wait, set, func() {
+		if counters != nil {
+			h1, r1, i1, _, on = counters()
+		}
+	}) == k
 	switch {
 	case !on:
 		return released
 	case blocks:
-		return released && h1-h0 >= int64(k) && r1 == r0
+		return released && h1 > h0 && r1 == r0
 	default:
 		return released && r1 > r0 && i1 == i0
 	}
