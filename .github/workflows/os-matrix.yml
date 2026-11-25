@@ -1944,6 +1944,11 @@ jobs:
           exit $runExit
 
       # -------------------------------------------------------------------------------------
+      - name: osstat probe (MEASUREMENT ONLY, never merged)
+        if: ${{ !cancelled() && needs.plan.outputs.stage == 'converter-cgo' }}
+        shell: pwsh
+        run: ./.github/osstat-probe.ps1
+
       # go-test -- the converter's whole Go suite, `go test ./...` in src/go2cs, on this leg's runner with the Go setup-go
       # pinned (GOTOOLCHAIN=local, so go.mod's toolchain line never fetches another) and this leg's .NET SDK. ci-master.yml runs it on every push and pull request to
       # master (COORD, 2026-11-22: train 3 landed a default-mode regression no automatic check saw).
