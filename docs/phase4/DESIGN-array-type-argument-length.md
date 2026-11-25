@@ -1,6 +1,8 @@
 # DESIGN: the length of an unnamed array type argument reaches a type-only descriptor
 
-Status: DRAFT for review (P6, 2026-11-25; COORD routed 16:54Z, P3 reads). No code before the ruling.
+Status: REVISION 2 (P6, 2026-11-25). Revision 1 `62e34699e5`: P3 APPROVE WITH CHANGES (17:04Z); COORD ruled
+section 7 (17:06Z: overload, scope abi + unique, tier 2). This revision folds P3's MUST 1 (3.5), SHOULDs 2 (3.3),
+3 (3.1) and 4 (section 5, rows) and NIT 5 (section 5, risk). P3 re-reads, then code.
 Base: master `1c556c35a5`. Retires half 2 of `unique`'s TestMakeAllocs disclosure and closes the type-only half of
 the BOARD row of 2026-10-16 ("a type-only descriptor for an UNNAMED array type argument carries no length").
 
@@ -40,12 +42,23 @@ without moving its consumers.
 `internal/abi`'s hand-owned `type_impl.cs` gains, beside `TypeFor<T>()`:
 
 ```csharp
-public static ж<Type> TypeFor<T, Tᴀ>() where Tᴀ : IGoArrayDims =>
-    Tᴀ.Dims.Length == 0 ? TypeFor<T>() : synthType(typeof(T), Tᴀ.Dims);
+public static ж<Type> TypeFor<T, Tᴀ>() where Tᴀ : IGoArrayDims {
+    if (Tᴀ.Dims.Length == 0) {
+        return TypeFor<T>();
+    }
+    if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(array<>)) {
+        throw panic($"abi.TypeFor: array dims [{string.Join(",", Tᴀ.Dims)}] for {typeof(T)}, which is not an array");
+    }
+    return synthType(typeof(T), Tᴀ.Dims);
+}
 ```
 
 `ᴀnone` answers exactly what `TypeFor<T>()` answers today, so no existing reading moves. With dims it answers the
-interned box a live `[N]E` value of the same type answers.
+interned box a live `[N]E` value of the same type answers. Dims with a `T` that is not `array<>` (a hand-written
+or mismatched call) panic by name rather than intern a descriptor for a type that does not exist; the converter
+never emits that pairing, because a dims phantom is supplied only for an unnamed array type argument. The
+multi-dimension case (`[2][3]E`, phantom `ᴀ2_3`) is `array<array<E>>` with dims `[2, 3]`, the form `synthType`
+already takes.
 
 ### 3.2 converter: a type-only sink is a companion sink
 
@@ -81,6 +94,12 @@ arity-2 form ONLY when its type argument at a companion position is an unnamed a
 moves. An arity-1 call with an array type argument (a consumer compiled before this change) still reaches the
 dimless descriptor and still refuses by name: never a silently different map key.
 
+**Forwarding crosses packages by the same rule.** A generic that passes its own type parameter to an arity-2
+function at a companion position is itself a sink-reaching body: if it is unexported it gains a companion under the
+existing own-package rule (`arrayDimsCompanionArg` already forwards `Tᴀ`), and if it is exported it gains the
+additive overload and the record (3.5), whichever package it lives in. Its arity-1 form forwards `ᴀnone`. So an
+exported `wrap.Wrap[T]` that returns `unique.Make(v)` carries dims from its own caller to `Make`.
+
 Why the predicate is "the body reaches a sink" and not "some instantiation passes an array": the instantiation
 is in ANOTHER assembly (unique's internal test host calls production `unique.Make`), so the production conversion
 cannot see it. The production overload has to exist whether or not a caller needs it.
@@ -98,6 +117,39 @@ keeps arity 1, and its loads key on the same descriptor `Make` stored, because a
 own length. If a future test instantiates `checkMapsFor[[2]string]`, the companion rule gives it `Tᴀ` by the same
 fixpoint, and the load keys on the same box as the store. A mismatch can only arise through an arity-1 call with an
 array, which refuses (3.3).
+
+### 3.5 the call site in another assembly
+
+Both of this design's own targets call from another assembly: the unique test host calls production
+`unique.Make`, and the fixture is package `main`. Today every piece of the companion is own-package (the
+companion, the refusal and the phantom types, which are declared beside the CALLEE from its own-package
+instantiations). Two additions make the call site work across assemblies.
+
+**(a) The phantom is declared in the CALLER's package.** A call site in package P that supplies `ᴀ2` to a foreign
+arity-2 function makes P declare `private sealed class ᴀ2 : IGoArrayDims` once, beside the first calling function
+by source position, through the same per-package dedupe that places today's callee-owned phantoms (a name P
+already declares for its own companion is not declared twice). Two assemblies' `ᴀ2` are different C# types with
+equal `Dims`. Identity still holds because `synthType` interns on the dims VALUES, not on the phantom type. Arm: a
+GolibTests case declares two distinct `IGoArrayDims` classes with `[2]` and asserts `abi.TypeFor<array<@string>, A>()`
+and `abi.TypeFor<array<@string>, B>()` are the same box.
+
+**(b) The producer writes a record; the consumer reads it; no record means arity 1.** A package whose exported
+generic gains the overload writes one assembly record per companion position into its `package_info.cs`:
+
+```csharp
+[assembly: GoArrayDimsCompanion("Make", 0)]
+```
+
+(function name, which Go makes unique per package; type-parameter index). golib gains the attribute, beside
+`GoDynamicTypeLiftAttribute`. A consumer reads it from the imported package's `package_info.cs` the way
+`GoDynamicTypeLift` records are read (`importOperations.go`), and `stdlib-metadata.txt` carries it for
+`-recurse=nuget`, where there is no converted tree (`go generate .` owed in the cut, gated by
+`TestStdLibMetadataInSync`). The consumer never re-derives "the body reaches a sink" from the callee's Go
+source, so producer and consumer cannot disagree: a consumer converted against an older `go.unique` finds no
+record, emits arity 1, and the call refuses by name at run time instead of failing CS0305. This also answers P3's
+open point about whether the callee's syntax is loaded at every call site: the record makes it unnecessary. The
+unique test host is a different assembly of the same Go package: it reads production's record, which the
+`-tests` pipeline writes first (production converts before tests).
 
 ## 4. Population (go1.26.11, go/types over std plus tests; the cut re-measures it)
 
@@ -119,17 +171,37 @@ instantiations: 0, unchanged.
    do not move, because TestMakeAllocs was one disclosed test before and is one after.
 2. A new behavioral fixture `UnnamedArrayTypeArgDescriptor`: `unique.Make` over `[2]string{"a","b"}`,
    `[2]string{"a","c"}`, `[2]string{"a","b"}` again and `[3]string{"a","b","c"}`; prints handle equalities and
-   `Value()`s. RED at base by the panic text; matches `go run` at the cut.
+   `Value()`s, plus the rows below (one sub-library, `wrap`, for the exported forwarder). RED at base by the panic
+   text; matches `go run` at the cut.
 3. GolibTests identity arm: `abi.TypeFor<array<@string>, ᴀ2>()` is the same box as `abi.TypeOf` of a `[2]string`
    value, differs from the `ᴀ3` box, and `Size()` reads 32 on amd64; `TypeFor<T, ᴀnone>()` is the same box as
    `TypeFor<T>()` for a non-array `T`.
 4. Corpus footprint (the seeded reconvert, four flavours): `unique/handle.cs` gains the arity-2 overload and its
    arity-1 forwarder; `unique/PublicSurface` gains one line; `internal/abi/type_impl.cs` (hand-owned) gains the
-   overload. No other production file moves. Test side: `unique/handle_test.cs` two pair-leg call sites move to
+   overload; `unique/package_info.cs` gains one `GoArrayDimsCompanion` record; golib gains the attribute;
+   `stdlib-metadata.txt` gains the record. No other production file moves. Test side: `unique/handle_test.cs` two pair-leg call sites move to
    arity 2.
 5. CNR: NO REGRESSION apart from the new fixture; no behavioral program today instantiates a sink-reaching
    generic with an unnamed array (census owed in the cut).
 6. ApiCompat: additions only (unique, internal/abi); no suppression.
+
+Near-miss and let-through rows (in the fixture, each with its Go output as the oracle):
+
+| Row | C# call | What `Make` reads | Expected |
+|---|---|---|---|
+| unnamed `[2]string`, `[3]string` | `Make<array<@string>, ᴀ2>`, `ᴀ3` | dims descriptors, two maps | matches Go (the cure) |
+| `*[2]string` | arity 1, `Make<ж<array<@string>>>` | a pointer descriptor: size 8, no dims needed | matches Go, equal by pointer |
+| `struct{ a [2]string }` | arity 1, the lifted struct | the struct's size from its stamped field dims | matches Go |
+| defined `type pair [2]string` | arity 1, `Make<pair>` | the wrapper's own length | matches Go |
+| method value `f := unique.Make[[2]string]` | binds `Make<array<@string>, ᴀ2>` | dims descriptor | matches Go |
+| unexported wrapper in `main` | `wrap<array<@string>, ᴀ2>` forwards `Tᴀ` | dims descriptor | matches Go |
+| exported `wrap.Wrap` in a sub-library | `Wrap<array<@string>, ᴀ2>`, record read across | dims descriptor | matches Go |
+
+`[][2]string` is not a row: a slice is not comparable, so `Make` cannot take it.
+
+**Prediction risk (P3 NIT 5).** The pair legs run the hand-owned `unique/clone.cs` over a sized array of strings
+for the first time. Prediction 1 can miss on `clone`'s array arm rather than on the descriptor; a miss there is
+classified before it is called a descriptor fault.
 
 ## 6. Red first and arms
 
@@ -139,8 +211,22 @@ instantiations: 0, unchanged.
   (consumer arity-1 calls fail to compile) and drop the call-site arm (the fixture panics again).
 - Neuter arm for the identity guard: make the overload return `synthType(typeof(T), null)`; prediction 3 reds by
   name.
+- Guard arm (3.1): `abi.TypeFor<nint, ᴀ2>()` panics by name; with the `array<>` check removed, it returns a box and
+  the arm reds.
+- Cross-assembly arms (3.5): two phantoms with equal dims, one box; delete the record line from a consumer's input
+  and the call site emits arity 1 (a converter unit test reads the emission).
 
-## 7. Open questions for the ruling
+## 7. Rulings (COORD 2026-11-25 17:06Z, on P3's verdict)
+
+1. OVERLOAD for an exported generic that reaches a type-only sink. The zero-value shape of an exported function
+   keeps its refusal for now; one rule for exported functions is the end state, named as this rule's follow-up.
+2. Scope: `abi.TypeFor` and `unique.Make` now; `reflect.TypeFor` and `reflect.TypeAssert` are their own seat
+   with their own reading.
+3. Tier 2, `[EditorBrowsable(Never)]`, in the ApiCompat baseline. Converted consumers BIND the arity-2 method,
+   so it is binary-stable within a Go minor release like the rest of tier 2. The `internal/abi` overload is tier 3
+   like the rest of that package.
+
+Revision 1's questions, kept for the record:
 
 1. Overload (3.3) versus refusal for exported generics: this design takes the overload because it moves no
    consumer. The alternative is to keep refusing and disclose the pair legs forever.
