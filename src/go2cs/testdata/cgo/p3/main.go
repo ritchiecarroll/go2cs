@@ -35,6 +35,10 @@ struct go2cs_probe_entry
     struct go2cs_probe_entry *next;
 };
 
+struct go2cs_probe_pair { int a; int b; };
+int go2cs_probe_add_into(struct go2cs_probe_pair *dst, const struct go2cs_probe_pair *x, const struct go2cs_probe_pair *y);
+int go2cs_probe_pair_and_int(struct go2cs_probe_pair *dst, int *n);
+
 struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
 int go2cs_probe_next_family(struct go2cs_probe_entry *node);
@@ -77,6 +81,13 @@ type goRefHost struct {
 	p *int
 	n int32
 	c int8
+}
+
+// goPairHost holds a Go array, so a view of it as a C struct has no storage C can read here (its array is a managed
+// reference): the struct image door hands C an image of the whole value (19.9).
+type goPairHost struct {
+	a, b int32
+	pad  [8]byte
 }
 
 // same returns the pointer it was handed: a user function whose result is an unsafe.Pointer.
@@ -429,6 +440,20 @@ func main() {
 		s := goRefHost{p: new(int)}
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&s.c)), 1)
 		fmt.Println("goviewsame", int(n), s.c, s.p != nil)
+	case "imgaddinto":
+		// The struct image door, B5: three views of ONE Go value are one object to C, as under Go. dst == x, and the
+		// second store reads the first (a = 2+2, b = 4+3): Go prints 1 4 7, where three copies would read 0 4 5.
+		g := goPairHost{a: 2, b: 3}
+		v := (*C.struct_go2cs_probe_pair)(unsafe.Pointer(&g))
+		same := C.go2cs_probe_add_into(v, v, v)
+		fmt.Println("imgaddinto", int(same), g.a, g.b)
+	case "imgmixed":
+		// B5's mixed case: a view of g and a pointer to g.b name one Go value. Go runs it on one memory; go2cs refuses by
+		// name rather than hand C an image and a copy of the same value.
+		g := goPairHost{a: 2, b: 3}
+		v := (*C.struct_go2cs_probe_pair)(unsafe.Pointer(&g))
+		n := C.go2cs_probe_pair_and_int(v, (*C.int)(unsafe.Pointer(&g.b)))
+		fmt.Println("imgmixed", int(n), g.a, g.b)
 	case "outstrtod":
 		// The out-parameter, shape (i) (18.12 item 4): strtod's char ** endptr is &end, a Go variable C writes. strtod,
 		// not strtol: glibc's C23 headers rename strtol to __isoc23_strtol, which go2cs refuses by name (GO2CS2001).

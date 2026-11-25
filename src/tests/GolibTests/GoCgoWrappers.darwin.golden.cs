@@ -144,8 +144,10 @@ static unsafe partial class cgotestꓸC_package
     {
         _Ctype_struct_tmᴍ.CheckLayoutᴍ();
 
+        global::go.golib.GoCgoImages images = default;
+
         long m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.ScalarPointer(p0, "gmtime_r", out nuint n0, out global::go.golib.GoCgoPin g0);
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.ScalarPointer(p0, "gmtime_r", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -155,7 +157,7 @@ static unsafe partial class cgotestꓸC_package
         }
 
         _Ctype_struct_tmᴍ m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "gmtime_r", out nuint n1);
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "gmtime_r", ref images, out nuint n1, out global::go.golib.GoCgoPin g1);
         nint a1 = (nint)n1;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -167,9 +169,12 @@ static unsafe partial class cgotestꓸC_package
         nint r;
 
         fixed (byte* f0 = g0)
+        fixed (byte* f1 = g1)
         {
             if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
                 a0 = g0.Address(f0);
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
 
             global::go.runtime_package.syscallEntersyscall();
 
@@ -185,6 +190,7 @@ static unsafe partial class cgotestꓸC_package
             if (r != a1)
             {
                 global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)r, g0, f0, "gmtime_r");
+                global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)r, g1, f1, "gmtime_r");
             }
         }
 
@@ -193,6 +199,8 @@ static unsafe partial class cgotestꓸC_package
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
             ᴍout__Ctype_struct_tmᴍ(ref p1.Value, m1);
+
+        images.CopyBack();
 
         if (r != 0 && r == a1)
             return p1;
@@ -209,8 +217,10 @@ static unsafe partial class cgotestꓸC_package
     {
         _Ctype_struct_go2cs_probe_pairᴍ.CheckLayoutᴍ();
 
+        global::go.golib.GoCgoImages images = default;
+
         _Ctype_struct_go2cs_probe_pairᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_add_into", out nuint n0);
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_add_into", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -220,7 +230,7 @@ static unsafe partial class cgotestꓸC_package
         }
 
         _Ctype_struct_go2cs_probe_pairᴍ m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "go2cs_probe_add_into", out nuint n1);
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "go2cs_probe_add_into", ref images, out nuint n1, out global::go.golib.GoCgoPin g1);
         nint a1 = (nint)n1;
         bool s1 = false;
 
@@ -239,7 +249,7 @@ static unsafe partial class cgotestꓸC_package
         }
 
         _Ctype_struct_go2cs_probe_pairᴍ m2 = default;
-        global::go.golib.GoCgoStructPointer k2 = global::go.golib.GoCgoArgs.StructPointer(p2, "go2cs_probe_add_into", out nuint n2);
+        global::go.golib.GoCgoStructPointer k2 = global::go.golib.GoCgoArgs.StructPointer(p2, "go2cs_probe_add_into", ref images, out nuint n2, out global::go.golib.GoCgoPin g2);
         nint a2 = (nint)n2;
         bool s2 = false;
 
@@ -263,15 +273,28 @@ static unsafe partial class cgotestꓸC_package
         }
 
         int r;
-        global::go.runtime_package.syscallEntersyscall();
 
-        try
+        fixed (byte* f0 = g0)
+        fixed (byte* f1 = g1)
+        fixed (byte* f2 = g2)
         {
-            r = go2cs_probe_add_intoᴍnative(a0, a1, a2);
-        }
-        finally
-        {
-            global::go.runtime_package.syscallExitsyscall();
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
+            if (k2 == global::go.golib.GoCgoStructPointer.Pinned)
+                a2 = g2.Address(f2);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_add_intoᴍnative(a0, a1, a2);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -282,6 +305,8 @@ static unsafe partial class cgotestꓸC_package
 
         if (k2 == global::go.golib.GoCgoStructPointer.Mirror && !s2)
             ᴍout__Ctype_struct_go2cs_probe_pairᴍ(ref p2.Value, m2);
+
+        images.CopyBack();
 
         return (@int)(int32)r;
     }
@@ -295,8 +320,10 @@ static unsafe partial class cgotestꓸC_package
     {
         _Ctype_struct_go2cs_probe_hfaᴍ.CheckLayoutᴍ();
 
+        global::go.golib.GoCgoImages images = default;
+
         _Ctype_struct_go2cs_probe_hfaᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_hfa_scale", out nuint n0);
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_hfa_scale", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -306,19 +333,28 @@ static unsafe partial class cgotestꓸC_package
         }
 
         double r;
-        global::go.runtime_package.syscallEntersyscall();
 
-        try
+        fixed (byte* f0 = g0)
         {
-            r = go2cs_probe_hfa_scaleᴍnative(a0, (float64)p1);
-        }
-        finally
-        {
-            global::go.runtime_package.syscallExitsyscall();
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_hfa_scaleᴍnative(a0, (float64)p1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
             ᴍout__Ctype_struct_go2cs_probe_hfaᴍ(ref p0.Value, m0);
+
+        images.CopyBack();
 
         return (@double)(float64)r;
     }
@@ -477,8 +513,10 @@ static unsafe partial class cgotestꓸC_package
     {
         _Ctype_struct_go2cs_probe_taggedᴍ.CheckLayoutᴍ();
 
+        global::go.golib.GoCgoImages images = default;
+
         _Ctype_struct_go2cs_probe_taggedᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_tagged_double", out nuint n0);
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_tagged_double", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -488,19 +526,28 @@ static unsafe partial class cgotestꓸC_package
         }
 
         int r;
-        global::go.runtime_package.syscallEntersyscall();
 
-        try
+        fixed (byte* f0 = g0)
         {
-            r = go2cs_probe_tagged_doubleᴍnative(a0);
-        }
-        finally
-        {
-            global::go.runtime_package.syscallExitsyscall();
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = go2cs_probe_tagged_doubleᴍnative(a0);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
             ᴍout__Ctype_struct_go2cs_probe_taggedᴍ(ref p0.Value, m0);
+
+        images.CopyBack();
 
         return (@int)(int32)r;
     }
@@ -641,8 +688,10 @@ static unsafe partial class cgotestꓸC_package
     {
         _Ctype_struct_utsnameᴍ.CheckLayoutᴍ();
 
+        global::go.golib.GoCgoImages images = default;
+
         _Ctype_struct_utsnameᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "uname", out nuint n0);
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "uname", ref images, out nuint n0, out global::go.golib.GoCgoPin g0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -652,19 +701,28 @@ static unsafe partial class cgotestꓸC_package
         }
 
         int r;
-        global::go.runtime_package.syscallEntersyscall();
 
-        try
+        fixed (byte* f0 = g0)
         {
-            r = unameᴍnative(a0);
-        }
-        finally
-        {
-            global::go.runtime_package.syscallExitsyscall();
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = unameᴍnative(a0);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
             ᴍout__Ctype_struct_utsnameᴍ(ref p0.Value, m0);
+
+        images.CopyBack();
 
         return (@int)(int32)r;
     }

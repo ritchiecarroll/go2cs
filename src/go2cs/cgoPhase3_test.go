@@ -374,6 +374,10 @@ const cgoP3ReturnedIntoGoMemory = "returned an address inside the Go memory it w
 // (GoCgoArgs.ScalarPointer; P3's review of 1b, item 3).
 const cgoP3WideReinterpret = "C may write past one"
 
+// cgoP3ImageTwoDoors is in the refusal of one Go value handed to C as an image and through another door
+// (GoCgoImages; the struct image door's B5).
+const cgoP3ImageTwoDoors = "name the same Go value"
+
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
 // 0 both ways. Since increment 3.2 seat 1b (18.12, P-2) an arm that hands C or a helper a pointer into Go memory whose
 // box names its storage prints as Go does: the wrapper pins the storage for the call. govoidnumber and govoidexpr hand
@@ -447,6 +451,9 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "resultstrcpyself"},
 		{name: "goviewwide", csFails: cgoP3WideReinterpret},
 		{name: "goviewsame"},
+		// The struct image door (19.9): one image per root (B5), against Go, and the mixed case refused by name.
+		{name: "imgaddinto"},
+		{name: "imgmixed", csFails: cgoP3ImageTwoDoors},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does, and since seat 1a
 		// (18.9) s6nextnil, s6nextdirect and s6name do too: the field accessor retired their cgoP3LayoutEntry pins (the
 		// readings before it are at cgoP3LayoutEntryPointer). Since seat 1c (18.11) s6next does too: the **C.T door
