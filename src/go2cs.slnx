@@ -1509,8 +1509,8 @@
     <Project Path="tests/Performance/PerfStringView/PerfStringView.csproj" />
     <Project Path="tests/Performance/PerfTlsHandshake/PerfTlsHandshake.csproj" />
   </Folder>
-  <Folder Name="/utilities/">
+  <Folder Name="/tools/">
     <File Path="set-version.ps1" />
-    <Project Path="utilities/UpdateTestTargets/UpdateTestTargets.csproj" />
+    <Project Path="tools/UpdateTestTargets/UpdateTestTargets.csproj" />
   </Folder>
 </Solution>
