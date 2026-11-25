@@ -6,7 +6,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using hooks = DefinedFuncTypeIdentity.hooks_package;
 using DefinedFuncTypeIdentity;
-using ꓸꓸꓸF = Span<main_package.F>;
+using ꓸꓸꓸF = variadic<main_package.F>;
 
 partial class main_package {
 

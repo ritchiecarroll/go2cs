@@ -40,6 +40,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"go2cs/internal/clihelp"
 )
 
 // resolveGo2CSPathDefault answers the DEFAULT for the -go2cspath flag: a user-set GO2CSPATH when the
@@ -253,65 +255,79 @@ func main() {
 	// into the converter's environment — see resolveGo2CSPathDefault for why that mattered.
 	go2csPath = resolveGo2CSPathDefault(goPath)
 
-	// Define command line flags for options
-	defaultStdLibTagList := strings.Join(defaultStdLibBuildTags, ",")
-
+	// Define command line flags for options. Each one's usage text is its summary in the option table
+	// (commandLineHelp.go); clihelp.Summary panics on a flag the table does not hold.
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	commandLine.SetOutput(io.Discard)
 
-	versionCmd := commandLine.Bool("version", false, "Print the converter's release tuple (go2cs release, converter revision, go.* package version, Go toolchains, VCS revision) as key=value lines and exit")
-	goRootCmd := commandLine.String("goroot", goRoot, "Path to Go root directory")
-	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
-	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
-	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library (implies -tags "+defaultStdLibTagList+" by default; pass an explicit -tags to override)")
-	convertTimeoutCmd := commandLine.Duration("convert-timeout", defaultConvertTimeout, "Per-package cap the -stdlib driver applies to ONE package's conversion; Go duration syntax, must be greater than zero. It is a safety net against a hung conversion, never a performance assumption -- a slow host under concurrent load can legitimately need far more than the default, and a package that hits it stops the run (exit 1), and failed_packages.txt lists it with every package not yet converted, for a resume")
-	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project (implies -tags "+defaultStdLibTagList+" by default, as -stdlib does)")
-	testActionCmd := commandLine.String("test-action", "convert", "Converted-test action: convert, build, run, compare, or all")
-	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare); the test host's dotnet publish gets at least 30m")
-	testDeadlineCmd := commandLine.Duration("test-deadline", defaultTestDeadline, "Per-test deadline for the CONVERTED host under -test-action run/compare/all: a top-level test still running this long after it started is reported failed and ABANDONED (labelled so in the comparison), and the run goes on to the next test. Without it a hung test held the host to -test-timeout and every later test went unmeasured. 0 disables it. The Go side is unbounded, as `go test` is. A row whose own legitimate test outlasts the default takes a per-row floor (run-validated-sweep.ps1 $testDeadlineFloors)")
-	testFilterCmd := commandLine.String("test-filter", "", "Regex handed VERBATIM to BOTH sides of a -test-action compare (go test -run and the converted host --run), so the two runs filter identically. Intended for the block-gated census: exclude a test that BLOCKS the suite by passing an anchored alternation of the parents to keep. A gated census is DIAGNOSTIC ONLY and must never bank a row -- the row banks from an ungated run, after the block is rooted or the divergence disclosed")
-	testOracleVetOffCmd := commandLine.Bool("test-oracle-vet-off", false, "Run the -tests compare's ORACLE (`go test`) with -vet=off, for a package whose own `go test` fails at go test's vet checks rather than at a test (github.com/pmezard/go-difflib v1.0.0: two Example names its vet rejects). Off by default, and set per run, so per module. The run first reads go test's vet subset with `go vet -json`, refuses the option for a package that vet passes, and states every finding, by analyzer, on the package's proof page and in MODULE.md. The converted side is compared test by test against the -vet=off run")
-	testOracleGOARCHCmd := commandLine.String("test-oracle-goarch", "", "The GOARCH the -tests compare's ORACLE (`go test`) runs at, when it must differ from the target's: the arch the converted host process runs at. Empty (the default) is the target's own. The conversion, the converted host and the manifest keep the target. For a host whose native arch differs from the corpus target's, osx-arm64 running the darwin/amd64 corpus, where the default ran the oracle under Rosetta and read Rosetta's own behaviour as the package's. Recorded as oracleGoarch in the comparison record when it differs")
-	testConfigCmd := commandLine.String("test-config", "Release", "Publish/run configuration for the converted test host: Release (default since 2026-09-02 -- the validation configuration of RECORD, with an explicit -p:go2csPath replacing the Debug-conditional csproj-template default, and the CLR's tiered JIT disabled by default, see -test-tiered) or Debug (the pre-2026-09-02 default, still fully supported by flag). Recorded on every proof page and in the comparison record so a verdict carries the level it was measured at. The default moved on the deployment owner's ruling, gated on the Release census (docs/phase4/CENSUS-release-tc0-delta.md), not on this flag's own authority")
-	testTieredCmd := commandLine.Bool("test-tiered", false, "With -test-config Release, opt back IN to the CLR's default tiered JIT (Release's own default is DOTNET_TieredCompilation=0, since a verdict that depends on JIT promotion timing is not reproducible run to run). Meaningless with -test-config Debug. It changes what the C# host's JIT does, not what the converter emits")
-	testBuildMaxCPUCmd := commandLine.Int("test-build-maxcpu", 0, "Cap the MSBuild nodes of the converted test host's dotnet publish, the only dotnet command a -tests run starts, by passing it -m:N. 0 (the default) passes no -m, and MSBuild uses one node per logical processor. Only an explicit -m on the command line caps it: a Directory.Build.rsp or MSBUILDNODECOUNT in the tree did not (measured on the i9, 2026-10-18)")
-	testPublishBinlogCmd := commandLine.Bool("test-publish-binlog", false, "Have the converted test host's dotnet publish write an MSBuild binary log to <output>/bin/tests/publish.binlog, from the first attempt, KEPT only when the publish fails and deleted when it succeeds. For census and battery sweeps chasing a build failure that passes on a re-run; costs ~35% of a warm publish")
-	testModuleDisclosuresCmd := commandLine.String("module-disclosures", "", "With -tests on a third-party module: the committed tree of module rows' disclosure manifests (<root>/<module>@<version>/<package dir>/go2cs_test_disclosures.json, e.g. src/tests/ModuleDisclosures). Read only when the package's output directory holds no manifest, and only for the module version this run resolved")
-	testModuleVersionCmd := commandLine.String("module-version", "", "With -tests -module-disclosures on a module source that is not a module-cache directory (a copy of the module): the version the copy is, e.g. v1.62.0. A copy carries no version of its own. Refused when it contradicts the module-cache directory's version; without it, -module-disclosures on a copy is refused before any conversion")
-	testAllowHandOwnCmd := commandLine.Bool("test-allow-handown", false, "Convert a package the -stdlib queue deliberately skips (testing, unsafe, builtin, cmd/...) as a -tests target anyway. Refused by default: `testing` IS the hand-owned Phase-4 test host, and the pipeline's natural output path is the very directory the host lives in, so a mistyped command overwrites it (measured 2026-09-03 -- the run replaced src/core/testing/testing.cs with Go's converted testing.go). Pass this ONLY with a BARE scratch output root, for a deliberate measurement whose emission is thrown away; it is not a route to banking such a package, which would still hit the F15b 'ONE testing package, period' collision. Consulted AFTER the hand-own host path since 2026-09-20, so what this flag does depends on what is AT the output root: on a BARE root it keeps the full production census measured 2026-09-03 (no csproj there, so the host path cannot open), while at a hand-owned counterpart's own directory -- or at a root SEEDED from src/core, which carries that counterpart's csproj and markers and so is NOT bare -- the host path wins instead, the run converts TESTS ONLY, and no production file is emitted over a hand-own")
+	versionCmd := commandLine.Bool("version", false, clihelp.Summary("version"))
+	goRootCmd := commandLine.String("goroot", goRoot, clihelp.Summary("goroot"))
+	goPathCmd := commandLine.String("gopath", goPath, clihelp.Summary("gopath"))
+	go2csPathCmd := commandLine.String("go2cspath", go2csPath, clihelp.Summary("go2cspath"))
+	convertStdLibCmd := commandLine.Bool("stdlib", false, clihelp.Summary("stdlib"))
+	convertTimeoutCmd := commandLine.Duration("convert-timeout", defaultConvertTimeout, clihelp.Summary("convert-timeout"))
+	convertTestsCmd := commandLine.Bool("tests", false, clihelp.Summary("tests"))
+	testActionCmd := commandLine.String("test-action", "convert", clihelp.Summary("test-action"))
+	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, clihelp.Summary("test-timeout"))
+	testDeadlineCmd := commandLine.Duration("test-deadline", defaultTestDeadline, clihelp.Summary("test-deadline"))
+	testFilterCmd := commandLine.String("test-filter", "", clihelp.Summary("test-filter"))
+	testOracleVetOffCmd := commandLine.Bool("test-oracle-vet-off", false, clihelp.Summary("test-oracle-vet-off"))
+	testOracleGOARCHCmd := commandLine.String("test-oracle-goarch", "", clihelp.Summary("test-oracle-goarch"))
+	testConfigCmd := commandLine.String("test-config", "Release", clihelp.Summary("test-config"))
+	testTieredCmd := commandLine.Bool("test-tiered", false, clihelp.Summary("test-tiered"))
+	testBuildMaxCPUCmd := commandLine.Int("test-build-maxcpu", 0, clihelp.Summary("test-build-maxcpu"))
+	testPublishBinlogCmd := commandLine.Bool("test-publish-binlog", false, clihelp.Summary("test-publish-binlog"))
+	testModuleDisclosuresCmd := commandLine.String("module-disclosures", "", clihelp.Summary("module-disclosures"))
+	testModuleVersionCmd := commandLine.String("module-version", "", clihelp.Summary("module-version"))
+	testAllowHandOwnCmd := commandLine.Bool("test-allow-handown", false, clihelp.Summary("test-allow-handown"))
 	var recurseVal recurseMode
-	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=module to convert only the module's own packages, leaving the third-party closure referenced but unconverted, and -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references (values combine: -recurse=module,nuget)")
-	moduleSafeTagCmd := commandLine.Bool("module-safe-tag", true, "With -recurse: convert the module, and with -tests run its go test baseline, with the build tags "+strings.Join(defaultModuleBuildTags, ",")+", so a library that ships a fallback for something converted code cannot do uses it: `safe` for unsafe pointer arithmetic into Go runtime internals (testify's internal/spew), `purego` and `noasm` for hand-written assembly (klauspost/cpuid/v2); -module-safe-tag=false drops all three and builds the module's default file set (an explicit -tags overrides both)")
+	commandLine.Var(&recurseVal, "recurse", clihelp.Summary("recurse"))
+	moduleSafeTagCmd := commandLine.Bool("module-safe-tag", true, clihelp.Summary("module-safe-tag"))
 	var nugetMapVals, nugetMapExcludeVals stringListFlag
-	commandLine.Var(&nugetMapVals, "nuget-map", "With -recurse=nuget (where mapping is ON by default): a Go-module -> NuGet-package mapping source, a local file or an https:// URL in nugetgo.net's schema v1; REPEATABLE, and the listed order is the precedence (the first source naming a module answers it). The nugetgo.net registry (https://nugetgo.net/v1/mappings.txt) answers every module the listed sources do not name, unless -nuget-map-only. A mapped module is referenced as its published package (one exact-pinned PackageReference, locked in go2cs.nuget.lock) when a version built for this go2cs release describes it exactly; otherwise it converts locally and the report says why. 'off' disables mapping entirely")
-	nugetMapOnlyCmd := commandLine.Bool("nuget-map-only", false, "With -nuget-map: use only the listed sources, dropping the nugetgo.net fallback, so a module they do not name stays local and the registry is never fetched")
-	commandLine.Var(&nugetMapExcludeVals, "nuget-map-exclude", "With -recurse=nuget: a module path that is never mapped, whatever a source says; repeatable")
-	nugetMapRefreshCmd := commandLine.Bool("nuget-map-refresh", false, "With -recurse=nuget: fetch every URL source unconditionally (bypassing the cache) and re-resolve every module, adopting what the sources now say instead of what go2cs.nuget.lock pinned")
-	nugetMapCanonicalOnlyCmd := commandLine.Bool("nuget-map-canonical-only", false, "With -recurse=nuget: apply canonical mappings only (the module owner's own conversion); a community mapping is treated as unmapped")
-	nugetMapFeedCmd := commandLine.String("nuget-map-feed", "", "With -recurse=nuget: read mapped packages' versions from this feed INSTEAD of nuget.org -- an https:// NuGet v3 service index (a rehearsal gallery such as int.nugettest.org) or a local folder of nupkgs; a rehearsal version (nugetgo-pack.ps1 -RehearsalSuffix) is admitted only from it. The restore of the emitted projects reads your own package sources, so name the feed there too")
-	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64,linux/arm64), which with -stdlib emits the multi-platform (layout L3) corpus — one flavour per target")
-	platformCensusCmd := commandLine.String("platform-census", "", "With -stdlib and two or more -platforms targets: convert once per target into an isolated seeded staging root under this directory, classify the emissions (shared/variant/partial/exclusive) and write platform-manifest.json there. Emits NO corpus output")
-	refCensusCmd := commandLine.String("ref-census", "", "With -stdlib: run the ж-box A1 ref-lowering classification census (analysis only, never emits) over the standard library — once per -platforms target — and write the JSON report to this path. See docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1")
-	platformStageCmd := commandLine.String("platform-stage", "", "Directory a multi-platform -stdlib EMISSION stages its per-target conversions in (kept afterwards for inspection); when omitted, the run stages in .go2cs-platform-stage under the output root, reclaims anything an earlier run left there, and removes it at the end")
-	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones (with -stdlib or -tests, "+defaultStdLibTagList+" is applied by default, and with -recurse "+strings.Join(defaultModuleBuildTags, ",")+"; any explicit -tags value replaces the default entirely)")
-	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
-	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
-	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, "Hoist mode, the standard library's: each string literal in a value slot with a readable name becomes one `static readonly` field (`F(helloˢ)`), and every other literal takes the default plain mode's cached form (`F(\"hello\")`, converted once and shared by golib). The standard library always hoists; this opts any other package in")
-	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
-	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
-	provenanceCmd := commandLine.Bool("provenance", false, "Include in each converted file a notice naming its Go source and module and that go2cs modified it by conversion (no timestamp)")
-	trimPathCmd := commandLine.Bool("trimpath", true, "Record a main-module source in the converted position maps the way `go build -trimpath` bakes it, <module path>/<path in module>, so the output names no directory of this machine; -trimpath=false records the absolute source path, as an untrimmed `go build` does")
-	inlineArraysCmd := commandLine.String("inline-arrays", "", "Override inline-array admission per package (comma-separated import-path patterns, each an exact path or a /... prefix). A pattern forces its packages ON with the declaration-local population: every struct the package declares or spells that holds an array and passes the caps holds its arrays inline (go.arrays). A -<pattern> turns admission OFF. With no override, a struct is admitted when its own package converts it whole through unsafe.Pointer (the auto rule); the standard library is never admitted")
-	warnCmd := commandLine.String("warn", "", "Downgrade the listed converter refusal codes to warnings (comma-separated), so a package holding a refused site still converts; each downgraded site fails loud, a panic carrying the refusal text, when reached, and the build reports it (GO2CS0011). Opt-in per code, never a default; only GO2CS2002 is allowed (an unknown or disallowed code is an error that names it)")
-	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
-	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Convert a single cgo package: load it cgo-on (CGO_ENABLED=1; needs a C compiler) and convert it when every C use it makes is one cgo support binds (calls of C functions a shared library defines; docs/Limitations.md). Any other use is refused by name, with the phase that owns it, before anything is written. Converts for the host's own target, or for another -platforms target when CC names that target's C compiler (for example the pinned zig, CC=\"zig cc -target <triple>\"); without one another target is refused, for a package with no C in it too. Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way; a package that imports runtime/cgo or plugin, whose cgo-off builds are not working builds of their cgo API, is refused by name, and one that imports net or os/user binds their cgo-off builds, as Go does with CGO_ENABLED=0")
-	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
-	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
-	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
-	allowStaleConverterCmd := commandLine.Bool("allow-stale-converter", false, "Proceed with a -stdlib or -tests run even when this binary is OLDER than the converter sources beside it. Those two drivers otherwise refuse, because their output is banked or measured and a stale run emits the previous converter's C# while exiting 0. Pass this for the one deliberate case: an A/B against a PRESERVED binary, where the pinned binary IS the measurement (see converterStaleness.go)")
-	dualRecvCmd := commandLine.Bool("dual-recv", false, "Experimental, for converter development: eligible pointer-receiver methods also emit a form that takes the receiver by reference, beside the default form. Off by default; output made with it is not validated")
-	dualRecvParamsCmd := commandLine.Bool("dual-recv-params", false, "Experimental, requires -dual-recv: those forms also lower their pointer parameters, and call sites choose between the two forms. Off by default")
-	probeCacheCmd := commandLine.String("probe-cache", "", "Go build cache (GOCACHE) for the escape probe's go build/go test runs, kept apart from your own GOCACHE; default go2cs/probe-cache under the user cache directory, or $"+probeCacheEnv+". Go trims it by its own rule, and deleting it is always safe")
+	commandLine.Var(&nugetMapVals, "nuget-map", clihelp.Summary("nuget-map"))
+	nugetMapOnlyCmd := commandLine.Bool("nuget-map-only", false, clihelp.Summary("nuget-map-only"))
+	commandLine.Var(&nugetMapExcludeVals, "nuget-map-exclude", clihelp.Summary("nuget-map-exclude"))
+	nugetMapRefreshCmd := commandLine.Bool("nuget-map-refresh", false, clihelp.Summary("nuget-map-refresh"))
+	nugetMapCanonicalOnlyCmd := commandLine.Bool("nuget-map-canonical-only", false, clihelp.Summary("nuget-map-canonical-only"))
+	nugetMapFeedCmd := commandLine.String("nuget-map-feed", "", clihelp.Summary("nuget-map-feed"))
+	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), clihelp.Summary("platforms"))
+	platformCensusCmd := commandLine.String("platform-census", "", clihelp.Summary("platform-census"))
+	refCensusCmd := commandLine.String("ref-census", "", clihelp.Summary("ref-census"))
+	platformStageCmd := commandLine.String("platform-stage", "", clihelp.Summary("platform-stage"))
+	buildTagsCmd := commandLine.String("tags", "", clihelp.Summary("tags"))
+	indentSpacesCmd := commandLine.Int("indent", 4, clihelp.Summary("indent"))
+	preferVarDeclCmd := commandLine.Bool("var", true, clihelp.Summary("var"))
+	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, clihelp.Summary("hoist-literals"))
+	useChannelOperatorsCmd := commandLine.Bool("uco", true, clihelp.Summary("uco"))
+	licenseCmd := commandLine.String("license", "", clihelp.Summary("license"))
+	provenanceCmd := commandLine.Bool("provenance", false, clihelp.Summary("provenance"))
+	trimPathCmd := commandLine.Bool("trimpath", true, clihelp.Summary("trimpath"))
+	inlineArraysCmd := commandLine.String("inline-arrays", "", clihelp.Summary("inline-arrays"))
+	warnCmd := commandLine.String("warn", "", clihelp.Summary("warn"))
+	includeCommentsCmd := commandLine.Bool("comments", false, clihelp.Summary("comments"))
+	parseCgoTargetsCmd := commandLine.Bool("cgo", false, clihelp.Summary("cgo"))
+	showParseTreeCmd := commandLine.Bool("tree", false, clihelp.Summary("tree"))
+	csprojFileCmd := commandLine.String("csproj", "", clihelp.Summary("csproj"))
+	debugModeCmd := commandLine.Bool("debug", false, clihelp.Summary("debug"))
+	allowStaleConverterCmd := commandLine.Bool("allow-stale-converter", false, clihelp.Summary("allow-stale-converter"))
+	dualRecvCmd := commandLine.Bool("dual-recv", false, clihelp.Summary("dual-recv"))
+	dualRecvParamsCmd := commandLine.Bool("dual-recv-params", false, clihelp.Summary("dual-recv-params"))
+	stackAppendCmd := commandLine.String("stack-append", "auto", clihelp.Summary("stack-append"))
+	probeCacheCmd := commandLine.String("probe-cache", "", clihelp.Summary("probe-cache"))
+
+	// The other direction of clihelp.Summary's check: an option the table describes that the flag set does not define
+	// fails at start-up, and so in every test, rather than reaching the help and the page.
+	for _, option := range clihelp.Options() {
+		if commandLine.Lookup(option.Name) == nil {
+			panic("clihelp: option -" + option.Name + " has a table entry but no flag")
+		}
+	}
+
+	// -h, -help and --help answer before the flags are parsed, so `go2cs -help tests` explains an option rather than
+	// failing on a missing input. Help goes to stdout and exits 0.
+	if topic, ok := helpRequest(os.Args[1:]); ok {
+		os.Exit(writeHelp(commandLine, topic, os.Stdout, os.Stderr))
+	}
 
 	var positionals []string
 	positionals, err = parseArgsInterspersed(commandLine, os.Args[1:])
@@ -379,53 +395,7 @@ func main() {
 	buildTags := resolveBuildTags(convertStdLib, *convertTestsCmd, recurseVal.enabled, *moduleSafeTagCmd, tagsExplicit, parseBuildTags(*buildTagsCmd))
 
 	if err != nil || (!convertStdLib && len(inputFilePath) == 0) {
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		}
-
-		fmt.Fprintln(os.Stderr, `
- Usage: go2cs [options] <input_dir> [output_dir]
- 
- Options:`)
-
-		commandLine.SetOutput(nil)
-		commandLine.PrintDefaults()
-
-		fmt.Fprintln(os.Stderr, `
-Examples:
-  go2cs -indent 2 -var=false example.go conv/example.cs
-  go2cs example.go
-  go2cs -cgo=true input_dir output_dir
-  go2cs package_dir
-  go2cs -tests package_dir                  # Convert production sources and package tests
-  go2cs -tests -test-action all package_dir # Convert, build, run, and compare with go test
-  go2cs -stdlib                           # Convert the entire Go standard library (applies the default -tags)
-  go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
-  go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
-  go2cs -recurse module_dir output_root   # Same, with generated src/pkg trees isolated under output_root
-  go2cs -recurse=module module_dir        # Convert only the module's own packages (deps referenced, not converted)
-  go2cs -recurse=nuget module_dir         # Same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
-  go2cs -recurse=module,nuget module_dir  # Values combine: module-only scope with NuGet references
-  go2cs -recurse=nuget -nuget-map mine.txt module_dir
-                                          # Map third-party modules to published packages: mine.txt answers
-                                          # the modules it names, nugetgo.net the rest (the default without it)
-  go2cs -recurse=nuget -nuget-map off module_dir
-                                          # Convert every third-party module locally; no mapping request
-  go2cs -recurse=nuget -nuget-map mine.txt -nuget-map-only module_dir
-                                          # Use mine.txt only; nugetgo.net is never fetched
-  go2cs -stdlib -allow-stale-converter    # Proceed on a DELIBERATELY pinned binary (an A/B against a preserved go2cs);
-                                          # without it, -stdlib and -tests refuse to run a binary older than their sources
-  go2cs -stdlib -comments -tags purego,math_big_pure_go
-                                          # Explicit form of the default: the portable Go implementations over the assembly ones
-  go2cs -stdlib -tags=                    # Opt OUT of the default tags (reproduce the asm-backed default build)
-  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 -platform-census out
-                                          # Emission census: convert once per target into out\<goos>-<goarch>,
-                                          # write out\platform-manifest.json; no corpus output
-  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64
-                                          # Multi-platform corpus (layout L3): files shared by every target
-                                          # stay flat, platform-varying ones land in <pkg>\<goos>, and the
-                                          # .csproj selects one with $(GoTargetOS)
- `)
+		writeUsageError(err, os.Args[1:], os.Stderr)
 		os.Exit(1)
 	}
 
@@ -597,8 +567,15 @@ Examples:
 
 	probeCacheFlag = strings.TrimSpace(*probeCacheCmd)
 
+	stackAppend, stackAppendErr := parseStackAppendMode(*stackAppendCmd)
+
+	if stackAppendErr != nil {
+		log.Fatalln(stackAppendErr)
+	}
+
 	options := Options{
 		warnCodes:           warnCodes,
+		stackAppend:         stackAppend,
 		inlineArrays:        inlineArrays,
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,

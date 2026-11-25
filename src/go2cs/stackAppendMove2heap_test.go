@@ -185,6 +185,7 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 		goPath:              build.Default.GOPATH,
 		go2csPath:           filepath.Join(root, "out"),
 		recurse:             true,
+		stackAppend:         stackAppendOn,
 		targetPlatform:      "linux/amd64",
 		indentSpaces:        4,
 		preferVarDecl:       true,

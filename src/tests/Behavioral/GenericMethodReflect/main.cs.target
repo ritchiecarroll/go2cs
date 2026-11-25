@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
@@ -104,13 +104,11 @@ internal static @string names(reflect.Type t) {
 
 internal static slice<reflect.Value> args(params ꓸꓸꓸany valuesʗp) {
     var values = valuesʗp.sslice();
-    var inᴷ = new stackAppend<reflect.Value>(moves: true);
 
     slice<reflect.Value> @in = default;
     foreach (var (_, a) in range(values)) {
-        @in = append(inᴷ, @in, reflect.ValueOf(a));
+        @in = append(@in, reflect.ValueOf(a));
     }
-    @in = builtin.move2heap(inᴷ, @in);
     return @in;
 }
 

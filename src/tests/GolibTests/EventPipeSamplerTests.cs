@@ -116,7 +116,7 @@ public class EventPipeSamplerTests
         // The unthinned SampleProfiler would give about 2,000.
         int ceiling = threads * hogMilliseconds * hz / 1000 * 3 / 2;
 
-        Console.WriteLine($"managed samples {sampler.LastManagedSamples}, written {stacks.Count}, hog as leaf {leafHog}, with its caller {withHogger}");
+        Console.WriteLine($"READING managed samples {sampler.LastManagedSamples}, written {stacks.Count}, hog as leaf {leafHog}, with its caller {withHogger}");
 
         Assert.IsTrue(withHogger >= leafHog / 2, $"the hog's Go caller is on the sampled stack; {withHogger} of {leafHog}");
         Assert.IsTrue(stacks.Count <= ceiling, $"samples are thinned to {hz} Hz per thread; {stacks.Count} > {ceiling}");
@@ -130,6 +130,8 @@ public class EventPipeSamplerTests
         // No converted path decides where a sample lands. RETIREMENT: the floor is still checked first on macOS, so a
         // runtime that samples the loop body there passes it, and this branch is never reached.
         // The other three assertions above hold on every OS; the floor itself is unchanged.
+        // On osx-arm64 the leaf count straddles the floor, so that RID's ExpectedSkips manifest marks this test MAY SKIP
+        // ('?'), and the READING line above shows the count in the leg's summary whichever way it went.
         if (leafHog < 20 && OperatingSystem.IsMacOS())
         {
             Assert.Inconclusive($"hog as leaf {leafHog} of {stacks.Count}, under the floor of 20: on macOS the CLR's SampleProfiler " +

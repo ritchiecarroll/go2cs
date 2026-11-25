@@ -3,7 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 

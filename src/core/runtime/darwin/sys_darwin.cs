@@ -8,7 +8,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = variadic<uintptr>;
 
 partial class runtime_package {
 
@@ -33,7 +33,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscalln(uintptr f
     uintptr r1 = default;
     uintptr r2 = default;
     uintptr err = default;
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     entersyscall();
     (r1, r2, err) = syscall_rawsyscalln(fn, args.ꓸꓸꓸ);

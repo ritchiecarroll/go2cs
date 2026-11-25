@@ -29,7 +29,7 @@ internal static bool same<T>(T a, T b) {
     return AreEqual(a, b);
 }
 
-internal static nint keyCount<K>(params Span<K> keysʗp) {
+internal static nint keyCount<K>(params variadic<K> keysʗp) {
     var keys = keysʗp.sslice();
 
     var m = new map<K, nint>{};

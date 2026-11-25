@@ -1,6 +1,6 @@
 namespace go.DefinedTypeOverForeignStruct;
 
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class ptlike_package {
 

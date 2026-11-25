@@ -22,7 +22,9 @@
                            their struct, unchanged, and seven in ways the suppression generator must refuse; and the
                            type's two methods into its method holder, a class marked [GoMethodHost]; and the Delta
                            drop (OQ2): ten renames and five negative controls the generator must refuse; and the
-                           clone drop: a struct that lost go.IGoValueClone and its Clone(), and two controls.
+                           clone drop: a struct that lost go.IGoValueClone and its Clone(), and two controls; and the
+                           variadic tail (wall E): seven entries where a params System.Span<X> became go.variadic<X>,
+                           and five controls changed some other way.
 #>
 #Requires -Version 7.0
 $ErrorActionPreference = 'Stop'

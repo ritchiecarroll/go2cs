@@ -85,6 +85,10 @@ var (
 	// cgoRouteFunctions maps each _Cfunc_ or _C2func_ name the package calls to its pseudo-package member.
 	cgoRouteFunctions map[string]string
 
+	// cgoRouteVariables maps each _Cvar_ name the package uses to its pseudo-package member (cgo item 3): *_Cvar_x is
+	// C.x, a ref property over the variable, and _Cvar_x alone is C.Ꮡx, the box over its address.
+	cgoRouteVariables map[string]string
+
 	// cgoCheckClosures maps each recognised call of cmd/cgo's check closure to its unwrap.
 	cgoCheckClosures map[*ast.CallExpr]*cgoCheckClosure
 
@@ -440,6 +444,12 @@ func cgoClosureVariable(ident *ast.Ident, prefix string) int {
 // same under conversions, for the address form; `_cgoN := p` for the variable form; `var _cgoN T = x` for an argument
 // that needs no check), then one check of each checked argument, then the call itself, of exactly _cgo0 … _cgoN-1 in
 // order, returned or as a statement. Anything else is not recognised, and the census refuses it.
+//
+// cgo Phase 3, the pinned class (DESIGN-cgo-phase3-marshaling 18.12 item 5) adds cmd/cgo's element and slice forms (checkIndex,
+// checkSlice): `_cgoIndexN := &a` (or `a` when it is not a variable) with `_cgoN := &(*_cgoIndexN)[i]` under conversions
+// and the check `_cgoCheckPointer(_cgoN, *_cgoIndexN)`; and `_cgoSliceN := s[lo:hi]` with `_cgoN := …_cgoSliceN…` and the
+// check `_cgoCheckPointer(_cgoSliceN, 0 == 0)`. Each variable stands for its definition, as `_cgoBaseN` does, and the
+// wrapper's door makes the check where the call runs: Go memory crosses pinned, and Go pointers in it are refused.
 func cgoRecognizeCheckClosure(funcLit *ast.FuncLit, info *types.Info, plumbing map[types.Object]bool) *cgoCheckClosure {
 	return cgoRecognizeCheckClosureStatements(funcLit.Body.List, info, plumbing)
 }
@@ -451,12 +461,16 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 		formPlain = iota
 		formVariable
 		formAddress
+		formIndex
+		formSlice
 	)
 
 	closure := &cgoCheckClosure{arguments: map[types.Object]cgoClosureArgument{}}
 	forms := map[int]int{}
 	argumentObjects := map[int]types.Object{}
 	baseValues := map[int]ast.Expr{}
+	indexValues := map[int]ast.Expr{}
+	sliceValues := map[int]ast.Expr{}
 	i := 0
 
 	// The definitions.
@@ -479,6 +493,26 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 				continue
 			}
 
+			if index := cgoClosureVariable(lhs, "_cgoIndex"); index >= 0 {
+				if _, seen := indexValues[index]; seen {
+					return nil
+				}
+
+				indexValues[index] = statement.Rhs[0]
+				closure.arguments[info.Defs[lhs]] = cgoClosureArgument{value: statement.Rhs[0]}
+				continue
+			}
+
+			if index := cgoClosureVariable(lhs, "_cgoSlice"); index >= 0 {
+				if _, seen := sliceValues[index]; seen {
+					return nil
+				}
+
+				sliceValues[index] = statement.Rhs[0]
+				closure.arguments[info.Defs[lhs]] = cgoClosureArgument{value: statement.Rhs[0]}
+				continue
+			}
+
 			index := cgoClosureVariable(lhs, "_cgo")
 
 			if index != len(argumentObjects) {
@@ -486,13 +520,31 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 			}
 
 			form := formVariable
+			_, based := baseValues[index]
+			_, indexed := indexValues[index]
+			_, sliced := sliceValues[index]
 
-			if _, based := baseValues[index]; based {
+			switch {
+			case based && !indexed && !sliced:
 				form = formAddress
 
 				if !cgoMentionsOnce(statement.Rhs[0], "_cgoBase", index) {
 					return nil
 				}
+			case indexed && !based && !sliced:
+				form = formIndex
+
+				if !cgoMentionsOnce(statement.Rhs[0], "_cgoIndex", index) {
+					return nil
+				}
+			case sliced && !based && !indexed:
+				form = formSlice
+
+				if !cgoMentionsOnce(statement.Rhs[0], "_cgoSlice", index) {
+					return nil
+				}
+			case based || indexed || sliced:
+				return nil
 			}
 
 			forms[index] = form
@@ -556,8 +608,32 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 			if forms[index] != formAddress || !cgoIsZeroEqualsZero(call.Args[1]) {
 				return nil
 			}
+		} else if index = cgoClosureVariable(target, "_cgoSlice"); index >= 0 {
+			if form, defined := forms[index]; !defined || form != formSlice || !cgoIsZeroEqualsZero(call.Args[1]) {
+				return nil
+			}
 		} else if index = cgoClosureVariable(target, "_cgo"); index >= 0 {
-			if form, defined := forms[index]; !defined || form != formVariable || !cgoIsNil(call.Args[1]) {
+			form, defined := forms[index]
+
+			switch {
+			case !defined:
+				return nil
+			case form == formVariable:
+				if !cgoIsNil(call.Args[1]) {
+					return nil
+				}
+			case form == formIndex:
+				// The check's second argument is the indexed operand: `*_cgoIndexN` for a variable, `_cgoIndexN` otherwise.
+				operand := ast.Unparen(call.Args[1])
+
+				if star, ok := operand.(*ast.StarExpr); ok {
+					operand = ast.Unparen(star.X)
+				}
+
+				if ident, ok := operand.(*ast.Ident); !ok || cgoClosureVariable(ident, "_cgoIndex") != index {
+					return nil
+				}
+			default:
 				return nil
 			}
 		} else {
@@ -883,6 +959,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	consumed := map[*ast.Ident]bool{}
 	closures := map[*ast.CallExpr]*cgoCheckClosure{}
 	calledIdents := map[*ast.Ident]bool{}
+	starredIdents := map[*ast.Ident]bool{}
 	var used []cgoDeclaration
 	usedAt := map[types.Object]token.Position{}
 
@@ -914,11 +991,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 					closure := cgoRecognizeCheckClosureStatements(statements, info, plumbing)
 
 					if closure == nil {
-						if cgoMentionsPrefix(n, "_cgoIndex") || cgoMentionsPrefix(n, "_cgoSlice") {
-							refuse(n.Pos(), fmt.Sprintf("%s: a pointer to an element of a Go slice or array, checked by cmd/cgo: go2cs does not hand C a pointer into Go memory yet", cgoCalledFunction(n, declarations, info)))
-						} else {
-							refuse(n.Pos(), fmt.Sprintf("%s: a deferred call through cmd/cgo's pointer-check closure in a shape go2cs does not recognise", cgoCalledFunction(n, declarations, info)))
-						}
+						refuse(n.Pos(), fmt.Sprintf("%s: a deferred call through cmd/cgo's pointer-check closure in a shape go2cs does not recognise", cgoCalledFunction(n, declarations, info)))
 
 						consume(n)
 						return false
@@ -934,6 +1007,11 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 					refuse(n.Pos(), fmt.Sprintf("%s: a goroutine started on a call through cmd/cgo's pointer-check closure, whose arguments cmd/cgo evaluates inside the new goroutine: not supported yet", cgoCalledFunction(n, declarations, info)))
 					consume(n)
 					return false
+				}
+			case *ast.StarExpr:
+				// cmd/cgo writes each use of a C variable as *_Cvar_x, _Cvar_x being the variable's address.
+				if operand, ok := ast.Unparen(n.X).(*ast.Ident); ok {
+					starredIdents[operand] = true
 				}
 			case *ast.CallExpr:
 				if callee, ok := ast.Unparen(n.Fun).(*ast.Ident); ok {
@@ -954,7 +1032,9 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 							}
 						}
 					} else if cgoMentionsPrefix(funcLit, "_cgoIndex") || cgoMentionsPrefix(funcLit, "_cgoSlice") {
-						refuse(n.Pos(), fmt.Sprintf("%s: a pointer to an element of a Go slice or array, checked by cmd/cgo: go2cs does not hand C a pointer into Go memory yet", cgoCalledFunction(funcLit, declarations, info)))
+						// The element and slice forms are recognised above (18.12 item 5); one in another shape is refused
+						// as any unrecognised closure is.
+						refuse(n.Pos(), fmt.Sprintf("%s: a call through cmd/cgo's pointer-check closure in a shape go2cs does not recognise", cgoCalledFunction(funcLit, declarations, info)))
 						consume(funcLit)
 						return false
 					}
@@ -990,7 +1070,13 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 					used = append(used, declaration)
 				}
 			case found && declaration.kind == cgoVar:
-				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable: go2cs does not read or write C variables yet", declaration.cName))
+				// cgo item 3: C.x reads and writes the variable in place, through a box over its exported address.
+				if !starredIdents[ident] {
+					refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable's address in a shape cmd/cgo does not write (go2cs reads only *_Cvar_x)", declaration.cName))
+				} else if _, seen := usedAt[object]; !seen {
+					usedAt[object] = pkg.Fset.Position(ident.Pos())
+					used = append(used, declaration)
+				}
 			case found && declaration.kind == cgoFuncValue:
 				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C function's address used as a value: not supported yet", declaration.cName))
 			case found && declaration.kind == cgoMacro:
@@ -1029,6 +1115,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 	var symbols []string
 	functions := map[string]string{}
+	variables := map[string]string{}
 
 	// A first pass decides refusals, before any C toolchain runs; the bindings are written once the capture names
 	// each symbol's library.
@@ -1048,7 +1135,11 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 			errnoForm = true
 		}
 
-		functions[declaration.object.Name()] = member
+		if declaration.kind == cgoVar {
+			variables[declaration.object.Name()] = member
+		} else {
+			functions[declaration.object.Name()] = member
+		}
 
 		if symbol := cgoSymbolOf(declaration); symbol != "" && !slices.Contains(symbols, symbol) {
 			symbols = append(symbols, symbol)
@@ -1118,6 +1209,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	}
 
 	set := newCgoWrapperSet(target, sizes)
+	set.class = cgoPseudoPackageClass(pkg.Name)
 	set.libraries = map[string]string{}
 
 	for _, entry := range captured {
@@ -1171,6 +1263,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 	cgoRouteActive = true
 	cgoRouteFunctions = functions
+	cgoRouteVariables = variables
 	cgoCheckClosures = closures
 
 	return route, nil
@@ -1364,6 +1457,14 @@ func (v *Visitor) convCgoClosureArgument(argument cgoClosureArgument, context Id
 
 	if argument.declared == nil {
 		return value
+	}
+
+	// A pointer is declared at its own type (`var _cgoN *T = p`): the value is already the box the parameter takes, and a
+	// Go-shaped `(*T)(p)` is not C#.
+	if declaredType := v.info.TypeOf(argument.declared); declaredType != nil {
+		if _, isPointer := declaredType.Underlying().(*types.Pointer); isPointer {
+			return value
+		}
 	}
 
 	return fmt.Sprintf("(%s)(%s)", v.getExpressionTypeName(argument.declared, false), value)

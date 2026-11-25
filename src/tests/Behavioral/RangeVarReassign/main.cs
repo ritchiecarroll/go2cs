@@ -5,15 +5,13 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void main() {
-    var outᴷ = new stackAppend<uint16>();
-
     @string s = "AB\U0001F600\U0001F601C";
     slice<uint16> @out = default;
     foreach (var (_, rᴛ1) in s) {
         var r = rᴛ1;
 
         if (r < 0x10000) {
-            @out = append(outᴷ, @out, (uint16)r);
+            @out = append(@out, (uint16)r);
         } else {
             r -= 0x10000;
             @out = append(@out, (uint16)(0xD800 + (r >> 10)));

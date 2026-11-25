@@ -1342,11 +1342,11 @@ func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *t
 
 	requireEmitted(t, "buf.cs", emitted["buf.cs"], []string{
 		"internal static Buffer Grow⁔(/*this*/ Buffer b, Type t)",
-		"using ꓸꓸꓸany = Span<any>;",
+		"using ꓸꓸꓸany = variadic<any>;",
 	}, nil)
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"namespace go.example.com.app;\n\nusing static go.example.com.app.buf_package;\nusing io = go.io_package;\nusing ꓸꓸꓸType = Span<buf_package.Type>;\nusing ꓸꓸꓸany = Span<any>;\n\n",
+		"namespace go.example.com.app;\n\nusing static go.example.com.app.buf_package;\nusing io = go.io_package;\nusing ꓸꓸꓸType = variadic<buf_package.Type>;\nusing ꓸꓸꓸany = variadic<any>;\n\n",
 		"public static (int64, error) WriteTo(this Buffer b, io.Writer w) => buf_package.WriteTo⁔(b, w);\n",
 		"public static Buffer Grow(this Buffer b, Type t) => buf_package.Grow⁔(b, t);\n",
 		"public static nint Add(this ref Buffer b, params ꓸꓸꓸany xsʗp) => buf_package.Add⁔(ref b, xsʗp);\n",
@@ -1414,11 +1414,11 @@ func TestForwarderDirectivesUnderAShadowedRootTakeGlobal(t *testing.T) {
 		namespace string
 		want      []string
 	}{
-		{"go.go", []string{"using static global::go.go.token_package;", "using iter = global::go.iter_package;", "using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}},
-		{"go.example", []string{"using static go.go.token_package;", "using iter = go.iter_package;", "using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}},
+		{"go.go", []string{"using static global::go.go.token_package;", "using iter = global::go.iter_package;", "using ꓸꓸꓸжFile = variadic<ж<token_package.File>>;"}},
+		{"go.example", []string{"using static go.go.token_package;", "using iter = go.iter_package;", "using ꓸꓸꓸжFile = variadic<ж<token_package.File>>;"}},
 	} {
 		packageNamespace = test.namespace
-		got := insertForwarderAliasDirectives(append([]string(nil), lines...), []string{"using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}, true)
+		got := insertForwarderAliasDirectives(append([]string(nil), lines...), []string{"using ꓸꓸꓸжFile = variadic<ж<token_package.File>>;"}, true)
 		want := append(append(append([]string(nil), lines[:5]...), ""), append(test.want, lines[5:]...)...)
 
 		if strings.Join(got, "\n") != strings.Join(want, "\n") {

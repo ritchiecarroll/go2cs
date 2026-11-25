@@ -19,7 +19,7 @@ partial struct num /*num:nint*/;
 
 internal static num Add(this num n, num o) { return n + o; }
 
-public static A Sum<A>(params Span<A> xsʗp)
+public static A Sum<A>(params variadic<A> xsʗp)
     where A : Adder<A>
 {
     var xs = xsʗp.sslice();

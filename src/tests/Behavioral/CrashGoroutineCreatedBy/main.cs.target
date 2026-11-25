@@ -35,8 +35,6 @@ internal static void worker() {
 internal static ж<Δregexp.Regexp> header = Δregexp.MustCompile(@"^goroutine (\d+) \[running\]:$");
 
 internal static void parent() {
-    var linesᴷ = new stackAppend<@string>(moves: true);
-
     var cmd = exec.Command(Δos.Args[0]);
     cmd.Env = append(Δos.Environ(), (@string)"CRASH_GOROUTINE_CHILD=1", (@string)"GOTRACEBACK=single");
     ref var stderr = ref heap(new bytes.Buffer(), out var Ꮡstderr);
@@ -52,10 +50,9 @@ internal static void parent() {
     slice<@string> lines = default;
     var scanner = bufio.NewScanner(new bytes_BufferжReader(Ꮡstderr));
     while (scanner.Scan()) {
-        lines = append(linesᴷ, lines, scanner.Text());
+        lines = append(lines, scanner.Text());
     }
 
-    lines = builtin.move2heap(linesᴷ, lines);
     foreach (var (i, line) in range(lines)) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(line, "panic: "): {

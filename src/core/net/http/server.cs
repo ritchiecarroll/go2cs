@@ -38,7 +38,7 @@ using go.net;
 using go.sync;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class http_package {
 
@@ -3925,7 +3925,7 @@ internal static void SetKeepAlivesEnabled⁔(/*this*/ ж<Server> Ꮡs, bool v) {
 }
 
 internal static void logf⁔(/*this*/ ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     if (s.ErrorLog != nil) {
         s.ErrorLog.Printf(format, args.ꓸꓸꓸ);
@@ -3938,7 +3938,7 @@ internal static void logf⁔(/*this*/ ref Server s, @string format, params ꓸ�
 // via ServerContextKey. If there's no associated server, or if ErrorLog
 // is nil, logging is done via the log package's standard logger.
 internal static void logf(ж<Request> Ꮡr, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (s, _) = r.Context().Value(ServerContextKey.OrTypedNil())._<ж<Server>>(ᐧ);

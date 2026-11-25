@@ -306,7 +306,7 @@ linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64. Every arm printed wha
 memory, was refused by name. A `-cgo` conversion is one package, and it builds against a go2cs clone
 (`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages yet. Building a cgo package against
 the `go.*` packages from the feed is planned for the next release.
-<!-- src/go2cs/main.go:307 (`Convert a single cgo package`; this entry describes the November 19 release, when -cgo did not combine with -recurse); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Convert a single cgo package"; this entry describes the November 19 release, when -cgo did not combine with -recurse); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **A pointer rebuilt from a number is refused too, with a narrow memory-safety gap left.** go2cs refuses, by name,
 any address inside Go memory that it is holding still, even after the address has been through a `uintptr`:
@@ -1107,7 +1107,7 @@ goroutine waits on a nil channel or an empty `select {}`; any other deadlock han
 goroutine, nor for the deadlock report: those went to stderr alone. They now reach the crash file too.
 <!-- Deadlock: merge 01986cdd81 (4078bdc81b): red first at master 3da19d0e2e (the line alone; the three-goroutine case
      twice); behavioral DeadlockGoroutineBlocks; golib + hand-owned runtime only, 0 corpus lines; no platform named.
-     Limitations.md:132-135#ab9ea8 and GoFeatureSupport.md:117#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
+     Limitations.md:135-138#ab9ea8 and GoFeatureSupport.md:117#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
      builtin.WriteFatalReport; GolibTests BackstopCrashOutputTests red with the crash file empty, green, linux. -->
 
 **A profiled program no longer hangs.** With the block or mutex profiler on, the first event on a stack the profiler

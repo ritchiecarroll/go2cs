@@ -17,7 +17,7 @@ import (
 	"testing"
 )
 
-// A behavioral project may carry go2cs.options (extra converter arguments; only -warn=<codes>), and FOUR instruments
+// A behavioral project may carry go2cs.options (extra converter arguments; only -warn=<codes> and -stack-append=on), and FOUR instruments
 // convert behavioral projects. If one of them stopped passing the file, it would convert a -warn project without -warn,
 // and the instruments would disagree about how the project converts, which is false-green route #2's shape. This guard
 // finds every converter invocation in the four and fails by name when one does not pass the project's options.

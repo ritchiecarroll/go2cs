@@ -67,6 +67,11 @@ internal interface ISliceBacking
 
 [EditorBrowsable(EditorBrowsableState.Never)] public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
 {
+    // The slice's spread as a variadic pack carrying the slice (Go's f(s...) hands f the slice itself). It hides
+    // IArray<T>'s Span spread, so a spread reached through a constraint (`func F[S ~[]E, E any](s S) { g(s...) }`)
+    // carries the header too.
+    new variadic<T> ꓸꓸꓸ { get; }
+
     ISlice<T> Append(params T[] elems);
 
     ISlice<T> this[Range range] { get; }
@@ -682,7 +687,13 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public T[] Source => AllocationCounter.CopyOf<T>(ToSpan());
 
-    public Span<T> ꓸꓸꓸ => ToSpan(); // Spread operator
+    // Spread operator: Go's `f(s...)`. The pack carries this slice header whole, so a variadic callee's
+    // `.slice()` prologue receives the caller's slice itself, as Go passes it (see variadicPack.cs).
+    public variadic<T> ꓸꓸꓸ => new(this);
+
+    // IArray<T>'s spread member stays a span (an ARRAY is never spread in Go; generic code over the
+    // constraint reads it as elements). Only slice<T>'s own spread carries the header.
+    Span<T> IArray<T>.ꓸꓸꓸ => ToSpan();
 
     // Pinning is a MANAGED-storage concept: native memory does not move, so a native-backed slice
     // has nothing to pin and no PinnedBuffer to offer. Callers that want its address use the

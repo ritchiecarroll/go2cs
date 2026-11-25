@@ -267,6 +267,30 @@ func f() string {
 	return Δslice
 }
 
+// A field of that spelling converts: it lives in its struct's scope.
+type S struct{ Δslice int }
+
+// Unless a sibling field is spelled Δslice in C#: a field named slice, or an embedded slice.
+type X struct {
+	slice  int
+	Δslice int
+}
+
+type slice struct{}
+
+type Y struct {
+	slice
+	Δslice int
+}
+
+// An embed one letter away converts.
+type Z struct {
+	slicex
+	Δslice int
+}
+
+type slicex struct{}
+
 // A shadowed local array is renamed ΔarrayΔ1: its base is array's SANITIZED spelling, which the package never declares.
 var ΔarrayΔ1 int
 
@@ -289,8 +313,6 @@ func run[S Script](v S) string { return v.Text() }
 
 type SΔScript struct{}
 
-// A bare Δ field projects to an empty name.
-type P2 struct{ Δ int }
 
 // A generic interface's type parameter ΔT shares a scope with the converted interface's own ΔT.
 type Box[ΔT any] interface{ Get() ΔT }
@@ -303,15 +325,6 @@ var ΔCopy int
 
 type T struct{}
 type TΔshape struct{}
-
-// golib projects a Δ-led field, method or type under another name.
-type P struct{ Δt float64 }
-
-func (P) ΔFoo() {}
-
-type I interface{ ΔBar() }
-
-type ΔMatrix struct{}
 
 // The generated local shapes: a shadowed x is renamed xΔ1, and a type switch binds t through a temporary Δt.
 var xΔ1, Δt int
@@ -357,6 +370,18 @@ func g() float64 {
 	t := 1.0
 	return t + Δt
 }
+
+// A Δ-led field, method or type, and a bare Δ field: each is stamped [GoName], which golib reads before it drops a
+// leading Δ.
+type P struct{ Δt float64 }
+
+func (P) ΔFoo() {}
+
+type I interface{ ΔBar() }
+
+type ΔMatrix struct{}
+
+type P2 struct{ Δ int }
 `
 
 func TestMarkerGlyphIdentifiersAreRefused(t *testing.T) {
@@ -396,21 +421,40 @@ func TestMarkerGlyphIdentifiersAreRefused(t *testing.T) {
 		"ΔMain":         "is the name go2cs gives this package's Main when it renames it",
 		"ΔCopy":         "is the name go2cs generates for the inline-array copy method",
 		"TΔshape":       "shape witness go2cs generates for this package's type T",
-		"Δt":            `is a struct field whose name starts with Δ: golib drops a leading Δ when it projects a converted field's Go name, so reflect, encoding/json and fmt would name it "t" where Go names it "Δt"`,
-		"ΔFoo":          `is a method whose name starts with Δ: golib drops a leading Δ when it projects a converted method's Go name, so reflect and dynamic interface checks would see "Foo" where Go sees "ΔFoo"`,
-		"ΔBar":          `is a method whose name starts with Δ`,
-		"ΔMatrix":       `is a type whose name starts with Δ: golib drops a leading Δ when it names a converted type, so reflect and fmt's %T would print "Matrix" where Go prints "ΔMatrix"`,
+		"Δt":            "is the temporary go2cs generates for the type switch binding t",
 		"xΔ1":           "is the name go2cs gives a shadowed or repeated x",
 		"ΔarrayΔ1":      "is the name go2cs gives a shadowed or repeated Δarray",
 		"Δstrings":      "is the name go2cs gives the import or package alias strings when it renames it",
 		"Δm":            "is the name go2cs gives the import or package alias m when it renames it",
 		"SΔScript":      "is the witness type parameter go2cs generates for a type parameter S constrained by Script",
 		"ΔT":            "is the name go2cs generates for the interface type parameter",
-		"Δ":             `is a struct field whose name starts with Δ: golib drops a leading Δ when it projects a converted field's Go name, so reflect, encoding/json and fmt would name it "" where Go names it "Δ"`,
 	}
 
-	// The package variable Δt is refused for the type switch's temporary, the field Δt for its projection: two sites,
-	// one name, so both texts are asserted from the full list.
+	// The package variable Δslice is refused; the field Δslice of S, the same spelling one scope in, converts.
+	var deltaSliceSites []string
+
+	for _, site := range refusal.sites {
+		if strings.HasPrefix(site.text, "example.com/m.Δslice ") {
+			deltaSliceSites = append(deltaSliceSites, site.text)
+		}
+	}
+
+	// The fields of X and Y are refused as well, each beside a sibling spelled Δslice; those of S and Z convert.
+	var packageSites, siblingSites int
+
+	for _, text := range deltaSliceSites {
+		if strings.HasSuffix(text, ", the C# name of another field of its struct; rename it") {
+			siblingSites++
+		} else {
+			packageSites++
+		}
+	}
+
+	if packageSites != 1 || siblingSites != 2 {
+		t.Errorf("want Δslice refused once as the package variable and twice beside a sibling; got %q", deltaSliceSites)
+	}
+
+	// The package variable Δt is refused for the type switch's temporary; the Δ-led field Δt converts.
 	var deltaTSites []string
 
 	for _, site := range refusal.sites {
@@ -419,20 +463,16 @@ func TestMarkerGlyphIdentifiersAreRefused(t *testing.T) {
 		}
 	}
 
-	if len(deltaTSites) != 2 || !strings.Contains(strings.Join(deltaTSites, "\n"), "is the temporary go2cs generates for the type switch binding t") {
-		t.Errorf("want Δt refused twice, as a projected field and as the type switch's temporary; got %q", deltaTSites)
+	if len(deltaTSites) != 1 || !strings.Contains(deltaTSites[0], "is the temporary go2cs generates for the type switch binding t") {
+		t.Errorf("want Δt refused once, as the type switch's temporary; got %q", deltaTSites)
 	}
 
 	for name, text := range want {
 		if site, refused := got[name]; !refused {
 			t.Errorf("%s was not refused", name)
-		} else if name != "Δt" && !strings.Contains(site, text) {
+		} else if !strings.Contains(site, text) {
 			t.Errorf("%s was refused with %q, want it to say %q", name, site, text)
 		}
-	}
-
-	if !strings.Contains(strings.Join(deltaTSites, "\n"), want["Δt"]) {
-		t.Errorf("the field Δt was not refused for its projection: %q", deltaTSites)
 	}
 
 	for name, text := range got {

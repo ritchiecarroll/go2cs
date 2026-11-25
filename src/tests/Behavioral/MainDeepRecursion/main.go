@@ -16,6 +16,11 @@ func depth(n int) int {
 	return depth(n-1) + 1
 }
 
+// main receives its depth from a goroutine, so it parks before it recurses. Under the M:N scheduler (GO2CS_MN=1) main
+// then runs as a twin, resumed on whichever carrier is free, and recurses on that carrier's stack, which must reserve
+// what main's own thread does.
 func main() {
-	fmt.Println("depth:", depth(levels))
+	n := make(chan int)
+	go func() { n <- levels }()
+	fmt.Println("depth:", depth(<-n))
 }

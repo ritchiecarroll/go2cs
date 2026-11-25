@@ -20,7 +20,7 @@ internal static bool Has⁔<T>(/*this*/ ref Set<T> s, T v) {
 
 internal static nint Len⁔<T>(/*this*/ ref Set<T> s) { return len(s.m); }
 
-public static ж<Set<T>> NewSet<T>(params Span<T> vsʗp) {
+public static ж<Set<T>> NewSet<T>(params variadic<T> vsʗp) {
     var vs = vsʗp.sslice();
 
     var s = Ꮡ(new Set<T>());

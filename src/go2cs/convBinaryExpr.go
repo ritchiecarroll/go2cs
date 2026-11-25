@@ -2147,6 +2147,17 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				leftOperand = v.applyUntypedConstBoxCast(binaryExpr.X, leftOperand)
 				rightOperand = v.applyUntypedConstBoxCast(binaryExpr.Y, rightOperand)
 
+				// The POINTER operand of a comparison against an EMPTY interface is converted to that interface
+				// first, as Go does (`x == p` is `x == any(p)`), so a nil one crosses as its typed nil: bare, AreEqual
+				// compared the interface's typed nil box with a C# null and answered false where Go answers true
+				// (NamedPointerNilInterface's `x==p` for a named pointer and `z==up` for a *T). A non-nil pointer is
+				// unchanged by the boundary treatment, so box identity still decides.
+				if lhsIsInterface && rhsIsPointer {
+					rightOperand = v.boxPointerIntoEmptyInterface(lhsType, binaryExpr.Y, rightOperand)
+				} else if rhsIsInterface && lhsIsPointer {
+					leftOperand = v.boxPointerIntoEmptyInterface(rhsType, binaryExpr.X, leftOperand)
+				}
+
 				// Handle interface comparison with special runtime function
 				if binaryOp == "==" {
 					return fmt.Sprintf("AreEqual(%s, %s)", leftOperand, rightOperand)

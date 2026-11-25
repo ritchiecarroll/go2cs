@@ -73,7 +73,7 @@ namespace go.net;
 
 using static go.net.mail_package;
 using time = go.time_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("mail")]
 public static partial class mail_package

@@ -10,7 +10,7 @@ global using Var = go.Funcꓸꓸꓸ<nint, nint>;
 namespace go;
 
 using time = time_package;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class AliasImportLib_package {
 
@@ -19,7 +19,7 @@ partial struct Box {
 }
 
 public static nint ApplyVar(Var f, params ꓸꓸꓸnint xsʗp) {
-    var xs = xsʗp.sslice();
+    var xs = xsʗp;
 
     return f(xs.ꓸꓸꓸ);
 }

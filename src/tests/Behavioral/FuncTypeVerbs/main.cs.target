@@ -2,8 +2,8 @@ namespace go;
 
 using errors = errors_package;
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 
@@ -30,7 +30,7 @@ internal static void main() {
         return total;
     };
     Funcꓸꓸꓸ<@string, any, @string> format = [GoFunc("main.func5")] @string (@string f, params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         return fmt.Sprintf(f, args.ꓸꓸꓸ);
     };
 

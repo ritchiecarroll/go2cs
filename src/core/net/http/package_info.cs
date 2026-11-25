@@ -393,8 +393,8 @@ using time = go.time_package;
 using tls = go.crypto.tls_package;
 using url = go.net.url_package;
 using urlpkg = go.net.url_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸhttp2Setting = Span<http_package.http2Setting>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸhttp2Setting = variadic<http_package.http2Setting>;
 
 [GoPackage("http")]
 public static partial class http_package

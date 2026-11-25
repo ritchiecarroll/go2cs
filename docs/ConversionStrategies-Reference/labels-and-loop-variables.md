@@ -158,19 +158,19 @@ for i := 0; i < 3; i++ {
 }
 fmt.Println(fs[0](), fs[1](), fs[2]())   // Go 1.22+: 0 1 2
 ```
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:23-26 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:21-24 -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     var i = iᴛ1;
-    fs = append(fsᴷ, fs, [GoFunc("g1.func1")] () => i);
+    fs = append(fs, [GoFunc("g1.func1")] () => i);
 }
 ```
 
-`var i = iᴛ1;` is a fresh variable each pass, so each closure captures its own. (`fsᴷ` is the function's stack buffer for the non-escaping `fs`, declared at its entry; see [A non-escaping append can take Go's 32-byte stack buffer](slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
+`var i = iᴛ1;` is a fresh variable each pass, so each closure captures its own.
 
 A variable the body (or a closure in it) *writes* adds the copy-backs:
 
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:34-43 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:30-39 -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
     var i = iᴛ1;
@@ -179,7 +179,7 @@ for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         continue;
     }
     i++;
-    fs = append(fsᴷ, fs, [GoFunc("g2.func1")] () => i);
+    fs = append(fs, [GoFunc("g2.func1")] () => i);
     iᴛ1 = i;
 }
 ```
@@ -188,12 +188,12 @@ An unlabeled `continue` copies back at its own site, and the copy-back at the en
 
 A **heap-boxed** clause variable allocates a *fresh box* each pass — the same rule as the [per-iteration range-variable box](pointers.md#pointers): a stored `&i` must be a distinct pointer per iteration — and always copies back (writes through the pointer are not syntactically detectable):
 
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:55-60 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs:48-53 -->
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     ref var i = ref heap<nint>(out var Ꮡi);
     i = iᴛ1;
-    ps = append(psᴷ, ps, Ꮡi);
+    ps = append(ps, Ꮡi);
     iᴛ1 = i;
 }
 ```
@@ -323,8 +323,8 @@ is re-measured by a guard. -->
 
 ## An index-only range over a slice or array reads no element
 <!-- src/go2cs/visitRangeStmt.go:813 `} else if (isSlice || isArray) && valExpr == "_" {` and :885
-`foreach (%s%s in range(%s(%s)))` (the length call spelled by `v.golibCall("len")`); src/core/golib/builtin.cs:2194 `public static nint len<T>(in slice<T> slice)`,
-:2204 `public static nint len<T>(in sslice<T> slice)`, :2154 `public static nint len<T>(in array<T> array)`. -->
+`foreach (%s%s in range(%s(%s)))` (the length call spelled by `v.golibCall("len")`); src/core/golib/builtin.cs:2212 `public static nint len<T>(in slice<T> slice)`,
+:2222 `public static nint len<T>(in sslice<T> slice)`, :2172 `public static nint len<T>(in array<T> array)`. -->
 Go's index-only range (`for i := range s`, `for i, _ := range s`, or `for range s`) reads the length once and
 loads no element. The converter ranges the length, `foreach (var i in range(len(s)))`, when the operand is a
 slice, an array, a named slice or array type, a type parameter whose core type is one, or a variadic parameter

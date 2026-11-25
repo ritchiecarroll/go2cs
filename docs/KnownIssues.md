@@ -62,7 +62,7 @@ architecture-specific path in the standard library.
      windows' and darwin's extern.cs at the same line;
      src/core/internal/goarch/amd64/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
      *_arm64.cs file exists anywhere under src/core. debug.ReadBuildInfo's GOARCH setting is composed from runtime.GOARCH
-     (src/core/runtime/debug/stubs_impl.cs:199 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
+     (src/core/runtime/debug/stubs_impl.cs:210 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
      (C1, claude/c1-aes-arm64): internal/cpu's ARM64 flags are filled on an arm64 process, so crypto/tls's
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
@@ -199,7 +199,8 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 
 **To avoid it**, bound how many goroutines are alive at once, with a worker pool for example.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) has the details, under
-*Goroutines are operating-system threads*.
+*Goroutines are operating-system threads*. [Async twins](AsyncTwins.md), experimental and opt-in, lift the limit
+for goroutines that wait in twinned code.
 <!-- Source: C1's run 42497561630 (claude/c1-darwin-threadcap a85e0cf11), on GitHub-hosted macOS runners: osx-arm64
      (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
      first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
@@ -215,7 +216,7 @@ and the program ends; nothing can catch it. A Go goroutine is not a thread, so t
 the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
 mappings each thread uses, and a larger `vm.max_map_count` on the machine.
 
-**Under the M:N scheduler** (experimental, on the master branch only: `GoTwins=true` and `GO2CS_MN=1`), a goroutine parked in a twin holds no
+**Under [async twins](AsyncTwins.md)** (experimental, on the master branch only: build with twins and run with `GO2CS_MN=1`), a goroutine parked in a twin holds no
 thread, so the limit counts only the goroutines blocked in calls the twins do not cover: a `sync.WaitGroup` or
 `sync.Cond` wait, a Lock reached through a `sync.Locker` interface, a cgo or system call. About 16,000 of those blocked
 at once end the program the same way (`PAL_SEHException`, then an abort); the same bound avoids it.
@@ -231,17 +232,20 @@ at once end the program the same way (`PAL_SEHException`, then an abort); the sa
 ## Goroutines on a shared pool of threads (M:N) are experimental, and off unless you build and run for them {#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them}
 
 By default each goroutine is an operating-system thread, which is what the two sections above describe. go2cs also has
-an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do. The scheduler is
+an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do
+([Async twins](AsyncTwins.md) explains it and how to opt in). The scheduler is
 on the master branch only; go2cs 1.26.11.1 does not have it. It is inert unless both halves are switched on:
 <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: `git grep GO2CS_MN nuget-1.26.11.1 -- src/core/golib` finds
      nothing, and src/Directory.Build.targets has no GoTwinsFor at the tag; the M:N work landed in trains 1 to 7. -->
 
 
-- **The build**: the projects are built with twins, an async copy of each function that can wait without holding a
-  thread. The `GoTwinsFor` property names the projects to build with twins, separated by `;`. Set it in the
+- **The build**: the projects are built with twins (async twins), an async copy of each function that can wait
+  without holding a thread. The `GoTwinsFor` property names the projects to build with twins, by project file name
+  without `.csproj`, separated by `;`. Set it in the
   environment: on the `dotnet build` command line each `;` must be written `%3B`, or MSBuild ends the property there.
-  `GoTwins=true` in one project's own file builds that project with twins. These properties are read by
-  `src/Directory.Build.targets`, so they work only in a project built inside a go2cs repository clone. The published
+  `GoTwins=true` in one project's own file builds that project with twins, but a new conversion writes the file
+  again and drops it. These properties are read by `src/Directory.Build.targets`, so they work only for a project
+  under the `src` directory of a go2cs repository clone. The published
   `go.*` packages are not built with twins, and a project that references them gets no twins from them.
 - **The run**: the environment sets `GO2CS_MN=1`. How many goroutines run at once follows `GOMAXPROCS`, as in Go: the
   `GOMAXPROCS` environment variable at start, and `runtime.GOMAXPROCS(n)` while the program runs. `GO2CS_MN_PROCS=<n>`
@@ -254,7 +258,7 @@ Without `GO2CS_MN=1` a program built with twins runs on threads as usual, and `r
 value Go's does but caps nothing: the operating system decides how many threads run at once. With it, a goroutine that
 waits inside code built without twins keeps its thread while it waits. The other `GO2CS_MN_*` variables the scheduler
 reads are measurement switches, not settings: none is supported, and they may change or go away. The diagnostics
-`GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0020` and `GO2CS0021` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.<!-- 2026-11-23 .5 docs pass (P1): the old range "GO2CS0014 through GO2CS0018" took in GO2CS0016, the GoFrame rule, which every build runs (DiagnosticCodes.md rows 0014-0021 at 97cca467a2). -->
+`GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.<!-- 2026-11-24 (P4, row 18, P3's NIT 8): GO2CS0019 added; it landed with row 7's N1 in train 9 and is reported only in a build with twins (DiagnosticCodes.md row 0019). --><!-- 2026-11-23 .5 docs pass (P1): the old range "GO2CS0014 through GO2CS0018" took in GO2CS0016, the GoFrame rule, which every build runs (DiagnosticCodes.md rows 0014-0021 at 97cca467a2). -->
 
 **A plain read and a call in the same expression can see different values with and without twins.** In an expression
 such as `fmt.Println(a, f())`, Go orders only the calls: the read of `a` may come before or after `f()`, and the gc
@@ -263,6 +267,15 @@ the value `a` had before the call. Built with twins and run with `GO2CS_MN=1`, a
 evaluated ahead of the plain reads in its expression, as gc evaluates it, and then the program prints the value after
 the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
 unspecified behavior.
+
+**After a carrier stack could not be reserved, goroutines recurse to two depths.** Under the M:N scheduler each carrier
+thread reserves 1 GiB, or what a set `GO2CS_GOROUTINE_STACK` says ([Tuning](Tuning.md#goroutine-stacks)). A carrier
+that cannot reserve its size, for instance because the carriers already running used up a commit or address-space
+limit, starts at the largest size it gets, halving down to 1 MiB, and says so once on stderr; carriers started after it
+take that size. Carriers started before it keep theirs, so a goroutine, `main` included, can recurse to the full depth
+on one carrier and run out of stack at half of it on another, depending on which carrier resumes it.
+<!-- Source: src/core/golib/runtime/GoScheduler.cs, CarrierThread (a halved size is published for later carriers only);
+     P3's row 4 read, 2026-11-24, NIT 4. -->
 
 ## A nugetgo package built on 1.26.10.3 beside the go.* 1.26.11.1 packages fails at restore {#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore}
 
@@ -588,8 +601,11 @@ A publish that is not a single file never makes a composite image, so it is not 
      from GOCACHE.
      Measured the same day on one very large package of another module: its probe entries took about 2,273 MB
      (about 200 MB of compiled object per target). Plain-statement ask from COORD 10:19Z. -->
-For each package it converts, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
-targets, so it emits the same escape decisions Go makes. Those builds go into their own cache, not your `GOCACHE`:
+When `-stack-append` is on, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
+targets for each package it converts, so it emits the same stack-append buffers Go makes. The option is on by
+default only for `-stdlib` and `-tests`; a plain or `-recurse` conversion runs none of these builds and never
+creates the cache unless you pass `-stack-append=on`
+([`-stack-append`](CommandLine.md#option-stack-append)). Those builds go into their own cache, not your `GOCACHE`:
 `go2cs/probe-cache` under the user cache directory, or the directory named by `-probe-cache` or `GO2CS_PROBE_CACHE`.
 The first conversion builds the standard library there for each target, about 60 MB each, and later conversions of
 any module reuse it. Each converted package adds its own entries, which grow with the size of its compiled code: about 5 MB
@@ -613,42 +629,39 @@ directory owned by you that no other user can open; otherwise the run stops befo
 
 The separate cache is on the master branch. go2cs 1.26.11.1 runs the same builds in your own `GOCACHE`, so they take
 the same space there, and it has neither `-probe-cache` nor `GO2CS_PROBE_CACHE`.
+`-stack-append` is new on the master branch: go2cs 1.26.11.1 runs these builds for every conversion.
 <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the probe cache landed in train 1 (claude/p4-probe-cache,
      merge dcfc9c99a1). At nuget-1.26.11.1, src/go2cs has no probe-cache flag or GO2CS_PROBE_CACHE, and the escape
      probe's go build runs with the caller's environment, so its entries go to the default GOCACHE. -->
+<!-- 2026-11-24 (P5, train 12): the owner ruled the stack-append hint on by default only for -stdlib and -tests and off
+     for plain and -recurse conversions, with -stack-append=on|off|auto (COORD 2026-11-24 17:50Z, on P5's scout). With
+     the hint off, collectStackAppendHints returns before any harvest, so no probe build runs and the cache directory is
+     never created (TestStackAppendOffRunsNoProbe, with the gate removed it reads 4 harvests and the cache created). -->
 
 
-## A Go struct field, method or type whose name starts with `Δ` refuses its package {#delta-led-field-method-type-refused}
+## By default, `cap()` after appending to a slice that does not escape can differ from Go {#by-default-cap-after-appending-to-a-slice-that-does-not-escape-can-differ-from-go}
 
-**Symptom.** Converting a package that declares a struct field, a method (an interface method included) or a named type
-whose name starts with `Δ`, such as `type P struct{ Δt float64 }`, stops with `error GO2CS2015`, which names the
-identifier and what Go would report for it. A `Δ`-led local, parameter, package variable, constant or function converts.
+**Symptom.** In a program converted without `-stdlib` or `-tests`, `cap()` of a slice built by `append` inside one
+function can read lower than Go's. Go 1.25 and later give the first `append` to an empty slice that does not escape a
+32-byte buffer, so after `var x []int64; x = append(x, 1)` Go reads `cap(x)` as 4 where the converted program reads 1.
+The slice's contents and length are always the same; only its capacity, and code that reads the capacity, differ.
 
-**Cause.** go2cs renames a Go name that collides with something it generates by adding a leading `Δ`, and the runtime
-library reads a leading `Δ` back as that marker: it drops it when it gives a converted field, method or type its Go name.
-A Go name that itself starts with `Δ` would then lose it: `P.Δt` would reflect and json-encode as `t`, unexported, so
-`json.Marshal(P{1})` would write `{}` where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()` would read
-`Matrix`. The refusal turns that silent difference into a stop at conversion.
+**Cause.** Reproducing the buffer needs the Go compiler's escape decision for each `append`, which go2cs reads from a
+`go build -gcflags=-m` per package and target. `-stack-append` controls it, and its default `auto` turns it on only for
+`-stdlib` and `-tests`, where converted tests compare against Go's own, because those builds cost time and disk (see
+[A conversion keeps a Go build cache of its own](#a-conversion-keeps-a-go-build-cache-of-its-own)). The buffer is a
+heap array in the converted program, so turning it on changes what a program can observe, not its speed or its
+allocations.
 
-The refusal is on the master branch. go2cs 1.26.11.1 does not refuse these names: it converts them, and the field,
-method or type then reflects and encodes without its leading `Δ`, with no warning.
+**Workaround.** Convert with `-stack-append=on` ([`-stack-append`](CommandLine.md#option-stack-append)) to reproduce
+Go's capacities. A single standard-library package converted without `-stdlib` takes the same default; convert it with
+`-stdlib <package>` or `-stack-append=on` to get the standard library's emission.
 
-**Workaround.** Rename the field, method or type so it does not start with `Δ` (`Dt`, `DeltaT`). A struct tag keeps the
-encoded name: `` Dt float64 `json:"Δt"` ``.
-
-**Still open.** The runtime library is not yet told which `Δ` go2cs added. Until it is, a user's `Δ`-led field, method
-or type cannot read back under its own name, and the refusal stays.
-<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: was "Fix owed. The runtime library is told which Δ go2cs
-     added, so ... this refusal is retired." (UX-8). The three projection sites named below still drop a leading Δ
-     at 97cca467a2, and no cure has landed. The refusal (GO2CS2015, src/go2cs/markerGlyphRefusal.go) landed in train 4
-     (claude/i9-marker-glyph-refusal, merge e25362aedc); at nuget-1.26.11.1 the file does not exist and the same
-     projections drop the Δ. -->
-
-
-<!-- P3 code read of the R1 seat (inbox/COORD/20261122T045652Z-P3.md, finding 2), ruled by COORD 045750Z: refuse now
-     (2a), durable cure as its own .5 seat (2b). The three projection sites: src/core/golib/GoReflect.FieldAccess.cs:404
-     `if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (fields), GoReflect.TypeNaming.cs:718 `if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (type names), runtime/TypeExtensions.GoMethodSets.cs:709 `emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)` (methods). The
-     refusal: src/go2cs/markerGlyphRefusal.go, deltaProjectionReason. -->
+The default is new on the master branch. go2cs 1.26.11.1 emits the buffer for every conversion.
+<!-- 2026-11-24 (P5, train 12), P3 review of 57f318f4b0 finding 3 and NIT 4, COORD 19:52Z: the owner's ruling
+     (COORD 17:50Z) made the hint off by default for plain and -recurse conversions, and only the reference page said
+     what that changes. Measured on P5's scout (COORD 2026-11-24 17:43Z, P5): of 42 behavioral projects with a buffer,
+     41 printed identically with the hint off, and StackAppendBackingStore's 11 differing lines were all cap(). -->
 
 ## In optimized code, `runtime.Caller` can report an earlier line of the calling function {#in-optimized-code-runtimecaller-can-report-an-earlier-line-of-the-calling-function}
 
@@ -695,6 +708,14 @@ To get Go's lines in a program, use one of these, at a large cost in speed:
 - `DOTNET_JITMinOpts=1` in the program's environment, which keeps a `Release` build but turns off JIT optimization: it
   reports the call's line instead of the function's first statement, but not two calls of one function in one
   statement apart; about 33 times slower on the same workload.
+
+<!-- Measured 2026-11-24 on linux-x64 (.NET 10), go1.26.11, P2's Δ cure seat at 27691240dc: Native AOT publishes of
+     DeltaNameProjection (Go `frame: main.Δf 78`, AOT `frame: main.Δf 0`) and CallerLineCallSite (9 of 9 rows false
+     against Go's true) under PublishAot=true. COORD 2026-11-24T05:20:52Z: same class as the 11-22 ruling; BOARD row
+     "caller line under Native AOT reads 0". -->
+Under Native AOT, `runtime.Caller` reports line 0 instead of the call's line, measured on `linux-x64`; the function
+name it reports matches Go. Neither route above applies to a Native AOT program, so for Go's lines run the program
+under the JIT with one of them.
 
 ## Issues in older versions {#issues-in-older-versions}
 

@@ -19,7 +19,7 @@ using os = os_package;
 using slices = slices_package;
 using @internal;
 using io;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class filepath_package {
 

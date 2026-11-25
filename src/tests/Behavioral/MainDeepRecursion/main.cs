@@ -13,8 +13,13 @@ internal static nint depth(nint n) {
     return depth(n - 1) + 1;
 }
 
-internal static void main() {
-    fmt.Println("depth:", depth(levels));
+internal static partial void main() {
+    var n = new channel<nint>(0);
+    var nʗ1 = n;
+    goǃ([GoFunc("main.func1")] () => {
+        nʗ1.ᐸꟷ(levels);
+    });
+    fmt.Println("depth:", depth(ᐸꟷ(n)));
 }
 
 } // end main_package

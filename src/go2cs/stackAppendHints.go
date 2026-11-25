@@ -778,7 +778,7 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 	packageStackAppendMoves = map[ast.Stmt][]*stackAppendBuffer{}
 	packageStackAppendMovesWritten = map[*stackAppendBuffer]bool{}
 
-	if pkg == nil || dir == "" {
+	if pkg == nil || dir == "" || !stackAppendEnabled(options) {
 		return
 	}
 

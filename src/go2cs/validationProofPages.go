@@ -390,14 +390,23 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		terminalClause = ", with no controlling terminal"
 	}
 
+	// The -stack-append mode, in the same sentence: a run whose mode resolved off converted without the
+	// stack-append buffer, so a test that reads cap() after a non-escaping append can disagree with Go there and
+	// agree on a default -tests run. Omitted when the record carries no "off" (the mode resolved on, or the record
+	// predates the field), which is the default -tests run every committed page describes.
+	stackAppendClause := ""
+	if comparison.Environment.StackAppend == "off" {
+		stackAppendClause = ", with the stack-append buffer off"
+	}
+
 	if configuration == "Release" {
 		tiering := "off"
 		if comparison.Environment.Tiered {
 			tiering = "on"
 		}
-		fmt.Fprintf(&page, "\nMeasured at `Release` (tiered JIT %s)%s%s.\n", tiering, oracleClause, terminalClause)
+		fmt.Fprintf(&page, "\nMeasured at `Release` (tiered JIT %s)%s%s%s.\n", tiering, oracleClause, terminalClause, stackAppendClause)
 	} else {
-		fmt.Fprintf(&page, "\nMeasured at `%s`%s%s.\n", configuration, oracleClause, terminalClause)
+		fmt.Fprintf(&page, "\nMeasured at `%s`%s%s%s.\n", configuration, oracleClause, terminalClause, stackAppendClause)
 	}
 
 	if provenance.convertedPath != "" {

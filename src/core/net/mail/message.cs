@@ -31,7 +31,7 @@ using time = time_package;
 using utf8 = unicode.utf8_package;
 using go.net;
 using unicode;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class mail_package {
 
@@ -40,7 +40,7 @@ internal static debugT debug = ((debugT)false);
 partial struct debugT /*bool*/;
 
 internal static void Printf⁔(/*this*/ debugT d, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (d) {
         log.Printf(format, args.ꓸꓸꓸ);

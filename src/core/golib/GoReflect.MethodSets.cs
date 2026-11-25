@@ -709,7 +709,7 @@ public static partial class GoReflect
     /// a closure allocation rather than a compile — the s_boundFactories memoization rule. The cache
     /// is keyed by the delegate type and is correctly absent from ClearTypeCaches' list: a delegate
     /// type's Invoke signature is fixed when its type loads. A VARIADIC func type is refused loud:
-    /// its tail is <c>params Span&lt;T&gt;</c>, a byref-like type expression trees reject outright —
+    /// its tail is <c>params variadic&lt;T&gt;</c>, a byref-like type expression trees reject outright —
     /// the route that exists is the reverse of <see cref="InvokeVariadic"/>'s typed family
     /// trampolines (one generic factory per golib <c>Actionꓸꓸꓸ</c>/<c>Funcꓸꓸꓸ</c> arity, rebound onto
     /// the natural type through <c>Invoke</c>), left unbuilt for want of a demonstrated consumer.
@@ -732,7 +732,7 @@ public static partial class GoReflect
         ParameterInfo[] parameters = invoke.GetParameters();
 
         // `Array` alone is the GoReflect.Array Kind constant in this scope, so System.Array is qualified.
-        // A byref-like `params Span<T>` variadic tail cannot ride an expression tree, so the typed
+        // A byref-like `params variadic<T>` variadic tail cannot ride an expression tree, so the typed
         // makeVariadicFunc{N}/makeVariadicAction{N} family carries it in a LAMBDA instead -- the reverse
         // of InvokeVariadic's call family (GoReflect.MakeVariadicDelegate.cs).
         if (System.Array.Exists(parameters, static p => p.ParameterType.IsByRef || p.ParameterType.IsByRefLike))
@@ -918,7 +918,7 @@ public static partial class GoReflect
     // IS `Func<T1, @string>`, so a freshly minted type of the same shape would be a different
     // System.Type and the identity would fail. Three families declare, in widening order: the BCL's
     // Func<>/Action<> through 16 parameters, golib's own ladder continuing them through 24
-    // (funcArity.cs), and the variadic families whose tail is `params Span<T>` through 8 fixed
+    // (funcArity.cs), and the variadic families whose tail is `params variadic<T>` through 8 fixed
     // parameters (variadic.cs). Every one of those ceilings is ASKED OF THE METADATA below rather
     // than restated here, so a rung added to either file is reached the day it is written and this
     // routing cannot drift from what the corpus actually binds.
@@ -932,19 +932,19 @@ public static partial class GoReflect
     // The mint is reached by WIDTH, never by shape: an expression tree carries neither of those, so
     // a minted delegate of that shape is one MakeGoFuncDelegate and CompileBoundFactory would refuse
     // anyway, and a type that exists but cannot be bound is worse than the refusal this has always
-    // been. The `Span<T>` variadic tail is the ONE exception, and it is not a shape the mint invents:
+    // been. The `variadic<T>` variadic tail is the ONE exception, and it is not a shape the mint invents:
     // the variadic families carry it themselves and InvokeVariadic's typed trampolines consume it.
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReflectOnlyJustification)]
     private static Type MakeDelegateType(Type[] parameterTypes, Type returnType)
     {
         bool isAction = returnType == typeof(void);
 
-        // A trailing `Span<T>` IS Go's variadic tail. MakeGoFuncType writes it and TryFuncShape reads
+        // A trailing `variadic<T>` IS Go's variadic tail. MakeGoFuncType writes it and TryFuncShape reads
         // it; this is the third and last place that convention is known, and it is read here only to
         // pick the family — the tail is passed to the mint untouched. The variadic families take the
         // tail's ELEMENT as their type argument, because a byref-like type cannot be one at all.
         if (parameterTypes.Length > 0 && parameterTypes[^1] is { IsGenericType: true } tail &&
-            tail.GetGenericTypeDefinition() == typeof(Span<>))
+            tail.GetGenericTypeDefinition() == typeof(variadic<>))
         {
             int fixedArity = parameterTypes.Length - 1;
 

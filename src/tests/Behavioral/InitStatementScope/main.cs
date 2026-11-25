@@ -111,24 +111,20 @@ internal static nint rebinding() {
 }
 
 internal static slice<nint> captures() {
-    var fnsᴷ = new stackAppend<Func<nint>>();
-    var outᴷ = new stackAppend<nint>(moves: true);
-
     slice<Func<nint>> fns = default;
     nint i = 0;
 loop:
     {
         nint x = i; if (x < 3) {
-            fns = append(fnsᴷ, fns, [GoFunc("captures.func1")] () => x);
+            fns = append(fns, [GoFunc("captures.func1")] () => x);
             i++;
             goto loop;
         }
     }
     slice<nint> @out = default;
     foreach (var (_, f) in range(fns)) {
-        @out = append(outᴷ, @out, f());
+        @out = append(@out, f());
     }
-    @out = builtin.move2heap(outᴷ, @out);
     return @out;
 }
 

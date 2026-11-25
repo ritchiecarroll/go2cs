@@ -34,7 +34,7 @@ using go.database.sql;
 using go.sync;
 using iter = iter_package;
 using math.rand;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class sql_package {
 
@@ -1906,7 +1906,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<DB> Ꮡdb, context.Co
 // Exec uses [context.Background] internally; to specify the context, use
 // [DB.ExecContext].
 internal static (Result, error) Exec⁔(/*this*/ ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡdb.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
@@ -1998,7 +1998,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<DB> Ꮡdb, context
 // Query uses [context.Background] internally; to specify the context, use
 // [DB.QueryContext].
 internal static (ж<Rows>, error) Query⁔(/*this*/ ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡdb.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
 }
@@ -2094,7 +2094,7 @@ internal static (ж<Rows>, error) queryDC⁔(/*this*/ ref DB db, context.Context
 // Otherwise, [*Row.Scan] scans the first selected row and discards
 // the rest.
 internal static ж<Row> QueryRowContext⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (rows, err) = Ꮡdb.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
@@ -2110,7 +2110,7 @@ internal static ж<Row> QueryRowContext⁔(/*this*/ ж<DB> Ꮡdb, context.Contex
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [DB.QueryRowContext].
 internal static ж<Row> QueryRow⁔(/*this*/ ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡdb.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
 }
@@ -2319,7 +2319,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Conn> Ꮡc, contex
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
 internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (rows, err) = Ꮡc.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
@@ -2855,7 +2855,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Co
 // Exec uses [context.Background] internally; to specify the context, use
 // [Tx.ExecContext].
 internal static (Result, error) Exec⁔(/*this*/ ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡtx.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
@@ -2878,7 +2878,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Tx> Ꮡtx, context
 // Query uses [context.Background] internally; to specify the context, use
 // [Tx.QueryContext].
 internal static (ж<Rows>, error) Query⁔(/*this*/ ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡtx.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
 }
@@ -2890,7 +2890,7 @@ internal static (ж<Rows>, error) Query⁔(/*this*/ ж<Tx> Ꮡtx, @string query,
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
 internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (rows, err) = Ꮡtx.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
@@ -2906,7 +2906,7 @@ internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Contex
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [Tx.QueryRowContext].
 internal static ж<Row> QueryRow⁔(/*this*/ ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡtx.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
 }
@@ -3010,7 +3010,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<Stmt> Ꮡs, context.C
 // Exec uses [context.Background] internally; to specify the context, use
 // [Stmt.ExecContext].
 internal static (Result, error) Exec⁔(/*this*/ ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡs.ExecContext(context.Background(), args.ꓸꓸꓸ);
 }
@@ -3214,7 +3214,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Stmt> Ꮡs, contex
 // Query uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryContext].
 internal static (ж<Rows>, error) Query⁔(/*this*/ ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡs.QueryContext(context.Background(), args.ꓸꓸꓸ);
 }
@@ -3244,7 +3244,7 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
 internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (rows, err) = Ꮡs.QueryContext(ctx, args.ꓸꓸꓸ);
     if (err != nil) {
@@ -3268,7 +3268,7 @@ internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Stmt> Ꮡs, context.Conte
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryRowContext].
 internal static ж<Row> QueryRow⁔(/*this*/ ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡs.QueryRowContext(context.Background(), args.ꓸꓸꓸ);
 }

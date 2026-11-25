@@ -16,8 +16,6 @@ internal static bool keep(nint v, bool ok) { return ok; }
 internal static nint must(nint v, bool ok) { return v; }
 
 internal static void main() {
-    var funcsᴷ = new stackAppend<Func<nint>>(moves: true);
-
     n = 0;
     nint count = 0;
     for (;;) {
@@ -85,11 +83,10 @@ break_outer:;
     var (ᴛ13, ᴛ14) = next();
     for (nint iᴛ1 = must(ᴛ13, ᴛ14); iᴛ1 < 4; ) {
         var i = iᴛ1;
-        funcs = append(funcsᴷ, funcs, [GoFunc("main.func1")] () => i);
+        funcs = append(funcs, [GoFunc("main.func1")] () => i);
         var (ᴛ15, ᴛ16) = next();
         iᴛ1 = must(ᴛ15, ᴛ16);
     }
-    funcs = builtin.move2heap(funcsᴷ, funcs);
     foreach (var (_, f) in range(funcs)) {
         fmt.Print(f(), " ");
     }

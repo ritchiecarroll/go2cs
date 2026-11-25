@@ -57,9 +57,9 @@ namespace go;
 
     internal override ref object? ElementViews => ref m_views;
 
-    // The native marshals' run source (NativeStructMarshal.CallDeep and the shared darwin/linux marshal): the
-    // fast arm's backing and absolute index. The foreign arm has no contiguous backing, so it answers none.
-    Array? IElementRun.RunBacking => m_backing;
+    // The native marshals' and header boxes' run source: the fast arm's backing and absolute index. The foreign arm has
+    // no contiguous backing and answers none, except a ReadOnlyStringBacking, whose shadow is its canonical storage.
+    Array? IElementRun.RunBacking => (Array?)m_backing ?? (m_foreign as ReadOnlyStringBacking)?.Source;
 
     nint IElementRun.RunIndex => m_index;
 

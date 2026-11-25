@@ -66,7 +66,7 @@ using System.Runtime.CompilerServices;
 namespace go.@internal;
 
 using static go.@internal.filepathlite_package;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 
 [GoPackage("filepathlite")]
 public static partial class filepathlite_package

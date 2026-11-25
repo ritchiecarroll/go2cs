@@ -259,6 +259,85 @@ public class ParkCutTests
         }
     }
 
+    // N1-1/2/4 again in the converter's OTHER forwarder form (P3's NIT 1 on the row 7 fold, owed at the union with G's
+    // cure 3377e32db6): `M(this ref T t) => M⁔(ref t)` gets a twin only as a box twin, `Mꞏtwin(this ж<T> Ꮡt)`. The weak
+    // mark rides that box twin, it still awaits its body, and another assembly reads the mark through IsWeak's
+    // parameter-0 box arm. If either breaks, every caller of a weak `this ref` method twins again and nothing else reds.
+    private const string SuffixWeakRef = """
+            public partial struct P { public nint v; }
+
+            public static void sfxBoth⁔(/*this*/ ref P p) { ᐸꟷ(ch); p.v++; }
+
+            public static void sfxBoth(this ref P p) => sfxBoth⁔(ref p);
+
+            internal static void onlySfx(ж<P> Ꮡp) { ref var p = ref Ꮡp.DerefOrNull(); p.sfxBoth(); }
+
+            internal static void sfxAndPark(ж<P> Ꮡp) { ref var p = ref Ꮡp.DerefOrNull(); p.sfxBoth(); ᐸꟷ(ch); }
+
+        """;
+
+    [TestMethod]
+    public void N1_1c_AWeakRefSuffixMethodKeepsItsBoxTwinParkingAndMarkedWeak()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, Props(weak: "go.box_package.P.sfxBoth"), SuffixWeakRef);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.AreEqual(0, Stale().Length, "a live weak entry: " + StaleText());
+        StringAssert.Contains(twins, "sfxBothꞏtwin(this global::go.ж<P> Ꮡp)", "the `this ref` forwarder's twin is a box twin");
+        string marks = MarksOf(twins, "sfxBoth");
+        StringAssert.Contains(marks, Weak, "the box twin carries the weak mark");
+        Assert.IsFalse(marks.Contains("GoParkForwarder", StringComparison.Ordinal), "the forwarder still parks, so it is not a marked forwarder");
+        StringAssert.Contains(TwinOf(twins, "sfxBoth"), "sfxBoth⁔ꞏtwin(Ꮡp)", "the box twin awaits its body's twin with its box");
+        Assert.IsFalse(twins.Contains("onlySfxꞏtwin(", StringComparison.Ordinal), "N1-1: a caller whose only park is the weak member is plain");
+        StringAssert.Contains(TwinOf(twins, "sfxAndPark"), "Ꮡp.sfxBothꞏtwin()", "N1-2: a caller twinned anyway hands the weak forwarder its box");
+    }
+
+    private const string SuffixWeakRefLibrary = """
+        using System;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class lib_package
+        {
+            internal static channel<nint> ch;
+
+            public partial struct P { public nint v; }
+
+            public static void sfxBoth⁔(/*this*/ ref P p) { ᐸꟷ(ch); p.v++; }
+
+            public static void sfxBoth(this ref P p) => sfxBoth⁔(ref p);
+        }
+        """;
+
+    private const string UsesSuffixRefLibrary = """
+            internal static void useSfx(ж<lib_package.P> Ꮡp) { ref var p = ref Ꮡp.DerefOrNull(); p.sfxBoth(); }
+
+            internal static void useSfxAndPark(ж<lib_package.P> Ꮡp) { ref var p = ref Ꮡp.DerefOrNull(); p.sfxBoth(); ᐸꟷ(ch); }
+
+        """;
+
+    [TestMethod]
+    public void N1_4d_AWeakRefSuffixMethodCrossesAssembliesOnItsBoxTwin()
+    {
+        LibraryTwins = true;
+        LibraryProperties = Props(weak: "go.lib_package.P.sfxBoth");
+
+        try
+        {
+            (string twins, Diagnostic[] errors) = RunWith(SuffixWeakRefLibrary, null, UsesSuffixRefLibrary);
+
+            Assert.AreEqual(0, errors.Length, Errors(errors));
+            Assert.IsFalse(twins.Contains("useSfxꞏtwin(", StringComparison.Ordinal), "the box twin's [GoParkWeak] keeps useSfx plain");
+            StringAssert.Contains(TwinOf(twins, "useSfxAndPark"), "Ꮡp.sfxBothꞏtwin()", "a caller twinned anyway hands the box twin its box");
+        }
+        finally
+        {
+            LibraryTwins = false;
+            LibraryProperties = null;
+        }
+    }
+
     // P3's SHOULD (row 7 read): a cut site inside a go literal is awaited by the rewriter when not cut, so a cut there is
     // live, never "dead".
     private const string CutInLiteral = """

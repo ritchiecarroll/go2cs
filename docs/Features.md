@@ -59,7 +59,8 @@ as `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)).
 
 **Concurrency**
 
-- Goroutines with Go's semantics, each on its own thread by default
+- Goroutines with Go's semantics, each on its own thread by default, or on a small shared pool with
+  [async twins](AsyncTwins.md) (experimental)
 - Channels with channel-operator (`<-`) lowering, and `select`-statement lowering
 
 **Composition & polymorphism**

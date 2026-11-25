@@ -327,16 +327,24 @@ try {
     # nothing there and the guard refuses them (REVIEW-go-break-floor.md, item 4). They were deleted when 1.26.10.3 was
     # published (C2, 2026-11-10: every pre-publish pack on master refused on them, release-smoke 42720953059), with the
     # file, as its header said; the record copy stays at docs/phase4/data/binary-compat/. A later announced break adds
-    # the file back, so the bound stays: at most B3's 12, citing B3 while it holds any.
-    Write-Host 'golib carries at most B3''s announced break, and nothing unannounced'
+    # the file back, so the bound stays.
+    # Wall E (COORD 2026-11-20T13:50:29Z and 14:03:02Z) is that later break: the .5 release makes every Go variadic
+    # parameter go.variadic<T>, and golib's file carries its 38 generated entries (the 36 Invoke and BeginInvoke of the
+    # variadic Action and Func families, slice<T>'s spread property by its getter, and ISlice<T>'s added spread
+    # property). The bound is B3's 12 or wall E's
+    # 38, whichever break the file announces, and the file cites it while it holds any entry.
+    Write-Host 'golib carries at most its announced break (B3, or wall E), and nothing unannounced'
     $golib = Join-Path $repoRoot 'src/core/golib/CompatibilitySuppressions.xml'
     $entries = @()
     if (Test-Path -LiteralPath $golib) { $entries = @(Read-GoApiCompatSuppressions $golib) }
-    Check 'golib''s suppression file carries at most the 12 B3 entries' ($entries.Count -le 12) "$($entries.Count) entries"
-    Check 'every entry names golib''s lib/ asset' (@($entries | Where-Object { $_.Asset -cne 'lib/net10.0/golib.dll' }).Count -eq 0) 'an entry names another asset'
     $text = ''
     if (Test-Path -LiteralPath $golib) { $text = [System.IO.File]::ReadAllText($golib) }
-    Check 'the file cites B3 and batch 231 while it carries any entry' ($entries.Count -eq 0 -or ($text.Contains('B3') -and $text.Contains('batch 231'))) 'no citation'
+    $b3 = $text.Contains('B3') -and $text.Contains('batch 231')
+    $wallE = $text.Contains('Wall E') -and $text.Contains('2026-11-20T13:50:29Z')
+    Check 'golib''s suppression file carries at most the 12 B3 entries or the 38 wall E entries, by the break it cites' (
+        $entries.Count -eq 0 -or ($b3 -and $entries.Count -le 12) -or ($wallE -and $entries.Count -le 38)) "$($entries.Count) entries; cites B3 $b3, wall E $wallE"
+    Check 'every entry names golib''s lib/ asset' (@($entries | Where-Object { $_.Asset -cne 'lib/net10.0/golib.dll' }).Count -eq 0) 'an entry names another asset'
+    Check 'the file cites B3 and batch 231, or wall E and its ruling, while it carries any entry' ($entries.Count -eq 0 -or $b3 -or $wallE) 'no citation'
 
     # A package id cannot be turned back into its directory: go.vendor.golang.org.x.crypto.cryptobyte lives in
     # vendor/golang.org/x/crypto/cryptobyte, and the reverse mapping looked in vendor/golang/org/... (the whole-surface
@@ -364,6 +372,33 @@ try {
     # compares with 1.26.11.1, where those members are already gone, and the guard refuses an entry that matches
     # nothing. The files and their caps are in the history at 429b8fccb4. A later announced break adds its files back
     # with its own bound here.
+    # Wall E is that break (the .5 release; COORD 2026-11-20T13:50:29Z, 14:03:02Z): a Go variadic parameter is
+    # go.variadic<T>, not System.Span<T>. Its entries are GENERATED (New-GoApiCompatMoveSuppressions.ps1, the variadic
+    # tail kind, over the wall E cut's release-smoke pack, run 44762759389): a CP0002 per changed method per asset (a
+    # delegate's Invoke and BeginInvoke among them, a spread property by its getter), and a CP0006 per interface member:
+    # 393 in 57 files, golib's 38 bounded above and these 355 in 56. Each header says when its file goes: once the .5
+    # release is published, the release after it compares with .5 and the entries match nothing.
+    Write-Host 'the tree carries at most the wall E break''s generated entries outside golib'
+    $variadicCaps = [ordered]@{
+        'go.cmp' = 1; 'go.crypto.ed25519' = 2; 'go.crypto.internal.boring' = 1; 'go.crypto.internal.cryptotest' = 1;
+        'go.crypto.internal.fips140.aes.gcm' = 1; 'go.crypto.x509.pkix' = 2; 'go.database.sql' = 24;
+        'go.debug.macho' = 1; 'go.debug.pe' = 1; 'go.encoding.asn1' = 2; 'go.encoding.json' = 1; 'go.encoding.xml' = 3;
+        'go.errors' = 1; 'go.fmt' = 29; 'go.go.doc' = 2; 'go.go.internal.gccgoimporter' = 2; 'go.go.scanner' = 1;
+        'go.go.token' = 1; 'go.go.types' = 1; 'go.html.template' = 8; 'go.image.color' = 1; 'go.internal.bisect' = 1;
+        'go.internal.fmtsort' = 1; 'go.internal.profile' = 2; 'go.internal.runtime.gc.internal.gen' = 1;
+        'go.internal.testenv' = 18; 'go.internal.trace.internal.testgen' = 6; 'go.io' = 2; 'go.log' = 18;
+        'go.log.slog' = 40; 'go.log.slog.internal.buffer' = 1; 'go.math.big.internal.asmgen' = 8; 'go.net' = 24;
+        'go.net.textproto' = 5; 'go.net.url' = 3; 'go.os.exec' = 12; 'go.os.signal' = 4; 'go.path' = 1;
+        'go.path.filepath' = 6; 'go.reflect' = 1; 'go.runtime.pprof' = 6; 'go.runtime.trace' = 1; 'go.slices' = 3;
+        'go.sort' = 3; 'go.strings' = 1; 'go.syscall' = 12; 'go.testing' = 66; 'go.testing.fstest' = 1;
+        'go.text.template' = 8; 'go.text.template.parse' = 3; 'go.unicode' = 2;
+        'go.vendor.golang.org.x.crypto.cryptobyte' = 1; 'go.vendor.golang.org.x.net.idna' = 1;
+        'go.vendor.golang.org.x.text.transform' = 1; 'go.vendor.golang.org.x.text.unicode.bidi' = 4;
+        'go.vendor.golang.org.x.text.unicode.norm' = 2
+    }
+    $capTotal = 0
+    foreach ($cap in $variadicCaps.Values) { $capTotal += $cap }
+    Check 'the caps are the generator''s 355 entries in 56 files' ($capTotal -eq 355 -and $variadicCaps.Count -eq 56) "$capTotal in $($variadicCaps.Count)"
     # D (docs/ConversionStrategies-Reference/struct-types.md, "Every defined func type declares its own delegate")
     # announces the next break: every defined func type is a delegate of its own, where it was its underlying Action or
     # Func, so each exported member whose signature names one changes its signature. Release-smoke's pack of the D seat
@@ -384,20 +419,27 @@ try {
     $capTotal = 0
     foreach ($cap in $retypeCaps.Values) { $capTotal += $cap }
     Check 'the caps are D''s 94 entries in 21 files' ($capTotal -eq 94 -and $retypeCaps.Count -eq 21) "$capTotal in $($retypeCaps.Count)"
-    $known = @('go.lib') + @($retypeCaps.Keys)
+    # Both breaks ship in .5 against 1.26.11.1, so a package both reach carries one file holding both generators'
+    # entries, de-duplicated (a member both change is removed from the baseline once, and both name it alike): its
+    # cap is the two counts added, and it cites both rulings.
+    $known = @('go.lib') + @($variadicCaps.Keys) + @($retypeCaps.Keys | Where-Object { -not $variadicCaps.Contains($_) })
     $other = @($real.Keys | Where-Object { $known -cnotcontains $_ } | Sort-Object)
     Check 'no other package carries a suppression file' ($other.Count -eq 0) ($other -join ', ')
     $kinds = @('CP0002', 'CP0006')
     $over = New-Object System.Collections.Generic.List[string]
-    foreach ($id in @($real.Keys | Where-Object { $retypeCaps.Contains($_) } | Sort-Object)) {
+    foreach ($id in @($real.Keys | Where-Object { $variadicCaps.Contains($_) -or $retypeCaps.Contains($_) } | Sort-Object)) {
+        $cap = 0
+        if ($variadicCaps.Contains($id)) { $cap += $variadicCaps[$id] }
+        if ($retypeCaps.Contains($id)) { $cap += $retypeCaps[$id] }
         $read = @(Read-GoApiCompatSuppressions $real[$id])
-        if ($read.Count -gt $retypeCaps[$id]) { $over.Add("$id has $($read.Count) entries, over its $($retypeCaps[$id])") }
+        if ($read.Count -gt $cap) { $over.Add("$id has $($read.Count) entries, over its $cap") }
         $foreign = @($read | Where-Object { $kinds -cnotcontains $_.DiagnosticId } | ForEach-Object { $_.DiagnosticId } | Sort-Object -Unique)
-        if ($foreign.Count) { $over.Add("$id has an entry a retype does not produce: $($foreign -join ', ')") }
+        if ($foreign.Count) { $over.Add("$id has an entry neither generator writes: $($foreign -join ', ')") }
         $text = [System.IO.File]::ReadAllText($real[$id])
-        if (-not ($text.Contains('struct-types.md') -and $text.Contains('generate-suppression-file option'))) { $over.Add("$id does not cite D's section and how it was generated") }
+        if ($variadicCaps.Contains($id) -and -not ($text.Contains('2026-11-20T13:50:29Z') -and $text.Contains('New-GoApiCompatMoveSuppressions.ps1'))) { $over.Add("$id does not cite the wall E ruling and its generator") }
+        if ($retypeCaps.Contains($id) -and -not ($text.Contains('struct-types.md') -and $text.Contains('generate-suppression-file option'))) { $over.Add("$id does not cite D's section and how it was generated") }
     }
-    Check 'each file holds at most its generated count, only CP0002 and CP0006, and cites D''s section and its generation' ($over.Count -eq 0) ($over -join '; ')
+    Check 'each file holds at most its generated count (both counts where both breaks reach it), only CP0002 and CP0006, and cites each break that reaches it' ($over.Count -eq 0) ($over -join '; ')
 
     # The break floor (DESIGN-go-break-floor.md section 4): go.lib's targets fail a consumer's build for a package built
     # below $(GoBreakFloor), and push-nuget refuses a release whose floor disagrees with its suppression files. Once the

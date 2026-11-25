@@ -104,7 +104,8 @@ try { & go build -o $converter . ; if ($LASTEXITCODE -ne 0) { Failure "the conve
 $recurseRoot = Join-Path $work 'PR'
 $env:CC = Get-NugetgoCgoCompiler -Zig $Zig -Flavor 'linux/amd64'
 $env:CGO_ENABLED = '1'
-& $converter -recurse=nuget -cgo=true -platforms linux/amd64 -go2cspath $src $moduleDir $recurseRoot *> (Join-Path $OutDir 'recurse-root.log')
+# -stack-append=on as nugetgo-pack.ps1 and Invoke-NugetgoRepack.ps1 pass it, so one package id never carries two emissions.
+& $converter -recurse=nuget -stack-append=on -cgo=true -platforms linux/amd64 -go2cspath $src $moduleDir $recurseRoot *> (Join-Path $OutDir 'recurse-root.log')
 $convertExit = $LASTEXITCODE
 Remove-Item Env:CC -ErrorAction SilentlyContinue
 if ($convertExit -ne 0) { Failure "-RecurseRoot: go2cs -recurse=nuget -cgo exited $convertExit (recurse-root.log)" }

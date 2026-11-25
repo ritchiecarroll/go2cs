@@ -370,42 +370,57 @@ partial class poll_package
     // (runtime/netpoll.cs:355-374, 556-613) with the parking replaced by Monitor.Wait.
     private static nint pollBlock(ManagedPollDesc desc, ManagedPollMode mode, bool ignoreErrors)
     {
-        lock (desc.Gate)
+        while (true)
         {
-            while (true)
+            // The park scope is disposed AFTER the gate is released, never inside lock (desc.Gate). Monitor.Wait takes
+            // the gate back before it returns, and under M:N Dispose waits for a P (GoScheduler.ExitBlocked): disposed
+            // under the gate, a woken reader waited for a P while holding the gate, and a carrier that held a P and then
+            // took the gate (SetReadDeadline, net/http's abortPendingRead) waited for the gate -- each for the other,
+            // forever (darwin mn-platform run 45358621509, 2 of 3 closure runs). The checks below run again with the
+            // gate retaken, so nothing they read is lost in the gap. Guarded by GolibTests PollBlockGateOrderTests.
+            Goroutine.ParkScope park = default;
+
+            try
             {
-                // READINESS IS CONSUMED FIRST, ahead of both error checks. Go does the same
-                // (netpollblock consumes pdReady before netpollcheckerr, runtime/netpoll.cs:585-589)
-                // and it is a real behavior, not an ordering accident: a completion that RACED the
-                // deadline is still delivered to the caller, matching Go's preference for returning
-                // real IO over a same-instant timeout.
-                if (mode.Ready)
+                lock (desc.Gate)
                 {
-                    mode.Ready = false;
-                    return pollNoError;
-                }
+                    // READINESS IS CONSUMED FIRST, ahead of both error checks. Go does the same
+                    // (netpollblock consumes pdReady before netpollcheckerr, runtime/netpoll.cs:585-589)
+                    // and it is a real behavior, not an ordering accident: a completion that RACED the
+                    // deadline is still delivered to the caller, matching Go's preference for returning
+                    // real IO over a same-instant timeout.
+                    if (mode.Ready)
+                    {
+                        mode.Ready = false;
+                        return pollNoError;
+                    }
 
-                if (!ignoreErrors)
-                {
-                    // Check order is fixed: closing beats timeout (netpollcheckerr, :539-554).
-                    if (desc.Closing)
-                        return pollErrClosing;
+                    if (!ignoreErrors)
+                    {
+                        // Check order is fixed: closing beats timeout (netpollcheckerr, :539-554).
+                        if (desc.Closing)
+                            return pollErrClosing;
 
-                    if (mode.Expired)
-                        return pollErrTimeout;
-                }
+                        if (mode.Expired)
+                            return pollErrTimeout;
+                    }
 
-                // Woken without readiness by a deadline, an unblock, or a deadline RESET that
-                // superseded the one that woke us -- Go's comment for the same retry: "Can happen if
-                // timeout has fired and unblocked us, but before we had a chance to run, timeout has
-                // been reset. Pretend it has not happened and retry."
-                //
-                // Park accounting only -- Go's netpollblock parks with waitReasonIOWait, which is
-                // what a traceback prints as [IO wait] for a goroutine blocked in the poller. §6
-                // row 9 of DESIGN-cooperative-scheduler.md left this adoption to the netpoll arc's
-                // option; taken here because the reason has a real park site and a real reader.
-                using (Goroutine.Park(WaitReason.IOWait))
+                    // Woken without readiness by a deadline, an unblock, or a deadline RESET that
+                    // superseded the one that woke us -- Go's comment for the same retry: "Can happen if
+                    // timeout has fired and unblocked us, but before we had a chance to run, timeout has
+                    // been reset. Pretend it has not happened and retry."
+                    //
+                    // Park accounting only -- Go's netpollblock parks with waitReasonIOWait, which is
+                    // what a traceback prints as [IO wait] for a goroutine blocked in the poller. §6
+                    // row 9 of DESIGN-cooperative-scheduler.md left this adoption to the netpoll arc's
+                    // option; taken here because the reason has a real park site and a real reader.
+                    park = Goroutine.Park(WaitReason.IOWait);
                     Monitor.Wait(desc.Gate);
+                }
+            }
+            finally
+            {
+                park.Dispose();
             }
         }
     }

@@ -145,9 +145,10 @@ partial class runtime_package
 
     // ---- getg: the calling goroutine's g and its m, minted once per thread ----
 
-    // A goroutine runs start-to-finish on one thread (golib's executor), so a thread-static is the
-    // exact cache for its life: the same fact golib's own Goroutine.Current (`t_current`) rests on. A
-    // pooled coro thread runs one goroutine after another, so the cache is dropped between them.
+    // A goroutine bound to a thread runs start-to-finish on it (golib's executor), so a thread-static is
+    // the exact cache for its life: the same fact golib's own Goroutine.Current (`t_current`) rests on. A
+    // pooled coro thread runs one goroutine after another, so the cache is dropped between them. A
+    // multiplexed goroutine (M:N) is not one thread's, so the cache moves with it (s_getgMounted, below).
     [ThreadStatic]
     private static ж<g>? t_getg;
 
@@ -161,6 +162,24 @@ partial class runtime_package
 
     private static readonly bool s_getgReset = GoroutineThreadState.Register(static () => t_getg = null);
     private static readonly bool s_getgOwnerReset = GoroutineThreadState.Register(static () => t_getgOwner = null);
+
+    // M:N (row 11, N10): a MULTIPLEXED goroutine is not one thread's for its life, so the cache and its owner move with it
+    // from carrier to carrier, and a goroutine resumed on another carrier reads its own g, not that carrier's.
+    private sealed class GetgMountedState
+    {
+        internal ж<g>? g;
+        internal Goroutine? owner;
+    }
+
+    private static readonly bool s_getgMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>
+    {
+        if (saved is null && t_getg is null && t_getgOwner is null)
+            return;
+
+        GetgMountedState held = (GetgMountedState)(saved ??= new GetgMountedState());
+        (held.g, t_getg) = (t_getg, held.g);
+        (held.owner, t_getgOwner) = (t_getgOwner, held.owner);
+    });
 
     // Go's goexit0: a goroutine that exits still locked to its thread (LockOSThread, or the runtime's own
     // lockOSThread, without the matching unlock) takes the thread with it -- "If the calling goroutine exits

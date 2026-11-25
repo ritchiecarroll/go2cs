@@ -16,6 +16,11 @@ import (
 )
 
 func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) string {
+	// cmd/cgo's *_Cvar_x is Go's C.x, a C variable read or written in place (cgo item 3).
+	if reference, ok := cgoVariableReference(starExpr.X); ok {
+		return reference
+	}
+
 	// A value pun READ, `*(*U)(unsafe.Pointer(&x))` over same-size sized numerics, is a bitcast of x's
 	// value (valuePunOperations.go) -- not a reinterpret of a box x would otherwise need.
 	if emission, ok := v.valuePunEmission(starExpr); ok {

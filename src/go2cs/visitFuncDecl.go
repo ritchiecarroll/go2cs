@@ -248,12 +248,17 @@ func (v *Visitor) variadicAliasIdent(elem types.Type, typeName string) string {
 }
 
 // variadicParamType renders a variadic parameter's C# type, registering the file-local
-// `using ꓸꓸꓸT = Span<…>;` alias whenever one applies. The alias is what keeps a variadic signature
+// `using ꓸꓸꓸT = variadic<…>;` alias whenever one applies. The alias is what keeps a variadic signature
 // reading like its Go original (`shapes ...Shape` → `params ꓸꓸꓸShape shapesʗp`); it already backs
 // os/signal's `Notify(…, params ꓸꓸꓸosꓸSignal sigʗp)` and internal/fuzz's `ꓸꓸꓸCorpusEntry`.
+//
+// The pack type is golib's `variadic<T>` (variadicPack.cs), not `Span<T>`: it carries the caller's
+// slice when the call spreads one (`f(s...)`), so the callee's `xs` IS that slice, as Go specifies,
+// and element writes through it reach the caller. A `Span<T>` tail lost the header and the heap
+// prologue's copy dropped those writes (sqlite's TestPreUpdateHook, convertAssign(&dest[i])).
 func (v *Visitor) variadicParamType(elem types.Type) string {
 	typeName, aliasName, inline := v.variadicElementType(elem)
-	spanType := fmt.Sprintf("Span<%s>", typeName)
+	spanType := fmt.Sprintf("variadic<%s>", typeName)
 
 	if inline {
 		return spanType
@@ -1278,7 +1283,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					sliceType = "sslice"
 				}
 
-				if v.options.preferVarDecl {
+				// A pack whose only use is a forward binds the pack itself (see packForwardOnly).
+				if v.packForwardOnly[param] {
+					if v.options.preferVarDecl {
+						v.writeString(resultParameters, "%s%svar %s = %s;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					} else {
+						v.writeString(resultParameters, "%s%svariadic<%s> %s = %s;", v.newline, v.indent(v.indentLevel+1), v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					}
+				} else if v.options.preferVarDecl {
 					v.writeString(resultParameters, "%s%svar %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 				} else {
 					v.writeString(resultParameters, "%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), sliceType, v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
@@ -1345,7 +1357,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// (internal) -- otherwise a public method returning that method's own unexported
 					// types is CS0050 (inconsistent accessibility). A PUBLICIZED unexported receiver
 					// type is emitted `public`, so its exported methods count as public here.
-					if (getAccess(holderUnqualifiedTypeName(recvTypeName)) == "public" || receiverTypeIsPublicized(param.Type())) && getAccess(goFunctionName) == "public" {
+					if (receiverTypeAccess(param.Type(), recvTypeName) == "public" || receiverTypeIsPublicized(param.Type())) && getGoAccess(goFunctionName) == "public" {
 						functionAccess = "public"
 					} else {
 						functionAccess = "internal"
@@ -1657,7 +1669,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// mark: golib's method-set readers, RecvGenerator and TypeGenerator all read an unmarked
 		// by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1). Only a
 		// generated forwarder that is VALUE-set while by-ref is marked, [GoCopyBound].
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+noInliningAttribute)
+		// A function or method whose Go name starts with Δ keeps it for golib in a [GoName] stamp.
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+goNameAttr(goFunctionName, csFunctionName)+noInliningAttribute)
 	}
 
 	var funcExecutionContext string
@@ -2144,7 +2157,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			// Update function access to match receiver type. A PUBLICIZED unexported receiver
 			// type is emitted `public`, so it does not restrict the method's access.
-			receiverAccess = getAccess(holderUnqualifiedTypeName(recvTypeName))
+			receiverAccess = receiverTypeAccess(param.Type(), recvTypeName)
 
 			if receiverAccess != "public" && receiverTypeIsPublicized(param.Type()) {
 				receiverAccess = "public"

@@ -77,7 +77,7 @@ namespace go.go;
 
 using static global::go.go.token_package;
 using iter = global::go.iter_package;
-using ꓸꓸꓸжFile = Span<ж<token_package.File>>;
+using ꓸꓸꓸжFile = variadic<ж<token_package.File>>;
 
 [GoPackage("token")]
 public static partial class token_package

@@ -586,7 +586,7 @@ runtime settings to choose. It is the before picture for the .NET 11 measurement
   ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). The main line has an
   experimental scheduler that runs many goroutines over a few threads, as Go does. It is off unless you build and
   run for it
-  ([Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)),
+  ([Async twins](AsyncTwins.md), [Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)),
   and the work continues on the kinds of blocking it can see.
   <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2 (UX-8): restated from "planned for the release after
        1.26.11.1". The scheduler: the g-mn-* merges of trains 3 to 7; KnownIssues.md's M:N entry; "the scheduler stays

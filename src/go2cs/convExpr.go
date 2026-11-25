@@ -73,6 +73,10 @@ type CallExprContext struct {
 	// as nothing (typedNilInterfaceBoxing.go's third arm). Marked only for an EXACT unsafe.Pointer —
 	// a named type over it renders as its wrapper struct.
 	anyBoxedUnsafePointerArgs map[int]bool
+	// anyBoxedNamedPointerArgs is the NAMED-pointer sibling (`type P *T`), at the same slots: go2cs-gen
+	// renders the type as a wrapper CLASS whose zero value is a null reference, so a nil one boxes as
+	// nothing unless it crosses as the type's canonical typed nil (typedNilInterfaceBoxing.go's fourth arm).
+	anyBoxedNamedPointerArgs map[int]bool
 	// inlineArrayBoxArgs marks the arguments that box an INLINE array (a go.arrays member, inlineArrayEmission.go) into
 	// an interface parameter: each crosses as its deep array<T> copy (inlineArrayBoxCopy), the one representation every
 	// other Go [N]T has in interface space.
@@ -203,6 +207,16 @@ func (c *CallExprContext) markAnyBoxedUnsafePointerArg(i int) {
 	}
 
 	c.anyBoxedUnsafePointerArgs[i] = true
+}
+
+// markAnyBoxedNamedPointerArg marks slot i for the typed-nil boundary's named-pointer arm (see
+// anyBoxedNamedPointerArgs), created on first use as the unsafe.Pointer marker is.
+func (c *CallExprContext) markAnyBoxedNamedPointerArg(i int) {
+	if c.anyBoxedNamedPointerArgs == nil {
+		c.anyBoxedNamedPointerArgs = make(map[int]bool)
+	}
+
+	c.anyBoxedNamedPointerArgs[i] = true
 }
 
 // markAnyBoxedTypeParamArg marks slot i for the typed-nil boundary's type-parameter arm (see anyBoxedTypeParamArgs),
