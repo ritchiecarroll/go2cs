@@ -177,7 +177,8 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     }
 
     if (len(l.tx) == 0 || sec < l.tx[0].when) {
-        var zoneΔ2 = Ꮡ(l.zone, l.lookupFirstZone());
+        var evalᴛ1 = l.lookupFirstZone();
+        var zoneΔ2 = Ꮡ(l.zone, evalᴛ1);
         name = zoneΔ2.name;
         offset = zoneΔ2.offset;
         start = alpha;

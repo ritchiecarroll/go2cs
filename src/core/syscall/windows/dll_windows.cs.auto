@@ -219,10 +219,11 @@ internal static (ж<Proc> proc, error err) FindProc⁔(/*this*/ ж<DLL> Ꮡd, @s
     ref var e = ref heap<Errno>(out var Ꮡe);
     (a, e) = getprocaddress((uintptr)d.Handle, namep);
     if (e != 0) {
+        var evalᴛ1 = e.Error();
         return (default, new DLLErrorжerror(Ꮡ(new DLLError(
             Err: e,
             ObjName: name,
-            Msg: "Failed to find "u8 + name + " procedure in "u8 + d.Name + ": "u8 + e.Error()
+            Msg: "Failed to find "u8 + name + " procedure in "u8 + d.Name + ": "u8 + evalᴛ1
         ))));
     }
     var p = Ꮡ(new Proc(

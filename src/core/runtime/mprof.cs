@@ -905,7 +905,8 @@ internal static void iterate_memprof(Action<ж<bucket>, uintptr, ж<uintptr>, ui
     var head = @unsafe.Pointer.To<bucket>(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
-        fn(b, b.nstk, Ꮡ(b.stk(), 0), b.size, mp.active.allocs, mp.active.frees);
+        var evalᴛ1 = b.stk();
+        fn(b, b.nstk, Ꮡ(evalᴛ1, 0), b.size, mp.active.allocs, mp.active.frees);
     }
     unlock(ᏑprofMemActiveLock);
 }

@@ -668,8 +668,10 @@ internal static int32 semasleep(int64 ns) {
             if (ms == 0) {
                 ms = 1;
             }
+            var evalᴛ2 = getg();
+            var evalᴛ3 = getg();
             result = stdcall(_WaitForMultipleObjects, 2,
-                (uintptr)Ꮡ(array<uintptr>([(~(~getg()).m).waitsema, (~(~getg()).m).resumesema])),
+                (uintptr)Ꮡ(array<uintptr>([(~(~evalᴛ2).m).waitsema, (~(~evalᴛ3).m).resumesema])),
                 0, (uintptr)ms);
             if (result != (uintptr)(_WAIT_OBJECT_0 + 1)) {
                 // Not a suspend/resume event

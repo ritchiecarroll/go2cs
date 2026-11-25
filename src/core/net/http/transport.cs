@@ -317,6 +317,7 @@ internal static ж<Transport> Clone⁔(/*this*/ ж<Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.ᏑnextProtoOnce.Do(Ꮡt.onceSetNextProtoDefaults);
+    var evalᴛ1 = t.ProxyConnectHeader.Clone();
     var t2 = Ꮡ(new Transport(
         Proxy: t.Proxy,
         OnProxyConnectResponse: t.OnProxyConnectResponse,
@@ -333,7 +334,7 @@ internal static ж<Transport> Clone⁔(/*this*/ ж<Transport> Ꮡt) {
         IdleConnTimeout: t.IdleConnTimeout,
         ResponseHeaderTimeout: t.ResponseHeaderTimeout,
         ExpectContinueTimeout: t.ExpectContinueTimeout,
-        ProxyConnectHeader: t.ProxyConnectHeader.Clone(),
+        ProxyConnectHeader: evalᴛ1,
         GetProxyConnectHeader: t.GetProxyConnectHeader,
         MaxResponseHeaderBytes: t.MaxResponseHeaderBytes,
         ForceAttemptHTTP2: t.ForceAttemptHTTP2,
@@ -1664,9 +1665,10 @@ internal static (ж<persistConn>, error err) getConn⁔(/*this*/ ж<Transport> �
         // We retain the request context's values.
         var (dialCtx, dialCancel) = context.WithCancel(context.WithoutCancel(ctx));
 
+        var evalᴛ1 = cm.key();
         var w = Ꮡ(new wantConn(
             cm: cm,
-            key: cm.key(),
+            key: evalᴛ1,
             ctx: dialCtx,
             cancelCtx: dialCancel,
             result: new channel<connOrError>(1),
@@ -1693,10 +1695,10 @@ internal static (ж<persistConn>, error err) getConn⁔(/*this*/ ж<Transport> �
             // Trace success but only for HTTP/1.
             // HTTP/2 calls trace.GotConn itself.
             if (r.pc != nil && r.pc.alt == nil && trace != nil && trace.GotConn != nil) {
-                var evalᴛ1 = r.pc.isReused();
+                var evalᴛ2 = r.pc.isReused();
                 var info = new httptrace.GotConnInfo(
                     Conn: r.pc.conn,
-                    Reused: evalᴛ1
+                    Reused: evalᴛ2
                 );
                 if (!r.idleAt.IsZero()) {
                     info.WasIdle = true;
@@ -1972,9 +1974,10 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
+        var evalᴛ1 = cm.key();
         pconn = Ꮡ(new persistConn(
             t: Ꮡt,
-            cacheKey: cm.key(),
+            cacheKey: evalᴛ1,
             reqch: new channel<requestAndChan>(1),
             writech: new channel<writeRequest>(1),
             closech: new channel<EmptyStruct>(0),
@@ -2130,7 +2133,8 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
                     }
                     // Okay to use and discard buffered reader here, because
                     // TLS server will not speak until spoken to.
-                    var br = bufio.NewReader(new io.LimitedReaderжReader(Ꮡ(new io.LimitedReader(R: new net_ConnᴠReader(connʗ1), N: Ꮡt.Value.maxHeaderResponseSize()))));
+                    var evalᴛ2 = Ꮡt.Value.maxHeaderResponseSize();
+                    var br = bufio.NewReader(new io.LimitedReaderжReader(Ꮡ(new io.LimitedReader(R: new net_ConnᴠReader(connʗ1), N: evalᴛ2))));
                     (Ꮡresp.ValueSlot, ᏑerrΔ10.ValueSlot) = ReadResponse(br, connectReqʗ1);
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2200,8 +2204,8 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
             if (!ok) {
                 (pconn, err) = (default, errors.New(httpTransportDoesNotˢ)); goto ᒐdone;
             }
-            var evalᴛ1 = unencryptedTLSConn(pconn.conn);
-            var alt = next(cm.targetAddr, evalᴛ1);
+            var evalᴛ3 = unencryptedTLSConn(pconn.conn);
+            var alt = next(cm.targetAddr, evalᴛ3);
             var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
                 // pconn.conn was closed by next (http2configureTransports.upgradeFn).
                 (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;

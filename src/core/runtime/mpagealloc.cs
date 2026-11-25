@@ -356,7 +356,9 @@ internal static ж<pallocData> tryChunkOf⁔(/*this*/ ref pageAlloc p, chunkIdx 
 //
 // The chunk index must be valid or this method may throw.
 internal static ж<pallocData> chunkOf⁔(/*this*/ ref pageAlloc p, chunkIdx ci) {
-    return p.chunks[ci.l1()].at<pallocData>((ulong)(ci.l2()));
+    var evalᴛ1 = ci.l1();
+    var evalᴛ2 = ci.l2();
+    return p.chunks[evalᴛ1].at<pallocData>((ulong)(evalᴛ2));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

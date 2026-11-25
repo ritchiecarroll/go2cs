@@ -210,12 +210,14 @@ partial struct commonHandler {
 
 internal static ж<commonHandler> clone⁔(/*this*/ ref commonHandler h) {
     // We can't use assignment because we can't copy the mutex.
+    var evalᴛ1 = slices.Clip<slice<byte>, byte>(h.preformattedAttrs);
+    var evalᴛ2 = slices.Clip<slice<@string>, @string>(h.groups);
     return Ꮡ(new commonHandler(
         json: h.json,
         opts: h.opts,
-        preformattedAttrs: slices.Clip<slice<byte>, byte>(h.preformattedAttrs),
+        preformattedAttrs: evalᴛ1,
         groupPrefix: h.groupPrefix,
-        groups: slices.Clip<slice<@string>, @string>(h.groups),
+        groups: evalᴛ2,
         nOpenGroups: h.nOpenGroups,
         w: h.w,
         mu: h.mu // mutex shared among all clones of this handler

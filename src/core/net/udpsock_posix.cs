@@ -17,7 +17,9 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
         return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port)));
     }
     case ж<syscall.SockaddrInet6> saΔ1: {
-        return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port, Zone: zoneCache.name((nint)saΔ1.ZoneId))));
+        var evalᴛ1 = saΔ1.Addr[0..];
+        var evalᴛ2 = zoneCache.name((nint)saΔ1.ZoneId);
+        return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: evalᴛ1, Port: saΔ1.Port, Zone: evalᴛ2)));
     }}
     return default;
 }

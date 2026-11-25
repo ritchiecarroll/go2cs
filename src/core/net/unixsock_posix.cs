@@ -126,7 +126,8 @@ internal static (nint, ж<UnixAddr>, error) readFrom⁔(/*this*/ ref UnixConn c,
     switch (sa.type()) {
     case ж<syscall.SockaddrUnix> saΔ1: {
         if (saΔ1.Name != ""u8) {
-            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: sotypeToNet(c.fd.sotype)));
+            var evalᴛ1 = sotypeToNet(c.fd.sotype);
+            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: evalᴛ1));
         }
         break;
     }}
@@ -149,7 +150,8 @@ internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) re
     switch (sa.type()) {
     case ж<syscall.SockaddrUnix> saΔ1: {
         if (saΔ1.Name != ""u8) {
-            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: sotypeToNet(c.fd.sotype)));
+            var evalᴛ1 = sotypeToNet(c.fd.sotype);
+            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: evalᴛ1));
         }
         break;
     }}

@@ -405,9 +405,10 @@ internal static (slice<byte>, error) Bytes⁔(/*this*/ ref dhKEMPrivateKey k) {
 }
 
 internal static PublicKey PublicKey⁔(/*this*/ ref dhKEMPrivateKey k) {
+    var evalᴛ1 = k.priv.PublicKey();
     return new dhKEMPublicKeyжPublicKey(Ꮡ(new dhKEMPublicKey(
         kem: k.kem,
-        pub: k.priv.PublicKey()
+        pub: evalᴛ1
     )));
 }
 

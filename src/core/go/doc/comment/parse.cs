@@ -835,8 +835,10 @@ internal static slice<Text> parseLinkedText⁔(/*this*/ ж<parseDoc> Ꮡd, @stri
                 var (def, ok) = d.links[tmpstring(buf), ꟷ]; if (ok) {
                     def.Used = true;
                     flush(start);
+                    var evalᴛ1 = text.slice(start + 1, i);
+                    var evalᴛ2 = d.parseText(default, evalᴛ1, false);
                     @out = append(@out, (Text)(new LinkжText(Ꮡ(new Link(
-                        Text: d.parseText(default, text.slice(start + 1, i), false),
+                        Text: evalᴛ2,
                         URL: def.URL
                     )))));
                     wrote = i + 1;

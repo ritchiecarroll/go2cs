@@ -985,19 +985,21 @@ internal static void scanSpan(objptr p, ж<gcWork> Ꮡgcw) {
     // N.B. Use gcw.ptrBuf as the output buffer. This is a bit different
     // from scanObjectsSmall, which puts addresses to dereference. ScanSpanPacked
     // on the other hand, fills gcw.ptrBuf with already dereferenced pointers.
+    var evalᴛ4 = spanclass.sizeclass();
+    var evalᴛ5 = spanPtrMaskUnsafe(spanBase);
     var nptrs = scan.ScanSpanPacked(
         (@unsafe.Pointer)spanBase,
         gcw.ptrBuf.at<uintptr>(0),
         ᏑtoScan,
-        (uintptr)spanclass.sizeclass(),
-        spanPtrMaskUnsafe(spanBase));
+        (uintptr)evalᴛ4,
+        evalᴛ5);
     gcw.heapScanWork += (int64)objsMarked * (int64)elemsize;
 
     if (debug.gctrace > 1) {
         // Write down some statistics.
         gcw.stats[spanclass.sizeclass()].spansDenseScanned++;
-        var evalᴛ4 = spanclass.sizeclass();
-        gcw.stats[evalᴛ4].spanObjsDenseScanned += (uint64)objsMarked;
+        var evalᴛ6 = spanclass.sizeclass();
+        gcw.stats[evalᴛ6].spanObjsDenseScanned += (uint64)objsMarked;
     }
 
     // Process all the pointers we just got.

@@ -3244,13 +3244,14 @@ internal static ast.Stmt parseForStmt⁔(/*this*/ ж<parser> Ꮡp) {
             // parseSimpleStmt returned a right-hand side that
             // is a single unary expression of the form "range x"
             var x = @as.Rhs[0]._<ж<ast.UnaryExpr>>().X;
+            var evalᴛ1 = @as.Rhs[0].Pos();
             return new ast.RangeStmtжStmt(Ꮡ(new ast.RangeStmt(
                 For: pos,
                 Key: key,
                 Value: value,
                 TokPos: @as.TokPos,
                 Tok: @as.Tok,
-                Range: @as.Rhs[0].Pos(),
+                Range: evalᴛ1,
                 X: x,
                 Body: body
             )));

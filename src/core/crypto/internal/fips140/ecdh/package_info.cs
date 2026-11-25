@@ -67,7 +67,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ecdh/cast.go", "cast.cs", "ABAelILcAAoW3IKCgoKUgpQ=")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAgOILu7oLu7oLuAAgSgu4AEBjSgriCgoCC2riCpoKCAAsYkoKClIKUpvjCyoKmgqamgrimgubUgu6CpqaigoIACAaigpSC7oLKgoK4gsqokoKClKqigtyClIKCqJKCgrg=", "175-184:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAgOILu7oLu7oLuAAgSgu4AEBjSgriCgoCC2riCpoKCAAsYkoKClIKUpvjCyoKmgqamgrimgubUgu6CpraigoIACAaigpSC7oLKgoK4gsqokoKClKqigtyClIKCqJKCgrg=", "175-184:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

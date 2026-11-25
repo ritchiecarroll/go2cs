@@ -2330,19 +2330,23 @@ internal static ref readonly @string x509TrailingDataAfterXˢ => ref x509Trailin
 private static readonly @string x509TrailingDataAfterXˢᵇ = "x509: trailing data after X.509 Subject"u8;
 
 internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref certificateRequest @in) {
+    var evalᴛ1 = @in.SignatureValue.RightAlign();
+    var evalᴛ2 = getSignatureAlgorithmFromAI(@in.SignatureAlgorithm);
+    var evalᴛ3 = getPublicKeyAlgorithmFromOID(@in.TBSCSR.PublicKey.Algorithm.Algorithm);
+    var evalᴛ4 = parseRawAttributes(@in.TBSCSR.RawAttributes);
     var @out = Ꮡ(new CertificateRequest(
         Raw: @in.Raw,
         RawTBSCertificateRequest: @in.TBSCSR.Raw,
         RawSubjectPublicKeyInfo: @in.TBSCSR.PublicKey.Raw,
         RawSubject: @in.TBSCSR.Subject.FullBytes,
 
-        Signature: @in.SignatureValue.RightAlign(),
-        SignatureAlgorithm: getSignatureAlgorithmFromAI(@in.SignatureAlgorithm),
+        Signature: evalᴛ1,
+        SignatureAlgorithm: evalᴛ2,
 
-        PublicKeyAlgorithm: getPublicKeyAlgorithmFromOID(@in.TBSCSR.PublicKey.Algorithm.Algorithm),
+        PublicKeyAlgorithm: evalᴛ3,
 
         Version: @in.TBSCSR.Version,
-        Attributes: parseRawAttributes(@in.TBSCSR.RawAttributes)
+        Attributes: evalᴛ4
     ));
 
     error err = default;

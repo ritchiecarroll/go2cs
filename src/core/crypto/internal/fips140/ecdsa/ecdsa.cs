@@ -197,7 +197,8 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
     if (d.IsZero() == 1) {
         return (default, errors.New(ecdsaPrivateKeyIsZeroˢ));
     }
-    var priv = Ꮡ(new PrivateKey(pub: pub.Value, d: d.Bytes(c.N)));
+    var evalᴛ1 = d.Bytes(c.N);
+    var priv = Ꮡ(new PrivateKey(pub: pub.Value, d: evalᴛ1));
     return (priv, default);
 }
 
@@ -239,12 +240,14 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         return (default, err);
     }
 
+    var evalᴛ1 = Q.Bytes();
+    var evalᴛ2 = k.Bytes(c.N);
     var priv = Ꮡ(new PrivateKey(
         pub: new PublicKey(
             curve: c.curve,
-            q: Q.Bytes()
+            q: evalᴛ1
         ),
-        d: k.Bytes(c.N)
+        d: evalᴛ2
     ));
     fipsPCT(Ꮡc, priv);
     return (priv, default);

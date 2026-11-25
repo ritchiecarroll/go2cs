@@ -940,7 +940,8 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
                 if (x.mode == variable || indirect) {
                     mode = variable;
                 }
-                check.record(Ꮡ(new operand(mode, new ast.SelectorExprжExpr(selx), obj.Type(), default, 0)));
+                var evalᴛ32 = obj.Type();
+                check.record(Ꮡ(new operand(mode, new ast.SelectorExprжExpr(selx), evalᴛ32, default, 0)));
             }
 
             // The field offset is considered a variable even if the field is declared before
@@ -950,9 +951,9 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             if (hasVarSize(@base, default)) {
                 x.mode = value;
                 if (check.recordTypes()) {
-                    var evalᴛ32 = obj.Type();
-                    var evalᴛ33 = makeSig(new BasicжType(Typ[Uintptr]), evalᴛ32);
-                    check.recordBuiltinType(call.Fun, evalᴛ33);
+                    var evalᴛ33 = obj.Type();
+                    var evalᴛ34 = makeSig(new BasicжType(Typ[Uintptr]), evalᴛ33);
+                    check.recordBuiltinType(call.Fun, evalᴛ34);
                 }
             } else {
                 var offs = check.conf.offsetof(@base, index);
@@ -961,8 +962,8 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
                     return default;
                 }
                 x.mode = constant_;
-                var evalᴛ34 = constant.MakeInt64(offs);
-                x.val = evalᴛ34;
+                var evalᴛ35 = constant.MakeInt64(offs);
+                x.val = evalᴛ35;
                 // result is constant - no need to record signature
             }
             x.typ = new BasicжType(Typ[Uintptr]);
@@ -978,8 +979,8 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             if (hasVarSize(x.typ, default)) {
                 x.mode = value;
                 if (check.recordTypes()) {
-                    var evalᴛ35 = makeSig(new BasicжType(Typ[Uintptr]), x.typ);
-                    check.recordBuiltinType(call.Fun, evalᴛ35);
+                    var evalᴛ36 = makeSig(new BasicжType(Typ[Uintptr]), x.typ);
+                    check.recordBuiltinType(call.Fun, evalᴛ36);
                 }
             } else {
                 var size = check.conf.@sizeof(x.typ);
@@ -988,8 +989,8 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
                     return default;
                 }
                 x.mode = constant_;
-                var evalᴛ36 = constant.MakeInt64(size);
-                x.val = evalᴛ36;
+                var evalᴛ37 = constant.MakeInt64(size);
+                x.val = evalᴛ37;
                 // result is constant - no need to record signature
             }
             x.typ = new BasicжType(Typ[Uintptr]);
@@ -1012,11 +1013,11 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             }
 
             x.mode = value;
-            var evalᴛ37 = NewSlice(ptr.@base);
-            x.typ = new SliceжType(evalᴛ37);
+            var evalᴛ38 = NewSlice(ptr.@base);
+            x.typ = new SliceжType(evalᴛ38);
             if (check.recordTypes()) {
-                var evalᴛ38 = makeSig(x.typ, new PointerжType(ptr), y.typ);
-                check.recordBuiltinType(call.Fun, evalᴛ38);
+                var evalᴛ39 = makeSig(x.typ, new PointerжType(ptr), y.typ);
+                check.recordBuiltinType(call.Fun, evalᴛ39);
             }
             break;
         }
@@ -1032,11 +1033,11 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             }
 
             x.mode = value;
-            var evalᴛ39 = NewPointer(Δslice.elem);
-            x.typ = new PointerжType(evalᴛ39);
+            var evalᴛ40 = NewPointer(Δslice.elem);
+            x.typ = new PointerжType(evalᴛ40);
             if (check.recordTypes()) {
-                var evalᴛ40 = makeSig(x.typ, new SliceжType(Δslice));
-                check.recordBuiltinType(call.Fun, evalᴛ40);
+                var evalᴛ41 = makeSig(x.typ, new SliceжType(Δslice));
+                check.recordBuiltinType(call.Fun, evalᴛ41);
             }
             break;
         }
@@ -1044,8 +1045,8 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             // unsafe.String(ptr *byte, len IntegerType) string
             Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_20, "unsafe.String");
 
-            var evalᴛ41 = NewPointer(universeByte);
-            Ꮡcheck.assignment(Ꮡx, new PointerжType(evalᴛ41), argumentToUnsafeStringˢ);
+            var evalᴛ42 = NewPointer(universeByte);
+            Ꮡcheck.assignment(Ꮡx, new PointerжType(evalᴛ42), argumentToUnsafeStringˢ);
             if (x.mode == invalid) {
                 return default;
             }
@@ -1058,9 +1059,9 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             x.mode = value;
             x.typ = new BasicжType(Typ[String]);
             if (check.recordTypes()) {
-                var evalᴛ42 = NewPointer(universeByte);
-                var evalᴛ43 = makeSig(x.typ, new PointerжType(evalᴛ42), y.typ);
-                check.recordBuiltinType(call.Fun, evalᴛ43);
+                var evalᴛ43 = NewPointer(universeByte);
+                var evalᴛ44 = makeSig(x.typ, new PointerжType(evalᴛ43), y.typ);
+                check.recordBuiltinType(call.Fun, evalᴛ44);
             }
             break;
         }
@@ -1074,11 +1075,11 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             }
 
             x.mode = value;
-            var evalᴛ44 = NewPointer(universeByte);
-            x.typ = new PointerжType(evalᴛ44);
+            var evalᴛ45 = NewPointer(universeByte);
+            x.typ = new PointerжType(evalᴛ45);
             if (check.recordTypes()) {
-                var evalᴛ45 = makeSig(x.typ, new BasicжType(Typ[String]));
-                check.recordBuiltinType(call.Fun, evalᴛ45);
+                var evalᴛ46 = makeSig(x.typ, new BasicжType(Typ[String]));
+                check.recordBuiltinType(call.Fun, evalᴛ46);
             }
             break;
         }
@@ -1108,8 +1109,8 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             // Note: trace is only available in self-test mode.
             // (no argument evaluated yet)
             if (nargs == 0) {
-                var evalᴛ46 = call.Pos();
-                Ꮡcheck.dump(vTraceWithoutArgumentsˢ, evalᴛ46);
+                var evalᴛ47 = call.Pos();
+                Ꮡcheck.dump(vTraceWithoutArgumentsˢ, evalᴛ47);
                 x.mode = novalue;
                 break;
             }
@@ -1117,8 +1118,8 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             var x1 = Ꮡx;
             foreach (var (_, arg) in range(argList)) {
                 Ꮡcheck.rawExpr(nil, x1, arg, default, false); // permit trace for types, e.g.: new(trace(T))
-                var evalᴛ47 = x1.Pos();
-                Ꮡcheck.dump("%v: %s", evalᴛ47, x1.OrTypedNil());
+                var evalᴛ48 = x1.Pos();
+                Ꮡcheck.dump("%v: %s", evalᴛ48, x1.OrTypedNil());
                 x1 = Ꮡt; // use incoming x only for first argument
             }
             if (x.mode == invalid) {

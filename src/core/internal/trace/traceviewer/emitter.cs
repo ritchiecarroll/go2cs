@@ -510,22 +510,24 @@ internal static void arrow⁔(/*this*/ ref Emitter e, ArrowEvent a, uint64 secti
         return;
     }
     e.arrowSeq++;
+    var evalᴛ1 = viewerTime(a.Start);
     e.OptionalEvent(Ꮡ(new format.Event(
         Name: a.Name,
         Phase: "s",
         TID: a.FromResource,
         PID: sectionID,
         ID: e.arrowSeq,
-        Time: viewerTime(a.Start),
+        Time: evalᴛ1,
         Stack: a.FromStack
     )));
+    var evalᴛ2 = viewerTime(a.End);
     e.OptionalEvent(Ꮡ(new format.Event(
         Name: a.Name,
         Phase: "t",
         TID: a.ToResource,
         PID: sectionID,
         ID: e.arrowSeq,
-        Time: viewerTime(a.End)
+        Time: evalᴛ2
     )));
 }
 

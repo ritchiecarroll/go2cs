@@ -1123,19 +1123,22 @@ internal static (ж<response> w, error err) readRequest⁔(/*this*/ ж<conn> Ꮡ
 
         c.rwc.SetReadDeadline(wholeReqDeadline);
 
+        var evalᴛ5 = new Header(0);
+        var evalᴛ6 = req.wantsHttp10KeepAlive();
+        var evalᴛ7 = req.wantsClose();
         w = Ꮡ(new response(
             conn: Ꮡc,
             cancelCtx: cancelCtx,
             req: req,
             reqBody: reqBody,
-            handlerHeader: new Header(0),
+            handlerHeader: evalᴛ5,
             contentLength: -1,
 
             // We populate these ahead of time so we're not
             // reading from req.Header after their Handler starts
             // and maybe mutates it (Issue 14940)
-            wants10KeepAlive: req.wantsHttp10KeepAlive(),
-            wantsClose: req.wantsClose()
+            wants10KeepAlive: evalᴛ6,
+            wantsClose: evalᴛ7
         ));
         if (isH2Upgrade) {
             w.closeAfterReply = true;

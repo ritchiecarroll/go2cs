@@ -60,10 +60,11 @@ internal static ж<Tree> Copy⁔(/*this*/ ж<Tree> Ꮡt) {
     if (Ꮡt == nil) {
         return default;
     }
+    var evalᴛ1 = t.Root.CopyList();
     return Ꮡ(new Tree(
         Name: t.Name,
         ParseName: t.ParseName,
-        Root: t.Root.CopyList(),
+        Root: evalᴛ1,
         text: t.text
     ));
 }

@@ -171,7 +171,8 @@ internal static (nint n, error err) ReadAt⁔(/*this*/ ж<File> Ꮡf, slice<byte
     }
 
     if (off < 0) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat", Path: f.name, Err: errors.New(negativeOffsetˢ)))));
+        var evalᴛ1 = errors.New(negativeOffsetˢ);
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat", Path: f.name, Err: evalᴛ1))));
     }
 
     while (len(b) > 0) {
@@ -277,7 +278,8 @@ internal static (nint n, error err) WriteAt⁔(/*this*/ ж<File> Ꮡf, slice<byt
     }
 
     if (off < 0) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat", Path: f.name, Err: errors.New(negativeOffsetˢ)))));
+        var evalᴛ1 = errors.New(negativeOffsetˢ);
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat", Path: f.name, Err: evalᴛ1))));
     }
 
     while (len(b) > 0) {

@@ -987,9 +987,10 @@ internal static void selector⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx
         }
         @params = appendꓸꓸꓸ(slice<ж<Var>>([NewParam(sig.recv.pos, sig.recv.pkg, name, x.typ)]), @params);
         x.mode = value;
+        var evalᴛ2 = NewTuple(@params.ꓸꓸꓸ);
         x.typ = new SignatureжType(Ꮡ(new Signature(
             tparams: sig.tparams,
-            @params: NewTuple(@params.ꓸꓸꓸ),
+            @params: evalᴛ2,
             results: sig.results,
             variadic: sig.variadic
         )));

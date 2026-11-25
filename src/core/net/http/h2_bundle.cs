@@ -7520,11 +7520,12 @@ internal static void writeHeader⁔(/*this*/ ref http2responseWriterState rws, n
             h.Del(transferEncodingˢ);
         }
 
+        var evalᴛ1 = rws.handlerDone && !rws.hasTrailers();
         rws.conn.writeHeaders(rws.stream, Ꮡ(new http2writeResHeaders(
             streamID: rws.stream.id,
             httpResCode: code,
             h: h,
-            endStream: rws.handlerDone && !rws.hasTrailers()
+            endStream: evalᴛ1
         )));
 
         return;
@@ -7695,12 +7696,14 @@ internal static error Push⁔(/*this*/ ref http2responseWriter w, @string target
         return fmt.Errorf("method %q must be GET or HEAD"u8, opts.Method);
     }
 
+    var evalᴛ1 = http2cloneHeader(opts.Header);
+    var evalᴛ2 = sc.srv.state.getErrChan();
     var msg = Ꮡ(new http2startPushRequest(
         parent: st,
         method: opts.Method,
         url: u,
-        header: http2cloneHeader(opts.Header),
-        done: sc.srv.state.getErrChan()
+        header: evalᴛ1,
+        done: evalᴛ2
     ));
 
     var selᴛ34 = sc.doneServing;
@@ -9409,23 +9412,25 @@ internal static partial (ж<Response>, error) roundTrip⁔(/*this*/ ж<http2Clie
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var ctx = req.Context();
+    var evalᴛ1 = http2actualContentLength(ref (Ꮡreq).DerefOrNull());
+    var evalᴛ2 = httptrace.ContextClientTrace(ctx);
     var cs = Ꮡ(new http2clientStream(
         cc: Ꮡcc,
         ctx: ctx,
         reqCancel: req.Cancel,
         isHead: req.Method == "HEAD"u8,
         reqBody: req.Body,
-        reqBodyContentLength: http2actualContentLength(ref (Ꮡreq).DerefOrNull()),
-        trace: httptrace.ContextClientTrace(ctx),
+        reqBodyContentLength: evalᴛ1,
+        trace: evalᴛ2,
         peerClosed: new channel<EmptyStruct>(0),
         abort: new channel<EmptyStruct>(0),
         respHeaderRecv: new channel<EmptyStruct>(0),
         donec: new channel<EmptyStruct>(0)
     ));
 
-    var evalᴛ1 = cc.t.disableCompression();
-    var evalᴛ2 = httpcommon.IsRequestGzip(req.Method, req.Header, evalᴛ1);
-    cs.requestedGzip = evalᴛ2;
+    var evalᴛ3 = cc.t.disableCompression();
+    var evalᴛ4 = httpcommon.IsRequestGzip(req.Method, req.Header, evalᴛ3);
+    cs.requestedGzip = evalᴛ4;
 
     var csʗ1 = cs;
     goǃ(csʗ1.doRequest, Ꮡreq, streamf);

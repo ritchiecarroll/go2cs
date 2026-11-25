@@ -793,7 +793,9 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
             defer(cancelʗ1, ref ᒐ);
         }
         var mem = ᐸꟷ(ws.memMu);
-        ws.m.r.save(mem.header().ᏑrandState, mem.header().ᏑrandInc);
+        var evalᴛ1 = mem.header();
+        var evalᴛ2 = mem.header();
+        ws.m.r.save(evalᴛ1.ᏑrandState, evalᴛ2.ᏑrandInc);
         var memʗ1 = mem;
         defer([GoFunc("(*workerServer).fuzz.func2")] () => {
             resp.Count = memʗ1.header().count;
@@ -857,10 +859,12 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
             default: {
                 if (mem.header().count % (int64)chainedMutations == 0) {
                     copy(vals, originalVals);
-                    ws.m.r.save(mem.header().ᏑrandState, mem.header().ᏑrandInc);
+                    var evalᴛ3 = mem.header();
+                    var evalᴛ4 = mem.header();
+                    ws.m.r.save(evalᴛ3.ᏑrandState, evalᴛ4.ᏑrandInc);
                 }
-                var evalᴛ1 = mem.valueRef();
-                ws.m.mutate(vals, cap(evalᴛ1));
+                var evalᴛ5 = mem.valueRef();
+                ws.m.mutate(vals, cap(evalᴛ5));
 
                 var entry = new CorpusEntry(Values: vals);
                 var (dur, cov, errMsg) = fuzzOnce(entry);

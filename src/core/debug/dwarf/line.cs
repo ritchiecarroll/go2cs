@@ -151,7 +151,8 @@ internal static (ж<LineReader>, error) LineReader⁔(/*this*/ ж<Data> Ꮡd, ж
     var (compDir, _) = cu.Val(AttrCompDir)._<@string>(ᐧ);
 
     // Create the LineReader.
-    var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
+    var evalᴛ1 = Ꮡd.offsetToUnit(cu.Offset);
+    var u = Ꮡ(d.unit, evalᴛ1);
     var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, (Offset)(uint32)off, d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
     ref var r = ref heap<LineReader>(new LineReader(

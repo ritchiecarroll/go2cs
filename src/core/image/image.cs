@@ -1295,10 +1295,12 @@ internal static Image SubImage⁔(/*this*/ ref Paletted p, Rectangle r) {
         )));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
+    var evalᴛ1 = p.Pix.slice(i);
+    var evalᴛ2 = p.Rect.Intersect(r);
     return new PalettedжImage(Ꮡ(new Paletted(
-        Pix: p.Pix.slice(i),
+        Pix: evalᴛ1,
         Stride: p.Stride,
-        Rect: p.Rect.Intersect(r),
+        Rect: evalᴛ2,
         Palette: p.Palette
     )));
 }

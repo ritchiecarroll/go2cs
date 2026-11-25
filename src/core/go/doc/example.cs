@@ -103,11 +103,13 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             ref var output = ref heap<@string>(out var Ꮡoutput);
             ref var unordered = ref heap<bool>(out var Ꮡunordered);
             (output, unordered, var hasOutput) = exampleOutput(f.Body, @file.Comments);
+            var evalᴛ1 = name[(int)(len("Example"))..];
+            var evalᴛ2 = playExample(ref (@file).DerefOrNull(), ref (f).DerefOrNull());
             flist = append(flistᴷ, flist, Ꮡ(new Example(
-                Name: name[(int)(len("Example"))..],
+                Name: evalᴛ1,
                 Doc: doc,
                 Code: new ast.BlockStmtжNode(f.Body),
-                Play: playExample(ref (@file).DerefOrNull(), ref (f).DerefOrNull()),
+                Play: evalᴛ2,
                 Comments: @file.Comments,
                 Output: output,
                 Unordered: unordered,
@@ -120,8 +122,8 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             // other top-level declarations, and no tests or
             // benchmarks, use the whole file as the example.
             flist[0].Code = new ast.FileжNode(@file);
-            var evalᴛ1 = playExampleFile(ref (@file).DerefOrNull());
-            flist[0].Play = evalᴛ1;
+            var evalᴛ3 = playExampleFile(ref (@file).DerefOrNull());
+            flist[0].Play = evalᴛ3;
         }
         list = appendꓸꓸꓸ(list, flist);
     }
@@ -645,10 +647,11 @@ internal static (ж<ast.BlockStmt>, slice<ж<ast.CommentGroup>>) stripOutputComm
     }
 
     // Copy body and comments, as the originals may be used elsewhere.
+    var evalᴛ1 = last.Pos();
     var newBody = Ꮡ(new ast.BlockStmt(
         Lbrace: body.Lbrace,
         List: body.List,
-        Rbrace: last.Pos()
+        Rbrace: evalᴛ1
     ));
     var newComments = new slice<ж<ast.CommentGroup>>(len(comments) - 1);
     copy(newComments, comments.slice(0, i));
