@@ -42550,4 +42550,80 @@ banks `darwin: 81 + 4` (evidence `docs/phase4/rebank-1.26.10.3/darwin/reread/P1-
 
 — P1 (2026-11-25)
 
+## 2026-11-25 — P2 (COORD rulings 20261125T145958Z, 150830Z, 151334Z): unoptimized test hosts change allocation and liveness verdicts (CURED for context and sync)
+
+**Class.** Since `de46ae4938` (11-23) every converted stdlib test assembly is compiled `Optimize=false`, so
+`runtime.Caller` reads per-call lines. That also changes what a test can OBSERVE of the code it measures. Two kinds:
+- **Allocation.** A want-0 `testing.AllocsPerRun` body no longer inlines the call it measures, so a box the JIT elided
+  is allocated again. context `TestAllocs`: `Background()` boxes `backgroundCtx` into `Context`, 24 B a run (2,400 B
+  over 100). JitDisasmSummary: every `go.context.tests` method MinOpts, `Background()` FullOpts but not inlined.
+- **Liveness.** A spill slot of the unoptimized frame keeps a value live that Go lets the collector take. sync
+  `TestPoolGC`: 98 of 100 pooled values cleaned up where Go allows one survivor (P1's root and bisect, first bad
+  `bb6267d0e4`, the train that carried the switch).
+
+**Both arms, linux-x64, same sources.** context at `a3bf724219` (its host does not compile at master before that cut):
+as built FAIL x2, `-p:GoTestOptimize=true` PASS x2; with the list below the whole row reads 62/62, EQUAL its bank. sync
+at master `1c556c35a5`: P1's arms (FAIL 6/6, PASS 3/3, the rest of the suite identical); with the list, 48 matching and
+9 disclosed, EQUAL its bank.
+
+**Probe of the cheaper cure, NO.** `[MethodImpl(MethodImplOptions.AggressiveOptimization)]` on the measured lambda, on a
+static local function or on a static method: 24 B a run each, at TieredCompilation 1 and 0, all compiled MinOpts. The
+assembly's DisableOptimizations wins. Control, the same source with `Optimize=true`: 0 B (AO arms 0 at TC=1 too).
+
+**Cure.** `GoOptimizedTestHosts` in golib's `go.lib.symbols.targets`, beside the switch: `context.tests=TestAllocs;
+sync.tests=TestPoolGC`. A listed stdlib host (root namespace `go`) builds with `GoTestOptimize=true`; an explicit
+`-p:GoTestOptimize=false` still builds it unoptimized for the A/B arm. `testOptimizedHosts_test.go` holds the admission
+rule: each entry names a test its package has, and no listed package reads caller lines (`runtime.Caller`,
+`Callers`, `CallersFrames`, or an expected `x_test.go:N` string). Made to fail: a misnamed test and a `testing.tests`
+entry each red by name; its control asserts the predicate fires on `testing` and `log`.
+
+**Reach (census, go/parser over the 269 roster ids, go1.26.11).** 110 test functions call `AllocsPerRun`, in 48 banked
+rows. R's waves 0-2 read the whole linux roster at `7d8e14c094` (which carries the switch): every one of the 48 reads
+EQUAL there except context (masked by CS1503), sort (masked by CS0051, i9's cut; `TestSearchWrappersDontAlloc` unread),
+runtime (host died first; its want-0 alloc tests unread at master), unique and internal/zstd. Measured locally, NOT this
+class: unique `TestHandle` fails with the test assembly optimized as well (FullOpts confirmed); internal/zstd validates
+as built (its `TestAlloc` skips on both sides). runtime is the third candidate once its finalizer death is attributed.
+
+**Owner.** P2 (this seat). Not listed: testing (its `TestTBHelper` reads caller lines and is cured by the switch).
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): unique IS this class; my "not this class" above was wrong, by the instrument.** P6 bisected
+unique `TestHandle` to `bb6267d0e4` (the switch) and read the whole row optimized at master: 27 matching, 12 disclosed,
+the .4 bank. My optimized arm ran the host with TIERED compilation on, so `TestHandle` ran at tier 0 (unoptimized code
+again) while my FullOpts check ran at `DOTNET_TieredCompilation=0`, which the pipeline uses. Re-run at TC=0 on the same
+publish: `TestHandle` PASS twice; the other failures are the row's banked disclosures. Mechanism (P6): `testHandle`
+holds two Handles in frame locals across `drainMaps`/`checkMapsFor`; a DisableOptimizations frame keeps them live to the
+method's end. `unique.tests=TestHandle` joins `GoOptimizedTestHosts`. Lesson: an optimized arm is read at the
+pipeline's own tiering (TC=0), and the opt-level check runs under the same setting as the verdict it vouches for.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): weak and crypto/internal/fips140cache join the list (COORD 155114Z, the finalizer/GC
+family).** Both arms at master `1c556c35a5`, linux-x64, optimized arm at `DOTNET_TieredCompilation=0` with FullOpts
+confirmed: weak as built fails TestPointer, TestPointerEquality, TestImmortalPointer, TestIssue69210, TestIssue70739 and
+TestPointerCleanup (in flight at the deadline), optimized PASS on the whole suite; fips140cache as built TestCache
+abandoned at the 15 m per-test deadline, optimized PASS. With the list, through `-tests all`: weak validated 9/9,
+fips140cache 1/1, unique 27 matching + 12 disclosed (its bank). The list's condition first read only root namespace
+`go`, which a nested package's host (`go.crypto.@internal`) does not have, so fips140cache's entry changed nothing; it
+now matches `go` or `go.*`, as the switch does, and `TestOptimizedTestHostsEvaluateOptimized` evaluates every listed
+project (made to fail on the narrow condition: it named fips140cache). runtime/pprof is P1's; runtime is still open.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): runtime/pprof joins the list under a NAMED caller-line exception (COORD 182736Z).** P1 rooted
+TestGoroutineCounts (hangs on fingReady, 15 m deadline) and TestGoroutineProfileConcurrency/finalizer_present
+("finalizer did not run") to the same class: a finalizer on new(*T), the local dropped, runtime.GC(); the unoptimized
+frame keeps the object alive. Bisect at TC0: first bad bb6267d0e4. A/B at master, TC0: optimized PASS 3/3 and 2/2, as
+built FAIL 3/3 and TIMEOUT. pprof_test.go calls runtime.Callers, so the guard refuses the entry; P1's full linux sweep
+at 89820c0df1 + the entry, TC0, read 148 matching + 8 disclosed in both arms, equal to the bank (595 s; as built FAIL in
+1,510 s). The guard now admits a caller-reading package only through `callerLineExceptions`, whose citation must carry a
+date and an equal sweep's counts, and flags an exception with no readers or no listed host (made to fail both ways).
+
+— P2 (2026-11-25)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
