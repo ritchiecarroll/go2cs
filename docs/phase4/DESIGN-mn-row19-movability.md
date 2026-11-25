@@ -2,7 +2,8 @@
 
 Owner, 2026-11-25: the movability seat is in .5, design first ("1 in .5"). A hash constructor never parks ("2 yes").
 The `&&`/`||` lowering is in ("Yes, rewrite - may be more common in user code"). Design P4, P3 reads this text, G reviews the code. This text
-comes first; no generator line is written before P3 has read it.
+comes first; no generator line is written before P3 has read it. P3's review (APPROVE WITH CHANGES, 2026-11-25) is
+folded in: three MUSTs and the SHOULDs and NITs.
 
 ## 1. The problem, as measured
 
@@ -46,6 +47,17 @@ Each rule names what it changes in `RefLikeBefore`, why the move keeps Go's orde
 clear (section 6 lists them). Each rule takes a red-first behavioral row in `TwinOrderTests`, like the row 19 cut's: a
 twin built, run, and compared with Go's value, plus the ref-blocked row that must disappear.
 
+**Where a statement may move or be lowered (P3, MUST 3).** M5, M6, M9 and every move only apply to a statement that
+is a direct member of a statement list: a block's statements or a switch section's statements. Two shapes are
+excluded, because each would compile and run wrong:
+- An `else if`: the inner `if` is the else clause of the outer one. A call moved ahead of it would run before the
+  FIRST condition, and when that condition is true Go never runs it.
+- A brace-less embedded statement (the body of an `if`, `else`, `while`, `for`, `foreach`, `using` or `lock` without
+  braces): `if (c) return a && f();` lowered in place gives `if (c) if (!(a)) return false; return f();`, and the
+  last return leaves the `if`.
+Such a site stays ref-blocked by name. Rows: an `else if` near-miss and a brace-less near-miss, each still blocked by
+name with Go's value. `RefLikeBefore`'s `m_current` test probably gives this already; the rows decide.
+
 **M1. An earlier call spills in Go order.** Today a call evaluated before the awaited call blocks it
 (`earlier:InvocationExpression`). Instead, that call is spilled first into its own temporary,
 `var ᴛN = g(…);`, plain (it does not park) or awaited (it does), and the awaited call moves after it. The spills come
@@ -53,7 +65,20 @@ out in text order, which is C#'s evaluation order and Go's call order. A pure re
 reads after both, as in gc. The receiver of an instance call is handled the same way: a by-ref receiver that reaches a
 ref (class 3, h2_bundle's `f.debugWriteLoggerf(…, Ꮡf.OrTypedNil(), http2summarizeFrame(fr))`) is read after the
 spills, through the ref Rule S derives again.
-Limit: a call in a short-circuit right operand or a conditional branch is not spilled. It may not run at all.
+A call is spilled only when all of these hold. Otherwise it stays a blocker, as today:
+- **By value.** Its method does not return by ref (`ref` or `ref readonly`), and its result is not used by ref: not a
+  `ref`, `in` or `out` argument, not a store target, not the receiver of a struct instance member. A spill copies the
+  value, so a write through the parameter would land in the copy and compile silently (P3, MUST 1: net/http
+  client.cs:776, `refererForURL(…, ref (req.URL).DerefOrNull(), req.Header.Get(…))`).
+- **Not ref-like.** Its result type is not a ref struct, which cannot live across the await (CS4007).
+- **Always reached.** The path from the statement to the call goes only through node kinds `RefLikeBefore`'s walk
+  already treats as unconditional: argument lists, parentheses, casts, member-access receivers, object-creation
+  arguments, tuple elements, and the operands of a non-logical binary operator. A call under `?.`, `?:`, `??`, the
+  right operand of `&&` or `||`, a switch expression arm or a lambda body may not run, and is not spilled.
+- **Recursive.** What is evaluated before each spilled call must itself pass: a constant, a pure read, or a call that
+  passes these same tests.
+Rows: the spill in Go order, checked by value; a near-miss with an earlier ref-returning call used by ref, which stays
+blocked by name and keeps Go's value.
 
 **M2. An adapter construction over pure reads is a pure read.** `new bytes_BufferжWriter(Ꮡbuf)` and
 `new fmt_StateᴠWriter(s)` are the converter's form of a Go interface conversion of a variable, `io.Writer(&buf)`. They
@@ -63,7 +88,8 @@ in the code against go2cs-gen's own output, never by the glyph in the name) and 
 slice-to-array conversion that gc runs before the call.
 Probe (run, 3.3): a Go interface conversion of a variable, followed by a call that reassigns the variable
 (`fmt.Fprintf(w, "%v", f())` with f setting w). If gc reads w BEFORE f, M2 is wrong and is dropped. The probe goes in
-MnGoOrder beside row 7's.
+MnGoOrder beside row 7's. P3 probed the VALUE adapter shape (`new fmt_StateᴠWriter(s)` copies its operand): see 3.3.
+M2's row covers a pointer adapter and a value adapter.
 
 **M3. Tuple elements are ordered like arguments.** `return (default, errors.New("…"u8 + rt.String()));` blocks on
 `in:TupleExpression`. A tuple literal's elements evaluate left to right, as a Go multi-value return's operands do, so
@@ -98,7 +124,8 @@ that, so this shape fell through.
 
 **M8 (proposed, strike if out of scope). A deconstruction into new locals moves like a local declaration.**
 `var (r, errΔ1) = d.CharsetReader(…)` blocks on `store-left:DeclarationExpression`. Its targets are fresh locals, as a
-single-variable declaration's is, so it moves as a declaration does. One site.
+single-variable declaration's is, so it moves as a declaration does. One site. A deconstruction that mixes a new local
+with an existing target is not this shape and stays blocked; it takes a near-miss row.
 
 ### 3.1 Ruling 2: a hash constructor never parks
 
@@ -130,23 +157,32 @@ Owner, 2026-11-25: "Yes, rewrite - may be more common in user code." So this is 
 `&&` or `||` cannot move, because it may not run at all, and if the statement holds something ref-like it stays plain
 (`in:LogicalAndExpression`). The rewrite turns the operator into the branch Go already means:
 
-- In a return: `return a && f();` becomes `if (!(a)) return false; return f();`, and `return a || f();` becomes
-  `if (a) return true; return f();`.
-- In a local declaration or a store to a plain local: `var t = a && f();` becomes `var t = a; if (t) t = f();`, and
-  `t = a || f();` becomes `t = a; if (!t) t = f();`.
+Every form goes through a fresh temporary `ᴛ`. It is written `var` below; the code declares it with the operator
+expression's own type, so a left operand of another type is converted as the operator would convert it:
+- `&&`: `var ᴛ = a; if (ᴛ) { ᴛ = f(); }`, then the original statement with `ᴛ` in place of the operator.
+- `||`: `var ᴛ = a; if (!ᴛ) { ᴛ = f(); }`, then the same.
+So `return a && f();` becomes `var ᴛ = a; if (ᴛ) { ᴛ = f(); } return ᴛ;`, and `t = a || f();` becomes
+`var ᴛ = a; if (!ᴛ) { ᴛ = f(); } t = ᴛ;`. The store target is written once, after the right operand, so a right operand
+that reads the target sees its OLD value, as in Go (P3, MUST 2: `ok = n > 0 && check(ok)`). The return form needs no
+`false` literal, so a named bool result type checks as before.
 
 The left operand is evaluated once, first, as before. The right operand runs only on the value that would have run it
-in Go, so short-circuit and Go order are unchanged. After the rewrite the right operand stands as its own return or
-store statement, so its call moves or awaits in place under the existing rules (and M1 through M8).
+in Go, so short-circuit and Go order are unchanged. After the rewrite the right operand stands in its own store
+statement, inside braces, so it is a direct member of a statement list and its call moves or awaits in place under the
+existing rules (and M1 through M8).
 
 Scope:
 - The rule fires only when the right operand holds a call that must await and cannot stay in place. A right operand
   that awaits nothing, or whose await can stay in place, is left as a plain expression.
 - A chain is lowered from the outside in: `a && b && f()` parses as `(a && b) && f()`, so the left operand `a && b`
-  becomes the `if` condition whole, and `a || (b && f())` lowers the outer `||` first and then the inner `&&` in the
+  becomes the temporary's initializer whole, and `a || (b && f())` lowers the outer `||` first and then the inner `&&` in the
   statement the outer rewrite produced.
 - Other positions (an `if` condition, an argument, a conditional expression) are not rewritten in this seat. A site
-  there stays ref-blocked by name.
+  there stays ref-blocked by name. So `(a && f()) || c` is not lowered: the awaiting `&&` is an operand, not the
+  statement's operator, and the site stays blocked by name.
+- The rule refuses (the site stays blocked by name) when the operator is a user-defined `&&` or `||` rather than the
+  built-in bool one, and when the left operand declares a pattern or `out` variable that the right operand uses
+  (`a is T x && f(x)`): moving the left operand into its own statement would fail definite assignment.
 
 Rows (COORD 2026-11-25 11:46Z), each red first and checked by value:
 - `&&` and `||`, each in a return and in a local store.
@@ -154,6 +190,8 @@ Rows (COORD 2026-11-25 11:46Z), each red first and checked by value:
 - A near-miss whose right operand awaits nothing: it stays a plain expression (the twin's text shows no `if`).
 - A right operand with a side effect, and one that panics, each with a left operand that short-circuits: the side
   effect must not happen and the panic must not be raised, checked by value against Go's result.
+- A store whose right operand reads the target (`ok = n > 0 && check(ok)`): the old value is passed, as in Go.
+- The `else if` and brace-less near-misses from the statement-list rule.
 
 Size: about 40 to 60 generator lines plus the rows. It clears gob's three class-6 rows.
 
@@ -173,6 +211,10 @@ conversion against a later call unspecified, and gc shows both orders:
 - A closure-captured LOCAL of concrete pointer type converted to `io.Writer` is read BEFORE the call when gc inlines
   the closure, and AFTER it with `-gcflags=-l`.
 
+P3's probe of the value shape (go1.26.11): `use(v, set())`, with v a struct converted to `fmt.Stringer` and set()
+writing v, reads the NEW value for a package variable and for a captured local, and so does an int converted to
+`any`. One exception: a four-word captured struct read the old value with inlining on, and the new one with `-l`.
+
 So M2's direction (read after) is gc's order whenever the later call is not inlined, and a legal Go order always. The
 twin's later call is a parking call and is never inlined into the statement, so M2 gives gc's non-inlined order. M2's
 row compares against that value, and its comment names the inlined case as the place where gc itself differs.
@@ -186,6 +228,8 @@ row compares against that value, and its comment names the inlined case as the p
   not this seat's.
 - The plain path keeps C# order. Where it differs from gc (P3's finding on the row 19 cut: `use((@string)f(), h())`
   reads "old" in C#, "Nld" in gc), that is operand order's list or KnownIssues, not this seat's.
+- M1 moves more twin sites to gc's order while the plain body keeps C#'s, so a result can differ by mode at more
+  places. The seat adds one KnownIssues line saying so, to stand until operand order lands.
 
 ## 5. Gates
 
@@ -223,8 +267,12 @@ What can miss, ranked by what a miss would mean:
    groups A or C would have stayed.
 3. Ruling 2 moving the block instead of clearing it (3.1's falsifier). Then 5 rows change blocker instead of
    disappearing.
-4. Build errors. Any wrong move fails to compile (CS4007, CS9217, CS8178) in the 358-report build, so a wrong rule
-   reads as a build error, never as a silent result. The prediction is 0 build errors.
+4. Build errors. A move that holds a ref or a ref-like value across an await fails to compile (CS4007, CS9217,
+   CS8178) in the 358-report build. The prediction is 0 build errors.
+5. A silent wrong result. The first version of this note said a wrong move could not be silent. P3 found three that
+   can: a spill of a by-ref call, an M9 store whose right operand reads the target, and a move out of an `else if` or
+   a brace-less body. Each now has a rule that excludes it and a row that checks it by value. A wrong result outside
+   those three would come from a shape not yet named, and the by-value rows are what would catch it.
 
 ### 6.2 On master with the row 19 cut (89 rows)
 
