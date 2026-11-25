@@ -156,6 +156,36 @@ public unsafe class GoCgoImagesTests
         StringAssert.Contains(RefusalOf(() => GoCgoArgs.StructPointer(root.Reinterpret<sockIn4, sockAny>(), "f", ref scalarFirst, out _, out _)), "name the same Go value");
     }
 
+    // B5 across allocations: an inline Go array is its own allocation here, so a pointer into sa.Addr pins Addr's backing
+    // and names neither sa's box nor its view. Handed beside an image of sa it would give C two copies of Addr's bytes,
+    // and the image's copy-back would overwrite what C wrote through the pin. The image claims every backing inside its
+    // root and the pin claims what it pins, so the refusal holds both ways, for the e2e shape
+    // (*C.int)(unsafe.Pointer(&sa.Addr)) and for the element &sa.Addr[0].
+    [TestMethod]
+    public void APointerIntoAnArrayInsideAnImagedRootIsRefusedEitherWay()
+    {
+        ж<sockIn4> root = Root(1);
+        ж<sockAny> View() => root.Reinterpret<sockIn4, sockAny>();
+        ж<int> AddrAsInt() => @unsafe.Pointer.To<int>(@unsafe.Pointer.FromBox(new FieldRefBox<array<byte>>(root, static p => ref ((ж<sockIn4>)p).Value.Addr)));
+        ж<byte> AddrFirst() => new ElemRefBox<byte>(root.Value.Addr, 0);
+
+        GoCgoImages a = default;
+        GoCgoArgs.StructPointer(View(), "f", ref a, out _, out _);
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.ScalarPointer(AddrAsInt(), "f", ref a, out _, out _)), "name the same Go value", "image, then (*C.int)(unsafe.Pointer(&sa.Addr))");
+
+        GoCgoImages b = default;
+        Assert.AreEqual(GoCgoStructPointer.Pinned, GoCgoArgs.ScalarPointer(AddrAsInt(), "f", ref b, out _, out _), "the field view pins Addr's backing");
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.StructPointer(View(), "f", ref b, out _, out _)), "name the same Go value", "(*C.int)(unsafe.Pointer(&sa.Addr)), then image");
+
+        GoCgoImages c = default;
+        GoCgoArgs.StructPointer(View(), "f", ref c, out _, out _);
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.ScalarPointer(AddrFirst(), "f", ref c, out _, out _)), "name the same Go value", "image, then &sa.Addr[0]");
+
+        GoCgoImages d = default;
+        GoCgoArgs.ScalarPointer(AddrFirst(), "f", ref d, out _, out _);
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.StructPointer(View(), "f", ref d, out _, out _)), "name the same Go value", "&sa.Addr[0], then image");
+    }
+
     private struct inAddr
     {
         public array<byte> B = new(4);

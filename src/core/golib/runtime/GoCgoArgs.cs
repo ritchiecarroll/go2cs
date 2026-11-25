@@ -102,14 +102,14 @@ namespace go.golib;
         if (pointer is NativeBox<T> native && !IsGenuinelyNative(native) && native.AliasesAnOrderToken && ImageRoot(native, function) is { } root)
         {
             address = 0;
-            pin = images.Image(root.Key, root.Box, root.Value, root.Type, root.Size, Math.Max(root.Size, NativeStructMarshal.ImageSizeOf(typeof(T)) ?? (nuint)Unsafe.SizeOf<T>()), function);
+            pin = images.Image(GoCgoImages.ImageKeys(root.Key, root.Value), root.Box, root.Value, root.Type, root.Size, Math.Max(root.Size, NativeStructMarshal.ImageSizeOf(typeof(T)) ?? (nuint)Unsafe.SizeOf<T>()), function);
             return GoCgoStructPointer.Pinned;
         }
 
         GoCgoStructPointer kind = StructPointer(pointer, function, out address);
 
         if (kind == GoCgoStructPointer.Mirror && pointer is not null)
-            images.ClaimOther(pointer.ReferentObject, function);
+            images.ClaimOther(OtherKeys(pointer, pin), function);
 
         return kind;
     }
@@ -124,9 +124,19 @@ namespace go.golib;
         GoCgoStructPointer kind = ScalarPointer(pointer, function, out address, out pin);
 
         if (kind is GoCgoStructPointer.Mirror or GoCgoStructPointer.Pinned && pointer is not null)
-            images.ClaimOther(pointer.ReferentObject, function);
+            images.ClaimOther(OtherKeys(pointer, pin), function);
 
         return kind;
+    }
+
+    // The allocations a pointer another door hands C names (P3's B5, keyed as an image is): its root, and the storage it
+    // pins, so a pointer into an array inside an imaged root (`&sa.Addr[0]`, or `(*C.int)(unsafe.Pointer(&sa.Addr))`,
+    // whose view names neither sa's box nor its view) is seen to name that root's memory.
+    private static object[] OtherKeys<T>(ж<T> pointer, in GoCgoPin pin)
+    {
+        object root = pointer.ReferentObject;
+
+        return pin.Storage is { } storage && !ReferenceEquals(storage, root) ? [root, storage] : [root];
     }
 
     // The root a struct view's order token names, when the door can image it: the token resolves to a live Go box (an

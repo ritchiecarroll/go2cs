@@ -3255,4 +3255,23 @@ Rows:
 Readings (offline, H): converter `go test -run Cgo` ok; GolibTests cgo slice 246 passed, 0 failed, 9 skipped. Hosted
 cgo-e2e, golib-tests and the net probe follow as their own lines.
 
+**Addendum (same day): the first hosted reading, and B5 across allocations.**
+- Hosted cgo-e2e at `2d5b9b6083`: imgaddinto printed `1 4 7` on both sides, but imgmixed was not refused; go2cs printed
+  Go's `imgmixed 5 5 3`. The emitted program (a probe-only dump) showed why: the fixture's goPairHost is laid out inline
+  by the converter (GoInlineLayout, explicit layout), so both views pinned its own storage and C got one memory with no
+  image. Neither arm reached the door; the output was right because nothing was copied.
+- The arms now use net's own root, syscall.RawSockaddrInet4, which the corpus emits with its arrays as managed
+  references. goPairHost stays as the control arm `inlinemixed`, which runs as Go does.
+- That shape exposed a B5 gap. A pointer into the root's array (`(*C.int)(unsafe.Pointer(&sa.Addr))`, or
+  `&sa.Addr[0]`) pins Addr's own backing, which is neither sa's box nor its view, so an image of sa and that pin would
+  have handed C two copies of Addr, the image's copy-back overwriting what C wrote through the pin. B5 is now keyed by
+  ALLOCATIONS: an image claims its root and every backing array inside the root's value, another door claims its root
+  and the storage it pins, and any overlap between an image and another door is refused by name.
+- Row APointerIntoAnArrayInsideAnImagedRootIsRefusedEitherWay (both shapes, both orders). Neutered controls, each red,
+  restored byte-identical: the image's backings left out; the pin's storage left out. A third arm (a view resolved to
+  its token's root) was dropped: every shape that needs it also pins, so no row could redden it.
+- GolibTests NoUncountedBackingAllocations named the image buffer; it is allocated through AllocationCounter now.
+- Net probe on the door (hosted, linux): all seven TestCgoLookup tests pass, PTR, PTRWithCancel and CNAME included.
+
+
 — H (2026-11-25)

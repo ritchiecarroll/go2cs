@@ -51,6 +51,9 @@ namespace go.golib;
     // it to assert an image's size (P3's B8), which reading past a short buffer cannot show: adjacent heap memory may be 0.
     internal int StorageLength => m_root?.Length ?? 0;
 
+    // The Go storage this pin holds still, if any: an allocation the call hands C (GoCgoImages, P3's B5).
+    internal Array? Storage => m_root;
+
     /// <summary>What C receives, given the address the wrapper's <c>fixed</c> pinned this argument at.</summary>
     public unsafe nint Address(byte* pinned) => m_root is null ? (nint)m_number : (nint)(pinned + m_offset);
 

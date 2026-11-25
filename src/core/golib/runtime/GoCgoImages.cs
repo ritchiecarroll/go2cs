@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace go.golib;
 
@@ -39,24 +40,40 @@ namespace go.golib;
 
     private sealed class Root
     {
-        internal required object Key;
+        // The allocations this entry hands C: for an image, its root and every backing array inside the root's value (an
+        // inline Go array is its own allocation here); for another door, the pointer's root and the storage it pins.
+        internal required object[] Keys;
         internal required Door Door;
         internal IGoReflectBox? Box;
         internal Type? Type;
         internal byte[]? Image;
         internal byte[]? Before;
+
+        internal bool Overlaps(object[] keys)
+        {
+            foreach (object mine in Keys)
+            {
+                foreach (object key in keys)
+                {
+                    if (ReferenceEquals(mine, key))
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     private List<Root>? m_roots;
 
-    private Root? Find(object key)
+    private Root? Find(object[] keys, Door door)
     {
         if (m_roots is null)
             return null;
 
         foreach (Root root in m_roots)
         {
-            if (ReferenceEquals(root.Key, key))
+            if (root.Door == door && root.Overlaps(keys))
                 return root;
         }
 
@@ -66,38 +83,75 @@ namespace go.golib;
     private static PanicException BothDoors(string function) =>
         RuntimeErrorPanic.ErrorString($"cgo: two pointers handed to C.{function} name the same Go value, one as an image (a struct view no door can pin) and one through another door; go2cs would hand C two copies of one Go value, so it refuses the call");
 
-    // A root the mirror or the scalar door hands C: refused when an image of it is already handed over.
-    internal void ClaimOther(object key, string function)
+    // A pointer the mirror, the scalar door or a pin hands C: refused when it names an allocation an image already holds
+    // (the image's root, or an array inside it: `&sa.Addr[0]` beside a view of sa).
+    internal void ClaimOther(object[] keys, string function)
     {
-        Root? found = Find(key);
-
-        if (found is { Door: Door.Image })
+        if (Find(keys, Door.Image) is not null)
             throw BothDoors(function);
 
-        if (found is null)
-            (m_roots ??= []).Add(new Root { Key = key, Door = Door.Other });
+        (m_roots ??= []).Add(new Root { Keys = keys, Door = Door.Other });
     }
 
     // The image of a root: the existing buffer when another parameter already imaged it, else a new buffer of `size`
     // bytes (at least the root's own Go size; the tail past the root zeroed), the root encoded into it.
-    internal unsafe GoCgoPin Image(object key, IGoReflectBox box, object value, Type type, nuint rootSize, nuint size, string function)
+    internal unsafe GoCgoPin Image(object[] keys, IGoReflectBox box, object value, Type type, nuint rootSize, nuint size, string function)
     {
-        Root? found = Find(key);
-
-        if (found is { Door: Door.Other })
+        if (Find(keys, Door.Other) is not null)
             throw BothDoors(function);
 
-        if (found is { Image: { } shared })
+        if (Find(keys, Door.Image) is { Image: { } shared })
             return new GoCgoPin(shared, 0);
 
-        byte[] image = new byte[(int)Math.Max(rootSize, size)];
+        byte[] image = AllocationCounter.NewArray<byte>((int)Math.Max(rootSize, size));
 
         fixed (byte* at = image)
             NativeStructMarshal.EncodeValue(value, type, at);
 
-        (m_roots ??= []).Add(new Root { Key = key, Door = Door.Image, Box = box, Type = type, Image = image, Before = (byte[])image.Clone() });
+        (m_roots ??= []).Add(new Root { Keys = keys, Door = Door.Image, Box = box, Type = type, Image = image, Before = AllocationCounter.CopyOf<byte>(image) });
 
         return new GoCgoPin(image, 0);
+    }
+
+    // The keys of an image: the root, then every backing array the root's value holds, nested structs and the elements
+    // of an array of structs included. An image root holds no Go pointer, so these are all the allocations it spans.
+    internal static object[] ImageKeys(object root, object value)
+    {
+        List<object> keys = [root];
+        AddBackings(keys, value);
+        return [.. keys];
+    }
+
+    private static void AddBackings(List<object> keys, object? value)
+    {
+        if (value is null)
+            return;
+
+        Type type = value.GetType();
+
+        if (type.IsPrimitive || type.IsEnum || !type.IsValueType)
+            return;
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(array<>))
+        {
+            if (type.GetField("m_array", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(value) is not Array backing)
+                return;
+
+            keys.Add(backing);
+
+            Type element = type.GetGenericArguments()[0];
+
+            if (!element.IsPrimitive && !element.IsEnum && element.IsValueType)
+            {
+                foreach (object? item in backing)
+                    AddBackings(keys, item);
+            }
+
+            return;
+        }
+
+        foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            AddBackings(keys, field.GetValue(value));
     }
 
     /// <summary>
