@@ -502,6 +502,71 @@ public class ParkCutTests
         StringAssert.Contains(StaleText(), "'go.fmt_package.pp.handleMethods->go.fmt_package.Stringer.String' (stdlib) is a stale N1 entry: names no member", "a row by name");
     }
 
+    // M:N row 19, owner ruling 2 (DESIGN-mn-row19-movability.md 3.1): a hash constructor never parks. crypto's
+    // Hash.New calls a registered constructor through a func value, so it could park, and crypto/tls's
+    // `tls13.ExpandLabel(() => recvʗ1.New(), …)` paired its lambda and blocked the call inside it. The stdlib table's
+    // weak row, bound in crypto's own build, marks New's twin [GoParkWeak]; a caller in another assembly then reads the
+    // lambda as one that never parks, and leaves it unpaired. The fixture's New parks on a receive: a func value parks
+    // only where the program pairs a literal of its type, and the row under test is the weak mark, not that route.
+    private const string CryptoLibrary = """
+        using System;
+
+        namespace go;
+
+        public static partial class crypto_package
+        {
+            public partial struct Hash { public nuint v; }
+
+            internal static channel<nint> ready;
+
+            internal static nint New⁔(/*this*/ Hash h) { global::go.builtin.ᐸꟷ(ready); return (nint)h.v; }
+
+            public static nint New(this Hash h) => New⁔(h);
+        }
+        """;
+
+    private const string UsesCrypto = """
+            internal static nint expand(Func<nint> mk, nint n) => mk() + n;
+
+            internal static nint useHash(crypto_package.Hash h) => expand(() => h.New(), 1);
+
+        """;
+
+    // A package class named crypto_package without Hash.New: the row binds there and reads stale.
+    private const string FakeCrypto = """
+        }
+
+        public static partial class crypto_package
+        {
+            internal static void unrelated() { }
+
+        """;
+
+    [TestMethod]
+    public void N1_7_AHashConstructorNeverParks_Row19Ruling2()
+    {
+        LibraryTwins = true;
+
+        try
+        {
+            (string twins, Diagnostic[] errors) = RunWith(CryptoLibrary, null, UsesCrypto);
+
+            Assert.AreEqual(0, errors.Length, Errors(errors));
+            string useHash = TwinOf(twins, "useHash");
+            StringAssert.Contains(useHash, "expandꞏtwin(", "expand still parks through its own func value, so useHash awaits it");
+            Assert.IsFalse(useHash.Contains("Newꞏtwin", StringComparison.Ordinal), "the lambda calls a weak member: it is not paired\n" + useHash);
+        }
+        finally
+        {
+            LibraryTwins = false;
+        }
+
+        (_, Diagnostic[] fakeErrors) = RunWith(null, null, Callers, FakeCrypto);
+
+        Assert.AreEqual(0, fakeErrors.Length, Errors(fakeErrors));
+        StringAssert.Contains(StaleText(), "'go.crypto_package.Hash.New' (stdlib) is a stale N1 entry: names no member", "the row is checked in crypto's own build");
+    }
+
     // N1-5b over the shape the converter emits (DESIGN-mn-nopark.md 3.3): a promoted call `w.Lock()` on a struct that
     // embeds the lock is written through the embedded field, `Ꮡw.of(W.ᏑMutex).Lock()`, in the same package and across
     // packages alike, so it reaches the weak member itself and never the generated [GoPromoted] forwarder. Here `lk` is

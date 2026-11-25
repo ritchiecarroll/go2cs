@@ -252,6 +252,10 @@ public sealed partial class TwinGenerator
         private readonly bool m_blockBody;
         private int m_pairAwaits;
 
+        // Row 19 ruling 2: awaits of a weak target (a member that never parks, such as crypto's Hash.New) do not make a
+        // literal park, so PairLiteral leaves a literal whose only awaits are weak target calls plain.
+        private int m_weakAwaits;
+
         // N2: the box twin's receiver (`this ref T t` becomes `this ж<T> Ꮡt`), whose ref the prologue declares; Rule R
         // derives it again after each await from the box (or, under GoTwinsBoxCopy, the probe's control, from a copy).
         public string? BoxReceiver { get; init; }
@@ -430,6 +434,8 @@ public sealed partial class TwinGenerator
                 m_spilled.Add(node);
                 m_spills.Add(ParseStatement("var " + temp + " = " + awaited.ToFullString() + ";"));
                 m_awaits++;
+                if (m_run.WeakTarget(site))
+                    m_weakAwaits++;
                 Awaits++;
                 Spills++;
 
@@ -444,6 +450,8 @@ public sealed partial class TwinGenerator
                 awaited = ParenthesizedExpression(awaited);
 
             m_awaits++;
+            if (m_run.WeakTarget(site))
+                m_weakAwaits++;
             Awaits++;
 
             return awaited.WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
@@ -1445,22 +1453,24 @@ public sealed partial class TwinGenerator
             }
 
             List<List<string>> scopes = m_scopes;
-            int awaits = m_awaits, pairAwaits = m_pairAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
+            int awaits = m_awaits, pairAwaits = m_pairAwaits, weakAwaits = m_weakAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
             List<string> hoisted = [.. HoistedPairs];
             List<int> sites = m_sites, calls = m_calls;
             m_scopes = [];
             m_awaits = 0;
             m_pairAwaits = 0;
+            m_weakAwaits = 0;
             m_sites = [];
             m_calls = [];
 
             CSharpSyntaxNode body = (CSharpSyntaxNode)Visit(node.Body)!;
-            bool parks = m_awaits - m_pairAwaits > 0;
+            bool parks = m_awaits - m_pairAwaits - m_weakAwaits > 0;
             List<int> literalSites = m_sites, literalCalls = m_calls;
 
             m_scopes = scopes;
             m_awaits = awaits;
             m_pairAwaits = pairAwaits;
+            m_weakAwaits = weakAwaits;
             m_sites = sites;
             m_calls = calls;
 
