@@ -3771,3 +3771,39 @@ waits, minutes on an idle socket, as plain .NET sockets do with their own overla
 the no-Pinner residue goes in Limitations.md.
 
 — H (2026-11-26)
+
+### 21.8 Record 2026-11-26: the `internal/poll` reading (the first measurement 21.2 and P3 asked for)
+
+**Question.** Every banked Windows net row has passed without real Pinner pins. So either something already holds an
+overlapped buffer still, or those rows never met a compaction mid-flight (P3). This is a CODE READING at `2da4575956`;
+nothing was run.
+
+**Answer: something already holds it, on both async paths.**
+- **File and pipe I/O:** `syscall.readFile` / `writeFile` are `fileIO` (`zsyscall_windows_file_impl.cs`).
+  - When the handle is registered with the managed poller (`GoAsyncIO.HasReadiness`), the submit converts the buffer's
+    element box `Ꮡ(buf, 0)` to an address. That conversion takes the box's own pinned `GCHandle`, released with the box.
+  - Then `operation.Pin(Ꮡbuf)` keeps the BOX in the operation record for the flight, until the next `Rearm`.
+- **Sockets:** `rearmOverlapped` (`zsyscall_windows_wsa_impl.cs`) does the same through `retainForFlight`. Its own comment:
+  "the pin is a GCHandle owned by that one box and released with it", so the box is what is retained.
+- So the kernel's asynchronous write lands in memory a pin holds for as long as the operation is in flight, whatever
+  `runtime.Pinner` does.
+- `internal/poll`'s `fd.pin` → `readPinner.Pin` / `writePinner.Pin` is therefore REDUNDANT in go2cs. Today it records
+  identity only, and costs a table entry and a list slot per I/O.
+- **Not exposed today.** The banked net rows pass because the bytes are held, not because no compaction came.
+
+**What this changes in S6.**
+- **The hot-path cost becomes a pure loss unless removed.** Under 21.7's MUST 2, `Pin` takes its own handle every time,
+  so poll's per-I/O Pin would add a second `GCHandle` and a `PinnedBuffer` to every overlapped read and write, for
+  nothing.
+- **Amended (21.3, 21.6):** the seat displaces poll's `pin` (and the deferred `Unpin`) on Windows, in the poll hand-own,
+  to the managed poller's retention, which already holds the buffer. It stays a no-op when the descriptor is not
+  registered: then `fileIO` and the WSA path take the synchronous branch, and the call holds the box itself (its
+  `GC.KeepAlive`).
+  - The displacement carries a guard row: the handle count per I/O stays 0 on the poll path (21.7's SHOULD 4 seam).
+  - A second row: an overlapped read survives a forced compaction mid-flight. That is the property the displacement
+    relies on, asserted instead of read.
+- **S6's reach is then cgo alone** (go-sdl2's four retaining calls, 20.9), and its cost is off every hot path: a first pin
+  is about 32 B plus a handle, at a `Pin` a program writes on purpose.
+- **Size: unchanged, one seat.** Three commits plus the poll displacement, which is about ten lines and two rows.
+
+— H (2026-11-26)
