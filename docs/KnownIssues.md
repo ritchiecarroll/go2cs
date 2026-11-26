@@ -734,6 +734,8 @@ These forms keep C#'s left-to-right order:
 - a package-level variable's initializer;
 - a statement in which a call whose several results pass straight into another call, such as `sum(two())`, would
   have to move, as in `x := g + sum(two())`.
+- any other statement whose calls the converter cannot fully order: such a statement keeps C#'s left-to-right order
+  as a whole, and none of its calls moves.
 
 A division that panics is a related case. In `fmt.Println(x/y, bump())` with `y` zero, Go runs `bump` and then panics
 on the division; the converted program panics first, so `bump` never runs.
