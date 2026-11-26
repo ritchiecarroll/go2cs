@@ -272,7 +272,7 @@ func TestTestCsprojRefusesDotnetTestByName(t *testing.T) {
 		}
 	}
 
-	for _, want := range []string{"-test-action compare", "dotnet run --project"} {
+	for _, want := range []string{"-test-action compare", "dotnet run --project", "GO2CS_MODULE_ROOT"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("the VSTest target's error does not name %q, the command to run instead", want)
 		}

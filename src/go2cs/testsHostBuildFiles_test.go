@@ -23,6 +23,11 @@ import (
 // csproj's relative pin was never reached (NU1104). One rule fixes all three: a Directory.Build.props beside the host
 // sets go2csPath before either project body runs.
 
+var (
+	xmlComment   = regexp.MustCompile(`(?s)<!--.*?-->`)
+	xmlCondition = regexp.MustCompile(`Condition="([^"]*)"`)
+)
+
 func testsHostFixture(t *testing.T) (root, output string) {
 	t.Helper()
 
@@ -70,11 +75,21 @@ func TestTestsHostBuildFilesPinGo2CSPathOutsideTheRoot(t *testing.T) {
 		}
 	}
 
-	if strings.Contains(props, "SolutionDir") {
+	if strings.Contains(xmlComment.ReplaceAllString(props, ""), "SolutionDir") {
 		t.Errorf("Directory.Build.props must not consult SolutionDir, which an IDE sets to the host folder or leaves empty:\n%s", props)
 	}
 
 	targets := readTestsHostFile(t, filepath.Join(output, "Directory.Build.targets"))
+
+	// MSBuild's condition parser takes no property function with quoted arguments inside a quoted operand (MSB4092,
+	// measured on the first emission): such a path goes through a property first.
+	for _, contents := range []string{props, targets} {
+		for _, condition := range xmlCondition.FindAllStringSubmatch(contents, -1) {
+			if strings.Contains(condition[1], "$([") {
+				t.Errorf("a Condition calls a property function MSBuild cannot parse there: %s", condition[1])
+			}
+		}
+	}
 
 	for _, want := range []string{
 		testsHostBuildFileMarker,
