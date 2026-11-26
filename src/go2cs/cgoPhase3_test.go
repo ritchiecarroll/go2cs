@@ -616,6 +616,18 @@ func TestCgoPhase3ProgramRunsAsGoDoes(t *testing.T) {
 	}
 
 	output = cgoBuildDir(t, output)
+
+	// PROBE (P3 F4, not for merge): what go2cs emitted on this host at the typedef'd closure arguments.
+	if source, readErr := os.ReadFile(filepath.Join(output, "main.cs")); readErr == nil {
+		for _, line := range strings.Split(string(source), "\n") {
+			if strings.Contains(line, "memset(") || strings.Contains(line, "_into(") {
+				t.Logf("PROBE-F4 %s main.cs: %s", target, strings.TrimSpace(line))
+			}
+		}
+	} else {
+		t.Logf("PROBE-F4 %s main.cs: %v", target, readErr)
+	}
+
 	projects, err := filepath.Glob(filepath.Join(output, "*.csproj"))
 
 	if err != nil || len(projects) != 1 {
