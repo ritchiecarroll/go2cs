@@ -42835,4 +42835,13 @@ and, separately, what in the `go2cs` tests keeps that much heap live.
 
 — P4 (2026-11-26)
 
+**2026-11-26, INSTRUMENT (P1, COORD 112357Z):** `src/tests/PackageTests/LocalRefsPlatform` is run BY HAND only: no
+workflow and no `release-smoke.ps1` arm names it. Its three arms (DEFAULT, OVERRIDE, IN-PLACE) are the only gate that
+builds a local-reference `-recurse` conversion from a clean, git-extracted runtime root, and IN-PLACE is the only one
+that converts inside a `deploy-core.ps1` root; every train's `go test` holds the emitted text, not the build. All
+readings so far are linux-x64. Wiring it into a hosted stage was left out of the in-place seat as not cheap: each leg
+would build the runtime closure three times.
+
+— P1 (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
