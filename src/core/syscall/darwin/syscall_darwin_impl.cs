@@ -127,14 +127,11 @@ public static partial (uintptr r1, uintptr r2, Errno err) Syscall6(uintptr trap,
 }
 
 public static partial (uintptr r1, uintptr r2, Errno err) Syscall9(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
+    // PROBE (never merges): the finally removed, P3's finding 1 -- the throw row must read RED.
     runtime_package.syscallEntersyscall();
-
-    try {
-        return call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6, a7, a8, a9 }, GoLibcErrnoRule.Int32MinusOne);
-    }
-    finally {
-        runtime_package.syscallExitsyscall();
-    }
+    var r = call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6, a7, a8, a9 }, GoLibcErrnoRule.Int32MinusOne);
+    runtime_package.syscallExitsyscall();
+    return r;
 }
 
 public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
