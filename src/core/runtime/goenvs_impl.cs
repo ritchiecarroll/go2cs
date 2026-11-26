@@ -49,6 +49,11 @@ partial class runtime_package
     [ModuleInitializer]
     internal static void ᴛInitEnvs()
     {
+        // First, ahead of every step below that can fail on the wrong platform: name a build of the
+        // standard library made for another one (hostofrecord_impl.cs). Its own module initializer
+        // would not be ordered against this one.
+        ᴛVerifyHostOfRecord();
+
         IDictionary variables = Environment.GetEnvironmentVariables();
         slice<@string> snapshot = new slice<@string>(variables.Count);
         nint i = 0;
