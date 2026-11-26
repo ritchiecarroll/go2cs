@@ -146,8 +146,13 @@ try {
         try { $code = Invoke-Logged (Join-Path $work 'convert-inplace.log') { & $Converter -recurse -go2cspath $deploy . } }
         finally { Pop-Location }
         $inPlaceApp = Join-Path $deploy 'src/example.com/localrefsplatform'
+        # The arm is about deploy-core's props: a converter that overwrote it with its own (which records the
+        # platform too) would pass every other check here.
+        $deployProps = Get-Content -Raw (Join-Path $deploy 'Directory.Build.props')
         if ($code -ne 0 -or -not (Test-Path $inPlaceApp)) {
             $verdicts += "FAIL (IN-PLACE): go2cs -recurse exited $code$(Get-FirstError (Join-Path $work 'convert-inplace.log'))"
+        } elseif ($deployProps -notmatch 'Written by deploy-core\.ps1') {
+            $verdicts += "FAIL (IN-PLACE): the conversion replaced deploy-core's Directory.Build.props"
         } else {
             Push-Location $inPlaceApp
             try {
