@@ -256,6 +256,22 @@ func TestTestCsprojRefusesDotnetTestByName(t *testing.T) {
 		t.Errorf("the VSTest target does not fail the run: a message or warning still exits 0")
 	}
 
+	// Unconditional, both of them (P3's read, finding 3): a Condition on either would let the false pass back in.
+	if open := body[:strings.Index(body, ">")+1]; strings.Contains(open, "Condition=") {
+		t.Errorf("the VSTest target carries a Condition: %s", open)
+	}
+
+	if errorAt := strings.Index(body, "<Error "); errorAt >= 0 {
+		errorElement := body[errorAt:]
+		if end := strings.Index(errorElement, "/>"); end >= 0 {
+			errorElement = errorElement[:end]
+		}
+
+		if strings.Contains(errorElement, "Condition=") {
+			t.Errorf("the VSTest target's Error carries a Condition")
+		}
+	}
+
 	for _, want := range []string{"-test-action compare", "dotnet run --project"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("the VSTest target's error does not name %q, the command to run instead", want)
