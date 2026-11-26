@@ -413,3 +413,26 @@ func TestTestsHostBuildFilesCarryTheModuleRootIntoTheRuntimeconfig(t *testing.T)
 		t.Errorf("the built host's runtimeconfig carries go2cs.ModuleRoot %q; want the module's directory %q\n%s", got, module, contents)
 	}
 }
+
+// goModCacheDir's last fallback, for GOMODCACHE unset and `go env` failing, is Go's own default: the first GOPATH
+// entry's pkg/mod, and with no GOPATH, <home>/go/pkg/mod (P3 202012Z, nit 2). Joining an empty GOPATH gave the
+// relative pkg/mod, which isPathUnder never matches, so the module-cache arm of testsHostRecordableModulePath went
+// silent and ~/out/y beside ~/go/pkg/mod recorded the cache layout.
+func TestTheModuleCacheFallbackIsGosDefault(t *testing.T) {
+	home := filepath.Join(filepath.VolumeName(os.TempDir())+string(os.PathSeparator), "users", "a")
+	first := filepath.Join(home, "gopath")
+	second := filepath.Join(home, "other")
+
+	for _, row := range []struct {
+		name, gopath, home, want string
+	}{
+		{"GOPATH set", first, home, filepath.Join(first, "pkg", "mod")},
+		{"GOPATH a list", first + string(os.PathListSeparator) + second, home, filepath.Join(first, "pkg", "mod")},
+		{"GOPATH unset", "", home, filepath.Join(home, "go", "pkg", "mod")},
+		{"neither", "", "", ""},
+	} {
+		if got := defaultGoModCache(row.gopath, row.home); got != row.want {
+			t.Errorf("%s: defaultGoModCache(%q, %q) = %q; want %q", row.name, row.gopath, row.home, got, row.want)
+		}
+	}
+}
