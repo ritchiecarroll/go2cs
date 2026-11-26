@@ -51,18 +51,22 @@ var packageDirectBoxReceiverMethods map[*types.Func]bool
 // type graph reachable (importedGenericFuncInfo holds a dependency's entire types.Info). A process that
 // converts many packages (a -stdlib run, which loads once per package, and the converter's own go test,
 // which converts thousands of fixtures) then grows without bound: the go2cs test binary reached 11 GB on
-// linux and timed out on the 7 GB osx-arm64 runner. Emptied here, at the root hand-in every driver
-// already makes, beside importedAddressedGlobals; collectTypeSpecRHS does the same for its own foreign
-// cache. Each cache still serves every lookup within one package's conversion.
+// linux and timed out on the 7 GB osx-arm64 runner. A new cache keyed by *types objects is emptied here.
 //
-// No entry is needed across this boundary. Two caches are pure functions of their key, so a lookup
-// after the reset recomputes the same value: foreignDerivedAliases (the package's scope) and
-// declaredStructsByPackage (its package-level types). The other three are derived through the CURRENT
-// root's state: importedGenericFuncDecls and importedGenericFuncInfo through currentLoadedPackage (set
-// just above), descriptorCompanionCache through descriptorCarrierPackage (currentPackageSource and
-// importedPackages). An entry built for an earlier root could only be stale for this one, never needed.
-// A -stdlib or single-package run makes one load per root, so its keys never repeat across roots and
-// its emission cannot move.
+// WHERE it runs is the property: once, where a root's work STARTS, before any analysis or pre-pass reads
+// a cache (processConversion after resetPackageState, convertTestVariant before prepareShapeWitness), and
+// never again inside that root. Within the root every reader then shares the first answer, as it did
+// before this reset existed. That matters for importedGenericFuncDecls and importedGenericFuncInfo: their
+// value depends on currentLoadedPackage at the first ask (loadedPackageSource searches only that package
+// and its direct imports, and a miss is cached), and the route pre-pass asks them with currentLoadedPackage
+// re-pointed at a DEPENDENCY (newGenericRouteVisitor) before emission asks under the root. A reset between
+// the two would let one conversion take two routes for one call (P3, 2026-11-26).
+//
+// No entry is needed across the boundary between roots. foreignDerivedAliases and
+// declaredStructsByPackage are pure functions of their key. The other three are derived through the
+// current root's state: the two generic-function maps through currentLoadedPackage, and
+// descriptorCompanionCache through descriptorCarrierPackage (currentPackageSource, importedPackages). A
+// -stdlib or single-package run makes one load per root, so its keys never repeat across roots.
 func resetLoadScopedCaches() {
 	packageLock.Lock()
 	foreignDerivedAliases = nil
@@ -89,7 +93,6 @@ func collectCaptureModeMethods(pkg *packages.Package) {
 	// IMPORTED package's syntax from; record the root here, where every driver already hands it in.
 	currentLoadedPackage = pkg
 	importedAddressedGlobals = map[*types.Package]map[types.Object]bool{}
-	resetLoadScopedCaches()
 	visited := map[*packages.Package]bool{}
 	captureModeCandidates = nil
 

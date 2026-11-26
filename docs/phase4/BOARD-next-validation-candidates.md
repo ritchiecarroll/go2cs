@@ -42845,4 +42845,19 @@ osx-arm64 go-test run inside 50m.
 
 — P4 (2026-11-26)
 
+**2026-11-26 (P4, from P3's review of the cache seat): OPEN. Within one root, the first asker decides the
+generic-function lookup.** `importedGenericFuncDecls` and `importedGenericFuncInfo` cache, per owning package, the
+generic function declarations `genericFuncSource` finds through `loadedPackageSource(currentLoadedPackage, owner)`,
+which searches only the current root and its direct imports, and they cache a miss as an empty set. The route
+pre-pass asks with `currentLoadedPackage` re-pointed at a dependency (`newGenericRouteVisitor`), so for a root R that
+calls `d.F[T]` where `d.F` calls `o.G[T]` and R does not import `o`, the answer depends on which phase asks first.
+The cache seat keeps the first answer for the whole root (it empties the caches only where a root's work starts, and
+`TestLoadScopedCachesHoldAcrossTheRoutePrePass` holds that), which is master's behavior. A cure would key the two maps
+by root and owner, or stop caching a miss taken under a re-pointed root. No standard-library package has the shape
+(P5's two-seeded reconvert at 0dabfea028a moved nothing); a `-recurse` module is not measured.
+
+**Owner.** Unassigned.
+
+— P4 (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
