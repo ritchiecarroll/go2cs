@@ -74,8 +74,8 @@ IL2075 12, this reading 25 and 11. One row sits under the other code here; which
 
 The publish-time reading matters for scope: **golib is where a full trim starts, and the hand-owned companion files
 of converted packages are where it continues**: `runtime/managed_impl.cs` and `runtime/memmove_impl.cs` (28 under
-ILLink), and `internal/abi/type_impl.cs:884` (one IL3050, `MakeGenericType` in `synthesizeArrayType`). One more is
-specific to Native AOT: `runtime/managed_impl.cs:2483` reads `Assembly.Location` to open a portable PDB (IL3000),
+ILLink), and `internal/abi/type_impl.cs:873` (one IL3050, `MakeGenericType` in `synthesizeArrayType`). One more is
+specific to Native AOT: `runtime/managed_impl.cs:2422` reads `Assembly.Location` to open a portable PDB (IL3000),
 which is empty in a single-file or AOT program. No GENERATED file reports a trim warning of its own in this closure;
 a larger closure may (the BOARD's 2026-10-06 publish saw `unsafe` and `slices` report IL2104).
 
@@ -364,7 +364,7 @@ By what they are FOR, which is what decides the answer:
 | **E. Code emitted at run time** (`reflect.StructOf`'s dynamic assembly; the `DynamicMethod` field accessors) | 5 | `GoStructSynthesis.cs` :192; `GoReflect.FieldAccess.cs` `buildFieldAccessor` :646 :671 :685; `ж.Contracts.cs` :143 |
 
 Outside golib the same class had two more in master's Native AOT publish of the consumer (section 2, not re-read at
-the FL union): `internal/abi/type_impl.cs:884` (`synthesizeArrayType`, `MakeGenericType`) and one in
+the FL union): `internal/abi/type_impl.cs:873` (`synthesizeArrayType`, `MakeGenericType`) and one in
 `runtime/managed_impl.cs`, both hand-owned companion files.
 
 ### 9.3 The principle

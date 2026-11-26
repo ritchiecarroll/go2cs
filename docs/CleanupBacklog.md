@@ -340,7 +340,7 @@
     which is the load-bearing row, since it says nothing was traded away.
     **(d)'s prescribed `= null!` does not apply site-for-site any more, and that is worth carrying
     rather than re-discovering:** of the three fields it names, `slice.m_array` is a `readonly` field
-    of a `readonly struct` (`src/core/golib/slice.cs:56,58`), where an initializer does not run for
+    of a `readonly struct` (`src/core/golib/slice.cs:66,68`), where an initializer does not run for
     `default(slice<T>)` at all; and `ж.m_val` has MOVED — it is now `StandardBox<T>.m_val`
     (`src/core/golib/ж.StandardBox.cs:38,42`), where `T` is UNCONSTRAINED, so `= null!` is ill-formed
     outright (`= default!` is the only spelling that compiles). Whoever takes (d) therefore derives

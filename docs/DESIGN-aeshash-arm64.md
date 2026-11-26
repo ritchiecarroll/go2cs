@@ -22,7 +22,7 @@ HasSSE41`, and arm64 when `cpu.ARM64.HasAES`. Apple silicon has AES, and `cpu_ar
 `ARM64.HasAES = true` outright, so Go on these machines always takes the arm64 branch.
 
 The converted `alginit` (`src/core/runtime/alg.cs:439`) never runs, because schedinit never runs. The selection that
-actually runs is the hand-owned `initHashAlgorithm` (`src/core/runtime/hash_impl.cs:178`). It tests the x86 branch
+actually runs is the hand-owned `initHashAlgorithm` (`src/core/runtime/hash_impl.cs:156`). It tests the x86 branch
 only:
 
 ```csharp
@@ -41,13 +41,13 @@ Taken at `4aebdadc1a` over `src/core/**/*.cs`, the darwin flavour (linux/ and wi
 `internal/cpu` itself excluded.
 
 **`cpu.X86.Has*`: 89 lines in 14 files.** 49 are in `vendor/golang.org/x/sys/cpu/cpu_x86.cs`, which has its own `X86`
-struct and is not internal/cpu's. Of the other 40, four are comments (`hash_impl.cs:91`, three in `crc32_amd64.cs`);
+struct and is not internal/cpu's. Of the other 40, four are comments (`hash_impl.cs:69`, three in `crc32_amd64.cs`);
 the code sites are:
 
 | Consumer | Flags | On an arm64 process today |
 |:--|:--|:--|
-| `runtime/hash_impl.cs:179` (`initHashAlgorithm`) and `runtime/alg.cs:441-443` (unreached) | AES, SSSE3, SSE41 | fallback hash (the trio) |
-| `runtime/cpuflags_impl.cs:50-53` (cpuinit's copy half) and `runtime/darwin/proc.cs:802-805` (the converted cpuinit, unreached) | AVX, FMA, POPCNT, SSE41 | all false |
+| `runtime/hash_impl.cs:157` (`initHashAlgorithm`) and `runtime/alg.cs:441-443` (unreached) | AES, SSSE3, SSE41 | fallback hash (the trio) |
+| `runtime/cpuflags_impl.cs:40-43` (cpuinit's copy half) and `runtime/darwin/proc.cs:802-805` (the converted cpuinit, unreached) | AVX, FMA, POPCNT, SSE41 | all false |
 | `runtime/cpuflags_amd64.cs:29-30` | ERMS, FSRM, AVX | false |
 | `runtime/cpuflags.cs:13-17`, `internal/bytealg/bytealg.cs:22-24` | `Offsetof` constants, not reads | n/a |
 | `internal/bytealg/index_amd64.cs:14` | AVX2 | false |
@@ -63,7 +63,7 @@ the code sites are:
 | Consumer | Flag | On an arm64 process today | Go on arm64 |
 |:--|:--|:--|:--|
 | `runtime/alg.cs:447` (unreached) | AES | n/a | AES hash |
-| `runtime/cpuflags_impl.cs:59`, `runtime/darwin/proc.cs:813` | ATOMICS | not taken: keyed on the constant `GOARCH` | set |
+| `runtime/cpuflags_impl.cs:49`, `runtime/darwin/proc.cs:813` | ATOMICS | not taken: keyed on the constant `GOARCH` | set |
 | `crypto/tls/cipher_suites.cs:369` (`hasGCMAsmARM64`) | AES, PMULL | **false** | true |
 | `crypto/internal/fips140deps/cpu/cpu.cs:18-26` | five re-exports | 0 consumers | n/a |
 | `crypto/subtle/dit_test.cs:25, :59, :92` | DIT | false: three tests skip | from the `hw.optional.arm.FEAT_DIT` sysctl |

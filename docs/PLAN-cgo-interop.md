@@ -184,7 +184,7 @@ enumerate in advance.
   RATIFIED 2026-08-22, landed) covers the **C→Go** direction: wrapping a C-returned buffer as a slice
   that reads and writes through to the real memory.
 - **Native-box source retention** — `NativeBox<T>`'s `m_retainedSource` slot (`ж.NativeBox.cs:31/47/79`)
-  and the corpus-wide `unsafe.Pointer.FromBox` mint (`core/unsafe/unsafe.cs:378-390`, merge `a7c964d80`): a number
+  and the corpus-wide `unsafe.Pointer.FromBox` mint (`core/unsafe/unsafe.cs:368-380`, merge `a7c964d80`): a number
   that carries the box it was minted from. This is the **callee-retains** mechanism — the machinery
   Phase 3's `C.CString`-class helpers and any C-keeps-the-pointer scenario need, and it landed after
   this document's fork.
@@ -699,7 +699,7 @@ Content was verified at each new site. "GONE" means the cited code no longer exi
 | `moduleConverter.go:233` · `importOperations.go:1027` | `:318-319` · `:1317-1318` |
 | `Roadmap.md:770-784` | the 5A/5B text is `Roadmap.md:402/421`; the completed half moved to `RoadmapHistory.md:307` |
 | `ToDo.md` item 48 · `ToDo.md:49-51` | `ToDo.md:63` (an `xx)` line pointing here) · `:64` |
-| `ж.NativeBox.cs:31/47/79` · `core/unsafe/unsafe.cs:378-390` | `:41/47/63` (+ `RetainedSource` `:212`) · `:371-377`, `FromBox<T>` `:510` |
+| `ж.NativeBox.cs:31/47/79` · `core/unsafe/unsafe.cs:368-380` | `:31/47/63` (+ `RetainedSource` `:202`) · `:361-367`, `FromBox<T>` `:500` |
 | `slice.cs:430-431` | `:660-661`, the same throw text |
 | `internal/runtime/syscall/linux/syscall_linux_impl.cs:105-119` | **moved under layout L3** to `internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:116-124`; it now cites the converter's own funnel hold (`convSyscallFunnelCall`, `syscallKeepAliveAnalysis.go`) |
 | `PinnedBuffer.Clone` (`1d01200a9`) | `golib/runtime/PinnedBuffer.cs:174` |
