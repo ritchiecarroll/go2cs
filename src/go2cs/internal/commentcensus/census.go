@@ -1018,6 +1018,11 @@ func csBodyRange(cs *csFile, ln int) (int, int, bool) {
 	for l := ln; l <= len(cs.lines) && l < ln+5000; l++ {
 		code := cs.codeText[l-1]
 		if open == 0 && strings.Contains(code, "=>") && !strings.Contains(code, "{") {
+			// An array-dims OVERLOAD's arity-1 forwarder (`Make<T>(T value) => Make<T, ᴀnone>(value);`) is the
+			// line the declaration is found at; the Go body is the arity-2 method declared on the next line.
+			if l == ln && strings.Contains(code, "ᴀnone>(") {
+				continue
+			}
 			return 0, 0, false
 		}
 		for _, ch := range code {

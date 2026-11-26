@@ -26,8 +26,8 @@ internal static void main() {
     fmt.Println(a[0], a[1], a[2], a[3]);
 
     uintptr pc = 0xAB;
-    fmt.Println(LiteralByteAt("0123456789abcdef"u8, (uintptr)(pc & 15)));
-    fmt.Println(LiteralByteAt("0123456789abcdef"u8, (uintptr)(pc >> 4 & 15)));
+    fmt.Println(builtin.LiteralByteAt("0123456789abcdef"u8, (uintptr)(pc & 15)));
+    fmt.Println(builtin.LiteralByteAt("0123456789abcdef"u8, (uintptr)(pc >> 4 & 15)));
     @string hex = "0123456789abcdef";
     uint64 k = 12;
     fmt.Println(hex[k]);

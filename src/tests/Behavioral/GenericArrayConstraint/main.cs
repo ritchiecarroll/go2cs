@@ -12,7 +12,7 @@ partial struct nttElement /*[4]fieldElement*/;
 internal static T /*s*/ addPoly<T>(T a, T b)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = GoZero<T>();
+    T s = builtin.GoZero<T>();
 
     foreach (var i in range(len(s))) {
         s[i] = (fieldElement)(a[i] + b[i]);
@@ -23,7 +23,7 @@ internal static T /*s*/ addPoly<T>(T a, T b)
 internal static T scalePoly<T>(T a, fieldElement k)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()
 {
-    T f = GoZero<T>();
+    T f = builtin.GoZero<T>();
     foreach (var i in range(len(a))) {
         f[i] = (fieldElement)(a[i] * k);
     }

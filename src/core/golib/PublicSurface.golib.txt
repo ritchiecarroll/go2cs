@@ -19,8 +19,8 @@
 # one reads red by the line; adding one reads red until its line is added. GolibTests writes the lines with
 # GO2CS_PUBLIC_SURFACE_MEMBERS=<path>.
 #
-# A [go-tier2] addition, and any change to [tier1] or [tier1-members] outside the deprecation path, needs a COORD
-# ruling, cited in a comment line beside it.
+# A [go-tier2] addition, and any change to [tier1] or [tier1-members] outside the deprecation path, needs a
+# recorded ruling, cited in a comment line beside it.
 
 [tier1]
 go.array`1
@@ -39,7 +39,7 @@ go.slice`1
 go.slice`1+Enumerator
 go.string
 go.uintptr
-# go.variadic`1: added 2026-11-20 on COORD's ruling (inbox/P2/20261120T135029Z-COORD.md): a variadic parameter's type,
+# go.variadic`1: added 2026-11-20 on the ruling of 2026-11-20T13:50:29Z: a variadic parameter's type,
 # named by every converted variadic signature and returned by slice<T>.ꓸꓸꓸ; its plumbing members are hidden.
 go.variadic`1
 go.ж`1
@@ -97,6 +97,8 @@ go.Funcꓸꓸꓸ`9
 go.GoAllocEntry
 go.GoArchExclusiveAttribute
 go.GoArrayDimsAttribute
+# Ruled 2026-11-25 (17:06Z, the array-dims companion design, section 7): a converter-emitted attribute, as GoArrayDimsAttribute; [go-tier2] by ruling
+go.GoArrayDimsCompanionAttribute
 go.GoArrayZero
 go.GoBoundedGoroutineAttribute
 go.GoBoxViewsAttribute
@@ -116,7 +118,7 @@ go.GoExternalStubAttribute
 go.GoFieldAccessAttribute
 go.GoForeignMemory
 go.GoFrame
-# go.GoFuncAttribute: a function literal's Go name, the owner's option (a) of 2026-11-22 (commit 832b50c1e8).
+# go.GoFuncAttribute: a function literal's Go name, a decision of 2026-11-22 (commit 832b50c1e8).
 # A converter-emitted attribute on every function literal; it stays in namespace go, so emission does not move.
 go.GoFuncAttribute
 go.GoFuncCookie
@@ -139,13 +141,13 @@ go.GoMapKeyDimsAttribute
 go.GoMemProfile
 go.GoMemberFact
 go.GoMemberRecordAttribute
-# go.GoMethodHostAttribute: added 2026-11-12 with the method holders (OQ2), on each holder class in package_info.cs.
-# COORD 2026-11-12: a converter-emitted attribute, the GoPromotedHost class; [go-tier2] by ruling
+# go.GoMethodHostAttribute: added 2026-11-12 with the method holders, on each holder class in package_info.cs.
+# Ruled 2026-11-12: a converter-emitted attribute, the GoPromotedHost class; [go-tier2] by ruling
 go.GoMethodHostAttribute
 go.GoMethodText
 go.GoModInfoAttribute
 # go.GoNameAttribute: added 2026-11-22 with the Δ projection cure, on each declaration whose Go name starts with Δ.
-# COORD 2026-11-22 (065204Z, the cure's design cleared): a converter-emitted attribute, as GoLocalNameAttribute; [go-tier2] by ruling
+# Ruled 2026-11-22 (06:52:04Z, the cure's design cleared): a converter-emitted attribute, as GoLocalNameAttribute; [go-tier2] by ruling
 go.GoNameAttribute
 go.GoPackageAttribute
 go.GoParamDimsAttribute
@@ -157,7 +159,7 @@ go.GoRecvAttribute
 go.GoRefPrimaryAttribute
 go.GoReflect
 go.GoReflectCompanionAttribute
-# go.GoRefusalDowngradedAttribute: added 2026-11-12 on COORD's ruling (the public-surface review). A converter-emitted
+# go.GoRefusalDowngradedAttribute: added 2026-11-12 on the public-surface review's ruling. A converter-emitted
 # assembly attribute, like the other Go* attributes here; it stays in namespace go, so emission does not move.
 go.GoRefusalDowngradedAttribute
 go.GoRequiresUnsafeAttribute
@@ -249,7 +251,7 @@ go.TypedNilOfExtensions
 go.UntypedComplex
 go.UntypedFloat
 go.UntypedInt
-# go.VariadicExtensions: added 2026-11-20 on COORD's ruling (inbox/P2/20261120T135029Z-COORD.md): the two pack
+# go.VariadicExtensions: added 2026-11-20 on the ruling of 2026-11-20T13:50:29Z: the two pack
 # prologues (.slice(), .sslice()), beside SSliceExtensions; converted projects do not import go.golib.
 go.VariadicExtensions
 go.channel
@@ -467,7 +469,7 @@ go.builtin :: field const System.IntPtr iota
 go.builtin :: field static readonly System.Boolean ᐧᐧ
 go.builtin :: field static readonly go.NilType nil
 go.builtin :: field static readonly go.NilType ꓸꓸꓸ
-# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): append of a variadic pack, wall E.
+# 2026-11-20, ruling of 13:50:29Z: append of a variadic pack, the variadic retype.
 go.builtin :: method static S append<S, T>(S, go.variadic<T>)
 go.builtin :: method static S append<S, T>(S, params System.ReadOnlySpan<T>)
 go.builtin :: method static S append<S, T>(S, params System.Span<T>)
@@ -768,7 +770,7 @@ go.builtin :: method static go.complex64 complex(System.Single, System.Single)
 go.builtin :: method static go.complex64 i(System.Single)
 go.builtin :: method static go.slice<System.Byte> append(go.slice<System.Byte>, params System.ReadOnlySpan<System.Int32>)
 go.builtin :: method static go.slice<T> append<T>(go.ISlice, params T[])
-# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): append of a variadic pack, wall E.
+# 2026-11-20, ruling of 13:50:29Z: append of a variadic pack, the variadic retype.
 go.builtin :: method static go.slice<T> append<T>(go.slice<T>, go.variadic<T>)
 go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params System.ReadOnlySpan<T>)
 go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params System.Span<T>)
@@ -1033,7 +1035,7 @@ go.slice<T> :: property T& Item[System.IntPtr] { get; }
 go.slice<T> :: property T& Item[System.UInt64] { get; }
 go.slice<T> :: property T[] Source { get; }
 go.slice<T> :: property go.slice<T> Item[System.Range] { get; }
-# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): was System.Span<T>; a named break of the .5 floor move.
+# 2026-11-20, ruling of 13:50:29Z: was System.Span<T>; a named break of the .5 floor move.
 go.slice<T> :: property go.variadic<T> ꓸꓸꓸ { get; }
 go.slice<T>.Enumerator :: method System.Boolean MoveNext()
 go.slice<T>.Enumerator :: method System.Void Dispose()
@@ -1181,13 +1183,13 @@ go.uintptr :: method static go.uintptr op_Subtraction(go.uintptr, go.uintptr)
 go.uintptr :: method static go.uintptr op_UnaryNegation(go.uintptr)
 go.uintptr :: method static go.uintptr op_UnaryPlus(go.uintptr)
 go.uintptr :: method static go.uintptr op_UnsignedRightShift(go.uintptr, System.Int32)
-# 2026-11-20, COORD ruling (inbox/P2/20261120T135029Z-COORD.md): go.variadic<T> enters [tier1] with these members.
+# 2026-11-20, ruling of 13:50:29Z: go.variadic<T> enters [tier1] with these members.
 go.variadic<T> :: method System.Span<T>.Enumerator GetEnumerator()
 go.variadic<T> :: method static System.ReadOnlySpan<T> op_Implicit(go.variadic<T>)
 go.variadic<T> :: method static System.Span<T> op_Implicit(go.variadic<T>)
 go.variadic<T> :: method static go.variadic<T> op_Implicit(System.Span<T>)
 go.variadic<T> :: property System.Int32 Length { get; }
-# 2026-11-20, COORD review (inbox/P2/20261120T145250Z-COORD.md item 4): Elements is hidden; tier 1 reaches a span by
+# 2026-11-20, review of 14:52:50Z, item 4: Elements is hidden; tier 1 reaches a span by
 # the copying implicit conversion.
 go.variadic<T> :: property T& Item[System.Int32] { get; }
 go.variadic<T> :: property T& Item[System.IntPtr] { get; }
@@ -1257,7 +1259,7 @@ go.ж<T> :: property T& ValueSlot { get; }
 go.ж<T> :: property go.PointerStorage StorageKind { get; }
 go.ж<T> :: property static go.ж<T> NilBox { get; }
 
-# [mn-frozen] The M:N surface frozen for L-min (decision of 2026-11-20 on M:N item 7b; the owner ruled L-min the same
+# [mn-frozen] The M:N surface frozen for L-min (decision of 2026-11-20 on M:N item 7b; L-min was ruled the same
 # day): every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated
 # code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
 # the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin, Goschedꞏtwin; channel`1 ᐸꟷꞏtwin), each
@@ -1298,7 +1300,7 @@ go.golib.GoFuncPair :: property abstract System.Delegate Twin { get; }
 go.golib.GoFuncPair :: shape abstract class; abstract-members get_Plain(), get_Twin()
 go.golib.GoParkForwarderAttribute :: ctor public ()
 go.golib.GoParkForwarderAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
-# GoParkWeakAttribute: N1, DESIGN-mn-nopark.md 3.2.
+# GoParkWeakAttribute: the no-park mark, DESIGN-mn-nopark.md 3.2.
 go.golib.GoParkWeakAttribute :: ctor public ()
 go.golib.GoParkWeakAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
 go.golib.GoTask :: method go.golib.GoTaskAwaiter GetAwaiter()

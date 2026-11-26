@@ -11,6 +11,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -137,6 +138,11 @@ func hostTarget(t *testing.T) (string, string) {
 // RE-CITED for the cgo-against-go.* item (INC 1, C2 ca1fd3a4e): -cgo beside -recurse was refused here ("the module
 // driver's loads stay at CGO_ENABLED=0"). The module driver now loads cgo-on under -cgo (moduleConverter.go), so the row
 // reads accepted; TestARecurseNugetConversionTakesACgoPackageThroughTheCgoRoute holds what it then converts.
+//
+// RE-CITED for cgo Phase 3 increment 3.4 seat 4a (DESIGN-cgo-phase3-marshaling section 19): -cgo beside -tests was
+// refused here ("the test drivers' loads stay at CGO_ENABLED=0"). The package's own test loads and the oracle now run
+// cgo-on under -cgo (packageTestLoaderEnv, cgoOracleEnv), so the row reads accepted; the corpus is still protected, by
+// checkCgoTestsOutput (TestACgoTestsConversionNeverWritesTheRepositorysCorpus).
 func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 	cases := []struct {
 		name               string
@@ -150,7 +156,7 @@ func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 		{name: "on, 1", cgo: true, env: "1"},
 		{name: "on, 0", cgo: true, env: "0", refused: "CGO_ENABLED=0"},
 		{name: "stdlib", cgo: true, stdlib: true, env: "-", refused: "-stdlib"},
-		{name: "tests", cgo: true, tests: true, env: "-", refused: "-tests"},
+		{name: "tests is accepted", cgo: true, tests: true, env: "-"},
 		{name: "recurse is accepted", cgo: true, env: "-"},
 	}
 
@@ -172,4 +178,145 @@ func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 			}
 		})
 	}
+}
+
+// -cgo -tests loads the CONVERTED package's own test variants cgo-on and runs the oracle cgo-on, as its production load
+// is; every other load keeps the loader pin (stop line S-G). Without -cgo nothing changes (seat 4a, section 19).
+func TestOnlyTheConvertedPackagesTestLoadsAndTheOracleTurnCgoOn(t *testing.T) {
+	unsetCgoEnabled(t)
+
+	last := func(env []string) string {
+		value := ""
+
+		for _, entry := range env {
+			if v, found := strings.CutPrefix(entry, "CGO_ENABLED="); found {
+				value = v
+			}
+		}
+
+		return value
+	}
+
+	if got := last(packageTestLoaderEnv(Options{parseCgoTargets: true}, "GOOS=linux")); got != "1" {
+		t.Errorf("-cgo: the package's test load runs at CGO_ENABLED=%q, want 1", got)
+	}
+
+	if got := last(packageTestLoaderEnv(Options{}, "GOOS=linux")); got != "0" {
+		t.Errorf("no -cgo: the package's test load runs at CGO_ENABLED=%q, want the loader pin 0", got)
+	}
+
+	if got := last(converterLoaderEnv("GOOS=linux")); got != "0" {
+		t.Errorf("another package's load runs at CGO_ENABLED=%q, want the loader pin 0 (S-G)", got)
+	}
+
+	if got := cgoOracleEnv(Options{parseCgoTargets: true}); len(got) != 1 || got[0] != "CGO_ENABLED=1" {
+		t.Errorf("-cgo: the oracle's extra environment is %q, want [CGO_ENABLED=1]", got)
+	}
+
+	if got := cgoOracleEnv(Options{}); got != nil {
+		t.Errorf("no -cgo: the oracle's extra environment is %q, want none", got)
+	}
+}
+
+// -cgo -tests never writes into a repository's corpus (stop line S-D), judged at the OUTPUT with symlinks resolved, and
+// only into a root its seed step marked (P3's verdict on 4a, inbox H 20261124T232124Z):
+//   - a root with no marker is refused (the repository's src, a deployed root);
+//   - route (a): an explicit -go2cspath elsewhere, the output inside a repository's src/core, is refused;
+//   - route (b): a scratch src that is a symlink to a repository's src is refused;
+//   - a marked scratch root, the output in its own core, is accepted;
+//   - without -cgo, or without -tests, nothing is checked.
+func TestACgoTestsConversionNeverWritesTheRepositorysCorpus(t *testing.T) {
+	repository := t.TempDir()
+	repoSrc := filepath.Join(repository, "src")
+	scratch := filepath.Join(t.TempDir(), "src")
+
+	for _, dir := range []string{filepath.Join(repoSrc, "core", "net"), filepath.Join(scratch, "core", "net")} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// A worktree's .git is a FILE; the check reads either.
+	if err := os.WriteFile(filepath.Join(repository, ".git"), []byte("gitdir: elsewhere"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(scratch, cgoScratchRootMarker), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cgoTests := Options{parseCgoTargets: true, convertTests: true}
+
+	check := func(t *testing.T, options Options, root, output, refusal string) {
+		t.Helper()
+		options.go2csPath = root
+		err := checkCgoTestsOutput(options, output)
+
+		switch {
+		case refusal != "" && (err == nil || !strings.Contains(err.Error(), refusal)):
+			t.Errorf("want a refusal naming %q, got %v", refusal, err)
+		case refusal == "" && err != nil:
+			t.Errorf("refused: %v", err)
+		}
+	}
+
+	t.Run("a root with no marker", func(t *testing.T) {
+		check(t, cgoTests, repoSrc, filepath.Join(t.TempDir(), "net"), cgoScratchRootMarker)
+	})
+
+	t.Run("route (a): an explicit root elsewhere, the output in a repository's core", func(t *testing.T) {
+		check(t, cgoTests, scratch, filepath.Join(repoSrc, "core", "net"), "CGO_ENABLED=0 by ruling")
+	})
+
+	t.Run("route (b): a scratch src that is a symlink to a repository's src", func(t *testing.T) {
+		link := filepath.Join(t.TempDir(), "src")
+
+		if err := os.Symlink(repoSrc, link); err != nil {
+			t.Skipf("NOT RUN: this host cannot create a symlink (%v); the hosted linux leg runs this arm", err)
+		}
+
+		if err := os.WriteFile(filepath.Join(repoSrc, cgoScratchRootMarker), nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		defer os.Remove(filepath.Join(repoSrc, cgoScratchRootMarker))
+
+		check(t, cgoTests, link, filepath.Join(link, "core", "net"), "CGO_ENABLED=0 by ruling")
+	})
+
+	t.Run("A1: a marked root, the output in a deployed corpus outside its core", func(t *testing.T) {
+		deployed := filepath.Join(t.TempDir(), "go2cs", "core", "net")
+
+		if err := os.MkdirAll(deployed, 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		check(t, cgoTests, scratch, deployed, "not under it")
+	})
+
+	t.Run("A2: a repository's core typed in another case", func(t *testing.T) {
+		upper := t.TempDir()
+
+		if err := os.MkdirAll(filepath.Join(upper, "src", "Core", "net"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filepath.Join(upper, ".git"), []byte("gitdir: elsewhere"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		check(t, cgoTests, scratch, filepath.Join(upper, "src", "Core", "net"), "CGO_ENABLED=0 by ruling")
+	})
+
+	t.Run("a marked scratch root", func(t *testing.T) {
+		check(t, cgoTests, scratch, filepath.Join(scratch, "core", "net"), "")
+	})
+
+	t.Run("no -cgo", func(t *testing.T) {
+		check(t, Options{convertTests: true}, repoSrc, filepath.Join(repoSrc, "core", "net"), "")
+	})
+
+	t.Run("no -tests", func(t *testing.T) {
+		check(t, Options{parseCgoTargets: true}, repoSrc, filepath.Join(repoSrc, "core", "net"), "")
+	})
 }

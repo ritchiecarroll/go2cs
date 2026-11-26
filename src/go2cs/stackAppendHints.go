@@ -987,7 +987,7 @@ func (v *Visitor) writeStackAppendMove(stmt ast.Stmt) {
 
 		v.outputBuilder.WriteString(v.newline)
 		v.outputBuilder.WriteString(v.indent(v.indentLevel))
-		fmt.Fprintf(v.outputBuilder, "%s = move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
+		fmt.Fprintf(v.outputBuilder, "%s = builtin.move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
 	}
 }
 

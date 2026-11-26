@@ -13,7 +13,13 @@ using go.golib;
 
 namespace go;
 
-public abstract partial class ж<T> : IManagedPinHolder
+public abstract partial class ж<T> : IManagedPinHolder, ICgoWord
 {
     PinnedBuffer? IManagedPinHolder.ManagedPin => m_pin;
+
+    // cgo .5 item 2 (GoCgoWordMirror): this pointer as one word of a Go array of C pointers handed to C whole, and a
+    // native box of this pointee type for a C address C wrote into such an array.
+    nuint ICgoWord.CgoWord() => GoCgoArgs.PointerMember(this);
+
+    object ICgoWord.CgoNativeSibling(nuint address) => new NativeBox<T>(address);
 }

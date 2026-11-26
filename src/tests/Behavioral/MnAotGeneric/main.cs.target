@@ -122,7 +122,7 @@ partial interface number<ΔT> /*operators = Sum, Arithmetic, Comparable, Ordered
 internal static T total<T>(slice<T> xs, nint n)
     where T : /* number */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    T t = GoZero<T>();
+    T t = builtin.GoZero<T>();
 
     foreach (var (_, x) in range(xs)) {
         t += x;

@@ -10,7 +10,7 @@ internal static void fullBuffered() {
     ch.ᐸꟷ(1);
 
     var chᴛ1 = ch.ᐸꟷ(2, ꓸꓸꓸ);
-    switch (trySelect(chᴛ1)) {
+    switch (builtin.trySelect(chᴛ1)) {
     case 0: {
         fmt.Println("full buffered: sent");
         break;
@@ -23,7 +23,7 @@ internal static void fullBuffered() {
     fmt.Println("full buffered: held =", ᐸꟷ(ch));
 
     var chᴛ2 = ch.ᐸꟷ(2, ꓸꓸꓸ);
-    switch (trySelect(chᴛ2)) {
+    switch (builtin.trySelect(chᴛ2)) {
     case 0: {
         fmt.Println("drained buffered: sent");
         break;
@@ -40,7 +40,7 @@ internal static void freeBuffered() {
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(1);
     var chᴛ1 = ch.ᐸꟷ(2, ꓸꓸꓸ);
-    switch (trySelect(chᴛ1)) {
+    switch (builtin.trySelect(chᴛ1)) {
     case 0: {
         fmt.Println("free buffered: sent");
         break;
@@ -68,7 +68,7 @@ internal static partial void unbufferedWithReceiver() {
 
     for (nint i = 0; i < 1000 && !sent; i++) {
         var chᴛ1 = ch.ᐸꟷ(7, ꓸꓸꓸ);
-        switch (trySelect(chᴛ1)) {
+        switch (builtin.trySelect(chᴛ1)) {
         case 0: {
             sent = true;
             break;
@@ -85,7 +85,7 @@ internal static partial void unbufferedWithReceiver() {
 internal static void nilChannel() {
     channel<nint> ch = default;
     var chᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);
-    switch (trySelect(chᴛ1)) {
+    switch (builtin.trySelect(chᴛ1)) {
     case 0: {
         fmt.Println("nil channel: sent");
         break;
@@ -109,7 +109,7 @@ internal static void closedChannel() {
         close(ch);
 
         var chᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);
-        switch (trySelect(chᴛ1)) {
+        switch (builtin.trySelect(chᴛ1)) {
         case 0: {
             fmt.Println("closed channel: sent");
             break;
@@ -132,7 +132,7 @@ internal static void oneOfManyReady() {
 
     var fullᴛ1 = full.ᐸꟷ(2, ꓸꓸꓸ);
     var openᴛ1 = open.ᐸꟷ(3, ꓸꓸꓸ);
-    switch (trySelect(fullᴛ1, openᴛ1)) {
+    switch (builtin.trySelect(fullᴛ1, openᴛ1)) {
     case 0: {
         fmt.Println("one of many: chose full");
         break;
@@ -156,7 +156,7 @@ internal static void neitherReady() {
 
     var fullᴛ1 = full.ᐸꟷ(2, ꓸꓸꓸ);
     var emptyᴛ1 = empty;
-    switch (trySelect(fullᴛ1, ᐸꟷ(emptyᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(fullᴛ1, ᐸꟷ(emptyᴛ1, ꓸꓸꓸ))) {
     case 0: {
         fmt.Println("neither ready: sent");
         break;
@@ -177,7 +177,7 @@ internal static void exactlyOneSend() {
 
     var aᴛ1 = a.ᐸꟷ(1, ꓸꓸꓸ);
     var bᴛ1 = b.ᐸꟷ(2, ꓸꓸꓸ);
-    switch (trySelect(aᴛ1, bᴛ1)) {
+    switch (builtin.trySelect(aᴛ1, bᴛ1)) {
     case 0: {
         break;
     }
@@ -220,7 +220,7 @@ internal static void namedChannelType() {
     var q = new queue(1);
 
     var qᴛ1 = q.ᐸꟷ(1, ꓸꓸꓸ);
-    switch (trySelect(qᴛ1)) {
+    switch (builtin.trySelect(qᴛ1)) {
     case 0: {
         fmt.Println("named channel: sent");
         break;
@@ -231,7 +231,7 @@ internal static void namedChannelType() {
     }}
 
     var qᴛ2 = q.ᐸꟷ(2, ꓸꓸꓸ);
-    switch (trySelect(qᴛ2)) {
+    switch (builtin.trySelect(qᴛ2)) {
     case 0: {
         fmt.Println("named channel full: sent");
         break;

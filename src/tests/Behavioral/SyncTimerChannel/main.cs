@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static bool tryRecv(/*<-*/channel<time.Time> c) {
     var cᴛ1 = c;
-    switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
     case 0 when cᴛ1.ꟷᐳ(out _): {
         return true;
     }

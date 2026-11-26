@@ -29,7 +29,7 @@ internal static (ж<encKey>, error) newEncapKey(slice<byte> b) {
 }
 
 internal static void main() {
-    keylike.RoundTrip<keylike.EncapKey, keylike.DecapKey<keylike.EncapKey>>("round trip", widenResult<ж<decKey>, keylike.DecapKey<keylike.EncapKey>>(generateKey, elemᴛ1 => new decKeyжDecapKey(elemᴛ1)), widen<slice<byte>, ж<encKey>, keylike.EncapKey>(newEncapKey, elemᴛ2 => new encKeyжEncapKey(elemᴛ2)));
+    keylike.RoundTrip<keylike.EncapKey, keylike.DecapKey<keylike.EncapKey>>("round trip", builtin.widenResult<ж<decKey>, keylike.DecapKey<keylike.EncapKey>>(generateKey, elemᴛ1 => new decKeyжDecapKey(elemᴛ1)), builtin.widen<slice<byte>, ж<encKey>, keylike.EncapKey>(newEncapKey, elemᴛ2 => new encKeyжEncapKey(elemᴛ2)));
 }
 
 } // end main_package

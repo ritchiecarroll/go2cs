@@ -36,7 +36,7 @@ internal static O convertMapToOptions<O>(map<@string, any> m, slice<@string> key
 }
 
 internal static O zeroOr<O>(bool ok, O parser) {
-    O zero = GoZero<O>();
+    O zero = builtin.GoZero<O>();
     if (ok) {
         return parser;
     }

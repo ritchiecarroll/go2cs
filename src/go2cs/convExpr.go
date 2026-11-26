@@ -580,7 +580,7 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		inner := v.convExprCore(expr, contexts)
 		v.renderingTypeParamConst = false
 
-		return fmt.Sprintf("ConvertToType<%s>(%s)", v.getCSharpTypeName(tp), stripOuterParens(inner))
+		return fmt.Sprintf("builtin.ConvertToType<%s>(%s)", v.getCSharpTypeName(tp), stripOuterParens(inner))
 	}
 
 	return v.convExprCore(expr, contexts)

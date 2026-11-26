@@ -133,7 +133,7 @@ internal static partial void main() {
         var sd = new channel<nint>(1);
         close(sd);
         var sdᴛ1 = sd.ᐸꟷ(1, ꓸꓸꓸ);
-        switch (trySelect(sdᴛ1)) {
+        switch (builtin.trySelect(sdᴛ1)) {
         case 0: {
             fmt.Println("sent (wrong)");
             break;

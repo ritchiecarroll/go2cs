@@ -106,7 +106,7 @@ internal static void main() {
     var evalᴛ28 = mut();
     fmt.Println("slice expression:", slices(g, evalᴛ27, evalᴛ28));
     reset();
-    var evalᴛ29 = m[tmpstring(bs)];
+    var evalᴛ29 = m[builtin.tmpstring(bs)];
     var evalᴛ30 = mut();
     fmt.Println("map by bytes:", ints(g, evalᴛ29, evalᴛ30));
     reset();

@@ -6,7 +6,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 /*linkname*/ internal static partial any clone(any m) {
-    return mapclone(m);
+    return builtin.mapclone(m);
 }
 
 internal static void main() {

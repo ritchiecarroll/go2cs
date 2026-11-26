@@ -11,6 +11,7 @@ package clihelp
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 // PagePath is docs/CommandLine.md, relative to src/go2cs, where `go generate` runs.
@@ -91,19 +92,44 @@ func Anchor(option Option) string {
 	return "option-" + option.Name
 }
 
-// markdownSyntax is the option's syntax as a code span. A pipe in it (a value such as on|off|auto) is escaped, since
-// the page's tables would otherwise read it as a cell boundary.
+// markdownSyntax is the option's syntax as a code span. A pipe in it (a value such as on|off|auto) is
+// escaped, since a table would otherwise read it as a cell boundary.
 func markdownSyntax(option Option) string {
 	return "`" + strings.ReplaceAll(syntax(option), "|", `\|`) + "`"
 }
 
-// writeCommonTable writes the Common options as a table: each name links to its sub-section, with its summary.
-func writeCommonTable(b *strings.Builder) {
-	b.WriteString("| Option | Description |\n|:--|:--|\n")
+// optionHeader is a table's "Option" header padded with no-break spaces, so that the column is never narrower than
+// its longest unbreakable option token. GitHub sizes the column to its widest unbreakable content when the description
+// column is long, and a code span can break after any hyphen, so without the padding the column takes the width of
+// the token minus its leading dash and the dash wraps alone (-recurse[=module,nuget] reads "-" then "recurse[=...").
+// GitHub strips <wbr>, and a no-break hyphen or word joiner inside the token would be copied into a command the
+// parser refuses, so the header is the one place the width can come from. Two no-break spaces per character, less
+// six, covers a code character (0.6em at 85%) against the narrowest no-break space of the fonts GitHub asks for
+// (about 0.25em, bold) with a few pixels to spare.
+func optionHeader(members []Option) string {
+	longest := 0
 
-	for _, option := range filter(func(o Option) bool { return o.Class == Common }) {
+	for _, option := range members {
+		for _, token := range strings.Fields(syntax(option)) {
+			longest = max(longest, utf8.RuneCountInString(token))
+		}
+	}
+
+	return "Option" + strings.Repeat("&nbsp;", max(0, 2*longest-6))
+}
+
+// writeCommonTable writes the Common options as a table: each name links to its sub-section, with its summary. A blank
+// line separates the table from each region marker: without one the site's kramdown reads the marker comment and the
+// table as one paragraph and shows the rows as text (GitHub renders the table either way).
+func writeCommonTable(b *strings.Builder) {
+	members := filter(func(o Option) bool { return o.Class == Common })
+	fmt.Fprintf(b, "\n| %s | Description |\n|:--|:--|\n", optionHeader(members))
+
+	for _, option := range members {
 		fmt.Fprintf(b, "| [%s](#%s) | %s. |\n", markdownSyntax(option), Anchor(option), option.Summary)
 	}
+
+	b.WriteString("\n")
 }
 
 var classIntros = map[Class]string{
@@ -123,7 +149,7 @@ func writeReference(b *strings.Builder) {
 		fmt.Fprintf(b, "### %s options\n\n%s\n\n", class, classIntros[class])
 
 		if class != Common {
-			b.WriteString("| Option | Group | Description |\n|:--|:--|:--|\n")
+			fmt.Fprintf(b, "| %s | Group | Description |\n|:--|:--|:--|\n", optionHeader(members))
 
 			for _, option := range members {
 				fmt.Fprintf(b, "| [%s](#%s) | %s | %s. |\n", markdownSyntax(option), Anchor(option), option.Group,

@@ -1,0 +1,20 @@
+# AR-17 env plain=('', '') twinned=('', '') shard-twin-names plain=None twinned=None
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-17	archive/tar	PASS	98	PASS	98	98	98	yes	yes	yes	reference	8	0	0	43	33
+AR-17	bufio	PASS	81	PASS	81	81	81	yes	yes	yes	reference	10	0	0	49	37
+AR-17	container/heap	PASS	7	PASS	7	7	7	yes	yes	yes	reference	8	0	0	274	188
+AR-17	crypto/internal/fips140/mlkem	PASS	11	PASS	11	11	11	yes	yes	yes	reference	10	0	0	36	30
+AR-17	debug/pe	PASS	10	PASS	10	10	10	yes	yes	yes	reference	8	0	0	48	38
+AR-17	encoding/csv	PASS	71	PASS	71	71	71	yes	yes	yes	reference	8	0	0	59	44
+AR-17	go/doc	PASS	90	PASS	90	90	90	yes	yes	yes	reference	8	0	0	48	37
+AR-17	hash/maphash	PASS	66	PASS	66	66	66	yes	yes	yes	reference	10	0	0	487	400
+AR-17	internal/cpu	PASS	9	PASS	9	9	9	yes	yes	yes	reference	8	0	0	29	22
+AR-17	internal/runtime/sys	PASS	4	PASS	4	4	4	yes	yes	yes	reference	8	0	0	19	14
+AR-17	internal/sync	PASS	106	PASS	106	106	106	yes	yes	yes	reference	8	0	0	30	21
+AR-17	internal/synctest	PASS	59	PASS	59	59	59	yes	yes	yes	reference	8	0	0	62	48
+AR-17	internal/testenv	PASS	7	PASS	7	7	7	yes	yes	yes	reference	8	0	0	25	19
+AR-17	math/big	PASS	249	PASS	249	249	249	yes	yes	yes	reference	10	0	0	113	82
+AR-17	net/http/httputil	PASS	62	PASS	62	62	62	yes	yes	yes	reference	18	0	0	181	144
+AR-17	os/user	PASS	12	PASS	12	12	12	yes	yes	yes	reference	8	0	0	21	16
+AR-17	strconv	PASS	39	PASS	39	39	39	yes	yes	yes	reference	8	0	0	26	19
+# summary rows=17 plain PASS=17 twinned EQUAL-bank=17 twinned EQUAL-plain=17

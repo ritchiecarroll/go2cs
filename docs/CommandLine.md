@@ -1,11 +1,6 @@
 # go2cs command-line options
 
-Every option the converter accepts. The [common options](#options) are the few a first conversion needs, and
-the [option reference](#option-reference) at the end of this page explains every option, common, advanced and
-experimental. `go2cs -help` prints the common options, `go2cs -help all` lists every option, and
-`go2cs -help <option>` prints one option's reference entry. The help and this page are written from one table,
-so they say the same thing. [Converting a real-world Go module](ConvertingAModule.md) walks through a whole
-conversion.
+Every option the converter accepts. The [common options](#options) are the few a first conversion needs, and the [option reference](#option-reference) at the end of this page explains every option, common, advanced and experimental. `go2cs -help` prints the common options, `go2cs -help all` lists every option, and `go2cs -help <option>` prints one option's reference entry. The help and this page are written from one table, so they say the same thing. [Converting a real-world Go module](ConvertingAModule.md) walks through a whole conversion.
 
 ## Usage
 
@@ -13,32 +8,52 @@ conversion.
 go2cs [options] <input_dir> [output_dir]
 ```
 
-Give the output directory whenever you convert a single package: without it the C# is written
-beside the Go input.
+Give the output directory whenever you convert a single package: without it the C# is written beside the Go input.
 
 Examples:
 
 ```shell
-go2cs package_dir out                  # convert a package
-go2cs -indent 2 -var=false package_dir out   # same, with 2-space indents and explicit types
-go2cs -stdlib                          # convert the entire Go standard library
-go2cs -stdlib fmt strings io           # convert specific standard library packages
-go2cs -recurse=nuget module_dir out    # convert a module + its third-party deps, stdlib from NuGet
-go2cs -recurse -go2cspath <gopath>/src/go2cs module_dir out   # same, against a standard library staged by deploy-core.ps1
-go2cs -recurse=module,nuget module_dir out   # convert only the module's own packages (deps referenced, not converted)
-go2cs -tests goroot_pkg_dir converted_pkg_dir   # convert a package plus its Go test suite
-go2cs -tests -test-action all goroot_pkg_dir converted_pkg_dir   # ...and build, run, and diff vs go test
-go2cs -tests -recurse -test-action all -go2cspath <go2cs_clone>/src module_dir out_root   # validate a whole module against its own tests
-go2cs toolchain env                    # the Go toolchain go2cs converts with (see below)
+# convert a package:
+go2cs package_dir out
+
+# same, with 2-space indents and explicit types:
+go2cs -indent 2 -var=false package_dir out
+
+# convert the entire Go standard library
+go2cs -stdlib
+
+# convert specific standard library packages:
+go2cs -stdlib fmt strings io
+
+# convert a module + its third-party deps, stdlib from NuGet:
+go2cs -recurse=nuget module_dir out
+
+# same, against a standard library staged by deploy-core.ps1:
+go2cs -recurse -go2cspath <gopath>/src/go2cs module_dir out
+
+# convert only the module's own packages (deps referenced, not converted):
+go2cs -recurse=module,nuget module_dir out
+
+# convert a package plus its Go test suite:
+go2cs -tests goroot_pkg_dir converted_pkg_dir
+
+# ...and build, run, and diff vs go test:
+go2cs -tests -test-action all goroot_pkg_dir converted_pkg_dir
+
+# validate a whole module against its own tests:
+go2cs -tests -recurse -test-action all -go2cspath <go2cs_clone>/src module_dir out_root
+
+# the Go toolchain go2cs converts with (see below):
+go2cs toolchain env
 ```
 
 ## Options
 
-The common options, with a short description each. Each name links to its full entry in the
-[option reference](#option-reference).
+The common options, each with a short description. Option names link to full entry in [option reference](#option-reference).
 
 <!-- BEGIN GENERATED common-options: written from src/go2cs/internal/clihelp/options.go by `go generate` in src/go2cs. Edit options.go, not this region; TestCommandLinePageInSync fails on a hand edit. -->
-| Option | Description |
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
 |:--|:--|
 | [`-recurse[=module,nuget]`](#option-recurse) | Convert a module and its third-party dependencies (=module: the module only; =nuget: standard library from NuGet). |
 | [`-go2cspath <dir>`](#option-go2cspath) | Where the go2cs standard library and runtime are when not from NuGet, and where -stdlib writes. |
@@ -50,6 +65,7 @@ The common options, with a short description each. Each name links to its full e
 | [`-tests`](#option-tests) | Also convert the package's Go tests and emit a runnable C# test host. |
 | [`-test-action <action>`](#option-test-action) | With -tests: convert, build, run, compare (with go test) or all. |
 | [`-version`](#option-version) | Print the converter's release tuple and exit. |
+
 <!-- END GENERATED common-options -->
 
 All converted C# code references a hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
@@ -141,7 +157,7 @@ For go2cs development: convert the Go standard library, or only the packages nam
 
 Common option, converting.
 
-Converts a single cgo package. It loads the package with cgo on (`CGO_ENABLED=1`, which needs a C compiler) and converts it when every use of C it makes is one go2cs binds: calls of C functions a shared library defines ([Limitations](Limitations.md#cgo)). Any other use is refused by name (`GO2CS2001`, see [Diagnostic codes](DiagnosticCodes.md)), with its reason, before anything is written.<!-- 2026-11-23 .5 docs pass (P1), UX-10 follow-on: no cgo refusal text names a phase (src/go2cs/cgoRoute.go). --> It converts for the machine's own operating system and architecture, or for another `-platforms` target when `CC` names that target's C compiler (for example `zig cc -target <triple>`); without one, any other `-platforms` is refused, for a package with no C in it too. Not combinable with `-stdlib` or `-tests`. With `-recurse`, every package of the module outside the standard library loads with cgo on, and each cgo package converts this way. A package that imports `runtime/cgo` or `plugin` is refused by name (`GO2CS2001`); one that imports `net` or `os/user` uses their standard-library builds without cgo, as Go does with `CGO_ENABLED=0` ([Limitations](Limitations.md#cgo)). More of cgo is on the [Roadmap](Roadmap.md#cgo).<!-- the [cgo interop plan](PLAN-cgo-interop.md) lays out the bridge (internal record, unlinked 2026-10-26, OQ-1) -->
+Converts a single cgo package. It loads the package with cgo on (`CGO_ENABLED=1`, which needs a C compiler) and converts it when every use of C it makes is one go2cs binds: calls of C functions a shared library defines ([Limitations](Limitations.md#cgo)). Any other use is refused by name (`GO2CS2001`, see [Diagnostic codes](DiagnosticCodes.md)), with its reason, before anything is written.<!-- 2026-11-23 .5 docs pass (P1), UX-10 follow-on: no cgo refusal text names a phase (src/go2cs/cgoRoute.go). --> It converts for the machine's own operating system and architecture, or for another `-platforms` target when `CC` names that target's C compiler (for example `zig cc -target <triple>`); without one, any other `-platforms` is refused, for a package with no C in it too. Not combinable with `-stdlib`. With `-tests`, it converts ONE package with its tests into a scratch root seeded from `src/core`, which the seed step marks with a `.go2cs-cgo-scratch-root` file at the root: a root without the marker, and an output inside a repository's `src/core` (symlinks resolved), are refused by name. The package's own test loads and the `go test` oracle run with cgo on, and every other package keeps its build without cgo. With `-recurse`, every package of the module outside the standard library loads with cgo on, and each cgo package converts this way. A package that imports `runtime/cgo` or `plugin` is refused by name (`GO2CS2001`); one that imports `net` or `os/user` uses their standard-library builds without cgo, as Go does with `CGO_ENABLED=0` ([Limitations](Limitations.md#cgo)). More of cgo is on the [Roadmap](Roadmap.md#cgo).<!-- the [cgo interop plan](PLAN-cgo-interop.md) lays out the bridge (internal record, unlinked 2026-10-26, OQ-1) -->
 
 #### <a id="option-tests"></a>`-tests`
 
@@ -165,7 +181,7 @@ Print the converter's release tuple and exit 0, converting nothing. One `key=val
 
 Options that change a default, tune a run, or drive a maintainer's instrument. `go2cs -help all` lists them with the common ones.
 
-| Option | Group | Description |
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Group | Description |
 |:--|:--|:--|
 | [`-goroot <dir>`](#option-goroot) | Converting | Override the detected Go root. |
 | [`-gopath <dir>`](#option-gopath) | Converting | Override the detected Go path. |
@@ -183,6 +199,7 @@ Options that change a default, tune a run, or drive a maintainer's instrument. `
 | [`-test-publish-binlog`](#option-test-publish-binlog) | Testing | With -tests: keep an MSBuild binary log of a failed test-host publish. |
 | [`-test-oracle-vet-off`](#option-test-oracle-vet-off) | Testing | With -tests: run go test with -vet=off. |
 | [`-test-oracle-goarch <arch>`](#option-test-oracle-goarch) | Testing | With -tests: the GOARCH go test runs at, when it must differ from the target. |
+| [`-cgo-removals-dry-run`](#option-cgo-removals-dry-run) | Testing | With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none. |
 | [`-test-allow-handown`](#option-test-allow-handown) | Testing | With -tests: convert a package -stdlib skips, into a bare scratch root. |
 | [`-module-disclosures <dir>`](#option-module-disclosures) | Testing | With -tests on a module: the tree of committed disclosure manifests. |
 | [`-module-version <version>`](#option-module-version) | Testing | With -module-disclosures: the version a copied module source is. |
@@ -303,6 +320,12 @@ With `-tests`: run `go test` with `-vet=off`, for a package whose own `go test` 
 Advanced option, testing.
 
 With `-tests`: the `GOARCH` that `go test` runs at, when it must differ from the conversion's target. For example, an Apple silicon host validating the `darwin/amd64` conversion sets `arm64`, so Go does not run under Rosetta. Empty by default, which is the target's own; when set, it is recorded in the comparison record.
+
+#### <a id="option-cgo-removals-dry-run"></a>`-cgo-removals-dry-run`
+
+Advanced option, testing.
+
+With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this flag each such file is removed and printed with its reason, but only when it carries go2cs's own emission header for its source; any other file there, and a hand-owned one, is refused by name.
 
 #### <a id="option-test-allow-handown"></a>`-test-allow-handown`
 
@@ -452,7 +475,7 @@ Disable the converter's per-file panic recovery, so a conversion failure crashes
 
 Options that make output that is not validated.
 
-| Option | Group | Description |
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Group | Description |
 |:--|:--|:--|
 | [`-dual-recv`](#option-dual-recv) | Development | Also emit by-reference forms of eligible pointer-receiver methods. |
 | [`-dual-recv-params`](#option-dual-recv-params) | Development | With -dual-recv: those forms also lower their pointer parameters. |

@@ -108,7 +108,7 @@ partial struct Ptr<T>
 internal static @string kind<T>(this Ptr<T> _)
     where T : Value
 {
-    T x = GoZero<T>();
+    T x = builtin.GoZero<T>();
     return "Ptr["u8 + x.kind() + "]"u8;
 }
 
@@ -121,7 +121,7 @@ partial struct Array<T, TΔValue>
 internal static @string kind<T, TΔValue>(this Array<T, TΔValue> _)
     where TΔValue : struct, ValueΔshape<T>
 {
-    T x = GoZero<T>();
+    T x = builtin.GoZero<T>();
     return "Array["u8 + TΔValue.kind(x) + "]"u8;
 }
 

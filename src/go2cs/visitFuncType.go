@@ -40,6 +40,13 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 
 	if named, ok := identType.(*types.Named); ok && !v.inFunction {
 		access = getGoAccess(named.Obj().Name())
+
+		// An unexported func type an exported declaration names is publicized, as every other type kind is
+		// (visitTypeSpec's pendingTypeAccess): a public member whose signature holds an internal delegate is
+		// CS0050/CS0051. sort's tests: `func OrderedBy(less ...lessFunc)`, exported, over `type lessFunc func(…)`.
+		if packagePublicizedTypes[named.Obj()] {
+			access = "public"
+		}
 	}
 
 	if len(constraints) > 0 {

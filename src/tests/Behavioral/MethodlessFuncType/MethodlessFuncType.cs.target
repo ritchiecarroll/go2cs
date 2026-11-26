@@ -36,16 +36,16 @@ internal static void main() {
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
 
     var (n, rel, err) = grab("a", Ꮡlog);
-    consume(NilSafeDelegateConversion<Action<error>, releaser>(rel), default);
+    consume(builtin.NilSafeDelegateConversion<Action<error>, releaser>(rel), default);
     fmt.Println("n:", n, "err:", err == nil);
 
     var h = new holder(release: makeReleaser("field", Ꮡlog), name: "h");
     h.release(fmt.Errorf("boom"u8));
-    consume(NilSafeDelegateConversion<Action<error>, releaser>(h.release), default);
+    consume(builtin.NilSafeDelegateConversion<Action<error>, releaser>(h.release), default);
 
     releaser r = makeReleaser("direct", Ꮡlog);
     r(default);
-    consume(NilSafeDelegateConversion<Action<error>, releaser>(r), fmt.Errorf("late"u8));
+    consume(builtin.NilSafeDelegateConversion<Action<error>, releaser>(r), fmt.Errorf("late"u8));
 
     lookup find = default;
     find = [GoFunc("main.func1")] (@string s) => (s + "!", len(s) > 0);

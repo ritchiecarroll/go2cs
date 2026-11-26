@@ -182,6 +182,18 @@ Copy-SourceTree (Join-Path $srcRoot 'core') $coreDst -ExcludeFiles @('Directory.
 # referencing the analyzer fails with MSB4019.
 Copy-Item (Join-Path $srcRoot 'version.props') -Destination (Join-Path $Target 'version.props') -Force
 
+# ---- Stage the field-access collision list where go2cs-gen embeds it from ----------------
+# go2cs-gen.csproj embeds ..\..\go2cs\fieldAccessCollisions.txt (since 810b9bb208): the ONE list the converter
+# reads by go:embed (src\go2cs\fieldAccess.go) and go2cs-gen reads as a resource. go:embed cannot reach outside
+# the converter's module, so the list stays in src\go2cs and is staged here at <root>\go2cs\, where the
+# deployed analyzer's relative include resolves. Without it a deployed go2cs-gen fails CS1566 and nothing in the
+# deploy root builds. repoguard TestDeployCoreStagesEveryGenInput holds every such ..\..\ input to this script.
+$collisionsDst = Join-Path $Target 'go2cs'
+if ($PSCmdlet.ShouldProcess($collisionsDst, 'stage go2cs/fieldAccessCollisions.txt')) {
+    [System.IO.Directory]::CreateDirectory($collisionsDst) | Out-Null
+    Copy-Item (Join-Path $srcRoot 'go2cs/fieldAccessCollisions.txt') -Destination (Join-Path $collisionsDst 'fieldAccessCollisions.txt') -Force
+}
+
 # ---- Write the root Directory.Build.props ------------------------------------------------
 # Pins $(go2csPath) to this deploy root for every project beneath it, so all
 # $(go2csPath)core\... / $(go2csPath)gen\... references resolve with no per-build flag.

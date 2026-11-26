@@ -267,7 +267,7 @@ internal static void main() {
     Δg g = [GoFunc("main.func2")] () => "Δg called";
     lib.Δfn lf = [GoFunc("main.func3")] () => "lib.Δfn called";
     main_Δh hf = [GoFunc("main.func4")] (nint n) => n + 1;
-    fmt.Printf("Δ func types: %d %d %s %s %d %T %T %T %T %s %s\n"u8, lib.ApplyΔ(dbl, 50), lib.ApplyΔ(NilSafeDelegateConversion<lib.ΔFn, main_Δh>(hf), 51), g(), lf(), hf(52),
+    fmt.Printf("Δ func types: %d %d %s %s %d %T %T %T %T %s %s\n"u8, lib.ApplyΔ(dbl, 50), lib.ApplyΔ(builtin.NilSafeDelegateConversion<lib.ΔFn, main_Δh>(hf), 51), g(), lf(), hf(52),
         (dbl).OrTypedNilFunc(), (g).OrTypedNilFunc(), (lf).OrTypedNilFunc(), (hf).OrTypedNilFunc(), reflect.TypeOf((g).OrTypedNilFunc()).Name(), reflect.TypeOf((hf).OrTypedNilFunc()).Name());
 }
 

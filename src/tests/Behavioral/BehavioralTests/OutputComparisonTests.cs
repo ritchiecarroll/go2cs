@@ -692,6 +692,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
+    public void CheckExportedFuncOfUnexportedFuncType() => CheckTarget("ExportedFuncOfUnexportedFuncType");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
@@ -1019,6 +1022,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
+
+    [TestMethod]
     public void CheckGoDeferConstArgs() => CheckTarget("GoDeferConstArgs");
 
     [TestMethod]
@@ -1056,6 +1062,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
+
+    [TestMethod]
+    public void CheckGolibIntrinsicShadow() => CheckTarget("GolibIntrinsicShadow");
 
     [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
@@ -2967,6 +2976,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
+
+    [TestMethod]
+    public void CheckUnnamedArrayTypeArgDescriptor() => CheckTarget("UnnamedArrayTypeArgDescriptor");
 
     [TestMethod]
     public void CheckUnnamedMapNilConversion() => CheckTarget("UnnamedMapNilConversion");

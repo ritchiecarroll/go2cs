@@ -31,7 +31,7 @@ type harnessCallSite struct {
 var harnessCallSites = []harnessCallSite{
 	{"src/tests/Behavioral/BehavioralRunner/Program.cs", regexp.MustCompile(`Exec\(s_go2csExe,`), `{options}-go2cspath`, `BehavioralPackages.ConverterOptions(`},
 	{"src/tests/Behavioral/BehavioralTests/BehavioralTestBase.cs", regexp.MustCompile(`Exec\(go2cs,`), `{options}-go2cspath`, `BehavioralPackages.ConverterOptions(`},
-	{"src/utilities/UpdateTestTargets/Program.cs", regexp.MustCompile(`Run\(go2csExe,`), `{options}-go2cspath`, `BehavioralPackages.ConverterOptions(`},
+	{"src/tools/UpdateTestTargets/Program.cs", regexp.MustCompile(`Run\(go2csExe,`), `{options}-go2cspath`, `BehavioralPackages.ConverterOptions(`},
 	{"src/tests/Behavioral/check-no-regression.ps1", regexp.MustCompile(`& \$go2csExe`), `@converterOptions -go2cspath`, `Get-ConverterOptions`},
 }
 
