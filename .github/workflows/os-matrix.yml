@@ -138,7 +138,7 @@ on:
           - reconvert-footprint
           - mn-platform
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;). Options on any other stage are refused.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;), behavioral-smoke ;mn=1 (M:N mode) and ;reps=N (with mn=1: MnMixedStorm''s twinned n=100,000 arm N more times, the storm gate). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -266,6 +266,7 @@ jobs:
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
       mn: ${{ steps.derive.outputs.mn }}
+      reps: ${{ steps.derive.outputs.reps }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
       cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
       # cgo-nuget-e2e: the prior run whose J1 feed is reused, or empty (J1 packs).
@@ -339,9 +340,9 @@ jobs:
           # reconvert-footprint: base=SHA and changed=SHA, both required, both full 40-digit SHAs (C2, 2026-11-23): the two
           # converters whose emissions the stage diffs. A short SHA is refused rather than resolved, because the reading
           # names the commits it measured and a prefix can name a different commit tomorrow.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $mnMode = '0'; $feedRun = ''
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $mnMode = '0'; $smokeReps = '1'; $feedRun = ''
           $footprintBase = ''; $footprintChanged = ''
-          $optionKeys = @(switch ($stage) { 'behavioral-smoke' { 'mn' } 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'cgo-nuget-e2e' { 'feedrun' } 'reconvert-footprint' { 'base', 'changed' } })
+          $optionKeys = @(switch ($stage) { 'behavioral-smoke' { 'mn', 'reps' } 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'cgo-nuget-e2e' { 'feedrun' } 'reconvert-footprint' { 'base', 'changed' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -361,7 +362,14 @@ jobs:
                   if ($seen['mn'] -notin '0', '1') { throw "behavioral-smoke filter option mn= is 0 (default mode) or 1 (M:N mode); got '$($seen['mn'])'." }
                   $mnMode = $seen['mn']
               }
-              if ($stage -eq 'behavioral-smoke') { Write-Host "behavioral-smoke: $(if ($mnMode -eq '1') { 'M:N mode (BehavioralRunner --mn)' } else { 'default mode' })" }
+              # behavioral-smoke ;reps=N (1-100, M:N mode only): the storm gate -- MnMixedStorm's direct-run step runs the twinned
+              # n=100,000 arm N more times, each a verdict (M:N row 13's I7, COORD 2026-11-25).
+              if ($seen.ContainsKey('reps')) {
+                  if ($seen['reps'] -notmatch '^[0-9]+$' -or [int]$seen['reps'] -lt 1 -or [int]$seen['reps'] -gt 100) { throw "behavioral-smoke filter option reps= is a whole number from 1 to 100; got '$($seen['reps'])'." }
+                  if ($mnMode -ne '1') { throw "behavioral-smoke filter option reps= needs mn=1 (it repeats the twinned storm)." }
+                  $smokeReps = $seen['reps']
+              }
+              if ($stage -eq 'behavioral-smoke') { Write-Host "behavioral-smoke: $(if ($mnMode -eq '1') { 'M:N mode (BehavioralRunner --mn)' } else { 'default mode' })$(if ($smokeReps -ne '1') { ", storm gate x$smokeReps" })" }
               if ($stage -eq 'stack-probe') {
                   if (-not $filter -or $filter.Contains(',')) { throw "stack-probe takes exactly ONE roster row before its options in filter; got '$filter'." }
                   $probeTest = "$($seen['test'])"
@@ -790,6 +798,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "mn=$mnMode" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "reps=$smokeReps" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
@@ -2328,7 +2337,7 @@ jobs:
       # -------------------------------------------------------------------------------------
       - name: M:N — direct runs of the twinned storm
         if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm' && needs.plan.outputs.mn == '1'
-        timeout-minutes: 30
+        timeout-minutes: ${{ fromJSON(needs.plan.outputs.reps || '1') > 1 && 120 || 30 }}
         shell: bash
         run: |
           set +e
@@ -2398,6 +2407,14 @@ jobs:
           for n in 1000 10000 100000; do
             one cs-twins $n 1 dotnet "$dll"
           done
+          # The storm gate (behavioral-smoke ;reps=N): the twinned n=100,000 arm N more times, each a verdict as above.
+          reps=${{ needs.plan.outputs.reps }}
+          if [ "${reps:-1}" -gt 1 ]; then
+            for i in $(seq 1 "$reps"); do
+              one cs-twins-gate-$i 100000 1 dotnet "$dll"
+            done
+            echo "READING mn-storm-gate reps=$reps failures=${#failures[@]}"
+          fi
           unset GO2CS_MN MN_STORM_N MN_STORM_HOLD_MS GO2CS_MN_READING
           chain=0
           bash src/tools/mnspike2/MnGoschedFair/chain-check.sh || chain=$?
@@ -2407,6 +2424,63 @@ jobs:
             exit 1
           fi
           exit 0
+
+      # -------------------------------------------------------------------------------------
+      # M:N N5, I4 (docs/phase4/DESIGN-mn-n5-invisible-blocking.md section 6; COORD's ruling of 2026-11-25: the gate of
+      # record is a hosted linux runner at its own P, p99 <= 25 ms). MnInvisible's V4 row: P goroutines in CPU steps of
+      # 200 ms (and 2 s) between parks while one goroutine sleeps 25 ms 200 times; its wake-to-run latency goes to stderr.
+      # Three runs per arm: default mode (the runner's floor, a reading only), then twinned under GO2CS_MN=1. A twinned
+      # run whose p99 passes 25 ms, or that does not finish, fails the step by name.
+      # -------------------------------------------------------------------------------------
+      - name: M:N — N5 wake latency (I4)
+        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnInvisible' && needs.plan.outputs.mn == '1'
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set +e
+          set +o pipefail
+          dll=src/tests/Behavioral/MnInvisible/bin/Release/net10.0/MnInvisible.dll
+          if [ ! -f "$dll" ]; then echo "::error::N5 I4: no build output at $dll"; exit 1; fi
+          if command -v timeout > /dev/null; then limit="timeout 120"; else limit=""; fi
+          echo "READING n5-i4 cores=$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
+          fail=0
+          for arm in floor:0:200 twinned:1:200 twinned:1:2000; do
+            IFS=: read -r label mn step <<< "$arm"
+            for r in 1 2 3; do
+              if [ "$mn" = "1" ]; then export GO2CS_MN=1; else unset GO2CS_MN; fi
+              MN_INV_ONLY=V4 MN_INV_READING=1 MN_INV_STEP_MS=$step $limit dotnet "$dll" > "$RUNNER_TEMP/n5-out.txt" 2> "$RUNNER_TEMP/n5-err.txt"
+              code=$?
+              line=$(grep -a '^reading: V4' "$RUNNER_TEMP/n5-err.txt" | tr -d '\r')
+              p99=$(echo "$line" | sed -n 's/.*p99_ms=\([0-9.]*\).*/\1/p')
+              echo "READING n5-i4 arm=$label step_ms=$step run=$r exit=$code $line"
+              # The 25 ms bar is the gate of record on linux (COORD 2026-11-25); elsewhere the latency is a reading, and only
+              # a run that does not finish fails.
+              if [ "$label" = "twinned" ]; then
+                if [ "$code" != "0" ] || [ -z "$p99" ]; then
+                  echo "::error::N5 I4: arm=$label step_ms=$step run=$r exit=$code p99_ms=${p99:-none} (the run did not finish)"
+                  fail=1
+                elif [ "$RUNNER_OS" = "Linux" ] && python3 -c "import sys; sys.exit(0 if float('$p99') > 25 else 1)"; then
+                  echo "::error::N5 I4: arm=$label step_ms=$step run=$r exit=$code p99_ms=${p99:-none} (the bar: p99 <= 25 ms)"
+                  fail=1
+                fi
+              fi
+            done
+          done
+          # The census reading of os/exec Wait (the record's section 4; COORD 2026-11-25: the platform of record is a hosted
+          # runner): K goroutines blocked in exec.Cmd.Wait, warmed, under GO2CS_MN=1. A reading; a pass not released fails.
+          export GO2CS_MN=1
+          for r in 1 2 3; do
+            MN_INV_ONLY=C-exec MN_INV_WARM=1 MN_INV_READING=1 $limit dotnet "$dll" > "$RUNNER_TEMP/n5-out.txt" 2> "$RUNNER_TEMP/n5-err.txt"
+            code=$?
+            out=$(tr -d '\r' < "$RUNNER_TEMP/n5-out.txt" | tail -n 1)
+            echo "READING n5-census run=$r exit=$code [$out] $(grep -a '^reading: C-exec' "$RUNNER_TEMP/n5-err.txt" | tr -d '\r')"
+            if [ "$code" != "0" ] || [ "$out" != "C-exec released: true" ]; then
+              echo "::error::N5 census: C-exec run=$r exit=$code [$out]"
+              fail=1
+            fi
+          done
+          unset GO2CS_MN
+          exit $fail
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'
