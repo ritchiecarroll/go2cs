@@ -133,9 +133,9 @@ The `GO2CS` codes a conversion or a build reports are listed in [Diagnostic code
 
 To build the whole converted standard library in Visual Studio, open the
 [Go Standard Library Solution](https://github.com/ritchiecarroll/go2cs/blob/master/src/go2cs-stdlib.slnx).
-Neither solution names a startup project, because the `.slnx` format has no place for one: Visual Studio starts on
-the first project by name, a class library, and keeps your choice per user in `.vs/`. In `src/go2cs.slnx`, right-click
-a program, such as `BehavioralRunner` or any behavioral test, and choose **Set as Startup Project**. The standard
+Neither solution names a startup project, because the `.slnx` format has no place for one: Visual Studio picks a
+class library (`go.arrays` today), and keeps your choice per user in `.vs/`. In `src/go2cs.slnx`, right-click a
+program, such as `BehavioralRunner` or any behavioral test, and choose **Set as Startup Project**. The standard
 library solution holds only libraries, so it has nothing to start.
 
 In VS Code, open the repository root: the committed `.vscode/settings.json` selects `src/go2cs.slnx` as
