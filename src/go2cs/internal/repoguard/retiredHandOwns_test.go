@@ -62,8 +62,8 @@ import (
 // platform's regex library, and \s is an extension: the GNU library and git's own compat copy (Windows) accept it,
 // while the library git uses on macOS reads \s in an extended expression as a literal "s" (REG_ENHANCED is set
 // there for basic expressions only). Every marked file then failed to match, git grep exited 1, and this guard
-// reported the baseline SHA as missing from the clone on every darwin run. src/handown-baseline.ps1 keeps \s:
-// it runs where \s is accepted, and both spellings select the same files there.
+// reported the baseline SHA as missing from the clone on every darwin run. src/handown-baseline.ps1 and
+// src/handown-census.ps1 spell it the same way; where \s is accepted, both spellings select the same files.
 const handOwnMarkerPredicate = `^[[:space:]]*\[module:[[:space:]]*(go\.)?GoManualConversion\]`
 
 // retiredRow is one line of testdata/handowns-retired.tsv.

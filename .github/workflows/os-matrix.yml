@@ -2002,11 +2002,12 @@ jobs:
           $lines = @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue)
           $packages = @($lines | Where-Object { $_ -match '^(ok|FAIL|---|\?)\s' -or $_ -match '^--- FAIL:' } | ForEach-Object { $_.TrimEnd() })
 
-          # A package that panics, a go test timeout included, prints no --- FAIL line for the test that was running,
-          # so the list above shows only the package's FAIL. Name the panic and the tests it interrupted.
+          # A package that panics (a go test timeout included), hits a runtime fatal error or is killed by a signal
+          # prints no --- FAIL line for the test that was running, so the list above shows only the package's FAIL.
+          # Name that line and the tests it interrupted.
           $panics = @()
           for ($i = 0; $i -lt $lines.Count; $i++) {
-              if ($lines[$i] -match '^panic: ') {
+              if ($lines[$i] -match '^(panic: |fatal error: |signal: )') {
                   $panics += $lines[$i].TrimEnd()
                   if ($i + 1 -lt $lines.Count -and $lines[$i + 1] -match '^\s*running tests:') {
                       for ($j = $i + 2; $j -lt $lines.Count -and $lines[$j] -match '^\s+Test'; $j++) { $panics += $lines[$j].TrimEnd() }
