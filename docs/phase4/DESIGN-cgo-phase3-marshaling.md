@@ -3902,3 +3902,49 @@ measure Read's path.
   the weakest holder measured too.
 
 — H (2026-11-26)
+
+### 21.11 Record 2026-11-26: P3's CHANGES on S6 folded (COORD inbox H 20261126T053128Z)
+
+P3 read S6 at `2ce6812305`: CHANGES, three MUSTs and two SHOULDs (inbox/COORD/20261126T052923Z-P3.md). All five are
+folded, as new commits on top of that tip.
+
+- **MUST 1: copying doors.** Both `OutParameter` overloads, and `PinVoidPointer`'s word-mirror arm, hand C a COPY of a
+  Go pointer slot: one stack word, or a mirror of the whole array of C pointers. A slot pinned with `runtime.Pinner` is
+  now refused by name (`RefusePinnerHeldCopy`). A slot holds a reference here, so it has no in-place answer.
+  - Rows: a pinned out-parameter slot (both overloads), and a pinned array of C pointers handed as a void pointer, each
+    with its unpinned near-miss.
+  - Control: with the refusal off, exactly those two rows go red.
+- **MUST 2: what crosses in place, and the second refusal.**
+  - Unit rows: a pinned reference-free struct crosses the typed struct door in place (kind Pinned, no image), and its
+    kept address survives compaction. A pinned root reached through an image view is refused by name; the unpinned
+    near-miss is still imaged.
+  - e2e arm `pinnerkeepstruct`: a pinned `C.struct_go2cs_probe_pair` handed to a typed parameter that C keeps.
+    `go2cs_probe_keep_pair` keeps it, a collection runs, Go writes `b = 9`, and C reads `b` through its kept pointer.
+    Hosted linux reads "pinnerkeepstruct 9" from both Go and go2cs.
+  - No layout counter-example was found: the struct of two `int`s crossed in place, and C read Go's write.
+- **MUST 3: the per-site table.** 21.10 holds the table, one row per site (the ten buffer sites plus :303). The
+  RUN/READ marks P3 asked for:
+  - **RUN:** :592 (`Read`) over a loopback TCP socket, through `WSARecv` / `writeWSABufs`. Measured by both poll rows:
+    zero handles per I/O, and a compaction mid-flight.
+  - **READ only:** :303, :722, :772, :802, :832, :864, :959, :1041, :1078 and :1115. Their holders are code readings.
+    `Write`'s socket path also runs inside the handle row's loop, but only as the writer of the bytes that are read,
+    so it is not claimed.
+  - **The unowned-descriptor branch is unchanged.** When the handle is not registered with the managed poller,
+    `fileIO`'s first branch (`zsyscall_windows_file_impl.cs`, `Ꮡoverlapped == nil || !GoAsyncIO.HasReadiness`) keeps
+    the box for the CALL only, through `GC.KeepAlive`. Go's `pin` was a no-op there too, since an FD that is not
+    pollable is blocking (`if fd.isBlocking { return }`). So the displacement changes nothing on that branch.
+- **SHOULD 4: `pinnerkeep` with real pins off.** A probe branch, `claude/h-cgo-s6-probe-nopins-r2` = `cc5446f3de`
+  (never lands), has `HoldAll` return no handles.
+  - Hosted linux cgo-e2e (run 45773373910): `pinnerkeep` still reads "pinnerkeep 9". It is therefore a **SMOKE arm**:
+    the void door hands C the box's storage in place with or without S6, and the collection did not move `x`.
+  - `pinnerkeepstruct` reads "pinnerkeepstruct **2**" against Go's 9. Without the Pinner's handle, the typed door's
+    in-place answer is gone, and C kept the call's stack mirror, which still holds the value from before Go's write.
+  - So `pinnerkeepstruct` is the arm that discriminates S6 end to end. Every other arm passed on the probe.
+- **SHOULD 5: the element walk.** `HoldAll` skips the per-element walk, which boxes every element, when the element type
+  holds no reference.
+
+One hosted-only fault came up along the way. The first push of `pinnerkeepstruct` (`6609cf41dc`) redefined
+`struct go2cs_probe_pair`, which the probe and the p3 preamble already declare. Both redefinitions are removed
+(`cc4bd6fe0b`), and the preamble's new prototypes sit below its own definition.
+
+— H (2026-11-26)
