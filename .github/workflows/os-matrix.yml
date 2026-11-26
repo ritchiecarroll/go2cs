@@ -738,6 +738,10 @@ jobs:
               # The arm leg takes the same 1.5x until its own calibration replaces it: ubuntu-24.04-arm has never run
               # these stages, and a timeout is a safety net, not an estimate.
               if ($t.runner -eq 'ubuntu-24.04-arm') { $minutes = [int][math]::Ceiling($minutes * 1.5) }
+              # go-test on a mac gets 120: the go2cs package alone ran past go test's 50-minute limit on osx-arm64
+              # twice (runs 45779430120 and 45800091628, each killed at 50m with tests still progressing), while
+              # osx-x64 finished it in about 32 min. The step's go test limit for darwin is this budget less 20.
+              if ($env:INPUT_STAGE -eq 'go-test' -and $t.runner -like 'macos-*') { $minutes = 120 }
 
               $entry = [ordered]@{
                   goos    = $t.goos
@@ -1990,7 +1994,10 @@ jobs:
 
           Push-Location 'src/go2cs'
           try {
-              & go test -buildvcs=false -count=1 -timeout 50m ./... *>&1 | Tee-Object -FilePath $log -Append
+              # go test's own limit applies to each package's test binary. darwin takes 100m inside the job's
+              # 120 (plan): osx-arm64, a 3-core runner, needs more than 50 for the go2cs package.
+              $goTestTimeout = if ($goos -eq 'darwin') { '100m' } else { '50m' }
+              & go test -buildvcs=false -count=1 -timeout $goTestTimeout ./... *>&1 | Tee-Object -FilePath $log -Append
               $runExit = $LASTEXITCODE
           }
           finally { Pop-Location }
@@ -1998,6 +2005,19 @@ jobs:
           # Each package's verdict and every failing test by name; the full output is the artifact.
           $lines = @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue)
           $packages = @($lines | Where-Object { $_ -match '^(ok|FAIL|---|\?)\s' -or $_ -match '^--- FAIL:' } | ForEach-Object { $_.TrimEnd() })
+
+          # A package that panics, a go test timeout included, prints no --- FAIL line for the test that was running,
+          # so the list above shows only the package's FAIL. Name the panic and the tests it interrupted.
+          $panics = @()
+          for ($i = 0; $i -lt $lines.Count; $i++) {
+              if ($lines[$i] -match '^panic: ') {
+                  $panics += $lines[$i].TrimEnd()
+                  if ($i + 1 -lt $lines.Count -and $lines[$i + 1] -match '^\s*running tests:') {
+                      for ($j = $i + 2; $j -lt $lines.Count -and $lines[$j] -match '^\s+Test'; $j++) { $panics += $lines[$j].TrimEnd() }
+                  }
+              }
+          }
+          $packages = $panics + $packages
 
           $summary = @(
               "## Converter tests (go test ./...) -- $goos ($rid)"
