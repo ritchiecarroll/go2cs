@@ -44,7 +44,9 @@
      Style (owner, 2026-11-26): NEWS.md is hard-wrapped, the GitHub release body a separate unwrapped copy; present
      tense, for visitors; no exact figures in durable text; the platform a claim was measured on is named; nicknames
      only. The bullets kept from the 11-23 pass carry some figures (counts in the D bullet and elsewhere); the
-     release-day prose drops them. -->
+     release-day prose drops them.
+     Train 15 landed 2026-11-26 (master 51f4d4b37a): its QUEUED marks are now LANDED with their first-parent merges;
+     cgo S4 left it and is PENDING for train 16. -->
 
 ---
 
@@ -231,14 +233,15 @@ and more of Go's own test suites match their Go results.
   when off ([Tuning](Tuning.md#checking-writes-through-string-data)). Measured on linux/amd64.
   <!-- 2026-11-26 (P4): train 11, merge a82699d6e7 (claude/p5-d5-readonly-strings 96bd78dead, D5). "costs nothing
        when off": Tuning.md's section says no literal is wrapped when off; re-read at release. -->
-- **[QUEUED claude/r-scan-avx512 f61823f8d9]** **The garbage collector's scan kernels use AVX-512 where Go uses
+- **[LANDED f53aabbfec]** **The garbage collector's scan kernels use AVX-512 where Go uses
   them.** On x64 processors with AVX-512 and BITALG, `internal/runtime/gc/scan` runs its vector kernels, as Go
   does, where it took the portable path.
-  <!-- 2026-11-26 (P4): the AVX-512 seat, finding 5 (BITALG via CPUID, managed kernel bodies). COORD named it with
-       train 15; flip to LANDED with its merge. -->
-- **[QUEUED claude/p6-array-typearg-len a983cc10dc]** An array type whose length comes from a type argument's
-  constant converts, so `reflect`'s `TestMakeAllocs` builds.
-  <!-- 2026-11-26 (P4): train 15. Wording to be read against the seat at landing. -->
+  <!-- 2026-11-26 (P4): the AVX-512 seat, finding 5 (BITALG via CPUID, managed kernel bodies). Train 15, merge
+       f53aabbfec (claude/r-scan-avx512 f61823f8d9); its roster companion 8bf8474038 (r-scan-avx512-r1) is internal. -->
+- **[LANDED 7f7bc336c3]** An unnamed array type used as a type argument keeps its length in reflection, so
+  `unique`'s `TestMakeAllocs` no longer panics.
+  <!-- 2026-11-26 (P4): train 15, merge 7f7bc336c3 (claude/p6-array-typearg-len a983cc10dc: the unnamed-array
+       type-argument length reaches abi.TypeFor; unique's TestMakeAllocs pair panic cured). -->
 - **[LANDED c869fc13a7]** **A blank import's comment says what happens to the package's
   `init`.** On every converted platform, Go's `import _ "image/png"` converts to the comment
   `// import _ "image/png" (init forced in ImportInitializers)`. The other two endings are `nothing to initialize`
@@ -330,15 +333,17 @@ and more of Go's own test suites match their Go results.
   on a small pool of threads, as Go does, instead of one operating-system thread each. The technique is **async
   twins**: a second copy of each function that waits by giving its thread back to the scheduler. It is opt-in: a
   program gets it only when its projects are built with twins, and it runs with `GO2CS_MN=1`.
-  **[QUEUED claude/r-twin-optin 01c276263e]** Twins build against a go2cs repository clone, a deploy-core root or the
+  **[LANDED 22884b0d6e]** Twins build against a go2cs repository clone, a deploy-core root or this release's go.*
   NuGet packages. **[LANDED 639adf1cda, 40500f2972]** Each pool thread reserves the stack size a Go program's main
   thread gets, or the size set in `GO2CS_GOROUTINE_STACK`, and a goroutine's thread-static state moves with it when it
   changes threads ([Tuning](Tuning.md#goroutine-stacks)).
-  <!-- 2026-11-26 (P4): "which works only inside a go2cs repository clone" is true at d6805be2e8 and is cured by
-       claude/r-twin-optin 01c276263e (train 15). If that seat misses the release, restore the clause and drop the
-       QUEUED sentence. If it lands, the release's packages carry twins, so the next sentence becomes "The published
-       `go.*` packages carry twins; a program that does not opt in runs each goroutine on its own thread, as before." Landed: train 11, 639adf1cda (claude/r-mn-row4-stack 37fede0ea6, M:N row 4) and 40500f2972
-       (claude/r-mn-n10-statics d4600c7264, row 11 N10). -->
+  <!-- 2026-11-26 (P4): "which works only inside a go2cs repository clone" was true at d6805be2e8; train 15 cured it,
+       merge 22884b0d6e (claude/r-twin-optin 01c276263e: the opt-in ships in golib buildTransitive,
+       go.lib.twins.targets). Corrected the same day: the release's packages carry the twin generator, so a consumer's
+       own projects can build with twins, but the go.* standard-library packages themselves are still built without
+       twins (AsyncTwins.md at 51f4d4b37a, "The rest of the standard library" and "The published packages"), so the
+       next sentence stands. Landed: train 11, 639adf1cda (claude/r-mn-row4-stack 37fede0ea6, M:N row 4) and
+       40500f2972 (claude/r-mn-n10-statics d4600c7264, row 11 N10). -->
   <!-- (b)-dependent --> The published `go.*` packages are not built with twins, and a program that does not opt
   in runs each goroutine on its own thread, as before. The diagnostics `GO2CS0014`, `GO2CS0015`, `GO2CS0017`,
   `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` come only from a build with twins
@@ -463,10 +468,10 @@ and more of Go's own test suites match their Go results.
   <!-- 2026-11-26 (P4): train 14, merges 766ace68e6 (claude/i9-reflect-convert-nil-func eb35afbabb), 2cc30ff0ad
        (claude/i9-slog-calldepth-recv 89d185b7a0), 592b00de1c (claude/p1-testing-arm64 d753602e3f); train 13,
        823e17f720 (claude/p1-tbhelper-retire a278806f98, cured by the unoptimized test host). -->
-- **[QUEUED claude/p1-recurse-host-target 582c50e1dd]** **A module converted against a local go2cs root records its
+- **[LANDED 68d912305a]** **A module converted against a local go2cs root records its
   target platform.** The output root names the .NET it targets and rolls forward to a newer one, and NuGet's restore
   reads the same platform, so a machine with only a newer .NET builds it.
-  <!-- 2026-11-26 (P4): train 15. Merged into claude/r-twin-optin as well. Flip with the train's merge. -->
+  <!-- 2026-11-26 (P4): train 15, merge 68d912305a (claude/p1-recurse-host-target 582c50e1dd). -->
 
 **The go2cs tool.**
 
@@ -526,8 +531,8 @@ and more of Go's own test suites match their Go results.
   NuGet packages build and run with .NET alone ([The dotnet tool](DotnetTool.md), [FAQ](FAQ.md)).
   <!-- 2026-11-26 (P4): train 11, merge 0d12703315 (claude/p1-go-only-docs 74924ed784). Check the link targets at
        release. -->
-- **[QUEUED claude/coord-contrib-wording 6fa2c933c0]** The README's contributing section says what helps most now.
-  <!-- 2026-11-26 (P4): train 15. -->
+- **[LANDED ec6805d97c]** The README's contributing section says what helps most now.
+  <!-- 2026-11-26 (P4): train 15, merge ec6805d97c (claude/coord-contrib-wording 6fa2c933c0). -->
 - **[PENDING claude/p5-go-attribution]** Each hand-written port of Go code in the standard library carries Go's
   notice and a header naming the Go source it follows.
   <!-- 2026-11-26 (P4): tip 3b6ad8d976, not in a train at d6805be2e8. -->
