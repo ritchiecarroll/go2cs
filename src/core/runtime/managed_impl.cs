@@ -7583,4 +7583,8 @@ partial class runtime_package
 
         private const string StateField = "<>1__state";
     }
+
+    // runtime/debug.SetMaxThreads: sched.maxmcount is the M:N scheduler's thread ceiling, which golib owns. Kept at the
+    // end of the class, so it moves no cited line above it.
+    public static nint SetMaxThreadsManaged(nint @in) => global::go.golib.GoScheduler.SetMaxThreads(@in);
 }

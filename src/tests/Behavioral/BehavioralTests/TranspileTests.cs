@@ -1534,6 +1534,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
 
     [TestMethod]
+    public void CheckMnInvisible() => CheckTarget("MnInvisible");
+
+    [TestMethod]
     public void CheckMnMainExit() => CheckTarget("MnMainExit");
 
     [TestMethod]

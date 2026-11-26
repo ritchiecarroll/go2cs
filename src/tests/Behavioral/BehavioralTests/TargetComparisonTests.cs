@@ -1537,6 +1537,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
 
     [TestMethod]
+    public void CheckMnInvisible() => CheckTarget("MnInvisible");
+
+    [TestMethod]
     public void CheckMnMainExit() => CheckTarget("MnMainExit");
 
     [TestMethod]
