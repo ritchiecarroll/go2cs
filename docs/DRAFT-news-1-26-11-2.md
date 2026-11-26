@@ -46,7 +46,9 @@
      only. The bullets kept from the 11-23 pass carry some figures (counts in the D bullet and elsewhere); the
      release-day prose drops them.
      Train 15 landed 2026-11-26 (master 51f4d4b37a): its QUEUED marks are now LANDED with their first-parent merges;
-     cgo S4 left it and is PENDING for train 16. -->
+     cgo S4 left it and is PENDING for train 16.
+     Train 16 landed 2026-11-26 (master 7d8af59808): the Go attribution bullet is LANDED; cgo S4 and S6, the darwin
+     bullets and the M:N headline stay PENDING. -->
 
 ---
 
@@ -533,9 +535,10 @@ and more of Go's own test suites match their Go results.
        release. -->
 - **[LANDED ec6805d97c]** The README's contributing section says what helps most now.
   <!-- 2026-11-26 (P4): train 15, merge ec6805d97c (claude/coord-contrib-wording 6fa2c933c0). -->
-- **[PENDING claude/p5-go-attribution]** Each hand-written port of Go code in the standard library carries Go's
+- **[LANDED f1046a6dc7]** Each hand-written port of Go code in the standard library carries Go's
   notice and a header naming the Go source it follows.
-  <!-- 2026-11-26 (P4): tip 3b6ad8d976, not in a train at d6805be2e8. -->
+  <!-- 2026-11-26 (P4): tip 3b6ad8d976, not in a train at d6805be2e8. Train 16, merge f1046a6dc7
+       (claude/p5-go-attribution 796eef671c). -->
 - **[LANDED a98c5175be, 42541a338c]** A page answers [Did AI write this?](AIAssistance.md), with an FAQ entry and
   a link from the README and the milestones table.
   <!-- The owner's text with COORD's review pass (a98c5175be); the links 42541a338c. -->
