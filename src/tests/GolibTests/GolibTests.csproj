@@ -93,6 +93,9 @@
   <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
     <Compile Remove="GoCgoWrappers.windows.golden.cs" />
     <Compile Remove="GoCgoWrapperTypes.windows.cs" />
+    <!-- cgo S6's poll guard: it drives internal/poll's Windows displacement through a real overlapped read, so it is a
+         Windows-only file (DESIGN-cgo-phase3-marshaling 21.8), not a skip on every other flavour. -->
+    <Compile Remove="PollPinDisplacementTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
     <Compile Remove="GoCgoWrapperTypes.posix.cs" />

@@ -36,7 +36,7 @@ missed:after-case-label	2
 missed:after-open-brace	12
 missed:before-case	1
 missed:before-close-brace	4
-missed:decl-doc	235
+missed:decl-doc	236
 missed:directive	31
 missed:field-doc	1
 missed:free-stmt	533
@@ -53,7 +53,7 @@ top:go-blank-cs-none	79
 top:go-none-cs-blank	39
 top:unmapped:const	2
 top:unmapped:func	381
-top:unmapped:method	168
+top:unmapped:method	169
 top:unmapped:type-alias	62
 top:unmapped:type-other	72
 top:unmapped:type-struct	8

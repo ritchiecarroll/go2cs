@@ -166,6 +166,9 @@ partial class poll_package
     // an address (the box's own pinned GCHandle) and retains the box in the operation record until the next Rearm. A
     // Pinner pin, which since S6 takes a handle of its own, would add a second handle to every overlapped read and write.
     // So this does nothing, and execIO's deferred Unpin finds an empty Pinner. A blocking FD took Go's early return anyway.
+    //
+    // pin pins ptr for the duration of the IO operation.
+    // If fd is in blocking mode, pin does nothing.
     [GoRecv] internal static void pin(this ref FD fd, nint mode, any ptr) {
     }
 
