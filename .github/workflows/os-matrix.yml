@@ -738,10 +738,6 @@ jobs:
               # The arm leg takes the same 1.5x until its own calibration replaces it: ubuntu-24.04-arm has never run
               # these stages, and a timeout is a safety net, not an estimate.
               if ($t.runner -eq 'ubuntu-24.04-arm') { $minutes = [int][math]::Ceiling($minutes * 1.5) }
-              # go-test on a mac gets 120: the go2cs package alone ran past go test's 50-minute limit on osx-arm64
-              # twice (runs 45779430120 and 45800091628, each killed at 50m with tests still progressing), while
-              # osx-x64 finished it in about 32 min. The step's go test limit for darwin is this budget less 20.
-              if ($env:INPUT_STAGE -eq 'go-test' -and $t.runner -like 'macos-*') { $minutes = 120 }
 
               $entry = [ordered]@{
                   goos    = $t.goos
@@ -1994,10 +1990,10 @@ jobs:
 
           Push-Location 'src/go2cs'
           try {
-              # go test's own limit applies to each package's test binary. darwin takes 100m inside the job's
-              # 120 (plan): osx-arm64, a 3-core runner, needs more than 50 for the go2cs package.
-              $goTestTimeout = if ($goos -eq 'darwin') { '100m' } else { '50m' }
-              & go test -buildvcs=false -count=1 -timeout $goTestTimeout ./... *>&1 | Tee-Object -FilePath $log -Append
+              # 50m stays the limit on every leg, osx-arm64 included: there the go2cs package runs past it, and past
+              # 100m (run 45809558237), because one test is at least 16x slower than on linux. That is a BOARD
+              # finding under diagnosis, not a budget; the summary below names the panic and the running test.
+              & go test -buildvcs=false -count=1 -timeout 50m ./... *>&1 | Tee-Object -FilePath $log -Append
               $runExit = $LASTEXITCODE
           }
           finally { Pop-Location }
