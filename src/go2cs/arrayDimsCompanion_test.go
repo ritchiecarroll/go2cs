@@ -11,6 +11,7 @@ package main
 import (
 	"go/ast"
 	"go/types"
+	"maps"
 	"slices"
 	"strings"
 	"testing"
@@ -107,7 +108,7 @@ func TestArrayDimsCompanionSelectsOnlyCarryingGenerics(t *testing.T) {
 
 	// Each dims type is declared once, by the function that owns it.
 	owned := map[string]string{}
-	facts := arrayDimsFactsFor(production)
+	facts := arrayDimsFactsFor(production, visitor.arrayDimsInputs())
 
 	for fn, dimsList := range facts.ownedTypes {
 		for _, dims := range dimsList {
@@ -202,5 +203,203 @@ func TestArrayDimsCompanionArgSpellsDimsAndForwards(t *testing.T) {
 
 	if got := visitor.arrayDimsCompanionArg(typeParam); got != "Tᴀ" {
 		t.Errorf("forwarded T: %q, want Tᴀ", got)
+	}
+}
+
+// The array-dims OVERLOAD (DESIGN-array-type-argument-length.md 3.3 and 3.5): an exported generic that
+// reaches a TYPE-ONLY sink, here another package's function that published a record, gains an
+// additive arity-2 form, and only a call site with dims to pass supplies the companion.
+const arrayDimsOverloadDep = `package dep
+
+// Sink stands for abi.TypeFor[T](): its package published a GoArrayDimsCompanion record for it.
+func Sink[T any]() int { return 0 }
+`
+
+const arrayDimsOverloadFixture = `package dims
+
+import "example/dims/dep"
+
+// Reach is exported and reaches the sink: it gains the overload whether or not a caller here needs it.
+func Reach[T any](v T) int { return dep.Sink[T]() }
+
+// Zero is exported and builds a zero value: it keeps its refusal (COORD ruling 2026-11-25).
+func Zero[T any]() T { var x T; return x }
+
+// reach is unexported, forwards to the sink and is instantiated with an array: an ordinary companion.
+func reach[T any]() int { return dep.Sink[T]() }
+
+func use() {
+	_ = Reach([2]string{})
+	_ = Reach(1)
+	_ = dep.Sink[[3]int]()
+	_ = dep.Sink[int]()
+	_ = reach[[4]byte]()
+}
+`
+
+func loadArrayDimsOverloadFixture(t *testing.T, records map[string][]int) (*Visitor, *packages.Package) {
+	t.Helper()
+
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod":     "module example/dims\n\ngo 1.23\n",
+		"dims.go":    arrayDimsOverloadFixture,
+		"dep/dep.go": arrayDimsOverloadDep,
+	})
+
+	production := loadProductionForDir(t, dir)
+	previousSource := currentPackageSource
+
+	t.Cleanup(func() {
+		currentPackageSource = previousSource
+		arrayDimsFactsCacheLock.Lock()
+		arrayDimsFactsKey, arrayDimsFactsValue = nil, nil
+		arrayDimsFactsCacheLock.Unlock()
+		resetArrayDimsRecords()
+	})
+
+	currentPackageSource = production
+
+	// The dependency's metadata, as importPackageInfoLines would read it: a record, or none at all.
+	resetArrayDimsRecords()
+	arrayDimsRecordsLock.Lock()
+	importedArrayDimsCompanions["example/dims/dep"] = records
+	arrayDimsRecordsLock.Unlock()
+
+	return &Visitor{info: production.TypesInfo, pkg: production.Types}, production
+}
+
+// arrayDimsCallSupplies answers each instantiated call's companion supply, keyed `Name[typeArg]`.
+func arrayDimsCallSupplies(visitor *Visitor, production *packages.Package) map[string]string {
+	supplies := map[string]string{}
+
+	for _, file := range production.Syntax {
+		ast.Inspect(file, func(node ast.Node) bool {
+			callExpr, isCall := node.(*ast.CallExpr)
+
+			if !isCall {
+				return true
+			}
+
+			funIdent := getCallFunIdent(callExpr.Fun)
+
+			if funIdent == nil {
+				return true
+			}
+
+			instance, ok := production.TypesInfo.Instances[funIdent]
+
+			if !ok {
+				return true
+			}
+
+			fn, _ := production.TypesInfo.Uses[funIdent].(*types.Func)
+			supplies[funIdent.Name+"["+instance.TypeArgs.At(0).String()+"]"] = strings.Join(visitor.arrayDimsCompanionSupply(fn, instance.TypeArgs), ",")
+
+			return true
+		})
+	}
+
+	return supplies
+}
+
+func TestArrayDimsOverloadForAnExportedSinkReachingGeneric(t *testing.T) {
+	visitor, production := loadArrayDimsOverloadFixture(t, map[string][]int{"Sink": {0}})
+
+	lookup := func(name string) *types.Func {
+		fn, _ := production.Types.Scope().Lookup(name).(*types.Func)
+
+		if fn == nil {
+			t.Fatalf("fixture has no function %s", name)
+		}
+
+		return fn
+	}
+
+	for name, want := range map[string]struct {
+		indices    []int
+		overloaded bool
+	}{
+		"Reach": {[]int{0}, true},
+		"Zero":  {nil, false},
+		"reach": {[]int{0}, false},
+	} {
+		fn := lookup(name)
+
+		if got := visitor.arrayDimsCompanionParams(fn); !slices.Equal(got, want.indices) {
+			t.Errorf("%s: companion indices = %v, want %v", name, got, want.indices)
+		}
+
+		if got := visitor.arrayDimsCompanionOverloaded(fn); got != want.overloaded {
+			t.Errorf("%s: overloaded = %v, want %v", name, got, want.overloaded)
+		}
+	}
+
+	// An array call site supplies the phantom; a non-array call site of an overload keeps arity 1; an
+	// unexported carrier's every call site supplies.
+	want := map[string]string{
+		"Reach[[2]string]": "ᴀ2",
+		"Reach[int]":       "",
+		"Sink[[3]int]":     "ᴀ3",
+		"Sink[int]":        "",
+		"reach[[4]byte]":   "ᴀ4",
+	}
+
+	got := arrayDimsCallSupplies(visitor, production)
+
+	for key, supply := range want {
+		if got[key] != supply {
+			t.Errorf("%s: supply %q, want %q", key, got[key], supply)
+		}
+	}
+
+	// The overload's call sites declare their dims in the CALLER (use); the unexported carrier owns its own.
+	facts := arrayDimsFactsFor(production, visitor.arrayDimsInputs())
+	owners := map[string]string{}
+
+	for fn, dimsList := range facts.ownedTypes {
+		for _, dims := range dimsList {
+			owners[arrayDimsTypeName(dims)] = fn.Name()
+		}
+	}
+
+	if !maps.Equal(owners, map[string]string{"ᴀ2": "use", "ᴀ3": "use", "ᴀ4": "reach"}) {
+		t.Errorf("phantom owners = %v", owners)
+	}
+}
+
+func TestArrayDimsOverloadNeedsTheRecord(t *testing.T) {
+	visitor, production := loadArrayDimsOverloadFixture(t, map[string][]int{})
+
+	for key, supply := range arrayDimsCallSupplies(visitor, production) {
+		if key == "reach[[4]byte]" {
+			continue
+		}
+
+		if supply != "" {
+			t.Errorf("%s: supplies %q with no record to read", key, supply)
+		}
+	}
+
+	if fn, _ := production.Types.Scope().Lookup("Reach").(*types.Func); visitor.arrayDimsCompanionOverloaded(fn) {
+		t.Errorf("Reach gained an overload with no record for the sink it reaches")
+	}
+}
+
+func TestArrayDimsOverloadForwarderLine(t *testing.T) {
+	typeParam := types.NewTypeParam(types.NewTypeName(0, nil, "T", nil), types.NewInterfaceType(nil, nil))
+	visitor := &Visitor{currentFuncArrayDimsNames: map[*types.TypeParam]string{typeParam: "Tᴀ"}}
+
+	got := visitor.arrayDimsOverloadForwarder("public", false, "Handle<T>", "Make", "<T, Tᴀ>", "T value", "\r\n    where Tᴀ : IGoArrayDims")
+
+	if want := "public static Handle<T> Make<T>(T value) => Make<T, ᴀnone>(value);"; got != want {
+		t.Errorf("forwarder\n got %s\nwant %s", got, want)
+	}
+
+	got = visitor.arrayDimsOverloadForwarder("public", false, "ref T", "At", "<T, K, Tᴀ>", "ref T x, K k", "\r\n    where K : new()\r\n    where Tᴀ : IGoArrayDims")
+
+	if want := "public static ref T At<T, K>(ref T x, K k) where K : new() => ref At<T, K, ᴀnone>(ref x, k);"; got != want {
+		t.Errorf("ref forwarder\n got %s\nwant %s", got, want)
 	}
 }

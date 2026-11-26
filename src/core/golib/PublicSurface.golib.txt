@@ -97,6 +97,8 @@ go.Funcꓸꓸꓸ`9
 go.GoAllocEntry
 go.GoArchExclusiveAttribute
 go.GoArrayDimsAttribute
+# Ruled 2026-11-25 (17:06Z, the array-dims companion design, section 7): a converter-emitted attribute, as GoArrayDimsAttribute; [go-tier2] by ruling
+go.GoArrayDimsCompanionAttribute
 go.GoArrayZero
 go.GoBoundedGoroutineAttribute
 go.GoBoxViewsAttribute
