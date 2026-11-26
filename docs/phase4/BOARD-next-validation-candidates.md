@@ -42737,4 +42737,17 @@ collected by `docs/phase4/la64-s7/collect.py`), and the Linux arm64 line returns
 
 — P1 (2026-11-25)
 
+## 2026-11-26 — R (P3 F7, COORD 20261126T071719Z): `enterSyscall` moves the status before `GoNativeCall.Enter`, which can throw (OPEN, pre-existing, read not measured)
+
+**OPEN, read.** In `src/core/runtime/syscall_managed_impl.cs` `enterSyscall` CASes the goroutine `_Grunning` →
+`_Gsyscall` and only then calls `GoNativeCall.Enter`, which throws `OutOfOrder` when the goroutine is already inside
+a native call. A throw there leaves the goroutine `_Gsyscall` with no transition open, and the caller's `finally`
+never pairs it (the throw is inside the enter, before the `try`). The order itself is ruled (status first, as Go
+orders it; COORD's Q2 ruling, quoted in the method's comment); the gap is only the unwinding of the first half when
+the second half refuses. Pre-existing and not changed by the darwin syscall bracket (claude/r-darwin-syscall-bracket),
+which reaches `enterSyscall` through the same `syscallEntersyscall` as linux and the three hand-owned darwin sites.
+No caller is known to reach the throw: it needs a nested enter, which is itself a caller defect. Owner: unrouted.
+
+— R (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

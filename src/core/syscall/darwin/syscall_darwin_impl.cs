@@ -4,6 +4,26 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - syscalln: DERIVED FROM src/runtime/sys_darwin.go, Go 1.26.11, func syscall_syscalln. Go's three statements in
+//   Go's order (entersyscall, the raw call, exitsyscall), the raw call being golib's libc call; the exit runs in a
+//   finally, because golib's call can throw where Go's cannot.
+// - Syscall, Syscall6, Syscall9: INSPIRED BY src/syscall/asm_darwin_amd64.s, Go 1.26.11, assembly routines Syscall,
+//   Syscall6 and Syscall9. The same entersyscall/exitsyscall bracket around golib's libc call.
+// - the rest (the dispatch onto golib, rawsyscalln, RawSyscall, RawSyscall6, the doors and the test seams):
+//   original go2cs code.
 
 // The syscall package's darwin keystone family, realized on golib's platform-neutral dispatcher.
 //
@@ -13,8 +33,20 @@
 // syscallPtr Go bodies in syscall_darwin.go, which call those two and then apply errno, errnoX or
 // errnoPtr to the result. Those bodies are converted, so this file no longer carries them. The runtime
 // entry reads errno after EVERY call (`err = *errnoAddr`, success or not) and tests nothing itself, which
-// is golib's GoLibcErrnoRule.AlwaysRead. The cooked and raw forms differ only by entersyscall/exitsyscall,
-// which the managed host already discharges, so both are the same call here.
+// is golib's GoLibcErrnoRule.AlwaysRead. The cooked and raw forms differ only by entersyscall/exitsyscall, as in
+// Go: syscalln brackets the call and rawsyscalln does not.
+//
+// THE BRACKET (2026-11-26, docs/phase4/DESIGN-darwin-syscall-bracket.md; COORD 20261126T071719Z). Until then both
+// forms were the same unbracketed call, on the reasoning that the managed host already discharges entersyscall's
+// P-release bookkeeping. The native-call seam (runtime/syscall_managed_impl.cs, DESIGN-native-call-seam.md) made
+// that untrue: entersyscall moves the goroutine to _Gsyscall and opens GoNativeCall's transition, in default mode
+// too, and under the M:N scheduler that transition is what lets a blocked goroutine's carrier be handed off or
+// retaken. Without it a goroutine in wait4 (os/exec's Cmd.Wait) kept its carrier and the scheduler injected threads
+// (MnInvisible's C-exec row on the hosted macs). linux closed the same gap by forwarding its pair
+// (syscall_linux_impl.cs). darwin cannot forward to the runtime's own syscall_syscalln: its rawsyscalln reads errno
+// through libc_error_addr, which refuses by name (runtime/darwin/libccall_impl.cs). So the bracket is here, around
+// golib's call. The window is wider than Go's by golib's managed marshalling and copy-back (NativeStructMarshal);
+// that is safe, because the thread keeps running and errno is read inside the call, before the exit.
 //
 // The exported Syscall, Syscall6, Syscall9, RawSyscall and RawSyscall6 below keep their Go 1.24 shape:
 // one libc call applying Go's failure test to the result. Their notes follow, unchanged.
@@ -29,9 +61,8 @@
 //     syscallX / syscall6X           — CMPQ AX, $-1  (all 64)               -> Int64MinusOne
 //     syscallPtr                     — TESTQ AX, AX  (NULL is the error)    -> NullPointer
 //
-// and on failure errno through __error(). `raw` and cooked variants are the same call here: the
-// entersyscall/exitsyscall brackets the cooked ones add are the P-release bookkeeping the managed
-// host already discharges (syscall_linux_impl.cs's reasoning, one platform over).
+// and on failure errno through __error(). The cooked Syscall, Syscall6 and Syscall9 bracket the call with
+// entersyscall/exitsyscall, as Go's asm_darwin_amd64.s does; RawSyscall and RawSyscall6 do not (THE BRACKET above).
 //
 // r2 is reported as 0: the second return register is read by no darwin wrapper in the corpus
 // (censused over zsyscall_darwin_amd64.cs, 0 readers), and a managed indirect call cannot observe
@@ -71,17 +102,39 @@ private static (uintptr r1, uintptr r2, Errno err) call(uintptr fn, ReadOnlySpan
     return ((uintptr)r1, (uintptr)0, (Errno)(uintptr)errno);
 }
 
-// The exported family: `trap` is a libc address on darwin exactly as `fn` is below.
+// The exported family: `trap` is a libc address on darwin exactly as `fn` is below. Syscall, Syscall6 and
+// Syscall9 enter a system call around it, as Go's asm_darwin_amd64.s does; RawSyscall and RawSyscall6 do not.
 public static partial (uintptr r1, uintptr r2, Errno err) Syscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
-    return call(trap, stackalloc nuint[] { a1, a2, a3 }, GoLibcErrnoRule.Int32MinusOne);
+    runtime_package.syscallEntersyscall();
+
+    try {
+        return call(trap, stackalloc nuint[] { a1, a2, a3 }, GoLibcErrnoRule.Int32MinusOne);
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 }
 
 public static partial (uintptr r1, uintptr r2, Errno err) Syscall6(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    return call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6 }, GoLibcErrnoRule.Int32MinusOne);
+    runtime_package.syscallEntersyscall();
+
+    try {
+        return call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6 }, GoLibcErrnoRule.Int32MinusOne);
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 }
 
 public static partial (uintptr r1, uintptr r2, Errno err) Syscall9(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
-    return call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6, a7, a8, a9 }, GoLibcErrnoRule.Int32MinusOne);
+    runtime_package.syscallEntersyscall();
+
+    try {
+        return call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6, a7, a8, a9 }, GoLibcErrnoRule.Int32MinusOne);
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 }
 
 public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
@@ -92,9 +145,17 @@ public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr tr
     return call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6 }, GoLibcErrnoRule.Int32MinusOne);
 }
 
-// The Go 1.26 runtime entries every converted keystone in syscall_darwin.cs calls.
+// The Go 1.26 runtime entries every converted keystone in syscall_darwin.cs calls. syscalln is Go's
+// syscall_syscalln (entersyscall, the raw call, exitsyscall); rawsyscalln is the raw call alone.
 internal static partial (uintptr r1, uintptr r2, Errno err) syscalln(uintptr fn, params variadic<uintptr> argsʗp) {
-    return calln(fn, argsʗp);
+    runtime_package.syscallEntersyscall();
+
+    try {
+        return calln(fn, argsʗp);
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 }
 
 internal static partial (uintptr r1, uintptr r2, Errno err) rawsyscalln(uintptr fn, params variadic<uintptr> argsʗp) {

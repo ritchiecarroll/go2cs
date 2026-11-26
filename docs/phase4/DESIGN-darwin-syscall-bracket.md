@@ -113,3 +113,33 @@ syscall/asm_darwin_amd64.s's `Syscall`, `Syscall6` and `Syscall9`. The file gain
   (R). P5 owns the darwin run layer; say if it is yours.
 - **Train.** It changes every darwin syscall's status transition. Behaviour without M:N is unchanged, but it is
   darwin-wide, so it rides a train with the darwin hosted legs in its gate.
+
+## 7. Amendment, 2026-11-26 (COORD 20261126T071719Z, adopting P3's F1-F7)
+
+Sections 1-6 stand as written above; this block corrects and extends them.
+
+- **F1, section 5 item 3 is wrong.** "No behaviour change outside M:N" does not hold: `entersyscall` runs in
+  default mode too (it moves the goroutine to `_Gsyscall` and `GoNativeCall.Enter` opens the transition whatever the
+  scheduler), so every darwin cooked syscall now changes status in default mode, as linux's have since 2026-11-09.
+  The default-mode arm is measured by row, not assumed: `AGoroutineBlockedInTheConvertedReadReadsGsyscall` is
+  linux's F-1 row run on darwin (a goroutine blocked in `syscall.Read` on a pipe reads `_Gsyscall`, depth 1, with
+  `GO2CS_MN` unset), and `AGoroutineBlockedInARawReadStaysGrunning` is its raw near-miss.
+- **F2, the default-mode sweep joins the gate.** A hosted darwin default-mode sweep of `os`, `os/exec`, `net`,
+  `internal/poll`, `syscall` and `os/signal` on osx-arm64 and osx-x64, verdict for verdict against the banked rows.
+- **F3/F4, the rows.** GolibTests' `DarwinSyscallBracketTests` carries, beside the direct probe rows of section 5
+  item 1, the real-wrapper rows (the converted `syscall6X` and `syscallPtr` through `GoSyscall6X`/`GoSyscallPtr`, a
+  blocked `syscall.Read`, and `RawSyscall` on libc's `read`) and throw rows for all four bracketed entries (a null
+  function pointer through each; ten arguments through `syscalln`), each asserting the status, the seam depth and
+  that golib's original `ArgumentException` surfaces.
+- **F5, attribution.** The file carries two notices: `syscalln` DERIVED FROM `src/runtime/sys_darwin.go`
+  `syscall_syscalln` (Copyright 2018); `Syscall`, `Syscall6` and `Syscall9` INSPIRED BY
+  `src/syscall/asm_darwin_amd64.s` (Copyright 2009); the rest original. Both old-reason statements in the header are
+  replaced.
+- **F6, the window.** The bracketed window is wider than Go's by golib's managed marshalling and copy-back
+  (`NativeStructMarshal`) around the libc call. That is safe: the thread keeps running managed code it owns, and
+  errno is read inside the call, before the exit.
+- **F7.** The pre-existing order in `enterSyscall` (the status moves to `_Gsyscall` before `GoNativeCall.Enter`,
+  which can throw) is recorded on the BOARD; this cut does not change it.
+
+**The gate**: darwin golib-tests, go-test and mn-platform on osx-arm64 and osx-x64; MnInvisible's C-exec row on both
+macs (predicted: retakes above 0, injections near 0); the F2 sweep; linux and windows CNR plus golib; repoguard.
