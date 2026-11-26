@@ -1,4 +1,4 @@
-# DRAFT — the go.* release notes after 1.26.11.1
+# DRAFT — the go.* 1.26.11.2 release notes
 
 <!-- DRAFT for owner and COORD review, started 2026-11-20 by P4 (COORD 08:02Z) from master 2d6cf69fd6, on the .3 and .4
      precedent (docs/DRAFT-news-1-26-10-3.md, then docs/DRAFT-news-1-26-10-4.md, which moved into docs/NEWS.md at the
@@ -31,23 +31,74 @@
      precedents kept the held entry off master's NEWS.md until then: .2 on a branch held unmerged, .4 excluded from
      batch 316 and merged at 86e387d2e4 just before the tag). The proposed README block is at the end of this file. -->
 
+<!-- 2026-11-26 (P4, COORD 2026-11-26 09:19Z, owner OK): renamed from docs/DRAFT-news-next.md, re-derived at master
+     d6805be2e8 from `git log --first-parent 97cca467a2..d6805be2e8` (trains 8-14). The release is 1.26.11.2: the
+     break floor is 1.26.11.2 since train 10 (cb6def82a2, src/core/golib/buildTransitive/go.lib.targets), so this
+     release DOES announce a binary break (the 11-23 note above, "no binary break is announced on master", is
+     superseded: D's delegates at train 10, wall E's variadic<T> at train 11, fcgi's Δrecord holder at train 12).
+     Marks, three kinds now: LANDED <first-parent merge> is on master; QUEUED <branch> <tip> is seated in a train not
+     yet landed (train 15, in its battery since 2026-11-26 05:56Z) or waits for one; PENDING <branch> is not seated yet
+     and may miss the release. At release, drop every bullet still QUEUED or PENDING, remove the marks, and write the
+     entry's prose (GoCorpusMigration.md, the release ritual, item 1). The title is the owner's pick at release, as
+     for 1.26.11.1; the headline is the M:N async twins, PENDING on G's rows.
+     Style (owner, 2026-11-26): NEWS.md is hard-wrapped, the GitHub release body a separate unwrapped copy; present
+     tense, for visitors; no exact figures in durable text; the platform a claim was measured on is named; nicknames
+     only. The bullets kept from the 11-23 pass carry some figures (counts in the D bullet and elsewhere); the
+     release-day prose drops them. -->
+
 ---
 
-## November XX, 2026 — Code that reads closer to Go, cgo packages in a module, and tests that use testify
+## November XX, 2026 — TITLE PICKED AT RELEASE
+
+<!-- Proposed title (P4, 2026-11-26), for the owner's pick: "Goroutines on a shared pool of threads, Go's variadic
+     slices, and cgo with tests". The 1.26.11.1 title is kept here for reference: "Code that reads closer to Go, cgo
+     packages in a module, and tests that use testify". -->
 
 <!-- Written ahead and HELD for release day (the .2 and .4 precedent, e665f4ea51 and 3f0edb682a): "November XX" (the
      month too) and "X.X.X.X" are placeholders, set as the last change before the release tag, here, in the README
      block's first line and in its link anchor (GoCorpusMigration.md, the release ritual, item 1). -->
 
-**NuGet X.X.X.X.** Converted C# reads closer to the Go it came from: an array literal is `array<nint>([1, 2, 3])`,
-package `main` keeps its methods beside its functions, and a stack trace names each function as Go does.
-`go2cs -recurse -cgo` converts a module's cgo packages with the module, and modules whose tests use testify convert
-and match Go's test results. C# written by hand against converted code may need the changes listed first, under
+**NuGet 1.26.11.2.** **[PENDING: G's M:N rows]** Goroutines can run on a small pool of threads, as Go runs them,
+in any converted program built with async twins, the go.* packages included. Converted C# reads closer to the Go it
+came from: an array literal is `array<nint>([1, 2, 3])`, package `main` keeps its methods beside its functions, and a
+stack trace names each function as Go does. A spread call `f(s...)` hands the callee the caller's slice, as in Go.
+`go2cs -cgo` converts a package with its tests, and `go2cs -recurse -cgo` converts a module's cgo packages with the
+module; modules whose tests use testify convert and match Go's test results. Assemblies compiled against 1.26.11.1
+must be rebuilt, and C# written by hand against converted code may need the changes listed first, under
 *Upgrading from 1.26.11.1*.
 <!-- 2026-11-23 (P1): the lead summarizes the bullets below; each claim carries its source there. -->
+<!-- 2026-11-26 (P4): the M:N sentence is the headline COORD named, PENDING on G's rows (the .5 plan, COORD ruling
+     2026-11-23); drop it at release if they miss, and with it "the go.* packages included", which rests on the twin
+     opt-in (QUEUED, train 15). The variadic, -cgo -tests and rebuild sentences: their bullets below. -->
 
 **Upgrading from 1.26.11.1.**
 
+- **[LANDED cb6def82a2]** **Rebuild what you built against 1.26.11.1.** This release changes members that compiled
+  code binds: a defined func type is now a delegate of its own, a variadic parameter is golib's `variadic<T>`, and
+  `net/http/fcgi`'s `record` type is spelled `Δrecord` (each below). An assembly or nugetgo package compiled against
+  go.* 1.26.11.1 that reaches one of them fails at run time with `MissingMethodException` or a similar error. The
+  build refuses the combination first: a package built below the new break floor is error `GO2CS3002`, which names
+  the package ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.11.2, and move each `nugetgo.*`
+  reference to its 1.26.11.2 revision.
+  <!-- 2026-11-26 (P4): train 10, merge cb6def82a2 (claude/coord-t10-floor a9e098be0c; golib c2b489c27c "the break
+       floor moves to 1.26.11.2, the .5 release"): <GoBreakFloor>1.26.11.2</GoBreakFloor> in
+       src/core/golib/buildTransitive/go.lib.targets at d6805be2e8. The breaks and their compatibility suppressions:
+       D (train 10, d62a18c559), wall E (train 11, 58124df9a9; pushnuget 4c16756345, ba6d705847), fcgi's holder
+       (train 12, c46de600d9). Shaped on the 1.26.11.1 entry's first Upgrading bullet. PENDING on the publish, not on
+       a merge: the nugetgo sentence holds once the release's nugetgo wave has published. -->
+- **[LANDED 58124df9a9]** **A variadic parameter is golib's `variadic<T>`, and a spread passes the caller's slice.**
+  On every converted platform, a Go `...T` parameter is now `params variadic<T>` (read through the alias
+  `params ꓸꓸꓸT`), where it was `params Span<T>`. For a spread call `f(s...)` the pack carries the caller's slice
+  itself, so the callee's writes into it, and a slice it returns, share the caller's array, as in Go. Before, a
+  callee that kept, returned, captured or appended to its parameter worked on a copy of a spread's elements, and the
+  caller's slice missed its writes (a lost write in modernc.org/sqlite's row scan). The alias keeps its shape,
+  `using ꓸꓸꓸT = variadic<…>;`. Compiled code that calls a converted variadic function must be rebuilt (above). See
+  [Slices and arrays](ConversionStrategies.md#slices-and-arrays).
+  <!-- 2026-11-26 (P4): train 11, merge 58124df9a9 (claude/p2-wall-e-spread-alias ddff8b8319; inbox/P2
+       20261120T121230Z-COORD.md, surface ruling 20261120T135029Z). The text: ConversionStrategies.md, "Variadic
+       parameters are packs" and "A spread passes the slice itself"; ConversionStrategies-Reference/
+       multi-result-and-comma-ok.md, "The pack is golib's variadic<T>"; behavioral VariadicSpreadHeapAlias and
+       VariadicPackPassThrough. -->
 - **[LANDED 07483fc78a]** **An unnamed array literal now reads `array<nint>([1, 2, 3])`.**
   On every converted platform, a Go array literal of an unnamed array type converts to a call of golib's
   `array<T>(…)` over a C# collection expression, where it was `new nint[]{1, 2, 3}.array()`. C# source written by
@@ -105,7 +156,7 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-23 (P1): landed by train 4, merge 0f93005fbd (claude/r-r7-slice-array 59c61e4734). The member list read
        again at 97cca467a2 from ISliceTypeTemplate.ClaimableMembers (it also lists Clone, claimed before this
        change). -->
-- **[QUEUED claude/r-r7-chan-map-num (tip in its READY post)]** **The same holds for named channel, map, numeric,
+- **[LANDED 11f0a5dde1]** **The same holds for named channel, map, numeric,
   string and pointer types.** A Go method named `Capacity`, `Length`, `IsClosed`, `IsUnbuffered`, `Receive`,
   `Received`, `Receiving`, `Sending`, `Make` or `GetEnumerator` on a named channel; `Length`, `IsNil`, `Count`, `Make`
   or `GetEnumerator` on a named map; `CompareTo` on a named number; or `Length`, `CompareTo` or `GetEnumerator` on a
@@ -137,7 +188,7 @@ and match Go's test results. C# written by hand against converted code may need 
        remarks ("A project that sets it keeps the generator's rule and loses only this net"), the GO2CS0016 row of
        DiagnosticCodes.md, PLAN-public-surface-stability.md (item 8, 2026-11-20). Disclosed in PublicSurface.md, tier 2,
        in the same pass. -->
-- **[LANDED e25362aedc; the `Δ`-name cure <train-11 merge>]** **A Go name spelled with a letter go2cs uses in generated
+- **[LANDED e25362aedc, 528c057cfa]** **A Go name spelled with a letter go2cs uses in generated
   names refuses its package.** A package that declares an identifier spelled with one of those letters (`Ꮡ`, `ᴛ`, `ж`
   and the others), or a `Δ` name equal to one go2cs generates in that package, stops with error `GO2CS2015`, which
   names each identifier: such a name could bind silently to a generated one. Every other `Δ` name converts, and a
@@ -158,7 +209,7 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-23 (P1): train 2, merge 27edc19447 (claude/p4-lift-dedup 29f9c49496); the converter bdaa9df223 ("one
        lift per anonymous type; a public site reuses a lift declared public"); COORD ruling 2026-11-20 on board (jj),
        cited in PublicSurface.md tier 3. -->
-- **[QUEUED claude/i9-alias-keyword-escape (train 12)]** **A Go type named `record` is spelled `Δrecord`.** At the start
+- **[LANDED c7cba87148, c46de600d9]** **A Go type named `record` is spelled `Δrecord`.** At the start
   of a C# member, `record` begins a record declaration, so a Go type declared with that name now takes the `Δ` prefix,
   like other names C# reserves. In the converted standard library this renames `net/http/fcgi`'s `record` type, and its
   method holder `fcgiᴛrecord` becomes `fcgiᴛΔrecord`. C# source written by hand that names the old spelling names the new
@@ -166,6 +217,8 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-25 (i9): owner ruling COORD 020915Z ("Δrecord, as ruled"); the seat claude/i9-alias-keyword-escape
        bf4cc3a23d; release-smoke's binary-compatibility guard read the holder's CP0001 on the train 12 union (417fd87146,
        run 45583774592), suppressed in src/core/net/http/fcgi/CompatibilitySuppressions.xml (COORD 2026-11-25T12:24:43Z). -->
+  <!-- 2026-11-26 (P4): landed by train 12, merges c7cba87148 (claude/i9-alias-keyword-escape bf4cc3a23d) and
+       c46de600d9 (claude/i9-t12-fcgi-suppression 60dd63d952). -->
 
 **What changed.**
 
@@ -236,6 +289,26 @@ and match Go's test results. C# written by hand against converted code may need 
        read and write 8352e4c998, go2cs-gen's properties 0b223db1a0; three of the four cgo phase 3 layout pins
        retired); train 6, merge 5f2f2d0aa3 (claude/h-cgo-1c 487a168cb1: the **C.T load and store 68220bfa6f).
        docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9 and 18.11. -->
+- **[LANDED ca855400f3, d229e5d09f]** **C global variables, and checked returns, under `-cgo`.** `C.x` reads and
+  writes a C global variable and `&C.x` takes its address. A C function's return value is checked against the route
+  its type takes, and a word C writes back through an argument is mirrored into the Go value.
+  <!-- 2026-11-26 (P4): train 12, merges ca855400f3 (claude/p2-cgo-cvars d59d7ebe84, cgo item 3) and d229e5d09f
+       (claude/p6-cgo-returns 3999e3d8c4, cgo items 1 and 2: return-route checks and the argv word mirror). Train 11
+       cb868cba55 (claude/h-cgo-1b-r8, the pinned class S-B2b) is internal and not listed. The wording of the second
+       sentence is to be read against PLAN-cgo-interop.md at release. -->
+- **[LANDED ee5f90adc4, 6e69ce74ac]** **`-cgo` combines with `-tests`.** A cgo package's Go tests convert and run with
+  its cgo code, so its suite is compared against Go's. `-cgo-removals-dry-run` lists the cgo-off files such a
+  conversion would remove, and removes none. A C struct reached through a Go pointer is read and written in place,
+  and a second, larger view of the same memory is refused ([Command line](CommandLine.md#option-cgo-removals-dry-run)).
+  <!-- 2026-11-26 (P4): train 14, merges ee5f90adc4 (claude/h-cgo-res-ptr-r6 32d3a5436a: cgo 3.4 seats 4a/4c and the
+       struct image door) and 6e69ce74ac (claude/h-cgo-res-ptr-r7 3471d8820e: the larger second view refused,
+       same-root sharing). -->
+- **[QUEUED claude/h-cgo-s4-r3 3450839689]** **Go memory handed to C as `void *` under `-cgo`.** A number made from Go
+  memory and passed to a `void *`, `uintptr_t` or `intptr_t` parameter crosses back to the memory it came from.
+  <!-- 2026-11-26 (P4): train 15 (assembled 092e546f26). Flip to LANDED with the train's merge. -->
+- **[PENDING claude/h-cgo-s6-r6]** **`runtime.Pinner` under `-cgo`.** A pinned Go value handed to C stays where C
+  can keep it, and a pinned slot at a door that cannot honour the pin is refused.
+  <!-- 2026-11-26 (P4): cgo S6, tip 0256e76fb6, not in a train at d6805be2e8. Drop the bullet if it misses. -->
 - **[LANDED 90e20f2d49, 3d7d5e6ec0]** **A pointer word stored through `*unsafe.Pointer` or into a func variable is
   kept.** `*p` and `*p = v`, where `p` is a `*unsafe.Pointer` that names a word of C memory or of Go memory rebuilt
   from a number, read and write that word. Storing a func value's word into a func variable through `unsafe.Pointer`
@@ -277,6 +350,20 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-23 (P1): train 2, merges cfab663076 (claude/p5-pool-cleanup-per-gc 4e855b3716: efa75d1c8c "age
        sync.Pool at every collection, as Go's clearpools does") and bf262dff62 (claude/c1-atomic-casp-address
        aad61a927c: 8c80148c92 and 23528457b0; GolibTests AtomicCompareAndSwapPointerAddressTests). -->
+- **[LANDED a82699d6e7]** **An opt-in check for writes through string bytes.** With `GO2CS_CHECK_STRING_WRITES=1`,
+  converted code that writes through `unsafe.StringData` into a string literal's bytes fails at the write, as such a
+  write faults in Go, instead of changing the literal for every later reader. It is off by default and costs nothing
+  when off ([Tuning](Tuning.md#checking-writes-through-string-data)). Measured on linux/amd64.
+  <!-- 2026-11-26 (P4): train 11, merge a82699d6e7 (claude/p5-d5-readonly-strings 96bd78dead, D5). "costs nothing
+       when off": Tuning.md's section says no literal is wrapped when off; re-read at release. -->
+- **[QUEUED claude/r-scan-avx512 f61823f8d9]** **The garbage collector's scan kernels use AVX-512 where Go uses
+  them.** On x64 processors with AVX-512 and BITALG, `internal/runtime/gc/scan` runs its vector kernels, as Go
+  does, where it took the portable path.
+  <!-- 2026-11-26 (P4): the AVX-512 seat, finding 5 (BITALG via CPUID, managed kernel bodies). COORD named it with
+       train 15; flip to LANDED with its merge. -->
+- **[QUEUED claude/p6-array-typearg-len a983cc10dc]** An array type whose length comes from a type argument's
+  constant converts, so `reflect`'s `TestMakeAllocs` builds.
+  <!-- 2026-11-26 (P4): train 15. Wording to be read against the seat at landing. -->
 - **[LANDED c869fc13a7]** **A blank import's comment says what happens to the package's
   `init`.** On every converted platform, Go's `import _ "image/png"` converts to the comment
   `// import _ "image/png" (init forced in ImportInitializers)`. The other two endings are `nothing to initialize`
@@ -286,11 +373,11 @@ and match Go's test results. C# written by hand against converted code may need 
        paragraph, and ConversionStrategies-Reference/package-conversion.md. -->
   <!-- 2026-11-23 (P1): landed by train 1, merge c869fc13a7 (claude/p4-blank-import-note 7de4e2e267); the three
        endings read again at 97cca467a2 in visitImportSpec.go. -->
-- **[QUEUED claude/c2-d-named-functype (tip in its READY post)]** **A defined func type is a delegate of its own.**
+- **[LANDED d62a18c559]** **A defined func type is a delegate of its own.**
   On every converted platform, a Go func type declared with `type`, such as `context.CancelFunc` or
   `bufio.SplitFunc`, is now a C# delegate named for it, whether or not it has methods; one without methods was
   written as its underlying `Action` or `Func<…>` delegate wherever it was used. So `%T`, reflect's `Name()` and a
-  type switch now tell `type F func(string) error` from `func(string) error`, as Go does. Thirty exported types of the
+  type switch now tell `type F func(string) error` from `func(string) error`, as Go does. Exported types of the
   standard library change this way, among them `context.CancelFunc` and `CancelCauseFunc`, `bufio.SplitFunc`,
   `io/fs.WalkDirFunc`, `path/filepath.WalkFunc`, `go/types.Qualifier` and `archive/zip`'s `Compressor` and
   `Decompressor`. Compiled C# code that passed or received `Action` or `Func<…>` there must be rebuilt; C# source
@@ -300,6 +387,11 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- C2's D seat, COORD rulings 2026-11-23 02:36Z (cure 1) and 05:38Z (the break floor moves at the .5 release,
        F = R; this line and the binary-compatibility suppressions are owed by the seat). The thirty types are the
        exported collapse markers of the corpus at 1079ca371f, the same on windows, linux and darwin. -->
+  <!-- 2026-11-26 (P4): landed by train 10, merge d62a18c559 (claude/i9-d-union f79546187a, D regenerated at the
+       union); the break floor rides cb6def82a2 (Upgrading, first bullet). Two follow-ups landed in train 13 and need no
+       text of their own: a `go f(x)` on a defined func type's value (bf85cc1707, claude/p2-go-named-func a3bf724219,
+       context's test host compiles again) and a publicized func type's delegate made public (e889201c31,
+       claude/i9-func-type-delegate-access f1bee92525, sort's CS0051). -->
 - **[LANDED 00b0dc37dd]** **Converting a module: two packages that spell one
   anonymous struct now agree on its layout by themselves.** When code such as ccgo's output declares the same
   anonymous struct in two packages (modernc.org/sqlite's `TLARGE_INTEGER` and modernc.org/libc's `largeInteger`),
@@ -350,7 +442,7 @@ and match Go's test results. C# written by hand against converted code may need 
   is reused across conversions and is safe to delete ([Known issues](KnownIssues.md#a-conversion-keeps-a-go-build-cache-of-its-own)).
   <!-- 2026-11-23 (P1): train 1, merge dcfc9c99a1 (claude/p4-probe-cache 7f14c1bb4d; board hh, COORD 2026-11-20
        09:41Z). The text: CommandLine.md's `-probe-cache` row and the KnownIssues.md entry. -->
-- **[QUEUED claude/p5-stackappend-optin (tip in its READY post)]** **The stack-append buffer is emitted only where it
+- **[LANDED cfdaddaa02]** **The stack-append buffer is emitted only where it
   is needed: `-stdlib` and `-tests`.** Go 1.25 and later give the first `append` to a slice that does not escape a
   32-byte buffer, which only `cap()` can observe. go2cs 1.26.11.1 reproduced it in every conversion, at the cost of a
   `go build -gcflags=-m` per package and target. The new option `-stack-append=on|off|auto` controls it; the default,
@@ -364,8 +456,17 @@ and match Go's test results. C# written by hand against converted code may need 
 - **[LANDED 1c9c6a224e … e280cae69d]** **An experimental M:N scheduler, off by default.** go2cs can run goroutines
   on a small pool of threads, as Go does, instead of one operating-system thread each. The technique is **async
   twins**: a second copy of each function that waits by giving its thread back to the scheduler. It is opt-in: a
-  program gets it only when its projects are built with twins, which works only inside a go2cs repository clone, and
-  it runs with `GO2CS_MN=1`. <!-- (b)-dependent --> The published `go.*` packages are not built with twins, and a program that does not opt
+  program gets it only when its projects are built with twins, and it runs with `GO2CS_MN=1`.
+  **[QUEUED claude/r-twin-optin 01c276263e]** Twins build against a go2cs repository clone, a deploy-core root or the
+  NuGet packages. **[LANDED 639adf1cda, 40500f2972]** Each pool thread reserves the stack size a Go program's main
+  thread gets, or the size set in `GO2CS_GOROUTINE_STACK`, and a goroutine's thread-static state moves with it when it
+  changes threads ([Tuning](Tuning.md#goroutine-stacks)).
+  <!-- 2026-11-26 (P4): "which works only inside a go2cs repository clone" is true at d6805be2e8 and is cured by
+       claude/r-twin-optin 01c276263e (train 15). If that seat misses the release, restore the clause and drop the
+       QUEUED sentence. If it lands, the release's packages carry twins, so the next sentence becomes "The published
+       `go.*` packages carry twins; a program that does not opt in runs each goroutine on its own thread, as before." Landed: train 11, 639adf1cda (claude/r-mn-row4-stack 37fede0ea6, M:N row 4) and 40500f2972
+       (claude/r-mn-n10-statics d4600c7264, row 11 N10). -->
+  <!-- (b)-dependent --> The published `go.*` packages are not built with twins, and a program that does not opt
   in runs each goroutine on its own thread, as before. The diagnostics `GO2CS0014`, `GO2CS0015`, `GO2CS0017`,
   `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` come only from a build with twins
   ([Async twins](AsyncTwins.md), [Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)).
@@ -380,7 +481,26 @@ and match Go's test results. C# written by hand against converted code may need 
        and f0f44ca4eb (g-mn-twins-p45, GoStdlibTwins default off); train 7 e280cae69d (g-mn-refblock, the Go-order
        note). The text: KnownIssues.md "Goroutines on a shared pool of threads (M:N) are experimental". GO2CS0016 is
        not listed here: it is the GoFrame rule, reported in every build (Upgrading, above). -->
+- **[PENDING claude/p5-darwin-arm64-flip]** **darwin/arm64 is converted as its own platform.** The standard library
+  is emitted for Apple silicon as for the other four targets, and `internal/cpu` reads the processor's features at
+  start-up, where darwin/arm64 used darwin/amd64's code.
+  <!-- 2026-11-26 (P4): D2, tip f6830223fb, not in a train at d6805be2e8. P5 leads; D5 (the golib-tests read) is
+       still owed, so Apple silicon keeps darwin/amd64 until it lands. Drop the bullet if the flip misses. -->
 - **Fixes.**
+  - **[PENDING claude/r-darwin-syscall-bracket]** On darwin, `syscall.Syscall`, `Syscall6`, `Syscall9` and
+    `syscalln` tell the runtime they are in a system call, as Go's do, so other goroutines run while one waits there.
+    <!-- 2026-11-26 (P4): tip ec4daed46c, not in a train at d6805be2e8. Drop if it misses. -->
+  - **[LANDED 1be6009846]** A goroutine waiting on a network or file deadline no longer deadlocks against the poller
+    that wakes it; the wait now releases its scheduler hold after the poller's lock.
+    <!-- 2026-11-26 (P4): train 11, merge 1be6009846 (claude/p5-pollblock-deadlock 447e629247: pollBlock lock order,
+         ParkScope disposed after the gate). Found as a darwin hang (P5, row 15). -->
+  - **[LANDED b584a43382]** A nil pointer of a named pointer type stored in an interface is Go's typed nil: the
+    interface is not nil and a type switch finds the named type.
+    <!-- 2026-11-26 (P4): train 11, merge b584a43382 (claude/i9-nil-named-ptr-iface 16ee4274a1). -->
+  - **[LANDED f36e08fd2f]** A deploy-core root builds converted code that reads a field through two pointer levels;
+    the generator's collision list now ships with it, where such a build failed with `CS1566`.
+    <!-- 2026-11-26 (P4): train 14, merge f36e08fd2f (claude/r-deploy-fac e10d5e6de2: deploy-core stages
+         fieldAccessCollisions.txt, plus a guard). Wording to be read against the seat's own description at release. -->
   - **[LANDED 4029f81426, 1dfb01cfdc]** A deferred call that writes through a slice, an element pointer or an
     `unsafe` view of a named array result, taken before `return v`, now changes the value the function returns, as in
     Go. A function literal's named array result that escapes in a function with a `defer` has its storage, where every
@@ -422,10 +542,16 @@ and match Go's test results. C# written by hand against converted code may need 
        67d79b0b1f (objx v0.5.3), 9a6c4e1019 (yaml v3 v3.0.5, 704 matched). The text: ValidatedModules.md. -->
 - **[LANDED bb6267d0e4]** **A converted test assembly is compiled without optimization**, so a line that test code
   reads (`t.Logf`, testify's failure locations) matches Go, while the package under test stays optimized. Set
-  `-p:GoTestOptimize=true` to build it optimized, for a benchmark run. Optimized code elsewhere can still report an
+  `-p:GoTestOptimize=true` to build it optimized, for a benchmark run. **[LANDED 862afefec7, c296f93fa3]** A few
+  standard-library suites whose tests wait for an object to be collected (`context`, `sync`, `unique`, `weak`,
+  `runtime`, `runtime/pprof` and one FIPS cache) keep an optimized test host, because an unoptimized frame keeps the
+  object alive. Optimized code elsewhere can still report an
   earlier line ([Known issues](KnownIssues.md#in-optimized-code-runtimecaller-can-report-an-earlier-line-of-the-calling-function)).
   <!-- 2026-11-23 (P1): train 6, merge bb6267d0e4, carrying claude/c2-m2-test-switch d881e25220 (golib de46ae4938 "a
        converted test assembly is compiled without optimization"; docs de97f0e231 and dc6af56c5c). -->
+  <!-- 2026-11-26 (P4): train 13, merge 862afefec7 (claude/p2-optimized-test-hosts fa2531cc3b: context, sync, unique,
+       weak, fips140cache, runtime/pprof under a named caller-line exception, plus the guard); train 14, merge
+       c296f93fa3 (claude/p2-runtime-optimized-host 1f72b752b0, runtime for TestStackGrowth). -->
 - **[LANDED bb6267d0e4, 1397c07b06]** **`-tests` on a module.** A module-cache release is converted and tested from a
   copy, so a run leaves the module cache unchanged, and a release that ships no `go.mod` converts. `-tests -recurse`
   finds what a test file imports under the run's build tags. `-test-oracle-vet-off` runs Go's side without vet, for a
@@ -457,6 +583,17 @@ and match Go's test results. C# written by hand against converted code may need 
        the fix 366fca939d, the tags on proof pages 8d9104967f, the go list reading ae9a2a8e55
        (docs/phase4/data/oracle-tags-1120/). -->
   <!-- 2026-11-23 (P1): landed by train 1, merge 30a590a94f (claude/c1-oracle-tags 3443259102). -->
+- **[LANDED 766ace68e6, 2cc30ff0ad, 823e17f720, 592b00de1c]** **More of Go's own tests match.** `reflect` converts a
+  nil func across identical signatures and names methods as Go does (`TestConvert`, `TestValuePanic`); `log/slog`
+  reports the caller Go reports (`TestCallDepth`); and `testing`'s `TestTBHelper` matches on every platform, its
+  disclosure retired, with `testing` validated on linux/arm64 ([Validated packages](ValidatedTestPackages.md)).
+  <!-- 2026-11-26 (P4): train 14, merges 766ace68e6 (claude/i9-reflect-convert-nil-func eb35afbabb), 2cc30ff0ad
+       (claude/i9-slog-calldepth-recv 89d185b7a0), 592b00de1c (claude/p1-testing-arm64 d753602e3f); train 13,
+       823e17f720 (claude/p1-tbhelper-retire a278806f98, cured by the unoptimized test host). -->
+- **[QUEUED claude/p1-recurse-host-target 582c50e1dd]** **A module converted against a local go2cs root records its
+  target platform.** The output root names the .NET it targets and rolls forward to a newer one, and NuGet's restore
+  reads the same platform, so a machine with only a newer .NET builds it.
+  <!-- 2026-11-26 (P4): train 15. Merged into claude/r-twin-optin as well. Flip with the train's merge. -->
 
 **The go2cs tool.**
 
@@ -485,7 +622,7 @@ and match Go's test results. C# written by hand against converted code may need 
   ([Converting a module](ConvertingAModule.md)).
   <!-- 2026-11-23 (P1): train 1, merge cfec06486f (claude/p2-nugetgo-tools-12611 ffaebde09e; readmeValidationBadge.go
        go2csBadge). -->
-- **[QUEUED claude/p4-cli-help (tip in its READY post)]** **`go2cs -help` lists the ten options a first conversion
+- **[LANDED 354da6fa52, 45dfd52dc2, 0012c1aed4]** **`go2cs -help` lists the ten options a first conversion
   needs.** `go2cs -help all` lists every option, sorted into common, advanced and experimental, and
   `go2cs -help <option>` explains one, for example `go2cs -help tests`. Help prints to standard output and exits 0. A
   mistyped option names the nearest ones (`there is no option -test-actoin. Did you mean -test-action?`) instead of
@@ -512,6 +649,15 @@ and match Go's test results. C# written by hand against converted code may need 
 
 **Documentation.**
 
+- **[LANDED 0d12703315]** Go is needed only to convert: a converted program, its tests and the `go2cs` tool's
+  NuGet packages build and run with .NET alone ([The dotnet tool](DotnetTool.md), [FAQ](FAQ.md)).
+  <!-- 2026-11-26 (P4): train 11, merge 0d12703315 (claude/p1-go-only-docs 74924ed784). Check the link targets at
+       release. -->
+- **[QUEUED claude/coord-contrib-wording 6fa2c933c0]** The README's contributing section says what helps most now.
+  <!-- 2026-11-26 (P4): train 15. -->
+- **[PENDING claude/p5-go-attribution]** Each hand-written port of Go code in the standard library carries Go's
+  notice and a header naming the Go source it follows.
+  <!-- 2026-11-26 (P4): tip 3b6ad8d976, not in a train at d6805be2e8. -->
 - **[LANDED a98c5175be, 42541a338c]** A page answers [Did AI write this?](AIAssistance.md), with an FAQ entry and
   a link from the README and the milestones table.
   <!-- The owner's text with COORD's review pass (a98c5175be); the links 42541a338c. -->
@@ -538,15 +684,15 @@ and match Go's test results. C# written by hand against converted code may need 
      anchor below is the entry heading's, as kramdown derives it. It quotes no roster figure (check-roster-format 2e). -->
 
 ```markdown
-## 📰 NEWS — Code that reads closer to Go, cgo packages in a module, and tests that use testify
+## 📰 NEWS — TITLE PICKED AT RELEASE
 
-<!-- HELD for release day with the NEWS.md entry (the .2 and .4 precedent): "November XX" (the month too), "X.X.X.X"
-     and the anchor's "november-xx" become the publish date and version as the last change before the release tag.
-     This block quotes no roster figure (check-roster-format 2e). -->
-**November XX, 2026, NuGet X.X.X.X.** Converted C# reads closer to the Go it came from: an array literal is
-`array<nint>([1, 2, 3])`, package `main` keeps its methods beside its functions, and a stack trace names each function
-as Go does. `go2cs -recurse -cgo` converts a module's cgo packages with the module, and modules whose tests use
-testify convert and match Go's test results. C# written by hand against converted code may need the small changes
-the notes list first.
-[Full announcement](NEWS.md#november-xx-2026--code-that-reads-closer-to-go-cgo-packages-in-a-module-and-tests-that-use-testify).
+<!-- HELD for release day with the NEWS.md entry (the .2 and .4 precedent): "November XX" (the month too), "X.X.X.X",
+     the title and the anchor become the publish date, version and the owner's title as the last change before the
+     release tag. The paragraph follows the entry's lead; drop the M:N sentence if G's rows miss the release. This
+     block quotes no roster figure (check-roster-format 2e). -->
+**November XX, 2026, NuGet X.X.X.X.** Goroutines can run on a small pool of threads, as Go runs them, in an
+experimental build that is off unless you opt in. A variadic parameter passes the caller's slice itself, as Go
+does, and `go2cs -cgo` combines with `-tests`, so a cgo package's own Go tests convert and run. Rebuild what you built
+against 1.26.11.1; the notes list the changes C# written by hand may need.
+[Full announcement](NEWS.md#november-xx-2026--title-picked-at-release).
 ```

@@ -221,7 +221,7 @@ linux-arm64 packages. [News](NEWS.md) has the full list.
        f74b4d7385, ef9be9bd32, 1f2a9afdfc, 5f2f2d0aa3; door C 52d3547def; A1 2506d6d48f; lever E 61b23a9888; the AOT
        error shell a9ee17b1eb; GOMAXPROCS ebbb1c850f and 0f96e28773; RWMutex bfdb234ea5; the shape witness 5cd4536a09.
        Breaking changes for hand-written C# (array literals, package main's methods, named slice and array methods)
-       are listed in docs/DRAFT-news-next.md for the release notes. -->
+       are listed in docs/DRAFT-news-1-26-11-2.md (DRAFT-news-next.md until 2026-11-26) for the release notes. -->
 
 **Not on the main line yet:** handing Go memory to C without a copy, and converting the `net` resolver with cgo,
 are planned for a release after 1.26.11.2 ([cgo](#cgo)).
