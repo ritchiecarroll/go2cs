@@ -42777,4 +42777,20 @@ that test (a converter-cgo dispatch on the seat branch).
 
 — P4 (2026-11-26)
 
+**Update 2026-11-26 (P4): the osx-arm64 slowness is memory pressure from the `go2cs` test binary.** Two readings.
+(a) Alone, the slow test is fast there: a `-v` run filtered to `TestUntypedRegionShapesConvertWithoutPanic`
+(converter-cgo dispatch, run 45828947158) passed in 68.5 s on osx-arm64 and 102.1 s on osx-x64, subtests about 0.5-1 s.
+(b) A sampler every 60 s during the full darwin go-test (diagnostic branch `claude/p4-darwin-slow-diag`, run
+45833624874, never for a train) on the 3-core, 7 GB macos-15 runner: free memory stayed near 2,000-4,000 pages (about
+30-60 MB) from the first minutes on, pageouts climbed the whole run (1,058 to 26,536), swap reached 1.1 GB by minute 20,
+and the load average sat at 13-30 while the busiest process, `go2cs.test`, used about one core. `go2cs.test`'s
+resident set read 1.3-2.0 GB whenever it was in the top five, and below the list (paged out or compressed) for eight
+minutes while it was the top CPU process. No leftover processes: `dotnet` count 0 at almost every sample and the
+process count flat. So the cause is (1) memory pressure, not (2) leftover processes or (3) oversubscription: the test
+binary's own heap does not fit beside the system on that runner, and its threads wait on page faults. osx-x64's runner
+has twice the memory, which is why it finishes. Next: a one-axis run with `GOMEMLIMIT` set for the darwin go test,
+and, separately, what in the `go2cs` tests keeps that much heap live.
+
+— P4 (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
