@@ -15,6 +15,10 @@
       TEMPLATE      with a runtimeconfig.template.json that sets rollForward, the template's value is the only one.
       LIBRARY       with -p:OutputType=Library the property stays unset (a library chooses no runtime).
       CONTROL       the arm can fail: a project-set Disable is written and, under -DotnetRoot, cannot start.
+      LOCAL REFS    a program in the shape of a `go2cs -recurse` conversion in local-reference mode: it references
+                    golib's PROJECT (so go.lib.targets never reaches it) and its output root's Directory.Build.targets
+                    imports go.lib.rollforward.targets with the converter's own line. It gets Major and, under
+                    -DotnetRoot, runs; without that import it gets no rollForward (the red the import turns green).
 
     With -DotnetRoot pointing at a .NET that has NO 10.0 runtime (an isolated .NET 11 install, say), the GREEN
     build is also RUN under that root and must start and print its runtime major; the CONTROL build must fail to
@@ -23,7 +27,8 @@
     -DotnetRoot, the same failure to start: that is the red this change turns green. A PUBLISH arm then publishes
     self-contained with and without the working-tree targets and expects the same warnings from both.
 
-    Exit 0 only when every arm reads as expected. Nothing outside a temporary work directory is written.
+    Exit 0 only when every arm reads as expected. Nothing outside a temporary work directory (and its -local sibling,
+    the LOCAL REFS arm's) is written.
 
 .PARAMETER Version
     The go.lib package version to restore (the fixture's GoPackageVersion).
@@ -34,6 +39,9 @@
 .PARAMETER TargetsFile
     PRE-PACK ONLY: import this go.lib.targets explicitly, to test the working-tree file against an
     already-published go.lib that does not carry the roll-forward default yet.
+
+.PARAMETER Go2csPath
+    The go2cs runtime root the LOCAL REFS arm references golib from. Default: this clone's src/.
 
 .PARAMETER DotnetRoot
     Optional: a dotnet root with no Microsoft.NETCore.App 10.0 runtime, used to RUN the built program. The build
@@ -47,6 +55,7 @@ param(
     [string] $Source = 'https://api.nuget.org/v3/index.json',
     [string] $TargetsFile,
     [string] $DotnetRoot,
+    [string] $Go2csPath = (Join-Path $PSScriptRoot '../../..'),
     [switch] $KeepWork
 )
 
@@ -182,6 +191,80 @@ elseif ($DotnetRoot) {
     } else { $verdicts += "PASS (CONTROL): rollForward Disable, failed to start as required (exit $($run.Code))" }
 } else { $verdicts += 'PASS (CONTROL): rollForward Disable' }
 
+# LOCAL REFS: a -recurse conversion in local-reference mode. Its program references golib's PROJECT, so go.lib.targets
+# (and the default it imports) never reaches it; the output root's Directory.Build.targets imports
+# go.lib.rollforward.targets itself. The Import below is the converter's own line, verbatim (moduleConverter.go,
+# generateRecurseBuildFiles; TestRecurseLocalRefsImportTheRollForward holds the two equal). Every build output, golib's
+# included, goes to a sibling of the work directory through the artifacts layout: a folder INSIDE the work directory
+# would join the package fixture's default compile glob.
+$go2csRoot = ([System.IO.Path]::GetFullPath($Go2csPath)).TrimEnd('/', '\') + '/'
+$localRoot = "$work-local"
+$localApp = Join-Path $localRoot 'app'
+New-Item -ItemType Directory -Path $localApp | Out-Null
+Copy-Item (Join-Path $fixture 'Program.cs') $localApp
+@"
+<Project>
+  <PropertyGroup Condition="'`$(go2csPath)' == ''">
+    <go2csPath>$go2csRoot</go2csPath>
+  </PropertyGroup>
+</Project>
+"@ | Set-Content -Path (Join-Path $localRoot 'Directory.Build.props') -Encoding utf8
+$localImport = @'
+  <Import Project="$(go2csPath)core/golib/buildTransitive/go.lib.rollforward.targets"
+          Condition="'$(GoLibRollForwardTargetsImported)' != 'true' and '$(go2csPath)' != '' and Exists('$(go2csPath)core/golib/buildTransitive/go.lib.rollforward.targets')" />
+'@
+@"
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>RollForward</AssemblyName>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="`$(go2csPath)core/golib/golib.csproj" />
+    <Using Include="go" />
+    <Using Include="go.builtin" Static="true" />
+  </ItemGroup>
+</Project>
+"@ | Set-Content -Path (Join-Path $localApp 'RollForward.csproj') -Encoding utf8
+
+function Build-LocalArm([bool] $WithImport) {
+    $targets = Join-Path $localRoot 'Directory.Build.targets'
+    "<Project>`n$(if ($WithImport) { $localImport })</Project>`n" | Set-Content -Path $targets -Encoding utf8
+    $artifacts = Join-Path $localRoot 'artifacts'
+    Remove-Item -Recurse -Force $artifacts -ErrorAction SilentlyContinue
+    $log = & dotnet build (Join-Path $localApp 'RollForward.csproj') -c Debug -nologo -v:m -p:UseArtifactsOutput=true "-p:ArtifactsPath=$artifacts" 2>&1 | ForEach-Object { "$_" }
+    if ($LASTEXITCODE -ne 0) { $log | Select-String ' error ' | Select-Object -First 5 | ForEach-Object { Write-Host "    $_" }; return $null }
+    return Join-Path $artifacts 'bin/RollForward/debug'
+}
+
+if (-not (Test-Path (Join-Path $go2csRoot 'core/golib/buildTransitive/go.lib.rollforward.targets'))) {
+    $verdicts += "FAIL (LOCAL REFS): $go2csRoot carries no core/golib/buildTransitive/go.lib.rollforward.targets"
+} else {
+    $out = Build-LocalArm $true
+    $value = if ($out) { Read-RollForward $out } else { '<build failed>' }
+    if ($value -ne 'Major') { $verdicts += "FAIL (LOCAL REFS): rollForward is $value, want Major" }
+    elseif ($DotnetRoot) {
+        $run = Invoke-Program $out
+        Write-Host "    $($run.Text)"
+        if ($run.Code -ne 0 -or $run.Text -notmatch 'ROLL-FORWARD: ok runtime=(\d+)' -or [int]$Matches[1] -lt 11) {
+            $verdicts += "FAIL (LOCAL REFS): under $DotnetRoot the program did not run on a newer major (exit $($run.Code))"
+        } else { $verdicts += "PASS (LOCAL REFS): rollForward Major, ran on runtime $($Matches[1])" }
+    } else { $verdicts += 'PASS (LOCAL REFS): rollForward Major' }
+
+    # The same program without the output root's import: no rollForward, and under -DotnetRoot no start. This is the red.
+    $out = Build-LocalArm $false
+    $value = if ($out) { Read-RollForward $out } else { '<build failed>' }
+    if ($value -ne '<unset>') { $verdicts += "FAIL (LOCAL REFS, NO IMPORT): rollForward is $value, want unset" }
+    elseif ($DotnetRoot) {
+        $run = Invoke-Program $out
+        if ($run.Code -eq 0) { $verdicts += "FAIL (LOCAL REFS, NO IMPORT): started under $DotnetRoot; the red did not reproduce" }
+        else { $verdicts += "PASS (LOCAL REFS, NO IMPORT): no rollForward, failed to start under $DotnetRoot (exit $($run.Code))" }
+    } else { $verdicts += 'PASS (LOCAL REFS, NO IMPORT): no rollForward key' }
+}
+
 # PUBLISHED (pre-pack only): the package as published, without the working-tree targets -- the red.
 if ($TargetsFile) {
     $out = Build-Arm @()
@@ -211,6 +294,6 @@ if ($TargetsFile) {
 }
 
 $verdicts | ForEach-Object { Write-Host $_ }
-if (-not $KeepWork) { Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue }
+if (-not $KeepWork) { Remove-Item -Recurse -Force $work, "$work-local" -ErrorAction SilentlyContinue }
 if (@($verdicts | Where-Object { $_ -like 'FAIL*' }).Count -gt 0) { exit 1 }
 exit 0

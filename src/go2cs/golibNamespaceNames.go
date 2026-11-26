@@ -29,6 +29,7 @@ var golibNamespaceTypes = nameSet(
 	"GoAllocEntry",
 	"GoArchExclusiveAttribute",
 	"GoArrayDimsAttribute",
+	"GoArrayDimsCompanionAttribute",
 	"GoArrayZero",
 	"GoBoundedGoroutineAttribute",
 	"GoBoxViewsAttribute",
