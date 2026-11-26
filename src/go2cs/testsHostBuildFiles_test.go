@@ -9,7 +9,9 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -340,5 +342,74 @@ func TestTestsHostBuildFilesRecordNoUnsafeModuleRoot(t *testing.T) {
 
 	if props := readTestsHostFile(t, filepath.Join(output, "Directory.Build.props")); strings.Contains(props, "GoModuleRoot") {
 		t.Errorf("a module root holding a single quote was recorded:\n%s", props)
+	}
+}
+
+// The SDK step the record rides on (P3 194127Z, F4): RuntimeHostConfigurationOption in the generated props must reach
+// bin/<host>.runtimeconfig.json as go2cs.ModuleRoot, holding the module's full path. A trivial console project stands
+// in for the host, so the row needs the SDK alone, at the SDK's own target framework, and no go2cs build.
+func TestTestsHostBuildFilesCarryTheModuleRootIntoTheRuntimeconfig(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: runs dotnet build")
+	}
+
+	dotnet, err := exec.LookPath("dotnet")
+
+	if err != nil {
+		t.Skip("NOT RUN: no dotnet on PATH (Inconclusive, not a pass)")
+	}
+
+	version, err := exec.Command(dotnet, "--version").Output()
+
+	if err != nil {
+		t.Skipf("NOT RUN: dotnet on PATH has no SDK (dotnet --version: %v; Inconclusive, not a pass)", err)
+	}
+
+	major, _, _ := strings.Cut(strings.TrimSpace(string(version)), ".")
+	root, output := testsHostFixture(t)
+	input := testsHostModuleFixture(t, output, "mod")
+	module := filepath.Dir(input)
+
+	writeTestsHostBuildFiles(input, output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+
+	project := "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n" +
+		"    <TargetFramework>net" + major + ".0</TargetFramework>\n  </PropertyGroup>\n</Project>\n"
+
+	if err := os.WriteFile(filepath.Join(output, "probe.csproj"), []byte(project), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(output, "Program.cs"), []byte("System.Console.WriteLine();\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	build := exec.Command(dotnet, "build", "probe.csproj", "-c", "Debug", "-o", "bin", "-nologo", "-p:UseSharedCompilation=false")
+	build.Dir = output
+	build.Env = append(os.Environ(), "MSBUILDDISABLENODEREUSE=1", "DOTNET_CLI_TELEMETRY_OPTOUT=1")
+
+	if log, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("dotnet build of the probe host failed: %v\n%s", err, log)
+	}
+
+	contents, err := os.ReadFile(filepath.Join(output, "bin", "probe.runtimeconfig.json"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var config struct {
+		RuntimeOptions struct {
+			ConfigProperties map[string]any `json:"configProperties"`
+		} `json:"runtimeOptions"`
+	}
+
+	if err := json.Unmarshal(contents, &config); err != nil {
+		t.Fatalf("probe.runtimeconfig.json: %v\n%s", err, contents)
+	}
+
+	got, _ := config.RuntimeOptions.ConfigProperties["go2cs.ModuleRoot"].(string)
+
+	if filepath.Clean(got) != filepath.Clean(module) {
+		t.Errorf("the built host's runtimeconfig carries go2cs.ModuleRoot %q; want the module's directory %q\n%s", got, module, contents)
 	}
 }
