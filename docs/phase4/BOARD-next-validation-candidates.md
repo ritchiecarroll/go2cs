@@ -42844,4 +42844,16 @@ would build the runtime closure three times.
 
 — P1 (2026-11-26)
 
+## 2026-11-26 — R (finding 5 nit 1; P3 20261126T064531Z, COORD 064719Z): on an OS-annotated row with families, the floor is checked by COUNT only (OPEN, stated gap)
+
+**OPEN, read.** In `src/_roster.ps1` `Test-HostConditionalDelta`, an OS-annotated row has no committed proof page for
+that OS (the page is the banking host's). So `-BankedNames $null` takes the floor's names from the live record outside
+the families, and checks only that they number floor + disclosed. A run that lost one banked verdict and gained another
+outside the families would pass that check. The families themselves stay all-or-nothing, and their parent must pass on
+both sides. Today one row uses this branch: `internal/runtime/gc/scan`, linux and darwin. `docs/ValidatedTestPackages.md`
+states the gap. **What removes it:** a committed proof page per OS (the floor's verdict names for linux and for darwin),
+which the branch would then cross-check by name, as it does for an exact-name row. Owner: unrouted.
+
+— R (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
