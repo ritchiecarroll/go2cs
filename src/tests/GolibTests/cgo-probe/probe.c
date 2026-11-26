@@ -226,6 +226,22 @@ GO2CS_PROBE_EXPORT int go2cs_probe_kept(void)
     return go2cs_probe_kept_pointer ? *(int *)go2cs_probe_kept_pointer : -1;
 }
 
+// The same, for a C STRUCT passed to a typed parameter (S6, P3's MUST 2): C keeps the struct pointer, a later call reads
+// its second member.
+struct go2cs_probe_pair { int a; int b; };
+
+static struct go2cs_probe_pair *go2cs_probe_kept_pair_pointer;
+
+GO2CS_PROBE_EXPORT void go2cs_probe_keep_pair(struct go2cs_probe_pair *pair)
+{
+    go2cs_probe_kept_pair_pointer = pair;
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_kept_pair_b(void)
+{
+    return go2cs_probe_kept_pair_pointer ? go2cs_probe_kept_pair_pointer->b : -1;
+}
+
 // An empty call log of 32 bytes, zeroed.
 GO2CS_PROBE_EXPORT char *go2cs_probe_log_new(void)
 {

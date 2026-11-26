@@ -28,6 +28,9 @@ void *go2cs_probe_same(void *pointer);
 uintptr_t go2cs_probe_word(uintptr_t word);
 void go2cs_probe_keep(void *pointer);
 int go2cs_probe_kept(void);
+struct go2cs_probe_pair { int a; int b; };
+void go2cs_probe_keep_pair(struct go2cs_probe_pair *pair);
+int go2cs_probe_kept_pair_b(void);
 char *go2cs_probe_log_new(void);
 void go2cs_probe_log_put(char *log, int value);
 void go2cs_probe_release(void *pointer);
@@ -329,6 +332,19 @@ func main() {
 		*x = 9
 		fmt.Println("pinnerkeep", int(C.go2cs_probe_kept()))
 		C.go2cs_probe_keep(nil)
+		pinner.Unpin()
+	case "pinnerkeepstruct":
+		// S6, P3's MUST 2: a pinned C STRUCT passed to a TYPED parameter C keeps. It crosses in place under the pin (a
+		// stack mirror would leave C a dead frame), and C reads Go's later write through it: 9 both ways.
+		var pinner runtime.Pinner
+		pair := new(C.struct_go2cs_probe_pair)
+		pair.a, pair.b = 1, 2
+		pinner.Pin(pair)
+		C.go2cs_probe_keep_pair(pair)
+		runtime.GC()
+		pair.b = 9
+		fmt.Println("pinnerkeepstruct", int(C.go2cs_probe_kept_pair_b()))
+		C.go2cs_probe_keep_pair(nil)
 		pinner.Unpin()
 	case "wordint":
 		// Its near-miss: an ordinary integer crosses a uintptr_t parameter as it is.

@@ -418,6 +418,8 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "wordint"},
 		// S6 (design 21): a pointer C keeps past the call, pinned with runtime.Pinner, read back after a collection.
 		{name: "pinnerkeep"},
+		// S6, P3's MUST 2: a pinned C struct handed to a typed parameter C keeps.
+		{name: "pinnerkeepstruct"},
 		{name: "gobytes"},
 		{name: "gostring"},
 		// Pointers DERIVED from a view of Go memory (the review of increment 3.1, §16.11).
