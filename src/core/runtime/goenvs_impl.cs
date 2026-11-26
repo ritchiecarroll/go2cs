@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ᴛInitEnvs: INSPIRED BY src/runtime/runtime1.go, Go 1.26.11, func goenvs_unix. The same envs, taken from the
+//   process environment in a module initializer.
+// - ᴛInitEnvs: INSPIRED BY src/runtime/os_windows.go, Go 1.26.11, func goenvs. The windows half of the same.
+// - GoStartEnvironment, GoParseDebugVarsAtStart, GoSetDefaultGoroot, GoSetDefaultModuleCache: original go2cs code.
+//   Start-up seams.
 
 // The runtime's environment snapshot, taken the way a managed program can take it.
 //

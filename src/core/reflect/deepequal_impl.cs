@@ -1,6 +1,16 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - DeepEqual, deepValueEqual, deepValueEqualBoxed: INSPIRED BY src/reflect/deepequal.go, Go 1.26.11, funcs
+//   DeepEqual, deepValueEqual. The same equality rules over boxed managed values, with cycle detection keyed on
+//   object identity; Go's doc comment verbatim.
+// - the element comparers, visitPair, identityRoot, sliceData, mapBacking and the other helpers: original go2cs code.
+//   The managed comparison machinery.
 // Deep equality test via reflection
 using go;
 using System;

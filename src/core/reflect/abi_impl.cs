@@ -1,6 +1,17 @@
 // Copyright 2021 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notices it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - abiSeq.regAssign: DERIVED FROM src/reflect/abi.go, Go 1.26.11, method abiSeq.regAssign. Go's body except the
+//   Struct arm, which also handles a synthesized descriptor.
+// - addTypeBits: DERIVED FROM src/reflect/type.go, Go 1.26.11, func addTypeBits. Go's body.
 
 // regAssign is hand-owned for ONE arm. Everything else is Go's body, unchanged.
 //

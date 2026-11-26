@@ -1,6 +1,17 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The converted Go declarations: DERIVED FROM src/hash/crc32/crc32_amd64.go, Go 1.26.11, funcs
+//   archAvailableCastagnoli, archInitCastagnoli, castagnoliShift, archUpdateCastagnoli, archAvailableIEEE,
+//   archInitIEEE, archUpdateIEEE. Go's code and comments.
+// - castagnoliSSE42, castagnoliSSE42Triple, ieeeCLMUL: bodies for the bodyless Go declarations of the same names in
+//   src/hash/crc32/crc32_amd64.go. Original go2cs code.
+// - castagnoliUpdate, ieeeUpdate, clmulLoad, clmulFold: original go2cs code. Helpers of those bodies.
 // AMD64-specific hardware-assisted CRC32 algorithms. See crc32.go for a
 // description of the interface that each architecture-specific file
 // implements.

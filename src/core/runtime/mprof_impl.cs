@@ -4,6 +4,20 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - newBucket, stkbucket: DERIVED FROM src/runtime/mprof.go, Go 1.26.11, funcs newBucket, stkbucket. Go's bodies over
+//   managed bucket storage.
+// - bucket.stk, bucket.mp, bucket.bp, saveblockevent: INSPIRED BY src/runtime/mprof.go, Go 1.26.11, func
+//   saveblockevent; methods bucket.stk, bucket.mp, bucket.bp. The same accessors and event record over that storage.
+// - partsOf, the memory-profile recorder and the Go* probes: original go2cs code. The managed store's own helpers.
 
 // The block/mutex/memory profile BUCKET STORE in managed storage, and runtime.saveblockevent over it.
 // Increment I2 of docs/phase4/DESIGN-managed-profiling.md, the managed bucket store ruling 8fc439415f (B)

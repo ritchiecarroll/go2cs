@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - CPUProfilingBroken: INSPIRED BY src/internal/testenv/testenv.go, Go 1.26.11, func CPUProfilingBroken. The answer
+//   Go gives on a port with no CPU sampler (its plan9 arm).
 
 // internal/testenv.CPUProfilingBroken, hand-owned by manualConversionFuncs["internal/testenv"] under
 // COORD's ruling of 2026-09-22.

@@ -4,6 +4,21 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - registerX86Options, deriveX86Features: DERIVED FROM src/internal/cpu/cpu_x86.go, Go 1.26.11, func doinit. Go's
+//   options table and its doDerived.
+// - initX86FeatureDetection: INSPIRED BY src/internal/cpu/cpu_x86.go, Go 1.26.11, func doinit. The same feature bits,
+//   read from .NET's hardware intrinsics in place of CPUID.
+// - getGOAMD64level: bodies for the bodyless Go declarations of the same names in src/internal/cpu/cpu_x86.go.
+//   Original go2cs code.
 
 // getGOAMD64level answers the amd64 MICROARCHITECTURE LEVEL THE BINARY WAS BUILT FOR — not the
 // level the host CPU happens to support. Go's cpu_x86.s is a compile-time constant selected by the

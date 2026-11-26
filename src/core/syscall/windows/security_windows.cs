@@ -1,6 +1,20 @@
 // Copyright 2012 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - TranslateAccountName, StringToSid, LookupSID, SID.String, SID.Len, SID.Copy, SID.LookupAccount,
+//   OpenCurrentProcessToken, Token.Close, Token.GetUserProfileDirectory: DERIVED FROM
+//   src/syscall/security_windows.go, Go 1.26.11, funcs TranslateAccountName, StringToSid, LookupSID,
+//   OpenCurrentProcessToken; methods SID.String, SID.Len, SID.Copy, SID.LookupAccount, Token.Close,
+//   Token.GetUserProfileDirectory. The converted output.
+// - Token.getInfo, Token.GetTokenUser, Token.GetTokenPrimaryGroup: INSPIRED BY src/syscall/security_windows.go, Go
+//   1.26.11, methods Token.getInfo, Token.GetTokenUser, Token.GetTokenPrimaryGroup. The same results, with the token
+//   information read into native memory and copied out.
+// - nativeSid, getTokenInfoBuffer: original go2cs code.
 
 // Hand-owned (whole file). EVERYTHING here is the converted security_windows.go output verbatim
 // -- see security_windows.cs.auto for the generated form to diff against -- EXCEPT the three

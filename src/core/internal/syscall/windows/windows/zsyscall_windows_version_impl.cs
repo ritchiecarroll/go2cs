@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2024 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - rtlGetVersion: DERIVED FROM src/internal/syscall/windows/zsyscall_windows.go (generated from the declarations in
+//   src/internal/syscall/windows/version_windows.go, whose notice this file carries), Go 1.26.11, func rtlGetVersion.
+//   The generated call, with the version record copied from native memory.
+// - copyNativeCsdVersion: original go2cs code. That copy.
 
 // The OS-VERSION member of the syscall struct-passing class, and the one EVERY Windows TCP dial
 // reaches.
