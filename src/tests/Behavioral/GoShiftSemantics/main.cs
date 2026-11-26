@@ -28,7 +28,7 @@ internal static void main() {
     fmt.Println(u >> (int)(c[3] & 63));
     fmt.Println(u >> (int)(c[4] % 64));
 
-    word w = (nuint)0x8000000000000001UL;
+    word w = unchecked((nuint)0x8000000000000001UL);
     const nuint W = 64;
     nuint h = c[0];
     fmt.Println((nuint)(w >> (W - h)), (nuint)(w << (W - h)));
@@ -45,7 +45,7 @@ internal static void main() {
     signedword swp = (signedword)(1099511627776L);
     fmt.Println((int64)(sw >> c[3]), (int64)(sw >> c[5]), (int64)(swp >> c[3]));
 
-    var far = slice<nuint>([(nuint)1 << 32, (nuint)(4294967296L + 1)]);
+    var far = slice<nuint>([(nuint)1 << 32, unchecked((nuint)(4294967296L + 1))]);
     foreach (var (_, k) in range(far)) {
         fmt.Println((uint32)(hw << k), (uint32)(hw >> k));
     }

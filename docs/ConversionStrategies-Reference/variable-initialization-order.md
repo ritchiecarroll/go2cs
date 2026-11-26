@@ -42,20 +42,19 @@ Notes: a **blank** (`_`) initializer never relocates (its value is unreadable, s
 
 A package-level `var a, b = f()` — one multi-value call deconstructed across the names — is a single initialization step in Go: `types.Info.InitOrder` carries **one entry for the whole spec** with every name in its `Lhs`, so `collectMovedInitVars` flags all of a spec's non-blank names together under one shared ordinal, and the emission registers **one `initᴛ` method per spec** at that ordinal — `writeOrderedInitCalls` needs no new bookkeeping. `crypto/internal/edwards25519`'s `var identity, _ = new(Point).SetBytes(…)` and `var generator, _ = …` show why it must: they reach `feOne` and `d` — declared *later* in the same file — through the package's own `(*Point).SetBytes`, so inline field initializers would run first, `identity` would read a null `feOne`, `field.Subtract` would null-dereference, and the package's static constructor would throw before any test ran. The standard-library occurrences are edwards25519's (all targets) and `os`'s `executable_darwin.go` (darwin).<!-- full detail in [`docs/phase4/FINDING-init-order-tuple-specs.md`](../phase4/FINDING-init-order-tuple-specs.md) (internal record, unlinked 2026-10-26, OQ-1) --><!-- Relocation landed 2026-08-11. At the time: edwards25519 went from 0 of 55 verdicts to 52 of 55 (three residuals separate pre-existing roots); census two production occurrences on windows (both edwards25519) and two latent on darwin. -->
 
-Two emission sub-shapes (`writeMovedPackageTupleVarSpec`, `visitValueSpec.go`), both turning every name into a **bare field**:
+Two emission sub-shapes (`writeMovedPackageTupleVarSpec`, `visitValueSpec.go`), both turning every non-blank name into a **bare field**. A blank name gets **no field**: Go's `_` has no storage, the call now runs in the ctor, so no blank ever carries it, and a field nothing assigns would be C#'s never-assigned warning (CS0649). Its `_ᴛNʗ` name is still minted, so the names after it do not shift.
 
-**One non-blank name** (the edwards25519 shape): the method assigns its component directly from the once-run call; blank siblings keep their uninitialized `_ᴛNʗ` fields — the call now runs in the ctor, so no blank ever carries it (from the `InitOrderTupleSpecs` golden, `var single, _ = makeGreeting()`):
+**One non-blank name** (the edwards25519 shape): the method assigns its component directly from the once-run call (from the `InitOrderTupleSpecs` golden, `var single, _ = makeGreeting()`):
 
-<!-- source: src/tests/Behavioral/InitOrderTupleSpecs/main.cs:7-9 -->
+<!-- source: src/tests/Behavioral/InitOrderTupleSpecs/main.cs:7-8 -->
 ```csharp
 internal static @string single;
-internal static error _ᴛ1ʗ;
 internal static void initᴛsingle() { single = makeGreeting().Item1; }
 ```
 
 **Two or more non-blank names** (darwin `os`'s `var initCwd, initCwdErr = Getwd()` shape; golden: `var cwd, cwdErr = fakeGetwd()`): the method evaluates the call **once into a method-local** and assigns each non-blank component from it — the inline path's hidden static tuple holder is unnecessary, because the method body itself sequences the call before its reads. The local reuses the holder's minted `tupleᴛNʗ` name shape so it cannot collide with anything the rendered call expression references:
 
-<!-- source: src/tests/Behavioral/InitOrderTupleSpecs/main.cs:11-13 -->
+<!-- source: src/tests/Behavioral/InitOrderTupleSpecs/main.cs:10-12 -->
 ```csharp
 internal static @string cwd;
 internal static error cwdErr;

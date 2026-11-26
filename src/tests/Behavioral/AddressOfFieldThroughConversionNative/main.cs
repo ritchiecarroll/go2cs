@@ -85,7 +85,7 @@ internal static void main() {
         (@unsafe.Pointer.To<expr>((@unsafe.Pointer)b).Ꮡu.Reinterpret<expr_u, int32>()).Value--;
         fmt.Println("union decrement:", le.Uint32(e[8..]));
 
-        (@unsafe.Pointer.To<expr>((@unsafe.Pointer)b).Ꮡu.Reinterpret<expr_u, uintptr>()).Value = (nuint)0x1122334455UL;
+        (@unsafe.Pointer.To<expr>((@unsafe.Pointer)b).Ꮡu.Reinterpret<expr_u, uintptr>()).Value = unchecked((nuint)0x1122334455UL);
         fmt.Println("union pointer member:", le.Uint64(e[8..]) == 0x1122334455UL);
 
         (@unsafe.Pointer.To<expr>((@unsafe.Pointer)b).Ꮡw.Reinterpret<expr_w, int32>()).Value = 41;

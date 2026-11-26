@@ -548,9 +548,7 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 						// has only an EXPLICIT operator to golib's uintptr, so it is CS0266 — while
 						// the branch below, reached only ABOVE MaxInt64, had the rule right and
 						// documented it.
-						result.WriteString(v.nativeWidthUnsignedPrefix(basicLit))
-						result.WriteString(value)
-						result.WriteString("UL")
+						result.WriteString(v.wideUnsignedLiteral(basicLit, value))
 					} else {
 						result.WriteString(value)
 						result.WriteRune('U')
@@ -591,9 +589,7 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 				// (uint/uintptr -> C# nuint) keeps the (nuint) cast — a bare ulong literal
 				// has no implicit conversion to nuint (CS0266); the non-constant unchecked
 				// (nuint) conversion does compile.
-				result.WriteString(v.nativeWidthUnsignedPrefix(basicLit))
-				result.WriteString(value)
-				result.WriteString("UL")
+				result.WriteString(v.wideUnsignedLiteral(basicLit, value))
 			} else {
 				result.WriteString(value)
 				result.WriteRune('U')
@@ -855,6 +851,22 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 // below MaxInt64) and the unsigned parse (above it) — had DRIFTED: only the second carried the rule,
 // so the defect showed up exactly in the range the first one owns. Two derivations of one predicate
 // is how that happens, so there is now one.
+// wideUnsignedLiteral renders an integer literal above MaxUint32 in an unsigned context: the
+// plain `UL` literal for a uint64 context, else the native-width `(nuint)` cast of it. That value
+// does not fit a 32-bit nuint, and C# checks a constant conversion to nuint as if the host could
+// be 32-bit (CS8778), so the cast goes in unchecked(...) -- the form the signed `(nint)` literal
+// branch writes. go2cs targets are 64-bit, so the value is exact. Both parse branches of
+// convBasicLit call this, so the two cannot drift apart.
+func (v *Visitor) wideUnsignedLiteral(basicLit *ast.BasicLit, value string) string {
+	prefix := v.nativeWidthUnsignedPrefix(basicLit)
+
+	if prefix == "" {
+		return value + "UL"
+	}
+
+	return "unchecked(" + prefix + value + "UL)"
+}
+
 func (v *Visitor) nativeWidthUnsignedPrefix(basicLit *ast.BasicLit) string {
 	basic, isBasic := v.getType(basicLit, true).(*types.Basic)
 

@@ -1628,6 +1628,15 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 
 		if isBlank {
 			csIDName = getGlobalTempVarName("_") + CapturedVarMarker
+
+			// An ALL-BLANK spec (`var _, _ = f()`) must still evaluate the call once for its side
+			// effect: the first blank carries it as its initializer. Every other blank gets NO
+			// field: Go's `_` has no storage, the call already ran via the non-blank field or the
+			// holder, and a field nothing assigns is C#'s CS0649. The temp name above is still
+			// minted so the names after it do not shift.
+			if !(nonBlankCount == 0 && i == 0) {
+				continue
+			}
 		}
 
 		if !firstLine {
@@ -1638,12 +1647,7 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 		csTypeName := v.getCSharpTypeName(tuple.At(i).Type())
 		access := v.testDeclaredValueAccess(getGoAccess(ident.Name), ident.Pos(), tuple.At(i).Type())
 
-		// An ALL-BLANK spec (`var _, _ = f()`) must still evaluate the call once for its side
-		// effect: carry it on the first blank's initializer. Otherwise blanks stay uninitialized —
-		// the call already ran via the non-blank/temp field.
-		if isBlank && !(nonBlankCount == 0 && i == 0) {
-			v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
-		} else if v.isAddressedGlobal(ident) {
+		if v.isAddressedGlobal(ident) {
 			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, fmt.Sprintf("%s.Item%d", componentSource, i+1), isInherentlyHeapAllocatedType(tuple.At(i).Type()))
 		} else {
 			v.writeOutput("%s static %s %s = %s.Item%d;", access, csTypeName, csIDName, componentSource, i+1)
@@ -1655,8 +1659,8 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 
 // writeMovedPackageTupleVarSpec emits a package-level tuple var spec whose initialization
 // collectMovedInitVars flagged for relocation into the ordered static ctor (package_init.cs).
-// Every name becomes a BARE field — blank names keep their uninitialized `_ᴛNʗ` fields (the call
-// now runs in the ctor, so no blank ever carries it), and an addressed global's box is declared
+// Every non-blank name becomes a BARE field — a blank name gets no field at all (the call now runs
+// in the ctor, so no blank ever carries it), and an addressed global's box is declared
 // default-valued with the relocated assignment writing through its ref property into the same
 // box, both mirroring the plain moved path — and the call moves into ONE per-file initᴛ method
 // registered at the spec's InitOrder ordinal (one method per spec, matching Go's one InitOrder
@@ -1682,7 +1686,10 @@ func (v *Visitor) writeMovedPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple 
 		csIDName := getSanitizedIdentifier(goIDName)
 
 		if csIDName == "_" {
-			csIDName = getGlobalTempVarName("_") + CapturedVarMarker
+			// No field for a blank (see the inline path): the name is minted so later names do
+			// not shift, and the init method below never assigns a blank component.
+			getGlobalTempVarName("_")
+			continue
 		} else {
 			if len(methodName) == 0 {
 				methodName = packageInitMethodName(csIDName)

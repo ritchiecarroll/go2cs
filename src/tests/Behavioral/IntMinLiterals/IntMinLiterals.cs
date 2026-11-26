@@ -17,7 +17,7 @@ internal static void main() {
         fmt.Println(v);
     }
 
-    nint nmin = ((nint)(-9223372036854775808L));
+    nint nmin = unchecked((nint)(-9223372036854775808L));
     nint nctl = -unchecked((nint)9223372036854775807L);
     fmt.Println(nmin, nctl, nmin < nctl);
 

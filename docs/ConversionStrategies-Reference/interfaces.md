@@ -1279,8 +1279,9 @@ import the candidate's package (`fs.go` declares `File` without importing `io`);
 and constraint interfaces are excluded. **Multiple non-subsuming bases sharing a method**
 (`CrossPkgLib.Sealed` and `.Rated` both carry `Label`): both are inherited, and the shared
 member is **re-declared** — a member covered by exactly one listed base is inherited/skipped,
-but one covered by two or more is re-declared so it hides both inherited slots and member
-lookup through the derived interface stays unambiguous (CS0121). Go needs only one method to
+but one covered by two or more is re-declared, `new`, so it hides both inherited slots and member
+lookup through the derived interface stays unambiguous (CS0121); the `new` states the hiding, which
+C# otherwise reports as CS0108. Go needs only one method to
 satisfy all; the C# implementers satisfy every slot with the same public method. Consequently the converter **never records an interface-to-interface
 `GoImplement`** — the generator's impl types are structs, and an interface-typed record kills
 its whole run. Bounds: candidates come from direct imports only — same-package
@@ -1312,8 +1313,9 @@ redeclared when the interface does not declare it itself and it reaches the inte
 or more distinct declaring interfaces** — `interfaceMethodDeclarers`, the predicate the call-site
 cast below already used. One declaring interface reached by two embed paths (`shared interface {
 left; right }`, both embedding `PrinterHost`) is not an overlap: C# finds the same member twice and
-binds it, and nothing is redeclared. A method the interface declares itself already hides the
-inherited ones. The spelling is the merged method's as go/types holds it, which is the first
+binds it, and nothing is redeclared. A method the interface declares itself is written once, where Go
+declares it, and takes `new` when an emitted base (an embed or a structural base) also supplies it,
+since that declaration hides the inherited ones (CS0108 without the modifier). The spelling is the merged method's as go/types holds it, which is the first
 declarer's; a second declarer that spells a parameter through an alias or another parameter name
 (`Ref(q PathAlias)`) is the same C# signature. An interface that embeds a merging interface AND
 another declarer (`LabeledHost interface { EmitHost; Labeler }`) redeclares too, and so do lifted
@@ -1374,9 +1376,11 @@ type X interface {
 ```
 
 Guarded by the `EmbeddedInterfaceMergedMethod` behavioral test (the adapter, type-parameter,
-method-value, nested, alias, function-local and anonymous arms, with the one-declarer diamond and the
-own-declaration as controls, output-compared vs Go) and by
-`TestAnInterfaceRedeclaresAMethodTwoEmbeddedInterfacesDeclare`; the call-site cast by
+method-value, nested, alias, function-local and anonymous arms, with the one-declarer diamond as the
+control and the own declaration's `new`, output-compared vs Go) and by
+`TestAnInterfaceRedeclaresAMethodTwoEmbeddedInterfacesDeclare` and `TestConvertedCodeWarnings` (the
+own declaration over two embeds and over two structural bases, and a declaration no base supplies as the
+control); the call-site cast by
 `TestACallOnAMethodTwoEmbeddedInterfacesDeclareNamesTheResolvedInterface`.
 
 ## Embedded-pointer hop receivers split per method

@@ -10,7 +10,7 @@ internal static partial (uintptr, nuint, nint) run() {
     uintptr p = default;
     p = (uintptr)(144115188075855872L - 1);
     nuint u = default;
-    u = (nuint)(144115188075855872L + 5);
+    u = unchecked((nuint)(144115188075855872L + 5));
     nint n = default;
     n = unchecked((nint)(144115188075855772L));
     return (p, u, n);
