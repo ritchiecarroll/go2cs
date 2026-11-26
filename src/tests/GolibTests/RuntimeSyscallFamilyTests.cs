@@ -129,6 +129,51 @@ public class RuntimeSyscallFamilyTests
         Assert.AreEqual(Grunning, after);
     }
 
+    // The same shape on a callback's way out: syscallCallbackExit moves the status back to _Gsyscall, then
+    // GoNativeCall.ReturnToNative refuses when the callback left a native call of its own open. The status moves back
+    // to _Grunning before the refusal propagates, matching the depth the refusal leaves (managed code is running).
+    [TestMethod]
+    public void ACallbackExitWhoseSeamThrowsLeavesTheStatusRunning()
+    {
+        uint afterRefusal = 0, after = 0;
+        int depthAfterRefusal = -2, depthAfter = -2;
+        Exception? refused = null;
+
+        Exception? thrown = OnGoroutine(() =>
+        {
+            runtime_package.GoEntersyscall();
+            runtime_package.GoCallbackCrossing crossing = runtime_package.syscallCallbackEnter();
+            GoNativeCall.Enter();
+
+            try
+            {
+                runtime_package.syscallCallbackExit(crossing);
+            }
+            catch (Exception e)
+            {
+                refused = e;
+            }
+
+            afterRefusal = runtime_package.GoCurrentGStatus();
+            depthAfterRefusal = GoNativeCall.TransitionDepth;
+
+            // Unwind by hand: the callback's own native call, the callback, the outer system call.
+            GoNativeCall.Exit();
+            runtime_package.syscallCallbackExit(crossing);
+            runtime_package.GoExitsyscall();
+            after = runtime_package.GoCurrentGStatus();
+            depthAfter = GoNativeCall.TransitionDepth;
+        });
+
+        Assert.IsNull(thrown, $"the goroutine threw outside the forced refusal: {thrown}");
+        Assert.IsInstanceOfType(refused, typeof(PanicException), $"got {refused?.GetType().Name}: {refused?.Message}");
+        StringAssert.Contains(refused!.Message, "not inside a callback from a native call");
+        Assert.AreEqual(Grunning, afterRefusal, "a refused return to native code rolls the status back to _Grunning");
+        Assert.AreEqual(3, depthAfterRefusal, "and leaves the seam where it was: call, callback, the callback's own call");
+        Assert.AreEqual(Grunning, after);
+        Assert.AreEqual(0, depthAfter);
+    }
+
     [TestMethod]
     public void GetCallerPCStaysThrowingByName()
     {
