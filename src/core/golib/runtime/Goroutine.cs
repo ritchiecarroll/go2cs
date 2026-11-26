@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ParkCore, Ready, Count, UserCount: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs gopark, goready, gcount.
+//   The same park and ready accounting and goroutine count.
+// - the goroutine record, scopes, profile labels and the rest: original go2cs code.
 
 using System;
 using System.Collections.Concurrent;

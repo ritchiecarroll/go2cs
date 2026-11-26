@@ -642,7 +642,9 @@ done:
 
 // TestLicensingGoProvenanceHeaders holds every hand-written src/core file that says it follows Go to
 // the attribution rule: Go's notice verbatim, and a provenance block whose bullets name the Go file
-// and version. Its fixtures prove each refusal fires before the corpus walk is believed.
+// and version. golib is walked too: its files that follow Go carry the same header under golib's own
+// notice (COORD's Q3 ruling), and the walk must reach at least one of them. Its fixtures prove each
+// refusal fires before the corpus walk is believed.
 func TestLicensingGoProvenanceHeaders(t *testing.T) {
 	licenses := "../../LICENSES"
 	notice := "// Copyright 2009 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n"
@@ -665,14 +667,14 @@ func TestLicensingGoProvenanceHeaders(t *testing.T) {
 			t.Errorf("fixture %q: got %q, want %q", fixture.name, problems, fixture.want)
 		}
 	}
-	checked := 0
+	checked, golibChecked := 0, 0
 	err := filepath.WalkDir("../core", func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if entry.IsDir() {
 			switch entry.Name() {
-			case "bin", "obj", "Generated", ".vs", "golib", "go.arrays", "go2cs":
+			case "bin", "obj", "Generated", ".vs", "go.arrays", "go2cs":
 				return filepath.SkipDir
 			}
 			return nil
@@ -688,6 +690,9 @@ func TestLicensingGoProvenanceHeaders(t *testing.T) {
 			return nil
 		}
 		checked++
+		if strings.HasPrefix(filepath.ToSlash(path), "../core/golib/") {
+			golibChecked++
+		}
 		for _, problem := range goProvenanceProblems(string(data), licenses) {
 			t.Errorf("%s: %s", filepath.ToSlash(path), problem)
 		}
@@ -698,6 +703,9 @@ func TestLicensingGoProvenanceHeaders(t *testing.T) {
 	}
 	if checked == 0 {
 		t.Fatal("no src/core file carries a PROVENANCE block: the walk read nothing")
+	}
+	if golibChecked == 0 {
+		t.Fatal("no golib file carries a PROVENANCE block: the walk no longer reaches golib")
 	}
 }
 
