@@ -227,9 +227,7 @@ GO2CS_PROBE_EXPORT int go2cs_probe_kept(void)
 }
 
 // The same, for a C STRUCT passed to a typed parameter (S6, P3's MUST 2): C keeps the struct pointer, a later call reads
-// its second member.
-struct go2cs_probe_pair { int a; int b; };
-
+// its second member. go2cs_probe_pair is the struct declared at the top of this file.
 static struct go2cs_probe_pair *go2cs_probe_kept_pair_pointer;
 
 GO2CS_PROBE_EXPORT void go2cs_probe_keep_pair(struct go2cs_probe_pair *pair)
