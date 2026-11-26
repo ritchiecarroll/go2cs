@@ -7,6 +7,9 @@
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>go2cs.Tests</RootNamespace>
+    <!-- CS1685: go2cs-gen's internal netstandard2.0 RuntimeHelpers shim (GetSubArray) is visible here through its
+         InternalsVisibleTo grant beside the BCL type; the compiler binds the shim, which behaves identically. -->
+    <NoWarn>$(NoWarn);CS1685</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

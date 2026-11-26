@@ -4,6 +4,12 @@
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>annotations</Nullable>
+    <!-- CS0649: layout and zero-value probe structs, read through reflection or Unsafe and never assigned by design. -->
+    <NoWarn>$(NoWarn);CS0649</NoWarn>
+    <!-- CS8981: fixture types and aliases keep Go's lowercase names (holder, reflect) so they read like the Go they mirror. -->
+    <NoWarn>$(NoWarn);CS8981</NoWarn>
+    <!-- CS8778, CS8973: 64-bit addresses and lengths as nint/nuint constants; go2cs targets 64-bit platforms only. -->
+    <NoWarn>$(NoWarn);CS8778;CS8973</NoWarn>
 
     <IsPackable>false</IsPackable>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>

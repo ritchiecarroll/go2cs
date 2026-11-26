@@ -5,6 +5,8 @@
 
     <IsPackable>false</IsPackable>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- CS8981: the global `rune` alias is golib's Go name for the type, kept lowercase as Go spells it. -->
+    <NoWarn>$(NoWarn);CS8981</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
