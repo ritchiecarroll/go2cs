@@ -153,7 +153,7 @@ internal static void cpu(channel<EmptyStruct> gate, channel<EmptyStruct> stop, t
     nint sink = 0;
     for (;;) {
         var stopᴛ1 = stop;
-        switch (trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
         case 0 when stopᴛ1.ꟷᐳ(out _): {
             sinks.ᐸꟷ(sink);
             return;
@@ -280,8 +280,6 @@ internal static void connReader(channel<EmptyStruct> gate, Δnet.Conn c, channel
 internal static partial nint censusNetRead(nint k) {
     GoFrame ᒐ = default;
     try {
-        var writersᴷ = new stackAppend<Δnet.Conn>();
-
         var (l, err) = Δnet.Listen("tcp", "127.0.0.1:0");
         if (err != nil) {
             return -1;
@@ -307,7 +305,7 @@ internal static partial nint censusNetRead(nint k) {
             if (errΔ2 != nil) {
                 return -1;
             }
-            writers = append(writersᴷ, writers, c);
+            writers = append(writers, c);
         }
         var (gate, done) = (new channel<EmptyStruct>(0), new channel<nint>(k));
         for (nint i = 0; i < k; i++) {
