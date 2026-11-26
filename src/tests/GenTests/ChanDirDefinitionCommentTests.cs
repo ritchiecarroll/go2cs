@@ -104,7 +104,7 @@ public class ChanDirDefinitionCommentTests
         golib::go.GoChanDirAttribute? chanDir = type.GetCustomAttribute<golib::go.GoChanDirAttribute>();
 
         Assert.IsNotNull(chanDir, $"{name} carries no GoChanDirAttribute, so reflect would read it as bidirectional");
-        CollectionAssert.AreEqual(new[] { Enum.Parse<golib::go.GoChanDir>(direction) }, chanDir.DirChain, $"{name}'s direction chain");
+        CollectionAssert.AreEqual(new[] { Enum.Parse<golib::go.GoChanDir>(direction) }, chanDir!.DirChain, $"{name}'s direction chain");
     }
 
     [TestMethod]

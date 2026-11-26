@@ -250,7 +250,7 @@ public class ExtensionHostListTests
 
         Assert.IsNotNull(list, "a compilation that references golib gets a list");
         StringAssert.Contains(list, GeneratedSource.ExtensionHostListDeclaration);
-        CollectionAssert.AreEquivalent(new[] { "go.demo_package", "go.helpers", "go.nested.inner_package" }, ExtensionHostsListedIn(list));
+        CollectionAssert.AreEquivalent(new[] { "go.demo_package", "go.helpers", "go.nested.inner_package" }, ExtensionHostsListedIn(list!));
 
         Diagnostic[] errors = [.. output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)];
         Assert.AreEqual(0, errors.Length, "the list binds: " + string.Join("; ", errors.Take(3)));

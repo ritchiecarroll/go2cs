@@ -97,7 +97,7 @@ internal static class PlatformExclusive
     {
         get
         {
-            string target = Environment.GetEnvironmentVariable("GoTargetOS");
+            string target = Environment.GetEnvironmentVariable("GoTargetOS") ?? "";
 
             if (!string.IsNullOrWhiteSpace(target))
                 return target.Trim().ToLowerInvariant();

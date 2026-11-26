@@ -28,8 +28,8 @@ public class VariadicShellBindingTests
 
         Assert.IsNotNull(shell, "a value binds through the object shell, with no generic shell");
         Assert.IsInstanceOfType(shell, typeof(vshell_package.ΔLogᴛObj));
-        Assert.AreEqual("Rec.Log 3 a,1", vshell_package.Call(() => shell.Log("a", (nint)1)));
-        Assert.AreEqual((nint)3, shell.Count(), "a member the invoker carries is unchanged");
+        Assert.AreEqual("Rec.Log 3 a,1", vshell_package.Call(() => shell!.Log("a", (nint)1)));
+        Assert.AreEqual((nint)3, shell!.Count(), "a member the invoker carries is unchanged");
     }
 
     [TestMethod]
@@ -40,7 +40,7 @@ public class VariadicShellBindingTests
 
         Assert.IsNotNull(shell, "a pointer binds through the object shell when the generic shell cannot be closed");
         box.Value.n = 5;
-        Assert.AreEqual("RecP.Log 5 x", vshell_package.Call(() => shell.Log("x")), "the call reads the pointee written after the bind");
+        Assert.AreEqual("RecP.Log 5 x", vshell_package.Call(() => shell!.Log("x")), "the call reads the pointee written after the bind");
     }
 
     [TestMethod]
@@ -50,8 +50,8 @@ public class VariadicShellBindingTests
         vshell_package.ILog? shell = Shell(box);
 
         Assert.IsNotNull(shell, "a type with no generated method set binds its pointer methods through their ж overload");
-        Assert.AreEqual("Hand.Log 6 ", vshell_package.Call(() => shell.Log()));
-        Assert.AreEqual((nint)6, shell.Count());
+        Assert.AreEqual("Hand.Log 6 ", vshell_package.Call(() => shell!.Log()));
+        Assert.AreEqual((nint)6, shell!.Count());
     }
 
     [TestMethod]

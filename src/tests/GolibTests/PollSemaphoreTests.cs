@@ -187,7 +187,7 @@ public class PollSemaphoreTests
         IDictionary? shared = Table(typeof(RuntimeSemaphore));
         Assert.IsNotNull(shared, "RuntimeSemaphore's semaTable was not found: these arms would read nothing");
 
-        if (shared.Contains(word))
+        if (shared!.Contains(word))
             return true;
 
         return Table(typeof(poll_package)) is { } own && own.Contains(word);

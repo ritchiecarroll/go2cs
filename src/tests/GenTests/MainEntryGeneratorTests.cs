@@ -75,7 +75,7 @@ public class MainEntryGeneratorTests
 
         IMethodSymbol? entry = output.GetEntryPoint(default);
         Assert.IsNotNull(entry, "the program has no entry point");
-        Assert.AreEqual("go.main_package", entry.ContainingType.ToDisplayString());
+        Assert.AreEqual("go.main_package", entry!.ContainingType.ToDisplayString());
         Assert.AreEqual("Main", entry.Name);
     }
 
@@ -105,7 +105,7 @@ public class MainEntryGeneratorTests
 
         IMethodSymbol? entry = output.GetEntryPoint(default);
         Assert.IsNotNull(entry, "the program has no entry point");
-        Assert.AreEqual("go.example.com.main_package", entry.ContainingType.ToDisplayString());
+        Assert.AreEqual("go.example.com.main_package", entry!.ContainingType.ToDisplayString());
     }
 
     [TestMethod]

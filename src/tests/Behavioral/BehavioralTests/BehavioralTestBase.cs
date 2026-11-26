@@ -309,7 +309,7 @@ public abstract class BehavioralTestBase
             // UNCONDITIONALLY and classifies the same two stderr classes -- is the instrument that
             // cannot be fooled by a warm tree. Closing it here would mean persisting a degraded verdict
             // on disk between runs, which is machinery for a case the unconditional gate already covers.
-            if (s_degradedProjects.TryGetValue(targetProject, out string[] previouslyDegraded))
+            if (s_degradedProjects.TryGetValue(targetProject, out string[]? previouslyDegraded))
                 AssertNotMeasured(targetProject, previouslyDegraded);
 
             // Once per project per process. The up-to-date check below cannot say this on its own: the converter

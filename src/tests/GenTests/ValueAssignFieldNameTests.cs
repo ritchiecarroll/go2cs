@@ -81,7 +81,7 @@ public class ValueAssignFieldNameTests
         SyntaxTree? generated = output.SyntaxTrees.FirstOrDefault(tree => tree.FilePath.EndsWith("segment.g.cs", StringComparison.Ordinal));
 
         Assert.IsNotNull(generated, "the generator emitted no part for segment");
-        StringAssert.Contains(generated.ToString(), "AssignFrom(in segment source)", "no AssignFrom was generated:\n" + generated);
+        StringAssert.Contains(generated!.ToString(), "AssignFrom(in segment source)", "no AssignFrom was generated:\n" + generated);
 
         string[] errors = output.GetDiagnostics()
             .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Location.SourceTree == generated)
