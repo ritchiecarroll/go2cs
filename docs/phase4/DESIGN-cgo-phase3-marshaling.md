@@ -3591,3 +3591,125 @@ confirmed the past-the-end deviation and asked for the fold, SHOULDs 2 and 3, an
   refusal of a minted token in a 64-bit integer argument.
 
 — H (2026-11-26)
+
+## 21. Sizing 2026-11-26: S6, `runtime.Pinner` holding a real pin (COORD's ruling; design only, P3 reads)
+
+COORD ruled on 20.9's census (inbox H 20261126T002923Z): S3 is deferred to a BOARD residual, and S6 is sized now. S6
+is the one class where valid Go gets a wrong result with no refusal. cgo lets C keep a Go pointer past the call only
+if a `runtime.Pinner` pins the memory, and go2cs's Pinner records that the memory is pinned without holding its
+address still.
+
+### 21.1 What exists (read at `3450839689`)
+
+- **`runtime.Pinner`** (`src/core/runtime/pinner_impl.cs`, hand-owned).
+  - `Pin(p)` resolves the referent with Go's `pinnerGetPtr` panics (`pinnerReferentOf`). It takes a box's
+    `ReferentObject`, so an element's referent is its canonical backing and a field's is its source allocation.
+  - It counts the referent in `PinTable` (a weak-keyed table, one count per object) and keeps it in the pinner's own
+    `pinnedReferents` list.
+  - `Unpin` uncounts every referent. A pinner collected with pins outstanding runs Go's leak finalizer, which unpins
+    and calls `pinnerLeakPanic`.
+  - **No `GCHandle`, no address, no pin-extent entry.** It records identity and lifetime, not stillness.
+- **The pins golib already takes.**
+  - `PinnedBuffer` holds a pinned `GCHandle` over an array (`PinOnly(storage)`). Its indexed form enters the pin-extent
+    index (`PinExtents`), which is how S4 finds interior numbers.
+  - A box's own conversion to a number pins its storage for the BOX's lifetime (the uintptr operator).
+  - The cgo doors pin call-scoped with `fixed` (1b), or copy into a stack mirror or an image.
+- **The doors decide by the box**, through `TryPinTarget`: storage, offset, `RequireCrossable`.
+  - A whole scalar box in the typed door takes a stack MIRROR (`PinnedAScalarPointerPinsAnElementAndAViewAndKeepsTheMirrorForAWholeBox`).
+  - A struct view no door can pin takes an IMAGE (3.4).
+  - A mirror's or an image's address is not the Go memory, so C keeping it is wrong even when the Go memory itself is
+    still.
+
+### 21.2 Consumers
+
+- **cgo: go-sdl2's four retaining calls (20.9).** In GOROOT, the only cgo use of Pinner is a cgocheck error test
+  (`testerrors/ptr_test.go`). It pins a Go pointer and stores it into C memory, and go2cs refuses that by name anyway,
+  as a store of a Go pointer into C memory.
+- **Not cgo, and larger: `internal/poll` on Windows.**
+  - Every overlapped read and write calls `fd.pin(mode, ptr)`, which is `readPinner.Pin` or `writePinner.Pin`, and
+    `execIO` defers the Unpin.
+  - The kernel writes into the buffer asynchronously, after the submitting syscall returns. That is exactly cgo's
+    retention case.
+  - Whether go2cs is exposed there today is NOT measured. Two things may already hold the bytes still: the managed
+    poller (`golib.GoAsyncIO`, DESIGN-netpoll-managed-poller.md), and the buffer's own box (`Ꮡ(buf, 0)`, whose
+    conversion pins for the box's life).
+  - So S6's first measurement is that path. It decides S6's cost as well as its reach (21.4).
+
+### 21.3 The design
+
+**(a) `Pin` takes a real pin.** The table moves DOWN to golib (`go.golib.GoPinTable`, `[EditorBrowsable(Never)]`): the
+doors are in golib, and golib cannot reference `runtime`. `runtime`'s hand-own calls it, so there is one rule rather
+than two (the shape `GoFatal` took for the runtime/sync shims). `Pin` resolves the referent as now. It then asks golib
+for the storage the doors would pin (`TryPinTarget`'s own resolution, never a copy of it) and holds it still:
+- If the storage is already inside a live indexed pin (`PinExtents.Find`), it takes a COUNT on that pin, and no new
+  handle.
+- Otherwise it pins the storage with an indexed `PinnedBuffer`, so the extent index sees it, and every door and S4's
+  number path find it pinned.
+
+The pin is kept with the pinner's referent and released at the referent's last `Unpin` (counts as Go's
+`specialPinCounter`). A referent with no pinnable storage keeps today's identity-only record. That is a value holding Go
+references, which has no address C could hold, so C was never handed its address.
+
+**(b) The doors honour it.**
+- A pointer whose referent `GoPinTable` holds never takes a stack mirror or an image. The door pins its storage in
+  place (the 1b path), so the address C keeps is the Go memory's own.
+- Where the storage cannot be handed over in place (a struct whose CLR layout is not Go's, the S3 shape), the door
+  refuses by name: "pinned with runtime.Pinner, so C may keep it, and go2cs cannot hand C this value's own memory".
+- Today's call-scoped answer stays for every pointer that nothing pinned.
+
+**(c) Go's semantics, kept.**
+- `Unpin` releases every pin the pinner holds.
+- A double unpin of an object panics ("runtime.Pinner: object already unpinned").
+- A pinner collected with pins outstanding unpins and panics (`pinnerLeakPanic`).
+- `isPinned` and `pinnerGetPinCounter` read the same table.
+- The leak finalizer now also releases handles. It must run before the handles' own finalizers would, so the pinner
+  holds its buffers strongly and releases them itself.
+
+### 21.4 Cost
+
+- **Per first pin of an allocation:** one `PinnedBuffer` (an object holding a handle, a length and a state byte; 32 B, as
+  R6 holds), plus its `GCHandle` table entry, plus an extent node. Re-pinning an already-pinned extent costs a count.
+  Everything is freed at Unpin. A B/op row cannot see the handle (golib-gen.md's pin-pricing rule), so it is priced
+  from the type.
+- **GC:** a pinned object cannot move, so long-lived pins in gen0/gen1 fragment the ephemeral segments. Go's own pins
+  are free, because its heap does not move. That is why Go code pins freely, as `internal/poll` does on every I/O.
+- **The hot-path question is the one to measure first.**
+  - If `internal/poll`'s per-I/O `Pin` reaches a buffer that is not already pinned, (a) adds a handle allocation and a
+    free to every overlapped read and write.
+  - The count-on-an-existing-pin arm is what keeps it free when the buffer's box has already pinned it.
+  - The net and os alloc rows are the gate.
+- **Residue, not cured:** a program that hands C a retained pointer WITHOUT a Pinner is invalid Go.
+  - It usually works under Go (its heap does not move), and here the pointer goes stale after a compaction.
+  - The door cannot see C keep a pointer, so this stays silent; Limitations.md should name it.
+  - Allocating such buffers on the pinned-object heap would be a separate increment, with its own cost.
+
+### 21.5 The interim COORD asked for
+
+- Yes, the door can detect it, but only after the table moves to golib, which is (a)'s first step. The door asks
+  `GoPinTable.IsPinned(referent)` and refuses by name: "pinned with runtime.Pinner, so C may keep it past the call;
+  go2cs holds Go memory still only for the call".
+- Cost: the move, one test per door, and a GolibTests row per door. It is a half seat.
+- But it refuses every Pinner-pinned pointer handed to C, including the valid uses that do not retain. And (a)+(b)
+  replace it, in the same files.
+- Lean: land (a)+(b) as one seat, and the interim only if S6 goes to .6.
+
+### 21.6 Size
+
+**One seat**, in three commits:
+1. The table moves to golib (mechanical; the runtime hand-own calls it). The rows that already guard it (`TestPinner*`
+   in the converted runtime suite) stay green.
+2. `Pin` takes or counts a real pin; `Unpin` and the leak finalizer release it.
+3. The doors honour it. New probe functions `go2cs_probe_keep` and `go2cs_probe_kept` (C keeps a pointer, and a later
+   call reads it). An e2e arm: Pin, keep, force a compacting collection, read back through C, Unpin.
+
+**Rows:**
+- A pinned scalar box survives compaction at the kept address. Near-miss: unpinned, the door still mirrors.
+- An element's pin counts on its backing's existing extent.
+- A struct whose layout differs is refused by name.
+- Double unpin and the leak panic are unchanged.
+- S4's number into a Pinner-pinned box resolves to the same pin.
+
+**Measurement first:** the `internal/poll` path (does a per-I/O Pin reach an unpinned buffer?), then the net and os
+alloc rows before and after.
+
+— H (2026-11-26)

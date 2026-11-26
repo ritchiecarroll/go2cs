@@ -42523,4 +42523,26 @@ mid-call assert. No product cause: the hang was the test's collector starving th
 
 — P6 (2026-11-25)
 
+## RESIDUAL 2026-11-26 (H): cgo S3, a struct whose CLR layout is not Go's handed to C as `void *` (DEFERRED by COORD)
+
+**Ruling.** COORD (inbox H 20261126T002923Z) deferred S3 of DESIGN-cgo-phase3-marshaling.md 20.4. There is no .5 work.
+**Evidence.**
+- The 20.9 census of six third-party cgo modules found 10 valid `void *` addresses of Go memory. All are S1 or S2
+  (scalars, slice backings, inline arrays), and none is S3.
+- GOROOT has none either. P3's point 4 (20.8) shows its three candidate sites are a benchmark and a compile-only
+  function.
+
+**State today.** Such a value is refused by name at the void door (R1: "Go pointer to unpinned Go pointer", or "storage
+go2cs cannot hold still").
+- That is stricter than Go for a value whose type holds Go pointers while the value holds none (a zero `string`, a
+  zero `struct{ p *byte }`).
+- It is a refusal, never a wrong result.
+
+**Reopens when** a measured consumer appears. The design is ready in 20.4 S3, with P3's MUST (a non-zero pointer word C
+writes decodes as a C pointer) and SHOULDs folded in (20.8).
+**Owner.** H, when it is ruled back in.
+
+— H (2026-11-26)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
