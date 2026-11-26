@@ -1459,18 +1459,25 @@ func (v *Visitor) convCgoClosureArgument(argument cgoClosureArgument, context Id
 		return value
 	}
 
+	// A declaration the load did not type (a best-effort load of cmd/cgo's generated code) has no type to name, so the
+	// value goes through as it is.
+	declaredType := v.info.TypeOf(argument.declared)
+
+	if declaredType == nil {
+		return value
+	}
+
 	// A pointer is declared at its own type (`var _cgoN *T = p`): the value is already the box the parameter takes, and a
-	// Go-shaped `(*T)(p)` is not C#.
-	if declaredType := v.info.TypeOf(argument.declared); declaredType != nil {
-		if _, isPointer := declaredType.Underlying().(*types.Pointer); isPointer {
-			return value
-		}
+	// Go-shaped `(*T)(p)` is not C#. A C function-pointer typedef takes this branch too: cmd/cgo declares it as *[0]byte,
+	// so it never reaches the cast below, where getCSharpTypeName would spell an anonymous signature as a delegate.
+	if _, isPointer := declaredType.Underlying().(*types.Pointer); isPointer {
+		return value
 	}
 
 	// The type is named as a declaration names its type (getCSharpTypeName), so a C typedef, which cmd/cgo declares as an
 	// alias (`var _cgo2 _Ctype_size_t = 2`), reaches its pseudo-package spelling, Cꓸsize_t. The bare alias-qualified name
 	// left it as the Go name _Ctype_size_t (CS0246), first met by memset's size_t parameter (cgo S4's govoidnumberwrite).
-	return fmt.Sprintf("(%s)(%s)", v.getCSharpTypeName(v.info.TypeOf(argument.declared)), value)
+	return fmt.Sprintf("(%s)(%s)", v.getCSharpTypeName(declaredType), value)
 }
 
 // cgoTargetDefaults makes a cgo package's project default to the one target its bindings were converted for: layout
