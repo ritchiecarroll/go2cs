@@ -6444,7 +6444,7 @@ public static (nint, nint) ReadOnlyRecv(this Box bʗp) {
     return (p.R.Min, p.Tag);
 }
 ```
-<!-- receiver reversion: commit 468ee62c6; censusFuncLocals origin "recv", src/go2cs/captureModeOperations.go:1840-1855 `A receiver ж-box A2 reverted (every address use feeds a ref-lowered position) has no box reason`; pinned by src/go2cs/recvRefLowering_test.go -->
+<!-- receiver reversion: commit 468ee62c6; censusFuncLocals origin "recv", src/go2cs/captureModeOperations.go:1874-1889 `A receiver ж-box A2 reverted (every address use feeds a ref-lowered position) has no box reason`; pinned by src/go2cs/recvRefLowering_test.go -->
 
 Either way the caller's value is untouched: `rb.BumpedRecv()` returns 16 and `rb.Tag` stays 6.
 

@@ -46,6 +46,39 @@ var packageCaptureModeBoxIdents map[types.Object]bool
 // (and avoids a per-call ThreadLocal allocation). For generics it also puts T in scope.
 var packageDirectBoxReceiverMethods map[*types.Func]bool
 
+// resetLoadScopedCaches empties the caches keyed by objects of ONE package load. Every load makes new
+// *types objects, so an entry from an earlier load can never be hit again, but it keeps that load's whole
+// type graph reachable (importedGenericFuncInfo holds a dependency's entire types.Info). A process that
+// converts many packages (a -stdlib run, which loads once per package, and the converter's own go test,
+// which converts thousands of fixtures) then grows without bound: the go2cs test binary reached 11 GB on
+// linux and timed out on the 7 GB osx-arm64 runner. Emptied here, at the root hand-in every driver
+// already makes, beside importedAddressedGlobals; collectTypeSpecRHS does the same for its own foreign
+// cache. Each cache still serves every lookup within one package's conversion.
+//
+// No entry is needed across this boundary. Two caches are pure functions of their key, so a lookup
+// after the reset recomputes the same value: foreignDerivedAliases (the package's scope) and
+// declaredStructsByPackage (its package-level types). The other three are derived through the CURRENT
+// root's state: importedGenericFuncDecls and importedGenericFuncInfo through currentLoadedPackage (set
+// just above), descriptorCompanionCache through descriptorCarrierPackage (currentPackageSource and
+// importedPackages). An entry built for an earlier root could only be stale for this one, never needed.
+// A -stdlib or single-package run makes one load per root, so its keys never repeat across roots and
+// its emission cannot move.
+func resetLoadScopedCaches() {
+	packageLock.Lock()
+	foreignDerivedAliases = nil
+	importedGenericFuncDecls = map[*types.Package]map[*types.Func]*ast.FuncDecl{}
+	importedGenericFuncInfo = map[*types.Package]*types.Info{}
+	packageLock.Unlock()
+
+	declaredStructsLock.Lock()
+	declaredStructsByPackage = map[*types.Package][]*types.Struct{}
+	declaredStructsLock.Unlock()
+
+	descriptorCompanionCacheLock.Lock()
+	descriptorCompanionCache = map[*types.Func][]int{}
+	descriptorCompanionCacheLock.Unlock()
+}
+
 // collectCaptureModeMethods records every non-generic pointer-receiver method whose body
 // takes the address of a receiver field — across the package AND its (transitive) imports,
 // since a calling package needs to know that an imported method (e.g. sync/atomic.Int32.Store)
@@ -56,6 +89,7 @@ func collectCaptureModeMethods(pkg *packages.Package) {
 	// IMPORTED package's syntax from; record the root here, where every driver already hands it in.
 	currentLoadedPackage = pkg
 	importedAddressedGlobals = map[*types.Package]map[types.Object]bool{}
+	resetLoadScopedCaches()
 	visited := map[*packages.Package]bool{}
 	captureModeCandidates = nil
 
