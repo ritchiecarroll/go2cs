@@ -22,7 +22,7 @@ allocation reports at least 1, whether or not golib's counter sees it. So parity
 it out of the counter changes nothing: an allocation the counter does not charge still fails a want-zero assert on
 its bytes. `AllocsPerRun` also calls the function once before it measures, so storage that is created on first use
 and reused afterwards does not show in the reading. <!-- src/core/testing/testing.cs:1150 (`if (allocated == 0L)`),
-:1116 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1055
+:1133 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1055
 (`nonzero bytes with a nonzero count ⟹ the COUNT is reported, floored at 1;`). -->
 
 **Where Go decides.** Go makes the decision at one of two places:

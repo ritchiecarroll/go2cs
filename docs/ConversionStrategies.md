@@ -11853,7 +11853,7 @@ It does so only when the statement's IL holds exactly one call and that call rea
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
 <!-- src/core/runtime/managed_impl.cs:5635 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
-     the printed form :2341 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
+     the printed form :2402 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
 
@@ -12388,7 +12388,7 @@ Go's does.
 <!-- the converter's record: src/go2cs/positionMapOperations.go:673 (`Go source positions are recorded here, one`)
      and :678 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
      A hand-kept record: src/core/sync/waitgroup.cs:37 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIYC3AMAANsD")]`),
-     for its goǃ( at :254 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
+     for its goǃ( at :263 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per
      tracked hand-owned src/core file with a goǃ( and maps every other line to no Go line. -->
 
@@ -12515,11 +12515,11 @@ converter's list can likewise name the operating systems it covers.
      src/core/runtime/trace/flightrecorder.cs:186-189 (`go.runtime_package.traceClockUnitsPerSecond()`);
      the push row src/go2cs/linknameOperations.go:813 (`"runtime/trace.runtime_traceClockUnitsPerSecond"`). -->
 <!-- math/bits: src/core/math/bits/bits_impl.cs:159 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`, with
-     AggressiveInlining on the line before it, as on Add64, :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
-     and Sub64, :133 `public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow)`; the reason and its linux/amd64
+     AggressiveInlining on the line before it, as on Add64, :129 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
+     and Sub64, :145 `public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow)`; the reason and its linux/amd64
      measurement are in that file's header comment. The word-size leaves:
      bits_impl.cs:86 (`public static (nuint hi, nuint lo) Mul(nuint x, nuint y)`),
-     :94 (`public static (nuint sum, nuint carryOut) Add(nuint x, nuint y, nuint carry)`), :105
+     :106 (`public static (nuint sum, nuint carryOut) Add(nuint x, nuint y, nuint carry)`), :117
      (`public static (nuint diff, nuint borrowOut) Sub(nuint x, nuint y, nuint borrow)`); the six list entries:
      src/go2cs/manualTypeOperations.go:2871-2878#46e257. -->
 

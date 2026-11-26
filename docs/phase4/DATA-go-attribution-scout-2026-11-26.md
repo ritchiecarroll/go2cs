@@ -472,7 +472,7 @@ published docs cite moved lines with a quote or fingerprint. (3) 8 code-sample s
 lines (`TestDocsSamplesHoldTheirLines` reads HEAD, so it shows only once the headers are committed;
 `docsamples -base WORKTREE -recite -check` showed them before). Every citation of a headed file outside the
 records (`docs/phase3`, `docs/phase4`, `docs/doctrine`, `docs/validation`, and the disclosure JSON prose) was
-moved by its file's diff: 99 citations in docs, `.claude` rules and skills, and code comments, each checked to
+moved by its file's diff: 114 citations in docs, `.claude` rules and skills, and code comments, each checked to
 name the same text at HEAD and in the worktree (the 3 that quote a re-encoded record line were moved by hand).
 20 citations name a file by a bare name that matches more than one file and were left as they were; the ones
 checked (`runtime2.cs`, `godebug.cs`, `sync/mutex.cs`, `unsafe.cs`) already pointed at other text at base. The disclosure records'

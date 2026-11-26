@@ -864,10 +864,10 @@ public static ChanDir ChanDir(this ж<Type> Ꮡt) {
 // shortcut: Go's Hasher means "the key's bytes are AT this address", and the only caller of an
 // installed hook in this corpus invokes it with a NIL pointer and discards the key
 // (internal/sync/hashtriemap.cs:234, over noAddress at :554) because a managed address names no
-// value. That file's own taxonomy classes an address-IGNORING hook as the honorable kind (:120) and
-// states at :124-127 that every honorable hook here is a function of the seed alone -- so honoring
+// value. That file's own taxonomy classes an address-IGNORING hook as the honorable kind (:132) and
+// states at :136-139 that every honorable hook here is a function of the seed alone -- so honoring
 // one and forcing total collision are the same act, which is precisely the contract
-// TestHashTrieMapBadHash already proves the map satisfies (34/34 with `return 0`). What :122 refuses
+// TestHashTrieMapBadHash already proves the map satisfies (34/34 with `return 0`). What :134 refuses
 // is a hook that DEREFERENCES the address; this is not one.
 //
 // Group and GroupSize are Go's layout, DERIVED and not invented: the compiler lays a slot group out as
