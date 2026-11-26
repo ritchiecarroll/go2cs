@@ -494,15 +494,21 @@ namespace go.golib;
     }
 
     /// <summary>
-    /// What C receives for a <c>uintptr_t</c> or <c>intptr_t</c> parameter (design 20.4 S4, P3's read): the integer as it
-    /// is, unless it is a TOKEN, the number go2cs gives <c>uintptr(unsafe.Pointer(p))</c> for a Go value that has no address
-    /// (it holds Go references). Go would hand C that value's address; a token names no memory, so C would receive silent
-    /// garbage, and the call is refused by name instead. Any other integer, a real address of Go memory included, crosses:
-    /// an integer is what Go lets C see.
+    /// What C receives for a 64-bit integer parameter (design 20.4 S4 and 20.10, P3's reads): the integer as it is,
+    /// unless it is a TOKEN go2cs MINTED, the number it gives <c>uintptr(unsafe.Pointer(p))</c> for a Go value that has no
+    /// address (it holds Go references). Go would hand C that value's address; a token names no memory, so C would receive
+    /// silent garbage, and the call is refused by name instead. Any other integer crosses, a real address of Go memory
+    /// included: an integer is what Go lets C see.
     /// </summary>
+    /// <remarks>
+    /// The bit pattern alone is not the test (P3's MUST on 53d4da880e): one 64-bit value in four has bit 63 set and bit
+    /// 47 clear, so a hash or an opaque id would be refused where Go passes it. A tagged number is refused only when the
+    /// registry holds an entry for it, live or collected. Every token the box-to-uintptr operator mints is registered
+    /// there (its reference-bearing arm, ж.cs), so a minted token is always seen; a tagged number never minted crosses.
+    /// </remarks>
     public static ulong Word(ulong value, string function)
     {
-        if (ManagedPointerTokens.IsTaggedToken((nuint)value))
+        if (ManagedPointerTokens.IsTaggedToken((nuint)value) && (ManagedPointerTokens.HoldsCollectedEntry((nuint)value) || ManagedPointerTokens.Resolve((nuint)value) is not null))
             throw RuntimeErrorPanic.ErrorString($"cgo: the pointer-sized integer handed to C.{function} is go2cs's token for a Go value that has no address (it holds Go references), not that value's address; C would receive a number that names no memory, so go2cs refuses the call");
 
         return value;

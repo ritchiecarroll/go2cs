@@ -3562,3 +3562,32 @@ Limitations.md entry naming the retention class until it lands.
 Census rows are the scratch instrument's output (not committed). The scratch module cache was removed after the run.
 
 — H (2026-11-25)
+
+### 20.10 Record 2026-11-26: P3's CHANGES on S4 folded
+
+P3 read S4 at `53d4da880e`: CHANGES, one MUST (inbox/COORD/20261125T222025Z-P3.md). COORD (inbox H 20261125T222108Z)
+confirmed the past-the-end deviation and asked for the fold, SHOULDs 2 and 3, and a Limitations sentence.
+
+- **MUST, `Word`.** It refused by bit pattern alone (bit 63 set, bit 47 clear), so one 64-bit value in four, a hash or an
+  opaque id such as `0x8000000000000001`, panicked where Go passes it. It now refuses only when the pattern matches AND
+  the registry holds an entry for that number, live or collected. Every token the box-to-uintptr operator mints is
+  registered (its reference-bearing arm, `ManagedPointerTokens.Register`), so a minted token is always seen; a tagged
+  number never minted crosses. Row: `0x8000000000000001` crosses. Control: the registry clause removed reds that row
+  alone; restored byte-identical. Residue: an identity token (a channel's, a map's) is not registered by any number
+  conversion, so one handed to a 64-bit integer parameter crosses as the integer it is.
+- **SHOULD 2, every 64-bit integer.** The word flag now covers every `int64`/`uint64` parameter (the `ioctl(fd, req,
+  unsigned long arg)` shape), not only `uintptr_t` and `intptr_t`; a 32-bit integer cannot carry an address and is
+  unchanged. On a non-token the check is one bit test. Footprint: one line in each non-Windows wrapper golden (`labs`,
+  whose `long` is 64-bit there; Windows' `long` is 32-bit). Converter row extended: `size_t` goes through, `int` does
+  not.
+- **SHOULD 3, a struct field's number.** Row `S4_AStructFieldsNumberCrossesAtTheField`: `uintptr(unsafe.Pointer(&s)) + 4`
+  on a reference-free struct in its own box crosses at the field, pinned, and C's write lands in `s.Y`. A struct box's
+  conversion pins its one-element slot and registers the pin, so the pin-extent index holds it and `PinNumber`'s
+  interior branch answers. No hole.
+- **NIT 4, residue.** `HoldsCollectedEntry` runs for every void pointer that carries no box, C memory included, so a C
+  address equal to a dead entry's number (heap returned to the OS, then malloc'd) is refused by name. Remote, and a
+  refusal, not corruption.
+- **Limitations.md**: the number door, the end cursor (held still for nothing, good only for comparison), and the
+  refusal of a minted token in a 64-bit integer argument.
+
+— H (2026-11-26)

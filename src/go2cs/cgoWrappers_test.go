@@ -496,9 +496,9 @@ func _Cfunc_handle(p0 uintptr) (r1 _Ctype_int) { return }
 	}
 }
 
-// Design 20.4 S4 (P3's read): a uintptr_t or intptr_t parameter goes through GoCgoArgs.Word, which refuses go2cs's
-// token for a Go value with no address by name. cmd/cgo declares each typedef as an ALIAS of the base C type, so the
-// word types are read off the outermost name: size_t, an alias of the same ulong, is not a word and passes as before.
+// Design 20.4 S4 and 20.10 (P3's reads): every 64-bit integer parameter, and uintptr_t/intptr_t, goes through
+// GoCgoArgs.Word, which refuses by name a token go2cs minted for a Go value with no address. A 32-bit integer cannot
+// carry an address and passes as before.
 func TestCgoWordParametersGoThroughTheWordCheck(t *testing.T) {
 	source := `package cgotest
 
@@ -507,8 +507,9 @@ type _Ctype_long int64
 type _Ctype_uintptr_t = _Ctype_ulong
 type _Ctype_intptr_t = _Ctype_long
 type _Ctype_size_t = _Ctype_ulong
+type _Ctype_int int32
 
-func _Cfunc_word(p0 _Ctype_uintptr_t, p1 _Ctype_size_t, p2 _Ctype_intptr_t) (r1 _Ctype_ulong) { return }
+func _Cfunc_word(p0 _Ctype_uintptr_t, p1 _Ctype_size_t, p2 _Ctype_intptr_t, p3 _Ctype_int) (r1 _Ctype_ulong) { return }
 `
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, "cgotest.go", source, 0)
@@ -540,14 +541,15 @@ func _Cfunc_word(p0 _Ctype_uintptr_t, p1 _Ctype_size_t, p2 _Ctype_intptr_t) (r1 
 		for _, want := range []string{
 			`(uint64)global::go.golib.GoCgoArgs.Word((ulong)(uint64)p0, "word")`,
 			`(int64)global::go.golib.GoCgoArgs.Word((ulong)(int64)p2, "word")`,
+			`(uint64)global::go.golib.GoCgoArgs.Word((ulong)(uint64)p1, "word")`,
 		} {
 			if !strings.Contains(text, want) {
 				t.Errorf("the wrapper does not hand its word parameter through the check: want %s in\n%s", want, text)
 			}
 		}
 
-		if strings.Contains(text, "Word((ulong)(uint64)p1") {
-			t.Errorf("size_t is not a word type, and went through the check:\n%s", text)
+		if strings.Contains(text, `p3, "word")`) {
+			t.Errorf("a 32-bit int cannot carry an address, and went through the check:\n%s", text)
 		}
 	}
 

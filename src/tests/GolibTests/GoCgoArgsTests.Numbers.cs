@@ -71,6 +71,29 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(fixedArray);
     }
 
+    // P3's SHOULD 3: the commonest number form, a FIELD, `uintptr(unsafe.Pointer(&s)) + unsafe.Offsetof(s.f)`, on a
+    // reference-free struct in its own box. The box's conversion pins its one-element slot and registers the pin (the
+    // pin-extent index holds it), so the interior number crosses at the field, held still, and C's write lands there.
+    [TestMethod]
+    public void S4_AStructFieldsNumberCrossesAtTheField()
+    {
+        ж<cgoPoint> point = new StandardBox<cgoPoint>(default(cgoPoint));
+        nuint start = ((uintptr)point).Value;
+        nuint field = start + 4; // Offsetof(cgoPoint.Y): two int32s
+
+        GoCgoPin pin = GoCgoArgs.PinVoidPointer(new @unsafe.Pointer((uintptr)field), "fill");
+        Assert.IsTrue(pin.IsGoMemory, "the field's number crosses as Go memory, pinned, never as a raw managed address");
+
+        fixed (byte* pinned = pin)
+        {
+            Assert.AreEqual((nint)field, pin.Address(pinned));
+            *(int*)pin.Address(pinned) = 5;
+        }
+
+        Assert.AreEqual((int32)5, point.Value.Y, "C's write lands in the field");
+        GC.KeepAlive(point);
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static nuint NumberOfADroppedBox()
     {
@@ -109,6 +132,11 @@ public unsafe partial class GoCgoArgsTests
         Assert.AreEqual(address, GoCgoArgs.Word(address, "word"), "a real address crosses as an integer");
         Assert.AreEqual(42UL, GoCgoArgs.Word(42, "word"));
         Assert.AreEqual(ulong.MaxValue, GoCgoArgs.Word(ulong.MaxValue, "word"), "(uintptr_t)-1 crosses");
+
+        // P3's MUST: a plain integer with a token's bit pattern (bit 63 set, bit 47 clear), never minted, crosses as Go
+        // passes it: a hash or an opaque id.
+        Assert.IsTrue(ManagedPointerTokens.IsTaggedToken((nuint)0x8000000000000001UL), "the premise: the pattern matches");
+        Assert.AreEqual(0x8000000000000001UL, GoCgoArgs.Word(0x8000000000000001UL, "word"), "an unminted tagged integer crosses");
 
         GC.KeepAlive(references);
         GC.KeepAlive(scalar);
