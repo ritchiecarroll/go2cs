@@ -3713,3 +3713,61 @@ references, which has no address C could hold, so C was never handed its address
 alloc rows before and after.
 
 — H (2026-11-26)
+
+### 21.7 Record 2026-11-26: P3's read of S6 folded (amends 21.3 to 21.6)
+
+P3 read section 21 at `3d8ec0ffca`: APPROVE WITH CHANGES (inbox/COORD/20261126T021610Z-P3.md). COORD (inbox H
+20261126T021746Z): fold MUSTs 1 and 2 and SHOULD 3 before code. The poll measurement stays first, and code waits for it
+and for the .5/.6 call.
+
+**MUST 1: a pin covers the whole value, not one storage.** Go's pin holds the whole object. In go2cs, an inline array is
+its own allocation (the image door's B5 rests on that).
+- So `p.Pin(&b)` with `b struct{ hdr [16]byte; n int32 }`, then `C.keep(unsafe.Pointer(&b.hdr[0]))`, must pin `hdr`'s
+  backing as well as `b`'s slot. Otherwise the door finds no pin on the backing, pins for the call only, and C keeps an
+  address that moves at the next compaction: the silent class S6 exists to close.
+- **Amended (a):** `Pin` of a value pins EVERY allocation inside it. `GoCgoImages.ImageKeys` already enumerates them
+  (the root plus each backing in its value), so the set is one definition shared by the image door and the pin.
+- **Row:** pin `&b`; the door then pins `&b.hdr[0]` in place under the Pinner's pin, and it survives a compaction.
+- **The reverse cannot be done, and is stated:** `p.Pin(&b.hdr[0])` then `C.keep(unsafe.Pointer(&b.n))`. Go pins the
+  object holding `hdr`, so `b.n` is pinned too. golib cannot walk from a backing up to the struct that holds it: an
+  array has no back-reference to its containers.
+  - In go2cs only `hdr`'s backing is pinned, and `&b.n` then gets the call-scoped answer.
+  - This goes in Limitations.md with S6: pin the whole value (`&b`), not an element inside it.
+
+**MUST 2: the count arm needs an owner.** `PinnedBuffer` frees its `GCHandle` in `Dispose` and in its finalizer, and has
+no count. An existing indexed pin belongs to someone else (a call-scoped pin, or a box's conversion pin) with its own
+release. A Pinner that counted on it would lose the handle when that owner released it. For example, poll pins a buffer
+that a call-scoped pin holds; the syscall returns; the owner disposes; the kernel writes to an address the collector
+may move; and the table still says pinned.
+- **Amended (a):** `Pin` ALWAYS takes its own handle; two pinned handles on one object are legal.
+- The count arm is kept only for repeat pins of storage the TABLE ITSELF already holds (a second `Pin` of the same
+  allocation). That count lives in the table's own record, and the table frees its handle at zero.
+- No pin belonging to another owner is ever counted on.
+- **Row:** the first owner releases its pin, and the Pinner's pin still holds the address across a compaction.
+
+**SHOULD 3: the typed struct door pins in place only under the S1 condition.** Today a whole Go struct always takes the
+mirror, because the mirror is where its layout is marshalled.
+- **Amended (b):** for a Pinner-pinned referent, the typed struct door pins in place only when the struct's CLR layout
+  IS its C layout. That is the void door's S1 condition (`RequireCrossable` and `NativeStructMarshal`'s blittable test:
+  no reference fields, the mirror's layout equal to the struct's own).
+- A Pinner-pinned struct that fails the test is refused by name: "pinned with runtime.Pinner, so C may keep it, and its
+  Go layout is not its C layout".
+- **Row:** a pinned struct holding an inline array, handed to a typed struct parameter, is refused by name.
+
+**SHOULD 4: a gate that can see a handle.** The alloc rows cannot (21.4 says so itself). The gate for the poll hot path
+is:
+- a count of handles the table takes per I/O, through a test seam on `GoPinTable`;
+- a timed read/write row, before and after.
+
+The long-pin case is written down too. A read parked on an idle connection keeps a gen0 buffer pinned for as long as it
+waits, minutes on an idle socket, as plain .NET sockets do with their own overlapped buffers.
+
+**NIT 5: locking.** `GoPinTable` is reached from every I/O goroutine at once.
+- The record lookup is a lock-free read of a weak-keyed table, as today's `PinTable`.
+- Count transitions and handle allocation take the table's one lock, as `PinTable.Pin` does now.
+- A repeat pin (the count arm) allocates nothing. A first pin allocates its record and its buffer.
+
+**Unchanged:** the table moves to golib; poll is measured first; one seat for (a)+(b); the interim only if S6 goes to .6;
+the no-Pinner residue goes in Limitations.md.
+
+— H (2026-11-26)
