@@ -3505,3 +3505,60 @@ here when it runs.
   number pin off (three rows); `Word`'s check off (its row); the alias read off (the converter row).
 
 — H (2026-11-25)
+
+### 20.9 Record 2026-11-25: Q1, the third-party census (the case for S3)
+
+The owner said yes in H's own chat (2026-11-25, after COORD's relay). Six cgo modules were fetched from proxy.golang.org
+into a scratch module cache (`GOMODCACHE` pointed at it, nothing installed, no toolchain change), read by the same
+syntactic instrument as 20.2, and the cache was then deleted. The instrument gained one class for this run: a bare
+`unsafe.Pointer` PARAMETER of the enclosing function handed straight to a C call (`void*:param-passthrough`), which the
+20.2 run did not classify. Over GOROOT that class reads 2, both inside `cmd/cgo/internal/test` (20.2's table is otherwise
+unchanged).
+
+| Module | Version | cgo files | Sites | `void *` = `&x` in Go memory | `void *` = number | `void *` pass-through of a caller's `unsafe.Pointer` | `T *` view of Go memory | `&x` to a `T *` |
+|---|---|---|---|---|---|---|---|---|
+| github.com/mattn/go-sqlite3 | v1.14.53 | 37 | 67 | 4: `&cArg` (a `C.int`) x2; `&bs[0]`, `&v[0]` (blob binds) | 0 (its handles are `C.malloc`'d cookies: C memory) | 2 | 4 `&b[i]`; 2 pointer | 18 |
+| github.com/google/gopacket | v1.1.19 | 4 | 24 | 0 | 0 | 0 | 2 `&variable` | 4 |
+| github.com/go-gl/gl | v0.0.0-20260331235117-4566fea9a276 | 84 | 25,199 | 0 | 0 in the bindings (`PtrOffset` makes buffer offsets, which name no Go memory) | 3,713 | 21,296 pointer pass-throughs | 0 |
+| github.com/veandco/go-sdl2 | v0.4.40 | 64 | 234 | 2: `&data[0]`, `&pixels[0]` | 1: `Mix_RegisterEffect`'s index cookie (not Go memory) | 11 | 82 pointer; 17 `&variable`; 1 `&b[i]` | 53 |
+| libvirt.org/go/libvirt | v1.12009.0 | 76 | 1,017 | 3: `&cmodel.model`, `&cmodel.doi`, `&clabel.label` (an inline char array in a C struct, memcpy's destination) | 0 | 0 | 14 `&variable`; 3 `&b[i]`; 2 `**T` out-parameters | 727 |
+| github.com/google/gousb | v1.1.3 | 3 | 10 | 0 | 0 | 0 | 1 each `&variable`, `&b[i]`, pointer | 7 |
+
+The `void *` = pointer-variable class (382 sites; the instrument does not type a variable, so each was read) is 375
+`free`/`sqlite3_free`/`SDL_free` of C memory; libvirt's 3 `memcpy` sources (`C.CString`) and 1 `memset` destination
+(`C.malloc`); sqlite's `sqlite3_unlock_notify` argument (`C.malloc`); and two that are Go memory. sqlite's
+`my_result_blob(unsafe.Pointer(p))` with `p = &b[0]` is a slice backing (S2). go-sdl2's
+`LogSetOutputFunction(unsafe.Pointer(ctx))` hands C a Go struct holding a `func` and an `interface{}`, which C keeps as
+a callback's user data: invalid under cgo's rules, and refused by Go's own cgocheck ("Go pointer to unpinned Go
+pointer") as by go2cs's door (R1, the same text).
+
+**Readings.**
+- **Every valid `void *` address of Go memory in the six modules is S1 or S2: 10 sites.** Two are a scalar
+  (`&cArg`), five a slice backing, three an inline array in a C struct, which 1b pins through the array's own backing.
+  The eleventh, go-sdl2's log context, is invalid Go and refused alike by both. **None is S3**: no
+  site hands a `void *` a struct whose CLR layout differs from Go's, or a pointer-bearing value. With 20.2's GOROOT
+  reading (S3's three cgo-suite sites are a benchmark and a compile-only function, P3's point 4), **S3 has no measured
+  consumer**.
+- **The large class is the pass-through: 3,726 sites** (go-gl 3,713, go-sdl2 11, sqlite 2), where the binding hands C
+  whatever `unsafe.Pointer` its own caller passed. The shape is decided at the CALLER, outside these modules, so this
+  census cannot score it. go-gl's own helpers say what callers pass: `gl.Ptr` (reflect's `UnsafeAddr` of a scalar or a
+  slice element: S1 or S2), `gl.Str` (a string's bytes) and `gl.PtrOffset` (a number into a bound GPU buffer, never Go
+  memory: S4 crosses it as C memory). go-gl's 21,296 typed views are the same pass-through into typed parameters, the
+  3.2 and 3.4 doors.
+- **S6 now has a measured consumer.** Four go-sdl2 pass-throughs hand C a pointer it KEEPS past the call:
+  `SDL_CreateRGBSurfaceFrom` and `SDL_CreateRGBSurfaceWithFormatFrom` (SDL does not copy the pixels; the surface reads
+  them for its whole life) and `SDL_SetTextureUserData`, `SDL_SetWindowData` (stored, handed back later). Under cgo's
+  rules each needs the caller to hold a `runtime.Pinner`, so each is S6's shape when the caller passes Go memory. The
+  call-scoped `fixed` of 1b is wrong for them: the address goes stale at the next compaction after the call returns.
+- **Cookies.** sqlite's callback handles are `C.malloc`'d one-byte allocations used as keys (C memory) and SDL_mixer's
+  is an integer index; both cross today, and the call-backs they serve wait for `//export` (S5a).
+
+**For COORD's .5/.6 call.** S3's case does not rest on these counts: zero of 10 measured valid Go-memory `void *` sites is S3.
+S6 has four (one module, all caller-dependent), and it is the class where go2cs's current behaviour is silently wrong
+rather than refused: a retained address of Go memory crosses pinned for the call only. A refusal by name for a retained
+pointer is not possible at the door (the door cannot know C keeps it); the remedy is S6's durable Pinner pin, or a
+Limitations.md entry naming the retention class until it lands.
+
+Census rows are the scratch instrument's output (not committed). The scratch module cache was removed after the run.
+
+— H (2026-11-25)
