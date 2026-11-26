@@ -8820,8 +8820,8 @@ that ends while locked retires its thread instead of handing it to the next goro
 These functions are hand-written C#
 ([Manually-Converted Declarations](#manually-converted-declarations)).
 
-<!-- Mutex wait: src/core/sync/mutex.cs:409 `gate.Wait();`;
-src/core/sync/mutex.cs:137 `internal sealed class WaitQueue : SemaphoreSlim {`;
+<!-- Mutex wait: src/core/sync/mutex.cs:419 `gate.Wait();`;
+src/core/sync/mutex.cs:147 `internal sealed class WaitQueue : SemaphoreSlim {`;
 src/core/sync/atomic/doc_impl.cs:142 `return Interlocked.Add(ref addr.Value, delta);`
 (2026-11-15, sqlite-cs W9a: this sentence cited internal/sync's runtime semaphore, which the hand-owned sync.Mutex never waited on; at 091935257c it waited on a SemaphoreSlim it held by reference, and since W9a on one it names by a handle.) -->
 **`sync` and `sync/atomic` run on .NET primitives.** A `sync.Mutex` is Go's eight bytes, and by default one that must
@@ -11505,7 +11505,7 @@ exactly two `int32`s apart, and the round trip returns the same number. In the C
 - `(uintptr)e0` is the collapsed `uintptr(unsafe.Pointer(e0))`, as in the `addrOf` example.
 - The two labels are plain C# literals, which go2cs-gen boxes as Go strings for `fmt.Println`
   ([Strings](#strings-string-and-sstring)).
-<!-- FromPinnedBox versus FromBox: src/core/unsafe/unsafe.cs:519-600#a513a1 (FromBox carries a pointer value across without pinning; FromPinnedBox takes the address through the box's own uintptr conversion, which pins, and retains the box). The reference lists when each factory is emitted. The program prints the same booleans under go run and the converted C#: UintptrUnsafePointerIdiom/main.go:9-11#95b548. -->
+<!-- FromPinnedBox versus FromBox: src/core/unsafe/unsafe.cs:529-610#a513a1 (FromBox carries a pointer value across without pinning; FromPinnedBox takes the address through the box's own uintptr conversion, which pins, and retains the box). The reference lists when each factory is emitted. The program prints the same booleans under go run and the converted C#: UintptrUnsafePointerIdiom/main.go:9-11#95b548. -->
 
 **Reading a number's bits as another number is a `bitcast`.** A value pun between two number types,
 such as Go's `math.Float64bits`, becomes golib's [`bitcast<TSrc, TDst>`](../src/core/golib/builtin.cs).
@@ -11661,7 +11661,7 @@ In the C#:
 - `getrandomTrap` is the package's system-call number. The first omitted lines try a faster path, and
   the later ones turn a failure number into a Go error.
 - The tuple result is Go's multiple return ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
-<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:2082#fa1cf5. The omitted lines: getrandom.cs:29-38#bb9a32 (the vgetrandom fast path and the getrandomUnsupported check) and 42-47 (errno handling). The indent of line 40 is an emission layout artifact; lines 39-41 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
+<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:2092#fa1cf5. The omitted lines: getrandom.cs:29-38#bb9a32 (the vgetrandom fast path and the getrandomUnsupported check) and 42-47 (errno handling). The indent of line 40 is an emission layout artifact; lines 39-41 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
 
 **Full detail:** [Reference → Converting a Go pointer to `unsafe.Pointer`](ConversionStrategies-Reference/pointers.md#converting-a-go-pointer-to-unsafepointer) — every conversion form and when each factory is used, address arithmetic, pinning, order tokens, layout folding, value puns, the cases where `unsafe.Slice` or `unsafe.String` copies instead of aliasing, fields read through a reinterpreted pointer, and the syscall keep-alive rule.
 
@@ -11852,7 +11852,7 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:5574 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+<!-- src/core/runtime/managed_impl.cs:5635 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
      the printed form :2341 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
@@ -12184,7 +12184,7 @@ A target on the list can be converted Go, as here, or hand-written C#: `testing/
 `testing.checkParallel`, which the hand-written `testing` package provides, and its forwarder calls that.
 <!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2542 (`"time.registerLoadFromEmbeddedTZData": true`),
      :2550 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
-     (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:1015
+     (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:1032
      (`public static void checkParallel(ж<T> t)`). -->
 
 The target in `time` is ordinary Go, marked with the one-argument directive. Each converted package is its
@@ -12341,7 +12341,7 @@ func (v *Value) Load() (val any) {
 The hand-written C# keeps the `any` in its one field. It reads the field with .NET's `Volatile.Read`, an
 atomic, ordered load of one object reference:
 
-<!-- source: src/core/sync/atomic/value.cs:6-20, 37-39 -->
+<!-- source: src/core/sync/atomic/value.cs:13-27, 44-46 -->
 <!-- attribute-shown: a hand-written file keeps the attributes -->
 ```csharp
 [module: go.GoManualConversion]
@@ -12387,7 +12387,7 @@ statement it replaces and no other line. A traceback's `created by` line then na
 Go's does.
 <!-- the converter's record: src/go2cs/positionMapOperations.go:673 (`Go source positions are recorded here, one`)
      and :678 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
-     A hand-kept record: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AP0B3AMAANsD")]`),
+     A hand-kept record: src/core/sync/waitgroup.cs:37 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIYC3AMAANsD")]`),
      for its goǃ( at :254 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per
      tracked hand-owned src/core file with a goǃ( and maps every other line to no Go line. -->
@@ -12418,7 +12418,7 @@ The converted `proc.cs` keeps only a placeholder where `Gosched` would be:
 The placeholder names the attribute that the `*_impl.cs` file carries. It is the same attribute as
 `go.GoManualConversion`; `go` is its namespace. The hand-owned `managed_impl.cs` supplies the method:
 
-<!-- source: src/core/runtime/managed_impl.cs:719-731 -->
+<!-- source: src/core/runtime/managed_impl.cs:780-792 -->
 ```csharp
 // Gosched yields the processor, allowing other goroutines to run. It does not suspend the
 // current goroutine, so execution resumes automatically.
@@ -12509,16 +12509,16 @@ converter's list can likewise name the operating systems it covers.
   the JIT inlines into their callers, with `Mul` and `Mul64` on .NET's `Math.BigMul`.
 - `reflect` and `internal/reflectlite`; see [Reflection](#reflection-reflect).
 - The network poller's runtime hooks and Linux's `Syscall6`, at the operating-system boundary.
-<!-- src/core/runtime/trace_impl.cs:59 (`public static error StartTrace()`), :106
+<!-- src/core/runtime/trace_impl.cs:71 (`public static error StartTrace()`), :118
      (`//go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond`);
      src/core/runtime/trace/flightrecorder_impl.cs:34 (`runtime_traceAdvance`), :36 (`runtime_traceClockNow`);
      src/core/runtime/trace/flightrecorder.cs:186-189 (`go.runtime_package.traceClockUnitsPerSecond()`);
      the push row src/go2cs/linknameOperations.go:813 (`"runtime/trace.runtime_traceClockUnitsPerSecond"`). -->
-<!-- math/bits: src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`, with
+<!-- math/bits: src/core/math/bits/bits_impl.cs:159 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`, with
      AggressiveInlining on the line before it, as on Add64, :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
      and Sub64, :133 `public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow)`; the reason and its linux/amd64
      measurement are in that file's header comment. The word-size leaves:
-     bits_impl.cs:74 (`public static (nuint hi, nuint lo) Mul(nuint x, nuint y)`),
+     bits_impl.cs:86 (`public static (nuint hi, nuint lo) Mul(nuint x, nuint y)`),
      :94 (`public static (nuint sum, nuint carryOut) Add(nuint x, nuint y, nuint carry)`), :105
      (`public static (nuint diff, nuint borrowOut) Sub(nuint x, nuint y, nuint borrow)`); the six list entries:
      src/go2cs/manualTypeOperations.go:2871-2878#46e257. -->

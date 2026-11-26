@@ -112,7 +112,7 @@
    interleaving under `-parallel`. `SanitizeName` itself is untouched — it also names subtests, where
    the string feeds the `go test -json` differential.
 9. ~~**`TestReporter` subtest-name escaping**~~ — **DONE 2026-08-03 (`166d9b72e`); struck 2026-09-02
-   on re-verified evidence.** `SanitizeName` (`src/core/testing/TestExecution.cs:833-855`) walks the
+   on re-verified evidence.** `SanitizeName` (`src/core/testing/TestExecution.cs:850-872`) walks the
    name rune by rune: Go's own `testing/match.go` space list folds to `_`, a Go-printable rune passes
    through, and everything else takes `AppendGoEscape` (:899) — the body of `strconv.QuoteRune`, so
    U+001A reads `\x1a` exactly as Go writes it. The method's `<remarks>` (:825-831) names this item's
@@ -190,7 +190,7 @@
     the anchor-redirect page, and the paragraph lives in the split page above.)
 15. ~~**`reflect.Value.Len()` reports 0 for EVERY channel.**~~ — **DONE 2026-08-20 (`22940de2f`, the
     channel-direction-cargo + `Value.Recv`/`Send` arc); struck 2026-09-02 on re-verified evidence.**
-    The arm is at `src/core/reflect/value_impl.cs:354` — `IChannel c => c.Length,` — exactly the
+    The arm is at `src/core/reflect/value_impl.cs:382` — `IChannel c => c.Length,` — exactly the
     one-line fix this item prescribed, and the comment above it records the gap in this item's own
     terms ("this arm was simply missing, so every channel Value reported 0 while Cap answered
     correctly one method away"). `Cap`'s arm is one method down at :604. The item's two secondary

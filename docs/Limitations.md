@@ -246,7 +246,7 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1654 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1715 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists each one and what it waits on,
   with frames for the calling goroutine only. `pprof.StartCPUProfile` gives a profile with no samples (profile with

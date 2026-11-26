@@ -707,7 +707,7 @@ with **exit code 2**. The report is the one Go prints (golib's `CrashReport`):
   ([Limitations](../Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
 <!-- src/core/golib/runtime/CrashReport.cs:192 `oldest first, each after the first on a TAB, with <c> [recovered]</c>`;
      :275 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The traceback renderer is the
-     converted runtime's (src/core/runtime/managed_impl.cs:174 `CrashReport.TracebackRenderer = crashTraceback;`).
+     converted runtime's (src/core/runtime/managed_impl.cs:235 `CrashReport.TracebackRenderer = crashTraceback;`).
      Guards: GolibTests CrashReportTests and CrashReportChainTests. Design record: docs/phase4/DESIGN-crash-report.md.
      history: the backstop once printed to stdout and called Environment.Exit(0), which polluted compared output and
      signaled false success to every caller; later it printed the first line alone, without the traceback. -->

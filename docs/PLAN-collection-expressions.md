@@ -124,7 +124,7 @@ then failed the same build with CS8130 and CS0411, so the build does see the cha
    for `SliceLiteral<T>`. `slice<T>([…])` stays for untargeted positions.
 4. An empty `[]` builds Go's non-nil empty slice, as `slice<T>([])` does today. A bare `[]` in hand-written C# that
    targets `slice<T>` would change from nil to non-nil: unsafe.Slice's nil case already returns `default`
-   (`src/core/unsafe/unsafe.cs:1014-1019`), and the build lists every other such site by marking the builder
+   (`src/core/unsafe/unsafe.cs:1024-1029`), and the build lists every other such site by marking the builder
    `[Obsolete]` for one build, which makes the compiler report each bound site (103 bare `[]` exist in hand-written
    C#; the ones read here target arrays, lists and dictionaries).
 

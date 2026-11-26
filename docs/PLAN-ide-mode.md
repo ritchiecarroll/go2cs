@@ -624,7 +624,7 @@ Elapsed time depends more on owner review bandwidth than on lane-weeks. With one
 **Position map and runtime**
 - `src/go2cs/positionMapOperations.go:23-35`: the position map's sentinel → table design.
 - `src/core/golib/GoPositionMapAttribute.cs:1-5` (MIT header), `:19-24` (consumers), `:50-56` (line-only encoding; predecessor lookup: "a C# line between two records belongs to the earlier one"), `:58-69` (function-literal spans; the Roslyn numbering "matches Go's counter only by coincidence").
-- `src/core/runtime/managed_impl.cs:1937-1971` (`goFuncLiteralSuffix`: same record lookup, falls back to the Roslyn-derived ordinal on a miss), `:2223-2226` (`goSourcePath` replaces `\` with `/` for every frame), `:2312-2331` (lookup keyed by the PDB path's file name against `CsFile`).
+- `src/core/runtime/managed_impl.cs:1998-2032` (`goFuncLiteralSuffix`: same record lookup, falls back to the Roslyn-derived ordinal on a miss), `:2284-2287` (`goSourcePath` replaces `\` with `/` for every frame), `:2373-2392` (lookup keyed by the PDB path's file name against `CsFile`).
 - `src/tests/GolibTests/CallerFrameTestVariantNamingTests.cs:336-361`: golib already compiles `#line` regions.
 
 **Converter modes, writes and build output**

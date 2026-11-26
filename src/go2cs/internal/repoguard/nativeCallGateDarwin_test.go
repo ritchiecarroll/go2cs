@@ -789,7 +789,7 @@ func TestRealizationBucketReadsBothBraceStyles(t *testing.T) {
 			name:  "K&R",
 			lines: []string{"internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {", "    return 0;", "}"},
 			want:  realizationBody,
-			why:   "the corpus's own style, and the real gate's shape at libccall_impl.cs:99",
+			why:   "the corpus's own style, and the real gate's shape at libccall_impl.cs:112",
 		},
 		{
 			name:  "Allman",
