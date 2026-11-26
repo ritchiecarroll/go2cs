@@ -31,8 +31,8 @@ import (
 //	throw new NotImplementedException("<identifier>: no implementation reached this compilation …")
 //
 // so every one of the 102 stdcallN call sites in runtime/windows is dead behind it. Three hand-own
-// headers already state that consequence in words: runtime/windows/os_windows_impl.cs:19 and :95,
-// runtime/windows/signal_windows_impl.cs:27, and internal/poll/windows/runtime_netpoll_impl.cs:16.
+// headers already state that consequence in words: runtime/windows/os_windows_impl.cs:33 and :109,
+// runtime/windows/signal_windows_impl.cs:44, and internal/poll/windows/runtime_netpoll_impl.cs:16.
 //
 // That is what makes a per-site census the wrong instrument here. C1's q90 step 1 (mailbox 7a181d2a0)
 // took the reachability reading COORD's ruling asks for BEFORE any census: runtime/windows
@@ -51,7 +51,7 @@ import (
 //	is stdcall1(_GetStdHandle, …). It is dead BY THE GATE. A guard scoring symbols rather than the
 //	gate would have called it live.
 //
-//	THE GATE IS NOT THE ONLY DOOR. signal_windows_impl.cs:75 declares SetConsoleCtrlHandlerNative as
+//	THE GATE IS NOT THE ONLY DOOR. signal_windows_impl.cs:92 declares SetConsoleCtrlHandlerNative as
 //	[LibraryImport("kernel32.dll")] -- a LIVE native call that never touches asmstdcall. So this guard
 //	prints the interop sites as a reading and its red says "every stdcallN site is dead behind this
 //	gate", NEVER "nothing in runtime/windows reaches the kernel".
@@ -81,7 +81,7 @@ import (
 // runtime's fork (ii) sites honestly classified as dead rather than silently assumed so.
 //
 // THE OTHER TWO FLAVOURS ARE NOT THIS SHAPE and are deliberately absent: darwin's gate (libcCall,
-// runtime/darwin/libccall_impl.cs:99) IS realized over golib's dispatcher, so its 46 sites are LIVE
+// runtime/darwin/libccall_impl.cs:112) IS realized over golib's dispatcher, so its 46 sites are LIVE
 // and owed a per-site census; linux has no single gate at all -- per-symbol stubs, six realized by
 // hand-own bodies and thirty-nine not, plus DISPLACEMENT, where a stub stays bodyless forever because
 // its callers were replaced (futex behind runtime/linux/lock_futex_impl.cs). Each gets its own

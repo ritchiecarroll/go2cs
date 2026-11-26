@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - The package and SiginfoChild.WaitStatus: DERIVED FROM src/internal/syscall/unix/siginfo_linux.go, Go 1.26.11,
+//   method SiginfoChild.WaitStatus. Go's code and comments, with the kernel's 128-byte record laid out explicitly.
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted siginfo_linux.go output).
 //

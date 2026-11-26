@@ -1,6 +1,16 @@
 // Copyright 2025 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The converted output and setVMAName: DERIVED FROM src/runtime/set_vma_name_linux.go, Go 1.26.11, func setVMAName.
+//   Go's code and comments.
+// - setVMANameSupported: INSPIRED BY src/runtime/set_vma_name_linux.go, Go 1.26.11, func setVMANameSupported. The
+//   same answer, from a one-time probe in place of mallocinit's first call.
+// - probeVMAName: original go2cs code. That probe.
 
 // go2cs HAND-OWNED (Go's probe added; the auto conversion is kept beside it as set_vma_name_linux.cs.auto).
 // RULED by COORD 2026-11-09 (runtime TestDecorateMappings, linux).

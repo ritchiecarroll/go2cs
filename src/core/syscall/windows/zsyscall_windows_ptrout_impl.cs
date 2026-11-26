@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ConvertSidToStringSid, ConvertStringSidToSid, NetGetJoinInformation, NetUserGetInfo: DERIVED FROM
+//   src/syscall/zsyscall_windows.go (generated from the declarations in src/syscall/security_windows.go, whose notice
+//   this file carries), Go 1.24.13, funcs ConvertSidToStringSid, ConvertStringSidToSid, NetGetJoinInformation,
+//   NetUserGetInfo. The kernel writes the out-pointer into a native cell that is then published to the caller's slot.
+// - publishPointerOut: original go2cs code.
 
 // Hand-written implementations of the generated syscall wrappers that take a Go `**T`
 // OUT-PARAMETER -- a slot the caller owns and the KERNEL writes a raw address into.
@@ -190,7 +203,7 @@ partial class syscall_package
     // an opaque native handle" -- is only half true and the safe half. The corpus mints `ж<SID>` on
     // exactly two roads, censused rather than assumed:
     //
-    //   NATIVE, and safe by construction. `nativeSid` (security_windows.cs:437) wraps the raw PSID
+    //   NATIVE, and safe by construction. `nativeSid` (security_windows.cs:451) wraps the raw PSID
     //       GetTokenInformation wrote into a POH-allocated buffer, so `NativeAddress != 0` and the
     //       operator returns that address before EnsureStableAddress is ever reached (ж.cs:628) --
     //       no pin exists because nothing managed is being addressed. os/user reaches this road

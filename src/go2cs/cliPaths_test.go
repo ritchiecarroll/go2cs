@@ -64,7 +64,11 @@ func runCLI(t *testing.T, dir string, args ...string) string {
 		t.Fatal(err)
 	}
 
-	cmd.Env = append(os.Environ(), cliPathsHelperEnv+"="+string(encoded))
+	// PWD names dir, as a shell sets it after cd. os/exec sets PWD from Dir only when Env is nil (go.dev/issue/50599),
+	// so without this the child inherits this process's PWD, which does not name its working directory, and
+	// os.Getwd falls back to the kernel's canonical path: /private/var/... on macOS, where t.TempDir() is under the
+	// /var symlink.
+	cmd.Env = append(os.Environ(), "PWD="+dir, cliPathsHelperEnv+"="+string(encoded))
 
 	output, err := cmd.CombinedOutput()
 

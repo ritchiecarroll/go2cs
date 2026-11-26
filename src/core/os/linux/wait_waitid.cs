@@ -1,6 +1,12 @@
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - Process.blockUntilWaitable: DERIVED FROM src/os/wait_waitid.go, Go 1.23.12, method Process.blockUntilWaitable. Go
+//   1.23.12's raw waitid loop, with the siginfo buffer in native memory; Go 1.26.11 calls unix.Waitid instead.
 // We used to use this code for Darwin, but according to issue #19314
 // waitid returns if the process is stopped, even when using WEXITED.
 //go:build linux

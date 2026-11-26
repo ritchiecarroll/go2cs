@@ -1,6 +1,15 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - readReparseLink, readReparseLinkHandle: DERIVED FROM src/os/file_windows.go, Go 1.26.11, funcs readReparseLink,
+//   readReparseLinkHandle. Go's statements and comments, with the reparse buffer decoded from its bytes in place of
+//   struct re-views.
+// - readReparseUint16, readReparseUint32, reparseSubstituteName: original go2cs code. That decoding.
 using go;
 
 // Hand-finished conversion (Phase 4 — os operational on Windows).

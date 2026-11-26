@@ -1,6 +1,15 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - File.readdir: DERIVED FROM src/os/dir_windows.go, Go 1.26.11, method File.readdir. Go's loop and comments, with
+//   the directory entries decoded from the raw buffer in place of a struct re-view.
+// - readEntryUint32, readEntryUint64, readEntryFiletime, readEntryName, newFileStatFromDirEntryBytes: original go2cs
+//   code. That decoding.
 using go;
 
 // Hand-finished conversion (Phase 4 — os operational on Windows).
