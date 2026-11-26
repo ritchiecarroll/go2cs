@@ -998,6 +998,12 @@ func TestRecurseGoFileFreeContainerDirsKeepDistinctProjectNames(t *testing.T) {
 		t.Errorf("output-root Directory.Build.targets does not import golib's go.lib.symbols.targets:\n%s", targets)
 	}
 
+	// The twin opt-in (GoTwinsFor) is golib's go.lib.twins.targets, imported the same way: without it a program converted
+	// outside the repository builds without twins and says nothing (measured 2026-11-25 in all three runtime modes).
+	if !strings.Contains(targets, `<Import Project="$(go2csPath)core/golib/buildTransitive/go.lib.twins.targets"`) {
+		t.Errorf("output-root Directory.Build.targets does not import golib's go.lib.twins.targets:\n%s", targets)
+	}
+
 	// A converted LIBRARY is not an application: a `dotnet publish -r <rid> -p:PublishAot=true` that reaches it
 	// through a solution (the per-project .slnx of -recurse=nuget) would otherwise publish it as its own native
 	// library. The .targets, not the .props, because OutputType is set in the project body.

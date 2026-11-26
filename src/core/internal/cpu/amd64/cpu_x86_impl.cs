@@ -1,3 +1,22 @@
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE — Go 1.26.11. This file mixes code ported from Go with code original to go2cs. The flag set it fills is
+// doinit's. The ported parts, by source:
+//
+//   src/internal/cpu/cpu_x86.go
+//     doinit, the HasAVX512BITALG read     DERIVED FROM: X86.HasAVX512BITALG = isSet(ecx7, cpuid_AVX512BITALG),
+//                                          under HasAVX512F (cpu_x86.go:178-185)
+//     doinit's option table                DERIVED FROM: registerX86Options, gated on the level as doinit gates it
+//     doinit's doDerived                   DERIVED FROM: deriveX86Features (the virtual HasAVX512)
+//   src/internal/cpu/cpu_x86.s
+//     cpuid                                INSPIRED BY: cpuid's managed body runs the same instruction (X86Base.CpuId)
+//     getGOAMD64level                      INSPIRED BY: its body is that TEXT's fall-through constant, 1
+//
+// Original to go2cs: the System.Runtime.Intrinsics mapping of every other flag, the module-initializer stand-in for
+// schedinit's cpuinit slot, GoCpuAppliesGodebug and the GolibTests probe GoCpuOptionsProbe.
+//
 // cpu_x86_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
@@ -59,13 +78,19 @@
 //                 HasAVX512VBMI Avx512Vbmi · HasAVX512VBMI2 Avx512Vbmi2 · HasAVX512GFNI Gfni.V512
 //                 HasAVX512VPCLMULQDQ Pclmulqdq.V512 · HasAVXVNNI AvxVnni · HasGFNI Gfni;
 //                 HasAVX512 is VIRTUAL (F+CD+BW+DQ+VL), derived after GODEBUG as Go's doDerived does.
-//   UNMAPPED (10) HasADX, HasERMS, HasRDTSCP, HasSHA, and Go 1.26's HasVAES, HasAVX512VAES,
-//                 HasAVX512VNNI, HasAVX512BITALG, HasAVX512VPOPCNTDQ — no System.Runtime.Intrinsics.X86
-//                 surface in .NET 10 (Sha, Aes.V256/V512, Avx512Vnni, Avx512Bitalg and Avx512Vpopcntdq
+//   FROM CPUID (1) HasAVX512BITALG. .NET 10 has no Avx512Bitalg, so it is read from CPUID leaf 7,
+//                 ECX bit 12, under HasAVX512F, exactly as doinit reads it. internal/runtime/gc/scan's
+//                 CanAVX512 needs it, and that package has managed bodies behind it
+//                 (scan/amd64/scan_amd64_impl.cs). So the flag reads the hardware, and what it gates exists.
+//   UNMAPPED (9)  HasADX, HasERMS, HasRDTSCP, HasSHA, and Go 1.26's HasVAES, HasAVX512VAES,
+//                 HasAVX512VNNI, HasAVX512VPOPCNTDQ — no System.Runtime.Intrinsics.X86
+//                 surface in .NET 10 (Sha, Aes.V256/V512, Avx512Vnni and Avx512Vpopcntdq
 //                 do not exist; verified by compile error, not assumed) — and HasOSXSAVE, which is
 //                 an OS-support PRECONDITION for AVX rather than a feature: the runtime has already
 //                 applied it, since Avx.IsSupported is false without it. These stay FALSE, which is
-//                 the conservative direction: a consumer gated on them takes the portable path.
+//                 the conservative direction: a consumer gated on them takes the portable path. Each
+//                 one turned on is its own census: what reads it, and whether a managed body exists
+//                 behind it (BOARD, 2026-11-25, R).
 //   (HasFSRM is also unmapped and false, as before.)
 //
 // NOT getGOAMD64level. The header above is right and this does not disturb it: that answers the
@@ -149,6 +174,14 @@ partial class cpu_package
         X86.HasSSE41 = Sse41.IsSupported;
         X86.HasSSE42 = Sse42.IsSupported;
         X86.HasSSSE3 = Ssse3.IsSupported;
+
+        // doinit's own read (cpu_x86.go:178-185): BITALG under HasAVX512F, whose IsSupported already folds in the
+        // OS's AVX-512 state support (Go's osSupportsAVX512). No intrinsic answers it, so CPUID does.
+        if (X86.HasAVX512F)
+        {
+            var (_, _, ecx7, _) = cpuid(7, 0);
+            X86.HasAVX512BITALG = isSet(ecx7, cpuid_AVX512BITALG);
+        }
 
         // Go's Initialize(env) runs doinit, which fills the option table on every OS, and then
         // processOptions(env). The env is runtime.getGodebugEarly's answer, which is GODEBUG only on

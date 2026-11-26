@@ -22,7 +22,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using math.rand;
 using static go.unique_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class unique_internal_test_package {
 
@@ -64,7 +64,7 @@ public static void TestHandle(ж<testing.T> t) {
     testHandle<testStringArray, testStringArray>(t, new testStringArray(new @string[]{"a", "b", "c"}.array()));
     testHandle<testStringStruct, testStringStruct>(t, new testStringStruct("x"));
     testHandle<testStringStructArrayStruct, testStringStructArrayStruct>(t, new testStringStructArrayStruct(
-        s: new testStringStruct[]{new("y"), new("z")}.array()
+        s: array<testStringStruct>([new("y"), new("z")])
     ));
     testHandle<testStruct, testStruct>(t, new testStruct(0.5D, "184"));
     testHandle<testEface, testEfaceᴅ>(t, (testEface)(@string)("hello"u8));
@@ -77,7 +77,7 @@ internal static readonly object v0V1ˢ = (@string)"v0 != v1"u8;
 
 internal static void testHandle<T, Tᴺ>(ж<testing.T> t, T value) {
     @string name = reflect.TypeFor<Tᴺ>().Name();
-    t.Run(fmt.Sprintf("%s/%#v"u8, name, (value).OrTypedNilOf()), (ж<testing.T> tΔ1) => {
+    t.Run(fmt.Sprintf("%s/%#v"u8, name, (value).OrTypedNilOf()), [GoFunc("testHandle[...].func1")] (ж<testing.T> tΔ1) => {
         var v0 = Make<T>(value);
         var v1 = Make<T>(value);
 
@@ -133,7 +133,7 @@ internal static readonly object stringWasImproperlyˢ = (@string)"string was imp
 public static void TestMakeClonesStrings(ж<testing.T> t) {
     @string s = strings.Clone("abcdefghijklmnopqrstuvwxyz"); // N.B. Must be big enough to not be tiny-allocated.
     var ran = new channel<bool>(0);
-    Δruntime.AddCleanup(@unsafe.StringData(s), (channel<bool> ch) => {
+    Δruntime.AddCleanup(@unsafe.StringData(s), [GoFunc("TestMakeClonesStrings.func1")] (channel<bool> ch) => {
         ch.ᐸꟷ(true);
     }, ran);
     var h = Make<@string>(s);
@@ -193,7 +193,7 @@ internal static testNestedHandle nestHandle(testNestedHandle n) {
 }
 
 public static void TestNestedHandle(ж<testing.T> t) {
-    var n0 = new testNestedHandle(arr: new nint[]{1, 2, 3, 4, 5, 6}.array());
+    var n0 = new testNestedHandle(arr: array<nint>([1, 2, 3, 4, 5, 6]));
     var n1 = nestHandle(n0);
     var n2 = nestHandle(n1);
     var n3 = nestHandle(n2);
@@ -254,67 +254,67 @@ public static void TestMakeAllocs(ж<testing.T> t) {
         errorf = (@string p1, params ꓸꓸꓸany p2) => t.Logf(p1, p2);
     }
 
-    var tests = slice<TestMakeAllocs_tests>([
-        new(name: "create heap bytes", allocs: 1, f: () => {
+    var tests = new TestMakeAllocs_tests[]{
+        new(name: "create heap bytes", allocs: 1, f: [GoFunc("TestMakeAllocs.func1")] () => {
             heapBytes = newHeapBytes();
         }),
 
-        new(name: "create heap string", allocs: 2, f: () => {
+        new(name: "create heap string", allocs: 2, f: [GoFunc("TestMakeAllocs.func2")] () => {
             heapString = newHeapString();
         }),
 
-        new(name: "static string", allocs: 0, f: () => {
+        new(name: "static string", allocs: 0, f: [GoFunc("TestMakeAllocs.func3")] () => {
             stringHandle = Make<@string>(thisStringIsStaticallyˢ);
         }),
 
-        new(name: "heap string", allocs: 0, f: () => {
+        new(name: "heap string", allocs: 0, f: [GoFunc("TestMakeAllocs.func4")] () => {
             stringHandle = Make<@string>(heapString);
         }),
 
-        new(name: "stack string", allocs: 0, f: () => {
+        new(name: "stack string", allocs: 0, f: [GoFunc("TestMakeAllocs.func5")] () => {
             array<byte> b = new(16);
             b[8] = (byte)'a';
             stringHandle = Make<@string>((@string)(b[..]));
         }),
 
-        new(name: "bytes", allocs: 0, f: () => {
+        new(name: "bytes", allocs: 0, f: [GoFunc("TestMakeAllocs.func6")] () => {
             stringHandle = Make<@string>((@string)heapBytes);
         }),
 
-        new(name: "bytes truncated short", allocs: 0, f: () => {
+        new(name: "bytes truncated short", allocs: 0, f: [GoFunc("TestMakeAllocs.func7")] () => {
             stringHandle = Make<@string>((@string)(heapBytes[..16]));
         }),
 
-        new(name: "bytes truncated long", allocs: 0, f: () => {
+        new(name: "bytes truncated long", allocs: 0, f: [GoFunc("TestMakeAllocs.func8")] () => {
             stringHandle = Make<@string>((@string)(heapBytes[..40]));
         }),
 
-        new(name: "string to any", allocs: 1, f: () => {
+        new(name: "string to any", allocs: 1, f: [GoFunc("TestMakeAllocs.func9")] () => {
             anyHandle = Make<any>(heapString);
         }),
 
-        new(name: "large number", allocs: 0, f: () => {
+        new(name: "large number", allocs: 0, f: [GoFunc("TestMakeAllocs.func10")] () => {
             intHandle = Make<nint>(randomNumber);
         }),
 
-        new(name: "large number to any", allocs: 1, f: () => {
+        new(name: "large number to any", allocs: 1, f: [GoFunc("TestMakeAllocs.func11")] () => {
             anyHandle = Make<any>(randomNumber);
         }),
 
-        new(name: "pair", allocs: 0, f: () => {
-            pairHandle = Make<array<@string>>(new @string[]{heapString, heapString}.array());
+        new(name: "pair", allocs: 0, f: [GoFunc("TestMakeAllocs.func12")] () => {
+            pairHandle = Make<array<@string>, ᴀ2>(array<@string>([heapString, heapString]));
         }),
 
-        new(name: "pair from stack", allocs: 0, f: () => {
+        new(name: "pair from stack", allocs: 0, f: [GoFunc("TestMakeAllocs.func13")] () => {
             array<byte> b = new(16);
             b[8] = (byte)'a';
-            pairHandle = Make<array<@string>>(new @string[]{(@string)(b[..]), (@string)(b[..])}.array());
+            pairHandle = Make<array<@string>, ᴀ2>(array<@string>([(@string)(b[..]), (@string)(b[..])]));
         }),
 
-        new(name: "pair to any", allocs: 1, f: () => {
-            anyHandle = Make<any>(new @string[]{heapString, heapString}.array());
+        new(name: "pair to any", allocs: 1, f: [GoFunc("TestMakeAllocs.func14")] () => {
+            anyHandle = Make<any>(array<@string>([heapString, heapString]));
         })
-    ]);
+    }.slice();
 
     foreach (var (_, tt) in range(tests)) {
         var allocs = testing.AllocsPerRun(100, tt.f);
@@ -323,6 +323,8 @@ public static void TestMakeAllocs(ж<testing.T> t) {
         }
     }
 }
+
+private sealed class ᴀ2 : IGoArrayDims { public static nint[] Dims { get; } = [2]; }
 
 //go:noinline
 internal static partial slice<byte> newHeapBytes() {
