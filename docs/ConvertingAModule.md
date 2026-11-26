@@ -328,19 +328,26 @@ dotnet build -c Debug
 dotnet run -c Debug
 ```
 
-The conversion records the platform it converted for (the host, unless `-platforms` names another) in the
-output root's generated `Directory.Build.props`, and the standard library builds that flavor, so on the machine
-that converted it no flag is needed; to build for another platform, convert for it. A conversion by go2cs
-1.26.11.1 or earlier records no platform: on Linux and macOS add `-p:GoTargetOS=linux` (or `darwin`) to
-`dotnet build` and `dotnet run`, and on Linux Arm64 also `-p:GoTargetArch=arm64`, because a local standard library
-builds its Windows flavor unless told otherwise, and that program stops at start-up with a warning that says so.
-The same conversions also need the .NET 10 runtime (or `DOTNET_ROLL_FORWARD=Major`) on a machine with only a newer
-.NET; a later conversion's output root lets the program roll forward as the go.lib package does. The converted C#
-is the same either way — only the reference style in the generated projects differs.
+Converted this way, inside the deploy root, the build has to name the platform on Linux and macOS: add
+`-p:GoTargetOS=linux` (or `darwin`) to `dotnet build` and `dotnet run`, and on Linux Arm64 also
+`-p:GoTargetArch=arm64`. The deploy root's `Directory.Build.props` is the one `deploy-core.ps1` wrote, and the
+conversion leaves it as it is, so no platform default is recorded; a local standard library then builds its Windows
+flavor, and that program stops at start-up with a warning that says so. Windows needs no flag. A conversion into a
+separate output root (below) writes its own `Directory.Build.props`, which records the platform it converted for
+(the host, unless `-platforms` names another), and builds that flavor with no flag; a conversion by go2cs 1.26.11.1
+or earlier records none, and needs the same flags. Conversions by go2cs 1.26.11.1 or earlier also need the .NET 10
+runtime (or `DOTNET_ROLL_FORWARD=Major`) on a machine with only a newer .NET; a later conversion lets the program
+roll forward as the go.lib package does, in either shape. The converted C# is the same either way — only the
+reference style in the generated projects differs.
 <!-- 2026-11-25 (P1, COORD 231547Z): before this, a local-refs hello program converted and built on linux-x64
      compiled the windows runtime flavor and died at start on kernel32.dll; on a linux-arm64 runner the layout check
      refused windows/arm64 (release-smoke 45695710215, arm T-twins-core). With the recorded platform and the
-     output root's import of go.lib.rollforward.targets it built with no flags on an SDK-11-only root and ran. -->
+     output root's import of go.lib.rollforward.targets it built with no flags on an SDK-11-only root and ran.
+     2026-11-26 (P1, COORD 100853Z): converted inside a deploy-core root, the build failed CS2021 x10 on every SDK and
+     OS: the conversion kept deploy-core's props, and its targets' generator-output path read two properties only the
+     converter's own props defines, so every project shared "gen/". The targets now guard that block; the same run
+     showed the deploy-root props records no platform, so this flow names it (gate: PackageTests/LocalRefsPlatform,
+     arm IN-PLACE). -->
 
 The output root does not have to be the deploy root: `go2cs -recurse -go2cspath <gopath>/src/go2cs . csharp`
 keeps the generated tree in `csharp/` while still referencing the deploy root. The conversion records that
