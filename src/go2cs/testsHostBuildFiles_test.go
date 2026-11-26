@@ -44,6 +44,13 @@ func testsHostFixture(t *testing.T) (root, output string) {
 	return root, output
 }
 
+// testsHostNoModule is an input directory with no go.mod above it, as a standard-library package's reads to this
+// writer: no module root is recorded for it.
+func testsHostNoModule(t *testing.T) string {
+	t.Helper()
+	return filepath.Join(t.TempDir(), "strings")
+}
+
 func readTestsHostFile(t *testing.T, path string) string {
 	t.Helper()
 
@@ -58,7 +65,7 @@ func readTestsHostFile(t *testing.T, path string) string {
 func TestTestsHostBuildFilesPinGo2CSPathOutsideTheRoot(t *testing.T) {
 	root, output := testsHostFixture(t)
 
-	writeTestsHostBuildFiles(output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+	writeTestsHostBuildFiles(testsHostNoModule(t), output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
 
 	props := readTestsHostFile(t, filepath.Join(output, "Directory.Build.props"))
 
@@ -113,7 +120,7 @@ func TestTestsHostBuildFilesSkipAPinnedOutput(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		writeTestsHostBuildFiles(output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+		writeTestsHostBuildFiles(testsHostNoModule(t), output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
 
 		for _, name := range []string{"Directory.Build.props", "Directory.Build.targets"} {
 			if _, err := os.Stat(filepath.Join(output, name)); err == nil {
@@ -140,7 +147,7 @@ func TestTestsHostBuildFilesSkipAPinnedOutput(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		writeTestsHostBuildFiles(output, Options{go2csPath: deployed, targetPlatform: "linux/amd64"})
+		writeTestsHostBuildFiles(testsHostNoModule(t), output, Options{go2csPath: deployed, targetPlatform: "linux/amd64"})
 
 		for _, name := range []string{"Directory.Build.props", "Directory.Build.targets"} {
 			if _, err := os.Stat(filepath.Join(output, name)); err == nil {
@@ -158,7 +165,7 @@ func TestTestsHostBuildFilesSkipAPinnedOutput(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		writeTestsHostBuildFiles(output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+		writeTestsHostBuildFiles(testsHostNoModule(t), output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
 
 		for _, name := range []string{"Directory.Build.props", "Directory.Build.targets"} {
 			if _, err := os.Stat(filepath.Join(output, name)); err == nil {
@@ -177,7 +184,7 @@ func TestTestsHostBuildFilesLeaveAForeignFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	writeTestsHostBuildFiles(output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+	writeTestsHostBuildFiles(testsHostNoModule(t), output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
 
 	if got := readTestsHostFile(t, propsPath); got != foreign {
 		t.Errorf("a foreign Directory.Build.props was rewritten:\n%s", got)
@@ -188,7 +195,7 @@ func TestTestsHostBuildFilesLeaveAForeignFile(t *testing.T) {
 	}
 
 	// A file go2cs wrote itself is refreshed.
-	writeTestsHostBuildFiles(output, Options{go2csPath: root, targetPlatform: "darwin/arm64"})
+	writeTestsHostBuildFiles(testsHostNoModule(t), output, Options{go2csPath: root, targetPlatform: "darwin/arm64"})
 
 	if targets := readTestsHostFile(t, filepath.Join(output, "Directory.Build.targets")); !strings.Contains(targets, testsHostBuildFileMarker) {
 		t.Errorf("the generated Directory.Build.targets did not survive a second run:\n%s", targets)
@@ -196,7 +203,7 @@ func TestTestsHostBuildFilesLeaveAForeignFile(t *testing.T) {
 }
 
 // The single-package -tests flow writes the files right after the tests csproj, so every host it emits gets them.
-var testsHostHookCall = regexp.MustCompile(`(?s)writeTestProject\(filepath\.Join\(outputPath, testProjectName\).*?\n\t}\n\n\twriteTestsHostBuildFiles\(outputPath, options\)\n`)
+var testsHostHookCall = regexp.MustCompile(`(?s)writeTestProject\(filepath\.Join\(outputPath, testProjectName\).*?\n\t}\n\n\twriteTestsHostBuildFiles\(inputPath, outputPath, options\)\n`)
 
 func TestTestsConversionWritesTheHostBuildFiles(t *testing.T) {
 	source, err := os.ReadFile("testConversion.go")
@@ -205,6 +212,56 @@ func TestTestsConversionWritesTheHostBuildFiles(t *testing.T) {
 	}
 
 	if !testsHostHookCall.Match([]byte(strings.ReplaceAll(string(source), "\r\n", "\n"))) {
-		t.Errorf("testConversion.go does not call writeTestsHostBuildFiles(outputPath, options) right after writeTestProject")
+		t.Errorf("testConversion.go does not call writeTestsHostBuildFiles(inputPath, outputPath, options) right after writeTestProject")
+	}
+}
+
+// A module package's host also records the module's directory (the T17 seat, COORD 182438Z): GoModuleRoot, relative to
+// the props as the go2csPath pin is, carried into the host's runtimeconfig as go2cs.ModuleRoot, which the host reads
+// when GO2CS_MODULE_ROOT is unset. The emitted file holds no absolute path. A standard-library package records none.
+func TestTestsHostBuildFilesRecordTheModuleRoot(t *testing.T) {
+	root, output := testsHostFixture(t)
+	module := filepath.Join(filepath.Dir(filepath.Dir(output)), "mod")
+	input := filepath.Join(module, "greet")
+
+	if err := os.MkdirAll(input, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(module, "go.mod"), []byte("module example.com/hello\n\ngo 1.23\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	writeTestsHostBuildFiles(input, output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+
+	props := readTestsHostFile(t, filepath.Join(output, "Directory.Build.props"))
+
+	for _, want := range []string{
+		"<PropertyGroup Condition=\"'$(GoModuleRoot)' == ''\">",
+		"<GoModuleRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../mod'))</GoModuleRoot>",
+		"<ItemGroup Condition=\"'$(GoModuleRoot)' != ''\">",
+		"<RuntimeHostConfigurationOption Include=\"go2cs.ModuleRoot\" Value=\"$(GoModuleRoot)\" />",
+	} {
+		if !strings.Contains(props, want) {
+			t.Errorf("a module host's Directory.Build.props lacks %q:\n%s", want, props)
+		}
+	}
+
+	if strings.Contains(props, filepath.ToSlash(module)) || strings.Contains(props, module) {
+		t.Errorf("the module root is emitted as an absolute path:\n%s", props)
+	}
+
+	for _, condition := range xmlCondition.FindAllStringSubmatch(props, -1) {
+		if strings.Contains(condition[1], "$([") {
+			t.Errorf("a Condition calls a property function MSBuild cannot parse there: %s", condition[1])
+		}
+	}
+
+	// The standard-library shape records nothing.
+	_, stdOutput := testsHostFixture(t)
+	writeTestsHostBuildFiles(testsHostNoModule(t), stdOutput, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+
+	if stdProps := readTestsHostFile(t, filepath.Join(stdOutput, "Directory.Build.props")); strings.Contains(stdProps, "GoModuleRoot") {
+		t.Errorf("a host with no module records a module root:\n%s", stdProps)
 	}
 }
