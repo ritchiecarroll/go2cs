@@ -747,7 +747,7 @@ that holds a reference, through a pointer reinterpreted from Go storage of anoth
 where it used to be read as if the layouts matched.
 <!-- docs/phase4/DESIGN-array-value-storage.md section 7 (the scout, 7.3 for the before-state:
      src/core/golib/runtime/RuntimeErrorPanic.cs refuses the whole-struct read) and its dated part-D and mixed-pair
-     amendments. The library: merge b6f3bbb44f (C2, I0-lib; go.arrays packed by src/core/golib/golib.csproj:158-176#f8f2d9,
+     amendments. The library: merge b6f3bbb44f (C2, I0-lib; go.arrays packed by src/core/golib/golib.csproj:160-178#f8f2d9,
      a pack without it fails). The converter: merge 817b56e8b0 (C2, I0 part D; std footprint 0; the census P1 on
      linux/amd64 over modernc.org/sqlite v1.62.0 and libc v1.80.1). Mixed pairs: merge 555e30c826 (C2,
      claude/c2-inline-pairs, 3c25375a04). Emission shape: src/tests/Behavioral/InlineArrayFields. The reflection
