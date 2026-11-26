@@ -1,0 +1,7 @@
+# W1R env plain=('', '') twinned=('', 'true') shard-twin-names plain=None twinned=9513
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+W1R	context	FAIL	-1	FAIL	-1	None	None	yes	NO	NO	-	-1	-1	-1	322	436
+W1R	net/url	FAIL	-1	FAIL	-1	None	None	yes	NO	NO	-	-1	-1	-1	29	31
+W1R	sync	FAIL	-1	FAIL	-1	47	47	yes	NO	yes	reference	0	4509	2	63	60
+W1R	testing	DISC	83	DISC	83	83	83	yes	NO	yes	reference	0	5004	0	73	73
+# summary rows=4 plain PASS=0 twinned EQUAL-bank=0 twinned EQUAL-plain=2

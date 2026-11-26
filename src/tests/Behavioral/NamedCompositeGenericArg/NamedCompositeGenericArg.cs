@@ -29,7 +29,7 @@ internal static slice<nint> keys<V>(map<nint, V> m) {
 internal static E total<E>(slice<E> s)
     where E : /* int | float64 */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IIncrementOperators<E>, IDecrementOperators<E>, IUnaryNegationOperators<E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    E t = GoZero<E>();
+    E t = builtin.GoZero<E>();
     foreach (var (_, v) in range(s)) {
         t += v;
     }
@@ -67,7 +67,7 @@ internal static void main() {
     fmt.Println("named chan:", drain<nint>(feed));
 
     Pred even = [GoFunc("main.func1")] (nint v) => v % 2 == 0;
-    fmt.Println("named func:", count(slice<nint>([1, 2, 4]), NilSafeDelegateConversion<Func<nint, bool>, Pred>(even)));
+    fmt.Println("named func:", count(slice<nint>([1, 2, 4]), builtin.NilSafeDelegateConversion<Func<nint, bool>, Pred>(even)));
 
     var grid = new Grid(new nint[]{4, 5}.array());
     fmt.Println("named array:", first<nint>(grid));

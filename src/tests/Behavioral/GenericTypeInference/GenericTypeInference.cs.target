@@ -68,7 +68,7 @@ public static E SumHalves<S, E>(S s)
         return s[0];
     }
     nint mid = len(s) / 2;
-    return SumHalves<S, E>(subslice<S, E>(s, 0, mid)) + SumHalves<S, E>(subslice<S, E>(s, mid));
+    return SumHalves<S, E>(builtin.subslice<S, E>(s, 0, mid)) + SumHalves<S, E>(builtin.subslice<S, E>(s, mid));
 }
 
 public static S AppendKeep<S, E>(S s, E v)
@@ -202,7 +202,7 @@ internal static U growShrink<U>(U v, U lim)
     where U : /* ~uint32 | ~uintptr */ IAdditionOperators<U, U, U>, ISubtractionOperators<U, U, U>, IMultiplyOperators<U, U, U>, IDivisionOperators<U, U, U>, IIncrementOperators<U>, IDecrementOperators<U>, IUnaryNegationOperators<U, U>, IModulusOperators<U, U, U>, IBitwiseOperators<U, U, U>, IShiftOperators<U, int, U>, IEqualityOperators<U, U, bool>, IComparisonOperators<U, U, bool>, new()
 {
     while (v < lim) {
-        v = v * ConvertToType<U>(2) + ConvertToType<U>(1);
+        v = v * builtin.ConvertToType<U>(2) + builtin.ConvertToType<U>(1);
     }
     return (v % lim) >> 1;
 }
@@ -212,7 +212,7 @@ internal static Seq<T> seqOf<T, N>(N n)
     where N : /* ~int32 | ~int64 */ IAdditionOperators<N, N, N>, ISubtractionOperators<N, N, N>, IMultiplyOperators<N, N, N>, IDivisionOperators<N, N, N>, IIncrementOperators<N>, IDecrementOperators<N>, IUnaryNegationOperators<N, N>, IModulusOperators<N, N, N>, IBitwiseOperators<N, N, N>, IShiftOperators<N, int, N>, IEqualityOperators<N, N, bool>, IComparisonOperators<N, N, bool>, new()
 {
     return [GoFunc("seqOf[...].func1")] (Func<T, bool> yield) => {
-        for (var i = ConvertToType<T>(0); i < ConvertToType<T>(ConvertToUInt64<N>(n)); i++) {
+        for (var i = builtin.ConvertToType<T>(0); i < builtin.ConvertToType<T>(builtin.ConvertToUInt64<N>(n)); i++) {
             if (!yield(i)) {
                 return;
             }
@@ -241,10 +241,10 @@ internal static (nint, bool) bsearchLike<S, E>(S s, E v)
 internal static Int halveN<Int>(Int n)
     where Int : /* ~int32 | ~int64 */ IAdditionOperators<Int, Int, Int>, ISubtractionOperators<Int, Int, Int>, IMultiplyOperators<Int, Int, Int>, IDivisionOperators<Int, Int, Int>, IIncrementOperators<Int>, IDecrementOperators<Int>, IUnaryNegationOperators<Int, Int>, IModulusOperators<Int, Int, Int>, IBitwiseOperators<Int, Int, Int>, IShiftOperators<Int, int, Int>, IEqualityOperators<Int, Int, bool>, IComparisonOperators<Int, Int, bool>, new()
 {
-    if (n <= ConvertToType<Int>(0)) {
+    if (n <= builtin.ConvertToType<Int>(0)) {
         return n;
     }
-    return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);
+    return builtin.ConvertToType<Int>(builtin.ConvertToUInt64<Int>(n) / 2);
 }
 
 internal static E halve<E>(E v)

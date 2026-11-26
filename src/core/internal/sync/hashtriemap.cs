@@ -1,6 +1,18 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - HashTrieMap and its methods: INSPIRED BY src/internal/sync/hashtriemap.go, Go 1.26.11, methods HashTrieMap.init,
+//   HashTrieMap.initSlow, HashTrieMap.Load, HashTrieMap.LoadOrStore, HashTrieMap.Store, HashTrieMap.Swap,
+//   HashTrieMap.CompareAndSwap, HashTrieMap.LoadAndDelete, HashTrieMap.Delete, HashTrieMap.CompareAndDelete,
+//   HashTrieMap.All, HashTrieMap.Range, HashTrieMap.Clear. The same map contract and panics over a concurrent
+//   dictionary in place of the hash-trie; Go's doc comments verbatim.
+// - storeOf, zeroValue, newSeed, installKeyHash, mustBeStaticallyComparable, mustBeComparable and the key wrapper's
+//   Equals and GetHashCode: original go2cs code. The store and its helpers.
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted hashtriemap.go output). Go's
 // HashTrieMap is a lock-free hash-trie seeded entirely from one runtime descriptor read: initSlow

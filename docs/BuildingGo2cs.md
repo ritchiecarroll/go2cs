@@ -34,8 +34,8 @@ says how to run them before you send a change.
 
 These focused checks run by hand when you change what they guard:
 
-- `src/check-warning-entries.sh`: the per-file warning entries the converter writes match the compiler's
-  warnings, in both directions.
+- `src/archived/scripts/check-warning-entries.sh` (archived: kept and still runnable, but no gate or CI job
+  runs it): the per-file warning entries the converter writes match the compiler's warnings, in both directions.
 - `src/tests/pack-paths-selftest.ps1`: the pack's path guard (`src/check-pack-paths.ps1`) names exactly
   the paths planted in fabricated packages.
 - `src/tools/nugetgo/Test-NugetgoSelfDescription.ps1`: the module pack's self-description, on a
@@ -133,9 +133,24 @@ The `GO2CS` codes a conversion or a build reports are listed in [Diagnostic code
 
 To build the whole converted standard library in Visual Studio, open the
 [Go Standard Library Solution](https://github.com/ritchiecarroll/go2cs/blob/master/src/go2cs-stdlib.slnx).
+Neither solution names a startup project, because the `.slnx` format has no place for one: Visual Studio picks a
+class library (`go.arrays` today), and keeps your choice per user in `.vs/`. In `src/go2cs.slnx`, right-click a
+program, such as `BehavioralRunner` or any behavioral test, and choose **Set as Startup Project**. The standard
+library solution holds only libraries, so it has nothing to start.
+
+In VS Code, open the repository root: the committed `.vscode/settings.json` selects `src/go2cs.slnx` as
+the C# Dev Kit's solution (opening `src/` selects it too), and **Terminal > Run Build Task** builds it. The Go
+extension's workspace leaves out the behavioral tests, the converted standard library, the archived examples and
+`docs/`, whose small Go modules would otherwise fill its views; open one of those folders on its own to work in it.
 
 ## Contributing
 
 Contributors: start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md),
 then see [`Architecture.md`](Architecture.md), [`ConversionStrategies.md`](ConversionStrategies.md) and
-[`Roadmap.md`](Roadmap.md) for details. There's plenty of low-hanging fruit here; jump in if you'd like to help.
+[`Roadmap.md`](Roadmap.md) for details.
+
+The most useful help right now is running go2cs on your own Go code. When the C# fails to build, or
+behaves differently from Go, a small program that reproduces it makes the best
+[issue](https://github.com/ritchiecarroll/go2cs/issues/new/choose). [Known Issues](KnownIssues.md) and
+[Limitations](Limitations.md) list what is already known. For anything sizable, start a
+[Discussion](https://github.com/ritchiecarroll/go2cs/discussions) first so we can agree on an approach.

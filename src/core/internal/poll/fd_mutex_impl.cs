@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2013 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - fdMutex.increfAndClose, rwlock, rwunlock: DERIVED FROM src/internal/poll/fd_mutex.go, Go 1.26.11, methods
+//   fdMutex.increfAndClose, fdMutex.rwlock, fdMutex.rwunlock. Go's state-word protocol and comments, with a per-mutex
+//   gate in place of the runtime semaphore words.
+// - gateOf: original go2cs code. Creates that gate.
 
 // Hand-owned companions for internal/poll's fdMutex read/write lock — `rwlock` and `rwunlock`,
 // displaced from the converted fd_mutex.cs through manualConversionFuncs. Nothing else in

@@ -32,6 +32,8 @@ EachCandidateOneMillisecondWaitIsMeasured  # the candidates are darwin's; this p
 ForegroundPlacesTheChildsGroupInTheTerminalsForeground  # no controlling terminal: run under a pty (util-linux `script -qfc`) to measure the transfer
 GotracebackWerAtStartReachesEnableWerAndClearsTheFaultBox  # enableWER acts only on Windows; elsewhere it is Go's own empty stub
 LinuxArm64OsInitMapsTheKernelsHwcapAsGoDoes  # not an arm64 process on Linux
+LiveFcntlSetsTheVariadicFlag  # calls libSystem's fcntl; macOS only (the osx-arm64 leg measures the stack slot, osx-x64 the register)
+LiveOpenCreatesTheFileWithTheVariadicMode  # calls libSystem's open; macOS only (the osx-arm64 leg measures the stack slot, osx-x64 the register)
 OnWindowsTheSameLibraryInTheApplicationDirectoryLoads  # only windows searches the application directory, as a Go binary's loader does: NOT MEASURED here
 The2a2bDiscriminatorUsesTheRegistrysOwnProjection_NotACopyOfIt  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
 TheArmsAreExhaustive_TheSumReconcilesWithTheConversionCount  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...

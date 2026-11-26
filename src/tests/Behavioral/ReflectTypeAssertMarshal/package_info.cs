@@ -67,8 +67,8 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial interface namer {}
     internal partial struct reading {}
-    internal partial struct record {}
     internal partial struct thing {}
+    internal partial struct Δrecord {}
     public partial struct celsius {}
     // </TypeAccessibility>
 

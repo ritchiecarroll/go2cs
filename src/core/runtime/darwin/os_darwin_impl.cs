@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - ᴛInitPhysPageSize, ᴛInitExecutablePath: INSPIRED BY src/runtime/os_darwin.go, Go 1.26.11, funcs osinit, sysargs.
+//   The page size and executable path those set, in module initializers.
 
 // The values Go's darwin sysargs and osinit set and the managed runtime never reached (2026-10-09).
 // This file has no `<name>.go` counterpart, so a -stdlib reconvert never emits over it; the module

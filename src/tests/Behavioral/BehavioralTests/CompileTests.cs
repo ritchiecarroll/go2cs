@@ -43,6 +43,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
 
     [TestMethod]
+    public void CheckAliasKeywordPackage() => CheckTarget("AliasKeywordPackage");
+
+    [TestMethod]
     public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
 
     [TestMethod]
@@ -595,6 +598,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
 
     [TestMethod]
+    public void CheckDeltaNameProjection() => CheckTarget("DeltaNameProjection");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]
@@ -707,6 +713,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
+
+    [TestMethod]
+    public void CheckExportedFuncOfUnexportedFuncType() => CheckTarget("ExportedFuncOfUnexportedFuncType");
 
     [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
@@ -1045,6 +1054,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
 
     [TestMethod]
+    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
+
+    [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
@@ -1088,6 +1103,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
+
+    [TestMethod]
+    public void CheckGolibIntrinsicShadow() => CheckTarget("GolibIntrinsicShadow");
 
     [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
@@ -1510,6 +1528,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
 
     [TestMethod]
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
+
+    [TestMethod]
     public void CheckMnGoMaxProcs() => CheckTarget("MnGoMaxProcs");
 
     [TestMethod]
@@ -1522,6 +1543,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
+    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
+
+    [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
@@ -1532,15 +1556,6 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
-
-    [TestMethod]
-    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
-
-    [TestMethod]
-    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
-
-    [TestMethod]
-    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
@@ -2015,6 +2030,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
+
+    [TestMethod]
+    public void CheckPackageSuffixCollision() => CheckTarget("PackageSuffixCollision");
 
     [TestMethod]
     public void CheckPackageVarFuncLitPointerParam() => CheckTarget("PackageVarFuncLitPointerParam");
@@ -2990,6 +3008,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
+
+    [TestMethod]
+    public void CheckUnnamedArrayTypeArgDescriptor() => CheckTarget("UnnamedArrayTypeArgDescriptor");
 
     [TestMethod]
     public void CheckUnnamedMapNilConversion() => CheckTarget("UnnamedMapNilConversion");

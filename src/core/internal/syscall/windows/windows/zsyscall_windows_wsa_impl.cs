@@ -4,6 +4,22 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - WSAGetOverlappedResult: DERIVED FROM src/internal/syscall/windows/zsyscall_windows.go (generated from the
+//   declarations in src/internal/syscall/windows/syscall_windows.go, whose notice this file carries), Go 1.24.13,
+//   func WSAGetOverlappedResult. The generated call and error mapping, against the native OVERLAPPED of go2cs's
+//   operation record.
+// - GetOverlappedResult: DERIVED FROM src/internal/syscall/windows/zsyscall_windows.go (generated from the
+//   declarations in src/internal/syscall/windows/syscall_windows.go, whose notice this file carries), Go 1.26.11,
+//   func GetOverlappedResult. The generated call and error mapping, against the native OVERLAPPED of go2cs's
+//   operation record.
 
 // Hand-written implementation of the HARVEST half of the overlapped socket surface -- the one member
 // of the submit seam that lives outside the `syscall` package. Design:

@@ -11,7 +11,7 @@ internal static void main() {
         cΔ1.ᐸꟷ(40 + loop);
 
         var cᴛ1 = cΔ1;
-        switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
         case 0 when cᴛ1.ꟷᐳ(out var x): {
             fmt.Println("recv", x);
             break;
@@ -23,7 +23,7 @@ internal static void main() {
 
         cΔ1.ᐸꟷ(50 + loop);
         var cᴛ2 = cΔ1;
-        switch (trySelect(ᐸꟷ(cᴛ2, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(cᴛ2, ꓸꓸꓸ))) {
         case 0 when cᴛ2.ꟷᐳ(out var x, out var ok): {
             fmt.Println("recv2", x, ok);
             break;
@@ -34,7 +34,7 @@ internal static void main() {
         }}
 
         var cᴛ3 = cΔ1;
-        switch (trySelect(ᐸꟷ(cᴛ3, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(cᴛ3, ꓸꓸꓸ))) {
         case 0 when cᴛ3.ꟷᐳ(out var x): {
             fmt.Println("unexpected", x);
             break;

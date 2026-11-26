@@ -574,7 +574,7 @@ $pathClasses = @(
     @{ Match = '^src/set-version\.ps1$';                  Class = 'MUST-NOT-CHANGE'; Note = 'stamps the CONVERTER TOOL version; its comment merely contrasts itself with version.props' }
     @{ Match = '^src/handown-census\.ps1$';               Class = 'MUST-NOT-CHANGE'; Note = "a -GoRoot worked example in the parameter help, plus a comment naming the release a GOROOT change landed in" }
     @{ Match = '^src/reconvert-deletions\.(ps1|bat)$';    Class = 'MUST-NOT-CHANGE'; Note = 'this pass NAMES the hop (-SourceGoRoot <old> -ExpectGo <new>); substituting either release would destroy the worked example and the seeded-vs-absent case it explains' }
-    @{ Match = '^src/utilities/UpdateTestTargets/';       Class = 'MUST-NOT-CHANGE'; Note = 'comments recording a measured ambient-toolchain skew against the corpus pin -- the finding IS the two releases disagreeing' }
+    @{ Match = '^src/tools/UpdateTestTargets/';           Class = 'MUST-NOT-CHANGE'; Note = 'comments recording a measured ambient-toolchain skew against the corpus pin -- the finding IS the two releases disagreeing' }
     @{ Match = '^src/tools/.+/go\.mod$';                  Class = 'MUST-NOT-CHANGE'; Note = "helper-tool module floor; H1.2 rules the CONVERTER module's directive only, and raising a tool's floor is a per-module decision, never a substitution" }
     @{ Match = '^src/_roster\.ps1$';                      Class = 'MUST-NOT-CHANGE'; Note = 'explanatory comment naming the era the roster columns were banked in' }
     @{ Match = '^src/release-nuget\.bat$';                Class = 'MUST-NOT-CHANGE'; Note = 'a worked example in a comment' }
@@ -1012,8 +1012,8 @@ foreach ($entry in $rawCounts) {
     if ($docFiles -contains $relPath) { continue }
     if ($relPath -eq 'src/version.props' -or $relPath -eq 'src/go2cs/go.mod') { continue }
 
-    # This instrument and its launcher name the release only in their own worked examples.
-    if ($relPath -eq 'src/migrate-gorelease.ps1' -or $relPath -eq 'src/migrate-gorelease.bat') { continue }
+    # This instrument names the release only in its own worked examples.
+    if ($relPath -eq 'src/migrate-gorelease.ps1') { continue }
 
     $class = ''
     $note = ''

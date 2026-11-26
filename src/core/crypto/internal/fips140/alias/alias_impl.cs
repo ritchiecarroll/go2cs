@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - AnyOverlap: INSPIRED BY src/crypto/internal/fips140/alias/alias.go, Go 1.26.11, func AnyOverlap. The same
+//   predicate, without ordering managed element addresses.
 
 // AnyOverlap is the corpus's memory-ALIASING predicate. Go writes it by ORDERING element addresses:
 //

@@ -471,6 +471,33 @@ public unsafe partial class GoCgoArgsTests
         Assert.AreEqual(GoCgoStructPointer.Mirror, GoCgoArgs.ScalarPointer(same, "fill", out _, out _), "the near-miss: a same-size view keeps the mirror");
     }
 
+    // P3's could-not-confirm on the fold: which root's size IReinterpretSource.PointeeSize reports for a VIEW OF A VIEW.
+    // Item 3's refusal keys on the root being wider than T, so a 4-byte field viewed as one char and then viewed again as
+    // one char must still be refused: C may write past one char into the field, and no door can pin it. Each chain is
+    // refused, and the same-size chain over a one-byte field keeps the mirror.
+    [TestMethod]
+    public void PinnedAViewOfAViewIsJudgedByItsChainsRoot()
+    {
+        ж<refHost> host = new StandardBox<refHost>(default(refHost));
+
+        (string form, Func<ж<sbyte>> make)[] wide =
+        [
+            ("int32 field -> sbyte -> sbyte", () => new FieldRefBox<int32>(host, static p => ref ((ж<refHost>)p).Value.N).Reinterpret<int32, sbyte>().Reinterpret<sbyte, byte>().Reinterpret<byte, sbyte>()),
+            ("int32 field -> int16 -> sbyte", () => new FieldRefBox<int32>(host, static p => ref ((ж<refHost>)p).Value.N).Reinterpret<int32, int16>().Reinterpret<int16, sbyte>()),
+        ];
+
+        foreach ((string form, Func<ж<sbyte>> make) in wide)
+        {
+            // The mechanism: Reinterpret re-roots a view of a view at its chain's root, so the root the door sizes is the
+            // 4-byte field, never the inner view.
+            Assert.IsInstanceOfType(((IReinterpretView)make()).ReinterpretRoot, typeof(FieldRefBox<int32>), $"{form}: the view's root is the chain's root");
+            StringAssert.Contains(RefusalOf(() => GoCgoArgs.ScalarPointer(make(), "fill", out _, out _)), "C may write past one", form);
+        }
+
+        ж<sbyte> same = new FieldRefBox<sbyte>(host, static p => ref ((ж<refHost>)p).Value.C).Reinterpret<sbyte, byte>().Reinterpret<byte, sbyte>();
+        Assert.AreEqual(GoCgoStructPointer.Mirror, GoCgoArgs.ScalarPointer(same, "fill", out _, out _), "the near-miss: a one-byte field's same-size chain keeps the mirror");
+    }
+
     // Item 4 (residual 1, endptr): inside the wrapper's `fixed`, a word C returned that lies in a pinned argument's
     // storage is refused by name. Minted as a native box, it would name Go memory that moves once the `fixed` ends. One
     // past the end is refused too: C's write cursor `buf + n` (P3's read of the fold, item 1). Controls: a C address,

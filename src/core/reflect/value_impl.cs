@@ -1,6 +1,48 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notices they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2024 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - The flag guards, Append and AppendSlice: DERIVED FROM src/reflect/value.go, Go 1.26.11, funcs Append,
+//   AppendSlice; methods flag.mustBe, flag.mustBeExportedSlow, flag.mustBeAssignable, flag.mustBeAssignableSlow. Go's
+//   bodies.
+// - The Value members value.cs displaces here: INSPIRED BY src/reflect/value.go, Go 1.26.11, funcs ValueOf,
+//   unpackEface, valueInterface, TypeAssert, Copy, Zero, New, NewAt, MakeSlice, SliceAt, MakeMap, MakeChan,
+//   MakeMapWithSize, valueMethodName, Select; methods Value.Interface, Value.Bool, Value.Int, Value.Uint,
+//   Value.Float, Value.Complex, Value.String, Value.IsNil, Value.Index, Value.Slice, Value.Slice3, Value.Cap,
+//   Value.SetLen, Value.SetCap, Value.Grow, Value.extendSlice, Value.IsZero, Value.Elem, Value.Addr, Value.Bytes,
+//   Value.SetBytes, Value.runes, Value.setRunes, Value.NumField, Value.Field, Value.UnsafePointer, Value.Pointer,
+//   Value.UnsafeAddr, Value.InterfaceData, Value.Set, Value.Close, Value.SetBool, Value.SetInt, Value.SetUint,
+//   Value.SetFloat, Value.SetComplex, Value.SetString, Value.SetZero, Value.Call, Value.Method, Value.CallSlice,
+//   flag.mustBeExported, Value.Type, Value.recv, Value.send, Value.Convert, Value.MethodByName, Value.Clear. The same
+//   contract over the boxed managed value: Go's guards, panics and doc comments are kept, the reads and writes go
+//   through golib's GoReflect bridge; where a body departs from Go's shape its own comment says so.
+// - The map members: INSPIRED BY src/reflect/map.go, Go 1.26.11, func MapOf; methods Value.MapRange, Value.MapKeys,
+//   Value.MapIndex, Value.SetMapIndex, MapIter.Next, MapIter.Key, MapIter.Value, MapIter.Reset, Value.SetIterKey,
+//   Value.SetIterValue, rtype.Key. The same contract over managed maps.
+// - The Type members: INSPIRED BY src/reflect/type.go, Go 1.26.11, funcs toType, TypeFor, implements,
+//   haveIdenticalUnderlyingType, PointerTo, ArrayOf, SliceOf, FuncOf, ChanOf, StructOf; methods Kind.String,
+//   rtype.Name, rtype.PkgPath, rtype.Elem, rtype.Len, rtype.NumField, rtype.NumMethod, interfaceType.Method,
+//   rtype.Field, structType.FieldByIndex, structType.FieldByName, rtype.Implements, rtype.ChanDir, rtype.NumIn,
+//   rtype.In, rtype.NumOut, rtype.Out, rtype.IsVariadic. The same contract over descriptors synthesized from managed
+//   types.
+// - Swapper: INSPIRED BY src/reflect/swapper.go, Go 1.26.11, func Swapper. The same swap, through golib's slice
+//   indexer.
+// - makeReflectValue, unwrapShell, makeTypedValue, packInterfaceValue, the token helpers, canonType,
+//   tryConvertOnlyShape, promotedFieldByName, the haveIdentical*Shape helpers and the other unexported helpers:
+//   original go2cs code. The managed-model machinery the members call, golib's GoReflect bridge beneath them.
+
 using go;
 using go.@internal;
 using System;
@@ -2696,6 +2738,15 @@ internal static @string valueMethodName(string method) {
     // `reflect.Value.` prefix from the FIRST PARAMETER'S TYPE, so `Append(ΔValue s, ...)` -- a package
     // function the emission gives a ΔValue first parameter -- matched, and it manufactured
     // "reflect.Value.Append" where Go says "unknown method".
+    //
+    // A Go method's body is the C# method `<name>⁔` (the converter's glyph suffix; U+2054 is connector
+    // punctuation, which no Go identifier can spell), and its extension forwarder `<name>` is a
+    // [StackTraceHidden] one-liner, so [CallerMemberName] captures the BODY's name. The Go method is the name
+    // without the suffix, as golib's frame naming reads it (GoSyntheticPC): reflect's TestValuePanic printed
+    // "call of reflect.Value.Recv⁔ on string Value".
+    if (method.Length > 1 && method[^1] == '\u2054')
+        method = method[..^1];
+
     return method.Length != 0 && char.IsUpper(method[0])
         ? (@string)("reflect.Value." + method)
         : "unknown method"u8;

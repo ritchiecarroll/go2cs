@@ -157,7 +157,7 @@ func (v *Visitor) funcValueForTarget(targetExpr ast.Expr, target types.Type, exp
 		return rendered
 	}
 
-	return fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, rendered)
+	return fmt.Sprintf("builtin.NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, rendered)
 }
 
 // funcSlotDelegateName is the delegate a slot of Go type target renders as, when a func value of Go type source

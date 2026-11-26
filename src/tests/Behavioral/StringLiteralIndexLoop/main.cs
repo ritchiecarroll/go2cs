@@ -7,7 +7,7 @@ partial class main_package {
 internal static nint sumTable(nint n) {
     nint total = 0;
     for (nint i = 0; i < n; i++) {
-        total += (nint)LiteralByteAt("\x01\x02\x03\x04"u8, i);
+        total += (nint)builtin.LiteralByteAt("\x01\x02\x03\x04"u8, i);
     }
     return total;
 }

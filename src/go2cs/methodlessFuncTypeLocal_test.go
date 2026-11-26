@@ -128,7 +128,7 @@ func main() {
 	}
 
 	// The unnamed local reaches the named parameter through the nil-safe conversion.
-	if want := "useExpand(NilSafeDelegateConversion<expandFunc, Action<nint, ж<nint>>>(expR))"; !strings.Contains(output, want) {
+	if want := "useExpand(builtin.NilSafeDelegateConversion<expandFunc, Action<nint, ж<nint>>>(expR))"; !strings.Contains(output, want) {
 		t.Errorf("expected the unnamed local converted to the named parameter (%q):\n%s", want, output)
 	}
 

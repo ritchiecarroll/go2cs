@@ -122,13 +122,13 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws
-       System.OutOfMemoryException, synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1352
+       System.OutOfMemoryException, synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1363
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`); a smaller stack reserve does not raise
        the cap. Found when internal/synctest's TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac
        runners at the 1.26.10.3 re-bank. A developer Mac's cap may differ. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1352 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1363 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
@@ -136,8 +136,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`, and then
   with Go's goroutine blocks. A deadlock on an ordinary channel or lock blocks forever: break in with a debugger,
   where, by default, each goroutine is a thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1096 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1169 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+  <!-- src/core/golib/runtime/Goroutine.cs:1107 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1180 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** By default, `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), or 16 MB when the converter proves it
   cannot recurse ([how](ConversionStrategies.md#goroutines)). Recursion past a thread's reserve ends the process
@@ -180,8 +180,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
        main.c alone; Go c, b, a, main. A goroutine panic, with main sleeping or waiting on a WaitGroup the goroutine's
        deferred Done releases: exit 2 and the report in both, converted `goroutine 1 [running]` with no `created by`
        line where Go prints `goroutine 18` and `created by main.main in goroutine 1`. The chain is rendered by
-       src/core/golib/runtime/CrashReport.cs:259 `// printpanics, oldest first: a panic whose older neighbour it re-raised is not printed again.`
-       and :275 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The closure frame stays
+       src/core/golib/runtime/CrashReport.cs:270 `// printpanics, oldest first: a panic whose older neighbour it re-raised is not printed again.`
+       and :286 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The closure frame stays
        until a post-hop converter change (COORD, 2026-10-24); the goroutine report on main's return is batch 35's. -->
 * **`unsafe` works over plain numbers and stops at anything .NET's garbage collector tracks**
   ([the rules](ConversionStrategies.md#unsafepointer-and-uintptr)). A pointer to anything holding a
@@ -246,7 +246,7 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1654 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1715 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists each one and what it waits on,
   with frames for the calling goroutine only. `pprof.StartCPUProfile` gives a profile with no samples (profile with
@@ -393,7 +393,7 @@ check runs at the package's first C call rather than when it loads.
        the host only (this section's text at the tag: "One package, one machine").
      - The net resolver: no merge in trains 1 to 7 converts it. -->
 
-<!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way"); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name.** Each of these is not supported yet; [the Roadmap](Roadmap.md#cgo) says what is planned.
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`.
@@ -404,7 +404,10 @@ check runs at the package's first C call rather than when it loads.
 - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
   compiled C;
 - `//export`;
-- a C variable, a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
+- a C variable whose type is not a C scalar or struct (an array, a pointer, a function pointer or a union);
+  `C.x` of a scalar or struct type reads and writes the variable in place, as Go does, once a library the
+  package links exports it;
+- a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
 - a C function Go's own cgo build does not import by its C name: one a header renames (macOS on x64 makes
   `fstat` the symbol `fstat$INODE64`), or one the C compiler inlines. go2cs cannot tell the two apart, so it
   refuses both rather than bind a function C would not call:
@@ -442,6 +445,21 @@ In three, Go proceeds and go2cs refuses the call when it is made:
      slice 0, defer 9, go 0 over GOROOT's 29 cgo packages (50 of the 81 checked calls that pass no element of a
      slice or an array take the variable check). -->
 
+**A Go struct viewed as a C struct crosses as an image, and C's writes land when the call returns.** A struct
+pointer that views a Go struct of another type which holds an array (net's
+`(*C.struct_sockaddr)(unsafe.Pointer(&sa))`, `sa` a `syscall.RawSockaddrInet4`) has no storage go2cs can hand C, so
+go2cs hands C an image of the whole Go struct, at Go's own offsets, and decodes it back after the call. It decodes
+only when C changed the image, so C's write lands in the Go struct when the call returns, not while C runs:
+- a goroutine that reads the struct during a blocking call sees the old value;
+- if C and a goroutine both write it during the call, C's write wins at the return;
+- a `bool` C writes as a byte other than 0 or 1 reads back as `true`.
+
+Three views of one Go value in one call share one image, as Go's one memory does. One Go value handed to C both as
+such a view and through another pointer of the same call is refused by name, and so is a view of a Go struct that
+holds a Go pointer.
+<!-- cgo Phase 3, increment 3.4, the struct image door: docs/phase4/DESIGN-cgo-phase3-marshaling.md 19.7 and 19.9
+     (P3's B4 to B8, COORD inbox H 20261125T034229Z); GolibTests GoCgoImagesTests; e2e arms imgaddinto, imgmixed. -->
+
 **A known memory-safety gap: a pointer rebuilt from a number, in three narrow cases.** go2cs refuses, by
 name, any address inside Go memory that it is holding still, even after the address has been through a
 `uintptr`: `u := uintptr(unsafe.Pointer(p))`, then `unsafe.Pointer(u + n)`, the reversed sum
@@ -471,6 +489,17 @@ or never was. In each, the call goes ahead, and the memory may move while C uses
      row 11 is asserted as disclosed in PinExtentsChildTests; row 8 is the receiver-type FromRef arm of
      DESIGN-cgo-phase3-marshaling.md section 16.9, whose direct form the cgo route refuses at conversion. Moved into
      the cgo section at the batch-308 merge, where P4 gave cgo a section of its own. -->
+
+**A Go array of C pointers costs its whole length on every call.** `C.f(&argv[0])` lets C read or fill every
+pointer in the array, as in Go. go2cs holds such an array as Go pointers rather than as machine words, so for the
+call it copies every element of the array into a word array, hands C that, and copies every word C changed back
+afterwards. The copy covers the whole array behind the slice, not only the part C uses: `argv[2:]` of a long array
+copies the long array, on every call. A word C writes that points into the Go memory the call handed it, the array
+itself included (`argv[0] = &argv[2]`), is refused by name, where Go would keep it. An array of C pointers that
+lives in C memory crosses by its own address, with no copy.
+<!-- cgo Phase 3, .5 cgo item 2 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.12.3, H's verdict (A), the word
+     mirror): GoCgoWordMirror in golib, emitted for the out-parameter door and the void door. Rows: GolibTests
+     CgoArgvTests and the cgo-e2e argv arms. -->
 
 **Platforms.** A converted cgo program was built and run against the Go build of the same program on
 linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64, and printed what Go printed apart from the
@@ -614,7 +643,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4283 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4291 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :859
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

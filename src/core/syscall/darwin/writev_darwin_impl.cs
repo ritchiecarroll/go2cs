@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009,2010 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - writev: DERIVED FROM src/syscall/zsyscall_darwin_amd64.go (generated from the declarations in
+//   src/syscall/syscall_darwin.go, whose notice this file carries), Go 1.26.11, func writev. The iovec array is
+//   passed in unmanaged memory.
 
 // writev's iovec ARRAY on darwin -- the linux seam of 2026-09-02 (syscall/linux/sockaddr_linux_impl.cs
 // GoWritevNative, internal/poll/linux/fd_writev_unix.cs) met on darwin's libc path, 2026-10-25.

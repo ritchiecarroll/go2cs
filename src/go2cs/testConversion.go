@@ -804,7 +804,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Dir:        inputPath,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 		ParseFile: parseFileUnparenAddressOperands,
@@ -1089,6 +1089,8 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, production.PkgPath, model, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
 		return err
 	}
+
+	writeTestsHostBuildFiles(outputPath, options)
 
 	sources, err := classifyTestSources(inputPath, includedSources, compileExcluded, handOwnHostExcluded, external)
 	if err != nil {
@@ -2012,7 +2014,7 @@ func collectSiblingTestClosure(inputPath string, options Options) {
 		Dir:        absolute,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}, ".")
@@ -3188,6 +3190,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		seedProductionAliasLifts(pkg, productionInfoPath)
 		seedProductionInterfaceAliases(pkg, productionInfoPath, options)
 		seedProductionDynamicTypeLifts(productionInfoPath)
+		seedProductionArrayDimsCompanions(productionInfoPath)
 	}
 
 	// The EXTERNAL variant additionally inherits the INTERNAL variant's purely-anonymous lifts.
@@ -4080,7 +4083,12 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
 		packageMethodHolders = bridgeHolders
+
+		// The test assembly takes the C pseudo-package's stamp from package_test_info.cs, written below; this unit
+		// carries none (CS0579 otherwise, on a cgo-on package).
+		cgoPseudoPackageStampElsewhere = true
 		writePackageInfoFile(unitPath, true)
+		cgoPseudoPackageStampElsewhere = false
 
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
 		packageEmittedTypeAccess = savedAccess
@@ -4400,7 +4408,7 @@ func supportedTestCapabilities() []string {
 		// testing.Testing reports whether the binary is a test binary. The host has implemented it
 		// since the one-tree consolidation (core/testing/testing.cs) and the capability list simply
 		// never named it -- an omission train 18 recorded in the same breath as the admission census
-		// ("the host implements testing.Testing at testing.cs:672, but the capability list omits the
+		// ("the host implements testing.Testing at testing.cs:689, but the capability list omits the
 		// name"). Roster impact measured before widening, per the charter: a GOROOT-wide scan of
 		// every *_test.go for `testing.Testing()` returns exactly ONE file, testing's own
 		// testing_test.go, so no validated package gains or loses a test by this.
@@ -7492,9 +7500,11 @@ func classifyTestSources(inputPath string, included hashset.HashSet[string], com
 // digest (F7): any option that changes emitted C# invalidates the manifest. Machine-specific
 // paths (goRoot/goPath/go2csPath) are deliberately excluded so digests stay machine-portable.
 func conversionOptionsDigest(options Options) string {
-	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t",
+	// stack-append is the resolved mode: a package converted with -stack-append=off and then compared without it is
+	// stale, not a default run, because its emission has no stack-append buffers.
+	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t;stack-append=%t",
 		options.useChannelOperators, options.preferVarDecl, options.indentSpaces,
-		options.includeComments, options.parseCgoTargets)
+		options.includeComments, options.parseCgoTargets, stackAppendEnabled(options))
 }
 
 // runtimeSourcesDigest hashes the hand-owned runtime the converted tests build against (golib +
@@ -8278,6 +8288,11 @@ type testEnvironmentRecord struct {
 	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
 	OracleGOARCH string `json:"oracleGoarch,omitempty"`
 
+	// StackAppend is "off" when the run's -stack-append mode resolved off: its emission has no stack-append buffers, so
+	// cap() after a non-escaping append, and an allocation count that reads it, can differ from a default -tests run.
+	// Omitted when the mode resolved on, the -tests default, so every default record is unchanged.
+	StackAppend string `json:"stackAppend,omitempty"`
+
 	// OracleBuildTags is the oracle `go test` child's build tags, recorded only when they differ from the
 	// conversion's (oracleBuildTagsRecord): every row but math/big's own drops math_big_pure_go, so Go ran
 	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise. A POINTER so an
@@ -8336,6 +8351,10 @@ func testEnvironmentFromOptions(options Options) testEnvironmentRecord {
 
 	if oracle := oracleOptions(options); oracle.targetPlatform != options.targetPlatform {
 		_, record.OracleGOARCH, _ = strings.Cut(oracle.targetPlatform, "/")
+	}
+
+	if !stackAppendEnabled(options) {
+		record.StackAppend = "off"
 	}
 
 	return record
@@ -11446,7 +11465,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	}
 
 	goArgs := oracleTestArgs(options, packagePath, hostFatalSkip)
-	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
+	goOutput, goErr := runCommandWithTimeoutEnv(testChildTimeout(options), inputPath, oracleOptions(options), cgoOracleEnv(options), "go", goArgs...)
 
 	// Captured immediately after the real oracle run, same directory, same options — see
 	// oracleGoVersion's own doc comment for why this is not `go env GOROOT`.

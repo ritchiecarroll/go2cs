@@ -95,7 +95,7 @@ func main() {
 
 	// A defined func type's value at a generic func parameter converts to the parameter as this call
 	// instantiates it: Pred is a delegate of its own, and C# infers T from the structural Func<nint, bool>.
-	if want := "count(NilSafeDelegateConversion<Func<nint, bool>, Pred>(even), 2)"; !strings.Contains(mainCs, want) {
+	if want := "count(builtin.NilSafeDelegateConversion<Func<nint, bool>, Pred>(even), 2)"; !strings.Contains(mainCs, want) {
 		t.Errorf("want %q: the parameter is func(T) bool instantiated at int:\n%s", want, mainCs)
 	}
 

@@ -36,6 +36,8 @@ DarwinArm64OsInitSetsGosFeaturesAndHoldsDitFalse  # not an arm64 process on macO
 EachCandidateOneMillisecondWaitIsMeasured  # the candidates are darwin's; this probe measures them on macOS only
 GetpidAnswersTheProcessId  # GoGetpidProbe exists only in the linux flavour of the runtime
 LinuxArm64OsInitMapsTheKernelsHwcapAsGoDoes  # not an arm64 process on Linux
+LiveFcntlSetsTheVariadicFlag  # calls libSystem's fcntl; macOS only (the osx-arm64 leg measures the stack slot, osx-x64 the register)
+LiveOpenCreatesTheFileWithTheVariadicMode  # calls libSystem's open; macOS only (the osx-arm64 leg measures the stack slot, osx-x64 the register)
 StandardErrorKeepsGoBytesAndOrder  # descriptor 2 is redirected with libc dup2; linux only
 TgkillRefusesByName  # GoTgkillProbe exists only in the linux flavour of the runtime
 The2a2bDiscriminatorUsesTheRegistrysOwnProjection_NotACopyOfIt  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...

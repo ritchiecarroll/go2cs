@@ -851,7 +851,7 @@ internal static nint convLocal(hertz h) {
   user-defined `==` candidates for `a == h` (CS9342), so the unnamed side is cast: `(hertz)a == h`. A `switch`
   whose tag and case value are one of each does the same in its `when` clause.
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246-596 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246-592 -->
 ```csharp
 internal static (bool, bool) sameLocal(anonBox_V a, hertz h) { return ((hertz)a == h, h != (hertz)a); }
 …
@@ -913,7 +913,7 @@ func laterTempo() (r struct{ Bpm int }) {
 }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:685-840 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:681-834 -->
 ```csharp
 internal static nint liftVar() {
     liftVar_x x = laterTempo();
@@ -1755,7 +1755,7 @@ by identity. A VARIADIC func type's tail is `params variadic<T>`, a byref-like t
 carry, so `MakeGoFuncDelegate` builds it through a typed family (`makeVariadicFunc{N}`/`makeVariadicAction{N}`,
 golib's `GoReflect.MakeVariadicDelegate.cs`), the reverse of `InvokeVariadic`'s call trampolines above; the
 invoker receives the variadic parameter as its packed slice.
-<!-- src/core/reflect/makefunc_impl.cs:67 `A VARIADIC func (isVariadic) is no longer refused here`. history: MakeFunc
+<!-- src/core/reflect/makefunc_impl.cs:75 `A VARIADIC func (isVariadic) is no longer refused here`. history: MakeFunc
      threw NotImplementedException for a variadic func type before that family existed. --> `makeMethodValue`'s identical
 `funcLayout` read deliberately stays auto: it is reachable only through `flagMethod`, which the
 bridge never sets (`Value.Method` binds the receiver into an ordinary delegate instead). With

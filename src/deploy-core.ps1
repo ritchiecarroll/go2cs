@@ -182,9 +182,49 @@ Copy-SourceTree (Join-Path $srcRoot 'core') $coreDst -ExcludeFiles @('Directory.
 # referencing the analyzer fails with MSB4019.
 Copy-Item (Join-Path $srcRoot 'version.props') -Destination (Join-Path $Target 'version.props') -Force
 
+# ---- Stage the field-access collision list where go2cs-gen embeds it from ----------------
+# go2cs-gen.csproj embeds ..\..\go2cs\fieldAccessCollisions.txt (since 810b9bb208): the ONE list the converter
+# reads by go:embed (src\go2cs\fieldAccess.go) and go2cs-gen reads as a resource. go:embed cannot reach outside
+# the converter's module, so the list stays in src\go2cs and is staged here at <root>\go2cs\, where the
+# deployed analyzer's relative include resolves. Without it a deployed go2cs-gen fails CS1566 and nothing in the
+# deploy root builds. repoguard TestDeployCoreStagesEveryGenInput holds every such ..\..\ input to this script.
+$collisionsDst = Join-Path $Target 'go2cs'
+if ($PSCmdlet.ShouldProcess($collisionsDst, 'stage go2cs/fieldAccessCollisions.txt')) {
+    [System.IO.Directory]::CreateDirectory($collisionsDst) | Out-Null
+    Copy-Item (Join-Path $srcRoot 'go2cs/fieldAccessCollisions.txt') -Destination (Join-Path $collisionsDst 'fieldAccessCollisions.txt') -Force
+}
+
 # ---- Write the root Directory.Build.props ------------------------------------------------
 # Pins $(go2csPath) to this deploy root for every project beneath it, so all
 # $(go2csPath)core\... / $(go2csPath)gen\... references resolve with no per-build flag.
+#
+# It also defaults GoTargetOS/GoTargetArch to the corpus flavor of the host that deploys. A program
+# converted in place here (go2cs -recurse -go2cspath <this root>) keeps THIS props -- the converter
+# never overwrites a props it did not write -- so without these defaults every L3 project built its
+# csproj default, the windows flavor, and a program built on Linux or macOS died at start on
+# kernel32.dll unless each build named -p:GoTargetOS. Both stay condition-guarded on empty, so an
+# explicit -p: global or an environment variable still wins. A host whose GOOS the corpus does not
+# carry ($HostGoos is $null) gets no default rather than a guess, as in _paths.ps1. The arch is
+# Get-HostFlavorArch's, the one every other instrument on this host builds: an Apple-silicon host keeps
+# darwin/amd64 under _paths.ps1's interim pin until D5, so a deploy there does not default a flavor
+# the host's own instruments do not build.
+$hostFlavorArch = Get-HostFlavorArch -Goos $HostGoos -Goarch $HostGoarch
+$platformLines = ''
+if ($HostGoos -and $hostFlavorArch) {
+    $platformLines = @"
+
+  <!-- The corpus flavor of the host that ran deploy-core.ps1. Override with -p:GoTargetOS and
+       -p:GoTargetArch (or the environment variables of the same names) to build another flavor. -->
+  <PropertyGroup Condition="'`$(GoTargetOS)' == ''">
+    <GoTargetOS>$HostGoos</GoTargetOS>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'`$(GoTargetArch)' == ''">
+    <GoTargetArch>$hostFlavorArch</GoTargetArch>
+  </PropertyGroup>
+"@
+}
+
 $propsContent = @'
 <Project>
 
@@ -196,6 +236,7 @@ $propsContent = @'
   <PropertyGroup>
     <go2csPath>$(MSBuildThisFileDirectory)</go2csPath>
   </PropertyGroup>
+'@ + $platformLines + @'
 
 </Project>
 '@

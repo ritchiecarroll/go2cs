@@ -336,7 +336,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 				// indexing `d.dense[id]` — has no C# cast to nint (a constrained type parameter is
 				// not directly convertible). Route through golib's ConvertToUInt64<T> bridge (the
 				// integer-type-param conversion family, cf. rand.N's E(x)), then narrow to nint.
-				index = fmt.Sprintf("(nint)(ConvertToUInt64<%s>(%s))", v.getCSharpTypeName(tp), index)
+				index = fmt.Sprintf("(nint)(builtin.ConvertToUInt64<%s>(%s))", v.getCSharpTypeName(tp), index)
 			}
 		}
 	}
@@ -403,7 +403,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	}
 
 	if literalByteAt {
-		return fmt.Sprintf("LiteralByteAt(%s, %s)", baseExpr, index)
+		return fmt.Sprintf("builtin.LiteralByteAt(%s, %s)", baseExpr, index)
 	}
 
 	// A map READ whose element carries shape takes golib's zero-factory indexer overload.
@@ -524,7 +524,7 @@ func (v *Visitor) mapReadTmpStringKey(mapType *types.Map, keyExpr ast.Expr) (str
 		return "", false
 	}
 
-	return fmt.Sprintf("tmpstring(%s)", v.convExpr(call.Args[0], nil)), true
+	return fmt.Sprintf("builtin.tmpstring(%s)", v.convExpr(call.Args[0], nil)), true
 }
 
 func (v *Visitor) isGenericTypeArgument(indexExpr *ast.IndexExpr) bool {

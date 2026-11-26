@@ -86,6 +86,88 @@ namespace go.golib;
     }
 
     /// <summary>
+    /// <see cref="StructPointer{T}(ж{T}, string, out nuint)"/> for a wrapper that holds a call's
+    /// <see cref="GoCgoImages"/> (cgo Phase 3, increment 3.4, the struct image door: DESIGN-cgo-phase3-marshaling 19.7 and
+    /// 19.9). A struct pointer that is a reinterpret view of a Go struct of another type, which no door can pin, crosses
+    /// as an IMAGE of its root: <see cref="GoCgoStructPointer.Pinned"/>, with <paramref name="pin"/> over the image
+    /// buffer, which the wrapper's <c>fixed</c> holds and <see cref="GoCgoImages.CopyBack"/> decodes back after the call
+    /// (net's <c>getnameinfo</c> over <c>(*C.struct_sockaddr)(unsafe.Pointer(&amp;sa))</c>). Every other pointer takes the
+    /// plain door, and one it hands C as a mirror is claimed in the set, so a root imaged and mirrored in one call is
+    /// refused by name (P3's B5).
+    /// </summary>
+    public static GoCgoStructPointer StructPointer<T>(ж<T>? pointer, string function, ref GoCgoImages images, out nuint address, out GoCgoPin pin)
+    {
+        pin = default;
+
+        if (pointer is NativeBox<T> native && !IsGenuinelyNative(native) && native.AliasesAnOrderToken && ImageRoot(native, function) is { } root)
+        {
+            address = 0;
+            pin = images.Image(GoCgoImages.ImageKeys(root.Key, root.Value), root.Box, root.Value, root.Type, root.Size, Math.Max(root.Size, NativeStructMarshal.ImageSizeOf(typeof(T)) ?? (nuint)Unsafe.SizeOf<T>()), function);
+            return GoCgoStructPointer.Pinned;
+        }
+
+        GoCgoStructPointer kind = StructPointer(pointer, function, out address);
+
+        if (kind == GoCgoStructPointer.Mirror && pointer is not null)
+            images.ClaimOther(OtherKeys(pointer, pin), function);
+
+        return kind;
+    }
+
+    /// <summary>
+    /// <see cref="ScalarPointer{T}(ж{T}, string, out nuint, out GoCgoPin)"/> for a wrapper that holds a call's
+    /// <see cref="GoCgoImages"/>: the scalar's root is claimed in the set, so a root one parameter images and this one
+    /// mirrors or pins is refused by name (P3's B5).
+    /// </summary>
+    public static GoCgoStructPointer ScalarPointer<T>(ж<T>? pointer, string function, ref GoCgoImages images, out nuint address, out GoCgoPin pin)
+    {
+        GoCgoStructPointer kind = ScalarPointer(pointer, function, out address, out pin);
+
+        if (kind is GoCgoStructPointer.Mirror or GoCgoStructPointer.Pinned && pointer is not null)
+            images.ClaimOther(OtherKeys(pointer, pin), function);
+
+        return kind;
+    }
+
+    // The allocations a pointer another door hands C names (P3's B5, keyed as an image is): its root, and the storage it
+    // pins, so a pointer into an array inside an imaged root (`&sa.Addr[0]`, or `(*C.int)(unsafe.Pointer(&sa.Addr))`,
+    // whose view names neither sa's box nor its view) is seen to name that root's memory.
+    private static object[] OtherKeys<T>(ж<T> pointer, in GoCgoPin pin)
+    {
+        object root = pointer.ReferentObject;
+
+        return pin.Storage is { } storage && !ReferenceEquals(storage, root) ? [root, storage] : [root];
+    }
+
+    // The root a struct view's order token names, when the door can image it: the token resolves to a live Go box (an
+    // offset added to it is refused by name, P3's B4), whose value is a struct NativeStructMarshal carries both ways (a
+    // root holding a Go pointer is refused by name), with no published unsafe.Pointer word over it (B-10). Null when the
+    // token resolves to nothing, so the plain door's refusal stands.
+    private static (object Key, IGoReflectBox Box, object Value, Type Type, nuint Size)? ImageRoot<T>(NativeBox<T> view, string function)
+    {
+        nuint number = view.NativeAddress;
+        nuint offset = 0;
+
+        object? root = ManagedPointerTokens.IsTokenArithmetic(number)
+            ? ManagedPointerTokens.ResolveArithmeticBase(number, out offset)
+            : ManagedPointerTokens.Resolve(number);
+
+        if (root is not IGoReflectBox box || box.IsNilPointer)
+            return null;
+
+        if (offset != 0)
+            throw Refused(function, typeof(T), $"a view {offset} bytes into a Go value no door can pin; go2cs images only a whole Go value, so it refuses rather than hand C the wrong bytes");
+
+        if (box.ReadBoxSlot() is not { } value || NativeStructMarshal.ImageSizeOf(value.GetType()) is not { } size)
+            throw Refused(function, typeof(T), "a view of a Go value that holds Go pointers (or has no image in memory), which C must not see");
+
+        if (GoPointerWords.AnyTable && GoPointerWords.HoldsAnyEntry(root))
+            throw GoPointerToUnpinnedGoPointer();
+
+        return (root is INilPointer nilable ? nilable.ReferentObject : root, box, value, value.GetType(), size);
+    }
+
+    /// <summary>
     /// How to hand C a pointer to one C SCALAR (cgo Phase 3, increment 3.2, seat 1b: design 18.12 item 2). As
     /// <see cref="StructPointer{T}"/> for nil, C memory and one whole scalar in a box or a field (a stack mirror). An
     /// element of a Go array, and a typed view over Go storage, are <see cref="GoCgoStructPointer.Pinned"/>: the box
@@ -181,6 +263,45 @@ namespace go.golib;
     }
 
     /// <summary>
+    /// <see cref="OutParameter{U}(ж{ж{U}}, string, out nuint, out ж{U})"/>, taking also an element of a Go array of C
+    /// pointers (cgo Phase 3, .5 cgo item 2, the argv shape: DESIGN-cgo-phase3-marshaling 18.12.3, H's verdict (A)).
+    /// <c>C.f(&amp;argv[0])</c> lets C read or fill the whole array, so an element of managed storage crosses as a word
+    /// mirror of the whole backing array (<paramref name="mirror"/>), pinned for the call by <paramref name="pin"/> at the
+    /// element's word (<see cref="GoCgoStructPointer.Pinned"/>); the wrapper checks every word C wrote against the call's
+    /// pins and copies the words back (<see cref="GoCgoWordMirror"/>). An element of a native window over C memory
+    /// (<c>&amp;s[0]</c>, <c>s</c> an <c>unsafe.Slice</c> of a C <c>char *[]</c>) crosses by its own address, uncopied
+    /// (<see cref="GoCgoStructPointer.Native"/>).
+    /// </summary>
+    /// <remarks>
+    /// The mirror costs the backing array's length on every call, not the count C uses, and a re-slice keeps its whole
+    /// backing array (docs/Limitations.md#cgo).
+    /// </remarks>
+    public static GoCgoStructPointer OutParameter<U>(ж<ж<U>>? slot, string function, out nuint word, out ж<U>? original, out GoCgoPin pin, out GoCgoWordMirror? mirror)
+    {
+        pin = default;
+        mirror = null;
+
+        if (slot is not ElemRefBox<ж<U>> element)
+            return OutParameter(slot, function, out word, out original);
+
+        word = 0;
+        original = null;
+
+        if (element.NativeElementAddress is var address and not 0)
+        {
+            word = address;
+            return GoCgoStructPointer.Native;
+        }
+
+        if (!element.TryGetElementStorage(out ж<U>[]? backing, out nint index) || index >= backing.Length)
+            throw Refused(function, typeof(ж<U>), "an element of a Go array of C pointers whose storage go2cs cannot copy for the call");
+
+        mirror = new GoCgoWordMirror(backing, static address => new NativeBox<U>(address));
+        pin = mirror.PinAt(index);
+        return GoCgoStructPointer.Pinned;
+    }
+
+    /// <summary>
     /// A pointer member's value as it is copied into a mirror: nil is 0 and a genuinely native pointer is its address.
     /// A pointer into Go memory panics with cgo's own message: Go's cgocheck makes the same refusal at run time, and
     /// here it is always on. (Go prefixes the message with the caller's file and line, which a wrapper cannot know.)
@@ -219,6 +340,35 @@ namespace go.golib;
 
         if (address == copiedIn)
             return original;
+
+        return new NativeBox<U>(address);
+    }
+
+    /// <summary>
+    /// <see cref="PointerMemberBack{U}(nuint, ж{U}, nuint)"/>, asked also against the stack copies the wrapper handed C
+    /// (cgo Phase 3, .5 cgo item 1(b): DESIGN-cgo-phase3-marshaling 18.12.3): an address that is a copy's own, of C's
+    /// pointee type, is the box that copy stands for (Go's <c>out == &amp;a</c>); any other address inside a copy names a
+    /// stack slot that dies with the call, and is refused by name, never minted as C memory.
+    /// </summary>
+    public static ж<U>? PointerMemberBack<U>(nuint address, ж<U>? original, nuint copiedIn, ReadOnlySpan<GoCgoStackCopy> copies, string function)
+    {
+        if (address == 0)
+            return null;
+
+        if (address == copiedIn)
+            return original;
+
+        foreach (ref readonly GoCgoStackCopy copy in copies)
+        {
+            if (copy.TryIdentity(address, out ж<U>? box))
+                return box;
+        }
+
+        foreach (ref readonly GoCgoStackCopy copy in copies)
+        {
+            if (copy.Holds(address))
+                throw RuntimeErrorPanic.ErrorString($"cgo: C.{function} returned an address inside the stack copy of a Go argument that is not that argument as a pointer to {typeof(U).Name}, and go2cs cannot represent a pointer into that copy, so it refuses the result");
+        }
 
         return new NativeBox<U>(address);
     }
@@ -281,6 +431,25 @@ namespace go.golib;
             throw VoidRefused(function, what);
 
         return new GoCgoPin(address);
+    }
+
+    /// <summary>
+    /// <see cref="PinVoidPointer(ж{uintptr}, string)"/>, taking also an element of a Go array of C pointers handed over
+    /// as a void pointer (<c>C.f(unsafe.Pointer(&amp;argv[0]))</c>, .5 cgo item 2): it crosses as a word mirror of the
+    /// whole backing array, as the typed door's (<see cref="OutParameter{U}(ж{ж{U}}, string, out nuint, out ж{U}, out GoCgoPin, out GoCgoWordMirror)"/>),
+    /// and the wrapper checks and copies back its words. Anything else is the void door's as before.
+    /// </summary>
+    public static GoCgoPin PinVoidPointer(ж<uintptr>? pointer, string function, out GoCgoWordMirror? mirror)
+    {
+        mirror = null;
+
+        if (pointer is IUnsafePointer { RetainedSource: ICgoWordElement element } && element.TryCgoWordMirror(out GoCgoWordMirror? words, out nint index))
+        {
+            mirror = words;
+            return words.PinAt(index);
+        }
+
+        return PinVoidPointer(pointer, function);
     }
 
     // The pin for a pointer that carries its box. The box decides (M2): its storage, found through the derivations it

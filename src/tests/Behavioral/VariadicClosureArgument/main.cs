@@ -27,7 +27,7 @@ internal static void main() {
         @out += fmt.Sprintf(format, args.ꓸꓸꓸ) + ";"u8;
     };
     header(writeFormat, 2);
-    headerNamed(NilSafeDelegateConversion<logFunc, Actionꓸꓸꓸ<@string, any>>(writeFormat), 3);
+    headerNamed(builtin.NilSafeDelegateConversion<logFunc, Actionꓸꓸꓸ<@string, any>>(writeFormat), 3);
     var s = new sink(write: writeFormat);
     s.write("field %s", (@string)"ok");
     writeFormat("direct %d %d", (nint)4, (nint)5);

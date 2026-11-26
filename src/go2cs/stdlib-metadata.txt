@@ -3403,6 +3403,7 @@
 
 ##unique
 // <ExportedTypeAliases>
+[assembly: GoArrayDimsCompanion("Make", 0)]
 // </ExportedTypeAliases>
 
 ##unsafe

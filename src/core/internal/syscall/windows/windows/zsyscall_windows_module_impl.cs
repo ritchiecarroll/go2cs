@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Module32First, Module32Next: DERIVED FROM src/internal/syscall/windows/zsyscall_windows.go (generated from the
+//   declarations in src/internal/syscall/windows/syscall_windows.go, whose notice this file carries), Go 1.24.13,
+//   funcs Module32First, Module32Next. The generated calls and error mapping, with the record copied from native
+//   memory.
+// - copyNativeModuleEntry, copyNativeModuleName: original go2cs code. That copy.
 
 // The MODULE-ENUMERATION member of the syscall struct-passing class -- the wrappers whose STRUCT
 // cannot cross the managed/native boundary by address.

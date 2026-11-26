@@ -43,8 +43,6 @@ internal static void show(@string label, any v) {
 private static readonly @string abcdefˢ = "abcdef"u8;
 
 internal static void main() {
-    var itemsᴷ = new stackAppend<any>();
-
     foreach (var (_, v) in range(slice<any>([(json.Number)(@string)"1", (json.Number)(@string)"-2.5"]))) {
         show("negate", negate(v));
     }
@@ -62,7 +60,7 @@ internal static void main() {
     show("var", boxed);
 
     var items = slice<any>([t[3..], "x"u8 + t]);
-    items = append(itemsᴷ, items, (any)(t[..1] + "y"u8));
+    items = append(items, (any)(t[..1] + "y"u8));
     foreach (var (i, item) in range(items)) {
         show(fmt.Sprint("item ", i), item);
     }

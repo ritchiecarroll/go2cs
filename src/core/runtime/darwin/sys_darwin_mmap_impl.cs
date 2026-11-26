@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - mmap, munmap: INSPIRED BY src/runtime/sys_darwin.go, Go 1.26.11, funcs mmap, munmap. The same libc calls, made
+//   directly in place of libcCall over an args struct.
+// - GoSysAllocOS, GoSysFreeOS, GoSysReserveOS: original go2cs code. Test seams.
 
 // runtime.mmap / runtime.munmap on darwin, hand-owned (G's ruling, 2026-10-19; manualConversionFuncs["runtime"],
 // goosDarwin): the OS mapping primitives every darwin sys*OS path reaches.

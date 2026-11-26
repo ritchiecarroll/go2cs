@@ -3,6 +3,21 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - the assignment relation: INSPIRED BY src/reflect/type.go, Go 1.26.11, funcs directlyAssignable,
+//   haveIdenticalType, haveIdenticalUnderlyingType. The same rules over golib's boxes, adapters, delegates and nil
+//   carriers.
+// - the conversion relation: INSPIRED BY src/reflect/value.go, Go 1.26.11, func convertOp; method Value.Convert.
+//   Identity, interface implementation and the named/unnamed rule.
+// - every routine's body and the managed representation it runs over: original go2cs code. None of Go's code is
+//   ported.
 
 // ReSharper disable InconsistentNaming
 
@@ -368,6 +383,18 @@ public static partial class GoReflect
         {
             if (dstType == nilFunc.Type)
                 return true;
+
+            // Two func types of identical signature are distinct delegates, since every defined func type is
+            // its own: a named type and its unnamed form are assignable both ways (one side unnamed), and any
+            // two convert. The nil crosses as the live-delegate arm in TryConvertTo carries a value, under the
+            // same refusal: two different NAMED func types stay unassignable, as in Go. reflect's TestConvert:
+            // `func()(nil)` converted to `MyFunc`.
+            if (typeof(Delegate).IsAssignableFrom(dstType) &&
+                !RefusedByGoAssignability(relation, nilFunc.Type, dstType) &&
+                haveIdenticalDelegateSignature(nilFunc.Type, dstType))
+            {
+                return true;
+            }
 
             if (!dstType.IsInterface)
                 return false;

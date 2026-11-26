@@ -103,10 +103,13 @@
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>>>MARKER:TEST_READY_TO_RUN<<
   </PropertyGroup>
 
-  <!-- Explicit compile items only (EnableDefaultCompileItems=false): the production sources are
-       recompiled into the test assembly alongside the converted test sources; nothing else in the
-       shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
-       can leak in because it is never listed. -->
+  <!-- Explicit compile items only (EnableDefaultCompileItems=false): the converted test sources,
+       the test package_info and the test host. The production sources are normally NOT listed:
+       the test assembly references the production project (the reference model, chosen for
+       black-box and internal suites alike). Only the recompile fall-back, taken when converted
+       records would have to change a closed production type, lists them here as well. Nothing
+       else in the shared directory (Generated/**, *.cs.auto review siblings, the production
+       package_info.cs) can leak in because it is never listed. -->
   <ItemGroup>>>MARKER:TEST_COMPILE_ITEMS<<
   </ItemGroup>
 
@@ -147,5 +150,15 @@
   <Import Project="$(go2csPath)core/go2cs.CpuProfiler/GoCpuProfiler.targets" Condition="'$(GoCpuProfiler)'=='true'" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <!-- `dotnet test` is not how a converted Go test host runs. It is an Exe, not a VSTest project, so the SDK's VSTest
+       target ran nothing and exited 0, which reads as a pass (the .NET 11 usability pass, 2026-11-26). This target
+       comes after the Sdk.targets import, so it replaces the SDK's, and it fails the run naming what to run instead.
+       The comparison with go test needs the Go package's directory, which this project does not record. The run
+       command works as written outside the go2cs tree, where the converter writes a Directory.Build.props pinning
+       go2csPath and the platform (writeTestsHostBuildFiles); inside it the tree's own props pins go2csPath only. -->
+  <Target Name="VSTest">
+    <Error Text="go2cs: $(MSBuildProjectFile) is a converted Go test host, not a VSTest project, so 'dotnet test' does not run it. Compare it with go test: go2cs -tests -test-action compare &lt;Go package directory&gt; $(MSBuildProjectDirectory). Or run the C# side alone: dotnet run --project $(MSBuildProjectFullPath) -- -test.v (a module package's host needs GO2CS_MODULE_ROOT set to the module's directory; a host inside the go2cs tree on Linux or macOS adds -p:GoTargetOS=linux or darwin)." />
+  </Target>
 
 </Project>

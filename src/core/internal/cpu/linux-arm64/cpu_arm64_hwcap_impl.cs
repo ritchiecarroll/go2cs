@@ -4,6 +4,24 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - initLinuxArm64FeatureDetection: INSPIRED BY src/runtime/os_linux_arm64.go, Go 1.26.11, func archauxv. The
+//   AT_HWCAP read, from getauxval in place of the auxiliary vector the runtime walks.
+// - initLinuxArm64FeatureDetection: INSPIRED BY src/runtime/proc.go, Go 1.26.11, func cpuinit. Its
+//   cpu.Initialize(env) call, in a module initializer that reads GODEBUG from the environment.
+// - getMIDR: bodies for the bodyless Go declarations of the same names in src/internal/cpu/cpu_arm64.go. Original
+//   go2cs code.
 
 // The linux/arm64 flavour's internal/cpu start-up: what Go's runtime does before any package init
 // reads a CPU flag, which go2cs never runs (S3 site 0, docs/phase4/DATA-la64-s3-census.md, the

@@ -4,6 +4,67 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notices they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2020 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2013 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - LockOSThread, UnlockOSThread, lockOSThread, unlockOSThread: DERIVED FROM src/runtime/proc.go, Go 1.26.11, funcs
+//   LockOSThread, UnlockOSThread, lockOSThread, unlockOSThread. Go's bodies, each telling golib's goroutine of the
+//   change.
+// - timeHistogram.record: DERIVED FROM src/runtime/histogram.go, Go 1.26.11, method timeHistogram.record. Go's body
+//   and comments.
+// - writeErrData: DERIVED FROM src/runtime/runtime.go, Go 1.26.11, func writeErrData. Go's body, writing through
+//   golib's standard error.
+// - Gosched, stopTheWorld, startTheWorld, gcount: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs Gosched,
+//   stopTheWorld, startTheWorld, gcount. The same contract on managed primitives, with no scheduler to stop.
+// - GOMAXPROCS, SetDefaultGOMAXPROCS, NumCgoCall, NumGoroutine, totalMutexWaitTimeNanos: INSPIRED BY
+//   src/runtime/debug.go, Go 1.26.11, funcs GOMAXPROCS, SetDefaultGOMAXPROCS, NumCgoCall, NumGoroutine,
+//   totalMutexWaitTimeNanos. The same answers from the managed runtime's own counts.
+// - GC: INSPIRED BY src/runtime/mgc.go, Go 1.26.11, func GC. A full collection through the CLR's collector, with Go's
+//   cycle bookkeeping.
+// - metricsLock, metricsUnlock, readMetricsLocked: INSPIRED BY src/runtime/metrics.go, Go 1.26.11, funcs metricsLock,
+//   metricsUnlock, readMetricsLocked. The same locking and reads over managed metric sources.
+// - ReadMemStats, flushallmcaches, consistentHeapStats.read: INSPIRED BY src/runtime/mstats.go, Go 1.26.11, funcs
+//   ReadMemStats, flushallmcaches; method consistentHeapStats.read. MemStats filled from the CLR's heap counters.
+// - goroutineProfileWithLabels, Stack: INSPIRED BY src/runtime/mprof.go, Go 1.26.11, funcs
+//   goroutineProfileWithLabels, Stack. The same profile and stack text, rendered from managed stack frames.
+// - runtime_debug_WriteHeapDump: INSPIRED BY src/runtime/heapdump.go, Go 1.26.11, func runtime_debug_WriteHeapDump. A
+//   minimal heap dump in Go's format.
+// - shrinkstack: INSPIRED BY src/runtime/stack.go, Go 1.26.11, func shrinkstack. A refusal where there is no
+//   goroutine stack to shrink.
+// - spanOf: INSPIRED BY src/runtime/mheap.go, Go 1.26.11, func spanOf. The answer for a heap with no spans.
+// - Goexit: INSPIRED BY src/runtime/panic.go, Go 1.26.11, func Goexit. The same exit of the goroutine after its
+//   deferred calls, through golib.
+// - Callers: INSPIRED BY src/runtime/extern.go, Go 1.26.11, func Callers. The same program counters, from managed
+//   stack frames mapped to Go positions.
+// - callers: INSPIRED BY src/runtime/traceback.go, Go 1.26.11, func callers. The same, for the runtime's own callers.
+// - Frames.Next, FuncForPC, Func.Name, Func.Entry, Func.FileLine: INSPIRED BY src/runtime/symtab.go, Go 1.26.11, func
+//   FuncForPC; methods Frames.Next, Func.Name, Func.Entry, Func.FileLine. The same frames and names, resolved through
+//   go2cs's position maps and portable PDBs.
+// - rawstring: INSPIRED BY src/runtime/string.go, Go 1.26.11, func rawstring. The same allocation, as a managed byte
+//   array.
+// - efaceHash, ifaceHash: INSPIRED BY src/runtime/alg.go, Go 1.26.11, funcs efaceHash, ifaceHash. The same hashes
+//   over the dynamic managed value.
+// - the crash and fatal tracebacks, the GOMAXPROCS and CPU-stats machinery, the print sink, the GC cycle driver, the
+//   sysmon tick, the frame resolver and position-map reader, the panic splicer, and the Go* probes: original go2cs
+//   code. The managed runtime's own machinery.
 
 // The runtime package's PROCESS-CONTROL surface, reimplemented on managed primitives.
 //
@@ -5262,6 +5323,17 @@ partial class runtime_package
         // A call names a Go-named forwarder; where the JIT inlines it, the frame is its suffix-form body.
         if (target is System.Reflection.MethodInfo forwarder && glyphBodyOf(forwarder) is { } body &&
             body.Module == callee.Module && body.MetadataToken == callee.MetadataToken)
+            return true;
+
+        // A call names a RecvGenerator `this ж<T>` overload of a pointer-receiver method, and the frame inside it is the
+        // method it forwards to: the Go-named `this ref T` forwarder, or that forwarder's suffix-form body where the JIT
+        // inlined the forwarder (goRecvForwardee answers the body when there is one). log/slog's TestCallDepth: a
+        // `logger.Log(...)` call on a `ж<Logger>` reported its own offset, which this test did not relate to the
+        // `ref Logger` forwarder frame, so the line fell to the next statement at TieredCompilation=0.
+        if (goRecvForwardee(target) is { } forwardee &&
+            ((forwardee.Module == callee.Module && forwardee.MetadataToken == callee.MetadataToken) ||
+             (callee is System.Reflection.MethodInfo calleeForwarder && glyphBodyOf(calleeForwarder) is { } calleeBody &&
+              calleeBody.Module == forwardee.Module && calleeBody.MetadataToken == forwardee.MetadataToken)))
             return true;
 
         // A virtual or interface call names the slot; the frame is the override or the implementation.
