@@ -1991,6 +1991,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// nothing was bound, and marks the descriptor so the lazy bind never binds it again.
 		// internal/poll/windows/fd_windows_impl.cs holds the body.
 		"FD.DisassociateIOCP": goosWindows,
+		// (*FD).pin (cgo S6, docs/phase4/DESIGN-cgo-phase3-marshaling.md 21.8). Go pins an overlapped buffer with
+		// runtime.Pinner for the flight. The managed poller already holds it: both async submits (syscall's fileIO and
+		// rearmOverlapped) convert the buffer's element box to an address, which takes the box's own pinned GCHandle,
+		// and retain the BOX in the operation record until the next Rearm. Since S6 a Pinner pin takes a handle of its
+		// own, so Go's body would add a second handle to every overlapped read and write for nothing. The hand-own does
+		// nothing; the deferred Unpin in execIO is a no-op on an empty Pinner. Guarded by GolibTests' poll rows (zero
+		// handles per I/O, an overlapped read surviving a forced compaction mid-flight).
+		// internal/poll/windows/fd_windows_impl.cs holds the body.
+		"FD.pin": goosWindows,
 	},
 	// debug/pe's COFF symbol reader pair. Go re-VIEWS one 18-byte symbol record as two struct
 	// shapes — `(*COFFSymbolAuxFormat5)(unsafe.Pointer(&sym))` — a free re-typing of the same

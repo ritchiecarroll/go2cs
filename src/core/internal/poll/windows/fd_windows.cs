@@ -267,18 +267,7 @@ internal static void cancelIO⁔(/*this*/ ж<FD> Ꮡfd, ж<operation> Ꮡo) {
     fd.pd.waitCanceled((nint)o.mode);
 }
 
-// pin pins ptr for the duration of the IO operation.
-// If fd is in blocking mode, pin does nothing.
-internal static void pin⁔(/*this*/ ref FD fd, nint mode, any ptr) {
-    if (fd.isBlocking) {
-        return;
-    }
-    if (mode == 'r') {
-        fd.readPinner.Pin(ptr);
-    } else {
-        fd.writePinner.Pin(ptr);
-    }
-}
+// go2cs generated this placeholder — func pin is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // execIO executes a single IO operation o.
 // It supports both synchronous and asynchronous IO.
@@ -321,7 +310,7 @@ internal static (nint, error) execIO⁔(/*this*/ ж<FD> Ꮡfd, nint mode, Func<�
             o.o.HEvent = (Δsyscall.Handle)(h | 1);
             defer(Δsyscall.CloseHandle, h, ref ᒐ);
         }
-        fd.pin(mode, o.OrTypedNil());
+        Ꮡfd.pin(mode, o.OrTypedNil());
         ref var qty = ref heap<uint32>(out var Ꮡqty);
         (qty, err) = submit(o);
         error waitErr = default;
@@ -604,7 +593,7 @@ internal static (nint, error) Read⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
         }
 
         if (len(buf) > 0) {
-            fd.pin('r', Ꮡ(buf, 0));
+            Ꮡfd.pin('r', Ꮡ(buf, 0));
         }
 
         if (len(buf) > maxRW) {
@@ -756,7 +745,7 @@ internal static (nint, error) Pread⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf, i
         defer(Ꮡfd.readWriteUnlock, ref ᒐ);
 
         if (len(buf) > 0) {
-            fd.pin('r', Ꮡ(buf, 0));
+            Ꮡfd.pin('r', Ꮡ(buf, 0));
         }
 
         if (len(buf) > maxRW) {
@@ -816,7 +805,7 @@ internal static (nint, Δsyscall.Sockaddr, error) ReadFrom⁔(/*this*/ ж<FD> �
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
-        fd.pin('r', Ꮡ(buf, 0));
+        Ꮡfd.pin('r', Ꮡ(buf, 0));
 
         var rsa = newWSARsa();
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
@@ -857,7 +846,7 @@ internal static (nint, error) ReadFromInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
-        fd.pin('r', Ꮡ(buf, 0));
+        Ꮡfd.pin('r', Ꮡ(buf, 0));
 
         var rsa = newWSARsa();
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
@@ -898,7 +887,7 @@ internal static (nint, error) ReadFromInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
-        fd.pin('r', Ꮡ(buf, 0));
+        Ꮡfd.pin('r', Ꮡ(buf, 0));
 
         var rsa = newWSARsa();
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
@@ -943,7 +932,7 @@ internal static (nint, error) Write⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
         }
 
         if (len(buf) > 0) {
-            fd.pin('w', Ꮡ(buf, 0));
+            Ꮡfd.pin('w', Ꮡ(buf, 0));
         }
         nint ntotal = default;
         for (;;) {
@@ -1059,7 +1048,7 @@ internal static (nint, error) Pwrite⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf, 
         defer(Ꮡfd.readWriteUnlock, ref ᒐ);
 
         if (len(buf) > 0) {
-            fd.pin('w', Ꮡ(buf, 0));
+            Ꮡfd.pin('w', Ꮡ(buf, 0));
         }
 
         if (fd.isBlocking) {
@@ -1146,8 +1135,6 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf,
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
         {
             var err = Ꮡfd.writeLock(); if (err != nil) {
                 return (0, err);
@@ -1166,7 +1153,7 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf,
             return (n, err);
         }
 
-        fd.pin('w', Ꮡ(buf, 0));
+        Ꮡfd.pin('w', Ꮡ(buf, 0));
 
         nint ntotal = 0;
         while (len(buf) > 0) {
@@ -1197,8 +1184,6 @@ internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
         {
             var err = Ꮡfd.writeLock(); if (err != nil) {
                 return (0, err);
@@ -1217,7 +1202,7 @@ internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             return (n, err);
         }
 
-        fd.pin('w', Ꮡ(buf, 0));
+        Ꮡfd.pin('w', Ꮡ(buf, 0));
 
         nint ntotal = 0;
         while (len(buf) > 0) {
@@ -1248,8 +1233,6 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
         {
             var err = Ꮡfd.writeLock(); if (err != nil) {
                 return (0, err);
@@ -1268,7 +1251,7 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             return (n, err);
         }
 
-        fd.pin('w', Ꮡ(buf, 0));
+        Ꮡfd.pin('w', Ꮡ(buf, 0));
 
         nint ntotal = 0;
         while (len(buf) > 0) {

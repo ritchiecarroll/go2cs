@@ -420,6 +420,10 @@
     <ProjectReference Include="..\..\core\internal\testenv\internal.testenv.csproj" />
     <ProjectReference Include="..\..\core\os\exec\os.exec.csproj" />
 
+    <!-- PollPinDisplacementTests (cgo S6, DESIGN-cgo-phase3-marshaling 21.8): a real overlapped read through net's poller on
+         Windows, so the poll pin displacement is guarded by a run rather than a reading. -->
+    <ProjectReference Include="..\..\core\net\net.csproj" />
+
     <!-- MulUnbalancedDiscriminatorTests: the §5.4 discriminator drives math/big's nat.mul through
          Int.SetBits/Int.Mul. Same precedent as sha3 above — an MSTest tier binding a converted
          package to reach a measurement no other harness can take. -->

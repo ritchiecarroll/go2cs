@@ -160,6 +160,15 @@ partial class poll_package
 
 } partial class pollᴛFD {
 
+    // (*FD).pin (cgo S6, docs/phase4/DESIGN-cgo-phase3-marshaling.md 21.8). Go's body pins ptr with the FD's read or write
+    // Pinner for the IO operation, because the kernel writes into the buffer after the submitting syscall returns. Here
+    // the managed poller already holds the buffer for exactly that flight: the submit converts the buffer's element box to
+    // an address (the box's own pinned GCHandle) and retains the box in the operation record until the next Rearm. A
+    // Pinner pin, which since S6 takes a handle of its own, would add a second handle to every overlapped read and write.
+    // So this does nothing, and execIO's deferred Unpin finds an empty Pinner. A blocking FD took Go's early return anyway.
+    [GoRecv] internal static void pin(this ref FD fd, nint mode, any ptr) {
+    }
+
     // (*FD).DisassociateIOCP. Go's body asks the kernel to drop the handle's completion port, which
     // in Go always exists: netpollopen associates every pollable handle at open. The managed poller
     // binds a socket to the CLR's port only at its FIRST overlapped submit (the S2 amendment; see
