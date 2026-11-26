@@ -28,9 +28,6 @@ void *go2cs_probe_same(void *pointer);
 uintptr_t go2cs_probe_word(uintptr_t word);
 void go2cs_probe_keep(void *pointer);
 int go2cs_probe_kept(void);
-struct go2cs_probe_pair { int a; int b; };
-void go2cs_probe_keep_pair(struct go2cs_probe_pair *pair);
-int go2cs_probe_kept_pair_b(void);
 char *go2cs_probe_log_new(void);
 void go2cs_probe_log_put(char *log, int value);
 void go2cs_probe_release(void *pointer);
@@ -45,6 +42,8 @@ struct go2cs_probe_entry
 struct go2cs_probe_pair { int a; int b; };
 int go2cs_probe_add_into(struct go2cs_probe_pair *dst, const struct go2cs_probe_pair *x, const struct go2cs_probe_pair *y);
 int go2cs_probe_pair_and_int(struct go2cs_probe_pair *dst, int *n);
+void go2cs_probe_keep_pair(struct go2cs_probe_pair *pair);
+int go2cs_probe_kept_pair_b(void);
 
 struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
