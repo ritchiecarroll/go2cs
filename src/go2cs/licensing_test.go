@@ -571,8 +571,8 @@ func TestLicensingPackageBoundaries(t *testing.T) {
 
 // goProvenanceProblems checks one hand-written standard-library file's Go attribution header: the
 // "// PROVENANCE" block under the go2cs notice that says which parts follow which Go files. A file
-// with no such block is not checked, and a "// PROVENANCE" heading in any other shape is refused, so a
-// block the checks below cannot read never passes unread. A file with one must carry, above the block, the notice of the
+// with no "// PROVENANCE" text at all is not checked. A "// PROVENANCE" heading in any other shape, or the text
+// with no block line, is refused, so a block the checks below cannot read never passes unread. A file with one must carry, above the block, the notice of the
 // code it follows (Go's copyright line and BSD line, or fiat-crypto's notice for code fiat-crypto
 // generated), name a license of record that exists under LICENSES/, and give every DERIVED FROM or
 // INSPIRED BY bullet a GOROOT-relative source path and the Go version the code was last read against.
@@ -589,6 +589,9 @@ func goProvenanceProblems(text string, licenses string) []string {
 		}
 	}
 	if block < 0 {
+		if strings.Contains(text, "// PROVENANCE") {
+			return []string{"PROVENANCE text without a block line (\"// PROVENANCE:\" or \"// PROVENANCE, part by part:\") in the first 300 lines"}
+		}
 		return nil
 	}
 	var problems []string
@@ -664,6 +667,7 @@ func TestLicensingGoProvenanceHeaders(t *testing.T) {
 		{"no version", lead + notice + "//\n// PROVENANCE:\n// - f: INSPIRED BY src/a/b.go, func f.\n", "without a Go version"},
 		{"no record", "//\n" + notice + "//\n// PROVENANCE:\n" + good, "without a license of record"},
 		{"other heading", lead + notice + "//\n// PROVENANCE — Go 1.26.11. Which part comes from where:\n//\n//   f   DERIVED FROM: src/a/b.go, f\n", "in another shape"},
+		{"no block line", lead + notice + "//\n// The parts follow Go.\n\n    // PROVENANCE: src/a/b.go, Go 1.26.11\n", "without a block line"},
 		{"missing record", strings.Replace(lead, "BSD-3-Clause", "BSD-9-Clause", 1) + notice + "//\n// PROVENANCE:\n" + good, "does not exist"},
 	}
 	for _, fixture := range fixtures {

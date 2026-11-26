@@ -691,9 +691,15 @@ follows Go carries a `// PROVENANCE` block whose bullets give the Go version the
 updates its bullet's version to the new release in the same commit. A hand-own that was not re-read keeps
 the old version, even where the hop moved the rest of the corpus. `TestLicensingGoProvenanceHeaders` refuses
 a bullet with no path or version and a block with no Go notice; it cannot tell whether a version is current.
+A DERIVED part's version is the release its statements follow; where one detail follows another release (a
+call form, a record), the bullet says so. An INSPIRED part's version is the release its contract was read
+against: its shape is go2cs's own, so a later change to Go's form alone (the 1.25 move from `Syscall9` to
+`SyscallN` in the generated wrappers) does not make it stale, and the hop re-reads it only for its contract.
 <!-- 2026-11-26, P5 attribution sweep (COORD 20261126T055140Z, P3 finding F4). The sweep's own version
      check diffed every DERIVED FROM function across Go 1.23.12, 1.24.13, 1.25.14 and 1.26.11 and pinned 11
-     parts to the older release their code still follows, and moved the windows Syscall family to original code (docs/phase4/DATA-go-attribution-scout-2026-11-26.md). -->
+     parts to the older release their code still follows, and moved the windows Syscall family to original code (docs/phase4/DATA-go-attribution-scout-2026-11-26.md).
+     The DERIVED/INSPIRED sentences: P3's read of the seat (20261126T170601Z, SHOULD 2), rtlGetVersion and the
+     ws2_32, addrinfo, certchain and dnsrecord wrappers. -->
 
 **A corpus migration is that regen.** Schedule the bundle **before H5**, for one reason: H5's overlay
 diff is the migration's primary signal, and every un-levelled artifact is noise inside it. Levelling

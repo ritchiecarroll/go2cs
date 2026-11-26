@@ -580,3 +580,27 @@ has the sweep's shape with R's parts and notes unchanged, in the same number of 
 The guard read neither file, because it checked only a block under the two exact headings. It now refuses a
 `// PROVENANCE` heading in any other shape; a fixture covers it, and master's scan_amd64_impl.cs put back made it
 fail naming the file (restored, sha256 checked).
+
+## P3's read folded (amended 2026-11-26)
+
+<!-- P5, on P3 20261126T170601Z (CLEAR WITH NITS) and COORD 20261126T170816Z (fold SHOULD 2 and 3; SHOULD 1, a
+     golib NOTICE, waits for the owner and is not in the seat). -->
+
+**SHOULD 2, the release a part cites.** `internal/syscall/windows/windows/zsyscall_windows_version_impl.cs`'s
+`rtlGetVersion` bullet now says what follows which release: the record is 1.26.11's `_OSVERSIONINFOEXW`, and the
+call keeps 1.24.13's `syscall.Syscall(addr, 1, ...)` form where 1.26.11 calls `SyscallN`. A census of every DERIVED
+bullet citing a `zsyscall_windows.go` found it the only part at 1.26.11 over a fixed-arity call; the others (seven files)
+were already pinned to 1.24.13. The INSPIRED wrappers P3 named (ws2_32, addrinfo, certchain, dnsrecord) keep
+1.26.11: the runbook paragraph now states the rule both kinds follow. A DERIVED part cites the release its
+statements follow and names any detail that follows another; an INSPIRED part cites the release its contract was
+read against, its shape is go2cs's own, and a change to Go's form alone does not make it stale.
+
+**SHOULD 3, the guard.** `goProvenanceProblems` now refuses `// PROVENANCE` text with no block line in the first
+300 lines, besides a heading in another shape (fixture "no block line"). Red control: a `// PROVENANCE:` line
+indented inside `runtime/trace/annotation_impl.cs` (an own file) made the guard fail naming it; restored, sha256
+checked. P3's floor (every marked or `*_impl.cs` file has a block or is on a checked-in own list) is not in this
+seat; it can be its own. Train 16's new hand-owns get headed as they land.
+
+**NIT 5, the step 2 table.** The "own or glue" row is 92, not 93: the 93 spec entries with no Go part include the
+skipped `cpu_arm64_darwin_impl.cs`, which has its own row. 148 headed + 92 own or glue + 1 G+O only + 1 skipped
+= 242, so 94 files are unheaded, as P3 counted.
