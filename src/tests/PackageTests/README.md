@@ -91,13 +91,19 @@ SDK then writes `rollForward` twice), `WinExe` WINEXE, and the `OutputType` clau
 # `LocalRefsPlatform`: a local-reference conversion builds its own platform, from a clean tree
 
 `test-local-refs-platform.ps1` converts a small module with plain `go2cs -recurse` against a runtime root extracted
-from git (tracked files only, so no `bin`/`obj` can hide a skipped restore) and runs two arms:
+from git (tracked files only, so no `bin`/`obj` can hide a skipped restore) and runs three arms:
 
 - DEFAULT: `dotnet build` and `dotnet run` with no flags build the program and print what `go run` prints. The output
   root's props default `GoTargetOS`/`GoTargetArch` to the platform the tree was converted for, and its targets hand the
-  same two values to NuGet's restore walk, which ignores the `ProjectReference` metadata the build honors;
+  same two values to NuGet's restore walk, which ignores the `ProjectReference` metadata the build honors. It also
+  checks the output root's `.artifacts/gen` holds one directory per converted project, so a misspelt guard on that
+  redirection fails here (read red with the guard's token property misspelt);
 - OVERRIDE: `-p:GoTargetArch=riscv64` beats the default and reaches the referenced runtime, whose layout check refuses
-  `<host GOOS>/riscv64` by name.
+  `<host GOOS>/riscv64` by name;
+- IN-PLACE: `deploy-core.ps1 -Target` stages the same root, and plain `go2cs -recurse -go2cspath <deploy root>`, with no
+  output root, converts into the deploy root itself. The conversion keeps deploy-core's `Directory.Build.props` and
+  writes only its targets, so the platform default is the one deploy-core recorded; `dotnet build` and `dotnet run`
+  with no flags build the program and print what `go run` prints.
 
 ```text
 pwsh src/tests/PackageTests/LocalRefsPlatform/test-local-refs-platform.ps1 [-Converter <go2cs>] [-Repository <clone>]
@@ -105,7 +111,11 @@ pwsh src/tests/PackageTests/LocalRefsPlatform/test-local-refs-platform.ps1 [-Con
 
 Read red-first on linux-x64: with the restore half removed from the converter, DEFAULT stops on `NETSDK1004` for a
 project the runtime references only on linux (release-smoke 45729437375 read the same on both linux legs), and
-OVERRIDE still passes; with it, both arms PASS.
+OVERRIDE still passes; with it, both arms PASS. IN-PLACE read red-first on linux-x64 with the converter at 582c50e1dd:
+`CS2021` for `deploy/core/internal/godebugs/gen/`, because the targets' generator-output path read two properties only
+the converter's own props defines; with the guard all three arms PASS. With no flags, IN-PLACE read red at
+148d7a8f68, whose deploy-core recorded no platform (the linux build compiled the windows runtime); green once
+deploy-core records it.
 
 # `BreakFloor`: a package built below the go.* break floor fails the build
 

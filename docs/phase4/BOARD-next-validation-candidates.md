@@ -42767,6 +42767,95 @@ kernels were.
 
 — R (2026-11-25)
 
+## 2026-11-26 — P2 (COORD 20261126T091914Z, P3's F7): a refused native-call seam left the goroutine _Gsyscall (CURED, pre-existing)
+`runtime/syscall_managed_impl.cs` moved the goroutine's status BEFORE the GoNativeCall half in two places, and the
+seam can refuse by throwing. `enterSyscall` set `_Gsyscall`, then `GoNativeCall.Enter` refused a second entry
+("already inside a native call"); every caller enters outside its `try`, so no `exitsyscall` ran and the goroutine
+stayed `_Gsyscall` with no seam entered. `syscallCallbackExit` set `_Gsyscall`, then `ReturnToNative` refused when
+the callback left a native call of its own open. Both now roll the status back before the refusal propagates; the
+order (status before the P release, the Q2 ruling) and the normal path are unchanged. No banked row is known to
+reach either refusal. Rows: `RuntimeSyscallFamilyTests.AnEntryWhoseSeamThrowsLeavesTheStatusRunning` and
+`.ACallbackExitWhoseSeamThrowsLeavesTheStatusRunning`, each red at master (status 3) before its cure.
+
+— P2 (2026-11-26)
+
+**2026-11-26 (P4): darwin go-test's "baseline two" were both test-side; a third red hid behind them on osx-arm64.**
+COORD 2026-11-26 10:10Z. Master's hosted darwin go-test (run 45779430120 at `d6805be2e8`) failed the same two tests on
+both macs, and every train read them as the baseline.
+
+- **TestRelativeGo2CSPathIsResolvedAtParseTime** (`/var` against `/private/var`). The converter is right: it resolves a
+  relative `-go2cspath` with `filepath.Abs`, as Go resolves any relative path, so from a shell it names the path the
+  user's working directory spells. The test's helper launch set `cmd.Env`, and `os/exec` sets `PWD` from `Dir` only
+  when `Env` is nil (go.dev/issue/50599), so the child inherited the parent's `PWD`, which did not name its working
+  directory, and `os.Getwd` fell back to the kernel's canonical `/private/var/...`. Fix: `runCLI` passes `PWD=dir`.
+  Reproduced on linux with `TMPDIR` on a symlinked directory: red at master with darwin's message shape, green with
+  the fix.
+- **TestRetiredHandOwnsHaveRows** ("is the commit in this clone?"). Not a shallow clone: go-test checks out with
+  `fetch-depth: 0` and `2e6cf71e48` is reachable from tags. `git grep` exited 1, which means no match. The marker
+  predicate spelled whitespace `\s`, which the regex library git uses on macOS reads as a literal `s` in an extended
+  expression (git sets `REG_ENHANCED` there for basic expressions only). Fix: `[[:space:]]`, the same files at both
+  baseline SHAs and at HEAD on linux (146, 186, 225); an exit 1 now says the census matched nothing. The guard stays
+  real on hosted runs. `src/handown-baseline.ps1` keeps `\s`: it runs where `\s` is accepted.
+- **The hidden third red.** In the same run the osx-arm64 leg's `go2cs` package hit `panic: test timed out after
+  50m0s`; the step summary kept only `ok`/`FAIL`/`---` lines, so the leg still read as "baseline two", and every
+  `go2cs` test after the kill point had not run there. The summary now leads with each `panic:` line and the tests
+  under its `running tests:` block. The limit stays 50m (COORD 13:29Z); the slowness is the next row.
+
+Hosted reads on `claude/p4-darwin-go-test`: run 45800091628 at `642184ab1d3`, osx-x64 green and osx-arm64 timed out
+at 50m (repoguard ok); run 45809558237 at `ae26fe533ef` (go test limit 100m on darwin, since withdrawn), osx-x64 green
+and osx-arm64 timed out at 100m, the new summary naming the test.
+
+— P4 (2026-11-26)
+
+**2026-11-26 (P4): OPEN. On osx-arm64 the converter's `go2cs` test package runs at least 16x slower than on linux.**
+`TestUntypedRegionShapesConvertWithoutPanic` takes 59 s on a 4-core linux box (go1.26.11, local) and was still running
+at 15m44s when run 45809558237's 100-minute limit killed the package, its subtests about 8 s each (each loads `fmt`
+and `strings` through `go/packages`). osx-x64 finishes the whole package in about 32 minutes, so the 3-core arm64
+runner's usual factor (about 1.5x) does not explain it. Until it is understood, darwin go-test on osx-arm64 cannot be
+green, and the summary names the timeout. Next measurement: per-subtest times with `-v` on both macs, filtered to
+that test (a converter-cgo dispatch on the seat branch).
+
+**Owner.** P4, diagnosing (COORD 2026-11-26 13:29Z).
+
+— P4 (2026-11-26)
+
+**Update 2026-11-26 (P4): the osx-arm64 slowness is memory pressure from the `go2cs` test binary.** Two readings.
+(a) Alone, the slow test is fast there: a `-v` run filtered to `TestUntypedRegionShapesConvertWithoutPanic`
+(converter-cgo dispatch, run 45828947158) passed in 68.5 s on osx-arm64 and 102.1 s on osx-x64, subtests about 0.5-1 s.
+(b) A sampler every 60 s during the full darwin go-test (diagnostic branch `claude/p4-darwin-slow-diag`, run
+45833624874, never for a train) on the 3-core, 7 GB macos-15 runner: free memory stayed near 2,000-4,000 pages (about
+30-60 MB) from the first minutes on, pageouts climbed the whole run (1,058 to 26,536), swap reached 1.1 GB by minute 20,
+and the load average sat at 13-30 while the busiest process, `go2cs.test`, used about one core. `go2cs.test`'s
+resident set read 1.3-2.0 GB whenever it was in the top five, and below the list (paged out or compressed) for eight
+minutes while it was the top CPU process. No leftover processes: `dotnet` count 0 at almost every sample and the
+process count flat. So the cause is (1) memory pressure, not (2) leftover processes or (3) oversubscription: the test
+binary's own heap does not fit beside the system on that runner, and its threads wait on page faults. osx-x64's runner
+has twice the memory, which is why it finishes. Next: a one-axis run with `GOMEMLIMIT` set for the darwin go test,
+and, separately, what in the `go2cs` tests keeps that much heap live.
+
+— P4 (2026-11-26)
+
+**2026-11-26, INSTRUMENT (P1, COORD 112357Z):** `src/tests/PackageTests/LocalRefsPlatform` is run BY HAND only: no
+workflow and no `release-smoke.ps1` arm names it. Its three arms (DEFAULT, OVERRIDE, IN-PLACE) are the only gate that
+builds a local-reference `-recurse` conversion from a clean, git-extracted runtime root, and IN-PLACE is the only one
+that converts inside a `deploy-core.ps1` root; every train's `go test` holds the emitted text, not the build. All
+readings so far are linux-x64. Wiring it into a hosted stage was left out of the in-place seat as not cheap: each leg
+would build the runtime closure three times.
+
+— P1 (2026-11-26)
+
+## 2026-11-26 — R (finding 5 nit 1; P3 20261126T064531Z, COORD 064719Z): on an OS-annotated row with families, the floor is checked by COUNT only (OPEN, stated gap)
+
+**OPEN, read.** In `src/_roster.ps1` `Test-HostConditionalDelta`, an OS-annotated row has no committed proof page for
+that OS (the page is the banking host's). So `-BankedNames $null` takes the floor's names from the live record outside
+the families, and checks only that they number floor + disclosed. A run that lost one banked verdict and gained another
+outside the families would pass that check. The families themselves stay all-or-nothing, and their parent must pass on
+both sides. Today one row uses this branch: `internal/runtime/gc/scan`, linux and darwin. `docs/ValidatedTestPackages.md`
+states the gap. **What removes it:** a committed proof page per OS (the floor's verdict names for linux and for darwin),
+which the branch would then cross-check by name, as it does for an exact-name row. Owner: unrouted.
+
+— R (2026-11-26)
+
 ## 2026-11-26 — P5 (Go attribution seat, P3 20261126T170601Z NITs 6 and 7; COORD 20261126T180158Z): two hand-own attribution rows (OPEN)
 
 - **NIT 6: `internal/cpu/darwin/cpu_arm64_darwin_impl.cs` is DERIVED and its Go notice and PROVENANCE block are on the
