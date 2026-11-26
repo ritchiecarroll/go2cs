@@ -181,9 +181,11 @@ func main() {
 		{"fileInfoDirEntry", []string{"// Name is declared by fs.FileInfo and fs.DirEntry\n", "    new @string Name();\n", "    new bool IsDir();\n"}, map[string]int{"new ": 2}},
 		// a function-local interface is hoisted and redeclares the same way
 		{"local_inner", []string{"    new @string Name(Path p);\n"}, map[string]int{"new ": 1}},
-		// the controls: one declarer reached by two paths, a method the interface declares itself, a constraint
+		// a method the interface declares itself is written once, where Go declares it, and takes `new`
+		// because the embedded bases also supply it: without it the declaration hides them silently (CS0108)
+		{"own", []string{"    new @string Name(Path p);\n"}, map[string]int{"Name(": 1, "new ": 1}},
+		// the controls: one declarer reached by two paths, a constraint
 		{"shared", nil, map[string]int{"new ": 0, "ID(": 0}},
-		{"own", []string{"    @string Name(Path p);\n"}, map[string]int{"Name(": 1, "new ": 0}},
 		{"constraint", nil, map[string]int{"new ": 0, "Name(": 0}},
 	} {
 		got := body(check.iface)
