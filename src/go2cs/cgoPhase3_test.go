@@ -416,6 +416,8 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "govoidnumberwrite"},
 		{name: "wordtoken", csFails: cgoP3WordToken},
 		{name: "wordint"},
+		// S6 (design 21): a pointer C keeps past the call, pinned with runtime.Pinner, read back after a collection.
+		{name: "pinnerkeep"},
 		{name: "gobytes"},
 		{name: "gostring"},
 		// Pointers DERIVED from a view of Go memory (the review of increment 3.1, §16.11).

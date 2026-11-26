@@ -26,6 +26,8 @@ int go2cs_probe_text_fill(char *buffer, int size);
 long go2cs_probe_sum(const void *bytes, int count);
 void *go2cs_probe_same(void *pointer);
 uintptr_t go2cs_probe_word(uintptr_t word);
+void go2cs_probe_keep(void *pointer);
+int go2cs_probe_kept(void);
 char *go2cs_probe_log_new(void);
 void go2cs_probe_log_put(char *log, int value);
 void go2cs_probe_release(void *pointer);
@@ -91,6 +93,7 @@ import "C"
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"syscall"
 	"unsafe"
 )
@@ -314,6 +317,19 @@ func main() {
 		s := []int{1}
 		u := uintptr(unsafe.Pointer(&s))
 		fmt.Println("wordtoken", uintptr(C.go2cs_probe_word(C.uintptr_t(u))) == u)
+	case "pinnerkeep":
+		// cgo S6 (design 21): C keeps a Go pointer past the call, which Go allows while a runtime.Pinner pins the memory.
+		// A collection runs, Go writes through its own pointer, and C reads through the one it kept: 9 both ways.
+		var pinner runtime.Pinner
+		x := new(C.int)
+		*x = 7
+		pinner.Pin(x)
+		C.go2cs_probe_keep(unsafe.Pointer(x))
+		runtime.GC()
+		*x = 9
+		fmt.Println("pinnerkeep", int(C.go2cs_probe_kept()))
+		C.go2cs_probe_keep(nil)
+		pinner.Unpin()
 	case "wordint":
 		// Its near-miss: an ordinary integer crosses a uintptr_t parameter as it is.
 		fmt.Println("wordint", uint64(C.go2cs_probe_word(C.uintptr_t(42))))

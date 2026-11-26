@@ -212,6 +212,20 @@ GO2CS_PROBE_EXPORT uintptr_t go2cs_probe_word(uintptr_t word)
     return word;
 }
 
+// A pointer C KEEPS past the call, and a later call that reads through it (cgo S6, design 21: legal in Go only when a
+// runtime.Pinner pins the memory).
+static void *go2cs_probe_kept_pointer;
+
+GO2CS_PROBE_EXPORT void go2cs_probe_keep(void *pointer)
+{
+    go2cs_probe_kept_pointer = pointer;
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_kept(void)
+{
+    return go2cs_probe_kept_pointer ? *(int *)go2cs_probe_kept_pointer : -1;
+}
+
 // An empty call log of 32 bytes, zeroed.
 GO2CS_PROBE_EXPORT char *go2cs_probe_log_new(void)
 {
