@@ -122,6 +122,33 @@ func TestTestsHostBuildFilesSkipAPinnedOutput(t *testing.T) {
 		}
 	})
 
+	// P3 182613Z SHOULD 1: the configured root is a deployed one, and the output sits under a CLONE's src/core,
+	// another go2cs root whose own props pins go2csPath. Untracked files written there are what a later sweep or
+	// `git add` trips on.
+	t.Run("under a go2cs root other than the configured one", func(t *testing.T) {
+		deployed, _ := testsHostFixture(t)
+		clone := filepath.Join(t.TempDir(), "clone", "src")
+		output := filepath.Join(clone, "core", "strings")
+
+		for _, dir := range []string{filepath.Join(clone, "core", "golib"), output} {
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		if err := os.WriteFile(filepath.Join(clone, "core", "golib", "golib.csproj"), []byte("<Project />"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		writeTestsHostBuildFiles(output, Options{go2csPath: deployed, targetPlatform: "linux/amd64"})
+
+		for _, name := range []string{"Directory.Build.props", "Directory.Build.targets"} {
+			if _, err := os.Stat(filepath.Join(output, name)); err == nil {
+				t.Errorf("%s written under a clone's go2cs root, whose own props pins go2csPath", name)
+			}
+		}
+	})
+
 	t.Run("under a -recurse output root", func(t *testing.T) {
 		root, output := testsHostFixture(t)
 		recurseRoot := filepath.Dir(filepath.Dir(output))
