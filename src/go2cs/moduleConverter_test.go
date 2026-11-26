@@ -247,6 +247,22 @@ func TestRecurseLocalRefsPinTheTargetPlatform(t *testing.T) {
 		}
 	}
 
+	// The restore half: NuGet's restore walk ignores ProjectReference metadata, so the targets hand the same two values
+	// to it. Without this a FRESH tree restored the runtime as windows and the build stopped on NETSDK1004 for every
+	// project the runtime references only on linux (release-smoke 45729437375, both linux legs).
+	{
+		root := t.TempDir()
+
+		NewModuleConverter(Options{go2csPath: filepath.Join(root, "runtime"), recurseOutputRoot: root, recurse: true, targetPlatform: "linux/amd64"}).generateRecurseBuildFiles()
+
+		targets := readGenerated(t, filepath.Join(root, "Directory.Build.targets"))
+		want := "<_GenerateRestoreGraphProjectEntryInputProperties>$(_GenerateRestoreGraphProjectEntryInputProperties);GoTargetOS=$(GoTargetOS);GoTargetArch=$(GoTargetArch)</_GenerateRestoreGraphProjectEntryInputProperties>"
+
+		if !strings.Contains(targets, want) {
+			t.Errorf("the output-root targets do not hand the platform to NuGet's restore walk:\n%s", targets)
+		}
+	}
+
 	// A -recurse=nuget conversion compiles against the go.* packages, whose flavour GoCompileRuntimeIdentifier picks:
 	// no GoTargetOS there, and nothing passed to package references.
 	root := t.TempDir()
@@ -255,6 +271,10 @@ func TestRecurseLocalRefsPinTheTargetPlatform(t *testing.T) {
 
 	if props := readGenerated(t, filepath.Join(root, "Directory.Build.props")); strings.Contains(props, "GoTargetOS") {
 		t.Errorf("a -recurse=nuget conversion pinned GoTargetOS:\n%s", props)
+	}
+
+	if targets := readGenerated(t, filepath.Join(root, "Directory.Build.targets")); strings.Contains(targets, "GoTargetOS") {
+		t.Errorf("a -recurse=nuget conversion handed GoTargetOS to the restore:\n%s", targets)
 	}
 }
 
