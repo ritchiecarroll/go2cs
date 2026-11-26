@@ -1090,6 +1090,8 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		return err
 	}
 
+	writeTestsHostBuildFiles(outputPath, options)
+
 	sources, err := classifyTestSources(inputPath, includedSources, compileExcluded, handOwnHostExcluded, external)
 	if err != nil {
 		return err
