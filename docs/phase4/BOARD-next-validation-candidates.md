@@ -42767,4 +42767,21 @@ kernels were.
 
 — R (2026-11-25)
 
+## 2026-11-26 — P5 (Go attribution seat, P3 20261126T170601Z NITs 6 and 7; COORD 20261126T180158Z): two hand-own attribution rows (OPEN)
+
+- **NIT 6: `internal/cpu/darwin/cpu_arm64_darwin_impl.cs` is DERIVED and its Go notice and PROVENANCE block are on the
+  darwin/arm64 branch only** (D2, `claude/p5-darwin-arm64-flip` f6830223fb, where the file moves to `darwin-arm64/`).
+  The attribution sweep skipped it so the two branches would not both edit it. Closes when D2 lands; if D2 is dropped,
+  the file takes the sweep's header on master.
+- **NIT 7: 11 hand-owned parts follow an older Go release than the corpus (1.26.11)**, each pinned in its header: one at
+  1.23.12 (`os/wait_waitid.go` `Process.blockUntilWaitable`, the raw waitid loop where 1.26.11 calls `unix.Waitid`) and
+  ten at 1.24.13 (`sync/oncefunc.go` `OnceFunc`/`OnceValue`/`OnceValues`; six `internal/syscall/windows` and two `syscall`
+  zsyscall parts over the fixed-arity `Syscall` form; `registry_test.go` `testGetStringsValue`). The full list is the F4
+  table in [DATA-go-attribution-scout-2026-11-26.md](DATA-go-attribution-scout-2026-11-26.md) ("Version check"). At least
+  one is a behaviour gap, not form only: 1.26.11's `oncefunc` clears `f` in the defer even when `f` panics, and the 1.24
+  shape does not. The next hop re-reads these parts against the corpus release, and each header moves only when its part
+  is re-read (runbook rule, `docs/GoCorpusMigration.md`).
+
+— P5 (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

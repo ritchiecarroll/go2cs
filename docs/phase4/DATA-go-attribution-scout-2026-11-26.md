@@ -604,3 +604,24 @@ seat; it can be its own. Train 16's new hand-owns get headed as they land.
 **NIT 5, the step 2 table.** The "own or glue" row is 92, not 93: the 93 spec entries with no Go part include the
 skipped `cpu_arm64_darwin_impl.cs`, which has its own row. 148 headed + 92 own or glue + 1 G+O only + 1 skipped
 = 242, so 94 files are unheaded, as P3 counted.
+
+## golib NOTICE and NITs 6-7 (amended 2026-11-26)
+
+<!-- P5, on COORD 20261126T180028Z (OWNER yes, 11-26: a golib NOTICE file in go.lib) and COORD 20261126T180158Z
+     (append NITs 6 and 7 as BOARD lines with the NOTICE commit). This answers P3's SHOULD 1. -->
+
+**SHOULD 1, the golib NOTICE.** `src/core/golib/NOTICE` names go.lib's three DERIVED parts with their Go sources at
+1.26.11: `NextSliceCap` (`src/runtime/slice.go`, `nextslicecap`), `FinalizerBinding`'s `TryBindFinalizerArgument` and its
+rejection texts (`src/runtime/mfinal.go`, `SetFinalizer`) and `SyncTestBubble.IsIdle` (`src/runtime/runtime2.go`,
+`waitReason.isIdleInSynctest`). Go's LICENSE follows verbatim (`diff` against the 1.26.11 GOROOT's LICENSE: no
+difference), so a binary redistribution carries the notice, the three conditions and the disclaimer, as BSD-3 clause 2
+asks. The file is ASCII with LF endings, like golib's LICENSE. `golib.csproj` is unchanged: its existing
+`<None Include="NOTICE" Pack="true" ... Condition="Exists(...)">` packs the file, and the license metadata stays MIT.
+
+**Pack proof.** `dotnet pack src/core/golib/golib.csproj -c Release` (after a Release build of `core/go.arrays`, which
+the pack target requires) produced `go.lib.1.26.11.1.nupkg` with `NOTICE` at the package root beside `LICENSE` and
+`README.md`, byte-identical to the source file; the nuspec still reads `<license type="expression">MIT</license>`.
+Control: the same pack with the file moved aside produced a package with no `NOTICE` entry (restored, sha256 checked).
+
+**NITs 6 and 7** are a BOARD block of this date: the darwin/arm64 file headed on D2 only, and the 11 parts pinned to an
+older release than the corpus.
