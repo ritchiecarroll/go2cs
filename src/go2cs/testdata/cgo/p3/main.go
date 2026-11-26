@@ -50,12 +50,6 @@ void go2cs_probe_list_release(struct go2cs_probe_entry *node);
 int go2cs_probe_next_family(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
 
-struct go2cs_probe_pair
-{
-    int a;
-    int b;
-};
-
 struct go2cs_probe_cursor
 {
     int n;

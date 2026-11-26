@@ -733,3 +733,51 @@ func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_
 		t.Errorf("a Go-shaped pointer conversion reached the C#")
 	}
 }
+
+// An argument cmd/cgo declares at a C TYPEDEF, `var _cgo2 _Ctype_size_t = 2` (cgo S4's hosted reading, CS0246 on
+// memset's call in the p3 program off linux/amd64): cmd/cgo declares a typedef as an alias, and the cast names it as a
+// declaration does, through the pseudo-package (Cꓸsize_t), never as the Go name _Ctype_size_t. The closure is cmd/cgo's
+// shape for `C.memset(p, 7, 2)`.
+func TestCgoAnArgumentDeclaredAtACTypedefCastsToItsPseudoPackageName(t *testing.T) {
+	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
+
+	// The capture names memset's library, for this test alone (the package's tests run serially).
+	cgoPhase2Libraries["memset"] = "libc.so.6"
+	defer delete(cgoPhase2Libraries, "memset")
+	files["cgo_import.go"] = strings.Replace(cgoOfflineImportFile(cgoPhase2Libraries), "package cgophase2", "package cgophase3", 1)
+	files["fixture.cgo1.go"] += `
+func fillSeven(p unsafe.Pointer) {
+	func() _cgo_unsafe.Pointer{ _cgo0 := p; var _cgo1 _Ctype_int = 7; var _cgo2 _Ctype_size_t = 2; _cgoCheckPointer(_cgo0, nil); return _Cfunc_memset(_cgo0, _cgo1, _cgo2); }()
+}
+`
+	files["cgo_gotypes.go"] += `
+//go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_memset
+//go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_memset _cgo_55dd9c1e1280_Cfunc_memset
+var __cgofn__cgo_55dd9c1e1280_Cfunc_memset byte
+var _cgo_55dd9c1e1280_Cfunc_memset = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_memset)
+
+//go:cgo_unsafe_args
+func _Cfunc_memset(p0 unsafe.Pointer, p1 _Ctype_int, p2 _Ctype_size_t) (r1 unsafe.Pointer) {
+	_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_memset, uintptr(unsafe.Pointer(&p0)))
+	if _Cgo_always_false {
+		_Cgo_use(p0)
+		_Cgo_use(p1)
+		_Cgo_use(p2)
+	}
+	return
+}
+`
+	stderr, output, err := convertCgoOffline(t, files)
+	if err != nil {
+		t.Fatalf("%v\n%s", err, stderr)
+	}
+	converted := readConverted(t, output, "fixture.cs")
+
+	if want := "C.memset(p, (C.@int)(7), (Cꓸsize_t)(2));"; !strings.Contains(converted, want) {
+		t.Errorf("the call does not read %q", want)
+	}
+
+	if strings.Contains(converted, "_Ctype_") {
+		t.Errorf("a cmd/cgo Go name reached the C#")
+	}
+}
