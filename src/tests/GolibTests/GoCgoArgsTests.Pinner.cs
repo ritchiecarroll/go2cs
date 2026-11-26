@@ -175,6 +175,126 @@ public unsafe partial class GoCgoArgsTests
         Assert.IsFalse(GoPinTable.Unpin(box), "a third unpin is Go's object-already-unpinned");
     }
 
+    // P3's MUST 1 on 2ce6812305: the out-parameter door hands C one stack word for a Go pointer slot, and the word-mirror
+    // arm a mirror of the whole array of C pointers. C keeping either keeps a copy. A pinned slot is refused by name;
+    // the unpinned near-misses keep their copies, as before.
+    [TestMethod]
+    public void S6_APinnedOutParameterSlotIsRefusedByName()
+    {
+        ж<ж<sbyte>> unpinned = new StandardBox<ж<sbyte>>((ж<sbyte>)null!);
+        Assert.AreEqual(GoCgoStructPointer.Mirror, GoCgoArgs.OutParameter(unpinned, "register", out _, out _), "unpinned: one stack word, as before");
+
+        ж<ж<sbyte>> slot = new StandardBox<ж<sbyte>>((ж<sbyte>)null!);
+        runtime_package.Pinner pinner = default;
+        pinner.Pin(slot);
+
+        try
+        {
+            StringAssert.Contains(RefusalOf(() => GoCgoArgs.OutParameter(slot, "register", out _, out _)), "pinned with runtime.Pinner");
+            StringAssert.Contains(RefusalOf(() => GoCgoArgs.OutParameter(slot, "register", out _, out _, out _, out _)), "pinned with runtime.Pinner", "the six-out overload");
+        }
+        finally
+        {
+            pinner.Unpin();
+        }
+    }
+
+    [TestMethod]
+    public void S6_APinnedArrayOfCPointersHandedAsAVoidPointerIsRefusedByName()
+    {
+        array<ж<sbyte>> free = new array<ж<sbyte>>(3);
+        GoCgoArgs.PinVoidPointer(@unsafe.Pointer.FromBox(new ElemRefBox<ж<sbyte>>(free, 0)), "keep", out GoCgoWordMirror? mirror);
+        Assert.IsNotNull(mirror, "unpinned: the word mirror, as before");
+
+        array<ж<sbyte>> argv = new array<ж<sbyte>>(3);
+        ж<ж<sbyte>> first = new ElemRefBox<ж<sbyte>>(argv, 0);
+        runtime_package.Pinner pinner = default;
+        pinner.Pin(first);
+
+        try
+        {
+            StringAssert.Contains(RefusalOf(() => GoCgoArgs.PinVoidPointer(@unsafe.Pointer.FromBox(new ElemRefBox<ж<sbyte>>(argv, 0)), "keep", out _)), "pinned with runtime.Pinner");
+        }
+        finally
+        {
+            pinner.Unpin();
+        }
+    }
+
+    // P3's MUST 2: a pinned reference-free STRUCT through the typed struct door crosses in place (kind Pinned, no image),
+    // and the address C keeps survives compaction.
+    [TestMethod]
+    public void S6_APinnedReferenceFreeStructCrossesTheStructDoorInPlace()
+    {
+        ж<cgoPoint> point = new StandardBox<cgoPoint>(new cgoPoint { X = 1, Y = 2 });
+        runtime_package.Pinner pinner = default;
+        pinner.Pin(point);
+
+        try
+        {
+            GoCgoImages images = default;
+            Assert.AreEqual(GoCgoStructPointer.Pinned, GoCgoArgs.StructPointer(point, "keep", ref images, out _, out GoCgoPin pin));
+            Assert.AreEqual(0, images.ImageCount, "in place, not an image");
+
+            nint kept;
+
+            fixed (byte* f = pin)
+                kept = pin.Address(f);
+
+            Compact();
+
+            ((int*)kept)[1] = 20; // C writes Y through the address it kept
+            Assert.AreEqual((int32)20, point.Value.Y);
+        }
+        finally
+        {
+            pinner.Unpin();
+        }
+    }
+
+    private struct pinIn4
+    {
+        public uint16 Family;
+        public uint16 Port;
+        public array<byte> Addr = new(4);
+        public array<byte> Zero = new(8);
+
+        public pinIn4() { }
+    }
+
+    private struct pinAny
+    {
+        public uint16 Family;
+        public array<sbyte> Data = new(14);
+
+        public pinAny() { }
+    }
+
+    // P3's MUST 2, the second refusal: a pinned root reached through a struct VIEW only an image could carry. An image is
+    // a copy, so C keeping it would keep the copy: refused by name.
+    [TestMethod]
+    public void S6_APinnedRootReachedThroughAnImageViewIsRefusedByName()
+    {
+        ж<pinIn4> root = new StandardBox<pinIn4>(new pinIn4 { Family = 2 });
+
+        GoCgoImages unpinned = default;
+        Assert.AreEqual(GoCgoStructPointer.Pinned, GoCgoArgs.StructPointer(root.Reinterpret<pinIn4, pinAny>(), "keep", ref unpinned, out _, out _));
+        Assert.AreEqual(1, unpinned.ImageCount, "unpinned: the image, as before");
+
+        runtime_package.Pinner pinner = default;
+        pinner.Pin(root);
+
+        try
+        {
+            GoCgoImages images = default;
+            StringAssert.Contains(RefusalOf(() => GoCgoArgs.StructPointer(root.Reinterpret<pinIn4, pinAny>(), "keep", ref images, out _, out _)), "a view of a Go value no door can hand over in place");
+        }
+        finally
+        {
+            pinner.Unpin();
+        }
+    }
+
     // S4's number into a Pinner-pinned box resolves to the same storage, so C keeping it keeps the pinned bytes.
     [TestMethod]
     public void S6_ANumberIntoAPinnedBoxCrossesAtThePinnedBytes()

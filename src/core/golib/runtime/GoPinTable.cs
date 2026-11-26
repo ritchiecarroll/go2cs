@@ -137,7 +137,9 @@ public static class GoPinTable
             case Array array:
                 storages.Add(array);
 
-                if (array.GetType().GetElementType() is { IsValueType: true, IsPrimitive: false, IsEnum: false })
+                // An element type holding no reference holds no inline array (an array<T> is a reference here), so the walk,
+                // which boxes every element, is skipped (P3's SHOULD 5 on 2ce6812305).
+                if (array.GetType().GetElementType() is { IsValueType: true, IsPrimitive: false, IsEnum: false } elementType && NativeStructMarshal.ContainsReferences(elementType))
                 {
                     foreach (object? element in array)
                         AddBackings(storages, element);

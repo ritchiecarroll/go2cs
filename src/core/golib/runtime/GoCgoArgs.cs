@@ -258,6 +258,8 @@ namespace go.golib;
         if (slot is null || slot.IsNilPointer)
             return GoCgoStructPointer.Nil;
 
+        RefusePinnerHeldCopy(slot, typeof(ж<U>), function);
+
         if (slot is NativeBox<ж<U>> native)
         {
             if (!IsGenuinelyNative(native))
@@ -300,6 +302,8 @@ namespace go.golib;
 
         if (slot is not ElemRefBox<ж<U>> element)
             return OutParameter(slot, function, out word, out original);
+
+        RefusePinnerHeldCopy(slot, typeof(ж<U>), function);
 
         word = 0;
         original = null;
@@ -468,6 +472,7 @@ namespace go.golib;
 
         if (pointer is IUnsafePointer { RetainedSource: ICgoWordElement element } && element.TryCgoWordMirror(out GoCgoWordMirror? words, out nint index))
         {
+            RefusePinnerHeldCopy(element, typeof(uintptr), function);
             mirror = words;
             return words.PinAt(index);
         }
@@ -689,6 +694,16 @@ namespace go.golib;
         RequireCrossable(root!);
         pin = new GoCgoPin(root!, offset);
         return true;
+    }
+
+    // cgo S6, P3's MUST 1 on 2ce6812305: the out-parameter door and the void door's word-mirror arm hand C a COPY of a Go
+    // pointer slot (one stack word, or a mirror of the whole array of C pointers). C keeping that address after the call
+    // keeps a dead stack word or a mirror the wrapper copies back once. A slot pinned with runtime.Pinner says C may keep
+    // it, and a slot holds a reference here, so it has no in-place answer: refused by name. Unpinned slots are unchanged.
+    private static void RefusePinnerHeldCopy(object box, Type type, string function)
+    {
+        if (GoPinTable.Any && box is INilPointer { IsNilPointer: false } pointer && GoPinTable.IsPinned(pointer.ReferentObject))
+            throw PinnerHeldRefused(function, type, "a Go pointer slot go2cs hands C as a copy (a stack word, or a word mirror of its array)");
     }
 
     private static PanicException PinnerHeldRefused(string function, Type type, string what) =>
