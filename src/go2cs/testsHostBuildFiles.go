@@ -179,6 +179,10 @@ func testsHostModuleRootLines(inputPath, outputPath string, options Options) []s
 //   - the target is in the module cache: the path carries the cache layout of the converting box;
 //   - the path holds a single quote (it ends the quoted string), $( or @( (property and item references) or % (an
 //     MSBuild escape), each of which changes the expression.
+//
+// Two directories under one parent short of the volume root are related even when the path between them names another
+// account (an output in one account's home and a module in another's give ../../../<other>/mod): the rule cannot tell
+// that from a shared work tree.
 func testsHostRecordableModulePath(outputPath, target string) (string, bool) {
 	if cache := goModCacheDir(); cache != "" && isPathUnder(target, cache) {
 		return "", false

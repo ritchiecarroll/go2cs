@@ -39,7 +39,7 @@ import (
 var goModCache string
 
 // goModCacheDir returns the Go module cache root (GOMODCACHE), resolved once: the environment
-// override first, then `go env`, falling back to the documented default <GOPATH>/pkg/mod
+// override first, then `go env`, falling back to Go's default (defaultGoModCache)
 // (main() has normalized the GOPATH environment variable by the time any conversion runs).
 func goModCacheDir() string {
 	if goModCache != "" {
@@ -55,9 +55,25 @@ func goModCacheDir() string {
 		return goModCache
 	}
 
-	goModCache = filepath.Join(os.Getenv("GOPATH"), "pkg", "mod")
+	home, _ := os.UserHomeDir()
+	goModCache = defaultGoModCache(os.Getenv("GOPATH"), home)
 
 	return goModCache
+}
+
+// defaultGoModCache is Go's own default module cache, for when neither GOMODCACHE nor `go env` answers: the first
+// GOPATH entry's pkg/mod, and with no GOPATH, <home>/go/pkg/mod, as `go` defaults GOPATH. Empty when neither is known,
+// rather than the relative pkg/mod an empty GOPATH would join into, which no absolute path is ever under.
+func defaultGoModCache(gopath, home string) string {
+	if entries := filepath.SplitList(gopath); len(entries) > 0 && entries[0] != "" {
+		return filepath.Join(entries[0], "pkg", "mod")
+	}
+
+	if home != "" {
+		return filepath.Join(home, "go", "pkg", "mod")
+	}
+
+	return ""
 }
 
 // loadedPackageIsAt reports whether the load produced exactly the package that lives at dir. Used to
