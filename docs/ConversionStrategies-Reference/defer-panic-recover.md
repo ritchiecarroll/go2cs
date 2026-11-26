@@ -411,9 +411,9 @@ and spreading inside the thunk, at every variadic deferred call in the corpus.
 An empty variadic call is NOT such a wall: `f()` on `func f(parts ...int)` answers `parts == nil` as `true`, as in
 Go, because the empty pack's `.slice()` copies no elements and keeps Go's nil for a zero-argument call.
 <!-- src/core/golib/variadicPack.cs:118-119#b93221: a literal pack's .slice() is `pack.Elements.slice()`, the Span copy below. -->
-<!-- src/core/golib/slice.cs:2032 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
+<!-- src/core/golib/slice.cs:2042 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
      empty slice where Go passes nil); golib's Span-to-slice copy has since kept nil-ness,
-     slice.cs:2002 `NIL-NESS CROSSES THIS BOUNDARY`. -->
+     slice.cs:2012 `NIL-NESS CROSSES THIS BOUNDARY`. -->
 
 ## A ZERO-ARG deferred/spawned call of a NAMED variadic callee keeps the lambda — the group carries `params`
 
@@ -705,9 +705,9 @@ with **exit code 2**. The report is the one Go prints (golib's `CrashReport`):
   ([how](../ConversionStrategies.md#a-partial-method-with-a-body-keeps-its-own-frame)). In a few shapes the
   traceback is shorter than Go's
   ([Limitations](../Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
-<!-- src/core/golib/runtime/CrashReport.cs:192 `oldest first, each after the first on a TAB, with <c> [recovered]</c>`;
-     :275 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The traceback renderer is the
-     converted runtime's (src/core/runtime/managed_impl.cs:174 `CrashReport.TracebackRenderer = crashTraceback;`).
+<!-- src/core/golib/runtime/CrashReport.cs:203 `oldest first, each after the first on a TAB, with <c> [recovered]</c>`;
+     :286 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The traceback renderer is the
+     converted runtime's (src/core/runtime/managed_impl.cs:235 `CrashReport.TracebackRenderer = crashTraceback;`).
      Guards: GolibTests CrashReportTests and CrashReportChainTests. Design record: docs/phase4/DESIGN-crash-report.md.
      history: the backstop once printed to stdout and called Environment.Exit(0), which polluted compared output and
      signaled false success to every caller; later it printed the first line alone, without the traceback. -->

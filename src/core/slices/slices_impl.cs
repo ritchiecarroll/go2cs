@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2021 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - overlaps: DERIVED FROM src/slices/slices.go, Go 1.26.11, func overlaps. Go's guards, with the final address
+//   comparison done by golib's slice Overlaps.
 
 // overlaps has the same four-take address-ordering shape as crypto/internal/alias.AnyOverlap (plus the
 // `elemSize - 1` arithmetic), and the same race: each `(uintptr)Ꮡ(…)` take pins its backing only until

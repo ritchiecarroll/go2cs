@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - gopark, ready, injectglist: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs gopark, ready, injectglist. The
+//   same park and ready, over golib's park seam with no scheduler.
+// - golibWaitReasonOf, goroutineOf and the Go* probes: original go2cs code. Helpers and test seams.
 
 // The runtime's gopark / ready / injectglist, over golib's park seam (S1b of
 // docs/phase4/DESIGN-gopark-goready-synctest.md).

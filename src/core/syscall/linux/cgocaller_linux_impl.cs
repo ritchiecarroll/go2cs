@@ -4,6 +4,27 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2019 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Setgroups: DERIVED FROM src/syscall/syscall_linux.go, Go 1.26.11, func Setgroups. The _Gid_t array is built in
+//   unmanaged memory, and the nil-pointer branch is dropped because the pointer is always set.
+// - SetRetval and the nine Shim* functions: DERIVED FROM src/runtime/cgo/linux_syscall.c, Go 1.26.11, C macro
+//   SET_RETVAL; C functions _cgo_libc_setegid, _cgo_libc_seteuid, _cgo_libc_setgid, _cgo_libc_setgroups,
+//   _cgo_libc_setregid, _cgo_libc_setresgid, _cgo_libc_setresuid, _cgo_libc_setreuid, _cgo_libc_setuid. Ported from
+//   C; each shim takes its arguments directly in place of an argset_t.
+// - cgocaller: bodies for the bodyless Go declarations of the same names in src/syscall/syscall_linux.go. Original
+//   go2cs code.
+// - InitCgoLibcPointers, GoCgocaller and the libc imports: original go2cs code.
 
 // The `cgocaller` keystone, Linux half — DESIGN-cgocaller-keystone.md §2, increment 1.
 //

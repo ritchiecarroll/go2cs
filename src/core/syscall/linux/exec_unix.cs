@@ -1,6 +1,18 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - ForkLock, StringSlicePtr, SlicePtrFromStrings, CloseOnExec, SetNonblock, ForkExec, StartProcess, Exec: DERIVED
+//   FROM src/syscall/exec_unix.go, Go 1.26.11, funcs StringSlicePtr, SlicePtrFromStrings, CloseOnExec, SetNonblock,
+//   ForkExec, StartProcess, Exec. The converted output; Exec hands execve unmanaged copies of argv and envp.
+// - forkExec: INSPIRED BY src/syscall/exec_unix.go, Go 1.26.11, func forkExec. Go's argument validation kept; the
+//   child is started with posix_spawn in place of fork and exec.
+// - runtime_BeforeExec, runtime_AfterExec, the posix_spawn seam and the native surface: original go2cs code.
+//   Runtime_BeforeExec and runtime_AfterExec are empty bodies for bodyless declarations.
 //go:build unix
 // Fork, exec, wait, etc.
 

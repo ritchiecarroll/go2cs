@@ -362,9 +362,9 @@ In a package written entirely by hand (`testing` and `unsafe`), marked `[assembl
 nothing is inferred from a signature or from where a type is declared: `[GoRecv]`, `[GoType]` and `[GoStr]`
 are the only way to say those things there.
 
-<!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
+<!-- source: src/core/internal/poll/fd_mutex_impl.cs:162 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
-<!-- source: src/core/internal/poll/fd_mutex_impl.cs:154 -->
+<!-- source: src/core/internal/poll/fd_mutex_impl.cs:166 -->
 ```csharp
 [GoRecv] internal static bool rwlock(this ref fdMutex mu, bool read) {
 ```

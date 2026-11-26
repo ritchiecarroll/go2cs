@@ -296,7 +296,7 @@ for range atyp.Len {
 	offset += etyp.Size()
 }
 ```
-<!-- source: src/core/unique/clone.cs:137-141, 149, 152 -->
+<!-- source: src/core/unique/clone.cs:146-150, 158, 161 -->
 ```csharp
 foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
     var exprᴛ1 = etyp.Kind();

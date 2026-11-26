@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2011 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - copyChecker.check: INSPIRED BY src/sync/cond.go, Go 1.26.11, method copyChecker.check. The same copy detection
+//   over a managed identity in place of the struct's own address.
 
 // Hand-written implementation of sync's copyChecker.check — the "a Cond must not be copied after
 // first use" guard. Go implements it by having the checker store its OWN ADDRESS in itself:

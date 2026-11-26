@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - _GetHostByName, _GetProtoByName, _GetServByName: INSPIRED BY src/syscall/zsyscall_windows.go (generated from the
+//   declarations in src/syscall/syscall_windows.go, whose notice this file carries), Go 1.26.11, funcs
+//   _GetHostByName, _GetProtoByName, _GetServByName. The native database entry is copied into a managed record.
+// - assertNetdbMirrors and the copy and transcribe helpers: original go2cs code.
 
 // THE NET-DATABASE FAMILY -- gethostbyname, getprotobyname and getservbyname -- the three unclosed
 // siblings of the name-resolution arc this directory's zsyscall_windows_addrinfo_impl.cs closed.
@@ -21,7 +33,7 @@
 // fabrication happens at the first READ, which materializes the whole record.
 //
 // AND THE ONE CONSUMER READS EXACTLY ONE INTEGER, which is what makes this the row-46 shape rather
-// than the addrinfo one. net's getprotobyname (net/windows/lookup_windows.cs:75) does
+// than the addrinfo one. net's getprotobyname (net/windows/lookup_windows.cs:84) does
 // `(~p).Proto` -- a uint16 -- and `~p` materializes the WHOLE Protoent on the way to it, fabricating
 // Name and Aliases as managed references from ws2_32's bytes. A field that looks exempt is not; that
 // is the note os/user's lookup_windows_impl.cs carries about PrimaryGroupID, in a second costume.

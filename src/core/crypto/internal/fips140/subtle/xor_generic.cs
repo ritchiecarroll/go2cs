@@ -1,6 +1,15 @@
 // Copyright 2013 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The converted output, xorBytes, aligned and xorLoop: DERIVED FROM
+//   src/crypto/internal/fips140/subtle/xor_generic.go, Go 1.26.11, funcs xorBytes, aligned, xorLoop. Go's code and
+//   comments.
+// - xorWords: original go2cs code. Replaces the words view, which has no managed equivalent.
 //go:build (!amd64 && !arm64 && !loong64 && !ppc64 && !ppc64le) || purego
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted xor_generic.go output).

@@ -4,6 +4,21 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from or inspired by Go, whose notice it carries (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - rawToSockaddrInet4, rawToSockaddrInet6, sockaddrInet4ToRaw, sockaddrInet6ToRaw: INSPIRED BY
+//   src/internal/poll/fd_windows.go, Go 1.26.11, funcs rawToSockaddrInet4, rawToSockaddrInet6, sockaddrInet4ToRaw,
+//   sockaddrInet6ToRaw. The same conversions through syscall's decoders and encoders, without re-viewing the raw
+//   buffer.
+// - FD.DisassociateIOCP: DERIVED FROM src/internal/poll/fd_windows.go, Go 1.26.11, method FD.DisassociateIOCP. Go's
+//   statements, with the handle's poller state cleared in the managed poller.
 
 // Hand-written implementations of fd_windows.go's FOUR raw-sockaddr converters -- the two DECODERS
 // rawToSockaddrInet4/rawToSockaddrInet6 and the two ENCODERS sockaddrInet4ToRaw/sockaddrInet6ToRaw --
