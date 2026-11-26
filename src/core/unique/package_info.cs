@@ -31,6 +31,7 @@ using System.Runtime.CompilerServices;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoArrayDimsCompanion("Make", 0)]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -71,7 +72,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuIKUgpSUgriCgpSm7qSCgoKUpsiClNyUkpTc5IKmgqaCgoKClIKCgoKCgpSCgpSuwoKCgoKUgoKCgpSCgpSUgpSUgpSUgriCgsqCgpQABxCCgpSmgoKCgoKUgqYACRSigpSmooKUABMsgqaCgoKmAAoWgoKCggAGFNKCgoKUlKiygoKUlKzkgoKUlIK4goKCgoKUlJSu", "136-138:1")]
-[assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqzEgoKUgoKClKaClJQ=")]
+[assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqz0goKUgoKClKaClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
