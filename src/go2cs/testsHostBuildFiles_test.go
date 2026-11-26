@@ -265,3 +265,80 @@ func TestTestsHostBuildFilesRecordTheModuleRoot(t *testing.T) {
 		t.Errorf("a host with no module records a module root:\n%s", stdProps)
 	}
 }
+
+// testsHostModuleFixture is a module beside the fixture's output (<base>/work/<name>, holding go.mod and a package
+// directory greet), returning the package's input directory.
+func testsHostModuleFixture(t *testing.T, output, name string) string {
+	t.Helper()
+
+	module := filepath.Join(filepath.Dir(filepath.Dir(output)), name)
+	input := filepath.Join(module, "greet")
+
+	if err := os.MkdirAll(input, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(module, "go.mod"), []byte("module example.com/hello\n\ngo 1.23\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	return input
+}
+
+// A recorded module root is emitted text that people commit, so a machine path must never land in it (P3 194127Z,
+// COORD 194711Z). A root is recorded only as a path relative to the props that stays below a common ancestor short of
+// the volume root, is not in the module cache, and needs no MSBuild escaping; anything else records nothing, and the
+// host keeps today's refusal naming GO2CS_MODULE_ROOT.
+func TestTestsHostModuleRootIsRecordedOnlyAsASafeRelativePath(t *testing.T) {
+	volume := filepath.VolumeName(os.TempDir()) + string(os.PathSeparator)
+	output := filepath.Join(volume, "work", "out", "greet")
+
+	saved := goModCache
+	goModCache = filepath.Join(volume, "cache", "mod")
+	t.Cleanup(func() { goModCache = saved })
+
+	for _, row := range []struct {
+		name, target, want string
+	}{
+		{"a sibling of the output", filepath.Join(volume, "work", "mod"), "$(MSBuildThisFileDirectory)../../mod"},
+		{"a path that climbs to the volume root", filepath.Join(volume, "home", "user", "mod"), ""},
+		{"a module-cache root", filepath.Join(volume, "cache", "mod", "github.com", "x", "y@v1.2.3"), ""},
+		{"a path on another volume (filepath.Rel fails)", filepath.Join("relative", "mod"), ""},
+		{"a single quote", filepath.Join(volume, "work", "it's"), ""},
+		{"a property reference", filepath.Join(volume, "work", "$(x)"), ""},
+		{"an item reference", filepath.Join(volume, "work", "@(x)"), ""},
+		{"a percent escape", filepath.Join(volume, "work", "%41"), ""},
+	} {
+		got, ok := testsHostRecordableModulePath(output, row.target)
+
+		if want := row.want != ""; ok != want || got != row.want {
+			t.Errorf("%s: testsHostRecordableModulePath(%q) = %q, %v; want %q, %v", row.name, row.target, got, ok, row.want, want)
+		}
+	}
+}
+
+// End to end through the writer: a module-cache module and a module whose path needs escaping record nothing.
+func TestTestsHostBuildFilesRecordNoUnsafeModuleRoot(t *testing.T) {
+	root, output := testsHostFixture(t)
+	cached := testsHostModuleFixture(t, output, "mod")
+
+	saved := goModCache
+	goModCache = filepath.Dir(filepath.Dir(cached))
+	t.Cleanup(func() { goModCache = saved })
+
+	writeTestsHostBuildFiles(cached, output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+
+	if props := readTestsHostFile(t, filepath.Join(output, "Directory.Build.props")); strings.Contains(props, "GoModuleRoot") {
+		t.Errorf("a module-cache module's root was recorded:\n%s", props)
+	}
+
+	goModCache = saved
+	root, output = testsHostFixture(t)
+	quoted := testsHostModuleFixture(t, output, "it's")
+
+	writeTestsHostBuildFiles(quoted, output, Options{go2csPath: root, targetPlatform: "linux/amd64"})
+
+	if props := readTestsHostFile(t, filepath.Join(output, "Directory.Build.props")); strings.Contains(props, "GoModuleRoot") {
+		t.Errorf("a module root holding a single quote was recorded:\n%s", props)
+	}
+}
