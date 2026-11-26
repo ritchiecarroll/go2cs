@@ -49,6 +49,15 @@ partial class runtime_package
     [ModuleInitializer]
     internal static void ᴛInitEnvs()
     {
+        // First, ahead of every step below that can fail on the wrong platform: name a build of the
+        // standard library made for another one (hostofrecord_impl.cs). Its own module initializer
+        // would not be ordered against this one. Nor are the runtime's OTHER module initializers
+        // ordered against ᴛInitEnvs: each must stay guarded by the running host or platform-neutral
+        // (managed calls, hook assignments), or it can reach the wrong platform before this warning.
+        // Nothing holds that mechanically. The call sits outside the try blocks below: the warning
+        // writes to stderr, which can throw on a closed stream, and only in the mismatch case.
+        ᴛVerifyHostOfRecord();
+
         IDictionary variables = Environment.GetEnvironmentVariables();
         slice<@string> snapshot = new slice<@string>(variables.Count);
         nint i = 0;
