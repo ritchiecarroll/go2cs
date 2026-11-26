@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.golib;
 
 namespace GolibTests;
 
@@ -80,6 +81,52 @@ public class RuntimeSyscallFamilyTests
 
         Assert.IsInstanceOfType(thrown, typeof(PanicException), $"got {thrown?.GetType().Name}: {thrown?.Message}");
         StringAssert.Contains(thrown!.Message, "exitsyscall");
+    }
+
+    // An entry whose seam half throws leaves both halves as it found them. GoNativeCall.Enter refuses a second entry
+    // ("already inside a native call"); before the rollback the status had already moved, so the goroutine stayed
+    // _Gsyscall with no seam entered: the next exitsyscall would pass the status check and fail in the seam, and a
+    // returning main would read the goroutine as blocked. The test opens the seam itself to force the refusal.
+    [TestMethod]
+    public void AnEntryWhoseSeamThrowsLeavesTheStatusRunning()
+    {
+        uint afterRefusal = 0, during = 0, after = 0;
+        int depthAfterRefusal = -2, depthAfter = -2;
+        Exception? refused = null;
+
+        Exception? thrown = OnGoroutine(() =>
+        {
+            GoNativeCall.Enter();
+
+            try
+            {
+                runtime_package.GoEntersyscall();
+            }
+            catch (Exception e)
+            {
+                refused = e;
+            }
+
+            afterRefusal = runtime_package.GoCurrentGStatus();
+            depthAfterRefusal = GoNativeCall.TransitionDepth;
+            GoNativeCall.Exit();
+            depthAfter = GoNativeCall.TransitionDepth;
+
+            // The goroutine is usable again: a normal pair moves the status and the seam as before.
+            runtime_package.GoEntersyscall();
+            during = runtime_package.GoCurrentGStatus();
+            runtime_package.GoExitsyscall();
+            after = runtime_package.GoCurrentGStatus();
+        });
+
+        Assert.IsNull(thrown, $"the goroutine threw outside the forced refusal: {thrown}");
+        Assert.IsInstanceOfType(refused, typeof(PanicException), $"got {refused?.GetType().Name}: {refused?.Message}");
+        StringAssert.Contains(refused!.Message, "already inside a native call");
+        Assert.AreEqual(Grunning, afterRefusal, "a refused entry rolls the status back to _Grunning");
+        Assert.AreEqual(1, depthAfterRefusal, "and enters no seam: only the test's own entry is open");
+        Assert.AreEqual(0, depthAfter, "the seam depth is 0 once the test closes its own entry");
+        Assert.AreEqual(runtime_package.GoGSyscallStatus(), during);
+        Assert.AreEqual(Grunning, after);
     }
 
     [TestMethod]
