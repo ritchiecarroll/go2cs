@@ -828,6 +828,7 @@
     <None Include="$(MSBuildThisFileDirectory)testBuildMaxCPU_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testsHostBuildFiles_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\README.md" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.cgo1.go" />
