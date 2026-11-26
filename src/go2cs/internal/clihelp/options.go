@@ -144,7 +144,11 @@ var options = []Option{
 			"(src/go2cs/cgoRoute.go). --> It converts for the machine's own operating system and architecture, or " +
 			"for another `-platforms` target when `CC` names that target's C compiler (for example `zig cc -target " +
 			"<triple>`); without one, any other `-platforms` is refused, for a package with no C in it too. Not " +
-			"combinable with `-stdlib` or `-tests`. With `-recurse`, every package of the module outside the " +
+			"combinable with `-stdlib`. With `-tests`, it converts ONE package with its tests into a scratch root " +
+			"seeded from `src/core`, which the seed step marks with a `.go2cs-cgo-scratch-root` file at the root: a " +
+			"root without the marker, and an output inside a repository's `src/core` (symlinks resolved), are " +
+			"refused by name. The package's own test loads and the `go test` oracle run with cgo on, and every " +
+			"other package keeps its build without cgo. With `-recurse`, every package of the module outside the " +
 			"standard library loads with cgo on, and each cgo package converts this way. A package that imports " +
 			"`runtime/cgo` or `plugin` is refused by name (`GO2CS2001`); one that imports `net` or `os/user` uses " +
 			"their standard-library builds without cgo, as Go does with `CGO_ENABLED=0` " +
@@ -431,6 +435,21 @@ var options = []Option{
 			"For example, an Apple silicon host validating the `darwin/amd64` conversion sets `arm64`, so Go does " +
 			"not run under Rosetta. Empty by default, which is the target's own; when set, it is recorded in the " +
 			"comparison record.",
+	},
+	{
+		// Added by cgo 3.4 seat 4c (claude/h-cgo-res-4c-r10) after this table existed; its usage text before the table:
+		//   With -cgo -tests, list the C# files of the cgo-off selection that the cgo-on load deselects, and remove none.
+		//   Without it, each one that carries go2cs's emission header for its source is removed, and printed with its
+		//   reason (a file in an output seeded from the corpus, which would otherwise compile beside its cgo-on
+		//   replacement); any other file in that set is refused by name
+		Name: "cgo-removals-dry-run", Value: "", Class: Advanced, Group: "Testing",
+		Summary: "With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none",
+		Details: "" +
+			"With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. " +
+			"An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build " +
+			"swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this " +
+			"flag each such file is removed and printed with its reason, but only when it carries go2cs's own " +
+			"emission header for its source; any other file there, and a hand-owned one, is refused by name.",
 	},
 	{
 		// The flag's usage text before this table (main.go, master cb6def82a2), kept as history:

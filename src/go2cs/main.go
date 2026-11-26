@@ -306,6 +306,7 @@ func main() {
 	warnCmd := commandLine.String("warn", "", clihelp.Summary("warn"))
 	includeCommentsCmd := commandLine.Bool("comments", false, clihelp.Summary("comments"))
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, clihelp.Summary("cgo"))
+	cgoRemovalsDryRunCmd := commandLine.Bool("cgo-removals-dry-run", false, clihelp.Summary("cgo-removals-dry-run"))
 	showParseTreeCmd := commandLine.Bool("tree", false, clihelp.Summary("tree"))
 	csprojFileCmd := commandLine.String("csproj", "", clihelp.Summary("csproj"))
 	debugModeCmd := commandLine.Bool("debug", false, clihelp.Summary("debug"))
@@ -642,6 +643,8 @@ func main() {
 		log.Fatalln("-dual-recv-params requires -dual-recv: it lowers the parameters of the by-reference forms that -dual-recv emits")
 	}
 
+	cgoRemovalsDryRun = *cgoRemovalsDryRunCmd
+
 	if err := checkCgoFlag(options.parseCgoTargets, convertStdLib, options.convertTests); err != nil {
 		log.Fatalln(err)
 	}
@@ -934,6 +937,11 @@ func main() {
 			// two-argument validation command then works from a clone with no flags or environment
 			// setup. An explicitly configured WORKING root wins.
 			resolveGo2CSPath(&options, outputFilePath, true)
+
+			// -cgo -tests writes a cgo-on package: never into the repository's corpus (section 19, stop line S-D).
+			if err := checkCgoTestsOutput(options, outputFilePath); err != nil {
+				log.Fatalln(err)
+			}
 
 			// The toolchain pin, checked once the root above is final — it is the tree version.props is
 			// read from. Every -test-action is covered, not just the converting ones: build/run/compare
