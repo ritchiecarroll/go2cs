@@ -3851,3 +3851,54 @@ the compaction row green in 3 of 3 runs, and the measured control is the one bel
 silently. A pin of an element does not cover the value that holds its array.
 
 — H (2026-11-26)
+
+### 21.10 Record 2026-11-26: every Pin site in fd_windows.go, and what holds its memory in go2cs (COORD's requirement)
+
+COORD made P3's SHOULD a requirement (inbox H 20261126T030411Z): before the displacement, one line per `fd.pin` site in
+go1.26.11's `internal/poll/fd_windows.go`, naming what holds that memory for the flight. Any site with NOTHING holding
+it would be a live core-I/O bug today. All eleven are below. This is a code reading at `2ce6812305`; the two poll rows
+measure Read's path.
+
+**Holders, defined.**
+- **(R) the native record.** Memory `OverlappedOp` allocates natively and frees itself (`Rearm`, `Staging`,
+  `GoAsyncIO.StageOperationBuffer`). It never moves.
+- **(B) the retained box.** The buffer's element box `Ꮡ(buf, 0)`. Its conversion to an address takes the box's own
+  pinned `GCHandle`, held for the box's life, and the operation record keeps the box until the next `Rearm`
+  (`operation.Pin`).
+- **(F) the box held by the FD.** The same box, reachable from the FD's own `operation` (`o.buf.Buf`, `o.msg`) for the
+  whole flight, because `execIO` blocks on the completion it submitted. Its pin is the box's own. This holder relies on
+  reachability rather than an explicit retention.
+
+| Go line | Function | Path in go2cs | What `pin` pinned in Go | Holder in go2cs |
+|---|---|---|---|---|
+| :303 | `execIO`, `fd.pin(mode, o)` | every overlapped submit | the operation: OVERLAPPED, WSABuf(s), WSAMsg, `rsa`/`rsan`, flags | **R** for each part. The OVERLAPPED is `Rearm`'s native one. WSABUFs, WSAMSG and the from-address image with its length are staged natively (`stageBuffers`, `StageOperationBuffer`), and the from-address, `Control.Len` and flags are transcribed back at harvest (`WSARecvFrom`, `WSARecvMsg`). An async completion's flags come through the overlapped result, never through `o.flags` |
+| :592 | `Read` | `ReadFile` (`fileIO`) / `WSARecv` | the data buffer | **B** (file: `operation.Pin`; socket: `writeWSABufs`), and **F** |
+| :722 | `Pread` | `ReadFile` (`fileIO`) | the data buffer | **B** |
+| :772 | `ReadFrom` | `WSARecvFrom` | the data buffer | **B** (`stageBuffers` → `writeWSABufs`), and **F** |
+| :802 | `ReadFromInet4` | `WSARecvFrom` | the data buffer | **B**, and **F** |
+| :832 | `ReadFromInet6` | `WSARecvFrom` | the data buffer | **B**, and **F** |
+| :864 | `Write` | `WriteFile` (`fileIO`) / `WSASend` | the data buffer | **B**, and **F** |
+| :959 | `Pwrite` | `WriteFile` (`fileIO`) | the data buffer | **B** |
+| :1041 | `WriteTo` | `WSASendto` (or `windows.WSASendtoInet4/6`) | the data buffer | `WSASendto`: **B** (`stageBuffers`) and **F**. `WSASendtoInet4/6`: **F only** |
+| :1078 | `WriteToInet4` | `windows.WSASendtoInet4` | the data buffer | **F only**: `stageWSABufs` (`net_windows_impl.cs`) writes the box's address and does not retain the box |
+| :1115 | `WriteToInet6` | `windows.WSASendtoInet6` | the data buffer | **F only**, as :1078 |
+
+**Readings.**
+- **No site is unheld.** There is no finding to post.
+- **Three sends rest on (F) alone:** `WriteToInet4`, `WriteToInet6`, and `WriteTo` when it routes to them. Their buffer
+  is held because the FD's operation keeps the box for the flight, not because the record retains it.
+  - That is sound while `execIO` blocks until completion. That is Go's own structure, and the same argument
+    `WSARecvMsg`'s note makes for its data and control buffers.
+  - It is the weakest holder in the table, so it is named, not hidden.
+  - Hardening it is a one-line change, outside this seat: `stageWSABufs` would retain each box through the operation,
+    as `writeWSABufs` does.
+- **The data a send hands the kernel is read, not written**, so a moved buffer on those three would send stale bytes,
+  not corrupt the heap. The read paths, where a move would corrupt, all have (B).
+- **ConnectEx** is not a pin site. Its sockaddr is a `stackalloc` image, read by the kernel during the call. Its send
+  buffer and byte count are retained through `rearmOverlapped` (**B**).
+- **TransmitFile**: the overlapped is native (**R**), and so are its buffer descriptors (**R**).
+- **The displacement stands for all eleven sites.** `FD.pin` is one function, and every site it covers has an owner for
+  the flight. The two poll rows measure Read's path. A compaction row for the (F)-only sends is offered if COORD wants
+  the weakest holder measured too.
+
+— H (2026-11-26)
