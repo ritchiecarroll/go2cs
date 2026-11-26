@@ -41,6 +41,12 @@ var callerLineExceptions = map[string]string{
 	// TestGoroutineProfileConcurrency/finalizer_present set a finalizer, drop the local and collect; the unoptimized frame
 	// keeps the object alive (P1's root and bisect, first bad bb6267d0e4).
 	"runtime.pprof.tests": "2026-11-25 P1, full linux sweep at 89820c0df1 + this entry, TC0: 148 matching + 8 disclosed in both arms, equal to the bank, no verdict moved",
+
+	// runtime's tests read caller lines in seven files (callers_test.go and kin). TestStackGrowth's watchdog raises "finalizer did
+	// not start" from a time.AfterFunc when the finalizer it set never runs: the unoptimized frame keeps the object alive. As built
+	// the host dies there, so the row cannot complete and no both-arms verdict comparison exists (COORD 2026-11-25 20:51Z): the
+	// evidence is the whole row optimized, every verdict, the seven caller-line files' tests included, equal to the bank.
+	"runtime.tests": "2026-11-25 P2, hosted linux sweep at 932aa2dcc8 (the list + this entry), Optimize=true, TC0: 11094 matching, PASS, equal to the bank; as built the host dies on TestStackGrowth's finalizer watchdog",
 }
 
 // callerLineCitationPattern is what an exception's citation must carry: a date and an equal sweep's counts.

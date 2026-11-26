@@ -11,7 +11,6 @@ package clihelp
 import (
 	"bytes"
 	"flag"
-	"html"
 	"os"
 	"path/filepath"
 	"strings"
@@ -91,7 +90,7 @@ func TestHandEditInsideARegionIsCaught(t *testing.T) {
 	}
 
 	page := strings.ReplaceAll(string(data), "\r\n", "\n")
-	edited := strings.Replace(page, "| [<code>-tests</code>](#option-tests) | ", "| [<code>-tests</code>](#option-tests) | Hand edit. ", 1)
+	edited := strings.Replace(page, "| [`-tests`](#option-tests) | ", "| [`-tests`](#option-tests) | Hand edit. ", 1)
 
 	if edited == page {
 		t.Fatal("the common-options region has no -tests row to edit")
@@ -239,35 +238,22 @@ func TestHelpWidth(t *testing.T) {
 	}
 }
 
-// A table cell writes the option's syntax with break points and entities only: what a reader copies from the rendered
-// page is the syntax -help prints, character for character, and nothing in the cell is read as Markdown or as a cell
-// boundary.
-func TestCellSyntaxCopiesAsTheSyntax(t *testing.T) {
-	for _, option := range options {
-		cell := cellSyntax(option)
-		inner, ok := strings.CutPrefix(cell, "<code>")
-		inner, closed := strings.CutSuffix(inner, "</code>")
+// Each option table's header is padded to its longest unbreakable token: two no-break spaces per character, less
+// six. -recurse[=module,nuget] (23 characters) sets the common table's header; a space in a syntax is a break point
+// the table may use, so it does not count.
+func TestOptionHeaderPadsToTheLongestToken(t *testing.T) {
+	common := filter(func(o Option) bool { return o.Class == Common })
 
-		if !ok || !closed {
-			t.Errorf("-%s: the cell is not one code element: %q", option.Name, cell)
-			continue
-		}
-
-		if strings.ContainsAny(inner, "|`\\*_[]") || strings.Contains(strings.ReplaceAll(inner, "<wbr>", ""), "<") {
-			t.Errorf("-%s: the cell carries a character Markdown or the table would read: %q", option.Name, cell)
-		}
-
-		if copied := html.UnescapeString(strings.ReplaceAll(inner, "<wbr>", "")); copied != syntax(option) {
-			t.Errorf("-%s: the cell copies as %q, not as the syntax %q", option.Name, copied, syntax(option))
-		}
-
-		if strings.HasPrefix(inner, "-<wbr>") || strings.Contains(inner, " <wbr>") || strings.Contains(inner, "<wbr> ") {
-			t.Errorf("-%s: a break point after the dash or beside a space: %q", option.Name, cell)
-		}
+	if got, want := optionHeader(common), "Option"+strings.Repeat("&nbsp;", 2*23-6); got != want {
+		t.Errorf("the common table's header is %q, want %d no-break spaces", got, 2*23-6)
 	}
 
-	if got := cellSyntax(Option{Name: "recurse", Value: "[=module,nuget]"}); got !=
-		"<code>-recurse<wbr>&#91;=module,<wbr>nuget&#93;</code>" {
-		t.Errorf("-recurse's cell is %q", got)
+	if got := optionHeader([]Option{{Name: "inline-arrays", Value: "<pattern>[,<pattern>...]"}}); got !=
+		"Option"+strings.Repeat("&nbsp;", 2*24-6) {
+		t.Errorf("a value token longer than the name sets the padding: %q", got)
+	}
+
+	if got := optionHeader([]Option{{Name: "v"}}); got != "Option" {
+		t.Errorf("a token shorter than the header word pads nothing: %q", got)
 	}
 }

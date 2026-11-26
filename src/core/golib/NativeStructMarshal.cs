@@ -595,6 +595,26 @@ namespace go;
     /// read from, and with any earlier copy.
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// The Go size of an IMAGE of a struct value of <paramref name="type"/>: its fields at Go's own offsets, which
+    /// <see cref="EncodeValue"/> writes and <see cref="DecodeValue"/> reads back. Null when either way cannot carry the
+    /// type: a field holding a Go pointer or another managed reference with no image in memory, or a layout this class
+    /// cannot prove. The cgo struct image door (GoCgoImages) admits only a type both ways carry, at one size.
+    /// </summary>
+    internal static nuint? ImageSizeOf(Type type)
+    {
+        Shape encode = shapeOf(type, nilPointersAsZero: false);
+        Shape decode = s_valueShapes.GetOrAdd(type, static t => classify(t, 0, nilPointersAsZero: false, nestedArrays: true));
+
+        return encode.Marshallable && decode.Marshallable && encode.Size == decode.Size && encode.PointerField is null ? encode.Size : null;
+    }
+
+    /// <summary>
+    /// Writes a struct value at Go's own offsets into <paramref name="destination"/>, which holds at least
+    /// <see cref="ImageSizeOf"/> bytes, zeroed. Padding is not written.
+    /// </summary>
+    internal static void EncodeValue(object value, Type type, byte* destination) => encode(value, type, destination);
+
     internal static object DecodeValue(Type type, byte* source)
     {
         Shape shape = s_valueShapes.GetOrAdd(type, static t => classify(t, 0, nilPointersAsZero: false, nestedArrays: true));

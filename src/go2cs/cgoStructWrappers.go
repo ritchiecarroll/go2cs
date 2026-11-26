@@ -568,6 +568,22 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		fmt.Fprintf(&before, "        %s.CheckLayout%s();\n", resultMirror.name, cgoMirrorSuffix)
 	}
 
+	// A wrapper that takes a struct pointer holds one GoCgoImages for the call (the struct image door, DESIGN-cgo-phase3-
+	// marshaling 19.7 and 19.9): a struct view no door can pin crosses as an image of its root, one image per root, and
+	// every pointer parameter's root is claimed in it, so one Go value is never handed C as two copies. A wrapper with no
+	// struct pointer emits none of it.
+	images := ""
+
+	for _, param := range params {
+		if param.pointer && param.mirror != nil {
+			images = "ref images, "
+		}
+	}
+
+	if images != "" {
+		before.WriteString("\n        global::go.golib.GoCgoImages images = default;\n")
+	}
+
 	for i, param := range params {
 		switch {
 		case param.void:
@@ -611,11 +627,12 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			// write through it). A pointer to one C scalar takes the pinned class there instead (18.12 item 2): its address
 			// inside Go storage, held still by the `fixed` around the call, since a scalar's layout is the same in C.
 			if param.mirror == nil {
-				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sScalarPointer(p%d, %q, out nuint n%d, out global::go.golib.GoCgoPin g%d);\n", i, args, i, function, i, i)
-				pinnedScalars = append(pinnedScalars, i)
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sScalarPointer(p%d, %q, %sout nuint n%d, out global::go.golib.GoCgoPin g%d);\n", i, args, i, function, images, i, i)
 			} else {
-				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, out nuint n%d);\n", i, args, i, function, i)
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, ref images, out nuint n%d, out global::go.golib.GoCgoPin g%d);\n", i, args, i, function, i, i)
 			}
+
+			pinnedScalars = append(pinnedScalars, i)
 
 			fmt.Fprintf(&before, "        nint a%d = (nint)n%d;\n", i, i)
 
@@ -676,6 +693,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		case param.mirror != nil:
 			fmt.Fprintf(&before, "\n        %s v%d = default;\n        ᴍin_%s(ref v%d, p%d);\n", param.mirror.name, i, param.mirror.name, i, i)
 		}
+	}
+
+	// After the call and the mirrors' copy-backs: each image C changed is decoded back into its root, once.
+	if images != "" {
+		after.WriteString("\n        images.CopyBack();\n")
 	}
 
 	switch {

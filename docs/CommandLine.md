@@ -53,18 +53,18 @@ The common options, each with a short description. Option names link to full ent
 
 <!-- BEGIN GENERATED common-options: written from src/go2cs/internal/clihelp/options.go by `go generate` in src/go2cs. Edit options.go, not this region; TestCommandLinePageInSync fails on a hand edit. -->
 
-| Option | Description |
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
 |:--|:--|
-| [<code>-recurse<wbr>&#91;=module,<wbr>nuget&#93;</code>](#option-recurse) | Convert a module and its third-party dependencies (=module: the module only; =nuget: standard library from NuGet). |
-| [<code>-go2cspath &lt;dir&gt;</code>](#option-go2cspath) | Where the go2cs standard library and runtime are when not from NuGet, and where -stdlib writes. |
-| [<code>-platforms &lt;os/arch&gt;</code>](#option-platforms) | The target platform, os/arch (default: this machine's). |
-| [<code>-tags &lt;list&gt;</code>](#option-tags) | Build tags applied when loading packages, comma-separated. |
-| [<code>-comments</code>](#option-comments) | Carry the Go source comments into the C#. |
-| [<code>-stdlib</code>](#option-stdlib) | For go2cs development: convert the Go standard library into the -go2cspath root. |
-| [<code>-cgo</code>](#option-cgo) | Convert a cgo package whose C use go2cs can bind (needs a C compiler). |
-| [<code>-tests</code>](#option-tests) | Also convert the package's Go tests and emit a runnable C# test host. |
-| [<code>-test-action &lt;action&gt;</code>](#option-test-action) | With -tests: convert, build, run, compare (with go test) or all. |
-| [<code>-version</code>](#option-version) | Print the converter's release tuple and exit. |
+| [`-recurse[=module,nuget]`](#option-recurse) | Convert a module and its third-party dependencies (=module: the module only; =nuget: standard library from NuGet). |
+| [`-go2cspath <dir>`](#option-go2cspath) | Where the go2cs standard library and runtime are when not from NuGet, and where -stdlib writes. |
+| [`-platforms <os/arch>`](#option-platforms) | The target platform, os/arch (default: this machine's). |
+| [`-tags <list>`](#option-tags) | Build tags applied when loading packages, comma-separated. |
+| [`-comments`](#option-comments) | Carry the Go source comments into the C#. |
+| [`-stdlib`](#option-stdlib) | For go2cs development: convert the Go standard library into the -go2cspath root. |
+| [`-cgo`](#option-cgo) | Convert a cgo package whose C use go2cs can bind (needs a C compiler). |
+| [`-tests`](#option-tests) | Also convert the package's Go tests and emit a runnable C# test host. |
+| [`-test-action <action>`](#option-test-action) | With -tests: convert, build, run, compare (with go test) or all. |
+| [`-version`](#option-version) | Print the converter's release tuple and exit. |
 
 <!-- END GENERATED common-options -->
 
@@ -157,7 +157,7 @@ For go2cs development: convert the Go standard library, or only the packages nam
 
 Common option, converting.
 
-Converts a single cgo package. It loads the package with cgo on (`CGO_ENABLED=1`, which needs a C compiler) and converts it when every use of C it makes is one go2cs binds: calls of C functions a shared library defines ([Limitations](Limitations.md#cgo)). Any other use is refused by name (`GO2CS2001`, see [Diagnostic codes](DiagnosticCodes.md)), with its reason, before anything is written.<!-- 2026-11-23 .5 docs pass (P1), UX-10 follow-on: no cgo refusal text names a phase (src/go2cs/cgoRoute.go). --> It converts for the machine's own operating system and architecture, or for another `-platforms` target when `CC` names that target's C compiler (for example `zig cc -target <triple>`); without one, any other `-platforms` is refused, for a package with no C in it too. Not combinable with `-stdlib` or `-tests`. With `-recurse`, every package of the module outside the standard library loads with cgo on, and each cgo package converts this way. A package that imports `runtime/cgo` or `plugin` is refused by name (`GO2CS2001`); one that imports `net` or `os/user` uses their standard-library builds without cgo, as Go does with `CGO_ENABLED=0` ([Limitations](Limitations.md#cgo)). More of cgo is on the [Roadmap](Roadmap.md#cgo).<!-- the [cgo interop plan](PLAN-cgo-interop.md) lays out the bridge (internal record, unlinked 2026-10-26, OQ-1) -->
+Converts a single cgo package. It loads the package with cgo on (`CGO_ENABLED=1`, which needs a C compiler) and converts it when every use of C it makes is one go2cs binds: calls of C functions a shared library defines ([Limitations](Limitations.md#cgo)). Any other use is refused by name (`GO2CS2001`, see [Diagnostic codes](DiagnosticCodes.md)), with its reason, before anything is written.<!-- 2026-11-23 .5 docs pass (P1), UX-10 follow-on: no cgo refusal text names a phase (src/go2cs/cgoRoute.go). --> It converts for the machine's own operating system and architecture, or for another `-platforms` target when `CC` names that target's C compiler (for example `zig cc -target <triple>`); without one, any other `-platforms` is refused, for a package with no C in it too. Not combinable with `-stdlib`. With `-tests`, it converts ONE package with its tests into a scratch root seeded from `src/core`, which the seed step marks with a `.go2cs-cgo-scratch-root` file at the root: a root without the marker, and an output inside a repository's `src/core` (symlinks resolved), are refused by name. The package's own test loads and the `go test` oracle run with cgo on, and every other package keeps its build without cgo. With `-recurse`, every package of the module outside the standard library loads with cgo on, and each cgo package converts this way. A package that imports `runtime/cgo` or `plugin` is refused by name (`GO2CS2001`); one that imports `net` or `os/user` uses their standard-library builds without cgo, as Go does with `CGO_ENABLED=0` ([Limitations](Limitations.md#cgo)). More of cgo is on the [Roadmap](Roadmap.md#cgo).<!-- the [cgo interop plan](PLAN-cgo-interop.md) lays out the bridge (internal record, unlinked 2026-10-26, OQ-1) -->
 
 #### <a id="option-tests"></a>`-tests`
 
@@ -181,48 +181,49 @@ Print the converter's release tuple and exit 0, converting nothing. One `key=val
 
 Options that change a default, tune a run, or drive a maintainer's instrument. `go2cs -help all` lists them with the common ones.
 
-| Option | Group | Description |
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Group | Description |
 |:--|:--|:--|
-| [<code>-goroot &lt;dir&gt;</code>](#option-goroot) | Converting | Override the detected Go root. |
-| [<code>-gopath &lt;dir&gt;</code>](#option-gopath) | Converting | Override the detected Go path. |
-| [<code>-module-safe-tag</code>](#option-module-safe-tag) | Converting | With -recurse: apply the safe, purego and noasm build tags (default on). |
-| [<code>-convert-timeout &lt;duration&gt;</code>](#option-convert-timeout) | Converting | With -stdlib: the cap on one package's conversion. |
-| [<code>-allow-stale-converter</code>](#option-allow-stale-converter) | Converting | With -stdlib or -tests: run even when this binary is older than its sources. |
-| [<code>-stack-append &lt;mode&gt;</code>](#option-stack-append) | Converting | Emit Go's stack-append buffer: on, off or auto. |
-| [<code>-probe-cache &lt;dir&gt;</code>](#option-probe-cache) | Converting | The Go build cache the escape probe uses (env GO2CS_PROBE_CACHE). |
-| [<code>-test-timeout &lt;duration&gt;</code>](#option-test-timeout) | Testing | With -tests: the package deadline for build, run and compare. |
-| [<code>-test-deadline &lt;duration&gt;</code>](#option-test-deadline) | Testing | With -tests: the per-test deadline for the converted host (0 disables it). |
-| [<code>-test-filter &lt;regex&gt;</code>](#option-test-filter) | Testing | With -tests: a regular expression both sides run, as go test -run. |
-| [<code>-test-config &lt;config&gt;</code>](#option-test-config) | Testing | With -tests: build and run the test host as Release (default) or Debug. |
-| [<code>-test-tiered</code>](#option-test-tiered) | Testing | With -test-config Release: turn the CLR's tiered JIT back on. |
-| [<code>-test-build-maxcpu &lt;n&gt;</code>](#option-test-build-maxcpu) | Testing | With -tests: cap the test host's dotnet publish at n MSBuild nodes. |
-| [<code>-test-publish-binlog</code>](#option-test-publish-binlog) | Testing | With -tests: keep an MSBuild binary log of a failed test-host publish. |
-| [<code>-test-oracle-vet-off</code>](#option-test-oracle-vet-off) | Testing | With -tests: run go test with -vet=off. |
-| [<code>-test-oracle-goarch &lt;arch&gt;</code>](#option-test-oracle-goarch) | Testing | With -tests: the GOARCH go test runs at, when it must differ from the target. |
-| [<code>-test-allow-handown</code>](#option-test-allow-handown) | Testing | With -tests: convert a package -stdlib skips, into a bare scratch root. |
-| [<code>-module-disclosures &lt;dir&gt;</code>](#option-module-disclosures) | Testing | With -tests on a module: the tree of committed disclosure manifests. |
-| [<code>-module-version &lt;version&gt;</code>](#option-module-version) | Testing | With -module-disclosures: the version a copied module source is. |
-| [<code>-nuget-map &lt;source&gt;</code>](#option-nuget-map) | NuGet mapping | With -recurse=nuget: add a module-to-package mapping source (repeatable; off disables mapping). |
-| [<code>-nuget-map-only</code>](#option-nuget-map-only) | NuGet mapping | With -nuget-map: use only the listed sources, not nugetgo.net. |
-| [<code>-nuget-map-exclude &lt;module-path&gt;</code>](#option-nuget-map-exclude) | NuGet mapping | With -recurse=nuget: never map this module (repeatable). |
-| [<code>-nuget-map-refresh</code>](#option-nuget-map-refresh) | NuGet mapping | With -recurse=nuget: fetch every source again and re-resolve every module. |
-| [<code>-nuget-map-canonical-only</code>](#option-nuget-map-canonical-only) | NuGet mapping | With -recurse=nuget: apply only the module owners' own mappings. |
-| [<code>-nuget-map-feed &lt;feed&gt;</code>](#option-nuget-map-feed) | NuGet mapping | With -recurse=nuget: read mapped package versions from this feed, not nuget.org. |
-| [<code>-indent &lt;n&gt;</code>](#option-indent) | Output | Spaces per indent level (default 4). |
-| [<code>-var</code>](#option-var) | Output | Prefer var declarations where the type is obvious (default on). |
-| [<code>-uco</code>](#option-uco) | Output | Emit channel operators instead of method calls (default on). |
-| [<code>-hoist-literals</code>](#option-hoist-literals) | Output | Hoist string literals to named static fields, as the standard library does. |
-| [<code>-csproj &lt;file&gt;</code>](#option-csproj) | Output | Generate project files from this .csproj template. |
-| [<code>-license &lt;expression&gt;</code>](#option-license) | Output | Set the generated projects' NuGet license to an SPDX expression. |
-| [<code>-provenance</code>](#option-provenance) | Output | Add a notice to each converted file naming its Go source and module. |
-| [<code>-trimpath</code>](#option-trimpath) | Output | Record main-module sources as go build -trimpath does (default on). |
-| [<code>-inline-arrays &lt;pattern&gt;<wbr>&#91;,<wbr>&lt;pattern&gt;...&#93;</code>](#option-inline-arrays) | Output | Override which packages' structs hold their arrays inline. |
-| [<code>-warn &lt;code&gt;<wbr>&#91;,<wbr>&lt;code&gt;...&#93;</code>](#option-warn) | Output | Downgrade the listed converter refusal codes to warnings. |
-| [<code>-platform-census &lt;dir&gt;</code>](#option-platform-census) | Multi-platform and census | With -stdlib and several -platforms: write a per-target emission census here. |
-| [<code>-platform-stage &lt;dir&gt;</code>](#option-platform-stage) | Multi-platform and census | With -stdlib and several -platforms: stage the per-target conversions here. |
-| [<code>-ref-census &lt;file&gt;</code>](#option-ref-census) | Multi-platform and census | With -stdlib: write the box-to-reference lowering census to this file. |
-| [<code>-tree</code>](#option-tree) | Diagnostics | Print each file's Go parse tree during conversion. |
-| [<code>-debug</code>](#option-debug) | Diagnostics | Let a conversion failure crash with a full stack trace. |
+| [`-goroot <dir>`](#option-goroot) | Converting | Override the detected Go root. |
+| [`-gopath <dir>`](#option-gopath) | Converting | Override the detected Go path. |
+| [`-module-safe-tag`](#option-module-safe-tag) | Converting | With -recurse: apply the safe, purego and noasm build tags (default on). |
+| [`-convert-timeout <duration>`](#option-convert-timeout) | Converting | With -stdlib: the cap on one package's conversion. |
+| [`-allow-stale-converter`](#option-allow-stale-converter) | Converting | With -stdlib or -tests: run even when this binary is older than its sources. |
+| [`-stack-append <mode>`](#option-stack-append) | Converting | Emit Go's stack-append buffer: on, off or auto. |
+| [`-probe-cache <dir>`](#option-probe-cache) | Converting | The Go build cache the escape probe uses (env GO2CS_PROBE_CACHE). |
+| [`-test-timeout <duration>`](#option-test-timeout) | Testing | With -tests: the package deadline for build, run and compare. |
+| [`-test-deadline <duration>`](#option-test-deadline) | Testing | With -tests: the per-test deadline for the converted host (0 disables it). |
+| [`-test-filter <regex>`](#option-test-filter) | Testing | With -tests: a regular expression both sides run, as go test -run. |
+| [`-test-config <config>`](#option-test-config) | Testing | With -tests: build and run the test host as Release (default) or Debug. |
+| [`-test-tiered`](#option-test-tiered) | Testing | With -test-config Release: turn the CLR's tiered JIT back on. |
+| [`-test-build-maxcpu <n>`](#option-test-build-maxcpu) | Testing | With -tests: cap the test host's dotnet publish at n MSBuild nodes. |
+| [`-test-publish-binlog`](#option-test-publish-binlog) | Testing | With -tests: keep an MSBuild binary log of a failed test-host publish. |
+| [`-test-oracle-vet-off`](#option-test-oracle-vet-off) | Testing | With -tests: run go test with -vet=off. |
+| [`-test-oracle-goarch <arch>`](#option-test-oracle-goarch) | Testing | With -tests: the GOARCH go test runs at, when it must differ from the target. |
+| [`-cgo-removals-dry-run`](#option-cgo-removals-dry-run) | Testing | With -cgo -tests: list the cgo-off files a cgo-on conversion would remove, and remove none. |
+| [`-test-allow-handown`](#option-test-allow-handown) | Testing | With -tests: convert a package -stdlib skips, into a bare scratch root. |
+| [`-module-disclosures <dir>`](#option-module-disclosures) | Testing | With -tests on a module: the tree of committed disclosure manifests. |
+| [`-module-version <version>`](#option-module-version) | Testing | With -module-disclosures: the version a copied module source is. |
+| [`-nuget-map <source>`](#option-nuget-map) | NuGet mapping | With -recurse=nuget: add a module-to-package mapping source (repeatable; off disables mapping). |
+| [`-nuget-map-only`](#option-nuget-map-only) | NuGet mapping | With -nuget-map: use only the listed sources, not nugetgo.net. |
+| [`-nuget-map-exclude <module-path>`](#option-nuget-map-exclude) | NuGet mapping | With -recurse=nuget: never map this module (repeatable). |
+| [`-nuget-map-refresh`](#option-nuget-map-refresh) | NuGet mapping | With -recurse=nuget: fetch every source again and re-resolve every module. |
+| [`-nuget-map-canonical-only`](#option-nuget-map-canonical-only) | NuGet mapping | With -recurse=nuget: apply only the module owners' own mappings. |
+| [`-nuget-map-feed <feed>`](#option-nuget-map-feed) | NuGet mapping | With -recurse=nuget: read mapped package versions from this feed, not nuget.org. |
+| [`-indent <n>`](#option-indent) | Output | Spaces per indent level (default 4). |
+| [`-var`](#option-var) | Output | Prefer var declarations where the type is obvious (default on). |
+| [`-uco`](#option-uco) | Output | Emit channel operators instead of method calls (default on). |
+| [`-hoist-literals`](#option-hoist-literals) | Output | Hoist string literals to named static fields, as the standard library does. |
+| [`-csproj <file>`](#option-csproj) | Output | Generate project files from this .csproj template. |
+| [`-license <expression>`](#option-license) | Output | Set the generated projects' NuGet license to an SPDX expression. |
+| [`-provenance`](#option-provenance) | Output | Add a notice to each converted file naming its Go source and module. |
+| [`-trimpath`](#option-trimpath) | Output | Record main-module sources as go build -trimpath does (default on). |
+| [`-inline-arrays <pattern>[,<pattern>...]`](#option-inline-arrays) | Output | Override which packages' structs hold their arrays inline. |
+| [`-warn <code>[,<code>...]`](#option-warn) | Output | Downgrade the listed converter refusal codes to warnings. |
+| [`-platform-census <dir>`](#option-platform-census) | Multi-platform and census | With -stdlib and several -platforms: write a per-target emission census here. |
+| [`-platform-stage <dir>`](#option-platform-stage) | Multi-platform and census | With -stdlib and several -platforms: stage the per-target conversions here. |
+| [`-ref-census <file>`](#option-ref-census) | Multi-platform and census | With -stdlib: write the box-to-reference lowering census to this file. |
+| [`-tree`](#option-tree) | Diagnostics | Print each file's Go parse tree during conversion. |
+| [`-debug`](#option-debug) | Diagnostics | Let a conversion failure crash with a full stack trace. |
 
 #### <a id="option-goroot"></a>`-goroot <dir>`
 
@@ -319,6 +320,12 @@ With `-tests`: run `go test` with `-vet=off`, for a package whose own `go test` 
 Advanced option, testing.
 
 With `-tests`: the `GOARCH` that `go test` runs at, when it must differ from the conversion's target. For example, an Apple silicon host validating the `darwin/amd64` conversion sets `arm64`, so Go does not run under Rosetta. Empty by default, which is the target's own; when set, it is recorded in the comparison record.
+
+#### <a id="option-cgo-removals-dry-run"></a>`-cgo-removals-dry-run`
+
+Advanced option, testing.
+
+With `-cgo -tests`, lists the files a cgo-on conversion would remove from its output, and removes none. An output seeded from the corpus holds the package's build without cgo, and where the cgo-on build swaps a file for another (`net`'s `cgo_stub.go` for `cgo_unix.go`), both would compile. Without this flag each such file is removed and printed with its reason, but only when it carries go2cs's own emission header for its source; any other file there, and a hand-owned one, is refused by name.
 
 #### <a id="option-test-allow-handown"></a>`-test-allow-handown`
 
@@ -468,10 +475,10 @@ Disable the converter's per-file panic recovery, so a conversion failure crashes
 
 Options that make output that is not validated.
 
-| Option | Group | Description |
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Group | Description |
 |:--|:--|:--|
-| [<code>-dual-recv</code>](#option-dual-recv) | Development | Also emit by-reference forms of eligible pointer-receiver methods. |
-| [<code>-dual-recv-params</code>](#option-dual-recv-params) | Development | With -dual-recv: those forms also lower their pointer parameters. |
+| [`-dual-recv`](#option-dual-recv) | Development | Also emit by-reference forms of eligible pointer-receiver methods. |
+| [`-dual-recv-params`](#option-dual-recv-params) | Development | With -dual-recv: those forms also lower their pointer parameters. |
 
 #### <a id="option-dual-recv"></a>`-dual-recv`
 
