@@ -297,7 +297,7 @@ internal static void setT<T>(ref T p, T val) { p = val; }
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    setT(ref nonnil(ref b).v, val);
+    setT(ref builtin.nonnil(ref b).v, val);
 }
 ```
 
@@ -333,7 +333,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
-<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:116-120 -->
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:114-118 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -1163,7 +1163,7 @@ internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
 }
 ```
 
-Boundaries, each guarded in `syscallFunnelSet_test.go`: a BARE `f(unsafe.Pointer(&x))` argument is not bridged (the Pointer retains its box through the call) and records nothing; a package-level variable's box is a static field and records nothing; an outer CONVERSION (`n := uintptr(noescape(unsafe.Pointer(&i)))`, runtime's `stdcallN` / `mstart0` shape) records nothing, because a stored number is outside the class — a KeepAlive after the store would hold the box exactly as far as the store. The drain is per STATEMENT: a box named inside an `if` condition is kept alive by the first statement after the call (inside the body or after the `if` — a use on any path after the call keeps the local live at it); a `for` INIT/POST clause, emitted inside the C# header where no statement can follow, is refused by name (`rejectForClauseKeepAlive`), as a deferred or spawned call is (the contract is statement-scoped and a `defer` runs at unwind); a function literal converts its body against an EMPTY pending list and restores the enclosing statement's afterwards, so a box the enclosing call named before its literal argument was converted is never drained inside the lambda. `src/syscall-keepalive-census.ps1` walks the converted emission: every captured temp has exactly one KeepAlive (arm 1), hand-own pointer arguments are held across their call (arm 2), and no raw pointer-derived funnel argument remains (arm 3) <!-- arm 3 was red on the pre-cut darwin emission, which had never been through the funnel path: RED 104 -->.
+Boundaries, each guarded in `syscallFunnelSet_test.go`: a BARE `f(unsafe.Pointer(&x))` argument is not bridged (the Pointer retains its box through the call) and records nothing; a package-level variable's box is a static field and records nothing; an outer CONVERSION (`n := uintptr(noescape(unsafe.Pointer(&i)))`, runtime's `stdcallN` / `mstart0` shape) records nothing, because a stored number is outside the class — a KeepAlive after the store would hold the box exactly as far as the store. The drain is per STATEMENT: a box named inside an `if` condition is kept alive by the first statement after the call (inside the body or after the `if` — a use on any path after the call keeps the local live at it); a `for` INIT/POST clause, emitted inside the C# header where no statement can follow, is refused by name (`rejectForClauseKeepAlive`), as a deferred or spawned call is (the contract is statement-scoped and a `defer` runs at unwind); a function literal converts its body against an EMPTY pending list and restores the enclosing statement's afterwards, so a box the enclosing call named before its literal argument was converted is never drained inside the lambda. `src/archived/scripts/syscall-keepalive-census.ps1` (archived; no gate runs it) walks the converted emission: every captured temp has exactly one KeepAlive (arm 1), hand-own pointer arguments are held across their call (arm 2), and no raw pointer-derived funnel argument remains (arm 3) <!-- arm 3 was red on the pre-cut darwin emission, which had never been through the funnel path: RED 104 -->.
 
 ## A call that returns an `unsafe.Pointer` is emitted as the call itself — the pointer keeps what it carries
 
@@ -1300,7 +1300,7 @@ func Float64bits(f float64) uint64 { return *(*uint64)(unsafe.Pointer(&f)) }
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs:50-52 -->
 ```csharp
 public static uint64 Float64bits(float64 f) {
-    return bitcast<float64, uint64>(f);
+    return builtin.bitcast<float64, uint64>(f);
 }
 ```
 
@@ -2770,29 +2770,29 @@ type record struct {
 partial class main_package {
 …
     var blob = new slice<byte>(24);
-    var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
+    var rec = Ꮡ(blob, 0).Reinterpret<byte, Δrecord>();
 
     rec.Kind = 0x01020304;
     rec.Length = 0x0506;
     rec.Off = 7;
     rec.Off += 1;
-    rec.of(record.ᏑPath).ElementRef(1) = 0x0a0b;
-    nint n = copy(rec.of(record.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
+    rec.of(main_package.Δrecord.ᏑPath).ElementRef(1) = 0x0a0b;
+    nint n = copy(rec.of(main_package.Δrecord.ᏑPath).slice(2), slice<uint16>([0x0c0d]));
     rec.tail.B = 0x1112;
 ```
 
-`rec.Kind` is a C# 14 extension PROPERTY on `ж<record>` that go2cs-gen emits, a `ref` with `ж<T>.field`'s two
+`rec.Kind` is a C# 14 extension PROPERTY on `ж<Δrecord>` that go2cs-gen emits, a `ref` with `ж<T>.field`'s two
 arms:
 
 <!-- illustration: not converter output -->
 ```csharp
-extension(global::go.ж<global::go.main_package.@record> ʗp)
+extension(global::go.ж<global::go.main_package.Δrecord> ʗp)
 {
     public ref uint Kind
     {
         [GeneratedCode("go2cs-gen", …), MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => ref ʗp is global::go.NativeBox<global::go.main_package.@record>
-            ? ref ʗp.field(global::go.main_package.@record.ᏑKind)
+        get => ref ʗp is global::go.NativeBox<global::go.main_package.Δrecord>
+            ? ref ʗp.field(global::go.main_package.Δrecord.ᏑKind)
             : ref ʗp.Value.Kind;
     }
     …

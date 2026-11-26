@@ -103,7 +103,7 @@ func (v *Visitor) elementProjection(fromElem, toElem types.Type, sliceExpr strin
 	toName := v.getCSharpTypeName(toElem)
 	elemVar := fmt.Sprintf("elem%s0", TempVarMarker)
 
-	return fmt.Sprintf("widen<%s, %s>(%s, %s => (%s)%s)",
+	return fmt.Sprintf("builtin.widen<%s, %s>(%s, %s => (%s)%s)",
 		v.getCSharpTypeName(fromElem), toName, sliceExpr, elemVar, toName, elemVar)
 }
 

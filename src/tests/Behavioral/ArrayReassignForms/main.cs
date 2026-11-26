@@ -68,7 +68,7 @@ internal static void main() {
     h.Assign(ᐸꟷ(ch));
     fmt.Println("receive:", sh);
     var chᴛ1 = ch;
-    switch (trySelect(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
     case 0 when chᴛ1.ꟷᐳ(out var hᴛ1): {
         h.Assign(hᴛ1);
         break;

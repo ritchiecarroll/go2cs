@@ -9,7 +9,7 @@ internal static nint addInt(nint a, nint b) { return a + b; }
 internal static E foldSlice<S, E>(S s, Func<E, E, E> combine)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    E acc = GoZero<E>();
+    E acc = builtin.GoZero<E>();
     foreach (var (_, v) in range(s)) {
         acc = combine(acc, v);
     }
@@ -41,9 +41,9 @@ internal static S insertAt<S, E>(S s, nint i, params variadic<E> vʗp)
     var v = vʗp.sslice();
 
     var @out = make<S>(0, len(s) + len(v));
-    @out = appendꓸꓸꓸ<S, E>(@out, subslice<S, E>(s, 0, i));
+    @out = appendꓸꓸꓸ<S, E>(@out, builtin.subslice<S, E>(s, 0, i));
     @out = appendꓸꓸꓸ<S, E>(@out, v);
-    @out = appendꓸꓸꓸ<S, E>(@out, subslice<S, E>(s, i));
+    @out = appendꓸꓸꓸ<S, E>(@out, builtin.subslice<S, E>(s, i));
 
     return @out;
 }

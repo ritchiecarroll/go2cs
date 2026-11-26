@@ -113,7 +113,7 @@ func main() {
 
 	// The POSITIVE half. The length is read from the DESTINATION TYPE, not from the store site, so
 	// the 8 here is the `[8]payload` in the field declaration.
-	if !strings.Contains(mainCs, "NativeArrayPointer<payload>(") {
+	if !strings.Contains(mainCs, "builtin.NativeArrayPointer<payload>(") {
 		t.Errorf("the pointer-to-array destination must mint a native-backed pointer:\n%s", mainCs)
 	}
 
@@ -122,7 +122,7 @@ func main() {
 	}
 
 	// It is a store INTO the slot, through the element pointer -- not a new expression somewhere.
-	if !strings.Contains(mainCs, ".Value = NativeArrayPointer<payload>(") {
+	if !strings.Contains(mainCs, ".Value = builtin.NativeArrayPointer<payload>(") {
 		t.Errorf("the mint must be assigned into the slot it replaces:\n%s", mainCs)
 	}
 
@@ -131,7 +131,7 @@ func main() {
 	// destination, and an ordinary assignment to the same pointer-to-array field. A predicate that
 	// matched on the SYNTAX would take all three of the first kind; one that ignored the dodge
 	// would take the fourth.
-	if got := strings.Count(mainCs, "NativeArrayPointer<"); got != 1 {
+	if got := strings.Count(mainCs, "builtin.NativeArrayPointer<"); got != 1 {
 		t.Errorf("exactly one store may mint (the pointer-to-array destination), got %d:\n%s", got, mainCs)
 	}
 

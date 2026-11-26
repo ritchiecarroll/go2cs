@@ -1,0 +1,20 @@
+# AR-11 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=92971
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-11	bytes	ABSENT	-1	PASS	88	None	88	NO	yes	bank	reference	-1	4433	0	-1	48
+AR-11	cmp	ABSENT	-1	PASS	4	None	4	NO	yes	bank	reference	-1	3731	0	-1	503
+AR-11	compress/gzip	ABSENT	-1	PASS	15	None	15	NO	yes	bank	reference	-1	5123	0	-1	45
+AR-11	crypto/internal/boring/bcache	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	3421	0	-1	21
+AR-11	go/build/constraint	ABSENT	-1	PASS	89	None	89	NO	yes	bank	reference	-1	3621	0	-1	27
+AR-11	go/constant	ABSENT	-1	PASS	9	None	9	NO	yes	bank	reference	-1	4812	0	-1	25
+AR-11	go/format	ABSENT	-1	PASS	4	None	4	NO	yes	bank	reference	-1	5800	0	-1	48
+AR-11	internal/buildcfg	ABSENT	-1	PASS	4	None	4	NO	yes	bank	reference	-1	3741	0	-1	45
+AR-11	internal/fuzz	ABSENT	-1	PASS	52	None	52	NO	yes	bank	reference	-1	6839	0	-1	46
+AR-11	internal/pkgbits	ABSENT	-1	PASS	2	None	2	NO	yes	bank	reference	-1	5450	0	-1	43
+AR-11	internal/syscall/unix	ABSENT	-1	PASS	9	None	9	NO	yes	bank	reference	-1	3560	0	-1	21
+AR-11	internal/trace	ABSENT	-1	PASS	191	None	191	NO	yes	bank	reference	-1	5519	0	-1	169
+AR-11	math/rand/v2	ABSENT	-1	PASS	36	None	36	NO	yes	bank	reference	-1	6780	0	-1	54
+AR-11	net/http/internal	ABSENT	-1	PASS	14	None	14	NO	yes	bank	reference	-1	3938	0	-1	43
+AR-11	os/signal	ABSENT	-1	PASS	30	None	30	NO	yes	bank	reference	-1	4390	0	-1	66
+AR-11	sync	ABSENT	-1	FAIL	-1	None	47	NO	NO	bank	reference	-1	4509	2	-1	69
+AR-11	testing/synctest	ABSENT	-1	PASS	18	None	18	NO	yes	bank	reference	-1	17304	0	-1	276
+# summary rows=17 plain PASS=0 twinned EQUAL-bank=16 twinned EQUAL-plain=0

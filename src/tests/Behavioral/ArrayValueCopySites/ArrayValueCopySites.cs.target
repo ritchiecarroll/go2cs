@@ -264,11 +264,9 @@ internal static void channelSend() {
 }
 
 internal static void appendElement() {
-    var sᴷ = new stackAppend<array<nint>>();
-
     var a = array<nint>([1, 2, 3]);
     slice<array<nint>> s = default;
-    s = append(sᴷ, s, a.Clone());
+    s = append(s, a.Clone());
     a[0] = 99;
     fmt.Println("appendElement:", s[0], a);
 }

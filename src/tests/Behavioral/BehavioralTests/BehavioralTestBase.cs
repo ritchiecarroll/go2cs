@@ -367,7 +367,7 @@ public abstract class BehavioralTestBase
 
             s_converterRuns.AddOrUpdate(targetProject, 1, (_, runs) => runs + 1);
 
-            // The project's go2cs.options (extra converter arguments; only -warn=<codes>), read here as at the other
+            // The project's go2cs.options (extra converter arguments; only -warn=<codes> and -stack-append=on), read here as at the other
             // three converter call sites (TestBehavioralHarnessReadsConverterOptions).
             string options = ProjectConverterOptions(projPath);
 

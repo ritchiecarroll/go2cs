@@ -59,11 +59,11 @@ var siblingClosureImportPaths []string
 
 // testLocalTypePrefixes holds fully-qualified package-class prefixes OTHER than the current
 // package's own whose members nonetheless compile into the SAME assembly, so a record naming one of
-// their types must render in the bare local form rather than qualified. Only a `-tests` conversion
-// populates it: the package under test is recompiled into the test assembly, but an EXTERNAL
-// (`package <name>_test`) variant reaches it through its IMPORT PATH and so renders its types fully
-// qualified — while the seeded production metadata carries the same pairs short. See
-// stripLocalTypeQualifier. Empty for every other conversion.
+// their types must render in the bare local form. Only a `-tests` conversion on the recompile
+// fall-back populates it (both reference models clear testPackageName): there the package under test
+// is recompiled into the test assembly, but an EXTERNAL (`package <name>_test`) variant reaches it
+// through its IMPORT PATH and renders its types fully qualified, while the seeded production metadata
+// carries the same pairs short. See stripLocalTypeQualifier. Empty for every other conversion.
 var testLocalTypePrefixes []string
 
 // packageImportLeadingSegments holds the C# using-alias identifier bound by every DIRECT import in

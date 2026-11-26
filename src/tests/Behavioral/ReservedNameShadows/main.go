@@ -12,8 +12,8 @@
 //     the string([]byte) elision's `sstring` views, and the `GoFrame` local every deferring
 //     function declares must all keep resolving.
 //   - `required`, `scoped` as USER TYPES: C# contextual keywords banned as type names
-//     (CS9029/CS9062) — escaped `@required`/`@scoped` like `file`; `record` compiles
-//     unescaped (control).
+//     (CS9029/CS9062) — escaped `@required`/`@scoped` like `file`; `record` begins a record
+//     declaration at member start, so it is Δ-renamed like `union` (csReservedTypeNames).
 //   - A local named `nil` is a shadowing VARIABLE (universe-object check in convIdent) —
 //     it must not be emitted as the `default!` nil-literal rendering.
 //   - A local named `__arglist` must escape the (undocumented) C# keyword — the keyword

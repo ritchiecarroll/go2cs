@@ -32,9 +32,6 @@ internal static partial void allocNew() { sinkT = @new<T>(); }
 internal static partial void allocLiteral() { sinkLit = Ꮡ(new T(a: 1)); }
 
 internal static partial void main() {
-    var namesᴷ = new stackAppend<@string>();
-    var linesᴷ = new stackAppend<@string>();
-
     runtime.MemProfileRate = 1;
     allocMake();
     allocGrow();
@@ -55,7 +52,7 @@ internal static partial void main() {
         foreach (var (_, pc) in range(r.Stack())) {
             var f = runtime.FuncForPC(pc - 1);
             if (f == nil) {
-                names = append(namesᴷ, names, (@string)"?");
+                names = append(names, (@string)"?");
                 continue;
             }
             @string name = f.Name();
@@ -64,7 +61,7 @@ internal static partial void main() {
                 @string line = strings.Join(names, " < ");
                 if (!seen[line]) {
                     seen[line] = true;
-                    lines = append(linesᴷ, lines, line);
+                    lines = append(lines, line);
                 }
                 break;
             }

@@ -13,7 +13,7 @@ internal static partial void add(ref nint p, nint d) { p += d; }
 internal static void bump(this ж<buf> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    add(ref nonnil(ref b).n, 1);
+    add(ref builtin.nonnil(ref b).n, 1);
 }
 
 internal static nint get(this ref buf b) { return b.n; }

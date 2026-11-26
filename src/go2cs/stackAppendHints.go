@@ -778,7 +778,7 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 	packageStackAppendMoves = map[ast.Stmt][]*stackAppendBuffer{}
 	packageStackAppendMovesWritten = map[*stackAppendBuffer]bool{}
 
-	if pkg == nil || dir == "" {
+	if pkg == nil || dir == "" || !stackAppendEnabled(options) {
 		return
 	}
 
@@ -987,7 +987,7 @@ func (v *Visitor) writeStackAppendMove(stmt ast.Stmt) {
 
 		v.outputBuilder.WriteString(v.newline)
 		v.outputBuilder.WriteString(v.indent(v.indentLevel))
-		fmt.Fprintf(v.outputBuilder, "%s = move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
+		fmt.Fprintf(v.outputBuilder, "%s = builtin.move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
 	}
 }
 

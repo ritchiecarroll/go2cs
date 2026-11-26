@@ -274,27 +274,23 @@ The closure case: each pass of the backward `goto` loop captures its own `x` bec
 scope each time it is entered. Siblings declaring the same name keep their blocks too, rather than
 renaming one of them.
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:113-147 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:113-143 -->
 ```csharp
 internal static slice<nint> captures() {
-    var fnsᴷ = new stackAppend<Func<nint>>();
-    var outᴷ = new stackAppend<nint>(moves: true);
-
     slice<Func<nint>> fns = default;
     nint i = 0;
 loop:
     {
         nint x = i; if (x < 3) {
-            fns = append(fnsᴷ, fns, [GoFunc("captures.func1")] () => x);
+            fns = append(fns, [GoFunc("captures.func1")] () => x);
             i++;
             goto loop;
         }
     }
     slice<nint> @out = default;
     foreach (var (_, f) in range(fns)) {
-        @out = append(outᴷ, @out, f());
+        @out = append(@out, f());
     }
-    @out = move2heap(outᴷ, @out);
     return @out;
 }
 
@@ -362,7 +358,7 @@ internal static nint size(this gauge g, words w) { return cap(w) + bits.Len64((u
 
 (Guarded by the `MethodHolderNames` behavioral test, output-compared against `go run`, and by the `GO2CS0013` analyzer, which reports a name in a holder that binds another member than the package's ([Diagnostic Codes](../DiagnosticCodes.md)).)
 
-The package-level rename that remains (`nameCollisions`) covers a type named as the emitter spells one of its own (`any`, `rune`, `nint`, `nuint`) and a type named after a C# 15 reserved type-position keyword (`closed`, `union`), with every package-level declaration that shares such a name. The rules below that speak of a "colliding" or "collision-renamed" name are about those renames.
+The package-level rename that remains (`nameCollisions`) covers a type named as the emitter spells one of its own (`any`, `rune`, `nint`, `nuint`) and a type named after a C# 15 reserved type-position keyword (`closed`, `union`) or after `record`, which C# reads as a record declaration at the start of a member, with every package-level declaration that shares such a name. The rules below that speak of a "colliding" or "collision-renamed" name are about those renames.
 <!-- Until 2026-11-11 (OQ2, the method holders) every method was a member of the package class, beside the package's types, constants and variables. A type and a same-named method could not share that class (CS0102), so the converter Δ-prefixed the TYPE (`Δfoo`) and kept the method's name; the generators read the type name from the emitted syntax, so renaming the type kept them in agreement. For a golib reserved word, already Δ-prefixed on both sides, the converter appended the type marker to the type only: Go `type slice struct{…}` became `partial struct Δsliceᴛ` beside `internal static Δsliceᴛ Δslice(this ref builder b, …)`, the Go runtime's GC slice header beside `func (*userArena) slice(…)`. The rename is gone: src/go2cs/nameCollisionAnalysisOperations.go no longer records a name for a method, and getCollisionAvoidanceIdentifier's marker branch is reached only by a remaining rename. -->
 
 A **struct field** named like a renamed package-level identifier is *not* renamed: a field is struct-scoped (a field `any` does not collide with a package type `any` in C#), so the field declaration keeps its core-sanitized name (`trace`). The box-field accessor static the `TypeGenerator` emits for it is therefore `g.Ꮡtrace` (the `Ꮡ`-prefixed declared member name). The converter's `&g.field` address form (`Ꮡg.of(g.Ꮡtrace)`) must use that **declared** field name — it derives the accessor member from `getCoreSanitizedIdentifier` plus the type-colliding rename, *not* from the general identifier path that applies the package-level collision `Δ`-rename. Using the latter would emit `g.ᏑΔtrace`, which has no matching generated static (CS0117). Reserved-word fields keep their `Δ` (the field really is declared `Δarray` for a field named `array`), so the accessor is `Ꮡ`+the declared name in every case. (Guarded by the `CollisionFieldBoxAccessor` behavioral test. Its field `mark` shared its name with a renamed type until 2026-11-11, when the type-vs-method rename ended; the test now pins the plain `mark` accessor beside a type `mark` and a method `mark`. Runtime's `g`/`m`/`p` fields `trace`/`stack`/`p` had the shape for the same reason.) The generated accessor's **accessibility** matches the *field's* (its exportedness), not the field type's name — an exported field `Fun [1]uintptr` (C# `array<nuint> Fun`) yields a **public** `ᏑFun`, so another package's `other.of(ITab.ᏑFun)` can reach it; deriving the scope from the type's simple name (`array` → lowercase → `internal`) would make the cross-package accessor unreachable (CS0117 in runtime's `iface.go` walking `abi.ITab.Fun`).
@@ -997,7 +993,7 @@ Every non-function predeclared Go identifier, the golib public top-level type su
 - **A local named `nil`** (`nil := 5`, legal Go) must not take the nil-literal rendering — `nint default! = 5;`, a syntax error — so the ident conversion checks the resolved object, not the *name* (mirroring the `true`/`false` handling): only a use resolving to the universe `*types.Nil` renders as the literal (`default!`, or golib `nil` in pointer contexts); a shadowing object falls through to normal rendering (`nint nil = 5;` — `nil` is not a C# keyword, and Go's own scoping guarantees no nil-literal use while shadowed).
 - **User types named `builtin` or `sstring`** would shadow golib names the emitter references even when the Go source never spells them — the qualified `builtin.len(…)` calls (emitted when a package method shadows a built-in) would bind the nested user struct (CS1501), and the string([]byte) elision's `sstring` views would bind the user type (CS0030). Both names are in the `reserved` set: the user types decline to `Δbuiltin`/`Δsstring`.
 - **User types named `any`, `rune`, `nint`, or `nuint`** shadow spellings the *emitter itself* produces: `interface{}` renders `any` (`slice<any>` bound the user struct, CS0029), an untyped rune-constant default spells `rune` (`c := 'x'` emits `rune c = 'x';`, CS0030), and Go `int`/`uint` map to the C# native-int contextual keywords (`partial struct nint { internal nint d; }` is a CS0523 layout cycle, and `@` cannot fix a name-identity problem). These names must **never** enter the string-based `reserved` set — legitimate emissions re-enter the same sanitizers, so corpus-wide `slice<rune>(…)` would corrupt to `slice<Δrune>` and re-fed delegate compositions corrupt `Func<…, nint, nint>` to `Δnint`. Instead `performNameCollisionAnalysis` registers a package-level TYPE bearing one of these names (`emitterSpelledTypeNames`) in the package-scoped `nameCollisions` map: every ident with that name *in that package* is `Δ`-renamed — exactly mirroring Go's package-scoped shadowing — with zero effect on any other package (the behavioral regression check is byte-identical<!-- [CNR](../Glossary.md#cnr) -->).
-- **`required` and `scoped`** are C# 11 contextual keywords banned as *type* names (CS9029/CS9062, surfacing in both the converted declaration and the TypeGenerator's output). Both are in the `keywords` `@`-escape set like `file` (`partial struct @required` — the `@` escape is valid in every position and the generator carries it through). `record`, `partial`, and the other contextual keywords compile clean as type names on C# 13/net9 (verified empirically) and stay unescaped.
+- **`required` and `scoped`** are C# 11 contextual keywords banned as *type* names (CS9029/CS9062, surfacing in both the converted declaration and the TypeGenerator's output). Both are in the `keywords` `@`-escape set like `file` (`partial struct @required` — the `@` escape is valid in every position and the generator carries it through). `partial` and the other contextual keywords compile clean as type names on C# 13/net9 (verified empirically) and stay unescaped. `record` does not: it is legal as a name, but at the START of a member declaration C# reads it as a record declaration, so a return type `static record M()` or `static record.Entry M()` fails CS1519/CS1001. It sits in `csReservedTypeNames` beside `closed`, `union` and `extension`: a declared type named `record` is renamed package-wide to `Δrecord` (net/http/fcgi's `type record struct`), an import alias or package qualifier named `record` is written `@record`, and a local named `record` stays bare unless its own package declares the type (there every identifier of that name takes `Δrecord`, the package-wide rule above: `ReservedNameShadows`' local `record := 1` becomes `nint Δrecord = 1;`). The type takes `Δ` rather than `@` although, for `record`, the `@` does survive go2cs-gen: one list and one marker serve every member-start keyword, where `@` would need a second, type-position-only escape path. Guarded by the `ReservedNameShadows` and `AliasKeywordPackage` behavioral tests.<!-- 2026-11-25, owner ruling via COORD ("Δrecord (as ruled)"). Until then this line said `record` compiled clean as a type name and stayed unescaped: true as a NAME, false at member start, which no corpus use had reached (P3's alias-escape review row, measured on claude/i9-alias-keyword-escape). Why Δ and not @ -- the @record probe (i9, 2026-11-24, outside the repo): the seat's converter with `record` moved into `keywords`, so a declared type emits `@record`; one Go package declaring `type record struct{ n int; name string }` with a pointer method, value methods (one of them `Clone() record`), interfaces implemented through the value and the pointer adapter (one with a member returning `record`), fmt.Stringer, and `type holder struct{ rec record; n int }`; Debug, windows. Build rc 0, stdout byte-equal to `go run .`. Every member-start spelling go2cs-gen wrote (TypeGenerator's declaration, RecvGenerator's pointer overloads, ImplementGenerator's adapters, the holder constructor) was the qualified `global::go.main_package.@record`; the bare `record` it also wrote sits only in legal positions. So for `record` the `@` survives the generator, unlike S2's finding for `closed`/`union`. The probe did not settle locals: `keywords` would also put `@record` on std locals (crypto/tls, archive/tar and others), and keeping them bare needed a new type-position-only path. The owner chose the existing list. -->
 - **`extension`** is a C# 14 contextual keyword banned as a type or alias name (CS9306), and is escaped only in those two positions. A Go package named `extension` reaches C# as an import alias, which is written `using @extension = …;` (the `@` is carried on the alias's type-position uses too, `@extension.Kind e = 1;`). A package that declares a type named `extension` renames that name package-wide to `Δextension`, the same rule as `closed` and `union`. A local or field named `extension` stays bare (`nint extension = 7;`): the name is legal there, and escaping it in every position would put `@` on ordinary std locals. The C# 15 names `closed`, `union` and `safe` get the same `@` at an import alias. Guarded by `TestCSBannedTypeAndAliasNamesAreEscaped` and the `KeywordPackageAliases` behavioral test.<!-- 2026-11-20, board (qq): goldmark's `using extension = …` failed CS9306. The first cut put `extension` in the keywords set and its footprint moved 6 std files on windows/amd64 (`@extension` on locals in crypto/tls, crypto/x509, image/gif and mime), so the escape was narrowed to the alias and type positions. -->
 - **A user type whose name is a spelling the converter maps to a builtin** (`type float struct{…}` in modernc.org/mathutil) is named by its go/types object, never by its spelling: a type-position identifier that resolves to a package-level or function-local `TypeName` (not the Universe) skips the basic-type spellings (`float` to `float64`, `int` to `nint`) and renders as declared, `new @float(n: n, fracBits: fracBits)`. Before this the composite literal emitted `new float64(n: n, …)` (CS1739). Guarded by the `DeclaredTypeNamedFloat` behavioral test.
 - **`__arglist`** is a real (undocumented) Roslyn keyword, so a Go local of that name is escaped: `nint @__arglist = 5;` (unescaped it fails to parse, CS1002).<!-- history: the keyword set once carried the typo __argslist, which covered nothing. -->
@@ -1191,10 +1187,17 @@ ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);   // CS0149: Method
 The remedy is the **opposite** of the shadow-renames elsewhere in this section: `heap` is the name the
 Go program chose and nothing about it is ambiguous in Go, so the identifier is preserved and the
 INTRINSIC is qualified instead — `builtin.heap(…)` — and only where a `heap` declaration is actually in
-scope, so the corpus stays byte-identical everywhere else. `heapIntrinsicName` supplies the spelling at
-every emission site; `declaresHeapIntrinsicIdent` answers per function declaration (walking
-nested function literals, and OR-ed with a literal's own declarations in `convFuncLit`), and
-`packageDeclaresHeapIntrinsicIdent` covers the one package-level shape that can also collide.
+scope, so the corpus stays byte-identical everywhere else. `heap` is one case of a general rule now
+(`golibCall.go`): the Go builtins golib supplies (`len`, `append`, `make`, `copy`, `panic`, `recover`)
+and `heap`, `quo` and `rem` keep the bare spelling and are qualified by one predicate,
+`golibNameShadowed`, wherever a Go declaration of the name would bind first; it answers per function
+declaration (every object the declaration defines, nested function literals and type-switch
+bindings included) or per package-level function literal, plus the package scope and any name a
+dot-import or the internal test class brings in through a second `using static`. The plumbing
+intrinsics no Go program writes (`tmpstring`, `nonnil`, `trySelect`, `ConvertToType`, …) are spelled
+`builtin.<name>` at every emission site instead, so no declaration can capture them; a package func
+named `tmpstring` used to run in place of golib's (guarded by `GolibIntrinsicShadow`, and by a scan in
+`golibCall_test.go` that fails on any of those names written bare in the converter or in `go2cs-gen`).
 
 **What does and does not shadow is decided by C#'s invocable-member rule, and every boundary below was
 measured rather than reasoned into place.** A simple name used as the target of an invocation ignores
@@ -1209,12 +1212,13 @@ space — can displace the `using static` import:
   simple name followed by a type-argument list considers only generic methods — a local is never a
   candidate. This is why the reserved-name census clears the case, and why a guard built on a *scalar*
   local (which takes exactly this form) proves nothing.
-* **A package-level TYPE or VAR named `heap` does NOT shadow**, because neither emits an invocable
-  member. A broader "any non-`PkgName` object" check would only over-qualify: `GlobalCapturedInClosure`
-  declares `type heap` at package level and compiles without the qualifier.
-  The check is narrowed to `*types.Func`, the one package-level shape that is a real method group.
-  Nothing in the corpus declares that, so the positive case is reasoned from the lookup rule rather
-  than reproduced; the negative side is guarded.
+* **A package-level TYPE named `heap` does NOT shadow**, because it emits no invocable member:
+  `GlobalCapturedInClosure` declares `type heap` at package level and compiles without the qualifier.
+  The package-scope check therefore takes a func, a variable or a constant and never a type. A variable
+  is kept because a func-typed one is an invocable delegate field and because `quo` and `rem` are also
+  written in value forms (`MinIntDivideShadow` declares a variable `rem`); for a variable of another
+  type the qualifier is redundant but harmless. The package-func case is reproduced in
+  `golibCall_test.go`'s integration table.
 * **An import ALIAS named `heap` does NOT shadow.** `import "container/heap"` renders as
   `using heap = go.container.heap_package;`, and a using-alias does not displace a `using static`
   method group in an invocation — proven by `container/heap`'s own validated `example_pq_test.cs`, which
@@ -1270,7 +1274,7 @@ Since 2026-11-11 no constant or variable is renamed because a method shares its 
 receiver's holder. `time` now declares `Second`, `Nanosecond`, `UTC` and `Local` under their Go names, and the
 examples in this section and the next show the shapes from before that date. The rules still hold for a member that
 a remaining package-level rename reaches (one that shares a name with a type named `any`, `rune`, `nint`, `nuint`,
-`closed` or `union`).
+`closed`, `union` or `record`).
 
 A package that collision-renames an exported const or var publishes it with the `const:` marker, which
 tells a consumer to keep the reference **qualified through the package** (`time.ΔSecond`) rather than

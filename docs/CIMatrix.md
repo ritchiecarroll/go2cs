@@ -220,6 +220,17 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   updated consumer and `consumer_override` must cite the break, `floor=<a.b.c.d>;news=<path>`: the tree's
   `GoBreakFloor`, above the previous release, and release notes holding its "Upgrading from <previous release>" entry.
   Either untrue fails the arm by name; with both true the verdict line reads `OVERRIDE`.
+- **T** the twin opt-in reaches a program converted OUTSIDE the repository ([Async twins](AsyncTwins.md)):
+  `PackageTests/TwinOptIn`, a goroutine program that imports nothing, converted three ways — `-recurse=nuget`
+  against the feed, `-recurse` against this tree's `src`, and `-recurse` against a `deploy-core.ps1` root staged in
+  the arm's work directory — each built without and with `GoTwinsFor` naming it. The build without carries no twin,
+  the build with carries twins (names ending `ꞏtwin` in the program assembly), and the twinned program run with
+  `GO2CS_MN=1` writes what `go run` writes. It gates, except the NuGet mode against a published `published_version`
+  feed (measured there: a release before .5 has no twins). The deployed mode is also the standing deploy-and-build
+  check (`deploy-core.ps1` had no CI step before it).
+  <!-- 2026-11-25 (R, COORD 20261125T182108Z and 191726Z): GoTwinsFor lived only in src/Directory.Build.targets, so a
+       program converted outside the repository built without twins in all three modes; and deploy-core.ps1 did not
+       stage go2cs/fieldAccessCollisions.txt, so a deployed go2cs-gen failed CS1566 from 810b9bb208 (2026-10-17). -->
 
 A leg is green when arms A-D, G and H pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (a converter that emits

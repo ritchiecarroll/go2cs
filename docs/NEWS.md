@@ -306,7 +306,7 @@ linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64. Every arm printed wha
 memory, was refused by name. A `-cgo` conversion is one package, and it builds against a go2cs clone
 (`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages yet. Building a cgo package against
 the `go.*` packages from the feed is planned for the next release.
-<!-- src/go2cs/main.go:307 (`Convert a single cgo package`; this entry describes the November 19 release, when -cgo did not combine with -recurse); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Convert a single cgo package"; this entry describes the November 19 release, when -cgo did not combine with -recurse); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **A pointer rebuilt from a number is refused too, with a narrow memory-safety gap left.** go2cs refuses, by name,
 any address inside Go memory that it is holding still, even after the address has been through a `uintptr`:
@@ -747,7 +747,7 @@ that holds a reference, through a pointer reinterpreted from Go storage of anoth
 where it used to be read as if the layouts matched.
 <!-- docs/phase4/DESIGN-array-value-storage.md section 7 (the scout, 7.3 for the before-state:
      src/core/golib/runtime/RuntimeErrorPanic.cs refuses the whole-struct read) and its dated part-D and mixed-pair
-     amendments. The library: merge b6f3bbb44f (C2, I0-lib; go.arrays packed by src/core/golib/golib.csproj:158-176#f8f2d9,
+     amendments. The library: merge b6f3bbb44f (C2, I0-lib; go.arrays packed by src/core/golib/golib.csproj:162-180#f8f2d9,
      a pack without it fails). The converter: merge 817b56e8b0 (C2, I0 part D; std footprint 0; the census P1 on
      linux/amd64 over modernc.org/sqlite v1.62.0 and libc v1.80.1). Mixed pairs: merge 555e30c826 (C2,
      claude/c2-inline-pairs, 3c25375a04). Emission shape: src/tests/Behavioral/InlineArrayFields. The reflection

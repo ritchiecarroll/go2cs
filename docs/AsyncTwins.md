@@ -61,9 +61,19 @@ the converted program's entry point starts `main`'s twin when the program is bui
 
 Opting in takes two switches: one when you build, one when you run.
 
-**The build.** Build the projects with twins. The properties that do this are read by go2cs's build files, so they
-work only for a project that sits under the `src` directory of a go2cs repository clone. A project anywhere else,
-such as a `-recurse` output root outside the clone, builds without twins and says nothing.
+**The build.** Build the projects with twins. The properties that do this are read by go.lib's build files, so they
+work for any converted program: one built against a go2cs repository clone, against a `deploy-core` root, or against
+the `go.*` NuGet packages. The published 1.26.11.1 packages carry no twins at all; twins arrive with the packages
+of the next release (.5).
+<!-- core/golib/buildTransitive/go.lib.twins.targets, imported by go.lib.targets (NuGet), by the Directory.Build.targets
+     that `go2cs -recurse` writes (local references) and by the repository's src/Directory.Build.targets. Until
+     2026-11-25 it lived only in the last, and a program converted outside the clone built without twins and said
+     nothing (R, COORD 20261125T182108Z; measured in all three modes). release-smoke's arm T converts a goroutine
+     program outside the repository in each mode and checks that GoTwinsFor adds twins and its absence adds none.
+     The published go.gen 1.26.11.1 has no TwinGenerator (read from its analyzer, 2026-11-25). -->
+
+Upgrading a program converted before this release: re-run the conversion, so the output root's
+`Directory.Build.targets` imports go.lib's twin file. A NuGet consumer needs nothing more than the new packages.
 
 - `GoTwinsFor` names the projects to build with twins: their project file names without `.csproj`, separated by `;`.
   Set it in the environment, or on the `dotnet build` command line with each `;` written as `%3B` (MSBuild otherwise
@@ -76,7 +86,7 @@ Setting `GoTwins` on the command line is not the same thing: a command-line prop
 references, standard-library packages included. Use `GoTwinsFor` on the command line instead.
 <!-- src/go2cs/projectFileWriter.go (needToWriteFile): the converter rewrites the project file and carries over only
      the GoHandOwnReferences block (P3's read, 2026-11-24; read from the code, not run). GoTwinsFor compares
-     $(MSBuildProjectName) in src/Directory.Build.targets. -->
+     $(MSBuildProjectName) in core/golib/buildTransitive/go.lib.twins.targets. -->
 
 **The run.** Set the environment variable `GO2CS_MN=1` when you start the program. How many goroutines run at once
 follows `GOMAXPROCS`, as in Go: the `GOMAXPROCS` environment variable at start, and `runtime.GOMAXPROCS(n)` while
@@ -92,8 +102,8 @@ in `GoTwinsFor`. The line is for reading, and its fields may change between rele
 <!-- src/core/golib/runtime/GoScheduler.cs: GO2CS_MN is read as exactly "1"; the line is registered in Start(), which
      runs at the first Ready; Reading() writes parks= and peak-os-threads=. -->
 
-**An example.** A program whose executable project is `App.csproj` and whose library project is `Lib.csproj`, both
-under the clone's `src` directory:
+**An example.** A converted program whose executable project is `App.csproj` and whose library project is
+`Lib.csproj`:
 
 ```shell
 dotnet build -c Release -p:GoTwinsFor=App%3BLib App.csproj
@@ -126,9 +136,9 @@ nothing from twins.
 
 - **Experimental.** The scheduler and the twins are new, and are off unless you opt in. Report anything that behaves
   differently with them than without them.
-- **Repository clones only.** The build properties work only for a project under the `src` directory of a go2cs
-  repository clone. <!-- (b)-dependent --> A project that references the published `go.*` packages from NuGet cannot
-  build with twins.
+- **The published packages.** The `go.*` packages published as 1.26.11.1 carry no twins: their go.gen has no twin
+  generator, so a project that references them builds without twins whatever it sets. Twins arrive with the next
+  release's packages. A program built against a repository clone or a `deploy-core` root has them now.
 - **Stack depth.** With the scheduler on, a goroutine started on a twin runs on one of the pool's threads, and so
   does `main`, unless an `init` function locked it to its thread. Every pool thread reserves 1 GiB, `main`'s usual
   reserve, or the goroutine reserve when that is larger, so `main` and every goroutine the scheduler runs keep at

@@ -124,14 +124,14 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 			elemType := convertToCSTypeName(v.getAliasQualifiedTypeName(sliceType.Elem(), false))
 
 			if sliceExpr.Max != nil {
-				return fmt.Sprintf("subslice3<%s, %s>(%s, %s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high, max)
+				return fmt.Sprintf("builtin.subslice3<%s, %s>(%s, %s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high, max)
 			}
 
 			if sliceExpr.High == nil {
-				return fmt.Sprintf("subslice<%s, %s>(%s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low)
+				return fmt.Sprintf("builtin.subslice<%s, %s>(%s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low)
 			}
 
-			return fmt.Sprintf("subslice<%s, %s>(%s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high)
+			return fmt.Sprintf("builtin.subslice<%s, %s>(%s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high)
 		}
 
 		// A sub-slice of a `string | []byte` UNION-constrained value goes through the Range
@@ -605,7 +605,7 @@ func (v *Visitor) numericCastOperand(expr ast.Expr, converted, csType string) st
 	// type parameter is not directly convertible). Route through golib's ConvertToUInt64<T> bridge
 	// (the E(100) integer-type-param family), then narrow — the same shape as the slice-index cast.
 	if tp, ok := types.Unalias(v.getType(expr, false)).(*types.TypeParam); ok && typeParamIsInteger(tp) {
-		return fmt.Sprintf("(%s)(ConvertToUInt64<%s>(%s))", csType, v.getCSharpTypeName(tp), converted)
+		return fmt.Sprintf("(%s)(builtin.ConvertToUInt64<%s>(%s))", csType, v.getCSharpTypeName(tp), converted)
 	}
 
 	return castOf(csType, converted)
@@ -657,7 +657,7 @@ func (v *Visitor) managedSliceViewRefusal(sliceExpr *ast.SliceExpr, viewBase ast
 	reason := fmt.Sprintf("go2cs: a slice view (*[N]%s)(p)[...] over a managed element has no managed aliasing pair (%s:%d)",
 		types.TypeString(arr.Elem(), types.RelativeTo(v.pkg)), filepath.Base(position.Filename), position.Line)
 
-	return fmt.Sprintf("(false ? default(slice<%s>) : throw panic(%s))", elemName, strconv.Quote(reason)), true
+	return fmt.Sprintf("(false ? default(slice<%s>) : throw %s(%s))", elemName, v.golibCall("panic"), strconv.Quote(reason)), true
 }
 
 func isPointerCast(expr string) (bool, string) {

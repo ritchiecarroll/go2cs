@@ -1,0 +1,19 @@
+# AR-5 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=99622
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-5	crypto/des	ABSENT	-1	PASS	55	None	55	NO	yes	bank	reference	-1	5447	0	-1	35
+AR-5	crypto/hkdf	ABSENT	-1	PASS	3	None	3	NO	yes	bank	reference	-1	4199	0	-1	22
+AR-5	crypto/internal/fips140/mldsa	ABSENT	-1	PASS	46	None	46	NO	yes	bank	reference	-1	5199	0	-1	32
+AR-5	crypto/internal/fips140/rsa	ABSENT	-1	PASS	123	None	123	NO	yes	bank	reference	-1	5443	0	-1	31
+AR-5	crypto/internal/fips140only	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	10612	0	-1	31
+AR-5	crypto/internal/fips140test	ABSENT	-1	PASS	2274	None	2274	NO	yes	bank	unknown	-1	8300	0	-1	179
+AR-5	encoding/base64	ABSENT	-1	PASS	17	None	17	NO	yes	bank	reference	-1	3746	0	-1	44
+AR-5	encoding/hex	ABSENT	-1	PASS	12	None	12	NO	yes	bank	reference	-1	3716	0	-1	335
+AR-5	go/parser	ABSENT	-1	PASS	183	None	183	NO	yes	bank	reference	-1	5726	0	-1	97
+AR-5	go/version	ABSENT	-1	PASS	3	None	3	NO	yes	bank	reference	-1	3570	0	-1	16
+AR-5	log	ABSENT	-1	PASS	24	None	24	NO	yes	bank	reference	-1	5000	0	-1	35
+AR-5	net/http/internal/ascii	ABSENT	-1	PASS	13	None	13	NO	yes	bank	reference	-1	3566	0	-1	15
+AR-5	net/http/pprof	ABSENT	-1	PASS	15	None	15	NO	yes	bank	reference	-1	17937	0	-1	182
+AR-5	net/netip	ABSENT	-1	PASS	211	None	211	NO	yes	bank	recompile	-1	6954	0	-1	56
+AR-5	runtime/metrics	ABSENT	-1	PASS	2	None	2	NO	yes	bank	reference	-1	6439	0	-1	41
+AR-5	text/scanner	ABSENT	-1	PASS	18	None	18	NO	yes	bank	reference	-1	3768	0	-1	17
+# summary rows=16 plain PASS=0 twinned EQUAL-bank=16 twinned EQUAL-plain=0

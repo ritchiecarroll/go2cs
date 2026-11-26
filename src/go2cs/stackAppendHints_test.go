@@ -320,7 +320,7 @@ func TestStackAppendHarvestRunsOncePerKey(t *testing.T) {
 	files := []FileEntry{{file: file, filePath: "/work/sa/sa.go"}}
 
 	for _, target := range stackAppendHarvestTargets {
-		collectStackAppendHints(files, fset, pkg, info, "/work/sa", Options{targetPlatform: target})
+		collectStackAppendHints(files, fset, pkg, info, "/work/sa", Options{targetPlatform: target, stackAppend: stackAppendOn})
 	}
 
 	for _, target := range stackAppendHarvestTargets {
@@ -330,7 +330,7 @@ func TestStackAppendHarvestRunsOncePerKey(t *testing.T) {
 	}
 
 	// A different build-tag set is a different build, so it harvests again.
-	collectStackAppendHints(files, fset, pkg, info, "/work/sa", Options{targetPlatform: "linux/amd64", buildTags: []string{"purego"}})
+	collectStackAppendHints(files, fset, pkg, info, "/work/sa", Options{targetPlatform: "linux/amd64", buildTags: []string{"purego"}, stackAppend: stackAppendOn})
 
 	if runs["linux/amd64"] != 2 {
 		t.Errorf("linux/amd64: harvested %d times after a -tags pass, want 2", runs["linux/amd64"])
@@ -498,6 +498,7 @@ func TestStackAppendEmission(t *testing.T) {
 		goPath:              build.Default.GOPATH,
 		go2csPath:           filepath.Join(root, "out"),
 		recurse:             true,
+		stackAppend:         stackAppendOn,
 		targetPlatform:      "linux/amd64",
 		indentSpaces:        4,
 		preferVarDecl:       true,

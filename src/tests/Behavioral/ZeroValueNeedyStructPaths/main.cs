@@ -12,12 +12,12 @@ partial struct counts {
 }
 
 internal static T zeroVar<T>() {
-    T z = GoZero<T>();
+    T z = builtin.GoZero<T>();
     return z;
 }
 
 internal static T /*z*/ zeroNamed<T>() {
-    T z = GoZero<T>();
+    T z = builtin.GoZero<T>();
 
     return z;
 }
@@ -27,7 +27,7 @@ internal static T zeroNew<T>() {
 }
 
 internal static T zeroCaptured<T>() {
-    T z = GoZero<T>();
+    T z = builtin.GoZero<T>();
     var zʗ1 = z;
     [GoFunc("zeroCaptured[...].func1")] T get() => zʗ1;
     return get();
