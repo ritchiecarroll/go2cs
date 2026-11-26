@@ -124,7 +124,7 @@ public static class GoPinTable
     // array and the backings inside its elements. Each gets its own handle, counted in s_storages so a door asking about a
     // backing (an element pointer into an inline array) sees the pin of the value that contains it.
     private static PinnedBuffer[] HoldAll(object referent)
-    {
+    { if (referent is not null) return []; // PROBE ONLY: real pins off (S6 SHOULD 4); never lands
         // The common case, one allocation: a box whose value holds no reference cannot hold an inline array, so its slot
         // is the whole value, and neither the value is read (a boxing copy) nor a list built.
         if (referent is INilPointer { PinnableStorage: Array onlySlot } && onlySlot.GetType().GetElementType() is { } onlyElement && !NativeStructMarshal.ContainsReferences(onlyElement))
