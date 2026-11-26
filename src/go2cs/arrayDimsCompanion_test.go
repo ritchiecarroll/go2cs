@@ -403,3 +403,42 @@ func TestArrayDimsOverloadForwarderLine(t *testing.T) {
 		t.Errorf("ref forwarder\n got %s\nwant %s", got, want)
 	}
 }
+
+// TestArrayDimsFactsMeasureATargetScope pins the target the facts hand the hand-own registry. A function
+// registered for one os/arch target (internal/cpu's osInit is registered for darwin/arm64 alone) is read by
+// the facts' displaced test, and goosScope.includes refuses a bare GOOS against such an entry by panicking.
+// The facts passed goosOfTarget(...) until the darwin/arm64 merge, so every target's conversion of
+// internal/cpu failed on cpu.go (GO2CS2008) and dropped its records from package_info.cs.
+func TestArrayDimsFactsMeasureATargetScope(t *testing.T) {
+	visitor, production := loadArrayDimsFixture(t)
+
+	previous, had := manualConversionFuncs["example/dims"]
+	manualConversionFuncs["example/dims"] = map[string]goosScope{"noSink": {"darwin/arm64"}}
+
+	t.Cleanup(func() {
+		if had {
+			manualConversionFuncs["example/dims"] = previous
+		} else {
+			delete(manualConversionFuncs, "example/dims")
+		}
+	})
+
+	for _, target := range []string{"windows/amd64", "darwin/amd64", "darwin/arm64"} {
+		visitor.options.targetPlatform = target
+		inputs := visitor.arrayDimsInputs()
+
+		if inputs.target != target {
+			t.Errorf("%s: the facts read target %q, want the full os/arch target", target, inputs.target)
+		}
+
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("%s: the facts panicked over a target-scoped registration: %v", target, r)
+				}
+			}()
+
+			computeArrayDimsFacts(production, inputs)
+		}()
+	}
+}
