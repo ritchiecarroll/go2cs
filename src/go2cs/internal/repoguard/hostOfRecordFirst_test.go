@@ -26,7 +26,7 @@ import (
 // holds both halves.
 var (
 	initEnvsBody      = regexp.MustCompile(`(?s)internal static void ᴛInitEnvs\(\)\s*\{(.*)`)
-	verifyHostMethod  = regexp.MustCompile(`(?s)(\[ModuleInitializer\]\s*)?internal static void ᴛVerifyHostOfRecord\(\)`)
+	verifyHostMethod  = regexp.MustCompile(`(?s)(\[[\w.]*ModuleInitializer\]\s*)?internal static void ᴛVerifyHostOfRecord\(\)`)
 	csLineComment     = regexp.MustCompile(`(?m)^\s*//.*$`)
 	firstCSStatement  = regexp.MustCompile(`^\s*([^;{}]*;)`)
 	verifyHostCallStr = "ᴛVerifyHostOfRecord();"
@@ -67,5 +67,23 @@ func TestHostOfRecordRunsFirstAtStartup(t *testing.T) {
 
 	if method[1] != "" {
 		t.Errorf("ᴛVerifyHostOfRecord is a [ModuleInitializer]; it must be called from ᴛInitEnvs instead, because C# does not order one module initializer against another")
+	}
+}
+
+// The red arm of the second half, in both spellings: the qualified one is what restoring the attribute would take,
+// since hostofrecord_impl.cs no longer carries the using (P3's read, finding 1), and this directory already uses it
+// (linux/signal_posix_impl.cs).
+func TestHostOfRecordGuardSeesEitherAttributeSpelling(t *testing.T) {
+	for _, attribute := range []string{"[ModuleInitializer]", "[System.Runtime.CompilerServices.ModuleInitializer]"} {
+		source := "    " + attribute + "\n    internal static void ᴛVerifyHostOfRecord()\n"
+		method := verifyHostMethod.FindStringSubmatch(source)
+
+		if method == nil || method[1] == "" {
+			t.Errorf("the guard does not see %s above ᴛVerifyHostOfRecord", attribute)
+		}
+	}
+
+	if method := verifyHostMethod.FindStringSubmatch("    internal static void ᴛVerifyHostOfRecord()\n"); method == nil || method[1] != "" {
+		t.Errorf("the guard reads an attribute on a bare ᴛVerifyHostOfRecord")
 	}
 }
