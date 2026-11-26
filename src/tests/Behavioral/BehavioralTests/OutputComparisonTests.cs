@@ -2939,6 +2939,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
 
     [TestMethod]
+    public void CheckUnnamedArrayTypeArgDescriptor() => CheckTarget("UnnamedArrayTypeArgDescriptor");
+
+    [TestMethod]
     public void CheckUnnamedMapNilConversion() => CheckTarget("UnnamedMapNilConversion");
 
     [TestMethod]

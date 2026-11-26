@@ -1421,6 +1421,8 @@
     <Project Path="tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/UntypedIntInterfaceBox/UntypedIntInterfaceBox.csproj" />
     <Project Path="tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
+    <Project Path="tests/Behavioral/UnnamedArrayTypeArgDescriptor/UnnamedArrayTypeArgDescriptor.csproj" />
+    <Project Path="tests/Behavioral/UnnamedArrayTypeArgDescriptor/wrap/UnnamedArrayTypeArgDescriptor.wrap.csproj" />
     <Project Path="tests/Behavioral/UnnamedMapNilConversion/UnnamedMapNilConversion.csproj" />
     <Project Path="tests/Behavioral/UnnamedParams/UnnamedParams.csproj" />
     <Project Path="tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />

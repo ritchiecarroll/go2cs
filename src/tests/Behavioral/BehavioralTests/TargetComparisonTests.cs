@@ -3010,6 +3010,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
 
     [TestMethod]
+    public void CheckUnnamedArrayTypeArgDescriptor() => CheckTarget("UnnamedArrayTypeArgDescriptor");
+
+    [TestMethod]
     public void CheckUnnamedMapNilConversion() => CheckTarget("UnnamedMapNilConversion");
 
     [TestMethod]
