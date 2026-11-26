@@ -127,4 +127,20 @@ public static (uintptr r1, uintptr r2, Errno err) GoSyscallPtr(uintptr fn, uintp
     return syscallPtr(fn, a1, a2, a3);
 }
 
+// TEST SEAMS (GolibTests' DarwinSyscallBracketTests): syscalln and rawsyscalln take a `params variadic<uintptr>`
+// pack, a stack-only type no reflection call can build, so the test reaches them through these two, as
+// DarwinNativeTransitionTests reaches posix_spawn, kill and readdir_r through their Go*Call seams. Each passes the
+// span through unchanged (variadic<uintptr> converts from it), so the call is the production one.
+public static (uintptr r1, uintptr r2, Errno err) GoSyscallnCall(uintptr fn, ReadOnlySpan<uintptr> args) {
+    Span<uintptr> pack = args.Length <= 16 ? stackalloc uintptr[args.Length] : new uintptr[args.Length];
+    args.CopyTo(pack);
+    return syscalln(fn, pack);
+}
+
+public static (uintptr r1, uintptr r2, Errno err) GoRawSyscallnCall(uintptr fn, ReadOnlySpan<uintptr> args) {
+    Span<uintptr> pack = args.Length <= 16 ? stackalloc uintptr[args.Length] : new uintptr[args.Length];
+    args.CopyTo(pack);
+    return rawsyscalln(fn, pack);
+}
+
 } // end syscall_package
