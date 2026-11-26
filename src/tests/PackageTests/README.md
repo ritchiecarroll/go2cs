@@ -285,7 +285,7 @@ TIMEOUT on this arm is the same defect in its other shape;
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
 leg; (E) `PublishSymbols` above, the guard and its AOT control against the same feed, MEASURED and never gating
 until it has read green on two trains; (F) `PackageSymbols` above (its AOT arm excepted: that is the `aot-smoke` stage), the
-packages' own symbol files, MEASURED and never gating on the same terms, its frame lines carried into the verdict. It exits 0 when the gating arms pass. The `release-smoke` stage of
+packages' own symbol files, MEASURED and never gating on the same terms, its frame lines carried into the verdict. (L) reads the `go.lib` arm B restored and requires `NOTICE` at its root, equal to `src/core/golib/NOTICE`; it gates for a folder feed and is MEASURED against a published version. It exits 0 when the gating arms pass. The `release-smoke` stage of
 `.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
 `-Feed https://api.nuget.org/v3/index.json -Version <go.* version>` runs the same arms against a published
 release instead (a URL feed requires `-Version`; nuget.org is then the one source); the stage's `published_version`

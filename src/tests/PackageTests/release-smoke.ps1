@@ -35,13 +35,16 @@
                             that runner's own "checks: <N> ok, 0 failed". -ConsumerRef is the exception path for a
                             deliberate break: it needs -ConsumerOverride citing the moved break floor and the release
                             notes' Upgrading entry, and the verdict line reads OVERRIDE.
+      L  GOLIB NOTICE       the go.lib arm B restored carries NOTICE at its root, identical to src/core/golib/NOTICE
+                            (Go's notice for go.lib's derived parts). It gates for a folder feed; against a published
+                            version it is a measurement, since releases up to 1.26.11.1 shipped without the file.
       T  TWIN OPT-IN        TwinOptIn (a goroutine program that imports nothing), converted with -recurse=nuget
                             against the feed, -recurse against this repository's src, and -recurse against a
                             deploy-core.ps1 root staged under -WorkRoot; each built without and with GoTwinsFor. No
                             twin without it, twins with it, and the twinned program (GO2CS_MN=1) writes what
                             `go run` writes. The NuGet mode is measured only against a published (URL) feed.
 
-    Exit 0 when A, B, C, G, H and T pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
+    Exit 0 when A, B, C, G, H, L and T pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
     under -WorkRoot.
 
 .PARAMETER Feed
@@ -637,6 +640,28 @@ $verdicts += Invoke-TwinArm 'deployed'
 $twinNuget = Invoke-TwinArm 'nuget'
 $publishedFeed = $Feed -match '^https?://'
 if ($publishedFeed) { $symbolVerdicts += $twinNuget } else { $verdicts += $twinNuget }
+
+# ---- L: go.lib carries golib's NOTICE ---------------------------------------------------------------------------
+# go.lib ships three parts derived from Go (src/core/golib/NOTICE names them), so BSD-3 clause 2 asks the binary package
+# to reproduce Go's notice, conditions and disclaimer. golib.csproj packs NOTICE only when the file exists, so a pack that
+# loses it is silent. The arm reads the go.lib arm B restored into its fresh cache (what a consumer receives) and compares
+# it with this tree's file, line endings normalized. It gates for a folder feed (the pre-publish pack); for a published
+# version it is a measurement, because every go.lib up to 1.26.11.1 shipped without the file.
+function Get-NoticeVerdict {
+    $name = 'L-golib-notice'
+    $source = Join-Path $repoSrc 'core/golib/NOTICE'
+    if (-not (Test-Path -LiteralPath $source)) { return "FAIL ($name): this tree has no src/core/golib/NOTICE to compare with" }
+    $pkg = Join-Path $WorkRoot "B-sample/nuget-cache/go.lib/$($Version.ToLowerInvariant())"
+    if (-not (Test-Path -LiteralPath $pkg)) { return "FAIL ($name): arm B restored no go.lib $Version ($pkg), so the package was not read" }
+    $notice = Join-Path $pkg 'NOTICE'
+    if (-not (Test-Path -LiteralPath $notice)) { return "FAIL ($name): go.lib $Version carries no NOTICE at its root ($pkg)" }
+    $want = ([System.IO.File]::ReadAllText($source)) -replace "`r`n", "`n"
+    $got = ([System.IO.File]::ReadAllText($notice)) -replace "`r`n", "`n"
+    if ($want -ne $got) { return "FAIL ($name): go.lib $Version's NOTICE differs from src/core/golib/NOTICE ($($got.Length) against $($want.Length) characters)" }
+    return "PASS ($name): go.lib $Version carries NOTICE at its root, identical to src/core/golib/NOTICE ($(@($want.TrimEnd("`n") -split "`n").Count) lines)"
+}
+$noticeVerdict = Get-NoticeVerdict
+if ($publishedFeed) { $symbolVerdicts += $noticeVerdict } else { $verdicts += $noticeVerdict }
 
 # ---- verdicts ------------------------------------------------------------------------------------
 if ($GateWalkthrough) { $verdicts += $walkVerdict }

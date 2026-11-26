@@ -1,0 +1,108 @@
+# Hand-owned files in src/core that carry no PROVENANCE block, each classified.
+# Read by TestLicensingHandOwnsAreClassified (licensing_test.go). A hand-owned file is an *_impl.cs, or a .cs carrying an
+# uncommented [module: GoManualConversion] marker, outside golib, go2cs, go.arrays and go2cs.CpuProfiler. Every one either
+# carries a PROVENANCE block (see docs/phase4/DESIGN-provenance-header.md) or has a row here, so a NEW hand-own is red
+# until someone has read it against its Go source.
+#
+# Rows: "<class> <path>", the path relative to src/core with forward slashes, sorted.
+#   own      original go2cs code, or glue: bodies for bodyless Go declarations (linkname pushes, assembly funcs) plus
+#            original code. Q4 ruled glue is own. Nothing in the file follows a Go function's statements or contract.
+#   pending  follows Go, and its header lands elsewhere; the row says where, after " -- ".
+# A file that gains a PROVENANCE block leaves this list in the same commit; the guard refuses a file classified both ways.
+#
+# Derivation: the 94 files of the 2026-11-26 sweep left unheaded (docs/phase4/DATA-go-attribution-scout-2026-11-26.md,
+# Step 2 results and P3's read folded: 92 own or glue, 1 bodies plus original code, 1 skipped).
+own crypto/internal/boring/sig/sig_impl.cs
+own crypto/internal/constanttime/constant_time_impl.cs
+own crypto/internal/fips140/nistec/fiat/p256_impl.cs
+own crypto/rand/rand_impl.cs
+own crypto/x509/internal/macos/darwin/corefoundation_impl.cs
+own embed/embed_impl.cs
+own hash/crc32/linux-arm64/crc32_arm64_impl.cs
+own internal/abi/funcpc_impl.cs
+own internal/buildcfg/darwin/zbootstrap_darwin_impl.cs
+own internal/buildcfg/windows/zbootstrap_windows_impl.cs
+own internal/bytealg/bytealg_impl.cs
+own internal/coverage/cfile/emit_impl.cs
+pending internal/cpu/darwin/cpu_arm64_darwin_impl.cs -- derived; headed on the darwin/arm64 branch (D2), where it moves to darwin-arm64/
+own internal/cpu/darwin/cpu_darwin_impl.cs
+own internal/poll/darwin/runtime_netpoll_impl.cs
+own internal/poll/deadline_prepay_impl.cs
+own internal/poll/linux/runtime_netpoll_impl.cs
+own internal/poll/runtime_sema_impl.cs
+own internal/poll/windows/deadline_prepay_windows_impl.cs
+own internal/poll/windows/runtime_netpoll_impl.cs
+own internal/runtime/atomic/atomic_impl.cs
+own internal/runtime/cgroup/runtime_impl.cs
+own internal/runtime/maps/runtime_impl.cs
+own internal/runtime/startlinetest/asmfunc_impl.cs
+own internal/runtime/sys/intrinsics_impl.cs
+own internal/runtime/syscall/linux/linux/syscall_linux_impl.cs
+own internal/sync/runtime_impl.cs
+own internal/synctest/synctest_impl.cs
+own internal/syscall/unix/linux/net_linux_impl.cs
+own internal/syscall/windows/windows/deadline_prepay_windows_impl.cs
+own internal/syscall/windows/windows/net_windows_impl.cs
+own iter/iter_impl.cs
+own math/amd64/hypot_asm_impl.cs
+own math/amd64/log_asm_impl.cs
+own math/linux-arm64/exp2_asm_impl.cs
+own math/math_impl.cs
+own math/rand/rand_impl.cs
+own math/rand/v2/rand_impl.cs
+own net/dnsclient_impl.cs
+own os/deadline_prepay_impl.cs
+own os/linux/pidfd_linux_impl.cs
+own os/proc_impl.cs
+own os/tempfile_impl.cs
+own os/windows/exec_windows_impl.cs
+own runtime/amd64/cputicks_impl.cs
+own runtime/amd64/test_amd64_impl.cs
+own runtime/cpusampler_impl.cs
+own runtime/darwin/goarch_darwin_impl.cs
+own runtime/darwin/lock_sema_impl.cs
+own runtime/darwin/netpoll_kqueue_impl.cs
+own runtime/debug/stubs_impl.cs
+own runtime/hostofrecord_impl.cs
+own runtime/linux-arm64/timestub2_impl.cs
+own runtime/linux/lock_futex_impl.cs
+own runtime/linux/mem_linux_impl.cs
+own runtime/linux/nanotime_impl.cs
+own runtime/linux/netpoll_epoll_impl.cs
+own runtime/linux/sigprocmask_impl.cs
+own runtime/linux/stubs2_impl.cs
+own runtime/malloc_impl.cs
+own runtime/memmove_impl.cs
+own runtime/netpoll_impl.cs
+own runtime/panicvalues_impl.cs
+own runtime/pprof/symtab_impl.cs
+own runtime/print_impl.cs
+own runtime/stubs_impl.cs
+own runtime/trace/annotation_impl.cs
+own runtime/trace/flightrecorder_impl.cs
+own runtime/windows/goarch_windows_impl.cs
+own runtime/windows/lock_sema_impl.cs
+own runtime/windows/nanotime_impl.cs
+own runtime/windows/netpoll_windows_impl.cs
+own sync/atomic/doc_impl.cs
+own sync/runtime_impl.cs
+own syscall/darwin/syscall_darwin_impl.cs
+own syscall/linux-amd64/syscall_linux_amd64_impl.cs
+own syscall/linux/syscall_linux_impl.cs
+own syscall/syscall_impl.cs
+own syscall/windows/deadline_prepay_windows_impl.cs
+own syscall/windows/syscall_windows_callback_impl.cs
+own testing/ExportTest.cs
+own testing/HostDescriptorLimit.cs
+own testing/LongPathTree.cs
+own testing/PackageAncestry.cs
+own testing/TestFlagBridge.cs
+own testing/TestFormat.cs
+own testing/TestHost.cs
+own testing/TestLogBridge.cs
+own testing/TestOptions.cs
+own testing/TestRegistry.cs
+own testing/TestReporter.cs
+own testing/TestRunner.cs
+own time/time_impl.cs
+own unique/canonmap_impl.cs
