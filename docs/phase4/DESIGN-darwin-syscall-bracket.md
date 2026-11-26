@@ -143,3 +143,17 @@ Sections 1-6 stand as written above; this block corrects and extends them.
 
 **The gate**: darwin golib-tests, go-test and mn-platform on osx-arm64 and osx-x64; MnInvisible's C-exec row on both
 macs (predicted: retakes above 0, injections near 0); the F2 sweep; linux and windows CNR plus golib; repoguard.
+
+### 7.1 After P3's code read, 2026-11-26 (P3 101328Z, COORD 103317Z)
+
+- **The gate as run, and mn-platform.** The line above lists mn-platform on osx-arm64 and osx-x64. The workflow's
+  mn-platform stage has one darwin leg, osx-arm64, so **osx-x64 mn-platform is NOT MEASURED**. It read PASS on
+  osx-arm64 (run 45779434937). What stands in for it on osx-x64 is the MnInvisible C-exec read under M:N on the probe
+  ref with the bracket (claude/r-dsb-mn-b, run 45786435129): retakes 15-16, injections 0. The same ref without the
+  bracket (claude/r-dsb-mn-a, run 45786429427) read retakes 0, injections 14-15 there.
+- **The throw rows made to fail (P3 finding 1).** They were green before the bracket existed, so nothing had shown
+  they can catch a lost exit. Probe ref claude/r-dsb-throw-probe (d8183a7e3f, measurement only, never merges)
+  removes the finally from Syscall9 and makes enter, call, exit a straight line. Hosted golib-tests on darwin, run
+  45804048284, filtered to DarwinSyscallBracketTests: on both macs 15 passed and 1 failed, the predicted row
+  `Syscall9OnANullPointerThrowsAndLeavesGrunning`. Its assert reads `_Gsyscall` (3) after the throw, where
+  `_Grunning` (2) is wanted, because the exit never ran. No other row moved, and the host did not go down.

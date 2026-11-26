@@ -186,6 +186,10 @@ public unsafe class DarwinSyscallBracketTests
         }, bracketed: true, "syscall.Read");
 
     // The raw counterpart: RawSyscall on libc's own read blocks without entering a system call, as Go's raw form.
+    // Its signal is weaker than the bracketed row's: a raw read shows nothing from outside, so the row cannot see the
+    // goroutine enter read. It waits one second, then reads _Grunning at depth 0 while the goroutine is still not
+    // done, and a goroutine slow to reach the read would read the same. What closes most of that gap is the premise
+    // after it: the releasing write(2) is what returns the read, and the read returns that one byte.
     [TestMethod]
     public void AGoroutineBlockedInARawReadStaysGrunning() =>
         AssertBlockedRead((fd, buffer) =>
