@@ -816,6 +816,10 @@ var (
 	// declares, and every method manualConversionFuncs displaces for this target. Their hand-written extension methods
 	// stand in their holders as declared, so no suffix-form body exists for a method expression to bind.
 	packageHandOwnedMethods = map[*types.Func]bool{}
+
+	// packageHandOwnedFuncs holds the free functions a hand-owned file declares: their C# is hand-written, so no
+	// converter-made shape (an array-dims overload, computeArrayDimsFacts) can be assumed of them.
+	packageHandOwnedFuncs = map[*types.Func]bool{}
 )
 
 // collectHandOwnedDecls records the types and vars declared by the files whose destination is a hand-owned `.cs`, and
@@ -826,7 +830,17 @@ func collectHandOwnedDecls(files []FileEntry, pkg *types.Package, info *types.In
 		for _, decl := range entry.file.Decls {
 			funcDecl, ok := decl.(*ast.FuncDecl)
 
-			if !ok || funcDecl.Recv == nil {
+			if !ok {
+				continue
+			}
+
+			if funcDecl.Recv == nil {
+				if entry.manualConversion {
+					if fn, ok := info.Defs[funcDecl.Name].(*types.Func); ok {
+						packageHandOwnedFuncs[fn] = true
+					}
+				}
+
 				continue
 			}
 

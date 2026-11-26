@@ -15,7 +15,7 @@ internal static void bump(ref nint p) { p++; }
 internal static void reset(this ж<mc> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    bump(ref nonnil(ref c).n);
+    bump(ref builtin.nonnil(ref c).n);
     clearViaPtr(ref (Ꮡc).DerefOrNull());
 }
 

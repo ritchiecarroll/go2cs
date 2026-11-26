@@ -581,10 +581,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.loopCopyBackStack = nil
 	v.continueTargetStack = nil
 
-	// Does anything in this declaration — or the package it lives in — name an identifier `heap`?
-	// If so, every heap-box emission below spells golib's intrinsic `builtin.heap` (see
-	// heapIntrinsicName); otherwise the bare `heap` the corpus reads everywhere.
-	v.heapIntrinsicShadowed = v.packageDeclaresHeapIntrinsicIdent() || v.declaresHeapIntrinsicIdent(funcDecl)
+	// The declarations golibCall consults for this function: a Go name declared anywhere in it that
+	// matches a golib intrinsic the body calls gets that call qualified `builtin.<name>`.
+	v.setGolibCallScope(funcDecl)
 
 	// Plan which repeated `string(x)` sstring conversions to lift to a single function-scope temp
 	// (loop-invariant / repeated-conversion hoisting — see planSStringHoists). Runs after tempVarCount
@@ -1028,7 +1027,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 								// (door C) threw at the cut. A named array type materializes its own backing. An alias of an
 								// unnamed array type (`type A = [8]uint64`) is the unnamed type, so it is unaliased first.
 								if arrayType, isArray := types.Unalias(param.Type()).(*types.Array); isArray {
-									v.writeString(resultDeclTarget, "%sheap(new array<%s>(%s), out var %s%s);", v.indent(v.indentLevel+1), v.getCSharpTypeName(arrayType.Elem()), v.arrayZeroValueArgs(fmt.Sprint(arrayType.Len()), arrayType), AddressPrefix, v.boxBaseName(ident))
+									v.writeString(resultDeclTarget, "%s%s(new array<%s>(%s), out var %s%s);", v.indent(v.indentLevel+1), v.heapIntrinsicName(), v.getCSharpTypeName(arrayType.Elem()), v.arrayZeroValueArgs(fmt.Sprint(arrayType.Len()), arrayType), AddressPrefix, v.boxBaseName(ident))
 								} else {
 									v.writeString(resultDeclTarget, "%sheap<%s>(out var %s%s);", v.indent(v.indentLevel+1), v.getCSharpTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident))
 								}
@@ -1671,7 +1670,22 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1). Only a
 		// generated forwarder that is VALUE-set while by-ref is marked, [GoCopyBound].
 		// A function or method whose Go name starts with Δ keeps it for golib in a [GoName] stamp.
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+goNameAttr(goFunctionName, csFunctionName)+noInliningAttribute)
+		attributes := forwarderPrefix + goNameAttr(goFunctionName, csFunctionName) + noInliningAttribute
+
+		// An EXPORTED generic that reaches a type-only sink gains the arity-2 ARRAY-DIMS OVERLOAD beside the
+		// arity every consumer already binds, which now forwards `ᴀnone` (arrayDimsCompanion.go). The overload
+		// is generated support surface (docs/PublicSurface.md tier 2), hidden from completion; the record
+		// tells a consumer in another assembly that it exists.
+		if funcDecl.Recv == nil && suffixHolder == "" && v.arrayDimsCompanionOverloaded(currentFuncType) {
+			forwarder := v.arrayDimsOverloadForwarder(functionAccess, v.useUnsafeFunc, resultSignature, declaredName, typeParams, declaredParameters, constraints)
+			attributes = goNameAttr(goFunctionName, csFunctionName) + forwarder + v.newline + v.indent(v.indentLevel) + "[" + methodHolderAttributes + "] " + attributes
+
+			if !v.isTestFileDecl(funcDecl.Pos()) {
+				publishArrayDimsCompanions(currentFuncType.Name(), v.arrayDimsCompanionParams(currentFuncType))
+			}
+		}
+
+		v.replaceMarker(functionAttributeMarker, attributes)
 	}
 
 	var funcExecutionContext string
@@ -2842,8 +2856,8 @@ var linknameForwardDefinitionSources = func() map[string]bool {
 // linknameForwardBuiltins is the whitelist of cross-package //go:linkname PULL targets whose
 // implementation is a golib BUILTIN — a compiler intrinsic Go defines in the runtime and links
 // into another package by symbol, for which golib carries the real C# implementation. The map
-// value is the golib builtin's C# name; it is in scope UNQUALIFIED via `using static go.builtin`,
-// so the forwarder emits a bare `<builtin>(args)` call (an empty package alias signals this). The
+// value is the golib builtin's C# name, which the forwarder spells `builtin.<name>(args)` (the alias
+// funcLinknameForward returns is "builtin"), so no Go declaration can capture the call. The
 // canonical case is maps.clone — Go implements it as runtime.mapclone (`//go:linkname mapclone
 // maps.clone`) and the maps package pulls it as a bodyless `func clone(m any) any`; golib's
 // builtin.mapclone returns a shallow, independent clone of the boxed map. Extend this set when a
@@ -2876,12 +2890,11 @@ func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, tar
 
 		target := fields[2]
 
-		// A linkname target implemented as a golib BUILTIN — in scope unqualified via
-		// `using static go.builtin`, so the forwarder emits a bare `<builtin>(args)` call. The
-		// empty alias is the sentinel writeLinknameForwarder reads to omit the package qualifier
+		// A linkname target implemented as a golib BUILTIN forwards as `builtin.<name>(args)`: the
+		// plumbing names are always qualified, so no Go declaration can capture the call (golibCall.go)
 		// (maps.clone → mapclone, Go's runtime.mapclone shallow-clone intrinsic).
 		if builtin, isBuiltin := linknameForwardBuiltins[target]; isBuiltin {
-			return "", builtin, true
+			return "builtin", builtin, true
 		}
 
 		// golang.org/x/sys's darwin libc pulls forward to syscall's PUBLIC twin of each target (see
@@ -3073,7 +3086,7 @@ func (v *Visitor) writeLinknamePanicStub(reason string) {
 	savedIndent := v.indentLevel
 	v.indentLevel = 0
 
-	v.writeOutputLn(" {%s%sthrow panic(\"go2cs: %s\");%s%s}", v.newline, v.indent(savedIndent+1), reason, v.newline, v.indent(savedIndent))
+	v.writeOutputLn(" {%s%sthrow %s(\"go2cs: %s\");%s%s}", v.newline, v.indent(savedIndent+1), v.golibCall("panic"), reason, v.newline, v.indent(savedIndent))
 
 	v.indentLevel = savedIndent
 }
@@ -3145,8 +3158,9 @@ func (v *Visitor) writeLinknameForwarder(signature *types.Signature, alias strin
 		return
 	}
 
-	// An empty alias signals a golib-builtin target (in scope unqualified via `using static
-	// go.builtin`); any other alias is the target package's using-alias (`syscall.loadlibrary`).
+	// An empty alias signals a member of this package's own class (an assembly sibling); any other
+	// alias is the target package's using-alias (`syscall.loadlibrary`), or "builtin" for a golib
+	// builtin target (`builtin.mapclone`).
 	call := fmt.Sprintf("%s(%s)", targetFunc, strings.Join(args, ", "))
 
 	if alias != "" {
@@ -3223,7 +3237,7 @@ func (v *Visitor) writeAdaptedForwarder(signature *types.Signature, alias string
 		pre = append(pre,
 			fmt.Sprintf("%s%s %s = default;", bodyIndent, boxType, box),
 			fmt.Sprintf("%sif (%s != nil) {", bodyIndent, local),
-			fmt.Sprintf("%sref var %s = ref heap(new %s(), out %s);", innerIndent, value, pointeeType, box))
+			fmt.Sprintf("%sref var %s = ref %s(new %s(), out %s);", innerIndent, value, v.heapIntrinsicName(), pointeeType, box))
 
 		post = append(post, fmt.Sprintf("%sif (%s != nil) {", bodyIndent, local))
 

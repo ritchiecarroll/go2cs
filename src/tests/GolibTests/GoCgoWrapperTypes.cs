@@ -81,4 +81,18 @@ internal static partial class cgotestꓸC_package
         public @double x;
         public @double y;
     }
+
+    // The return-route structs (P6, items 1(a) and 1(b)): each holds a pointer that C writes back, so the copy-back is
+    // where Go's answer is decided. Go's blank padding field is omitted, as a converted struct omits it.
+    internal struct struct_go2cs_probe_cursor
+    {
+        public @int n;
+        public ж<@char> cur;
+    }
+
+    internal struct struct_go2cs_probe_node
+    {
+        public @int value;
+        public ж<struct_go2cs_probe_node> next;
+    }
 }

@@ -64,8 +64,9 @@ var keywords = hashset.NewHashSet([]string{
 	// and aliases cannot be named '...'"). Like `file`, the '@' escape is valid in every position, so they are escaped
 	// like full keywords. `extension` (C# 14, CS9306) is banned at the same two positions but is NOT here: escaped
 	// everywhere it put '@' on std locals that never change meaning, so it sits in csReservedTypeNames below, which
-	// Δ-renames a declared type and '@'-escapes an import alias, and a local stays bare. (`record`/`partial` names only
-	// warn; `nint`/`nuint` need a RENAME, see `reserved`. csBannedTypeAndAliasNames_test.go holds every case.)
+	// Δ-renames a declared type and '@'-escapes an import alias, and a local stays bare. (`partial` names only warn;
+	// `record` only warns as a NAME but breaks at member start, so it sits in csReservedTypeNames too; `nint`/`nuint`
+	// need a RENAME, see `reserved`. csBannedTypeAndAliasNames_test.go holds every case.)
 	"required", "scoped",
 
 	// The remaining C# keywords overlap with Go keywords (true keywords in Go too), so they
@@ -87,14 +88,18 @@ var keywords = hashset.NewHashSet([]string{
 //     named `union` itself only warns (CS8981), but its every member-start use breaks.
 //   - safe (PREVIEW only, unsafe evolution -- not LangVersion 15): a member modifier. Included
 //     pre-emptively, as ruled; the corpus declares no such type, so it costs nothing today.
+//   - record (C# 9): a type or alias named `record` only warns (CS8860), but at member start `record` begins a
+//     record declaration, so `static record Get()` and a package qualifier's `static record.Entry Get()` both fail
+//     (CS1519/CS1001). A package named record reached it through method forwarders (the alias-keyword seat,
+//     COORD ruling 2026-11-24); net/http/fcgi's `type record` takes the Δ rename.
 //
-// An import alias and a package qualifier so named take '@' for all four ON PURPOSE (getSanitizedImport, convIdent):
-// `extension` is CS9306, closed/union/safe break at member start. As with emitterSpelledTypeNames, a type declared only in a
+// An import alias and a package qualifier so named take '@' for all five ON PURPOSE (getSanitizedImport, convIdent):
+// `extension` is CS9306, closed/union/safe/record break at member start. As with emitterSpelledTypeNames, a type declared only in a
 // `_test.go` file renames the test side's uses of a same-named production field (the B2 coherence class);
 // the corpus declares none. C# 15's `with(` collection-element rule is position-scoped, not a rename: since
 // parity seat #30 a slice literal is a collection expression (`slice<nint>([…])`), and an element beginning
 // with a call to a Go `with` is written `@with(…)` (escapeCollectionWithElement); every other use stays bare.
-var csReservedTypeNames = hashset.NewHashSet([]string{"closed", "union", "safe", "extension"})
+var csReservedTypeNames = hashset.NewHashSet([]string{"closed", "union", "safe", "extension", "record"})
 
 // collectCSReservedTypeNameDecls records every name in file that a C# 15 reserved TYPE-position keyword
 // (csReservedTypeNames) would break: a type declaration at any level, an alias, and a type parameter of a

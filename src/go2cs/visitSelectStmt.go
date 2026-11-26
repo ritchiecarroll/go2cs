@@ -193,7 +193,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	// receive cases keep their `when ch.ꟷᐳ(out v):` guard, which consumes the committed value
 	// from the runtime's per-thread pending slot.
 	if hasDefault {
-		v.outputBuilder.WriteString("trySelect(")
+		v.outputBuilder.WriteString("builtin.trySelect(")
 	} else {
 		v.outputBuilder.WriteString("select(")
 	}

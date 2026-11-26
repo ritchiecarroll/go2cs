@@ -20,8 +20,6 @@ internal static partial @string caller(nint skip) {
 }
 
 internal static partial @string stack() {
-    var namesᴷ = new stackAppend<@string>();
-
     var pcs = new slice<uintptr>(16);
     nint n = runtime.Callers(2, pcs);
     var frames = runtime.CallersFrames(pcs.slice(0, n));
@@ -29,7 +27,7 @@ internal static partial @string stack() {
     for (;;) {
         var (f, more) = frames.Next();
         if (strings.HasPrefix(f.Function, "main.")) {
-            names = append(namesᴷ, names, f.Function);
+            names = append(names, f.Function);
         }
         if (!more) {
             break;

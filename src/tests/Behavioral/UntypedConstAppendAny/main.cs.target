@@ -28,10 +28,8 @@ internal static @string kind(any v) {
 }
 
 internal static void main() {
-    var pathᴷ = new stackAppend<any>();
-
     var path = slice<any>([(@string)"a"]);
-    path = append(pathᴷ, path, (any)((nint)0));
+    path = append(path, (any)((nint)0));
     path = append(path, (any)((nint)(1 << 3)), (any)((nint)(-5)), (any)((rune)'r'), (any)2.5D, (any)((@string)"s"));
     path = append(path, (any)((nint)(named)), (any)((nint)(named + 1)), (any)((float64)(ratio)), (any)((int32)(letter)), (any)(word), (any)(word + "x"));
 

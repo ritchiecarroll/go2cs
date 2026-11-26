@@ -113,7 +113,7 @@ internal static void thunkRead(channel<nint> done, ref cell c) {
 }
 
 internal static nint chainRead(ref nest n) {
-    return readCell(ref nonnil(ref n).h.c);
+    return readCell(ref builtin.nonnil(ref n).h.c);
 }
 
 internal static nint readRCell(ref rcell c) {
@@ -123,7 +123,7 @@ internal static nint readRCell(ref rcell c) {
 }
 
 internal static nint chainRef(ref rnest n) {
-    return readRCell(ref nonnil(ref n).h.c);
+    return readRCell(ref builtin.nonnil(ref n).h.c);
 }
 
 internal static @string /*out*/ nilChain(ref nest n) {
@@ -135,7 +135,7 @@ internal static @string /*out*/ nilChain(ref nest n) {
                 @out = fmt.Sprint("panic: ", r);
             }
         }, ref ᒐ);
-        nint v = readCell(ref nonnil(ref n).h.c);
+        nint v = readCell(ref builtin.nonnil(ref n).h.c);
         @out = fmt.Sprint(v);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -152,7 +152,7 @@ internal static @string /*out*/ nilParam(ref holder nh) {
                 @out = fmt.Sprint("panic: ", r);
             }
         }, ref ᒐ);
-        nint v = readCell(ref nonnil(ref nh).c);
+        nint v = readCell(ref builtin.nonnil(ref nh).c);
         @out = fmt.Sprint(v);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -1,0 +1,20 @@
+# AR-13 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=93803
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-13	container/ring	ABSENT	-1	PASS	8	None	8	NO	yes	bank	reference	-1	3428	0	-1	403
+AR-13	crypto/ed25519	ABSENT	-1	PASS	9	None	9	NO	yes	bank	reference	-1	7482	0	-1	40
+AR-13	crypto/internal/fips140/ecdh	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	5168	0	-1	34
+AR-13	crypto/internal/fips140/edwards25519	ABSENT	-1	PASS	54	None	54	NO	yes	bank	reference	-1	5175	0	-1	84
+AR-13	debug/elf	ABSENT	-1	PASS	32	None	32	NO	yes	bank	reference	-1	7038	0	-1	59
+AR-13	encoding/xml	ABSENT	-1	PASS	393	None	393	NO	yes	bank	reference	-1	4166	0	-1	61
+AR-13	fmt	ABSENT	-1	PASS	62	None	62	NO	yes	bank	reference	-1	4447	0	-1	48
+AR-13	go/printer	ABSENT	-1	PASS	45	None	45	NO	yes	bank	reference	-1	5814	0	-1	43
+AR-13	image/color	ABSENT	-1	PASS	10	None	10	NO	yes	bank	reference	-1	4091	0	-1	23
+AR-13	index/suffixarray	ABSENT	-1	PASS	12	None	12	NO	yes	bank	reference	-1	4634	0	-1	256
+AR-13	internal/coverage/test	ABSENT	-1	PASS	6	None	6	NO	yes	bank	unknown	-1	4222	0	-1	27
+AR-13	internal/platform	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	5458	0	-1	36
+AR-13	internal/runtime/atomic	ABSENT	-1	PASS	16	None	16	NO	yes	bank	reference	-1	3421	0	-1	23
+AR-13	internal/unsafeheader	ABSENT	-1	PASS	6	None	6	NO	yes	bank	reference	-1	3537	0	-1	17
+AR-13	internal/zstd	ABSENT	-1	DISC	535	None	535	NO	NO	bank	reference	-1	4907	0	-1	29
+AR-13	net/http/httptest	ABSENT	-1	PASS	62	None	62	NO	yes	bank	reference	-1	16801	0	-1	181
+AR-13	unicode	ABSENT	-1	PASS	28	None	28	NO	yes	bank	reference	-1	4014	0	-1	48
+# summary rows=17 plain PASS=0 twinned EQUAL-bank=16 twinned EQUAL-plain=0

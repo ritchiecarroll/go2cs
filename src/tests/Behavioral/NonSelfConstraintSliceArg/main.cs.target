@@ -63,7 +63,7 @@ internal static (T, bool) find<T>(slice<T> xs, @string name)
             return (x, true);
         }
     }
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     return (zero, false);
 }
 
@@ -89,19 +89,19 @@ internal static nint countLike<T>(slice<T> xs, T like)
 internal static void main() {
     var items = wrap("b", "a");
 
-    fmt.Println("join:", join<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), (Δp0, Δp1) => compareItems(Δp0, Δp1)), len(items), items[0].n);
+    fmt.Println("join:", join<itemжNamedᴾ>(builtin.widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), (Δp0, Δp1) => compareItems(Δp0, Δp1)), len(items), items[0].n);
 
-    fmt.Println("literal:", join<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), [GoFunc("main.func1")] (itemжNamedᴾ aΔp, itemжNamedᴾ bΔp) => {
+    fmt.Println("literal:", join<itemжNamedᴾ>(builtin.widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), [GoFunc("main.func1")] (itemжNamedᴾ aΔp, itemжNamedᴾ bΔp) => {
         var a = (ж<item>)aΔp;
         var b = (ж<item>)bΔp;
         return strings.Compare(b.n, a.n);
     }));
 
-    var (got, ok) = (find<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), "a") switch { var ᴛr => ((ж<item>)ᴛr.Item1, ᴛr.Item2) });
+    var (got, ok) = (find<itemжNamedᴾ>(builtin.widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), "a") switch { var ᴛr => ((ж<item>)ᴛr.Item1, ᴛr.Item2) });
     fmt.Println("find:", ok, got == items[1]);
     got.n = "a2";
     fmt.Println("write-through:", items[1].n);
-    (var missing, ok) = (find<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), "zz") switch { var ᴛr => ((ж<item>)ᴛr.Item1, ᴛr.Item2) });
+    (var missing, ok) = (find<itemжNamedᴾ>(builtin.widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), "zz") switch { var ᴛr => ((ж<item>)ᴛr.Item1, ᴛr.Item2) });
     fmt.Println("missing:", ok, missing == nil);
 
     var spare = Ꮡ(new item("spare"));
@@ -110,7 +110,7 @@ internal static void main() {
     var spareʗ2 = spare;
     fmt.Println("firstOr:", firstOr(items, [GoFunc("main.func2")] ж<item> () => spareʗ1) == items[0], firstOr(default, [GoFunc("main.func3")] ж<item> () => spareʗ2) == spare);
 
-    fmt.Println("countLike:", countLike<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), Ꮡ(new item("b"))), countLike<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(wrap("b", "c", "b"), elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), items[0]));
+    fmt.Println("countLike:", countLike<itemжNamedᴾ>(builtin.widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), Ꮡ(new item("b"))), countLike<itemжNamedᴾ>(builtin.widen<ж<item>, itemжNamedᴾ>(wrap("b", "c", "b"), elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), items[0]));
 }
 
 } // end main_package

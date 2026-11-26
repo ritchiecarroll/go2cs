@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 
 	"golang.org/x/tools/go/packages"
@@ -201,5 +202,125 @@ func TestModuleConverterOutputDirDefaultsToGo2CSPath(t *testing.T) {
 
 	if got, want := m.outputDirFor("example.com/app"), filepath.Join(go2csPath, "src", "example.com", "app"); got != want {
 		t.Fatalf("outputDirFor default root = %q, want %q", got, want)
+	}
+}
+
+// TestRecurseLocalRefsPinTheTargetPlatform drives the EMISSION of a local-reference -recurse output root: its
+// props must default GoTargetOS and GoTargetArch to the corpus flavour of the platform the tree was converted FOR and
+// hand them to the referenced runtime projects. Without it every L3 package of the standard library built its
+// windows/amd64 default: a linux conversion built on linux died at start on kernel32.dll, and a linux/arm64 runner
+// asked the layout for windows/arm64, which it refuses. One row per host the fleet builds on, plus the targets that
+// fall back to their GOOS's flavour.
+func TestRecurseLocalRefsPinTheTargetPlatform(t *testing.T) {
+	cases := []struct{ target, goos, goarch string }{
+		{"windows/amd64", "windows", "amd64"},
+		{"linux/amd64", "linux", "amd64"},
+		{"linux/arm64", "linux", "arm64"},
+		{"darwin/amd64", "darwin", "amd64"},
+		// darwin/arm64 converts against the darwin/amd64 layout (corpusFlavourOf), so it builds that layout.
+		{"darwin/arm64", "darwin", "amd64"},
+		{"windows/arm64", "windows", "amd64"},
+	}
+
+	for _, c := range cases {
+		root := t.TempDir()
+
+		NewModuleConverter(Options{
+			go2csPath:         filepath.Join(root, "runtime"),
+			recurseOutputRoot: root,
+			recurse:           true,
+			targetPlatform:    c.target,
+		}).generateRecurseBuildFiles()
+
+		props := readGenerated(t, filepath.Join(root, "Directory.Build.props"))
+
+		for _, line := range []string{
+			"<PropertyGroup Condition=\"'$(GoTargetOS)' == ''\">",
+			"<GoTargetOS>" + c.goos + "</GoTargetOS>",
+			"<PropertyGroup Condition=\"'$(GoTargetArch)' == ''\">",
+			"<GoTargetArch>" + c.goarch + "</GoTargetArch>",
+			"<AdditionalProperties>GoTargetOS=$(GoTargetOS);GoTargetArch=$(GoTargetArch)</AdditionalProperties>",
+		} {
+			if !strings.Contains(props, line) {
+				t.Errorf("%s: the props lack %q:\n%s", c.target, line, props)
+			}
+		}
+	}
+
+	// The restore half: NuGet's restore walk ignores ProjectReference metadata, so the targets hand the same two values
+	// to it. Without this a FRESH tree restored the runtime as windows and the build stopped on NETSDK1004 for every
+	// project the runtime references only on linux (release-smoke 45729437375, both linux legs).
+	{
+		root := t.TempDir()
+
+		NewModuleConverter(Options{go2csPath: filepath.Join(root, "runtime"), recurseOutputRoot: root, recurse: true, targetPlatform: "linux/amd64"}).generateRecurseBuildFiles()
+
+		targets := readGenerated(t, filepath.Join(root, "Directory.Build.targets"))
+		want := "<_GenerateRestoreGraphProjectEntryInputProperties>$(_GenerateRestoreGraphProjectEntryInputProperties);GoTargetOS=$(GoTargetOS);GoTargetArch=$(GoTargetArch)</_GenerateRestoreGraphProjectEntryInputProperties>"
+
+		if !strings.Contains(targets, want) {
+			t.Errorf("the output-root targets do not hand the platform to NuGet's restore walk:\n%s", targets)
+		}
+	}
+
+	// A -recurse=nuget conversion compiles against the go.* packages, whose flavour GoCompileRuntimeIdentifier picks:
+	// no GoTargetOS there, and nothing passed to package references.
+	root := t.TempDir()
+
+	NewModuleConverter(Options{go2csPath: filepath.Join(root, "runtime"), recurseOutputRoot: root, recurse: true, nugetRefs: true, targetPlatform: "linux/amd64"}).generateRecurseBuildFiles()
+
+	if props := readGenerated(t, filepath.Join(root, "Directory.Build.props")); strings.Contains(props, "GoTargetOS") {
+		t.Errorf("a -recurse=nuget conversion pinned GoTargetOS:\n%s", props)
+	}
+
+	if targets := readGenerated(t, filepath.Join(root, "Directory.Build.targets")); strings.Contains(targets, "GoTargetOS") {
+		t.Errorf("a -recurse=nuget conversion handed GoTargetOS to the restore:\n%s", targets)
+	}
+}
+
+// TestRecurseLocalRefsImportTheRollForward: a local-reference program references golib's PROJECT, so golib's
+// buildTransitive (go.lib.targets, which imports go.lib.rollforward.targets) never reaches it, and on a machine with
+// only a newer .NET it exited 150 at launch. The output root imports the file itself, with the guard. A -recurse=nuget
+// output root needs no import (the package brings it), and the guard keeps the two from stacking either way.
+func TestRecurseLocalRefsImportTheRollForward(t *testing.T) {
+	const want = `<Import Project="$(go2csPath)core/golib/buildTransitive/go.lib.rollforward.targets"`
+
+	root := t.TempDir()
+
+	NewModuleConverter(Options{go2csPath: filepath.Join(root, "runtime"), recurseOutputRoot: root, recurse: true, targetPlatform: "linux/amd64"}).generateRecurseBuildFiles()
+
+	targets := readGenerated(t, filepath.Join(root, "Directory.Build.targets"))
+
+	if !strings.Contains(targets, want) || !strings.Contains(targets, "'$(GoLibRollForwardTargetsImported)' != 'true'") {
+		t.Errorf("output-root Directory.Build.targets does not import golib's go.lib.rollforward.targets under its guard:\n%s", targets)
+	}
+
+	// The RollForward gate's LOCAL REFS arm builds a program under an output root carrying this same import; it must be
+	// the converter's line, verbatim, or the gate proves a different file than the converter writes.
+	lines := strings.Split(strings.ReplaceAll(targets, "\r\n", "\n"), "\n")
+
+	for i, line := range lines {
+		if strings.HasPrefix(line, "  "+want) && i+1 < len(lines) {
+			gate := strings.ReplaceAll(readGenerated(t, filepath.Join("..", "tests", "PackageTests", "RollForward", "test-roll-forward.ps1")), "\r\n", "\n")
+
+			if !strings.Contains(gate, line+"\n"+lines[i+1]+"\n") {
+				t.Errorf("the RollForward gate's LOCAL REFS arm does not carry the converter's import verbatim:\n%s\n%s", line, lines[i+1])
+			}
+		}
+	}
+
+	// The imported file must exist where the import points, carry the guard it is imported under, and be packed, or
+	// the import is inert and the NuGet path loses the default it moved out of go.lib.targets.
+	golib := filepath.Join("..", "core", "golib")
+
+	for _, check := range []struct{ file, text string }{
+		{filepath.Join(golib, "buildTransitive", "go.lib.rollforward.targets"), "<GoLibRollForwardTargetsImported>true</GoLibRollForwardTargetsImported>"},
+		{filepath.Join(golib, "buildTransitive", "go.lib.rollforward.targets"), "<RollForward>Major</RollForward>"},
+		{filepath.Join(golib, "buildTransitive", "go.lib.targets"), `<Import Project="$(MSBuildThisFileDirectory)go.lib.rollforward.targets"`},
+		{filepath.Join(golib, "golib.csproj"), `<None Include="buildTransitive/go.lib.rollforward.targets" Pack="true" PackagePath="buildTransitive/" />`},
+	} {
+		if text := readGenerated(t, check.file); !strings.Contains(text, check.text) {
+			t.Errorf("%s lacks %q", check.file, check.text)
+		}
 	}
 }

@@ -13,8 +13,8 @@ internal static void addTo(ref uint64 @out, uint64 v) {
 }
 
 internal static void scale(ref vec v, uint64 k) {
-    addTo(ref nonnil(ref v).x, k);
-    addTo(ref nonnil(ref v).y, k);
+    addTo(ref builtin.nonnil(ref v).x, k);
+    addTo(ref builtin.nonnil(ref v).y, k);
     @double(ref v);
 }
 

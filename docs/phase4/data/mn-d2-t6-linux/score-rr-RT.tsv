@@ -1,0 +1,4 @@
+# RT env plain=('', '') twinned=('', 'true') shard-twin-names plain=None twinned=15544
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+RT	runtime	FAIL	-1	FAIL	-1	10934	10934	yes	NO	yes	reference	0	15544	12	4215	4521
+# summary rows=1 plain PASS=0 twinned EQUAL-bank=0 twinned EQUAL-plain=1

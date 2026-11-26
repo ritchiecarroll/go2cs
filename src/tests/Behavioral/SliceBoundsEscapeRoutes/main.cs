@@ -63,11 +63,11 @@ internal static void main() {
     });
     nint past = 5;
     arm("literal index:", [GoFunc("main.func7")] () => {
-        fmt.Println("byte", LiteralByteAt("abc"u8, past));
+        fmt.Println("byte", builtin.LiteralByteAt("abc"u8, past));
     });
     nint neg = -1;
     arm("literal negative index:", [GoFunc("main.func8")] () => {
-        fmt.Println("byte", LiteralByteAt("abc"u8, neg));
+        fmt.Println("byte", builtin.LiteralByteAt("abc"u8, neg));
     });
     arm("string past end:", [GoFunc("main.func9")] () => {
         @string s = "abc";

@@ -72,7 +72,11 @@ $RosterRowPattern = '^\|\s*\[`([^`]+)`\]\([^)]*\)\s*\|\s*(\d+)\s*\|\s*(\d*)\s*\|
 
 # The host-conditional annotation (predates the per-OS one, unchanged): the run of backticked,
 # comma-separated names right after the colon, stopping at the first text that is not one.
-$RosterConditionalPattern = 'host-conditional\s*(?:\([^)]*\))?\s*:\s*((?:`[^`]+`\s*,\s*)*`[^`]+`)'
+$RosterConditionalPattern = 'host-conditional\s*(?:\([^)]*\))?\s*:\s*((?:`[^`]+`(?:\s*\(\+\d+\))?\s*,\s*)*`[^`]+`(?:\s*\(\+\d+\))?)'
+# A FAMILY in that list (R1, 2026-11-25): `Parent/` + U+2026 HORIZONTAL ELLIPSIS, followed by its exact size `(+N)`.
+# It names a parent and all of its subtests (Test-HostConditionalDelta). The marker is built from its code point, so
+# no non-ASCII literal sits in this file. A family without its size, or a size on a plain name, is refused at parse.
+$RosterFamilyMarker = '/' + [string][char]0x2026
 
 # The host-conditional DISCLOSURE annotation (Q31, 2026-09-04): the names of disclosure-manifest
 # entries whose FIRING is a property of the host, so the same verdict honestly sits in the matched
@@ -364,8 +368,28 @@ function Get-ValidatedRosterRows {
         $rowDisclosed = if ($Matches[3]) { [int]$Matches[3] } else { 0 }
 
         $rowConditional = @()
+        $rowFamilies = @()
         if ($line -match $RosterConditionalPattern) {
-            $rowConditional = @([regex]::Matches($Matches[1], '`([^`]+)`') | ForEach-Object { $_.Groups[1].Value })
+            foreach ($entry in [regex]::Matches($Matches[1], '`([^`]+)`(?:\s*\(\+(\d+)\))?')) {
+                $entryName = $entry.Groups[1].Value
+                $entrySized = $entry.Groups[2].Success
+
+                if ($entryName.EndsWith($RosterFamilyMarker, [System.StringComparison]::Ordinal)) {
+                    if (-not $entrySized) {
+                        throw "Roster row '$rowPackage': host-conditional family '$entryName' carries no size; write it as ``$entryName`` (+N)."
+                    }
+                    $rowFamilies += [PSCustomObject]@{
+                        Parent = $entryName.Substring(0, $entryName.Length - $RosterFamilyMarker.Length)
+                        Size   = [int]$entry.Groups[2].Value
+                    }
+                }
+                elseif ($entrySized) {
+                    throw "Roster row '$rowPackage': host-conditional name '$entryName' carries a size, which only a family (``Parent$RosterFamilyMarker``) takes."
+                }
+                else {
+                    $rowConditional += $entryName
+                }
+            }
         }
 
         $rowConditionalDisclosures = @()
@@ -510,6 +534,7 @@ function Get-ValidatedRosterRows {
             Expected    = $rowExpected
             Disclosed   = $rowDisclosed
             Conditional = $rowConditional
+            ConditionalFamilies = $rowFamilies
             ConditionalDisclosures = $rowConditionalDisclosures
             OS          = $rowOs
             Execution   = $rowExecution
@@ -648,6 +673,7 @@ function Get-HopSkeletonRows {
             Expected    = $null
             Disclosed   = $null
             Conditional = @()
+            ConditionalFamilies = @()
             ConditionalDisclosures = @()
             OS          = @{}
             # $null by design: this parses a dated CENSUS record and builds no sweep rows (-Hop reads
@@ -789,6 +815,7 @@ function Get-HopPopulationRows {
             Expected    = $null
             Disclosed   = $null
             Conditional = @()
+            ConditionalFamilies = @()
             ConditionalDisclosures = @()
             OS          = @{}
             Execution   = if ($distinct.Count -eq 1 -and $distinct[0]) { $distinct[0] } else { $null }
@@ -2078,6 +2105,155 @@ function Test-CapabilityAbsentDelta {
     }
 
     return New-CapabilityAbsentResult $true $null
+}
+
+# ---- host-conditional verdicts ------------------------------------------------------------------
+# A banked count is normally exact, but a verdict COUNT can be legitimately host-dependent:
+# path/filepath banks 61 on a host without symlink-creation privilege, where Go itself skips
+# TestWalkSymlinkRoot -- and on a host WITH the privilege the test runs and spawns its six
+# table-driven subtests, six verdict rows that simply do not exist on the banking host (the
+# skip->pass flips of the other privilege-gated tests are count-NEUTRAL; only rows that appear or
+# vanish move the count). Banking the larger number would false-red every unprivileged host, the
+# larger population -- so the roster banks the FLOOR and names the conditional verdicts, and the
+# sweep accepts floor+k ONLY when the k extra rows are exactly k of the named tests, agreeing on
+# both runtimes, with no banked verdict missing. Anything outside the named set still fails
+# loudly, exactly as before.
+#
+# The check needs the banked verdict NAME SET, not just the count -- count arithmetic alone would
+# wave through a lost banked row canceling against a rogue new one. That set is the package's
+# committed proof page (docs/validation/current/<pkg-dots>.md), read from HEAD deliberately: the
+# sweep run that just validated at the larger count has already REWRITTEN the working-tree page to
+# match itself, so only the committed copy still records what was banked.
+#
+# FAMILIES (R1, 2026-11-25; COORD 20261125T172300Z and 172751Z, P3's SHOULD 2). A capability-gated test can spawn
+# thousands of subtests -- internal/runtime/gc/scan's AVX-512 kernels run 6,166 on a hosted AVX-512 runner and none
+# elsewhere -- too many to name one by one. A FAMILY names a parent and its subtests, `Parent/...` (U+2026) with its
+# exact size `(+N)`, derived from the evidence. A family is ALL OR NOTHING, because Go runs none of it or all of it:
+# the sweep accepts the floor plus EXACTLY the sizes of the families that ran (with any named exact rows), never an
+# in-between count. A family that ran must have its parent PASS on both sides (its only allowed change from the
+# floor, where it skips). On an OS-annotated row there is no committed proof page for that OS (the page is the
+# banking host's, Windows-shaped), so -BankedNames $null asks for the floor's name set from the live record OUTSIDE
+# the families; that set must number exactly floor + disclosed. Only a row with a family may use it: an exact-name
+# row keeps the page cross-check it always had.
+function Test-HostConditionalDelta {
+    param(
+        [int] $Expected,           # banked matching-verdict count (roster column 2, the floor)
+        [int] $Disclosed,          # banked disclosed count (roster column 3)
+        [string[]] $Conditional,   # the named host-conditional verdicts (roster annotation)
+        [object[]] $Families = @(),# the named host-conditional FAMILIES: { Parent; Size } (roster annotation)
+        [int] $Got,                # the live run's validated count
+        $Comparison,               # the run's go2cs_test_comparison.json via ConvertFrom-ComparisonRecord:
+                                   # go/csharp are ORDINAL dictionaries (never PSObjects -- a PSObject
+                                   # cannot hold the legal case-only verdict-name pairs; see _roster.ps1)
+        [string[]] $BankedNames    # verdict names from the committed proof page's Verdicts table, or
+                                   # $null on an OS-annotated row with families (the live floor, above)
+    )
+
+    # Local to this function -- nested definitions do not leak into the script scope.
+    function New-HostConditionalVerdictResult([bool] $accepted, [string[]] $extras, [string] $reason) {
+        return [PSCustomObject]@{ Accepted = $accepted; Extras = $extras; Reason = $reason }
+    }
+
+    $Conditional = @($Conditional | Where-Object { $_ })
+    $Families = @($Families | Where-Object { $null -ne $_ })
+    $familyTotal = 0
+    foreach ($family in $Families) { $familyTotal += [int]$family.Size }
+
+    # The family a verdict name belongs to: the first whose parent prefixes it with '/'. Null for none.
+    $familyOf = {
+        param([string] $name)
+        foreach ($family in $Families) {
+            if ($name.StartsWith($family.Parent + '/', [System.StringComparison]::Ordinal)) { return $family }
+        }
+        return $null
+    }
+
+    $k = $Got - $Expected
+    if ($k -lt 1) {
+        return New-HostConditionalVerdictResult $false @() "count $Got is below the banked floor $Expected -- a lost verdict is never host-conditional"
+    }
+    if ($k -gt ($Conditional.Count + $familyTotal)) {
+        return New-HostConditionalVerdictResult $false @() "count $Got exceeds the floor by $k, more than the $($Conditional.Count) named host-conditional verdicts and $familyTotal family rows"
+    }
+    if ($null -eq $Comparison -or $null -eq $Comparison.go -or $null -eq $Comparison.csharp) {
+        return New-HostConditionalVerdictResult $false @() 'comparison record carries no per-test verdict maps'
+    }
+
+    # A moved disclosed count shifts the same arithmetic this check relies on, and a disclosure
+    # appearing or retiring is roster maintenance, never host capability.
+    $liveDisclosed = if ($null -eq $Comparison.disclosed) { 0 } else { @($Comparison.disclosed).Count }
+    if ($liveDisclosed -ne $Disclosed) {
+        return New-HostConditionalVerdictResult $false @() "disclosed count moved ($liveDisclosed live vs $Disclosed banked) -- not a host-conditional shape"
+    }
+
+    $goMap = $Comparison.go
+    $csMap = $Comparison.csharp
+    $liveNames = @($goMap.Keys)
+
+    if ($null -eq $BankedNames) {
+        if ($Families.Count -eq 0) {
+            return New-HostConditionalVerdictResult $false @() 'no committed proof page for this OS, and no family to derive the floor from -- nothing is absorbed'
+        }
+        $BankedNames = @($liveNames | Where-Object { $null -eq (& $familyOf $_) })
+        if ($BankedNames.Count -ne ($Expected + $Disclosed)) {
+            return New-HostConditionalVerdictResult $false @() "the live record outside the families holds $($BankedNames.Count) verdicts where the annotation banks $Expected matched + $Disclosed disclosed"
+        }
+    }
+    else {
+        # The proof page lists every compared verdict: the matched rows plus the disclosed-divergent
+        # ones. If page and roster disagree the banked evidence is inconsistent -- absorb nothing.
+        if ($BankedNames.Count -ne ($Expected + $Disclosed)) {
+            return New-HostConditionalVerdictResult $false @() "committed proof page lists $($BankedNames.Count) verdicts where the roster banks $Expected matched + $Disclosed disclosed -- page and table disagree"
+        }
+    }
+
+    # Ordinal sets: a family reading carries thousands of names, and array containment would be quadratic.
+    $liveSet = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+    foreach ($name in $liveNames) { [void]$liveSet.Add($name) }
+    $bankedSet = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+    foreach ($name in $BankedNames) { [void]$bankedSet.Add($name) }
+
+    $missing = @($BankedNames | Where-Object { -not $liveSet.Contains($_) })
+    if ($missing.Count -gt 0) {
+        return New-HostConditionalVerdictResult $false @() "banked verdicts missing from this run: $($missing -join ', ')"
+    }
+
+    $extras = @($liveNames | Where-Object { -not $bankedSet.Contains($_) })
+    $outside = @($extras | Where-Object { ($Conditional -notcontains $_) -and ($null -eq (& $familyOf $_)) })
+    if ($outside.Count -gt 0) {
+        $shown = @($outside | Select-Object -First 5)
+        return New-HostConditionalVerdictResult $false @() "extra verdicts outside the named host-conditional set: $($shown -join ', ')$(if ($outside.Count -gt 5) { " (+$($outside.Count - 5) more)" })"
+    }
+
+    # A family is all or nothing, and one that ran has its parent pass on both sides.
+    foreach ($family in $Families) {
+        $ran = @($extras | Where-Object { $_.StartsWith($family.Parent + '/', [System.StringComparison]::Ordinal) }).Count
+        if ($ran -eq 0) { continue }
+        if ($ran -ne [int]$family.Size) {
+            return New-HostConditionalVerdictResult $false @() "family $($family.Parent) ran $ran of $($family.Size) -- a family is all or nothing"
+        }
+        $goParent = if ($goMap.ContainsKey($family.Parent)) { $goMap[$family.Parent] } else { 'absent' }
+        $csParent = if ($csMap.ContainsKey($family.Parent)) { $csMap[$family.Parent] } else { 'absent' }
+        if ($goParent -ne 'pass' -or $csParent -ne 'pass') {
+            return New-HostConditionalVerdictResult $false @() "family $($family.Parent) ran, but its parent reads go '$goParent' / C# '$csParent' -- its only allowed change is skip to pass, on both sides"
+        }
+    }
+
+    # With nothing missing this equals $k by construction; a mismatch means the count and the
+    # verdict maps have come apart (a converter-side accounting change) -- refuse to absorb.
+    if ($extras.Count -ne $k) {
+        return New-HostConditionalVerdictResult $false @() "the $($extras.Count) extra verdict rows do not account for the count delta of $k"
+    }
+
+    foreach ($name in $extras) {
+        $goVerdict = $goMap[$name]
+        if (-not $csMap.ContainsKey($name) -or $csMap[$name] -ne $goVerdict) {
+            $csVerdict = if (-not $csMap.ContainsKey($name)) { 'absent' } else { $csMap[$name] }
+            return New-HostConditionalVerdictResult $false @() "conditional verdict ${name}: go '$goVerdict' vs C# '$csVerdict' -- the sides do not agree"
+        }
+    }
+
+    return New-HostConditionalVerdictResult $true $extras $null
 }
 
 # ---- host-conditional DISCLOSURES (the FOURTH absorption: one verdict changes COLUMN) ------------

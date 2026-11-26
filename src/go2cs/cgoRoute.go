@@ -85,6 +85,10 @@ var (
 	// cgoRouteFunctions maps each _Cfunc_ or _C2func_ name the package calls to its pseudo-package member.
 	cgoRouteFunctions map[string]string
 
+	// cgoRouteVariables maps each _Cvar_ name the package uses to its pseudo-package member (cgo item 3): *_Cvar_x is
+	// C.x, a ref property over the variable, and _Cvar_x alone is C.Ꮡx, the box over its address.
+	cgoRouteVariables map[string]string
+
 	// cgoCheckClosures maps each recognised call of cmd/cgo's check closure to its unwrap.
 	cgoCheckClosures map[*ast.CallExpr]*cgoCheckClosure
 
@@ -955,6 +959,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	consumed := map[*ast.Ident]bool{}
 	closures := map[*ast.CallExpr]*cgoCheckClosure{}
 	calledIdents := map[*ast.Ident]bool{}
+	starredIdents := map[*ast.Ident]bool{}
 	var used []cgoDeclaration
 	usedAt := map[types.Object]token.Position{}
 
@@ -1002,6 +1007,11 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 					refuse(n.Pos(), fmt.Sprintf("%s: a goroutine started on a call through cmd/cgo's pointer-check closure, whose arguments cmd/cgo evaluates inside the new goroutine: not supported yet", cgoCalledFunction(n, declarations, info)))
 					consume(n)
 					return false
+				}
+			case *ast.StarExpr:
+				// cmd/cgo writes each use of a C variable as *_Cvar_x, _Cvar_x being the variable's address.
+				if operand, ok := ast.Unparen(n.X).(*ast.Ident); ok {
+					starredIdents[operand] = true
 				}
 			case *ast.CallExpr:
 				if callee, ok := ast.Unparen(n.Fun).(*ast.Ident); ok {
@@ -1060,7 +1070,13 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 					used = append(used, declaration)
 				}
 			case found && declaration.kind == cgoVar:
-				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable: go2cs does not read or write C variables yet", declaration.cName))
+				// cgo item 3: C.x reads and writes the variable in place, through a box over its exported address.
+				if !starredIdents[ident] {
+					refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable's address in a shape cmd/cgo does not write (go2cs reads only *_Cvar_x)", declaration.cName))
+				} else if _, seen := usedAt[object]; !seen {
+					usedAt[object] = pkg.Fset.Position(ident.Pos())
+					used = append(used, declaration)
+				}
 			case found && declaration.kind == cgoFuncValue:
 				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C function's address used as a value: not supported yet", declaration.cName))
 			case found && declaration.kind == cgoMacro:
@@ -1099,6 +1115,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 	var symbols []string
 	functions := map[string]string{}
+	variables := map[string]string{}
 
 	// A first pass decides refusals, before any C toolchain runs; the bindings are written once the capture names
 	// each symbol's library.
@@ -1118,7 +1135,11 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 			errnoForm = true
 		}
 
-		functions[declaration.object.Name()] = member
+		if declaration.kind == cgoVar {
+			variables[declaration.object.Name()] = member
+		} else {
+			functions[declaration.object.Name()] = member
+		}
 
 		if symbol := cgoSymbolOf(declaration); symbol != "" && !slices.Contains(symbols, symbol) {
 			symbols = append(symbols, symbol)
@@ -1188,6 +1209,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	}
 
 	set := newCgoWrapperSet(target, sizes)
+	set.class = cgoPseudoPackageClass(pkg.Name)
 	set.libraries = map[string]string{}
 
 	for _, entry := range captured {
@@ -1241,6 +1263,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 	cgoRouteActive = true
 	cgoRouteFunctions = functions
+	cgoRouteVariables = variables
 	cgoCheckClosures = closures
 
 	return route, nil

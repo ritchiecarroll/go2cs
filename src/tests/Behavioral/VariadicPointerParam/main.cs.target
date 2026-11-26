@@ -101,9 +101,8 @@ internal static nint capturedLen(params ꓸꓸꓸжbox bsʗp) {
 
 internal static nint appendedLen(params ꓸꓸꓸжbox bsʗp) {
     var bs = bsʗp.slice();
-    var bsᴷ = new stackAppend<ж<box>>();
 
-    bs = append(bsᴷ, bs, Ꮡ(new box(v: 50)));
+    bs = append(bs, Ꮡ(new box(v: 50)));
     return len(bs);
 }
 

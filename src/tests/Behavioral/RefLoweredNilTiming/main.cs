@@ -15,7 +15,7 @@ internal static void consume(ref uint64 p, uint64 marker) {
 
 internal static void eagerFrom(ref elem e) {
     var m = side("side effect ran");
-    consume(ref nonnil(ref e).x, m);
+    consume(ref builtin.nonnil(ref e).x, m);
     fmt.Println("eagerFrom completed");
 }
 

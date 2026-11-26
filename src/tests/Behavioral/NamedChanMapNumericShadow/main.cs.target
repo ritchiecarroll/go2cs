@@ -116,7 +116,7 @@ internal static void main() {
 
     p.ᐸꟷ(1);
     var pᴛ1 = p;
-    switch (trySelect(ᐸꟷ<nint>(pᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ<nint>(pᴛ1, ꓸꓸꓸ))) {
     case 0 when pᴛ1.ꟷᐳ(out var v): {
         fmt.Println("selected receive:", v);
         break;
@@ -127,7 +127,7 @@ internal static void main() {
     }}
     p.ᐸꟷ(2);
     var pᴛ2 = p;
-    switch (trySelect(ᐸꟷ<nint>(pᴛ2, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ<nint>(pᴛ2, ꓸꓸꓸ))) {
     case 0 when pᴛ2.ꟷᐳ(out var v, out var ok): {
         fmt.Println("selected receive ok:", v, ok);
         break;
@@ -137,7 +137,7 @@ internal static void main() {
         break;
     }}
     var pᴛ3 = p.ᐸꟷ(9, ꓸꓸꓸ);
-    switch (trySelect(pᴛ3)) {
+    switch (builtin.trySelect(pᴛ3)) {
     case 0: {
         fmt.Println("selected send");
         break;
@@ -234,7 +234,7 @@ internal static void main() {
     var rc = new Receive(1);
     rc.ᐸꟷ(5);
     var rcᴛ1 = rc;
-    switch (trySelect(ᐸꟷ<nint>(rcᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ<nint>(rcᴛ1, ꓸꓸꓸ))) {
     case 0 when rcᴛ1.ꟷᐳ(out var v): {
         fmt.Println("type Receive selected:", v);
         break;

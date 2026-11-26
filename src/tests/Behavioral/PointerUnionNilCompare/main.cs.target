@@ -35,7 +35,7 @@ internal static @string describe<T>(T x) {
 internal static bool present<T>(T x) { return !GoReflect.IsNilGoValue(x); }
 
 internal static T zero<T>() {
-    T z = GoZero<T>();
+    T z = builtin.GoZero<T>();
     return z;
 }
 

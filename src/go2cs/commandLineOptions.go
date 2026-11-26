@@ -127,6 +127,9 @@ type Options struct {
 	// warnCodes is -warn's refusal codes, downgraded to warnings, each on the allow-list (warnOption.go).
 	warnCodes map[string]bool
 
+	// stackAppend is -stack-append's mode; stackAppendEnabled resolves auto per conversion (stackAppendOption.go).
+	stackAppend stackAppendMode
+
 	// inlineArrays is -inline-arrays' per-package override of inline-array admission (inlineArrayAdmission.go).
 	inlineArrays inlineArrayOverride
 
