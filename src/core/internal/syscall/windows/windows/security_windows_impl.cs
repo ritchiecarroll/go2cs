@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - getTokenInfo, GetTokenGroups, TOKEN_GROUPS.AllGroups, GetSidIdentifierAuthority: INSPIRED BY
+//   src/internal/syscall/windows/security_windows.go, Go 1.26.11, funcs getTokenInfo, GetTokenGroups,
+//   GetSidIdentifierAuthority; method TOKEN_GROUPS.AllGroups. The same results, with the token records transcribed
+//   from native memory.
+// - nativeSid, getTokenInfoBuffer, transcribeTokenGroups: original go2cs code. That transcription.
 
 // The TOKEN-INFORMATION members of the native-boundary class, in internal/syscall/windows --- the
 // UNREPAIRED TWINS of members cured one package over.

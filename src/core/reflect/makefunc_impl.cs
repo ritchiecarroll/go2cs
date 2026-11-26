@@ -1,6 +1,14 @@
 // Copyright 2012 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - MakeFunc: INSPIRED BY src/reflect/makefunc.go, Go 1.26.11, func MakeFunc. The same function value, built as a
+//   managed delegate over the caller's implementation; Go's doc comment verbatim.
+// - packResultTuple, marshalMakeFuncResult: original go2cs code. Result marshalling.
 // MakeFunc implementation.
 using go;
 using System;

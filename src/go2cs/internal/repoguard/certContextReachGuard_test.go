@@ -25,7 +25,7 @@ import (
 //
 //	"a context this file did not build -- CertCreateCertificateContext's, a plain native box nothing
 //	 reads through -- keeps working unchanged and needs no hand-own"
-//	     -- syscall/windows/zsyscall_windows_certchain_impl.cs:79, restated at :273
+//	     -- syscall/windows/zsyscall_windows_certchain_impl.cs:94, restated at :288
 //
 // C1 measured the reach rather than taking the header's word for it, and the header is right. The
 // defect in fork (ii) is a WRONG FIELD OFFSET; if no field is ever read through the box, it cannot

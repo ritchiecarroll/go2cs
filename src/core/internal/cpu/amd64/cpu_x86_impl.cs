@@ -1,28 +1,30 @@
-// Copyright 2017 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-//
-// PROVENANCE — Go 1.26.11. This file mixes code ported from Go with code original to go2cs. The flag set it fills is
-// doinit's. The ported parts, by source:
-//
-//   src/internal/cpu/cpu_x86.go
-//     doinit, the HasAVX512BITALG read     DERIVED FROM: X86.HasAVX512BITALG = isSet(ecx7, cpuid_AVX512BITALG),
-//                                          under HasAVX512F (cpu_x86.go:178-185)
-//     doinit's option table                DERIVED FROM: registerX86Options, gated on the level as doinit gates it
-//     doinit's doDerived                   DERIVED FROM: deriveX86Features (the virtual HasAVX512)
-//   src/internal/cpu/cpu_x86.s
-//     cpuid                                INSPIRED BY: cpuid's managed body runs the same instruction (X86Base.CpuId)
-//     getGOAMD64level                      INSPIRED BY: its body is that TEXT's fall-through constant, 1
-//
-// Original to go2cs: the System.Runtime.Intrinsics mapping of every other flag, the module-initializer stand-in for
-// schedinit's cpuinit slot, GoCpuAppliesGodebug and the GolibTests probe GoCpuOptionsProbe.
-//
 // cpu_x86_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - registerX86Options, deriveX86Features: DERIVED FROM src/internal/cpu/cpu_x86.go, Go 1.26.11, func doinit. Go's
+//   option table, gated on the level as doinit gates it, and its doDerived (the virtual HasAVX512).
+// - initX86FeatureDetection, the HasAVX512BITALG read: DERIVED FROM src/internal/cpu/cpu_x86.go, Go 1.26.11, func
+//   doinit. isSet(ecx7, cpuid_AVX512BITALG) under HasAVX512F (cpu_x86.go:178-185).
+// - initX86FeatureDetection, every other flag: INSPIRED BY src/internal/cpu/cpu_x86.go, Go 1.26.11, func doinit. The
+//   same feature bits, read from .NET's hardware intrinsics in place of CPUID; the intrinsic mapping is go2cs's own.
+// - cpuid: INSPIRED BY src/internal/cpu/cpu_x86.s, Go 1.26.11, assembly routine cpuid. The managed body runs the
+//   same instruction (X86Base.CpuId).
+// - getGOAMD64level: INSPIRED BY src/internal/cpu/cpu_x86.s, Go 1.26.11, assembly routine getGOAMD64level. Its body
+//   is that routine's fall-through constant, 1.
+// - the module-initializer stand-in for schedinit's cpuinit slot, GoCpuAppliesGodebug and the GolibTests probe
+//   GoCpuOptionsProbe: original go2cs code.
 
 // getGOAMD64level answers the amd64 MICROARCHITECTURE LEVEL THE BINARY WAS BUILT FOR — not the
 // level the host CPU happens to support. Go's cpu_x86.s is a compile-time constant selected by the

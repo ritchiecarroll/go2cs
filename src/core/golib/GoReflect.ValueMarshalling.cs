@@ -3,19 +3,21 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
-
-// Portions follow the behavior of Go's reflect package:
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file. (License of record: LICENSES/BSD-3-Clause.txt.)
+// license that can be found in the LICENSE file.
 //
-// Provenance: inspired by src/reflect/type.go and src/reflect/value.go, Go go1.26.11 (same behavior, own shape).
-// The assignment and conversion relations here reproduce Go's rules as reflect applies them, following
-// directlyAssignable, haveIdenticalType and haveIdenticalUnderlyingType (type.go) and Value.Convert / convertOp
-// (value.go): identity, interface implementation, and the named/unnamed rule that relates two types of identical
-// underlying type when one side is unnamed (assignment) or always (conversion). None of Go's code is ported: the
-// managed representation those rules run over (golib's boxes, adapters, delegates and the canonical nil carriers)
-// and every routine in this file are original go2cs code.
+// PROVENANCE, part by part:
+// - the assignment relation: INSPIRED BY src/reflect/type.go, Go 1.26.11, funcs directlyAssignable,
+//   haveIdenticalType, haveIdenticalUnderlyingType. The same rules over golib's boxes, adapters, delegates and nil
+//   carriers.
+// - the conversion relation: INSPIRED BY src/reflect/value.go, Go 1.26.11, func convertOp; method Value.Convert.
+//   Identity, interface implementation and the named/unnamed rule.
+// - every routine's body and the managed representation it runs over: original go2cs code. None of Go's code is
+//   ported.
 
 // ReSharper disable InconsistentNaming
 

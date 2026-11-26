@@ -45,7 +45,7 @@ Plus every `packages.Load` (`conversionDriver.go:206-220`, `moduleConverter.go:2
 `linknameOperations.go:160`, `testConversion.go:761,1775`, `stdLibConverter.go:311,391`), which shells out to
 `go list` on `PATH`.
 <!-- 2026-11-14 (R): the oracle row re-pointed from :10564, which by batch 305's master cited an unrelated comment, to
-     oracleTestArgs, the `go test -json` argument list the -tests comparison runs: src/go2cs/testConversion.go:11154#a7d5e7.
+     oracleTestArgs, the `go test -json` argument list the -tests comparison runs: src/go2cs/testConversion.go:11156#a7d5e7.
      This note carries the fingerprint so the provenance guard holds the cite (the table cell is not read). -->
 
 **1b. GOROOT/src.** `go/types` type-checks the standard library from source (`LoadAllSyntax`); `checkGoRootSpelling`

@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - loadWSASendRecvMsg, WSASendMsg, WSARecvMsg: DERIVED FROM src/internal/syscall/windows/syscall_windows.go, Go
+//   1.26.11, funcs loadWSASendRecvMsg, WSASendMsg, WSARecvMsg. Go's calls and error mapping, with the GUID and
+//   message records marshalled natively.
+// - lookupExtensionFunction: original go2cs code. That marshalling for the extension lookup.
 
 // Hand-written implementations of syscall_windows.go's WSASendMsg, WSARecvMsg and the
 // loadWSASendRecvMsg extension lookup beneath both -- the whole of the Windows WriteMsg/ReadMsg seam.

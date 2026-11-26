@@ -23,15 +23,18 @@
 // question is one, and would make the neutral `lib/` slot's provenance a question again — it is
 // byte-identical to the win-x64 flavor because it IS that flavor, duplicated at pack time.
 //
-// A module initializer is the right slot for the same reason goargs_impl.cs and goenvs_impl.cs use
-// one: it runs when the runtime assembly is first touched, before any converted Go code in it, once.
-// Every converted program reaches `runtime` (os -> runtime on every path that has an os), so a
-// mismatch is announced before the first wrong answer rather than after it.
+// It is NOT a module initializer of its own. It runs as the first statement of goenvs_impl.cs's
+// ᴛInitEnvs, the runtime's start-up initializer, which runs when the runtime assembly is first
+// touched, before any converted Go code in it, once. Every converted program reaches `runtime`
+// (os -> runtime on every path that has an os), so a mismatch is announced before the first wrong
+// answer rather than after it. As a separate [ModuleInitializer] it could not be: C# does not order
+// one module initializer against another, and ᴛInitEnvs ran first and reached the platform first. A
+// Windows build run on Linux died "GOMAXPROCS at startup: System.DllNotFoundException: ... kernel32.dll"
+// and this warning never printed (measured at d6805be2e8, 2026-11-26). repoguard's
+// TestHostOfRecordRunsFirstAtStartup holds the call's position.
 //
 // This file has no `<name>.go` counterpart, so a -stdlib reconvert never emits over it; the module
 // marker states the ownership explicitly and matches the other hand-owned runtime files.
-
-using System.Runtime.CompilerServices;
 
 [module: go.GoManualConversion]
 
@@ -39,7 +42,6 @@ namespace go;
 
 partial class runtime_package
 {
-    [ModuleInitializer]
     internal static void ᴛVerifyHostOfRecord()
     {
         GoHostOfRecord.Verify(GOOS, GOARCH);

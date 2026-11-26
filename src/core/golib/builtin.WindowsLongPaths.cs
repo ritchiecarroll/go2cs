@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - InitializeWindowsLongPaths: INSPIRED BY src/runtime/os_windows.go, Go 1.26.11, func initLongPathSupport. The same
+//   version check and PEB bit.
+// - the P/Invoke declaration: original go2cs code.
 
 // ReSharper disable InconsistentNaming
 

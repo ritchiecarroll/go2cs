@@ -1012,8 +1012,8 @@ foreach ($entry in $rawCounts) {
     if ($docFiles -contains $relPath) { continue }
     if ($relPath -eq 'src/version.props' -or $relPath -eq 'src/go2cs/go.mod') { continue }
 
-    # This instrument and its launcher name the release only in their own worked examples.
-    if ($relPath -eq 'src/migrate-gorelease.ps1' -or $relPath -eq 'src/migrate-gorelease.bat') { continue }
+    # This instrument names the release only in its own worked examples.
+    if ($relPath -eq 'src/migrate-gorelease.ps1') { continue }
 
     $class = ''
     $note = ''

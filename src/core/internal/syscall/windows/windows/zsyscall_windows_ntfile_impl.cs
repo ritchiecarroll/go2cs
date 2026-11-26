@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - NtCreateFile, NtOpenFile: DERIVED FROM src/internal/syscall/windows/zsyscall_windows.go (generated from the
+//   declarations in src/internal/syscall/windows/syscall_windows.go, whose notice this file carries), Go 1.24.13,
+//   funcs NtCreateFile, NtOpenFile. The generated calls, with the object attributes marshalled natively.
+// - prepareObjectAttributes: original go2cs code. That marshalling.
 
 // THE os.Root DOOR -- NtCreateFile and NtOpenFile, the two ntdll wrappers every os.Root operation
 // on Windows goes through, and the hop-new members of the syscall STRUCT-PASSING class.
