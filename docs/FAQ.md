@@ -94,7 +94,7 @@ machine that has no .NET 10 runtime the program runs on the newer runtime, which
 on. The README's [Requirements](README.md#requirements) says how to require .NET 10 instead.
 <!-- 2026-11-23 .5 docs pass (P1), UX-12, at master 97cca467a2: the FAQ said "exactly one ... .NET release at a
      time", which the README's Requirements contradicts since go.lib's buildTransitive targets give an executable
-     RollForward=Major when no .NET 10 runtime is present (src/core/golib/buildTransitive/go.lib.targets:445 `<RollForward>Major</RollForward>`;
+     RollForward=Major when no .NET 10 runtime is present (src/core/golib/buildTransitive/go.lib.rollforward.targets:47 `<RollForward>Major</RollForward>`, split out of go.lib.targets 2026-11-25;
      src/tests/PackageTests/RollForward). Owner's release-readiness item UX-12 (COORD 2026-11-22 083506Z). -->
 
 ## Which platforms are supported?
