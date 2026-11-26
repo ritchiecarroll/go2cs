@@ -1,6 +1,23 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - AddCleanup, Cleanup.Stop and the cleanup queue: INSPIRED BY src/runtime/mcleanup.go, Go 1.26.11, funcs
+//   AddCleanup, unique_runtime_blockUntilEmptyCleanupQueue, sync_test_runtime_blockUntilEmptyCleanupQueue; methods
+//   Cleanup.Stop, cleanupQueue.enqueue, cleanupQueue.needsWake, cleanupQueue.wake, cleanupQueue.readQueueStats,
+//   cleanupQueue.blockUntilEmpty. The same cleanup contract over CLR finalization and golib's runner; Go's doc
+//   comments verbatim.
+// - addCleanup: INSPIRED BY src/runtime/mheap.go, Go 1.26.11, func addCleanup. The same registration, against a
+//   managed referent.
+// - holdsPointerInto, pointerFacts, inTinySpan, valueHoldsPointerInto, canHoldPointerSlot, ReattachCleanups and the
+//   registry's Add, Register, Reattach, Cancel, Prune and flush: original go2cs code. The managed registry.
 
 // go2cs HAND-OWNED (native replacement; the auto conversion is kept beside it as mcleanup.cs.auto).
 // RULED at COORD c58b4c01d after C1 f9f41e8d8 s3.

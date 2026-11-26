@@ -4,6 +4,24 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - rtype.Implements: DERIVED FROM src/internal/reflectlite/type.go, Go 1.26.11, method rtype.Implements. Go's two
+//   panic guards verbatim; the method-set test is golib's GoReflect.GoImplements in place of Go's implements call.
+// - rtype.Elem, rtype.PkgPath, rtype.String, implements, haveIdenticalUnderlyingType: INSPIRED BY
+//   src/internal/reflectlite/type.go, Go 1.26.11, funcs implements, haveIdenticalUnderlyingType; methods rtype.Elem,
+//   rtype.PkgPath, rtype.String. Same contract, go2cs's own bodies over golib's GoReflect.
+// - resolveTypeOff, resolveNameOff: bodies for the bodyless Go declarations of the same names in
+//   src/internal/reflectlite/type.go. Original go2cs code.
+// - haveIdenticalFuncShape, funcParamDimsAt, haveIdenticalStructShape, structTypePkgPath, structFieldDescriptor,
+//   sysTypeOfLiteType: original go2cs code. Helpers over GoReflect; they port no Go function.
 
 namespace go.@internal;
 

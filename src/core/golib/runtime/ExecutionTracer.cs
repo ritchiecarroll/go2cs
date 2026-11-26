@@ -3,6 +3,19 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Stop, Read: INSPIRED BY src/runtime/trace.go, Go 1.26.11, funcs StopTrace, ReadTrace. The same stop and read
+//   contract over golib's event buffers.
+// - syncBatch: INSPIRED BY src/runtime/tracetime.go, Go 1.26.11, func traceSyncBatch. EvSync, the frequency and the
+//   three clock readings.
+// - the generation machinery and the event hooks: original go2cs code.
 
 using System;
 using System.Collections.Generic;

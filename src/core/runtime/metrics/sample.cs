@@ -1,6 +1,14 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - Read: INSPIRED BY src/runtime/metrics/sample.go, Go 1.26.11, func Read. The same read, crossing into the runtime
+//   by registration in place of a raw slice address.
+// - writeValues, ᴛRegisterSampleCrossing: original go2cs code. That crossing.
 
 // Hand-finished conversion (runtime/metrics.Read's crossing into the runtime).
 //

@@ -1,6 +1,15 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from or inspired by Go, whose notice it carries above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - makeCloneSeq, buildStructCloneSeq, buildArrayCloneSeq: DERIVED FROM src/unique/clone.go, Go 1.26.11, funcs
+//   makeCloneSeq, buildStructCloneSeq, buildArrayCloneSeq. The converted output.
+// - clone: INSPIRED BY src/unique/clone.go, Go 1.26.11, func clone. The same string cloning, driven by the clone
+//   sequence over managed fields.
 
 // go2cs HAND-OWNED FILE (replaces the converted clone.go output). Only clone<T> departs from the
 // conversion; makeCloneSeq and the cloneSeq builders below are kept in their converted form, because

@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2022 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Getpwnam, Getpwuid, Getgrnam, Getgrgid: DERIVED FROM src/internal/syscall/unix/user_darwin.go, Go 1.26.11, funcs
+//   Getpwnam, Getpwuid, Getgrnam, Getgrgid. Go's calls, with the record the C library writes transcribed into the
+//   caller's struct.
+// - copyNativeString, publishPasswd, publishGroup: original go2cs code. The transcription.
 
 // Hand-written implementations of the four user/group lookups internal/syscall/unix declares on
 // DARWIN -- getpwnam_r, getpwuid_r, getgrnam_r, getgrgid_r (user_darwin.go). They are this

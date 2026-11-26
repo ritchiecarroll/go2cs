@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - lookupFullNameServer, lookupUserPrimaryGroup, listGroupsForUsernameAndDomain: DERIVED FROM
+//   src/os/user/lookup_windows.go, Go 1.26.11, funcs lookupFullNameServer, lookupUserPrimaryGroup,
+//   listGroupsForUsernameAndDomain. Go's statements and comments, with the netapi32 level records read out of native
+//   memory.
+// - copyNativeUtf16, readLocalGroupNames: original go2cs code. That read.
 
 // Hand-written implementations of the three os/user lookups that read a netapi32 LEVEL RECORD back
 // out of a buffer the API publishes: lookupFullNameServer and lookupUserPrimaryGroup from

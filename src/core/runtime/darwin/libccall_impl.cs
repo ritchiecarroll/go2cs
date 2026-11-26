@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - libcCall: INSPIRED BY src/runtime/sys_libc.go, Go 1.26.11, func libcCall. The same dispatch to a libc trampoline,
+//   through golib's native dispatcher in place of the g0 stack switch.
+// - libc_error_addr: INSPIRED BY src/runtime/sys_darwin.go, Go 1.26.11, func libc_error_addr. The same errno address,
+//   from golib.
+// - machVMRegion, procRegionFilename: original go2cs code. Native helpers of the dispatch.
 
 // runtime.libcCall — darwin's dispatch bottom, realized on golib's platform-neutral dispatcher.
 //
