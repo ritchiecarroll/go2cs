@@ -237,7 +237,7 @@ partial class windows_package
         NativeWSAMsg* nativeMsg = (NativeWSAMsg*)block;
         NativeWSABuf* staged = (NativeWSABuf*)(block + msgBytes);
 
-        stageWSABufs(msg.Buffers, msg.BufferCount, staged);
+        stageWSABufs(msg.Buffers, msg.BufferCount, staged, Ꮡoverlapped);
 
         // The address is optional: internal/poll's WriteMsg leaves Name unset on a CONNECTED socket,
         // where the kernel already knows the destination, and Winsock reads lpMsg->name only when
@@ -366,7 +366,7 @@ partial class windows_package
         NativeWSABuf* staged = (NativeWSABuf*)(block + msgBytes);
         byte* addr = block + msgBytes + bufBytes;
 
-        stageWSABufs(msg.Buffers, msg.BufferCount, staged);
+        stageWSABufs(msg.Buffers, msg.BufferCount, staged, Ꮡoverlapped);
 
         // ⚠ ZEROED EVERY SUBMIT, load-bearing rather than tidy. The staging block belongs to the
         // OPERATION and is reused by every receive on this waiter, so the PREVIOUS datagram's sender

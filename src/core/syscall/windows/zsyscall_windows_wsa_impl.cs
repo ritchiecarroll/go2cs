@@ -321,7 +321,7 @@ partial class syscall_package
     // plain native OVERLAPPED that carries the caller's event, and never touches the CLR's port: a
     // bound overlapped carries no event, and its completion would wake nobody. A BOUND record does
     // the same for any submit that arrives carrying an event (see Rearm).
-    private sealed unsafe class OverlappedOp : IGoAsyncOperation, IDisposable
+    private sealed unsafe class OverlappedOp : IGoAsyncOperation, golib.IGoAsyncRetainer, IDisposable
     {
         // Null for a record on a disassociated descriptor (see above).
         internal readonly SocketBinding? Binding;
@@ -419,6 +419,10 @@ partial class syscall_package
         }
 
         internal void Pin(object box) => m_pins.Add(box);
+
+        // A submit from ANOTHER package (internal/syscall/windows' stageWSABufs) retains through golib's seam (cgo S6, design
+        // 21.10): the same list, cleared at the same Rearm.
+        void golib.IGoAsyncRetainer.RetainForFlight(object box) => Pin(box);
 
         // ---- IGoAsyncOperation's SUBMIT side (netpoll design §4.7) -------------------------------
         // The same Rearm and Staging this package calls in-process, exposed through golib's neutral

@@ -522,6 +522,32 @@ namespace go.golib;
     }
 
     /// <summary>
+    /// Keeps <paramref name="box"/> reachable for the flight of the submission the operation named by <paramref name="key"/>
+    /// is about to make, through the record's <see cref="IGoAsyncRetainer"/>; a record that cannot retain ignores it.
+    /// </summary>
+    /// <param name="key">Pointer the operation is named by.</param>
+    /// <param name="box">The object to keep, normally a buffer's pinning box.</param>
+    public static void RetainForFlight(object key, object box)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        if (box is not null && TryGetOperationState(key, out object? state) && state is IGoAsyncRetainer retainer)
+        {
+            retainer.RetainForFlight(box);
+            Interlocked.Increment(ref s_retainedForFlight);
+        }
+    }
+
+    private static long s_retainedForFlight;
+
+    /// <summary>
+    /// TEST SEAM (cgo S6, design 21.10): how many boxes a record has retained through <see cref="RetainForFlight"/> since the
+    /// process started. A loopback send completes before any compaction can move its buffer, so only a count can show the
+    /// retention is wired.
+    /// </summary>
+    public static long RetainedForFlight => Interlocked.Read(ref s_retainedForFlight);
+
+    /// <summary>
     /// Work the operation named by <paramref name="key"/> owes when it completes.
     /// </summary>
     /// <param name="key">Pointer the operation is named by.</param>
@@ -649,6 +675,22 @@ namespace go.golib;
 /// Implemented by a submitting package's per-operation state to expose the operation's native
 /// control block to the package that harvests its result.
 /// </summary>
+/// <summary>
+/// A record that can keep an object reachable for the flight of its current submission (cgo S6, design 21.10 and
+/// COORD's hardening ruling): the submitting package hands it a buffer's pinning box, and the record holds the box until
+/// its next rearm, so the box's own pin outlives the call that handed the OS its address.
+/// </summary>
+/// <remarks>
+/// A separate OPTIONAL interface, not a member of <see cref="IGoAsyncOperation"/>: widening that interface breaks every
+/// implementer (its own remarks), and a record that cannot retain simply ignores the call.
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IGoAsyncRetainer
+{
+    /// <summary>Keeps <paramref name="box"/> reachable until the record's next rearm.</summary>
+    /// <param name="box">The object to keep.</param>
+    void RetainForFlight(object box);
+}
+
 [EditorBrowsable(EditorBrowsableState.Never)] public interface IGoAsyncOperation
 {
     /// <summary>

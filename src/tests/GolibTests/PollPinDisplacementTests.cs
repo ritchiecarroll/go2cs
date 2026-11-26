@@ -110,6 +110,96 @@ public class PollPinDisplacementTests
         }
     }
 
+    // COORD's hardening ruling (design 21.10): WriteToInet4 sends were held only by the box being reachable from the FD's
+    // operation; stageWSABufs now retains it through the record. 200 datagrams, each from a fresh buffer, are sent through
+    // UDPConn.WriteTo on a udp4 socket (fd.writeToInet4 -> WSASendtoInet4) while another thread compacts the heap without
+    // pause, and every datagram must arrive with its own bytes.
+    [TestMethod]
+    public void AWriteToInet4SendCarriesItsOwnBytesWhileTheHeapCompacts()
+    {
+        if (!OperatingSystem.IsWindows())
+            Assert.Inconclusive("the displacement is Windows' (internal/poll/windows): NOT MEASURED on this host");
+
+        (net_package.PacketConn receiver, error rerr) = net_package.ListenPacket("udp4", "127.0.0.1:0");
+        Assert.IsNull(rerr, $"listen receiver: {rerr}");
+        (net_package.PacketConn sender, error serr) = net_package.ListenPacket("udp4", "127.0.0.1:0");
+        Assert.IsNull(serr, $"listen sender: {serr}");
+
+        const int count = 200, size = 1400;
+        using CancellationTokenSource stop = new();
+
+        Thread compactor = new(() =>
+        {
+            while (!stop.IsCancellationRequested)
+            {
+                object[] churn = new object[1024];
+
+                for (int i = 0; i < churn.Length; i++)
+                    churn[i] = new byte[64];
+
+                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+                // A collector that never yields between blocking collections starves a thread returning from native code
+                // (the BOARD's 2026-11-25 hang, cured by the same 1 ms in GolibTests' collector rows).
+                Thread.Sleep(1);
+            }
+        }) { IsBackground = true };
+
+        try
+        {
+            compactor.Start();
+            long retainedBefore = GoAsyncIO.RetainedForFlight;
+
+            int bad = OnAGoroutine(() =>
+            {
+                net_package.Addr to = receiver.LocalAddr();
+                slice<byte> got = new slice<byte>(new byte[size + 16]);
+                int mismatches = 0;
+
+                for (int d = 0; d < count; d++)
+                {
+                    byte[] bytes = new byte[size];
+
+                    for (int i = 0; i < size; i++)
+                        bytes[i] = (byte)(d * 31 + i);
+
+                    (nint written, error werr) = sender.WriteTo(new slice<byte>(bytes), to);
+                    Assert.IsNull(werr, $"send {d}: {werr}");
+                    Assert.AreEqual((nint)size, written);
+
+                    (nint n, net_package.Addr _, error ferr) = receiver.ReadFrom(got);
+                    Assert.IsNull(ferr, $"receive {d}: {ferr}");
+                    Assert.AreEqual((nint)size, n, $"datagram {d}");
+
+                    for (int i = 0; i < size; i++)
+                    {
+                        if (got[i] != (byte)(d * 31 + i))
+                        {
+                            mismatches++;
+                            break;
+                        }
+                    }
+                }
+
+                return mismatches;
+            });
+
+            Assert.AreEqual(0, bad, "every datagram carries the bytes of the buffer it was sent from");
+
+            // The deterministic half. On loopback the kernel copies a datagram inside the call, before a compaction can
+            // move it, so the bytes alone cannot tell a retained buffer from an unheld one (an unpinned-address control read
+            // green 3 of 3). The record must have retained at least one box per send.
+            Assert.IsTrue(GoAsyncIO.RetainedForFlight - retainedBefore >= count, $"each WriteToInet4 send retains its buffer's box through the record (retained {GoAsyncIO.RetainedForFlight - retainedBefore} for {count} sends)");
+        }
+        finally
+        {
+            stop.Cancel();
+            compactor.Join();
+            sender.Close();
+            receiver.Close();
+        }
+    }
+
     // A compaction while a read is in flight: the read is submitted and parked, the heap is compacted with garbage around
     // the buffer, then the peer writes. The bytes land in the buffer the read was given, because the poller holds it.
     [TestMethod]
