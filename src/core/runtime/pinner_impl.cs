@@ -289,49 +289,20 @@ internal static ж<uintptr> pinnerGetPinCounter(@unsafe.Pointer addr)
 
 internal static class PinTable
 {
-    private sealed class PinRecord
-    {
-        public int Count;
-    }
-
-    // Weak keys: the table is never the reason an allocation stays alive. The HOLD is the
-    // Pinner's own list (Go's refs). Reads take no lock (CWT reads are thread-safe); count
-    // transitions take one, where Go takes span.speciallock.
-    private static readonly ConditionalWeakTable<object, PinRecord> s_records = new();
-    private static readonly object s_lock = new();
-
-    public static void Pin(object referent)
-    {
-        lock (s_lock)
-        {
-            if (s_records.TryGetValue(referent, out PinRecord? record))
-                record.Count++;
-            else
-                s_records.Add(referent, new PinRecord { Count = 1 });
-        }
-    }
+    // The table moved DOWN to golib (cgo S6, docs/phase4/DESIGN-cgo-phase3-marshaling.md 21): the cgo doors that must see
+    // a pin live in golib, which cannot reference runtime, and a pin now HOLDS the allocation still rather than only
+    // recording it. This class keeps the runtime's spelling of Go's pinner bits and forwards, so its callers are unchanged.
+    public static void Pin(object referent) => go.golib.GoPinTable.Pin(referent);
 
     public static void Unpin(object referent)
     {
-        lock (s_lock)
-        {
-            if (!s_records.TryGetValue(referent, out PinRecord? record))
-                @throw("runtime.Pinner: object already unpinned"u8);
-
-            if (--record.Count == 0)
-                s_records.Remove(referent);
-        }
+        if (!go.golib.GoPinTable.Unpin(referent))
+            @throw("runtime.Pinner: object already unpinned"u8);
     }
 
-    public static bool IsPinned(object referent)
-    {
-        return s_records.TryGetValue(referent, out _);
-    }
+    public static bool IsPinned(object referent) => go.golib.GoPinTable.IsPinned(referent);
 
-    public static int Count(object referent)
-    {
-        return s_records.TryGetValue(referent, out PinRecord? record) ? record.Count : 0;
-    }
+    public static int Count(object referent) => go.golib.GoPinTable.Count(referent);
 }
 
 // ---- the cgo argument check over managed values ----
