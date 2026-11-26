@@ -114,6 +114,7 @@ func resetPackageState(pkg *packages.Package) {
 	liftRecordsRead = make(map[string]bool)
 	packageConstraintLiftNames = make(map[string]string)
 	resetInlineConstraintState()
+	resetArrayDimsRecords()
 	packageLiftedTypeNames = hashset.HashSet[string]{}
 	productionLiftedTypeNames = nil
 	productionAliasLiftedTypes = nil
@@ -161,6 +162,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}
 	packageHandOwnedMethods = map[*types.Func]bool{}
+	packageHandOwnedFuncs = map[*types.Func]bool{}
 
 	// Capture the package's own source directory for the README's validation badge, which has to
 	// look at the Go sources the conversion never compiles (the `_test.go` files) to tell a package
