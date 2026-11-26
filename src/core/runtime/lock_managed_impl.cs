@@ -1,6 +1,23 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2024 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - lock2, unlock2, mutexContended, unlock2Wake: INSPIRED BY src/runtime/lock_spinbit.go, Go 1.26.11, funcs lock2,
+//   unlock2, mutexContended, unlock2Wake. The same mutex contract and contention accounting over a managed monitor,
+//   in place of the spinbit protocol.
+// - notewakeup, notesleep: INSPIRED BY src/runtime/lock_sema.go, Go 1.26.11, funcs notewakeup, notesleep. The same
+//   one-time note over a managed event.
+// - notetsleepg, noteSleepDeadline: INSPIRED BY src/runtime/lock_futex.go, Go 1.26.11, func notetsleepg. The same
+//   timed sleep.
+// - the held-lock list, the waiter accounting, the lock profile record and the GoRuntimeLock* probes: original go2cs
+//   code. The managed core's own bookkeeping.
 using go;
 
 // Hand-finished conversion — the MANAGED CORE of runtime's mutex + one-time note, shared by every

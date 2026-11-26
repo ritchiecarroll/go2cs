@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - sigaction: INSPIRED BY src/runtime/sys_darwin.go, Go 1.26.11, func sigaction. The same libc call, with the struct
+//   encoded and decoded across the native boundary.
+// - handlerWordOf, storeHandlerWord, GoSigactionQuery, GoSigactionInstall: original go2cs code. That encoding and its
+//   test seams.
 
 // The darwin run layer's increment 6 (2026-09-05, Q41): runtime.sigaction, the darwin flavour's
 // signal INSTALL/QUERY primitive, realized over libc's sigaction(2) -- the entry point Go's own

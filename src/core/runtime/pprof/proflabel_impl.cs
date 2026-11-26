@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - runtime_setProfLabel, runtime_getProfLabel: INSPIRED BY src/runtime/proflabel.go, Go 1.26.11, funcs
+//   runtime_setProfLabel, runtime_getProfLabel. The runtime's push bodies: the labels are stored on, and read from,
+//   the current goroutine.
 
 // Per-goroutine profile labels — the managed realization of `getg().labels`.
 //

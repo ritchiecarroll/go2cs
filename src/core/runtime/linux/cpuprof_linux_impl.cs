@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2010 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - setThreadCPUProfiler: INSPIRED BY src/runtime/os3_plan9.go, Go 1.26.11, func setThreadCPUProfiler. Plan9's body,
+//   a port with no profiling signal: the rate is stored on the m.
+// - setProcessCPUProfiler: original go2cs code. Hands the rate to go2cs's sampler seam.
 
 // runtime.setProcessCPUProfiler / runtime.setThreadCPUProfiler on LINUX, hand-owned by
 // manualConversionFuncs["runtime"] (goosAny) under COORD's ruling of 2026-09-26 (ledger 4a122cd994,

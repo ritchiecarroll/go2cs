@@ -1,6 +1,12 @@
 // Copyright 2019 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - poolDequeue, poolChain: DERIVED FROM src/sync/poolqueue.go, Go 1.26.11, the methods of poolDequeue, poolChain.
+//   Only the slot representation is changed.
 
 // go2cs NATIVE FORK (hand-owned; replaces the converted poolqueue.go output). The fork is confined to
 // poolDequeue's SLOT REPRESENTATION — the packed head/tail, the fullness test, the CAS protocol and

@@ -1,6 +1,16 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from or inspired by Go, whose notice it carries above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The converted output: DERIVED FROM src/runtime/runtime2.go, Go 1.26.11, funcs newMWeakPointer, getcallerfp;
+//   methods waitReason.String, waitReason.isMutexWait, waitReason.isSyncWait, waitReason.isChanWait,
+//   waitReason.isWaitingForSuspendG, waitReason.isIdleInSynctest. Go's declarations and comments.
+// - efaceOf: INSPIRED BY src/runtime/runtime2.go, Go 1.26.11, func efaceOf. An inert eface in place of the raw
+//   reinterpret.
 global using itab = go.@internal.abi_package.ITab;
 
 // go2cs HAND-OWNED. Unlike the companion pattern (runtime2_impl.cs supplies the bodyless

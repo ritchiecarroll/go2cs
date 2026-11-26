@@ -42767,6 +42767,18 @@ kernels were.
 
 — R (2026-11-25)
 
+## 2026-11-26 — P2 (COORD 20261126T091914Z, P3's F7): a refused native-call seam left the goroutine _Gsyscall (CURED, pre-existing)
+`runtime/syscall_managed_impl.cs` moved the goroutine's status BEFORE the GoNativeCall half in two places, and the
+seam can refuse by throwing. `enterSyscall` set `_Gsyscall`, then `GoNativeCall.Enter` refused a second entry
+("already inside a native call"); every caller enters outside its `try`, so no `exitsyscall` ran and the goroutine
+stayed `_Gsyscall` with no seam entered. `syscallCallbackExit` set `_Gsyscall`, then `ReturnToNative` refused when
+the callback left a native call of its own open. Both now roll the status back before the refusal propagates; the
+order (status before the P release, the Q2 ruling) and the normal path are unchanged. No banked row is known to
+reach either refusal. Rows: `RuntimeSyscallFamilyTests.AnEntryWhoseSeamThrowsLeavesTheStatusRunning` and
+`.ACallbackExitWhoseSeamThrowsLeavesTheStatusRunning`, each red at master (status 3) before its cure.
+
+— P2 (2026-11-26)
+
 **2026-11-26 (P4): darwin go-test's "baseline two" were both test-side; a third red hid behind them on osx-arm64.**
 COORD 2026-11-26 10:10Z. Master's hosted darwin go-test (run 45779430120 at `d6805be2e8`) failed the same two tests on
 both macs, and every train read them as the baseline.
@@ -42822,6 +42834,44 @@ has twice the memory, which is why it finishes. Next: a one-axis run with `GOMEM
 and, separately, what in the `go2cs` tests keeps that much heap live.
 
 — P4 (2026-11-26)
+
+**2026-11-26, INSTRUMENT (P1, COORD 112357Z):** `src/tests/PackageTests/LocalRefsPlatform` is run BY HAND only: no
+workflow and no `release-smoke.ps1` arm names it. Its three arms (DEFAULT, OVERRIDE, IN-PLACE) are the only gate that
+builds a local-reference `-recurse` conversion from a clean, git-extracted runtime root, and IN-PLACE is the only one
+that converts inside a `deploy-core.ps1` root; every train's `go test` holds the emitted text, not the build. All
+readings so far are linux-x64. Wiring it into a hosted stage was left out of the in-place seat as not cheap: each leg
+would build the runtime closure three times.
+
+— P1 (2026-11-26)
+
+## 2026-11-26 — R (finding 5 nit 1; P3 20261126T064531Z, COORD 064719Z): on an OS-annotated row with families, the floor is checked by COUNT only (OPEN, stated gap)
+
+**OPEN, read.** In `src/_roster.ps1` `Test-HostConditionalDelta`, an OS-annotated row has no committed proof page for
+that OS (the page is the banking host's). So `-BankedNames $null` takes the floor's names from the live record outside
+the families, and checks only that they number floor + disclosed. A run that lost one banked verdict and gained another
+outside the families would pass that check. The families themselves stay all-or-nothing, and their parent must pass on
+both sides. Today one row uses this branch: `internal/runtime/gc/scan`, linux and darwin. `docs/ValidatedTestPackages.md`
+states the gap. **What removes it:** a committed proof page per OS (the floor's verdict names for linux and for darwin),
+which the branch would then cross-check by name, as it does for an exact-name row. Owner: unrouted.
+
+— R (2026-11-26)
+
+## 2026-11-26 — P5 (Go attribution seat, P3 20261126T170601Z NITs 6 and 7; COORD 20261126T180158Z): two hand-own attribution rows (OPEN)
+
+- **NIT 6: `internal/cpu/darwin/cpu_arm64_darwin_impl.cs` is DERIVED and its Go notice and PROVENANCE block are on the
+  darwin/arm64 branch only** (D2, `claude/p5-darwin-arm64-flip` f6830223fb, where the file moves to `darwin-arm64/`).
+  The attribution sweep skipped it so the two branches would not both edit it. Closes when D2 lands; if D2 is dropped,
+  the file takes the sweep's header on master.
+- **NIT 7: 11 hand-owned parts follow an older Go release than the corpus (1.26.11)**, each pinned in its header: one at
+  1.23.12 (`os/wait_waitid.go` `Process.blockUntilWaitable`, the raw waitid loop where 1.26.11 calls `unix.Waitid`) and
+  ten at 1.24.13 (`sync/oncefunc.go` `OnceFunc`/`OnceValue`/`OnceValues`; six `internal/syscall/windows` and two `syscall`
+  zsyscall parts over the fixed-arity `Syscall` form; `registry_test.go` `testGetStringsValue`). The full list is the F4
+  table in [DATA-go-attribution-scout-2026-11-26.md](DATA-go-attribution-scout-2026-11-26.md) ("Version check"). At least
+  one is a behaviour gap, not form only: 1.26.11's `oncefunc` clears `f` in the defer even when `f` panics, and the 1.24
+  shape does not. The next hop re-reads these parts against the corpus release, and each header moves only when its part
+  is re-read (runbook rule, `docs/GoCorpusMigration.md`).
+
+— P5 (2026-11-26)
 
 **Update 2026-11-26 (P4): the osx-arm64 slowness is a converter memory leak, and the cure is a seat.** Two readings.
 
