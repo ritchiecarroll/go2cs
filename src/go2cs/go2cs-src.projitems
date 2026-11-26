@@ -492,6 +492,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPackageBoxParity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPointerCastShape_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnSourcePins_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\hostOfRecordFirst_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\layoutKeyLists_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\lineKeyedRecords_test.go" />
