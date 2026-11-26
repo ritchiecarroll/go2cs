@@ -4,6 +4,23 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2011 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - enableWER: INSPIRED BY src/runtime/signal_windows.go, Go 1.26.11, func enableWER. The same error-mode change
+//   through a P/Invoke call.
+// - the console control handler: INSPIRED BY src/runtime/os_windows.go, Go 1.26.11, func ctrlHandler. The same
+//   event-to-signal mapping, installed through the host's console handler.
+// - the handler install helpers: original go2cs code.
 
 // The runtime's console control handler, installed the way a managed program can install it - the
 // OS EDGE of Windows signal delivery, and deliberately nothing more.

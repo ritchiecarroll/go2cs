@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - registerArm64Options: DERIVED FROM src/internal/cpu/cpu_arm64.go, Go 1.26.11, func doinit. Go's options table.
+// - initArm64FeatureDetection, registerProcessOptions: original go2cs code. The arm64-process start-up for an
+//   amd64-converted corpus.
 
 // ---------------------------------------------------------------------------------------------
 // ARM64 FEATURE DETECTION FOR AN ARM64 PROCESS, in a corpus converted for amd64.

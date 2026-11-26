@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2020 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - schedStatsAggregate.compute: DERIVED FROM src/runtime/metrics.go, Go 1.26.11, method schedStatsAggregate.compute.
+//   Go's body except the runnext test, which reads the slot as a reference.
 
 // schedStatsAggregate.compute (metrics.go, Go 1.26: the scheduler metrics behind /sched/goroutines:*),
 // hand-owned for ONE line, the runqempty precedent (runtime2_impl.cs) at a second site.

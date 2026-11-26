@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - profBuf.write: DERIVED FROM src/runtime/profbuf.go, Go 1.26.11, method profBuf.write. Go's statements in Go's
+//   order and Go's comments verbatim, with the one departure the note below explains (the tag slot holds the
+//   reference itself).
 
 // profBuf.write, hand-owned for its tag store (manualConversionFuncs["runtime"], goosAny; declared once,
 // in profbuf.go). The labels piece of section 11.6, docs/phase4/DESIGN-managed-profiling.md.

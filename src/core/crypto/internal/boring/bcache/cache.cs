@@ -1,6 +1,15 @@
 // Copyright 2022 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from or inspired by Go, whose notice it carries above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The package, its types, Cache.table, Clear, Get and Put: DERIVED FROM src/crypto/internal/boring/bcache/cache.go,
+//   Go 1.26.11, methods Cache.table, Cache.Clear, Cache.Get, Cache.Put. The converted output with Go's comments.
+// - Cache.Register: INSPIRED BY src/crypto/internal/boring/bcache/cache.go, Go 1.26.11, method Cache.Register. The
+//   same registration with the runtime's pool clearing, without handing it a raw address.
 
 // Package bcache implements a GC-friendly cache (see [Cache]) for BoringCrypto.
 

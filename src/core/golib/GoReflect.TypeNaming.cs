@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2013 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - GoTypeName and its type-string helpers: INSPIRED BY src/go/types/typestring.go, Go 1.26.11, method
+//   typeWriter.typ. The same spelling rules for Go type strings, read from CLR types.
+// - package paths, qualified names and the CLR lookups: original go2cs code.
 
 // ReSharper disable InconsistentNaming
 

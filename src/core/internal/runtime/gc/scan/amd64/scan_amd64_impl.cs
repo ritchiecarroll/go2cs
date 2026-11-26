@@ -1,38 +1,38 @@
-// Copyright 2025 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-//
-// PROVENANCE — Go 1.26.11. This file holds managed bodies for three kernels that Go writes in assembly. Each one returns
-// what Go's kernel returns. Which part comes from where:
-//
-//   ExpandAVX512           DERIVED FROM src/internal/runtime/gc/scan/expand_reference.go, ExpandReference: the body
-//                          calls it. INSPIRED BY src/internal/runtime/gc/scan/scan_amd64.s, ExpandAVX512: the kernel
-//                          stores all 16 words of the output (two 64-byte stores), so the output is cleared first
-//                          rather than OR-ed into.
-//   scanSpanPackedAVX512   DERIVED FROM src/internal/runtime/gc/scan/scan_reference.go, ScanSpanPackedReference: the
-//                          walk over the span's words, in order. INSPIRED BY src/internal/runtime/gc/scan/scan_amd64.s,
-//                          scanSpanPackedAVX512: the word mask is objMarks EXPANDED (the expander ExpandAVX512 calls,
-//                          bounded by the span's object count) AND-ed with ptrMask, and each selected word is
-//                          compressed into the buffer in order, ZERO WORDS INCLUDED. It has no nil test; its caller
-//                          ScanSpanPackedAVX512 runs FilterNilAVX512 after it. The mask follows the assembly, not the
-//                          reference's unbounded per-word object test: for a mark bit at or past the object count,
-//                          the reference would scan the span's tail words (size 48: words 1020-1023) and the kernel
-//                          does not.
-//   FilterNilAVX512        INSPIRED BY src/internal/runtime/gc/scan/filter_amd64.s, FilterNilAVX512: an
-//                          ORDER-PRESERVING compaction of the non-zero words (VPCOMPRESSQ over 8-word frames, then a
-//                          scalar tail), here one scalar loop. Not derived from filter.go's FilterNil, which swaps from
-//                          the end and does not keep order. ScanSpanPackedAVX512's test compares against the reference
-//                          in ORDER, so the order is part of the contract.
-//
-// NOT REPRODUCED: the assembly's full-width stores also write lanes past the returned count (up to 7 words). Their
-// contents are unspecified and nothing reads them. This file writes only the words it returns.
-//
-// The rest of this file is original to go2cs:
-//
 // scan_amd64_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // SPDX-License-Identifier: BSD-3-Clause
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2025 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ExpandAVX512: DERIVED FROM src/internal/runtime/gc/scan/expand_reference.go, Go 1.26.11, func ExpandReference.
+//   The body calls it.
+// - ExpandAVX512's cleared output: INSPIRED BY src/internal/runtime/gc/scan/scan_amd64.s, Go 1.26.11, assembly
+//   routine ExpandAVX512. The kernel stores all 16 words of the output (two 64-byte stores), so the output is cleared
+//   first rather than OR-ed into.
+// - scanSpanPackedAVX512's walk: DERIVED FROM src/internal/runtime/gc/scan/scan_reference.go, Go 1.26.11, func
+//   ScanSpanPackedReference. The walk over the span's words, in order.
+// - scanSpanPackedAVX512's word mask: INSPIRED BY src/internal/runtime/gc/scan/scan_amd64.s, Go 1.26.11, assembly
+//   routine scanSpanPackedAVX512. objMarks EXPANDED (bounded by the span's object count) AND-ed with ptrMask, each
+//   selected word compressed into the buffer in order, ZERO WORDS INCLUDED, with no nil test (the caller
+//   ScanSpanPackedAVX512 runs FilterNilAVX512 after it). For a mark bit at or past the object count the reference
+//   would scan the span's tail words (size 48: words 1020-1023) and the kernel does not; this follows the kernel.
+// - FilterNilAVX512: INSPIRED BY src/internal/runtime/gc/scan/filter_amd64.s, Go 1.26.11, assembly routine
+//   FilterNilAVX512. An ORDER-PRESERVING compaction of the non-zero words (VPCOMPRESSQ over 8-word frames, then a
+//   scalar tail), here one scalar loop. Not derived from filter.go's FilterNil, which swaps from the end and does not
+//   keep order; ScanSpanPackedAVX512's test compares against the reference in ORDER.
+// - the rest of the file: original go2cs code.
+//
+// NOT REPRODUCED: the assembly's full-width stores also write lanes past the returned count (up to 7 words). Their
+// contents are unspecified and nothing reads them. This file writes only the words it returns.
 //
 // WHY MANAGED BODIES. The kernels are AVX-512 assembly (expand_amd64.s is generated by mkasm.go). The converted package
 // declares them as bodiless partials, and without these bodies each one would be a generated stub that throws. Go runs

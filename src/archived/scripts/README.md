@@ -11,5 +11,6 @@ for reference and still run from here: each one now finds `src/` two levels up.
 | `check-symbol-sync.bat` | Windows launcher for `src/check-symbol-sync.ps1` | nothing |
 | `set-version.bat` | Windows launcher for `src/set-version.ps1` | nothing |
 | `push-nuget.bat` | Windows launcher for `src/push-nuget.ps1` | nothing |
+| `migrate-gorelease.bat` | Windows launcher for `src/migrate-gorelease.ps1` | only that script's own skip list |
 
 To bring one back, `git mv` it to `src/` and undo its one-line root change (the `../..` it gained).

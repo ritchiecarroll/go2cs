@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ᴛInitArgs: INSPIRED BY src/runtime/runtime1.go, Go 1.26.11, func goargs. The same argslice, taken from the
+//   process command line in a module initializer.
+// - KernelArgv0: original go2cs code. Reads the kernel's argv[0].
 
 // The runtime's command-line snapshot, taken the way a managed program can take it — the exact
 // sibling of goenvs_impl.cs beside it, for the exact same reason.

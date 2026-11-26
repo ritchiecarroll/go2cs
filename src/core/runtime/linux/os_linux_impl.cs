@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ᴛInitBootstrapConstants, readTransparentHugePageSize, parseHugePageSize: INSPIRED BY src/runtime/os_linux.go, Go
+//   1.26.11, func osinit. The bootstrap constants osinit sets, in a module initializer.
+// - syscall_runtime_doAllThreadsSyscall and the Go* probes: original go2cs code. A refusal and test seams.
 
 // The bootstrap constants Go's linux osinit path sets and the managed runtime never reached
 // (increment 7 of the runtime row, 2026-09-05). This file has no `<name>.go` counterpart, so a

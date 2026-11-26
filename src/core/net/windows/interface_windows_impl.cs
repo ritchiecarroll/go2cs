@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2011 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - adapterAddresses: DERIVED FROM src/net/interface_windows.go, Go 1.26.11, func adapterAddresses. Go's
+//   buffer-growing call loop, with the adapter chain copied out of native memory.
+// - copyAdapterChain and the other copy*Chain helpers, managedSocketAddress, toRawSockaddrAny, copyNativeUtf16String,
+//   copyNativeAnsiString: original go2cs code. That copy.
 
 // Hand-written implementation of net.adapterAddresses -- the single producer behind EVERY Windows
 // interface and DNS-configuration answer the corpus can give. Four consumers read what it returns:

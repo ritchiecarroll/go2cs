@@ -226,6 +226,59 @@ func TestTestCsprojTemplateEmitsWellFormedXml(t *testing.T) {
 	}
 }
 
+// `dotnet test` on a converted test host (the .NET 11 usability pass, 2026-11-26, COORD's S4). The host is an Exe,
+// not a VSTest project, so the SDK's VSTest target restored 70 projects, ran nothing, printed nothing at the default
+// verbosity and exited 0, which a new user reads as a pass. The host's VSTest target, defined AFTER the Sdk.targets
+// import so it replaces the SDK's, fails the run and names what to run instead.
+func TestTestCsprojRefusesDotnetTestByName(t *testing.T) {
+	contents := renderTestCsprojTemplate()
+
+	sdkTargets := strings.Index(contents, `<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />`)
+	if sdkTargets < 0 {
+		t.Fatalf("test-csproj-template.xml does not import Sdk.targets explicitly; this guard needs the import to order the VSTest target after it")
+	}
+
+	vstest := strings.Index(contents, `<Target Name="VSTest"`)
+	if vstest < 0 {
+		t.Fatalf("test-csproj-template.xml defines no VSTest target: `dotnet test` on a converted test host runs nothing and exits 0")
+	}
+
+	if vstest < sdkTargets {
+		t.Errorf("the VSTest target precedes the Sdk.targets import, so the SDK's own VSTest target replaces it")
+	}
+
+	body := contents[vstest:]
+	if end := strings.Index(body, "</Target>"); end >= 0 {
+		body = body[:end]
+	}
+
+	if !strings.Contains(body, "<Error ") {
+		t.Errorf("the VSTest target does not fail the run: a message or warning still exits 0")
+	}
+
+	// Unconditional, both of them (P3's read, finding 3): a Condition on either would let the false pass back in.
+	if open := body[:strings.Index(body, ">")+1]; strings.Contains(open, "Condition=") {
+		t.Errorf("the VSTest target carries a Condition: %s", open)
+	}
+
+	if errorAt := strings.Index(body, "<Error "); errorAt >= 0 {
+		errorElement := body[errorAt:]
+		if end := strings.Index(errorElement, "/>"); end >= 0 {
+			errorElement = errorElement[:end]
+		}
+
+		if strings.Contains(errorElement, "Condition=") {
+			t.Errorf("the VSTest target's Error carries a Condition")
+		}
+	}
+
+	for _, want := range []string{"-test-action compare", "dotnet run --project", "GO2CS_MODULE_ROOT"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("the VSTest target's error does not name %q, the command to run instead", want)
+		}
+	}
+}
+
 // The CPU sampler opt-in (section 11.3 of docs/phase4/DESIGN-managed-profiling.md): the -tests host of a
 // tabled package sets <GoCpuProfiler>true</GoCpuProfiler>, and every test csproj carries the Import that
 // the property turns on; any other package's host sets nothing, so it carries neither the companion nor

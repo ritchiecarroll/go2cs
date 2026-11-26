@@ -3,6 +3,25 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2010 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Panicwrap: INSPIRED BY src/runtime/error.go, Go 1.26.11, func panicwrap. The same message for a value method
+//   called through a nil pointer.
+// - IntegerDivideByZero, NilPointerDereference: INSPIRED BY src/runtime/panic.go, Go 1.26.11, funcs panicdivide,
+//   panicmem. The same runtime error values.
+// - TypeAssertion: INSPIRED BY src/runtime/iface.go, Go 1.26.11, func panicnildottype. The same type-assertion error
+//   text.
+// - the other runtime error factories: original go2cs code.
 
 using System;
 using System.Diagnostics.CodeAnalysis;

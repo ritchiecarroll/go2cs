@@ -1,6 +1,18 @@
 // Copyright 2014 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - StartTrace, StopTrace, ReadTrace: INSPIRED BY src/runtime/trace.go, Go 1.26.11, funcs StartTrace, StopTrace,
+//   ReadTrace. The same trace contract over golib's managed execution tracer; Go's doc comments verbatim.
+// - traceClockUnitsPerSecond: INSPIRED BY src/runtime/tracetime.go, Go 1.26.11, func traceClockUnitsPerSecond. The
+//   same clock rate, from golib's tracer.
 
 using go;
 using go.golib;

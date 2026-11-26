@@ -1755,7 +1755,7 @@ by identity. A VARIADIC func type's tail is `params variadic<T>`, a byref-like t
 carry, so `MakeGoFuncDelegate` builds it through a typed family (`makeVariadicFunc{N}`/`makeVariadicAction{N}`,
 golib's `GoReflect.MakeVariadicDelegate.cs`), the reverse of `InvokeVariadic`'s call trampolines above; the
 invoker receives the variadic parameter as its packed slice.
-<!-- src/core/reflect/makefunc_impl.cs:67 `A VARIADIC func (isVariadic) is no longer refused here`. history: MakeFunc
+<!-- src/core/reflect/makefunc_impl.cs:75 `A VARIADIC func (isVariadic) is no longer refused here`. history: MakeFunc
      threw NotImplementedException for a variadic func type before that family existed. --> `makeMethodValue`'s identical
 `funcLayout` read deliberately stays auto: it is reachable only through `flagMethod`, which the
 bridge never sets (`Value.Method` binds the receiver into an ordinary delegate instead). With

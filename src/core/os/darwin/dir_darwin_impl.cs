@@ -1,6 +1,15 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - File.readdir: DERIVED FROM src/os/dir_darwin.go, Go 1.26.11, method File.readdir. Go's loop and comments, with
+//   readdir_r's entry buffer and out-pointer held in native memory.
+// - readdir_r_native, readdirRCall, GoReaddirRCall, ReadUInt64, ReadEntryName: original go2cs code. That native call
+//   and its decoding.
 using go;
 
 // Hand-finished conversion (Phase 4 — os operational on darwin).

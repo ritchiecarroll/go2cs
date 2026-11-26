@@ -3,6 +3,25 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notices they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2024 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - IsIdle: DERIVED FROM src/runtime/runtime2.go, Go 1.26.11, method waitReason.isIdleInSynctest. Go's table of idle
+//   wait reasons, whole.
+// - IncActive, DecActive, MaybeWakeLocked: INSPIRED BY src/runtime/synctest.go, Go 1.26.11, methods
+//   synctestBubble.incActive, synctestBubble.decActive, synctestBubble.maybeWakeLocked. The same counts and wake rule
+//   over golib's goroutines.
+// - the bubble's fake clock, Run, Wait and the rest: original go2cs code.
 
 using System;
 using System.Threading;
