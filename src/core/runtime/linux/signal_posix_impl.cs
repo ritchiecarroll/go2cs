@@ -1,6 +1,16 @@
 // Copyright 2012 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - sigenable, sigdisable, sigignore, dieFromSignal: INSPIRED BY src/runtime/signal_unix.go, Go 1.26.11, funcs
+//   sigenable, sigdisable, sigignore, dieFromSignal. The same install, removal and ignore of OS handlers, over .NET's
+//   PosixSignalRegistration.
+// - the start-up donor read, the signal map, throwFromSignal, installPosixSignal, InitPosixSignalBridge and the other
+//   helpers: original go2cs code. The bridge they stand on.
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using go;

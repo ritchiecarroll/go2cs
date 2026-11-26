@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - pointerMask: INSPIRED BY src/runtime/mbitmap.go, Go 1.26.11, func pointerMask. The same pointer bitmap, read from
+//   the type in place of the collector's metadata.
 
 // The GC pointer bitmap, answered from the TYPE rather than from the heap.
 //

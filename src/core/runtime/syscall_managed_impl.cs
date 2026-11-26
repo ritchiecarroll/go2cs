@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - entersyscall, reentersyscall, entersyscallblock, exitsyscall: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs
+//   entersyscall, reentersyscall, entersyscallblock, exitsyscall. The same status transitions and syscall frame
+//   record, with no P to hand off.
+// - enterSyscall, the syscall* forwarders, the callback enter and exit, and the Go* seams: original go2cs code.
+//   Helpers and test seams.
 
 // The entersyscall FAMILY -- entersyscall, reentersyscall, entersyscallblock, exitsyscall --
 // hand-owned (COORD ruling 2026-09-22; registered in manualConversionFuncs["runtime"]).
@@ -51,6 +64,11 @@ partial class runtime_package
     // the status before the P release, as Go orders it (COORD's Q2 ruling). The seam does golib's half today (a
     // returning main reads a goroutine inside a system call as not runnable), and is where an M:N scheduler releases
     // the P.
+    //
+    // The seam can refuse the entry (a transition already open: "already inside a native call"). Then the status moves
+    // back before the refusal propagates, so a refused entry leaves both halves as they were, as a refused exit does.
+    // Every caller enters OUTSIDE its try, so no exitsyscall runs for a refused entry; without the rollback the
+    // goroutine stayed _Gsyscall with no seam entered.
     private static void enterSyscall(NativeCallHint hint)
     {
         ж<g> gp = getg();
@@ -58,7 +76,15 @@ partial class runtime_package
         if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
             throw new PanicException($"runtime: entersyscall on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
 
-        GoNativeCall.Enter(hint);
+        try
+        {
+            GoNativeCall.Enter(hint);
+        }
+        catch
+        {
+            gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning);
+            throw;
+        }
     }
 
     // The mirror: the seam first (the P reacquired, under M:N), then the status. An exit from a status other than
@@ -144,15 +170,28 @@ partial class runtime_package
         if (entered == 0)
             return;
 
-        if ((entered & 2) != 0)
+        if ((entered & 2) == 0)
         {
-            ж<g> gp = getg();
-
-            if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
-                throw new PanicException($"runtime: a callback returns to native code on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+            GoNativeCall.ReturnToNative();
+            return;
         }
 
-        GoNativeCall.ReturnToNative();
+        ж<g> gp = getg();
+
+        if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
+            throw new PanicException($"runtime: a callback returns to native code on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+
+        // The seam can refuse (the callback left a native call of its own open); the status moves back first, as a
+        // refused entersyscall's does, so it matches the depth the refusal leaves.
+        try
+        {
+            GoNativeCall.ReturnToNative();
+        }
+        catch
+        {
+            gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning);
+            throw;
+        }
     }
 
     // TEST SEAMS (pinner_impl.cs's pattern; GolibTests is not in the InternalsVisibleTo grant).

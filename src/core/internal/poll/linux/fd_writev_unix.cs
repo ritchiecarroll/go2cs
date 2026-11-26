@@ -1,6 +1,12 @@
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - writev: DERIVED FROM src/internal/poll/fd_writev_unix.go, Go 1.26.11, func writev. Go's retry loop, with the
+//   iovec array marshalled by golib in place of the raw syscall.
 //go:build dragonfly || freebsd || linux || netbsd || (openbsd && mips64)
 
 // go2cs HAND-OWNED (whole-file replacement of the converted fd_writev_unix.go output) -- the

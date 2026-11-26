@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - AnyOverlap: INSPIRED BY src/vendor/golang.org/x/crypto/internal/alias/alias_purego.go, Go 1.26.11, func
+//   AnyOverlap. The same overlap test through golib's slice Overlaps in place of address ordering.
 
 // The vendored purego twin of crypto/internal/alias.AnyOverlap — golang.org/x/crypto's copy of the memory-ALIASING
 // predicate, reached by chacha20 (XORKeyStream) and chacha20poly1305 (Seal / Open) through InexactOverlap on every

@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - readCOFFSymbols, File.COFFSymbolReadSectionDefAux: DERIVED FROM src/debug/pe/symbol.go, Go 1.26.11, func
+//   readCOFFSymbols; method File.COFFSymbolReadSectionDefAux. Go's statements, with the aux record read through the
+//   primary record's layout instead of an unsafe re-view.
 
 // Hand-written implementations of debug/pe's COFF symbol reader pair — the two declarations whose
 // Go bodies re-VIEW one 18-byte symbol record as two struct shapes through unsafe.Pointer:

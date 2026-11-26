@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - pipe, read, write1: INSPIRED BY src/runtime/sys_darwin.go, Go 1.26.11, funcs pipe, read, write1. The same libc
+//   calls, made directly in place of the assembly trampolines.
 
 // The darwin run layer's increment 4 (2026-09-03): runtime's own pipe, read and write1 -- the three
 // primitives the async-signal-safe signal note (os_darwin.go: sigNoteSetup / sigNoteWakeup /

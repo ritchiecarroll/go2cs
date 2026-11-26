@@ -4,6 +4,21 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - CertGetCertificateChain, CertAddCertificateContextToStore, CertFreeCertificateContext, CertFreeCertificateChain,
+//   CertVerifyCertificateChainPolicy: INSPIRED BY src/syscall/zsyscall_windows.go (generated from the declarations in
+//   src/syscall/syscall_windows.go, whose notice this file carries), Go 1.26.11, funcs CertGetCertificateChain,
+//   CertAddCertificateContextToStore, CertFreeCertificateContext, CertFreeCertificateChain,
+//   CertVerifyCertificateChainPolicy. The native certificate structures are viewed and copied through managed
+//   mirrors.
+// - the view, copy and allocation helpers: original go2cs code.
 
 // Hand-written implementation of crypt32's CERTIFICATE-CHAIN seam -- the one call
 // crypto/x509's Windows system verifier is built on, and the only member of the syscall

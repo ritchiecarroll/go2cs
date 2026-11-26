@@ -1,0 +1,52 @@
+NOTICE file for go.lib, the go2cs runtime library (src/core/golib)
+
+go2cs (https://github.com/ritchiecarroll/go2cs)
+Copyright (c) 2018-2026 The go2cs Authors. All rights reserved.
+go.lib's own code is licensed under the MIT License; see the LICENSE file.
+
+-------------------------------------------------------------------------------
+
+Portions of go.lib are derived from the Go source code (https://github.com/golang/go),
+Go 1.26.11, which is licensed under the BSD 3-clause license
+(https://opensource.org/licenses/BSD-3-Clause):
+
+* NextSliceCap (slice.cs): derived from src/runtime/slice.go, func nextslicecap.
+
+* FinalizerBinding (GoReflect.FinalizerBinding.cs), TryBindFinalizerArgument and its
+  rejection texts: derived from src/runtime/mfinal.go, func SetFinalizer.
+
+* SyncTestBubble.IsIdle (runtime/SyncTestBubble.cs): derived from
+  src/runtime/runtime2.go, method waitReason.isIdleInSynctest.
+
+Each of these files names its derived parts in a PROVENANCE block in its header.
+Go's copyright notice, license conditions and disclaimer follow.
+
+-------------------------------------------------------------------------------
+
+Copyright 2009 The Go Authors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google LLC nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

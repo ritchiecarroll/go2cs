@@ -60,7 +60,7 @@ ONE stdlib, on disk and in any build; no path rewriting anywhere. Five kinds of 
 - **A hand-own that rewires ONE CALLER of a runtime door and leaves the DOOR ITSELF leaves a silent no-op
   for the next caller.** Rewire or RETIRE the door, and grep the callers of every door a hand-own retires.
   <!-- ⚠ 2026-09-13, C1 f9f41e8d8 §3, with COORD ruling `runtime/mcleanup.cs` a hand-own OWED rather than a
-  free add at H5. `mfinal.cs:496` rewired `SetFinalizer` to `GoFinalizerQueue.EnsureRunner`; `createfing`
+  free add at H5. `mfinal.cs:509` rewired `SetFinalizer` to `GoFinalizerQueue.EnsureRunner`; `createfing`
   at :182 was NEVER rewired and still starts the CONVERTED runner that :644 calls vestigial and the file
   header declares DEAD. 1.24's `mcleanup.cs` is one of 12 new files and its `AddCleanup` calls
   `createfing()` at :115 — so adding it as the plain auto makes `runtime.AddCleanup` compile, return a

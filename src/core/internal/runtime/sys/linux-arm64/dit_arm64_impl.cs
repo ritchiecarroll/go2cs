@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2024 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - EnableDIT, DITEnabled, DisableDIT: DERIVED FROM src/internal/runtime/sys/no_dit.go, Go 1.26.11, funcs EnableDIT,
+//   DITEnabled, DisableDIT. Go's bodies for an arch without DIT, given to the arm64 declarations.
 
 // internal/runtime/sys's three arm64 DIT primitives (dit_arm64.go declares them, dit_arm64.s sets and reads
 // PSTATE.DIT), bodied as Go's own no_dit.go bodies them for every arch without DIT: EnableDIT and DITEnabled

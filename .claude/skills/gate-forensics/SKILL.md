@@ -745,7 +745,7 @@ untrue. #6-#8 are other shapes, and re-running catches none of them.
      guarantee and writes the witness into the hand-own. Hand-own class, 2026-09-08, R, measured twice in one day
      on two different instruments: "census every `_impl.cs`" scanned 112 companions and missed the 44 whole-file
      `[module: GoManualConversion]` rewrites -- 156 hand-owns in all -- one of which declares a forced-init hook
-     (`crypto/internal/boring/bcache/cache.cs:50`); the ANSWER did not move and it gained a REASON, since bcache
+     (`crypto/internal/boring/bcache/cache.cs:59`); the ANSWER did not move and it gained a REASON, since bcache
      is one of the four hand-owned-by-consequence packages whose `package_info.cs` is never re-emitted, so it can
      never RECEIVE the relocation and the collision class is immune there BY CONSTRUCTION -- the difference
      between "I found nothing" and stating what the population DOES. The hop ladder's PREFLIGHT was blind the

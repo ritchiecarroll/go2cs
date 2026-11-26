@@ -120,7 +120,7 @@ function Get-StrippedGo([string]$Path) {
 # --- 1. Marker census: line-anchored, whole files, tracked files only -----------------------------
 Push-Location $core
 try {
-    $marked = @(git grep -l -E '^\s*\[module:\s*(go\.)?GoManualConversion\]' -- '*.cs' 2>$null) |
+    $marked = @(git grep -l -E '^[[:space:]]*\[module:[[:space:]]*(go\.)?GoManualConversion\]' -- '*.cs' 2>$null) |
         ForEach-Object { $_ -replace '/', '\' }
 } finally { Pop-Location }
 if ($marked.Count -eq 0) { throw 'marker census returned zero -- wrong directory or broken git grep' }
