@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2022 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - init: INSPIRED BY src/crypto/internal/fips140/nistec/p256.go, Go 1.26.11, func init. The same generator tables,
+//   decoded from the embedded bytes by go2cs's own loop rather than aliased.
 
 using System;
 using System.Buffers.Binary;

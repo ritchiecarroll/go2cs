@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - rtype.string: DERIVED FROM src/runtime/type.go, Go 1.26.11, method rtype.string. Go's body, after one added arm
+//   that names a descriptor synthesized from a managed type.
 
 // rtype.string (type.go) for descriptors synthesized from managed types.
 //

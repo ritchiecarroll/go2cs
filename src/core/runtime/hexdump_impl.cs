@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2025 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - hexdumpWords: DERIVED FROM src/runtime/hexdump.go, Go 1.26.11, func hexdumpWords. Go's body, with the symbolizer
+//   on the caller records in place of findfunc.
 
 // HAND-OWNED companion to hexdump.go -- hexdumpWords, with its symbolizer on the caller records.
 //

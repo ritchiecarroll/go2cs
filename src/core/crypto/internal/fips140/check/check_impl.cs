@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2024 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - init: DERIVED FROM src/crypto/internal/fips140/check/check.go, Go 1.26.11, func init. Go's statements except the
+//   section hash, which a CLR assembly has nothing to feed.
 
 using go;
 using go.golib;

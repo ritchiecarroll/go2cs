@@ -1,6 +1,14 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - Make, Pointer.Value: INSPIRED BY src/weak/pointer.go, Go 1.26.11, func Make; method Pointer.Value. Go's package
+//   and doc comments kept; the handle is a CLR weak reference in a canonical per-allocation table.
+// - handle and the canonical table: original go2cs code.
 
 /*
 The weak package is a package for managing weak pointers.

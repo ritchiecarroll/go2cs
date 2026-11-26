@@ -1,6 +1,16 @@
 // Copyright 2017 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - TestRunAtLowIntegrity, getProcessIntegrityLevel, tokenGetInfo, getIntegrityLevelToken: DERIVED FROM
+//   src/internal/syscall/windows/exec_windows_test.go, Go 1.26.11, funcs TestRunAtLowIntegrity,
+//   getProcessIntegrityLevel, tokenGetInfo, getIntegrityLevelToken. Go's test, with the token label marshalled
+//   natively.
+// - setTokenIntegrityLabel, tokenIntegrityLabelSid: original go2cs code. That marshalling.
 //go:build windows
 
 // Hand-owned: TestRunAtLowIntegrity's own local getIntegrityLevelToken hands the kernel

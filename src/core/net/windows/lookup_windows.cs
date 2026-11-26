@@ -1,6 +1,15 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - The package: DERIVED FROM src/net/lookup_windows.go, Go 1.26.11, funcs winError, getprotobyname, lookupProtocol,
+//   validRecs, resolveCNAME, concurrentThreadsLimit; methods Resolver.lookupHost, Resolver.lookupIP,
+//   Resolver.lookupPort, Resolver.lookupCNAME, Resolver.lookupSRV, Resolver.lookupMX, Resolver.lookupNS,
+//   Resolver.lookupTXT, Resolver.lookupAddr. The converted output with Go's comments; the six DNS record payload
+//   reads go through the native record copies.
 
 // HAND-OWNED COMPANION to syscall/windows/zsyscall_windows_dnsrecord_impl.cs. Only the SIX record
 // payload reads differ from the auto-conversion; everything else is the converter's own emission.
@@ -52,7 +61,7 @@
 // hand-owned file. One table entry per statement, each followed by a zero entry, so every other
 // line of the file still reports its own C# position. repoguard's TestHandOwnedGoStatementsMapToGo
 // checks it.
-[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs", "AHNwAABvAJAByAIAAMcC")]
+[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs", "AHxwAABvAJAByAIAAMcC")]
 
 namespace go;
 

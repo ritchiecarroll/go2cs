@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - GetCommandLine: INSPIRED BY src/syscall/zsyscall_windows.go (generated from the declarations in
+//   src/syscall/syscall_windows.go, whose notice this file carries), Go 1.26.11, func GetCommandLine. The same
+//   command line, with the dotnet muxer prefix removed.
+// - snapshotCommandLine, muxerPrefixLength and the Go* probes: original go2cs code.
 
 // syscall.GetCommandLine on Windows: the PROGRAM's command line, also under the `dotnet prog.dll` muxer (C44).
 //

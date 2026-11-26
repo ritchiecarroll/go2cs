@@ -1,6 +1,11 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - Once.Do, Once.doSlow: DERIVED FROM src/sync/once.go, Go 1.26.11, methods Once.Do, Once.doSlow.
 using go;
 
 // Hand-finished conversion (joins sync's Mutex/RWMutex/WaitGroup/Pool/Cond hand-owns). The one

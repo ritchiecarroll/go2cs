@@ -6,7 +6,7 @@
 .DESCRIPTION
     The marker census is H6's own predicate, line-anchored and whole-file, over tracked .cs under src/core:
 
-      git grep -l -E '^\s*\[module:\s*(go\.)?GoManualConversion\]' <sha> -- 'src/core/*.cs'
+      git grep -l -E '^[[:space:]]*\[module:[[:space:]]*(go\.)?GoManualConversion\]' <sha> -- 'src/core/*.cs'
 
     The population is the MARKED set only. *_impl.cs companions are outside it, as ruled 2026-10-12
     (AUDIT-h6-handown-go124 OQ-1, ruled OUT): a deleted companion leaves its partial declarations without
@@ -44,7 +44,7 @@ if (-not $Out) {
     $Out = Join-Path $root 'src/go2cs/internal/repoguard/testdata/handowns-baseline.txt'
 }
 
-$predicate = '^\s*\[module:\s*(go\.)?GoManualConversion\]'
+$predicate = '^[[:space:]]*\[module:[[:space:]]*(go\.)?GoManualConversion\]'
 $union = New-Object 'System.Collections.Generic.SortedSet[string]' ([System.StringComparer]::Ordinal)
 $header = New-Object System.Collections.Generic.List[string]
 [void]$header.Add('# The retired-hand-own guard''s baseline (GoCorpusMigration.md H6, "Durable form").')

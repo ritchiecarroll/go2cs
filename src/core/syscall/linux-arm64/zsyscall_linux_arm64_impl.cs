@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Fstat, fstatat: DERIVED FROM src/syscall/zsyscall_linux_arm64.go (generated from the declarations in
+//   src/syscall/syscall_linux_arm64.go, whose notice this file carries), Go 1.26.11, funcs Fstat, fstatat. The kernel
+//   stat is read into a native buffer and copied into Stat_t.
+// - copyNativeStat, GoNativeStatLayoutProbe, offsetIn, selectTrap: original go2cs code.
 
 // linux/arm64's Fstat and fstatat: the struct-passing class's first members (its write-up is the header of
 // linux-amd64/zsyscall_linux_amd64_impl.cs), with arm64's own `struct stat` (S3, the zsyscall twin:
