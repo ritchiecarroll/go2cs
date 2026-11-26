@@ -1142,10 +1142,30 @@ func (m *ModuleConverter) generateRecurseBuildFiles() {
 		"  <PropertyGroup Condition=\"'$(OutputType)' == 'Library'\">",
 		"    <IsPublishable>false</IsPublishable>",
 		"  </PropertyGroup>",
-		"",
-		"</Project>",
-		"",
 	}
+
+	// The restore half of the platform default. The props hand GoTargetOS/GoTargetArch to the referenced runtime
+	// projects through ProjectReference metadata, which the BUILD honors and NuGet's restore walk does not: the walk
+	// evaluates each referenced project with only the properties named in _GenerateRestoreGraphProjectEntryInputProperties.
+	// So a fresh tree restored runtime as windows, never restored the projects it references only for linux, and the
+	// build then stopped on NETSDK1004 for each (internal/runtime/cgroup, internal/runtime/syscall/linux,
+	// internal/syscall/unix). Appending the two values to that property makes the walk, and the restore graph built
+	// from it, evaluate every reference at the flavour the build uses. It is NuGet's own property (NuGet.targets appends
+	// solution properties to it the same way); NuGet.targets is imported before this file, and a Directory.Build.rsp
+	// would reach the command line alone, never an IDE's restore.
+	if !m.options.nugetRefs && len(recurseTargetPlatformLines(m.options.targetPlatform)) > 0 {
+		targetsLines = append(targetsLines,
+			"",
+			"  <!-- NuGet's restore walk evaluates referenced projects without ProjectReference metadata, so the platform the",
+			"       props hand down is handed to the restore too: a fresh tree otherwise restores the windows flavour and",
+			"       the build stops on NETSDK1004 for each project the runtime references only on the target platform. -->",
+			"  <PropertyGroup Condition=\"'$(GoTargetOS)' != '' and '$(GoTargetArch)' != ''\">",
+			"    <_GenerateRestoreGraphProjectEntryInputProperties>$(_GenerateRestoreGraphProjectEntryInputProperties);GoTargetOS=$(GoTargetOS);GoTargetArch=$(GoTargetArch)</_GenerateRestoreGraphProjectEntryInputProperties>",
+			"  </PropertyGroup>",
+		)
+	}
+
+	targetsLines = append(targetsLines, "", "</Project>", "")
 
 	m.writeRecurseBuildFile(filepath.Join(root, "Directory.Build.props"), propsLines)
 	m.writeRecurseBuildFile(filepath.Join(root, "Directory.Build.targets"), targetsLines)
