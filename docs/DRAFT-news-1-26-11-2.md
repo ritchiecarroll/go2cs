@@ -177,9 +177,10 @@ and more of Go's own test suites match their Go results.
   <!-- 2026-11-26 (P4): train 14, merges ee5f90adc4 (claude/h-cgo-res-ptr-r6 32d3a5436a: cgo 3.4 seats 4a/4c and the
        struct image door) and 6e69ce74ac (claude/h-cgo-res-ptr-r7 3471d8820e: the larger second view refused,
        same-root sharing). -->
-- **[QUEUED claude/h-cgo-s4-r3 3450839689]** **Go memory handed to C as `void *` under `-cgo`.** A number made from Go
+- **[PENDING claude/h-cgo-s4-r3]** **Go memory handed to C as `void *` under `-cgo`.** A number made from Go
   memory and passed to a `void *`, `uintptr_t` or `intptr_t` parameter crosses back to the memory it came from.
-  <!-- 2026-11-26 (P4): train 15 (assembled 092e546f26). Flip to LANDED with the train's merge. -->
+  <!-- 2026-11-26 (P4): was QUEUED for train 15 (assembled 092e546f26); train 15 was re-assembled without it at
+       05a60b597d (COORD FLEET 13:29Z), and S4 moves to train 16 with S6. Drop the bullet if it misses the release. -->
 - **[PENDING claude/h-cgo-s6-r6]** **`runtime.Pinner` under `-cgo`.** A pinned Go value handed to C stays where C
   can keep it, and a pinned slot at a door that cannot honour the pin is refused.
   <!-- 2026-11-26 (P4): cgo S6, tip 0256e76fb6, not in a train at d6805be2e8. Drop the bullet if it misses. -->
