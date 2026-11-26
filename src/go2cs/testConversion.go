@@ -3188,6 +3188,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		seedProductionAliasLifts(pkg, productionInfoPath)
 		seedProductionInterfaceAliases(pkg, productionInfoPath, options)
 		seedProductionDynamicTypeLifts(productionInfoPath)
+		seedProductionArrayDimsCompanions(productionInfoPath)
 	}
 
 	// The EXTERNAL variant additionally inherits the INTERNAL variant's purely-anonymous lifts.

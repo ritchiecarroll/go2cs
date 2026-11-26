@@ -1053,12 +1053,9 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 		}
 
 		// THE ARRAY-DIMS COMPANION'S SUPPLY: one argument per carrying type parameter, after the
-		// descriptor companions, in declared order (arrayDimsCompanion.go).
-		for _, index := range v.arrayDimsCompanionParams(funcObj) {
-			if index < typeArgs.Len() {
-				names = append(names, v.arrayDimsCompanionArg(typeArgs.At(index)))
-			}
-		}
+		// descriptor companions, in declared order; for an additive overload only when the call has
+		// dims to pass (arrayDimsCompanion.go).
+		names = append(names, v.arrayDimsCompanionSupply(funcObj, typeArgs)...)
 	}
 
 	return names

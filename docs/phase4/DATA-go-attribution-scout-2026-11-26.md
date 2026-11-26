@@ -563,3 +563,20 @@ Correction: the four `docs/PLAN-*.md` files and `docs/DESIGN-aeshash-arm64.md` c
 not move. Step 2 had moved 26 of its 114 citations in those five files (one of them, a `:31` continuation in
 PLAN-cgo-interop, onto the wrong file); those five files are restored to their base text, which leaves 88 step 2
 citations, all in living docs, `.claude` rules and skills, and code comments.
+
+## Master merge after train 15 (amended 2026-11-26)
+
+<!-- P5. Master 51f4d4b37a merged into the seat at 773508cb86. -->
+
+Train 15 touched three things the sweep owns. (1) `docs/ConversionStrategies.md`: one conflict, where master
+re-cited `visitFuncDecl.go` and the seat re-cited `testing.cs`; both moves kept. (2) R's
+`internal/cpu/amd64/cpu_x86_impl.cs` gained a second attribution block above the go2cs notice
+(`// PROVENANCE — Go 1.26.11 ...`), in another shape from the seat's block below it. The merge was clean and left
+the file with two Go notices and two blocks that disagreed (the seat had missed `cpuid`; R named it, and
+`getGOAMD64level` as following cpu_x86.s). Resolved to one block in the sweep's shape carrying R's parts:
+`cpuid` and `getGOAMD64level` INSPIRED BY `src/internal/cpu/cpu_x86.s`, the HasAVX512BITALG read DERIVED FROM
+doinit. (3) The new `internal/runtime/gc/scan/amd64/scan_amd64_impl.cs` carried the same other shape; it now
+has the sweep's shape with R's parts and notes unchanged, in the same number of lines.
+The guard read neither file, because it checked only a block under the two exact headings. It now refuses a
+`// PROVENANCE` heading in any other shape; a fixture covers it, and master's scan_amd64_impl.cs put back made it
+fail naming the file (restored, sha256 checked).

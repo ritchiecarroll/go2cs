@@ -519,6 +519,25 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
+// TypeFor with an ARRAY-DIMS companion: the length of an unnamed array type argument, which a type
+// alone cannot carry here. C# spells every Go [N]E as the one array<E>, so TypeFor<array<E>>() has no
+// length and refuses Size(), Len() and ArrayType() by name. The converter supplies a dims phantom
+// (`ᴀ2`, `ᴀ2_3`) only for an unnamed array type argument, and golib's ᴀnone otherwise, which answers
+// exactly what TypeFor<T>() answers. With dims the answer is the interned descriptor a live [N]E value
+// of the same type answers (synthType interns on the dims values, never on the phantom type, so two
+// assemblies' equal phantoms reach one box). Dims for a T that is not an array panic by name rather
+// than intern a descriptor for a type that does not exist. See arrayDimsCompanion.go in the converter
+// and docs/phase4/DESIGN-array-type-argument-length.md.
+public static ж<Type> TypeFor<T, Tᴀ>() where Tᴀ : IGoArrayDims {
+    if (Tᴀ.Dims.Length == 0) {
+        return TypeFor<T>();
+    }
+    if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(array<>)) {
+        throw panic($"abi.TypeFor: array dims [{string.Join(",", Tᴀ.Dims)}] for {typeof(T)}, which is not an array");
+    }
+    return synthType(typeof(T), Tᴀ.Dims);
+}
+
 internal static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<InterfaceType>> s_interfaceTypes = new();
 
 } partial class abiᴛType {
