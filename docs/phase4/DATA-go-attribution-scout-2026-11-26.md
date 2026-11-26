@@ -397,3 +397,118 @@ already opens with Go's notice keeps it where it is and takes only the PROVENANC
 - **Q4, glue.** 54 files only give bodies to bodyless Go declarations (linkname pushes, assembly funcs).
   Recommended: own, header unchanged, unless the step 2 read finds the body follows the pushing Go function, in
   which case that function is the one cited.
+
+## Step 2 results (amended 2026-11-26)
+
+<!-- P5, step 2 of the sweep, under COORD 20261126T055140Z (GO) and 20261126T061317Z (Q2 owner ruling).
+     P3 findings F1-F5 on the scout applied. Base d6805be2e8. -->
+
+**What was done.** Every one of the 242 hand-owned files in the pre-sort was read against its Go source (F1).
+Each verdict was written as one block of a spec, and every Go name the spec cites is checked against the Go
+file it names before a header is written, so a bullet cannot cite a function that file does not declare (F5).
+
+| Outcome | Files |
+|---|---|
+| Header added, whole file derived from Go | 27 |
+| Header added, whole file inspired by Go | 18 |
+| Header added, whole file derived and inspired in parts | 9 |
+| Header added, mixed: Go parts plus original go2cs code (part by part) | 94 |
+| **Headed** | **148** |
+| Own or glue, header unchanged (Q4) | 93 |
+| Only bodies for bodyless Go declarations plus original code, header unchanged | 1 |
+| Skipped: `internal/cpu/darwin/cpu_arm64_darwin_impl.cs`, whose header the darwin/arm64 branch carries | 1 |
+| **Total** | **242** |
+
+The pre-sort's buckets (derived 55, mixed 72, inspired 26, own 35, own-glue 54) moved after reading: the
+classifier counted as derived any body that keeps Go's names and guards, and many of those bridge the rest
+with go2cs's own code, which makes them mixed.
+
+**Header shape.** Inserted under the go2cs notice, comments only:
+
+- one lead sentence naming what the file is derived from or inspired by and the license of record;
+- each distinct notice once, verbatim from the Go file followed, unless it is already in the file's head (F2);
+- `// PROVENANCE:` or `// PROVENANCE, part by part:`, then one bullet per part. Each Go bullet names the C#
+  members, `DERIVED FROM` or `INSPIRED BY`, the GOROOT-relative `src/...` path, the Go version and the Go
+  functions, methods, assembly routines or C functions followed. Original parts say "original go2cs code".
+
+`reflect/value_impl.cs` had a one-paragraph `// Provenance:` note; the new block replaces it (the 13 deleted
+lines of the diff). Q1 files carry the notice of the Go file holding the `//sys` declarations and name the
+generated `zsyscall_*.go` file in the bullet. The 4 fiat files carry fiat-crypto's notice and disclaimer
+verbatim, and the new `LICENSES/BSD-1-Clause.txt` holds that text. Per the owner's Q2 ruling ("Notice in files
+only"), no `.csproj`, nuspec or `PackageLicenseExpression` changed.
+
+**Version check (F4).** Each Go part was compared against Go 1.23.12, 1.24.13, 1.25.14 and 1.26.11. A part
+whose C# follows an older release's text carries that release:
+
+| Part | Version | Reason |
+|---|---|---|
+| `os/wait_waitid.go` `Process.blockUntilWaitable` | 1.23.12 | the raw waitid loop; 1.26.11 calls `unix.Waitid` |
+| `sync/oncefunc.go` `OnceFunc`, `OnceValue`, `OnceValues` | 1.24.13 | the 1.24 body shape |
+| `internal/syscall/windows` zsyscall: `NetShareAdd`, `Module32First/Next`, `NtCreateFile/NtOpenFile`, `adjustTokenPrivileges`, `NetUserGetLocalGroups`, `WSAGetOverlappedResult` (6 parts) | 1.24.13 | the generated `Syscall(proc.Addr(), n, ...)` form, changed at 1.25 |
+| `syscall` zsyscall: `ConvertSidToStringSid`, `ConvertStringSidToSid`, `NetGetJoinInformation`, `NetUserGetInfo`; `getStartupInfo` (2 parts) | 1.24.13 | same |
+| `registry_test.go` `testGetStringsValue` | 1.24.13 | compares with the file's own `equalStringSlice` |
+
+That is 11 pinned parts. In `syscall/windows/dll_windows.cs`, `Syscall` through `Syscall18` and `SyscallN`
+are original go2cs code: they were written as forwarders while Go declared them bodyless (through 1.25.14).
+Every other part follows 1.26.11. `docs/GoCorpusMigration.md` gains a paragraph on when a hand-own's
+version moves: only when the hand-own is re-read at a hop.
+
+**Guard (F3).** `TestLicensingGoProvenanceHeaders` (`src/go2cs/licensing_test.go`) walks `src/core` outside
+golib and the generated trees. Every file with a PROVENANCE block must carry a Go notice (or fiat-crypto's),
+name a license of record that exists under `LICENSES/`, and every DERIVED FROM / INSPIRED BY bullet must name a
+`src/...` `.go`, `.s` or `.c` path and a Go version. Seven fixtures cover the accept and refuse cases. Regress
+control on the real tree: deleting the Go copyright line in `time/sleep_impl.cs` and the version from the first
+bullet of `runtime/profbuf_impl.cs` made the guard fail naming both files (no Go notice; a bullet with no Go
+version). Both were restored from copies and checked by sha256 (`3d604e3e...` and `a3dfe325...`), and the
+guard passed again. The guard cannot tell whether a version is current; that stays with the hop runbook.
+
+**Line-number drift.** A header moves every line below it, and three things read line numbers in these files.
+The first gate run (repoguard) named two of them. (1) Two hand-owns, `net/windows/lookup_windows.cs` and
+`sync/waitgroup.cs`, carry a hand-kept `GoPositionMap` record that maps each `goǃ(` line to its Go `go`
+statement; both tables were re-encoded with every C# line moved down by the 9 header lines (`AHNwAABvAJAByAIAAMcC`
+to `AHxwAABvAJAByAIAAMcC`, `AP0B3AMAANsD` to `AIYC3AMAANsD`; decoded before and after, Go lines unchanged). These
+two attribute lines are the only non-comment lines in the src/core diff. (2) 34 provenance notes in the
+published docs cite moved lines with a quote or fingerprint. (3) 8 code-sample source comments cite moved
+lines (`TestDocsSamplesHoldTheirLines` reads HEAD, so it shows only once the headers are committed;
+`docsamples -base WORKTREE -recite -check` showed them before). Every citation of a headed file outside the
+records (`docs/phase3`, `docs/phase4`, `docs/doctrine`, `docs/validation`, and the disclosure JSON prose) was
+moved by its file's diff: 99 citations in docs, `.claude` rules and skills, and code comments, each checked to
+name the same text at HEAD and in the worktree (the 3 that quote a re-encoded record line were moved by hand).
+20 citations name a file by a bare name that matches more than one file and were left as they were; the ones
+checked (`runtime2.cs`, `godebug.cs`, `sync/mutex.cs`, `unsafe.cs`) already pointed at other text at base. The disclosure records'
+prose cites `testing.cs` and `unsafe.cs` lines too; no disclosure SIGNATURE carries a C# line, so matching is
+unaffected, and the prose and the proof pages built from it move at the next bank.
+
+### Q3: golib's 22 name-match files, read one by one
+
+For COORD's ruling. No golib file was changed. "Derived" means Go's statements in Go's order; "inspired" means
+the same contract in go2cs's own shape; "cites only" means the name match is a coincidence or a reference.
+
+| golib file | Verdict | Go source followed |
+|---|---|---|
+| `GoReflect.FinalizerBinding.cs` | **derived (part)** | `runtime/mfinal.go` `SetFinalizer`: the binding switch and its messages, transcribed |
+| `slice.cs` | **derived (part)** | `runtime/slice.go` `nextslicecap`, statement by statement, in `NextSliceCap` |
+| `runtime/SyncTestBubble.cs` | **derived (part)** + inspired | `runtime/runtime2.go` `isIdleInSynctest` whole in `IsIdle`; `incActive`, `decActive`, `maybeWakeLocked` inspired |
+| `GoLibcCall.cs` | inspired | `runtime/sys_darwin.go` syscalln errno rule |
+| `GoMemProfile.cs` | inspired | `runtime/malloc.go` `mallocgc` profiling branch, `nextSample`, `profilealloc` |
+| `GoReflect.TypeNaming.cs` | inspired | `go/types/typestring.go` |
+| `GoReflect.ValueMarshalling.cs` | inspired | `reflect/type.go`, `reflect/value.go`; already carries Go's notice and a provenance line (2 copied lines) |
+| `PanicException.cs` | inspired | `runtime/panic.go` `preprintpanics` |
+| `builtin.WindowsLongPaths.cs` | inspired | `runtime/os_windows.go` `initLongPathSupport` |
+| `channel.cs` | inspired | `runtime/chan.go` `chansend`, `chanrecv`, `send`, `recv` |
+| `runtime/CrashReport.cs` | inspired | `runtime/panic.go` `printpanics` |
+| `runtime/ExecutionTracer.cs` | inspired | `runtime/trace.go` `StopTrace`, `ReadTrace`; `runtime/tracetime.go` `traceSyncBatch` |
+| `runtime/Goroutine.cs` | inspired | `runtime/proc.go` `gopark` accounting, `gcount` |
+| `runtime/RuntimeErrorPanic.cs` | inspired | `runtime/error.go` `panicwrap`; `runtime/panic.go` `panicdivide`, `panicmem`; `runtime/iface.go` `panicnildottype` |
+| `runtime/RuntimeSemaphore.cs` | inspired | `runtime/sema.go` `cansemacquire`, `semaRoot` queue and dequeue, `semacquire1` order |
+| `stackAppend.cs` | inspired | `cmd/compile` ssagen stack-append backing store |
+| `string.cs` | inspired | `runtime/string.go` `concatstrings` |
+| `GoReflect.MethodSets.cs` | cites only | the matches are LINQ `Select` and `Expression.Convert` |
+| `GoStructSynthesis.cs` | cites only | the matches are the words "name" and "string" in comments |
+| `runtime/MainExit.cs` | cites only | the match is the word "read" in comments |
+| `builtin.cs` | cites only | `fatal` is go2cs's own method; `printpointer` is named in one comment |
+| `ж.cs` | cites only | the match is `String()` in a doc comment |
+
+Tally: 3 files hold derived parts, 14 are inspired, 5 cite only. The three derived parts are the ones where
+Go's notice would apply most clearly; whether that means a header in golib, which packs only its MIT LICENSE,
+is the ruling Q3 left open.
