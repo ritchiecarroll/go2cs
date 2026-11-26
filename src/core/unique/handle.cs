@@ -32,9 +32,12 @@ internal static T Value⁔<T>(/*this*/ Handle<T> h) {
 // Make returns a globally unique handle for a value of type T. Handles
 // are equal if and only if the values used to produce them are equal.
 // Make is safe for concurrent use by multiple goroutines.
-public static Handle<T> Make<T>(T value) {
+public static Handle<T> Make<T>(T value) => Make<T, ᴀnone>(value);
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static Handle<T> Make<T, Tᴀ>(T value)
+    where Tᴀ : IGoArrayDims
+{
     // Find the map for type T.
-    var typ = abi.TypeFor<T>();
+    var typ = abi.TypeFor<T, Tᴀ>();
     if (typ.Size() == 0) {
         return new Handle<T>(Ꮡzero.Reinterpret<uintptr, T>());
     }

@@ -138,4 +138,10 @@ To build the whole converted standard library in Visual Studio, open the
 
 Contributors: start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md),
 then see [`Architecture.md`](Architecture.md), [`ConversionStrategies.md`](ConversionStrategies.md) and
-[`Roadmap.md`](Roadmap.md) for details. There's plenty of low-hanging fruit here; jump in if you'd like to help.
+[`Roadmap.md`](Roadmap.md) for details.
+
+The most useful help right now is running go2cs on your own Go code. When the C# fails to build, or
+behaves differently from Go, a small program that reproduces it makes the best
+[issue](https://github.com/ritchiecarroll/go2cs/issues/new/choose). [Known Issues](KnownIssues.md) and
+[Limitations](Limitations.md) list what is already known. For anything sizable, start a
+[Discussion](https://github.com/ritchiecarroll/go2cs/discussions) first so we can agree on an approach.

@@ -335,6 +335,12 @@
          AfterFunc inside a bubble, through its converted public surface over time_impl.cs. -->
     <ProjectReference Include="..\..\core\time\time.csproj" />
 
+    <!-- ScanAvx512KernelTests: internal/runtime/gc/scan's three AVX-512 kernels (managed bodies in
+         amd64/scan_amd64_impl.cs) against the package's own reference implementations, and
+         CanAVX512() against the hardware (internal/cpu's BITALG read). -->
+    <ProjectReference Include="..\..\core\internal\runtime\gc\scan\internal.runtime.gc.scan.csproj" />
+    <ProjectReference Include="..\..\core\internal\runtime\gc\internal.runtime.gc.csproj" />
+
     <!-- The synctest pull guards (SyncTestPullsTests) call internal/synctest's converted surface
          (Run, Wait, Acquire, Bubble.Release, Bubble.Run) over its hand-owned companion. -->
     <ProjectReference Include="..\..\core\internal\synctest\internal.synctest.csproj" />

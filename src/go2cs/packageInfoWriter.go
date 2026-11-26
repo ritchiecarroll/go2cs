@@ -420,6 +420,12 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			lines.Add(record)
 		}
 
+		// Publish every exported generic that gained an array-dims overload (see GoArrayDimsCompanionAttribute),
+		// so a consumer in another assembly supplies dims to it and no consumer re-derives the overload.
+		for _, record := range publishedArrayDimsCompanionRecords() {
+			lines.Add(record)
+		}
+
 		// Sort lines
 		sortedLines := lines.Keys()
 		sort.Strings(sortedLines)
