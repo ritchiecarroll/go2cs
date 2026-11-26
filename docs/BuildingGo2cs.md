@@ -138,6 +138,11 @@ the first project by name, a class library, and keeps your choice per user in `.
 a program, such as `BehavioralRunner` or any behavioral test, and choose **Set as Startup Project**. The standard
 library solution holds only libraries, so it has nothing to start.
 
+In VS Code, open the repository root: the committed `.vscode/settings.json` selects `src/go2cs.slnx` as
+the C# Dev Kit's solution (opening `src/` selects it too), and **Terminal > Run Build Task** builds it. The Go
+extension's workspace leaves out the behavioral tests, the converted standard library, the archived examples and
+`docs/`, whose small Go modules would otherwise fill its views; open one of those folders on its own to work in it.
+
 ## Contributing
 
 Contributors: start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md),
