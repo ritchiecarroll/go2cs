@@ -520,10 +520,10 @@ func (v *Visitor) writeImportInit(csNamespace string) {
 // the instance.
 //
 // Only a TYPE occludes: `typeof(a.b)` is a namespace-or-type-name, and that lookup considers types
-// and namespaces alone, so a same-named func/var/const is irrelevant. And only a type emitted into
-// THIS class occludes — packageScopeClassName answers which class declares a package-level object,
-// so a production type does not qualify a hook written into the test-variant class (and vice
-// versa), keeping the `-stdlib` and `-tests` emissions of the production files identical.
+// and namespaces alone, so a same-named func/var/const is irrelevant. A TEST type occludes only a hook
+// written into its own class — packageScopeClassName answers which class declares a package-level
+// object — so it does not qualify a production hook, keeping the `-stdlib` and `-tests` emissions of
+// the production files identical. A PRODUCTION type occludes a hook in every unit (see the body).
 //
 // SINCE THE RELOCATION the hook is written into the emission unit's metadata file, not into the
 // file whose import spec produced it, so `emittedClassName` answers for the hook's HOME class only
@@ -549,11 +549,39 @@ func (v *Visitor) forcingTargetShadowed(csNamespace string) bool {
 		leadSegment = csNamespace[:dot]
 	}
 
-	// The emitted C# name is the sanitized form of the Go identifier (`internal` -> `@internal`), so
-	// compare against the sanitized spelling of each package-level type name rather than trying to
-	// unmake the escape.
-	for _, name := range v.pkg.Scope().Names() {
-		object := v.pkg.Scope().Lookup(name)
+	// A PRODUCTION type occludes a hook in every unit, the test variants' included: once a metadata file
+	// carries method forwarders, insertForwarderAliasDirectives repeats its `using static <pkg>_package;`
+	// lines inside the namespace declaration, and C# searches a namespace declaration's own usings before
+	// the enclosing namespace's members, so the production class's nested type wins over `go.<segment>`
+	// (net/url: `type encoding` against the internal tests' hook for encoding/json, CS0426). A TEST type
+	// still occludes only in its own class, so the production files' `-stdlib` and `-tests` emissions stay
+	// identical. The external variant is a package of its own, so its production package's scope is read
+	// from its imports.
+	if v.typeNamedInScope(v.pkg.Scope(), leadSegment, func(object types.Object) bool {
+		return !v.declaredInTestFile(object) || v.packageScopeClassName(object) == v.emittedClassName
+	}) {
+		return true
+	}
+
+	if v.options.testExternalVariant && v.options.testProductionPath != "" {
+		for _, imported := range v.pkg.Imports() {
+			if imported.Path() == v.options.testProductionPath {
+				return v.typeNamedInScope(imported.Scope(), leadSegment, func(object types.Object) bool {
+					return !v.declaredInTestFile(object)
+				})
+			}
+		}
+	}
+
+	return false
+}
+
+// typeNamedInScope reports whether scope declares a type whose emitted name is leadSegment and occludes
+// says it shadows. The emitted C# name is the sanitized form of the Go identifier (`internal` ->
+// `@internal`), so the comparison is against the sanitized spelling rather than an unmade escape.
+func (v *Visitor) typeNamedInScope(scope *types.Scope, leadSegment string, occludes func(types.Object) bool) bool {
+	for _, name := range scope.Names() {
+		object := scope.Lookup(name)
 
 		if _, isType := object.(*types.TypeName); !isType {
 			continue
@@ -563,7 +591,7 @@ func (v *Visitor) forcingTargetShadowed(csNamespace string) bool {
 			continue
 		}
 
-		return v.packageScopeClassName(object) == v.emittedClassName
+		return occludes(object)
 	}
 
 	return false

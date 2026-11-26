@@ -445,6 +445,21 @@ In three, Go proceeds and go2cs refuses the call when it is made:
      slice 0, defer 9, go 0 over GOROOT's 29 cgo packages (50 of the 81 checked calls that pass no element of a
      slice or an array take the variable check). -->
 
+**A Go struct viewed as a C struct crosses as an image, and C's writes land when the call returns.** A struct
+pointer that views a Go struct of another type which holds an array (net's
+`(*C.struct_sockaddr)(unsafe.Pointer(&sa))`, `sa` a `syscall.RawSockaddrInet4`) has no storage go2cs can hand C, so
+go2cs hands C an image of the whole Go struct, at Go's own offsets, and decodes it back after the call. It decodes
+only when C changed the image, so C's write lands in the Go struct when the call returns, not while C runs:
+- a goroutine that reads the struct during a blocking call sees the old value;
+- if C and a goroutine both write it during the call, C's write wins at the return;
+- a `bool` C writes as a byte other than 0 or 1 reads back as `true`.
+
+Three views of one Go value in one call share one image, as Go's one memory does. One Go value handed to C both as
+such a view and through another pointer of the same call is refused by name, and so is a view of a Go struct that
+holds a Go pointer.
+<!-- cgo Phase 3, increment 3.4, the struct image door: docs/phase4/DESIGN-cgo-phase3-marshaling.md 19.7 and 19.9
+     (P3's B4 to B8, COORD inbox H 20261125T034229Z); GolibTests GoCgoImagesTests; e2e arms imgaddinto, imgmixed. -->
+
 **A known memory-safety gap: a pointer rebuilt from a number, in three narrow cases.** go2cs refuses, by
 name, any address inside Go memory that it is holding still, even after the address has been through a
 `uintptr`: `u := uintptr(unsafe.Pointer(p))`, then `unsafe.Pointer(u + n)`, the reversed sum
@@ -628,7 +643,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4283 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4288 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :859
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

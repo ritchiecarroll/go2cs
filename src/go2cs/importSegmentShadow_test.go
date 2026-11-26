@@ -104,9 +104,8 @@ func TestForcingTargetShadowedOnlyByOwnClassType(t *testing.T) {
 		t.Error("an already-global target is unreachable by class lookup and must be left alone")
 	}
 
-	// The same declaration, emitted into the PRODUCTION class, does not occlude a hook written into
-	// the TEST-VARIANT class: the two are sibling partial classes, and a `using static` import of
-	// the production class loses to the namespace's own members at namespace scope.
+	// The same declaration, made TEST-declared: it shadows a hook in the test-variant class and not one in
+	// the production class.
 	whiteboxInternalTestObjects = map[types.Object]bool{shadowType: true}
 	t.Cleanup(func() { whiteboxInternalTestObjects = nil })
 
@@ -128,6 +127,36 @@ func TestForcingTargetShadowedOnlyByOwnClassType(t *testing.T) {
 
 	if production.forcingTargetShadowed("sync.atomic_package") {
 		t.Error("a TEST-declared type must NOT qualify a hook emitted into the PRODUCTION class — that would drift the -stdlib and -tests emissions of the same production file")
+	}
+
+	// The other direction does occlude: a PRODUCTION-declared type shadows a hook written into the
+	// TEST-VARIANT class. The test variant's metadata file repeats `using static <pkg>_package;` inside its
+	// namespace declaration (insertForwarderAliasDirectives), and C# searches a namespace declaration's own
+	// usings before the enclosing namespace's members, so the production class's nested type wins over the
+	// `go.<segment>` namespace (net/url: `type encoding` against the test hook for encoding/json, CS0426).
+	whiteboxInternalTestObjects = nil
+
+	if !testVariant.forcingTargetShadowed("sync.atomic_package") {
+		t.Error("a PRODUCTION-declared type must shadow a hook emitted into the test-variant class: its metadata file brings the production class into scope with a namespace-level `using static` (CS0426)")
+	}
+
+	// The external variant is a package of its own: the production type is not in its scope but in its
+	// production import's, and its metadata file brings that class into scope the same way.
+	externalPkg := types.NewPackage("example/consumer_test", "consumer_test")
+	externalPkg.SetImports([]*types.Package{pkg})
+
+	external := &Visitor{
+		pkg:              externalPkg,
+		emittedClassName: "consumer_test_package",
+		options:          Options{testExternalVariant: true, testProductionPath: "example/consumer"},
+	}
+
+	if !external.forcingTargetShadowed("sync.atomic_package") {
+		t.Error("a PRODUCTION-declared type must shadow a hook emitted into the external test variant's class (CS0426)")
+	}
+
+	if external.forcingTargetShadowed("fmt_package") {
+		t.Error("an unrelated target must stay bare in the external variant")
 	}
 }
 
@@ -206,5 +235,71 @@ func TestTestLocalTypeShadowRootsForcingHook(t *testing.T) {
 
 	if bare != "fmt_package" {
 		t.Errorf("an unshadowed import must keep its bare target — the gate exists to hold the corpus footprint at zero, got %q", bare)
+	}
+}
+
+// TestProductionTypeShadowRootsTestVariantHook is net/url's shape, reduced: the PRODUCTION files declare a type
+// named for the leading segment of a package only the internal tests import (`type encoding` against
+// "encoding/json"), and the tests declare a method, so the test variant's metadata file carries forwarders and
+// repeats `using static <pkg>_package;` inside its namespace. The hook for that import must be rooted.
+func TestProductionTypeShadowRootsTestVariantHook(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: loads and converts a test-variant fixture")
+	}
+
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod": "module example/pshad\n\ngo 1.23\n",
+		"value.go": "package pshad\n\n" +
+			"type encoding uint8\n\n" +
+			"func Mode() int { return int(encoding(3)) }\n",
+		"pshad_test.go": "package pshad\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n)\n\n" +
+			"type probe struct{ n int }\n\n" +
+			"func (p probe) String() string { b, _ := json.Marshal(p.n); return fmt.Sprint(string(b), Mode()) }\n",
+	}
+
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	internal, _ := loadBothTestVariantsForDir(t, dir)
+
+	if internal == nil {
+		t.Fatal("the internal test variant was not loaded")
+	}
+
+	outputPath := t.TempDir()
+	options := Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
+
+	options.testClassNameOverride = getSanitizedImport("pshad_internal_test" + PackageSuffix)
+	options.testWhiteboxReference = true
+	options.testInlineTypeAccess = true
+	options.testProductionPath = "example/pshad"
+
+	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
+		t.Fatal(err)
+	}
+
+	shadowed, forced := packageImportInits["encoding/json"]
+
+	if !forced {
+		t.Fatalf("encoding/json was not forced at all; claims: %v", importInitClaims())
+	}
+
+	if shadowed != "global::go.encoding.json_package" {
+		t.Errorf("the test variant's hook must be rooted past the production `encoding` type (CS0426 otherwise), got %q", shadowed)
+	}
+
+	bare, forced := packageImportInits["fmt"]
+
+	if !forced {
+		t.Fatalf("fmt was not forced at all; claims: %v", importInitClaims())
+	}
+
+	if bare != "fmt_package" {
+		t.Errorf("an unshadowed import must keep its bare target, got %q", bare)
 	}
 }

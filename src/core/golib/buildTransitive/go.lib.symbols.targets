@@ -64,6 +64,32 @@
     Directory.Build.targets `go2cs -recurse` generates (a module's), and go.lib.targets (a NuGet consumer's). Set
     GoTestOptimize=true to build a test assembly optimized, for a benchmark run.
   -->
+  <!--
+    OPTIMIZED TEST HOSTS: the stdlib test hosts that keep their optimizations, each with the test that needs it.
+
+    An unoptimized frame changes what a test can observe of the code it measures, not only its lines. A want-0
+    testing.AllocsPerRun body stops inlining the call it measures, so a box the JIT used to elide is allocated again
+    (context's TestAllocs: Background() boxes backgroundCtx into Context, 24 bytes a run); and a spill slot of the
+    unoptimized frame keeps a value live that Go lets the collector take (sync's TestPoolGC: 98 of 100 pooled values
+    cleaned up, where Go allows one survivor; P1's root; and unique's TestHandle: Handles held in frame locals keep the
+    canonical copy reachable past the collection, P6's root; weak's TestPointer and crypto/internal/fips140cache's
+    TestCache, whose weak pointers and cleanups wait on values the unoptimized frame still holds). [MethodImpl(AggressiveOptimization)] on the measured
+    closure does not help: in an assembly marked DisableOptimizations the JIT still compiles it MinOpts.
+
+    A host joins this list only when both arms are read for its row: as built it is not EQUAL its bank because of an
+    allocation or liveness assertion, and with GoTestOptimize=true it is. testOptimizedHosts_test.go holds the list to
+    that: every entry names a test its package has, and no listed package reads caller lines (runtime.Caller and
+    kin), the fidelity the switch below exists for, unless the guard names an exception citing a dated sweep of the
+    whole row equal in both arms (runtime/pprof: TestGoroutineCounts and finalizer_present, P1's root; runtime: TestStackGrowth's finalizer
+    watchdog). Entries are <project name>=<test>; an explicit
+    -p:GoTestOptimize=false still builds a listed host unoptimized, for the A/B arm.
+  -->
+  <PropertyGroup>
+    <GoOptimizedTestHosts>context.tests=TestAllocs;sync.tests=TestPoolGC;unique.tests=TestHandle;weak.tests=TestPointer;crypto.internal.fips140cache.tests=TestCache;runtime.pprof.tests=TestGoroutineCounts;runtime.tests=TestStackGrowth</GoOptimizedTestHosts>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoTestOptimize)' == '' and ('$(RootNamespace)' == 'go' or $(RootNamespace.StartsWith('go.'))) and $([System.String]::Copy(';$(GoOptimizedTestHosts);').Contains(';$(MSBuildProjectName)='))">
+    <GoTestOptimize>true</GoTestOptimize>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(GoTestOptimize)' != 'true' and $(MSBuildProjectName.EndsWith('.tests')) and ('$(RootNamespace)' == 'go' or $(RootNamespace.StartsWith('go.')))">
     <Optimize>false</Optimize>
   </PropertyGroup>

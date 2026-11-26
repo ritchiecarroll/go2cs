@@ -1,0 +1,13 @@
+# W2R env plain=('', '') twinned=('', 'true') shard-twin-names plain=None twinned=46041
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+W2R	crypto/internal/fips140cache	FAIL	-1	FAIL	-1	0	0	yes	NO	yes	reference	0	3421	0	919	920
+W2R	internal/runtime/gc/scan	PASS	3095	FAIL	-1	3095	3092	yes	NO	NO	reference	0	3588	0	20	20
+W2R	internal/zstd	DISC	535	DISC	535	535	535	yes	NO	yes	reference	0	4907	0	48	54
+W2R	log/slog	FAIL	-1	FAIL	-1	227	227	yes	NO	yes	reference	0	5656	0	93	89
+W2R	reflect	FAIL	-1	FAIL	-1	444	444	yes	NO	yes	reference	0	6944	30	162	179
+W2R	runtime/pprof	FAIL	-1	FAIL	-1	146	146	yes	NO	yes	reference	0	7238	0	1378	1378
+W2R	sort	FAIL	-1	FAIL	-1	None	None	yes	NO	NO	-	-1	-1	-1	290	419
+W2R	syscall	DISC	50	DISC	50	50	50	yes	NO	yes	reference	0	6410	0	66	70
+W2R	unique	FAIL	-1	FAIL	-1	16	16	yes	NO	yes	reference	0	4456	0	48	49
+W2R	weak	FAIL	-1	FAIL	-1	5	5	yes	NO	yes	reference	0	3421	0	1825	1824
+# summary rows=10 plain PASS=1 twinned EQUAL-bank=0 twinned EQUAL-plain=8

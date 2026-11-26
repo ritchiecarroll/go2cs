@@ -1,0 +1,20 @@
+# AR-6 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=114655
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-6	crypto/aes	ABSENT	-1	PASS	58	None	58	NO	yes	bank	reference	-1	5435	0	-1	37
+AR-6	crypto/cipher	ABSENT	-1	PASS	27289	None	27289	NO	yes	bank	reference	-1	6784	0	-1	71
+AR-6	crypto/ecdh	ABSENT	-1	PASS	47	None	47	NO	yes	bank	reference	-1	6848	0	-1	37
+AR-6	crypto/hpke	ABSENT	-1	PASS	231	None	231	NO	yes	bank	reference	-1	5587	0	-1	57
+AR-6	crypto/internal/boring	ABSENT	-1	PASS	3	None	3	NO	yes	bank	reference	-1	4118	0	-1	31
+AR-6	crypto/internal/fips140/ecdsa	ABSENT	-1	PASS	10	None	10	NO	yes	bank	reference	-1	5544	0	-1	39
+AR-6	crypto/rsa	ABSENT	-1	PASS	590	None	590	NO	yes	bank	reference	-1	10237	0	-1	142
+AR-6	errors	ABSENT	-1	PASS	80	None	80	NO	yes	bank	reference	-1	3421	0	-1	492
+AR-6	go/doc/comment	ABSENT	-1	PASS	10059	None	10059	NO	yes	bank	reference	-1	5144	0	-1	40
+AR-6	hash/crc64	ABSENT	-1	PASS	12	None	12	NO	yes	bank	reference	-1	3770	0	-1	26
+AR-6	internal/profile	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	4991	0	-1	31
+AR-6	internal/strconv	ABSENT	-1	PASS	47	None	47	NO	yes	bank	reference	-1	16737	0	-1	208
+AR-6	io/ioutil	ABSENT	-1	PASS	28	None	28	NO	yes	bank	reference	-1	4337	0	-1	29
+AR-6	net/http	ABSENT	-1	PASS	1538	None	1538	NO	yes	bank	reference	-1	18377	26	-1	428
+AR-6	os/exec/internal/fdtest	ABSENT	-1	PASS	1	None	1	NO	yes	bank	reference	-1	3422	0	-1	19
+AR-6	testing/cryptotest	ABSENT	-1	PASS	10	None	10	NO	yes	bank	reference	-1	6366	0	-1	38
+AR-6	text/tabwriter	ABSENT	-1	PASS	3	None	3	NO	yes	bank	recompile	-1	3537	0	-1	42
+# summary rows=17 plain PASS=0 twinned EQUAL-bank=17 twinned EQUAL-plain=0

@@ -431,7 +431,7 @@ func refuseMarkerGlyphTestFiles(inputPath string, options Options) *markerGlyphR
 		Dir:        absolute,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}, ".")

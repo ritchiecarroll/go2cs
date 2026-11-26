@@ -4,6 +4,19 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+// Portions follow the behavior of Go's reflect package:
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file. (License of record: LICENSES/BSD-3-Clause.txt.)
+//
+// Provenance: inspired by src/reflect/type.go and src/reflect/value.go, Go go1.26.11 (same behavior, own shape).
+// The assignment and conversion relations here reproduce Go's rules as reflect applies them, following
+// directlyAssignable, haveIdenticalType and haveIdenticalUnderlyingType (type.go) and Value.Convert / convertOp
+// (value.go): identity, interface implementation, and the named/unnamed rule that relates two types of identical
+// underlying type when one side is unnamed (assignment) or always (conversion). None of Go's code is ported: the
+// managed representation those rules run over (golib's boxes, adapters, delegates and the canonical nil carriers)
+// and every routine in this file are original go2cs code.
+
 // ReSharper disable InconsistentNaming
 
 using System;
@@ -368,6 +381,18 @@ public static partial class GoReflect
         {
             if (dstType == nilFunc.Type)
                 return true;
+
+            // Two func types of identical signature are distinct delegates, since every defined func type is
+            // its own: a named type and its unnamed form are assignable both ways (one side unnamed), and any
+            // two convert. The nil crosses as the live-delegate arm in TryConvertTo carries a value, under the
+            // same refusal: two different NAMED func types stay unassignable, as in Go. reflect's TestConvert:
+            // `func()(nil)` converted to `MyFunc`.
+            if (typeof(Delegate).IsAssignableFrom(dstType) &&
+                !RefusedByGoAssignability(relation, nilFunc.Type, dstType) &&
+                haveIdenticalDelegateSignature(nilFunc.Type, dstType))
+            {
+                return true;
+            }
 
             if (!dstType.IsInterface)
                 return false;

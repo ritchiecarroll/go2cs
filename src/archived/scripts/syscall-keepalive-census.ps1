@@ -48,7 +48,7 @@ param(
     [string] $CorpusRoot
 )
 
-. (Join-Path $PSScriptRoot '_paths.ps1')
+. (Join-Path $PSScriptRoot '../../_paths.ps1')
 
 if (-not $CorpusRoot) {
     $CorpusRoot = Join-Path $RepoRoot 'src\core'

@@ -30,7 +30,7 @@
 #   Run from a clean tree (no uncommitted .editorconfig). Build output is left in place; purge it after.
 set -u
 
-SRC="$(cd "$(dirname "$0")" && pwd)"
+SRC="$(cd "$(dirname "$0")/../.." && pwd)"
 CORE="$SRC/core"
 MARKER='# go2cs: per-file warning entries, written by every conversion of this package -- do not edit'
 CODES='CS0219|CS0649|CS0675'
