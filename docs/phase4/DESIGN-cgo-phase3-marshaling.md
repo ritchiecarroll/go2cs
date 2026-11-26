@@ -3639,7 +3639,7 @@ address still.
 
 **(a) `Pin` takes a real pin.** The table moves DOWN to golib (`go.golib.GoPinTable`, `[EditorBrowsable(Never)]`): the
 doors are in golib, and golib cannot reference `runtime`. `runtime`'s hand-own calls it, so there is one rule rather
-than two (the shape `GoFatal` took for the runtime/sync shims). `Pin` resolves the referent as now. It then asks golib
+than two (the shape the fatal-report type took for the runtime/sync shims, `golib/runtime/FatalReport.cs`). `Pin` resolves the referent as now. It then asks golib
 for the storage the doors would pin (`TryPinTarget`'s own resolution, never a copy of it) and holds it still:
 - If the storage is already inside a live indexed pin (`PinExtents.Find`), it takes a COUNT on that pin, and no new
   handle.
