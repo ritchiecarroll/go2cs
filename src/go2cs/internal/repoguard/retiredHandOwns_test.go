@@ -58,7 +58,13 @@ import (
 // POSITIVE CONTROL: TestRetiredHandOwnScannerFires drives the same scanner over a synthetic baseline, HEAD
 // set and rows, one plant per refusal, plus a clean control that must read empty.
 
-const handOwnMarkerPredicate = `^\s*\[module:\s*(go\.)?GoManualConversion\]`
+// The predicate spells whitespace as the POSIX class [[:space:]], never \s. git grep -E hands the pattern to the
+// platform's regex library, and \s is an extension: the GNU library and git's own compat copy (Windows) accept it,
+// while the library git uses on macOS reads \s in an extended expression as a literal "s" (REG_ENHANCED is set
+// there for basic expressions only). Every marked file then failed to match, git grep exited 1, and this guard
+// reported the baseline SHA as missing from the clone on every darwin run. src/handown-baseline.ps1 and
+// src/handown-census.ps1 spell it the same way; where \s is accepted, both spellings select the same files.
+const handOwnMarkerPredicate = `^[[:space:]]*\[module:[[:space:]]*(go\.)?GoManualConversion\]`
 
 // retiredRow is one line of testdata/handowns-retired.tsv.
 type retiredRow struct {
@@ -76,6 +82,11 @@ func markedAt(t *testing.T, root, ref string) []string {
 	out, err := exec.Command("git", "-C", root, "grep", "-l", "-E", handOwnMarkerPredicate, ref, "--", "src/core/*.cs").Output()
 
 	if err != nil {
+		// git grep exits 1 when nothing matches and 128 when the ref is unknown; say which.
+		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
+			t.Fatalf("the marker census at %s matched no file: the commit is in the clone, so this git's regex read the predicate differently", ref)
+		}
+
 		t.Fatalf("the marker census at %s failed (is the commit in this clone?): %v", ref, err)
 	}
 
