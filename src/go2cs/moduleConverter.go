@@ -1062,6 +1062,8 @@ func (m *ModuleConverter) generateRecurseBuildFiles() {
 			fmt.Sprintf("    <go2csPath>%s</go2csPath>", pin),
 			"  </PropertyGroup>",
 		)
+
+		propsLines = append(propsLines, recurseTargetPlatformLines(m.options.targetPlatform)...)
 	}
 
 	// Default GoStdLibVersion to the converter's Go minor, floating on the patch and revision. Omitted if the
@@ -1128,6 +1130,12 @@ func (m *ModuleConverter) generateRecurseBuildFiles() {
 		"  <Import Project=\"$(go2csPath)core/golib/buildTransitive/go.lib.twins.targets\"",
 		"          Condition=\"'$(GoLibTwinsTargetsImported)' != 'true' and '$(go2csPath)' != '' and Exists('$(go2csPath)core/golib/buildTransitive/go.lib.twins.targets')\" />",
 		"",
+		"  <!-- An executable runs on a newer major .NET when no .NET 10 runtime is installed (golib's",
+		"       go.lib.rollforward.targets). A package consumer gets it from go.lib.targets; under local project",
+		"       references the output root imports it, and the guard keeps a second import inert. -->",
+		"  <Import Project=\"$(go2csPath)core/golib/buildTransitive/go.lib.rollforward.targets\"",
+		"          Condition=\"'$(GoLibRollForwardTargetsImported)' != 'true' and '$(go2csPath)' != '' and Exists('$(go2csPath)core/golib/buildTransitive/go.lib.rollforward.targets')\" />",
+		"",
 		"  <!-- A converted library is not an application. Publishing one is publishing the program that references",
 		"       it; a 'dotnet publish -r <rid> -p:PublishAot=true' that reaches a library through a solution would",
 		"       otherwise publish it as its own native library. The program's publish still carries the library. -->",
@@ -1141,6 +1149,51 @@ func (m *ModuleConverter) generateRecurseBuildFiles() {
 
 	m.writeRecurseBuildFile(filepath.Join(root, "Directory.Build.props"), propsLines)
 	m.writeRecurseBuildFile(filepath.Join(root, "Directory.Build.targets"), targetsLines)
+}
+
+// recurseTargetPlatformLines renders the output root's default for GoTargetOS and GoTargetArch under local project
+// references: the corpus flavour of the platform this tree was converted FOR (corpusFlavourOf, so darwin/arm64 builds
+// the darwin/amd64 layout it was converted against). Every L3 package of the standard library compiles exactly one
+// per-GOOS (and per-GOARCH) folder and, left unset, takes windows/amd64, the corpus reference target: before this
+// default a linux conversion built on linux compiled the WINDOWS runtime and died at start on kernel32.dll, and a
+// linux/arm64 runner asked the layout for windows/arm64, which it refuses.
+//
+// The properties are set in the converted projects and handed to every project they reference through
+// AdditionalProperties: the standard library's projects live under the runtime root, outside this output root, so
+// they never read this file, and a property only reaches them as a global one. MSBuild passes a project's global
+// properties on down its own references, so golib and every standard-library package build the same flavour. A
+// value given on the command line (-p:GoTargetOS=...) is a global property: it beats the default here, and the
+// AdditionalProperties then pass that value on. The arch is pinned with the OS, never left to the build host: an
+// unpinned arch was half of the windows/arm64 refusal.
+func recurseTargetPlatformLines(targetPlatform string) []string {
+	flavour := corpusFlavourOf(corpusLattice(), targetPlatform)
+	goos, goarch := goosOfTarget(flavour), archOfTarget(flavour)
+
+	if goos == "" || goarch == "" {
+		return nil
+	}
+
+	return []string{
+		"",
+		"  <!-- The platform this tree was converted for. The standard library compiles one per-GOOS and per-GOARCH",
+		"       folder of each platform-varying package, and an unset build takes windows/amd64; these defaults pick",
+		"       the flavour the conversion read, and the ProjectReference metadata hands it to the referenced runtime",
+		"       projects, which do not read this file. A -p:GoTargetOS / -p:GoTargetArch global still wins; change it",
+		"       only together with a re-conversion for that platform. -->",
+		"  <PropertyGroup Condition=\"'$(GoTargetOS)' == ''\">",
+		fmt.Sprintf("    <GoTargetOS>%s</GoTargetOS>", goos),
+		"  </PropertyGroup>",
+		"",
+		"  <PropertyGroup Condition=\"'$(GoTargetArch)' == ''\">",
+		fmt.Sprintf("    <GoTargetArch>%s</GoTargetArch>", goarch),
+		"  </PropertyGroup>",
+		"",
+		"  <ItemDefinitionGroup>",
+		"    <ProjectReference>",
+		"      <AdditionalProperties>GoTargetOS=$(GoTargetOS);GoTargetArch=$(GoTargetArch)</AdditionalProperties>",
+		"    </ProjectReference>",
+		"  </ItemDefinitionGroup>",
+	}
 }
 
 // writeRecurseBuildFile writes one generated build file, refusing to clobber a FOREIGN one. The
