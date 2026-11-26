@@ -231,6 +231,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`uintptr` as a generic numeric type argument](generic-constraints.md#uintptr-as-a-generic-numeric-type-argument)
   - [Union-constrained sub-slices ARE the type parameter](generic-constraints.md#union-constrained-sub-slices-are-the-type-parameter)
   - [Spreading a union-constrained value](generic-constraints.md#spreading-a-union-constrained-value)
+  - [An unnamed array type argument carries its length through an array-dims companion](generic-constraints.md#an-unnamed-array-type-argument-carries-its-length-through-an-array-dims-companion)
 - **[Type Aliasing](type-aliasing.md)**
   - [Type Definitions](type-aliasing.md#type-definitions)
   - [Type Alias Declarations](type-aliasing.md#type-alias-declarations)
