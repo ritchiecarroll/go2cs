@@ -68,7 +68,7 @@ public class EventLineFramingTests
             byte[] raw = Encoding.UTF8.GetBytes(rawOutput);
             stdout.Write(raw, 0, raw.Length);
 
-            new TestReporter("guard", json: true, verbose: true).Report(new TestEvent("guard", "TestBody", "pass", 0.1D));
+            new TestReporter("guard", json: true).Report(new TestEvent("guard", "TestBody", "pass", 0.1D));
         }
         finally
         {

@@ -73,7 +73,7 @@ public class GoTestOrderTests
         lock (s_ran)
             s_ran.Clear();
 
-        TestReporter reporter = new("ordering", json: false, verbose: false);
+        TestReporter reporter = new("ordering", json: false);
         TestRunner runner = new(registry, new TestOptions(), reporter, ".", ".");
         runner.RunAll();
 

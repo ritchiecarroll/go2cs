@@ -32,7 +32,7 @@ public class TestChdirLifecycleTests
 
     private static TestExecution NewExecution(string name)
     {
-        TestReporter reporter = new("guard", json: false, verbose: false);
+        TestReporter reporter = new("guard", json: false);
         TestRunner runner = new(new TestRegistry("guard", []), new TestOptions(), reporter, ".", ".");
 
         return new TestExecution(runner, name, null, "guard.go", 1);
@@ -240,7 +240,7 @@ public class TestChdirLifecycleTests
             Assert.AreEqual(link, pwdDuring,
                 "t.Chdir(\".\") records PWD from os.Getwd, which keeps PWD's logical spelling -- not getcwd's physical one");
 
-            TestReporter reporter = new("guard", json: false, verbose: false);
+            TestReporter reporter = new("guard", json: false);
             TestRunner runner = new(new TestRegistry("guard", []), TestOptions.Parse(["-test.artifacts"]), reporter, ".", ".");
             string artifactDir = runner.MakeArtifactDir();
 

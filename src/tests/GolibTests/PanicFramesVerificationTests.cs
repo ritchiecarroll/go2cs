@@ -78,7 +78,7 @@ public class PanicFramesVerificationTests
     [DataRow(true, DisplayName = "SkipNow")]
     public void ANilDeferredFuncFaultingDuringTheTestHostsGoexitSplicesNothing(bool skip)
     {
-        TestReporter reporter = new("guard", json: false, verbose: false);
+        TestReporter reporter = new("guard", json: false);
         TestRunner runner = new(new TestRegistry("guard", []), new TestOptions(), reporter, ".", ".");
         TestExecution parent = new(runner, "TestHostGoexitGuard", null, "guard.go", 1);
         List<string>? got = null;

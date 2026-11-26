@@ -45,7 +45,7 @@ public class GoroutineFatalHostTests
         // through the real parser is also what keeps this guard honest about the flags the pipeline
         // actually passes.
         TestOptions options = TestOptions.Parse(["--result", resultFile, "--junit", junitFile]);
-        TestReporter reporter = new("guard", json: false, verbose: false);
+        TestReporter reporter = new("guard", json: false);
         TestRunner runner = new(new TestRegistry("guard", []), options, reporter, ".", ".");
 
         return (runner, reporter, options, resultFile, junitFile);

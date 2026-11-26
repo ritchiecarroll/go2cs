@@ -87,7 +87,6 @@ public sealed record TestEvent(
 /// </summary>
 /// <param name="package">Go import path, stamped onto package-level events.</param>
 /// <param name="json">Emit one JSON object per event (the machine-comparable form).</param>
-/// <param name="verbose">Report <c>run</c> events too, mirroring <c>go test -v</c>.</param>
 /// <remarks>
 /// Every method locks, and that is not defensive habit: tests run in parallel by design, so
 /// reporting is genuinely concurrent, and both the retained list and the console writes have to be
@@ -95,7 +94,7 @@ public sealed record TestEvent(
 /// <see cref="Events"/> are what the host writes the result and JUnit files from at the end, so
 /// they must survive even a run that ends in a package timeout.
 /// </remarks>
-internal sealed class TestReporter(string package, bool json, bool verbose)
+internal sealed class TestReporter(string package, bool json)
 {
     private readonly object m_syncRoot = new();
     private readonly List<TestEvent> m_events = [];

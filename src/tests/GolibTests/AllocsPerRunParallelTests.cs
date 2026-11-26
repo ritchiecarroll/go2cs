@@ -61,7 +61,7 @@ public class AllocsPerRunParallelTests
             s_parallelPanic = CallAllocsPerRun();
         }, "allocs_guard_test.go", 2);
 
-        TestRunner runner = new(registry, new TestOptions(), new TestReporter("allocsguard", json: false, verbose: false), ".", ".");
+        TestRunner runner = new(registry, new TestOptions(), new TestReporter("allocsguard", json: false), ".", ".");
         runner.RunAll();
 
         Assert.IsNull(s_serialPanic,

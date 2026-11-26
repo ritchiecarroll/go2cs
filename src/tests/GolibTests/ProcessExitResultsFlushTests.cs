@@ -34,7 +34,7 @@ public class ProcessExitResultsFlushTests
 
         // Parsed rather than hand-set, through the flags the pipeline actually passes.
         TestOptions options = TestOptions.Parse(["--result", resultFile, "--junit", junitFile]);
-        TestReporter reporter = new("guard", json: false, verbose: false);
+        TestReporter reporter = new("guard", json: false);
         TestRegistry registry = new("guard", []);
 
         return (reporter, registry, options, resultFile, junitFile);
@@ -145,7 +145,7 @@ public class ProcessExitResultsFlushTests
         foreach (bool json in new[] { false, true })
         {
             (_, TestRegistry registry, TestOptions options, _, _) = NewHost();
-            TestReporter reporter = new("guard", json: json, verbose: false);
+            TestReporter reporter = new("guard", json: json);
             TextWriter original = Console.Out;
             using StringWriter captured = new();
 

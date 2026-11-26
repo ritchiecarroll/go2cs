@@ -34,7 +34,7 @@ public class EventLineTerminatorTests
         try
         {
             // A package-level pass with nothing to say: the summary line a -test.v child ends with.
-            new TestReporter("guard", json: false, verbose: true).Report(new TestEvent("guard", "", "pass"));
+            new TestReporter("guard", json: false).Report(new TestEvent("guard", "", "pass"));
         }
         finally
         {

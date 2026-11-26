@@ -106,7 +106,7 @@ public class ConsoleEventLineAtomicityTests
 
         try
         {
-            TestReporter reporter = new("guard", json: true, verbose: false);
+            TestReporter reporter = new("guard", json: true);
             byte[] noise = Encoding.ASCII.GetBytes(new string('E', 40) + "\n");
             using CancellationTokenSource stop = new();
 
@@ -157,7 +157,7 @@ public class ConsoleEventLineAtomicityTests
 
         try
         {
-            new TestReporter("guard", json: true, verbose: false).Report(new TestEvent("guard", "TestCaptured", "pass"));
+            new TestReporter("guard", json: true).Report(new TestEvent("guard", "TestCaptured", "pass"));
         }
         finally
         {

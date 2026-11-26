@@ -390,7 +390,7 @@ public static class TestHost
             // decided by Go's code.
 
 
-            TestReporter reporter = new(registry.Package, options.Json, options.Verbose);
+            TestReporter reporter = new(registry.Package, options.Json);
             TestRunner runner = new(registry, options, reporter, workingDirectory, runRoot);
 
             // TEST-HOST-ONLY: the results file is written on EVERY way out of the process, a converted

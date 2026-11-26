@@ -22,7 +22,7 @@ public class HostGo126TempDirAndCleanupTests
 
     private static TestRunner NewRunner(string runRoot) =>
         new(new TestRegistry(GuardPackage, []), new TestOptions(),
-            new TestReporter(GuardPackage, json: false, verbose: false), ".", runRoot);
+            new TestReporter(GuardPackage, json: false), ".", runRoot);
 
     private static string NewRunRoot(string tag)
     {

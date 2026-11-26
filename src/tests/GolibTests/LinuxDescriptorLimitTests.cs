@@ -227,7 +227,7 @@ public class LinuxDescriptorLimitTests
             "guard.go", 1);
         registry.Add("TestBRunsAfterward", _ => secondRan = true, "guard.go", 2);
 
-        TestReporter reporter = new("guard", json: false, verbose: false);
+        TestReporter reporter = new("guard", json: false);
         TestRunner runner = new(registry, new TestOptions(), reporter, ".", ".");
 
         nint exit;

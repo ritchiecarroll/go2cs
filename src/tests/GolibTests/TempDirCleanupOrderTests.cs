@@ -35,7 +35,7 @@ public class TempDirCleanupOrderTests
 
     private static TestRunner NewRunner(string runRoot) =>
         new(new TestRegistry(GuardPackage, []), new TestOptions(),
-            new TestReporter(GuardPackage, json: false, verbose: false), ".", runRoot);
+            new TestReporter(GuardPackage, json: false), ".", runRoot);
 
     [TestMethod]
     public void EveryCleanupSucceedsWhenAChdirSitsBetweenTempDirCalls()
