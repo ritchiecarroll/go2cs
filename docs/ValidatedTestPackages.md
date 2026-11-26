@@ -1024,7 +1024,7 @@ not sum to a Disclosed figure.
 
 | Class | Entries | What it means (one line) |
 |:--|:--:|:--|
-| `deferred` | 158 | An allocation-count assert the CLR can meet in principle; it carries Go's want, a measured reading and a retirement plan. |
+| `deferred` | 157 | An allocation-count assert the CLR can meet in principle; it carries Go's want, a measured reading and a retirement plan. |
 | `structural` | 7 |<!-- Until 2026-11-25: 8, before testing's TestTBHelper entry retired. --> Its reason proves that no managed implementation can meet the assert, so it carries no plan. |
 | `alloc-count-semantics` | 8 | An allocation-count assert whose allocations golib's counter never sees, so the host reports only bytes; nothing to retire. |
 | `codegen-liveness` | 16 | A test asserts from its own frame that an object it just stopped using is collectible; the CLR can still report that slot live. |
