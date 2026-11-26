@@ -157,15 +157,28 @@ partial class runtime_package
         if (entered == 0)
             return;
 
-        if ((entered & 2) != 0)
+        if ((entered & 2) == 0)
         {
-            ж<g> gp = getg();
-
-            if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
-                throw new PanicException($"runtime: a callback returns to native code on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+            GoNativeCall.ReturnToNative();
+            return;
         }
 
-        GoNativeCall.ReturnToNative();
+        ж<g> gp = getg();
+
+        if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
+            throw new PanicException($"runtime: a callback returns to native code on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+
+        // The seam can refuse (the callback left a native call of its own open); the status moves back first, as a
+        // refused entersyscall's does, so it matches the depth the refusal leaves.
+        try
+        {
+            GoNativeCall.ReturnToNative();
+        }
+        catch
+        {
+            gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning);
+            throw;
+        }
     }
 
     // TEST SEAMS (pinner_impl.cs's pattern; GolibTests is not in the InternalsVisibleTo grant).
