@@ -3807,3 +3807,47 @@ nothing was run.
 - **Size: unchanged, one seat.** Three commits plus the poll displacement, which is about ten lines and two rows.
 
 — H (2026-11-26)
+
+### 21.9 Record 2026-11-26: S6 as built (COORD's ruling: in .5; inbox H 20261126T023252Z)
+
+Branch `claude/h-cgo-s6`, stacked on `claude/h-cgo-s6-size-r2` (S4-r3 plus sections 21 to 21.8). Five commits:
+- **Table.** `go.golib.GoPinTable` holds the pins, and runtime's `PinTable` forwards to it.
+  - A first pin takes its OWN pinned handle over every allocation inside the value: the box's slot, and each backing
+    that `ImageKeys` finds. Each allocation is counted per storage.
+  - A repeat pin counts and allocates nothing. The last unpin frees the handles.
+  - A reference-free value takes a one-allocation fast path.
+- **Doors.** A Pinner-pinned pointer crosses in place under the S1 test, or is refused by name. It is never a mirror and
+  never an image.
+- **Poll.** `FD.pin` is displaced on Windows (the registry key plus the hand-own), with the emission from a seeded
+  `-stdlib` reconvert of `internal/poll`. The `fd_poll_runtime.cs` blank-import comment that the same reconvert
+  rewrote is unrelated corpus drift, and was not overlaid.
+- **e2e.** The `pinnerkeep` arm and the probe's `keep`/`kept`.
+- **This record.**
+
+**Measured cost** (`TheCostPerPinIsMeasured`, Debug): a distinct pin is 24 B before and 216 B after. That is the table
+entry, the record, a `PinnedBuffer` and a storage count, plus a `GCHandle` table slot that is not on the GC heap. A
+repeat pin is 0 B before and after. Without the fast path it was 568 B; 21.4's "about 32 B" counted the buffer alone.
+
+**Correction to 21.8's citation.** The socket READ path retains its buffer box in `writeWSABufs` (called from
+`stageBuffers`: `operation?.Pin(buf.Buf)`). `retainForFlight` is the send path's. The FD's own operation struct
+(`o.buf.Buf`) also holds the same box for the flight. So there are two holders: dropping `retainForFlight` alone left
+the compaction row green in 3 of 3 runs, and the measured control is the one below.
+
+**Rows and controls.** Each control was restored byte-identical (`cmp`).
+
+| Row | Control | Read |
+|---|---|---|
+| a pinned scalar crosses in place; its kept address survives compaction (near-miss: unpinned keeps the mirror) | door check off / no real pins | red / red 3 of 3 |
+| pinning a value pins its inline arrays (MUST 1) | no real pins | red 3 of 3 |
+| another owner's release does not release the Pinner's pin (MUST 2) | door check off / no real pins | red / red 3 of 3 |
+| a pinned struct whose layout is not C's is refused by name (SHOULD 3) | door check off | red |
+| a repeat pin counts, takes no handle; a third unpin is "already unpinned" | no real pins | red 3 of 3 |
+| S4's number into a pinned box crosses at the pinned bytes | no real pins | GREEN: the box's own conversion pin holds it, so this row guards S4's resolution, not the Pinner's handle |
+| poll: 50 overlapped TCP reads and writes take no pin handle (Windows) | Go's `pin` body restored | red (which also proves the reads reach `fd.pin`) |
+| poll: an overlapped read survives three forced compactions mid-flight (Windows) | the kernel handed an unpinned address of the same buffer | red 3 of 3 (byte 0 read 0, expected 3) |
+| e2e `pinnerkeep`: "pinnerkeep 9" both ways (hosted linux) | none | |
+
+**Limitations.md** gains two lines. A retained pointer handed to C without a Pinner goes stale after a compaction,
+silently. A pin of an element does not cover the value that holds its array.
+
+— H (2026-11-26)

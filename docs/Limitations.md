@@ -351,6 +351,14 @@ expression or through a variable) is handed to C as a `void *` when it points in
 and that memory is held still for the call. A number one past the end of that memory, the end of a begin/end pair, is
 not held still, so C may only compare it, never read or write through it. A 64-bit integer argument that is go2cs's
 stand-in for the address of a Go value holding Go pointers is refused by name.
+
+On the master branch, C may keep a Go pointer past the call when a `runtime.Pinner` pins the memory, as cgo requires:
+the pin holds the value and every array inside it still until `Unpin`. A pinned value whose Go layout is not its C
+layout (a struct holding an array, for instance) is refused by name. Two cases are not covered:
+- A pointer C keeps without a Pinner is invalid Go, though it usually works under Go, whose heap does not move. Here
+  the memory can move at the next collection, and nothing reports it.
+- Pinning an element of an array does not pin the struct that holds the array (Go's pin does). Pin the whole value.
+<!-- cgo S6, docs/phase4/DESIGN-cgo-phase3-marshaling.md 21, 21.7 and 21.9: GoPinTable and GoCgoArgs.TryPinnerHeld. -->
 <!-- cgo S4, docs/phase4/DESIGN-cgo-phase3-marshaling.md 20.8 and 20.10: GoCgoArgs.PinNumber and GoCgoArgs.Word; the end
      cursor's sentence is P3's, on confirming the past-the-end deviation (COORD inbox H 20261125T222108Z). -->
 <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: cgo increment 3.2 seat 1a (train 4, claude/h-cgo-sb2a, merge
