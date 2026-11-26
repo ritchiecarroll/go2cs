@@ -47,6 +47,13 @@ namespace go.golib;
     /// <summary>The reference a <c>fixed</c> pins: the storage's first byte, or a null reference for a number.</summary>
     public ref byte GetPinnableReference() => ref m_root is null ? ref Unsafe.NullRef<byte>() : ref MemoryMarshal.GetArrayDataReference(m_root);
 
+    // TEST SEAM: the length, in elements, of the storage this pin holds (0 for a number). The struct image door's rows read
+    // it to assert an image's size (P3's B8), which reading past a short buffer cannot show: adjacent heap memory may be 0.
+    internal int StorageLength => m_root?.Length ?? 0;
+
+    // The Go storage this pin holds still, if any: an allocation the call hands C (GoCgoImages, P3's B5).
+    internal Array? Storage => m_root;
+
     /// <summary>What C receives, given the address the wrapper's <c>fixed</c> pinned this argument at.</summary>
     public unsafe nint Address(byte* pinned) => m_root is null ? (nint)m_number : (nint)(pinned + m_offset);
 

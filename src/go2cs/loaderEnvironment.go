@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -57,6 +58,119 @@ func cgoOnLoad(options Options, env []string) bool {
 	return enabled == "1"
 }
 
+// packageTestLoaderEnv is converterLoaderEnv for a load of the CONVERTED package's own test variants: cgo-on under -cgo,
+// as its production load is (conversionDriver.go), so the variants select the files the production load selected
+// (cgo Phase 3, increment 3.4 seat 4a: DESIGN-cgo-phase3-marshaling section 19). Only the package being converted
+// loads this way. A load of any OTHER package (linknameOperations' target closure) keeps converterLoaderEnv: no other
+// package loads cgo-on (stop line S-G).
+func packageTestLoaderEnv(options Options, settings ...string) []string {
+	env := converterLoaderEnv(settings...)
+
+	if options.parseCgoTargets {
+		env = append(env, "CGO_ENABLED=1")
+	}
+
+	return env
+}
+
+// cgoOracleEnv is the extra environment of the -tests oracle (`go test -json`) under -cgo: cgo-on, so Go's own run
+// selects the cgo files the conversion selected, whatever the host's implicit default is. Empty otherwise: the oracle
+// keeps the environment it always had.
+func cgoOracleEnv(options Options) []string {
+	if options.parseCgoTargets {
+		return []string{"CGO_ENABLED=1"}
+	}
+
+	return nil
+}
+
+// cgoScratchRootMarker is the file a scratch root's seed step writes at the root (the -go2cspath directory, beside
+// core), and -cgo -tests refuses a root without it: the repository's src and a deployed root (%GOPATH%/src/go2cs) are
+// shared corpora emitted at CGO_ENABLED=0, and neither holds it (P3's SHOULD 2 on 4a, ruled in by COORD, inbox H
+// 20261124T232124Z).
+const cgoScratchRootMarker = ".go2cs-cgo-scratch-root"
+
+// checkCgoTestsOutput refuses a -cgo -tests conversion whose root is not a seeded scratch root (no
+// cgoScratchRootMarker), or whose OUTPUT lies in a repository's corpus (repositoryCorpusOf). The output is judged
+// itself, symlinks resolved, never through the root: an explicit -go2cspath elsewhere with the output inside a
+// repository's src/core, or a scratch src that is a symlink to one, both passed a root-side check, and with 4c's
+// removal both would delete a tracked file (P3's MUST 1 on 4a). The corpus is emitted at CGO_ENABLED=0 by ruling, so a
+// cgo-on package goes to a scratch root seeded from it, never into it (stop line S-D).
+func checkCgoTestsOutput(options Options, outputPath string) error {
+	if !options.parseCgoTargets || !options.convertTests {
+		return nil
+	}
+
+	if _, err := os.Stat(filepath.Join(options.go2csPath, cgoScratchRootMarker)); err != nil {
+		return fmt.Errorf("-cgo -tests converts into a scratch root seeded from src/core, which its seed step marks with %s; the root %q holds none (the repository's src and a deployed root are corpora emitted at CGO_ENABLED=0, and are refused)", cgoScratchRootMarker, options.go2csPath)
+	}
+
+	if corpus, inside := repositoryCorpusOf(outputPath); inside {
+		return fmt.Errorf("-cgo -tests writes a cgo-on conversion, and %s is in the repository's corpus (%s), which is emitted at CGO_ENABLED=0 by ruling: convert into a scratch root seeded from src/core instead", outputPath, corpus)
+	}
+
+	// The output must lie under the MARKED root's core, both resolved: the marker is read at the root, and an explicit
+	// root is kept (resolveGo2CSPath), so a marked root with the output in a deployed corpus (%GOPATH%/src/go2cs/core/net,
+	// no .git above it) passed both checks above, and 4c would remove its cgo_stub.cs (P3's A1, ruled required).
+	if core := filepath.Join(resolveExistingSymlinks(options.go2csPath), "core"); !isPathUnder(resolveExistingSymlinks(outputPath), core) {
+		return fmt.Errorf("-cgo -tests writes into the marked scratch root's own core (%s), and %s is not under it: convert into the scratch root's core", core, outputPath)
+	}
+
+	return nil
+}
+
+// repositoryCorpusOf reports the repository corpus a path lies in, if any: the path is resolved through every symlink
+// on it (the longest prefix that exists), and an ancestor named `core` whose grandparent holds git metadata (a .git
+// directory, or a worktree's .git file) is a repository's src/core. It is the one predicate both the -cgo -tests output
+// check and 4c's per-file removal ask.
+func repositoryCorpusOf(path string) (string, bool) {
+	resolved := resolveExistingSymlinks(path)
+
+	for dir := resolved; ; {
+		// EqualFold: on a case-insensitive volume an output typed .../src/Core/net names the same directory (P3's A2).
+		if strings.EqualFold(filepath.Base(dir), "core") {
+			if _, err := os.Stat(filepath.Join(filepath.Dir(filepath.Dir(dir)), ".git")); err == nil {
+				return dir, true
+			}
+		}
+
+		parent := filepath.Dir(dir)
+
+		if parent == dir {
+			return "", false
+		}
+
+		dir = parent
+	}
+}
+
+// resolveExistingSymlinks is filepath.EvalSymlinks over the longest prefix of path that exists, with the rest joined
+// back on: an output directory a conversion has not created yet still resolves through a symlinked parent.
+func resolveExistingSymlinks(path string) string {
+	absolute, err := filepath.Abs(path)
+
+	if err != nil {
+		return path
+	}
+
+	var rest []string
+
+	for dir := absolute; ; {
+		if resolved, err := filepath.EvalSymlinks(dir); err == nil {
+			return filepath.Join(append([]string{resolved}, rest...)...)
+		}
+
+		parent := filepath.Dir(dir)
+
+		if parent == dir {
+			return absolute
+		}
+
+		rest = append([]string{filepath.Base(dir)}, rest...)
+		dir = parent
+	}
+}
+
 // checkCgoFlag refuses a -cgo the converter cannot honour. -cgo makes the conversion's loads cgo-on: the
 // single-package driver's own (processConversion), and under -recurse the module driver's closure load and each
 // package's own (a cgo package against the go.* packages, INC 1). It is refused beside -stdlib (the standard library
@@ -71,8 +185,6 @@ func checkCgoFlag(cgo, stdlib, tests bool) error {
 	switch {
 	case stdlib:
 		return fmt.Errorf("-cgo cannot be combined with -stdlib: the standard library converts at CGO_ENABLED=0 by ruling")
-	case tests:
-		return fmt.Errorf("-cgo cannot be combined with -tests: the test drivers' loads stay at CGO_ENABLED=0")
 	}
 
 	if value, set := os.LookupEnv("CGO_ENABLED"); set && value != "" && value != "1" {

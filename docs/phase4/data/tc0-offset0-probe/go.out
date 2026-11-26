@@ -1,0 +1,3 @@
+method variadic  ZzCallDepthProbe/lg.(*Logger).record:11 ZzCallDepthProbe/lg.(*Logger).Log:23 main.main:11
+method plain  ZzCallDepthProbe/lg.(*Logger).record:11 ZzCallDepthProbe/lg.(*Logger).Info:25 main.main:13
+func variadic  ZzCallDepthProbe/lg.(*Logger).record:11 ZzCallDepthProbe/lg.Top:27 main.main:15
