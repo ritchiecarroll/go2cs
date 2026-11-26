@@ -99,8 +99,19 @@ namespace go.golib;
     {
         pin = default;
 
+        if (pointer is not null && GoPinTable.Any && TryPinnerHeld(pointer, function, out pin))
+        {
+            address = 0;
+            images.ClaimOther(OtherKeys(pointer, pin), function);
+            return GoCgoStructPointer.Pinned;
+        }
+
         if (pointer is NativeBox<T> native && !IsGenuinelyNative(native) && native.AliasesAnOrderToken && ImageRoot(native, function) is { } root)
         {
+            // An image is a copy: C keeping its address after the call would keep the copy's, not the Go value's (S6).
+            if (GoPinTable.Any && GoPinTable.IsPinned(root.Key))
+                throw PinnerHeldRefused(function, typeof(T), "a view of a Go value no door can hand over in place");
+
             address = 0;
             pin = images.Image(GoCgoImages.ImageKeys(root.Key, root.Value), root.Box, root.Value, root.Type, root.Size, Math.Max(root.Size, NativeStructMarshal.ImageSizeOf(typeof(T)) ?? (nuint)Unsafe.SizeOf<T>()), function);
             return GoCgoStructPointer.Pinned;
@@ -220,6 +231,12 @@ namespace go.golib;
                 throw Refused(function, typeof(T), $"a reinterpret view of a {rootSize}-byte Go value whose storage go2cs cannot hold still, and C may write past one {typeof(T).Name} into it");
 
             default:
+                if (GoPinTable.Any && TryPinnerHeld(pointer, function, out pin))
+                {
+                    address = 0;
+                    return GoCgoStructPointer.Pinned;
+                }
+
                 return StructPointer(pointer, function, out address);
         }
     }
@@ -644,6 +661,38 @@ namespace go.golib;
 
     private static PanicException GoPointerToUnpinnedGoPointer() =>
         RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go pointer");
+
+    // cgo S6 (DESIGN-cgo-phase3-marshaling 21.3 (b), 21.7 SHOULD 3): a pointer into a value pinned with runtime.Pinner, which
+    // C may KEEP past the call, never crosses as a stack mirror or an image, whose address is a copy's. It crosses in place,
+    // held still by the Pinner's own handle (and the wrapper's `fixed` for the call), when its CLR layout is its C layout:
+    // the storage holds no reference (the S1 condition). A pinned value that fails the test is refused by name. False when
+    // nothing pinned the pointer's value, so the door's call-scoped answer stands.
+    private static bool TryPinnerHeld<T>(ж<T> pointer, string function, out GoCgoPin pin)
+    {
+        pin = default;
+
+        if (pointer.IsNilPointer || pointer is NativeBox<T> { NativeAddress: not 0 } native && IsGenuinelyNative(native))
+            return false;
+
+        bool held = GoPinTable.IsPinned(pointer.ReferentObject);
+        bool located = TryPinTarget(pointer, 0, out Array? root, out nint offset);
+
+        if (located)
+            held |= GoPinTable.HoldsStorage(root!);
+
+        if (!held)
+            return false;
+
+        if (!located || RuntimeHelpers.IsReferenceOrContainsReferences<T>() || NativeStructMarshal.ContainsReferences(root!.GetType().GetElementType()!))
+            throw PinnerHeldRefused(function, typeof(T), "a Go value whose Go layout is not its C layout");
+
+        RequireCrossable(root!);
+        pin = new GoCgoPin(root!, offset);
+        return true;
+    }
+
+    private static PanicException PinnerHeldRefused(string function, Type type, string what) =>
+        RuntimeErrorPanic.ErrorString($"cgo: the {type.Name} pointer handed to C.{function} is pinned with runtime.Pinner, so C may keep it past the call, and it is {what}; go2cs cannot hand C that value's own memory, so it refuses the call (docs/Limitations.md#cgo)");
 
     private static PanicException VoidRefused(string function, string what) =>
         RuntimeErrorPanic.ErrorString($"cgo: the void pointer handed to C.{function} is {what}, and handing C a pointer into Go memory is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");
