@@ -1,6 +1,8 @@
-using go;
+using go.@internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using go;
 using abi = go.@internal.abi_package;
+using static go.@internal.abi_package;
 using unique = go.unique_package;
 
 namespace GolibTests;
