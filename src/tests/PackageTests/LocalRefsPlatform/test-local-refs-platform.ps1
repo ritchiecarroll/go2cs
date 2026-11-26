@@ -18,7 +18,9 @@
       IN-PLACE   deploy-core -Target <deploy root>, then plain -recurse -go2cspath <deploy root> with no output root, so
                  the conversion lands in the deploy root itself. The converter keeps deploy-core's
                  Directory.Build.props and writes only its Directory.Build.targets, so that props carries no platform
-                 default and the build names the host platform explicitly; it builds and runs, output equal to go run's.
+                 default and the build passes exactly the flags docs/ConvertingAModule.md names for this host (none on
+                 Windows, -p:GoTargetOS on Linux and macOS, and -p:GoTargetArch=arm64 on Linux Arm64); it builds and
+                 runs, output equal to go run's.
 
     Before the restore half (release-smoke 45729437375, both linux legs) DEFAULT stopped on NETSDK1004 for each
     project the runtime references only on linux; before the platform default, a linux build compiled the windows
@@ -112,6 +114,16 @@ try {
                 if ($runCode -ne 0 -or $actual -ne $expected) {
                     $verdicts += "FAIL (DEFAULT): dotnet run exited $runCode, printed '$actual', want '$expected'"
                 } else { $verdicts += "PASS (DEFAULT): no flags, built from a clean root and printed what go run prints ($hostOS)" }
+
+                # The generator-output redirection still HAPPENS under the converter's own props: one directory per
+                # converted project in <output root>/.artifacts/gen. Its guard reads two property names; a misspelt
+                # one would make it always false, and every arm would still pass.
+                $projects = @(Get-ChildItem -Path $converted -Recurse -Filter *.csproj | Where-Object { $_.FullName -notlike '*.artifacts*' }).Count
+                $genRoot = Join-Path $converted '.artifacts/gen'
+                $genDirs = if (Test-Path $genRoot) { @(Get-ChildItem -Path $genRoot -Directory).Count } else { 0 }
+                if ($projects -gt 0 -and $genDirs -eq $projects) {
+                    $verdicts += "PASS (DEFAULT): generator output redirected, $genDirs of $projects project(s) under .artifacts/gen"
+                } else { $verdicts += "FAIL (DEFAULT): .artifacts/gen holds $genDirs directories for $projects converted project(s)" }
             }
 
             # OVERRIDE: a global property beats the default and reaches the referenced runtime projects.
@@ -138,8 +150,12 @@ try {
         } else {
             Push-Location $inPlaceApp
             try {
+                # Exactly the flags the doc names for this host, so the arm runs the documented commands. Apple silicon
+                # gets no arch flag: the darwin flavor is amd64 for both mac RIDs.
                 $hostArch = (& go env GOARCH).Trim()
-                $platform = @("-p:GoTargetOS=$hostOS", "-p:GoTargetArch=$hostArch")
+                $platform = @()
+                if ($hostOS -ne 'windows') { $platform += "-p:GoTargetOS=$hostOS" }
+                if ($hostOS -eq 'linux' -and $hostArch -eq 'arm64') { $platform += '-p:GoTargetArch=arm64' }
                 $code = Invoke-Logged (Join-Path $work 'build-inplace.log') { & dotnet build -c Debug -nologo -v:m @platform }
                 if ($code -ne 0) {
                     $verdicts += "FAIL (IN-PLACE): dotnet build exited $code$(Get-FirstError (Join-Path $work 'build-inplace.log'))"
@@ -148,7 +164,7 @@ try {
                     $runCode = $LASTEXITCODE
                     if ($runCode -ne 0 -or $actual -ne $expected) {
                         $verdicts += "FAIL (IN-PLACE): dotnet run exited $runCode, printed '$actual', want '$expected'"
-                    } else { $verdicts += "PASS (IN-PLACE): converted inside a deploy-core root, built and printed what go run prints ($hostOS/$hostArch)" }
+                    } else { $verdicts += "PASS (IN-PLACE): converted inside a deploy-core root, built with '$($platform -join ' ')' and printed what go run prints ($hostOS/$hostArch)" }
                 }
             } finally { Pop-Location }
         }

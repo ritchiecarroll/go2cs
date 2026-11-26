@@ -95,12 +95,15 @@ from git (tracked files only, so no `bin`/`obj` can hide a skipped restore) and 
 
 - DEFAULT: `dotnet build` and `dotnet run` with no flags build the program and print what `go run` prints. The output
   root's props default `GoTargetOS`/`GoTargetArch` to the platform the tree was converted for, and its targets hand the
-  same two values to NuGet's restore walk, which ignores the `ProjectReference` metadata the build honors;
+  same two values to NuGet's restore walk, which ignores the `ProjectReference` metadata the build honors. It also
+  checks the output root's `.artifacts/gen` holds one directory per converted project, so a misspelt guard on that
+  redirection fails here (read red with the guard's token property misspelt);
 - OVERRIDE: `-p:GoTargetArch=riscv64` beats the default and reaches the referenced runtime, whose layout check refuses
   `<host GOOS>/riscv64` by name;
 - IN-PLACE: `deploy-core.ps1 -Target` stages the same root, and plain `go2cs -recurse -go2cspath <deploy root>`, with no
   output root, converts into the deploy root itself. The conversion keeps deploy-core's `Directory.Build.props` and
-  writes only its targets, so the build names the host platform; it builds and prints what `go run` prints.
+  writes only its targets, so the build passes exactly the flags `docs/ConvertingAModule.md` names for the host; it
+  builds and prints what `go run` prints.
 
 ```text
 pwsh src/tests/PackageTests/LocalRefsPlatform/test-local-refs-platform.ps1 [-Converter <go2cs>] [-Repository <clone>]
