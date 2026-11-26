@@ -86,6 +86,88 @@ namespace go.golib;
     }
 
     /// <summary>
+    /// <see cref="StructPointer{T}(ж{T}, string, out nuint)"/> for a wrapper that holds a call's
+    /// <see cref="GoCgoImages"/> (cgo Phase 3, increment 3.4, the struct image door: DESIGN-cgo-phase3-marshaling 19.7 and
+    /// 19.9). A struct pointer that is a reinterpret view of a Go struct of another type, which no door can pin, crosses
+    /// as an IMAGE of its root: <see cref="GoCgoStructPointer.Pinned"/>, with <paramref name="pin"/> over the image
+    /// buffer, which the wrapper's <c>fixed</c> holds and <see cref="GoCgoImages.CopyBack"/> decodes back after the call
+    /// (net's <c>getnameinfo</c> over <c>(*C.struct_sockaddr)(unsafe.Pointer(&amp;sa))</c>). Every other pointer takes the
+    /// plain door, and one it hands C as a mirror is claimed in the set, so a root imaged and mirrored in one call is
+    /// refused by name (P3's B5).
+    /// </summary>
+    public static GoCgoStructPointer StructPointer<T>(ж<T>? pointer, string function, ref GoCgoImages images, out nuint address, out GoCgoPin pin)
+    {
+        pin = default;
+
+        if (pointer is NativeBox<T> native && !IsGenuinelyNative(native) && native.AliasesAnOrderToken && ImageRoot(native, function) is { } root)
+        {
+            address = 0;
+            pin = images.Image(GoCgoImages.ImageKeys(root.Key, root.Value), root.Box, root.Value, root.Type, root.Size, Math.Max(root.Size, NativeStructMarshal.ImageSizeOf(typeof(T)) ?? (nuint)Unsafe.SizeOf<T>()), function);
+            return GoCgoStructPointer.Pinned;
+        }
+
+        GoCgoStructPointer kind = StructPointer(pointer, function, out address);
+
+        if (kind == GoCgoStructPointer.Mirror && pointer is not null)
+            images.ClaimOther(OtherKeys(pointer, pin), function);
+
+        return kind;
+    }
+
+    /// <summary>
+    /// <see cref="ScalarPointer{T}(ж{T}, string, out nuint, out GoCgoPin)"/> for a wrapper that holds a call's
+    /// <see cref="GoCgoImages"/>: the scalar's root is claimed in the set, so a root one parameter images and this one
+    /// mirrors or pins is refused by name (P3's B5).
+    /// </summary>
+    public static GoCgoStructPointer ScalarPointer<T>(ж<T>? pointer, string function, ref GoCgoImages images, out nuint address, out GoCgoPin pin)
+    {
+        GoCgoStructPointer kind = ScalarPointer(pointer, function, out address, out pin);
+
+        if (kind is GoCgoStructPointer.Mirror or GoCgoStructPointer.Pinned && pointer is not null)
+            images.ClaimOther(OtherKeys(pointer, pin), function);
+
+        return kind;
+    }
+
+    // The allocations a pointer another door hands C names (P3's B5, keyed as an image is): its root, and the storage it
+    // pins, so a pointer into an array inside an imaged root (`&sa.Addr[0]`, or `(*C.int)(unsafe.Pointer(&sa.Addr))`,
+    // whose view names neither sa's box nor its view) is seen to name that root's memory.
+    private static object[] OtherKeys<T>(ж<T> pointer, in GoCgoPin pin)
+    {
+        object root = pointer.ReferentObject;
+
+        return pin.Storage is { } storage && !ReferenceEquals(storage, root) ? [root, storage] : [root];
+    }
+
+    // The root a struct view's order token names, when the door can image it: the token resolves to a live Go box (an
+    // offset added to it is refused by name, P3's B4), whose value is a struct NativeStructMarshal carries both ways (a
+    // root holding a Go pointer is refused by name), with no published unsafe.Pointer word over it (B-10). Null when the
+    // token resolves to nothing, so the plain door's refusal stands.
+    private static (object Key, IGoReflectBox Box, object Value, Type Type, nuint Size)? ImageRoot<T>(NativeBox<T> view, string function)
+    {
+        nuint number = view.NativeAddress;
+        nuint offset = 0;
+
+        object? root = ManagedPointerTokens.IsTokenArithmetic(number)
+            ? ManagedPointerTokens.ResolveArithmeticBase(number, out offset)
+            : ManagedPointerTokens.Resolve(number);
+
+        if (root is not IGoReflectBox box || box.IsNilPointer)
+            return null;
+
+        if (offset != 0)
+            throw Refused(function, typeof(T), $"a view {offset} bytes into a Go value no door can pin; go2cs images only a whole Go value, so it refuses rather than hand C the wrong bytes");
+
+        if (box.ReadBoxSlot() is not { } value || NativeStructMarshal.ImageSizeOf(value.GetType()) is not { } size)
+            throw Refused(function, typeof(T), "a view of a Go value that holds Go pointers (or has no image in memory), which C must not see");
+
+        if (GoPointerWords.AnyTable && GoPointerWords.HoldsAnyEntry(root))
+            throw GoPointerToUnpinnedGoPointer();
+
+        return (root is INilPointer nilable ? nilable.ReferentObject : root, box, value, value.GetType(), size);
+    }
+
+    /// <summary>
     /// How to hand C a pointer to one C SCALAR (cgo Phase 3, increment 3.2, seat 1b: design 18.12 item 2). As
     /// <see cref="StructPointer{T}"/> for nil, C memory and one whole scalar in a box or a field (a stack mirror). An
     /// element of a Go array, and a typed view over Go storage, are <see cref="GoCgoStructPointer.Pinned"/>: the box

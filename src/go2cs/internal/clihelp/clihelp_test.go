@@ -237,3 +237,23 @@ func TestHelpWidth(t *testing.T) {
 		}
 	}
 }
+
+// Each option table's header is padded to its longest unbreakable token: two no-break spaces per character, less
+// six. -recurse[=module,nuget] (23 characters) sets the common table's header; a space in a syntax is a break point
+// the table may use, so it does not count.
+func TestOptionHeaderPadsToTheLongestToken(t *testing.T) {
+	common := filter(func(o Option) bool { return o.Class == Common })
+
+	if got, want := optionHeader(common), "Option"+strings.Repeat("&nbsp;", 2*23-6); got != want {
+		t.Errorf("the common table's header is %q, want %d no-break spaces", got, 2*23-6)
+	}
+
+	if got := optionHeader([]Option{{Name: "inline-arrays", Value: "<pattern>[,<pattern>...]"}}); got !=
+		"Option"+strings.Repeat("&nbsp;", 2*24-6) {
+		t.Errorf("a value token longer than the name sets the padding: %q", got)
+	}
+
+	if got := optionHeader([]Option{{Name: "v"}}); got != "Option" {
+		t.Errorf("a token shorter than the header word pads nothing: %q", got)
+	}
+}

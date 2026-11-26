@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-// Move up from the working directory this is run from -- "go2cs/src/utilities/UpdateTestTargets/
+// Move up from the working directory this is run from -- "go2cs/src/tools/UpdateTestTargets/
 // bin/Debug/net9.0" -- to "go2cs/src". Built from Path.Combine SEGMENTS rather than an embedded
 // @"..\..\..\..\..\": .NET does not normalize backslashes on Unix, so that literal is a single
 // directory NAME there and every path below resolves to somewhere that does not exist. Identical

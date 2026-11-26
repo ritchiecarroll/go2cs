@@ -177,10 +177,10 @@ go2cs -version
 
 Give the output directory when you convert a package: without it, the C# is written beside the Go input.
 
-| Option | What it does |
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | What it does |
 |:--|:--|
 | `-recurse=nuget` | Convert a module and its third-party dependencies, in dependency order; a dependency already published as a converted NuGet package is referenced instead of converted. The standard library, the runtime and the source generators are NuGet package references, so nothing is staged on your machine. Start here. |
-| `-recurse="module, nuget"` | Convert only the module's own packages, and reference the dependencies without converting them. Use it when a dependency does not convert yet; the solution builds once the dependencies are in place. |
+| `-recurse=module,nuget` | Convert only the module's own packages, and reference the dependencies without converting them. Use it when a dependency does not convert yet; the solution builds once the dependencies are in place. |
 | `-tests` | Also convert the Go test suite. With `-test-action all`, build it, run it, and compare its results with `go test`. For a module it takes plain `-recurse`, not `=nuget` or `=module`, and `-go2cspath` with the absolute path of a go2cs clone's `src` folder, whose converted standard library the tests build against. |
 | `-platforms <os/arch>` | The platform to convert for. It defaults to the machine you are on. |
 | `-tags <list>` | The build tags to select files with, as in `go build -tags`. |
@@ -244,8 +244,13 @@ in C#, runs `go test`, and compares the two:
 ## Contributing
 
 Start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md), then
-[Building go2cs from source](BuildingGo2cs.md) and [`Architecture.md`](Architecture.md). There is plenty
-of low-hanging fruit here; jump in if you'd like to help.
+[Building go2cs from source](BuildingGo2cs.md) and [`Architecture.md`](Architecture.md).
+
+The most useful help right now is running go2cs on your own Go code. When the C# fails to build, or
+behaves differently from Go, a small program that reproduces it makes the best issue. The larger work
+still ahead is in the [Roadmap](Roadmap.md), and what is already known is in
+[Known Issues](KnownIssues.md) and [Limitations](Limitations.md). For anything sizable, start a
+Discussion first so we can agree on an approach.
 
 go2cs is a personal project, worked on in spare time. Issues, ideas and pull requests are welcome and are read,
 but replies are best-effort and can take a while. Questions belong in

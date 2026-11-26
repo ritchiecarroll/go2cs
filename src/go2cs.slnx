@@ -582,6 +582,8 @@
     <Project Path="tests/Behavioral/EscapedLoopVarSiblingIndex/EscapedLoopVarSiblingIndex.csproj" />
     <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/ExportedAliasUnexportedTarget.csproj" />
     <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/aliaslib/ExportedAliasUnexportedTarget.aliaslib.csproj" />
+    <Project Path="tests/Behavioral/ExportedFuncOfUnexportedFuncType/ExportedFuncOfUnexportedFuncType.csproj" />
+    <Project Path="tests/Behavioral/ExportedFuncOfUnexportedFuncType/lib/ExportedFuncOfUnexportedFuncType.lib.csproj" />
     <Project Path="tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="tests/Behavioral/FieldAccessReinterpret/FieldAccessReinterpret.csproj" />
     <Project Path="tests/Behavioral/FieldAddressProperties/FieldAddressProperties.csproj" />
@@ -705,6 +707,7 @@
     <Project Path="tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="tests/Behavioral/GuardedNilPointerParamDeref/GuardedNilPointerParamDeref.csproj" />
     <Project Path="tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
+    <Project Path="tests/Behavioral/GoCallNamedFuncType/GoCallNamedFuncType.csproj" />
     <Project Path="tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="tests/Behavioral/GoDeferConstArgs/GoDeferConstArgs.csproj" />
     <Project Path="tests/Behavioral/GoImageCopyThroughView/GoImageCopyThroughView.csproj" />
@@ -1418,6 +1421,8 @@
     <Project Path="tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/UntypedIntInterfaceBox/UntypedIntInterfaceBox.csproj" />
     <Project Path="tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
+    <Project Path="tests/Behavioral/UnnamedArrayTypeArgDescriptor/UnnamedArrayTypeArgDescriptor.csproj" />
+    <Project Path="tests/Behavioral/UnnamedArrayTypeArgDescriptor/wrap/UnnamedArrayTypeArgDescriptor.wrap.csproj" />
     <Project Path="tests/Behavioral/UnnamedMapNilConversion/UnnamedMapNilConversion.csproj" />
     <Project Path="tests/Behavioral/UnnamedParams/UnnamedParams.csproj" />
     <Project Path="tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
@@ -1525,8 +1530,8 @@
     <Project Path="tests/Performance/PerfStringView/PerfStringView.csproj" />
     <Project Path="tests/Performance/PerfTlsHandshake/PerfTlsHandshake.csproj" />
   </Folder>
-  <Folder Name="/utilities/">
+  <Folder Name="/tools/">
     <File Path="set-version.ps1" />
-    <Project Path="utilities/UpdateTestTargets/UpdateTestTargets.csproj" />
+    <Project Path="tools/UpdateTestTargets/UpdateTestTargets.csproj" />
   </Folder>
 </Solution>

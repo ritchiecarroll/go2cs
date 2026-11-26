@@ -941,6 +941,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			if err := writePackageInitFile(packageInitDir, packageNamespace, packageName); err != nil {
 				log.Fatalf("Failed to write package init file for \"%s\": %s\n", packageOutputPath, err)
 			}
+
+			// A cgo-on conversion into a root seeded from the corpus: the C# of each cgo-off file this load deselects
+			// goes, or both selections compile (cgoDeselectedOutputs.go; DESIGN-cgo-phase3-marshaling 19.6).
+			if err := removeCgoDeselectedOutputs(pkg, packageOutputPath, options); err != nil {
+				log.Fatalf("%v\n", err)
+			}
 		}
 
 		// NOTE: `.cs.auto` review siblings for manually-converted files were emitted inline by the

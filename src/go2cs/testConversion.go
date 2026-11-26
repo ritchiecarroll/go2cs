@@ -804,7 +804,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Dir:        inputPath,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 		ParseFile: parseFileUnparenAddressOperands,
@@ -2012,7 +2012,7 @@ func collectSiblingTestClosure(inputPath string, options Options) {
 		Dir:        absolute,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}, ".")
@@ -3188,6 +3188,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		seedProductionAliasLifts(pkg, productionInfoPath)
 		seedProductionInterfaceAliases(pkg, productionInfoPath, options)
 		seedProductionDynamicTypeLifts(productionInfoPath)
+		seedProductionArrayDimsCompanions(productionInfoPath)
 	}
 
 	// The EXTERNAL variant additionally inherits the INTERNAL variant's purely-anonymous lifts.
@@ -4080,7 +4081,12 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
 		packageMethodHolders = bridgeHolders
+
+		// The test assembly takes the C pseudo-package's stamp from package_test_info.cs, written below; this unit
+		// carries none (CS0579 otherwise, on a cgo-on package).
+		cgoPseudoPackageStampElsewhere = true
 		writePackageInfoFile(unitPath, true)
+		cgoPseudoPackageStampElsewhere = false
 
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
 		packageEmittedTypeAccess = savedAccess
@@ -11449,7 +11455,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	}
 
 	goArgs := oracleTestArgs(options, packagePath, hostFatalSkip)
-	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
+	goOutput, goErr := runCommandWithTimeoutEnv(testChildTimeout(options), inputPath, oracleOptions(options), cgoOracleEnv(options), "go", goArgs...)
 
 	// Captured immediately after the real oracle run, same directory, same options — see
 	// oracleGoVersion's own doc comment for why this is not `go env GOROOT`.

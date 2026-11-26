@@ -187,6 +187,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// (cgoPseudoPackage.go), separated there as they would be in the package class.
 	packageBuilder, cgoPart := v.outputBuilder, &strings.Builder{}
 	cgoClassName := getSanitizedImport(cgoPseudoPackageClass(packageName))
+	cgoPseudoPackageReferenced = false
 	var cgoPrevDecl ast.Decl
 	cgoPrevShape := declShapeOther
 
@@ -291,7 +292,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	// Each file that names a C type or constant reaches the pseudo-package through `C`, and a file that names none
 	// never sees it (§11.17).
-	if v.namesCgoPseudoPackageMember(file) {
+	if v.namesCgoPseudoPackageMember(file) || cgoPseudoPackageReferenced {
 		v.addRequiredUsing(fmt.Sprintf("%s = %s", cgoPseudoPackageAlias, cgoClassName))
 	}
 

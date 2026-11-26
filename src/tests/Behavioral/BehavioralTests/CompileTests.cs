@@ -715,6 +715,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
+    public void CheckExportedFuncOfUnexportedFuncType() => CheckTarget("ExportedFuncOfUnexportedFuncType");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
@@ -1052,6 +1055,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
+
+    [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
 
     [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
@@ -2999,6 +3005,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
+
+    [TestMethod]
+    public void CheckUnnamedArrayTypeArgDescriptor() => CheckTarget("UnnamedArrayTypeArgDescriptor");
 
     [TestMethod]
     public void CheckUnnamedMapNilConversion() => CheckTarget("UnnamedMapNilConversion");
