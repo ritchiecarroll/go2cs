@@ -244,8 +244,13 @@ in C#, runs `go test`, and compares the two:
 ## Contributing
 
 Start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md), then
-[Building go2cs from source](BuildingGo2cs.md) and [`Architecture.md`](Architecture.md). There is plenty
-of low-hanging fruit here; jump in if you'd like to help.
+[Building go2cs from source](BuildingGo2cs.md) and [`Architecture.md`](Architecture.md).
+
+The most useful help right now is running go2cs on your own Go code. When the C# fails to build, or
+behaves differently from Go, a small program that reproduces it makes the best issue. The larger work
+still ahead is in the [Roadmap](Roadmap.md), and what is already known is in
+[Known Issues](KnownIssues.md) and [Limitations](Limitations.md). For anything sizable, start a
+Discussion first so we can agree on an approach.
 
 go2cs is a personal project, worked on in spare time. Issues, ideas and pull requests are welcome and are read,
 but replies are best-effort and can take a while. Questions belong in

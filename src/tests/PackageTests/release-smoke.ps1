@@ -35,8 +35,13 @@
                             that runner's own "checks: <N> ok, 0 failed". -ConsumerRef is the exception path for a
                             deliberate break: it needs -ConsumerOverride citing the moved break floor and the release
                             notes' Upgrading entry, and the verdict line reads OVERRIDE.
+      T  TWIN OPT-IN        TwinOptIn (a goroutine program that imports nothing), converted with -recurse=nuget
+                            against the feed, -recurse against this repository's src, and -recurse against a
+                            deploy-core.ps1 root staged under -WorkRoot; each built without and with GoTwinsFor. No
+                            twin without it, twins with it, and the twinned program (GO2CS_MN=1) writes what
+                            `go run` writes. The NuGet mode is measured only against a published (URL) feed.
 
-    Exit 0 when A, B, C, G and H pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
+    Exit 0 when A, B, C, G, H and T pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
     under -WorkRoot.
 
 .PARAMETER Feed
@@ -518,6 +523,120 @@ foreach ($check in @(
     $detail = @(Get-Content -LiteralPath $checkLog -ErrorAction SilentlyContinue | Where-Object { $_ -match $pattern } | ForEach-Object { $_.Trim() }) -join ' | '
     $symbolVerdicts += if ($code -eq 0) { "PASS ($($check.Name)): $detail" } else { "FAIL ($($check.Name)): exit $code -- $detail (see $($check.Name).log)" }
 }
+
+# ---- T: the twin opt-in reaches a program converted OUTSIDE the repository -------------------------
+# GoTwinsFor (docs/AsyncTwins.md) lived only in src/Directory.Build.targets until 2026-11-25, so a program converted
+# anywhere else built without twins and said nothing: measured that day in all three runtime modes (R, COORD
+# 20261125T182108Z). golib's buildTransitive/go.lib.twins.targets now carries it, imported by go.lib.targets (NuGet)
+# and by the -recurse output root's Directory.Build.targets (local references). This arm converts TwinOptIn, a
+# goroutine program that imports nothing, three ways and builds each twice, into its own artifacts root:
+#   nuget     -recurse=nuget against the feed
+#   core      -recurse against this repository's src (a clone)
+#   deployed  -recurse against a deploy-core.ps1 root staged in the work directory
+# It passes when the build WITHOUT GoTwinsFor carries no twin and the build WITH it carries twins (names ending
+# U+A78F 'twin' in the program assembly), and the twinned program, run with GO2CS_MN=1, writes what `go run` writes
+# (println goes to standard error in Go, so standard error is what is compared). The nuget arm gates only against
+# this tree's pack: a published version before .5 carries no twins at all.
+$twinFixture = Join-Path $PSScriptRoot 'TwinOptIn'
+$twinProject = 'example.com.twinoptin'
+$twinAssembly = 'twinoptin'
+
+function Get-TwinNameCount([string]$ArtifactsRoot) {
+    $dll = Get-ChildItem -LiteralPath (Join-Path $ArtifactsRoot 'bin') -Recurse -Filter "$twinAssembly.dll" -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '[\\/]ref[\\/]' } | Select-Object -First 1
+    if (-not $dll) { return $null }
+    # Bytes read as Latin-1 keep a one-to-one byte mapping, so the UTF-8 needle counts exactly.
+    $latin1 = [System.Text.Encoding]::GetEncoding(28591)
+    $needle = $latin1.GetString([System.Text.Encoding]::UTF8.GetBytes(([string][char]0xA78F) + 'twin'))
+    $text = $latin1.GetString([System.IO.File]::ReadAllBytes($dll.FullName))
+    return [PSCustomObject]@{ Count = [regex]::Matches($text, [regex]::Escape($needle)).Count; Path = $dll.FullName }
+}
+
+function Invoke-TwinArm([string]$Mode) {
+    $name = "T-twins-$Mode"
+    $arm = Join-Path $WorkRoot $name
+    $src = Join-Path $arm 'src'
+    $out = Join-Path $arm 'out'
+    $cache = Join-Path $arm 'nuget-cache'
+    New-Item -ItemType Directory -Force $src, $cache | Out-Null
+    Copy-Item (Join-Path $twinFixture 'go.mod'), (Join-Path $twinFixture 'main.go') $src
+
+    $goErr = Join-Path $arm 'go.stderr.txt'
+    Push-Location $src
+    try {
+        $ErrorActionPreference = 'Continue'
+        & go run . 1> (Join-Path $arm 'go.stdout.txt') 2> $goErr
+        $ErrorActionPreference = 'Stop'
+    }
+    finally { Pop-Location }
+    if ($LASTEXITCODE -ne 0) { return "FAIL ($name): go run exited $LASTEXITCODE (the Go baseline itself)" }
+
+    $buildArgs = @()
+    switch ($Mode) {
+        'nuget' {
+            $code = Invoke-Logged (Join-Path $arm 'convert.log') { & $Converter -recurse=nuget $src $out }
+            if ($code -ne 0) { return "FAIL ($name): go2cs -recurse=nuget exited $code$(Get-FirstError (Join-Path $arm 'convert.log'))" }
+            Write-FeedConfig $out
+            $buildArgs += "-p:GoStdLibVersion=$Version"
+        }
+        'core' {
+            $code = Invoke-Logged (Join-Path $arm 'convert.log') { & $Converter -recurse -go2cspath $repoSrc $src $out }
+            if ($code -ne 0) { return "FAIL ($name): go2cs -recurse exited $code$(Get-FirstError (Join-Path $arm 'convert.log'))" }
+        }
+        'deployed' {
+            $deploy = Join-Path $arm 'deploy'
+            $code = Invoke-Logged (Join-Path $arm 'deploy.log') { & pwsh -NoProfile -File (Join-Path $repoSrc 'deploy-core.ps1') -Target $deploy -NoBuild }
+            if ($code -ne 0) { return "FAIL ($name): deploy-core.ps1 exited $code$(Get-FirstError (Join-Path $arm 'deploy.log'))" }
+            $code = Invoke-Logged (Join-Path $arm 'convert.log') { & $Converter -recurse -go2cspath $deploy $src $out }
+            if ($code -ne 0) { return "FAIL ($name): go2cs -recurse exited $code$(Get-FirstError (Join-Path $arm 'convert.log'))" }
+        }
+    }
+
+    $proj = Get-ChildItem -LiteralPath $out -Recurse -Filter "$twinProject.csproj" -File | Select-Object -First 1
+    if (-not $proj) { return "FAIL ($name): no $twinProject.csproj under $out" }
+
+    $env:NUGET_PACKAGES = $cache
+    try {
+        $offRoot = Join-Path $arm 'art-off'
+        $onRoot = Join-Path $arm 'art-on'
+        $code = Invoke-Logged (Join-Path $arm 'build-off.log') { & dotnet build $proj.FullName -c Release --nologo "-p:Go2csArtifactsRoot=$offRoot$([IO.Path]::DirectorySeparatorChar)" @buildArgs }
+        if ($code -ne 0) { return "FAIL ($name): the build without GoTwinsFor exited $code$(Get-FirstError (Join-Path $arm 'build-off.log'))" }
+        $code = Invoke-Logged (Join-Path $arm 'build-on.log') { & dotnet build $proj.FullName -c Release --nologo "-p:Go2csArtifactsRoot=$onRoot$([IO.Path]::DirectorySeparatorChar)" "-p:GoTwinsFor=$twinProject" @buildArgs }
+        if ($code -ne 0) { return "FAIL ($name): the build with GoTwinsFor exited $code$(Get-FirstError (Join-Path $arm 'build-on.log'))" }
+    }
+    finally { $env:NUGET_PACKAGES = $null }
+
+    $off = Get-TwinNameCount $offRoot
+    $on = Get-TwinNameCount $onRoot
+    if (-not $off -or -not $on) { return "FAIL ($name): no $twinAssembly.dll under $offRoot or $onRoot" }
+    if ($off.Count -ne 0) { return "FAIL ($name): the build WITHOUT GoTwinsFor carries $($off.Count) twin name(s)" }
+    if ($on.Count -eq 0) { return "FAIL ($name): the build WITH GoTwinsFor carries no twin -- the opt-in did not reach the build" }
+
+    # The twinned program, with the scheduler switched on: it must still do what Go does. (Whether a goroutine parks is
+    # the twins' own property, gated by the behavioral --mn runs; this arm's question is that the opt-in reaches the build.)
+    $csErr = Join-Path $arm 'cs.stderr.txt'
+    $env:GO2CS_MN = '1'
+    try {
+        $ErrorActionPreference = 'Continue'
+        & dotnet $on.Path 1> (Join-Path $arm 'cs.stdout.txt') 2> $csErr
+        $runCode = $LASTEXITCODE
+        $ErrorActionPreference = 'Stop'
+    }
+    finally { $env:GO2CS_MN = $null }
+    if ($runCode -ne 0) { return "FAIL ($name): the twinned program exited $runCode$(Get-StderrHead $csErr)" }
+
+    $want = ([System.IO.File]::ReadAllText($goErr)) -replace "`r`n", "`n"
+    $got = ([System.IO.File]::ReadAllText($csErr)) -replace "`r`n", "`n"
+    if ($want.TrimEnd("`n") -ne $got.TrimEnd("`n")) { return "FAIL ($name): standard error differs from go run: go '$($want.Trim())' vs C# '$($got.Trim())'" }
+
+    return "PASS ($name): twins without GoTwinsFor 0, with it $($on.Count); the twinned program (GO2CS_MN=1) writes what go run writes"
+}
+
+$verdicts += Invoke-TwinArm 'core'
+$verdicts += Invoke-TwinArm 'deployed'
+$twinNuget = Invoke-TwinArm 'nuget'
+$publishedFeed = $Feed -match '^https?://'
+if ($publishedFeed) { $symbolVerdicts += $twinNuget } else { $verdicts += $twinNuget }
 
 # ---- verdicts ------------------------------------------------------------------------------------
 if ($GateWalkthrough) { $verdicts += $walkVerdict }

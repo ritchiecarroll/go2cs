@@ -244,9 +244,12 @@ on the master branch only; go2cs 1.26.11.1 does not have it. It is inert unless 
   without `.csproj`, separated by `;`. Set it in the
   environment: on the `dotnet build` command line each `;` must be written `%3B`, or MSBuild ends the property there.
   `GoTwins=true` in one project's own file builds that project with twins, but a new conversion writes the file
-  again and drops it. These properties are read by `src/Directory.Build.targets`, so they work only for a project
-  under the `src` directory of a go2cs repository clone. The published
-  `go.*` packages are not built with twins, and a project that references them gets no twins from them.
+  again and drops it. These properties are read by go.lib's build files, so they work for any converted program,
+  against a repository clone, a `deploy-core` root or the `go.*` packages. The published 1.26.11.1 packages carry no
+  twins (their go.gen has no twin generator), so a project that references them builds without twins whatever it
+  sets.
+  <!-- 2026-11-25 (R, COORD 20261125T191726Z): the switch moved from src/Directory.Build.targets to
+       core/golib/buildTransitive/go.lib.twins.targets, imported by go.lib.targets and the -recurse output root. -->
 - **The run**: the environment sets `GO2CS_MN=1`. How many goroutines run at once follows `GOMAXPROCS`, as in Go: the
   `GOMAXPROCS` environment variable at start, and `runtime.GOMAXPROCS(n)` while the program runs. `GO2CS_MN_PROCS=<n>`
   pins the count instead; it is a measurement switch, not a supported setting.

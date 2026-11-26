@@ -3007,6 +3007,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUnixAbstractAddrName() => CheckTarget("UnixAbstractAddrName");
 
     [TestMethod]
+    public void CheckUnnamedArrayTypeArgDescriptor() => CheckTarget("UnnamedArrayTypeArgDescriptor");
+
+    [TestMethod]
     public void CheckUnnamedMapNilConversion() => CheckTarget("UnnamedMapNilConversion");
 
     [TestMethod]
