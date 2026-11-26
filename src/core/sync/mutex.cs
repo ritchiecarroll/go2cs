@@ -1,6 +1,16 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - Mutex.Lock, Mutex.TryLock, Mutex.Unlock: INSPIRED BY src/sync/mutex.go, Go 1.26.11, methods Mutex.Lock,
+//   Mutex.TryLock, Mutex.Unlock. The same contract and fatal reports over go2cs's queue.
+// - throw, fatal: bodies for the bodyless Go declarations of the same names in src/sync/runtime.go. Original go2cs
+//   code.
+// - the queue-stripe machinery and Lockꞏtwin: original go2cs code.
 
 // Package sync provides basic synchronization primitives such as mutual
 // exclusion locks. Other than the [Once] and [WaitGroup] types, most are intended

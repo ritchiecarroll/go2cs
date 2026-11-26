@@ -1,6 +1,18 @@
 // Copyright 2021 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The package: DERIVED FROM src/internal/godebug/godebug.go, Go 1.26.11, funcs New, lookup, init, newIncNonDefault,
+//   update, parse; methods Setting.Name, Setting.Undocumented, Setting.String, Setting.IncNonDefault,
+//   Setting.register, Setting.Value. The converted output with Go's comments.
+// - runtimeStderr.Write: INSPIRED BY src/internal/godebug/godebug.go, Go 1.26.11, method runtimeStderr.Write. The
+//   same write to standard error, through .NET's stream in place of the runtime's write.
+// - setUpdate, registerMetric, setNewIncNonDefault: bodies for the bodyless Go declarations of the same names in
+//   src/internal/godebug/godebug.go. Original go2cs code.
 
 // Package godebug makes the settings in the $GODEBUG environment variable
 // available to other packages. These settings are often used for compatibility

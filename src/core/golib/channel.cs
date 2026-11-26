@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ChanCore<T>.Send and ChanCore<T>.Recv: INSPIRED BY src/runtime/chan.go, Go 1.26.11, funcs chansend, chanrecv,
+//   send, recv. The same order: closed, then a waiting partner, then the buffer, then park or fail.
+// - select, the waiter queues, the async bridge and the rest: original go2cs code.
 
 // ReSharper disable UnusedMemberInSuper.Global
 // ReSharper disable UnusedMember.Global

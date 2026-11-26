@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - NetUserGetLocalGroups: DERIVED FROM src/internal/syscall/windows/zsyscall_windows.go (generated from the
+//   declarations in src/internal/syscall/windows/security_windows.go, whose notice this file carries), Go 1.24.13,
+//   func NetUserGetLocalGroups. The generated call, with the out-pointer published from native memory.
+// - publishPointerOut: original go2cs code. That publication.
 
 // This package's member of the ptrout class -- the generated wrappers that take a Go `**T`
 // OUT-PARAMETER, a slot the caller owns and the KERNEL writes a raw address into.

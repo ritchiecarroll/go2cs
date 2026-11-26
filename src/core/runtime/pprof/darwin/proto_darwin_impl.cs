@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - readMapping, readMainModuleMapping: DERIVED FROM src/runtime/pprof/proto_darwin.go, Go 1.26.11, func
+//   readMainModuleMapping; method profileBuilder.readMapping. Go's bodies, with a mapping added for the runtime's
+//   synthetic Go text.
 
 // readMapping and readMainModuleMapping, hand-owned (manualConversionFuncs["runtime/pprof"]) so that a
 // profile carries a mapping for this runtime's Go TEXT. The reason is proto_windows_impl.cs's: this

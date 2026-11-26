@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - gcTestIsReachable: INSPIRED BY src/runtime/mgc.go, Go 1.26.11, func gcTestIsReachable. The same answer from weak
+//   references over the CLR heap.
 
 // go2cs HAND-OWNED companion — runtime.gcTestIsReachable over the CLR heap (C1-2).
 // Coordinator routing: mailbox 1ef59adad (option (c)); the bisect that motivated it is i9's
@@ -117,7 +127,7 @@ internal static uint64 /*mask*/ gcTestIsReachable(params ꓸꓸꓸunsafeꓸPoint
     // reclaims what the drain released. Without the second pass an object whose only reference was
     // released by a finalizer would still read alive.
     // ⚠ `global::System.GC` in full, and it is not pedantry: this class DECLARES Go's own
-    // `runtime.GC()` (managed_impl.cs:292), so inside runtime_package the bare name `GC`
+    // `runtime.GC()` (managed_impl.cs:353), so inside runtime_package the bare name `GC`
     // resolves to that method and `GC.Collect()` is CS0119 — 'GC() is a method, which is not
     // valid in the given context', three of them, measured on the os-matrix census before this
     // line was written this way. A `using System;` cannot win against a member of the

@@ -4,6 +4,23 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - SanitizeName, IsGoSpace, NextSubtestName: INSPIRED BY src/testing/match.go, Go 1.26.11, funcs rewrite, isSpace;
+//   method matcher.unique. The same subtest name rewrite and de-duplication.
+// - AppendGoEscape: INSPIRED BY src/strconv/quote.go, Go 1.26.11, func appendEscapedRune. The escape forms for a
+//   non-printable rune.
+// - the rest of the test host's execution model: original go2cs code.
 
 using System;
 using System.Collections.Generic;

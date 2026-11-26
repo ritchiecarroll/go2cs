@@ -1,6 +1,19 @@
 // Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from or inspired by Go, whose notice it carries above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The package: DERIVED FROM src/internal/syscall/windows/registry/value.go, Go 1.26.11, func ExpandString; methods
+//   Key.GetValue, Key.getValue, Key.GetStringValue, Key.GetMUIStringValue, Key.GetStringsValue, Key.GetIntegerValue,
+//   Key.GetBinaryValue, Key.setValue, Key.setStringValue, Key.SetStringValue, Key.SetExpandStringValue,
+//   Key.SetStringsValue, Key.SetBinaryValue, Key.DeleteValue, Key.ReadValueNames. The converted output with Go's
+//   comments.
+// - Key.SetDWordValue, Key.SetQWordValue: INSPIRED BY src/internal/syscall/windows/registry/value.go, Go 1.26.11,
+//   methods Key.SetDWordValue, Key.SetQWordValue. The same writes, with the scalar's bytes taken through a span in
+//   place of an unsafe re-view.
 //go:build windows
 
 // Hand-owned: SetDWordValue/SetQWordValue are the "caller-reinterpreted byte buffer" class from

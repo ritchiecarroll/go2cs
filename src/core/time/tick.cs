@@ -1,6 +1,13 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - NewTicker, Ticker.Stop, Ticker.Reset, Tick: DERIVED FROM src/time/tick.go, Go 1.26.11, funcs NewTicker, Tick;
+//   methods Ticker.Stop, Ticker.Reset. The Ticker is allocated as a managed object in place of the runtime timer
+//   layout.
 
 // Hand-finished conversion (tick.go — Ticker construction and control).
 //

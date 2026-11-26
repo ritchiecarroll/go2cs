@@ -3,6 +3,18 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - stackAppend<T> and builtin.append over it: INSPIRED BY src/cmd/compile/internal/ssagen/ssa.go, Go 1.26.11,
+//   methods state.getBackingStoreInfoForAppend, state.append. The 32-byte stack backing store for a non-escaping
+//   append.
+// - move2heap and the capacity helpers: original go2cs code.
 
 // ReSharper disable InconsistentNaming
 

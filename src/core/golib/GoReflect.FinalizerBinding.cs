@@ -21,6 +21,18 @@
 //
 //******************************************************************************************************
 
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - TryBindFinalizerArgument and its rejection texts: DERIVED FROM src/runtime/mfinal.go, Go 1.26.11, func
+//   SetFinalizer. The binding switch over the finalizer's parameter type and its panic messages, transcribed onto the
+//   managed object and delegate.
+// - the CLR reflection helpers: original go2cs code.
+
 // WHY THIS FILE EXISTS, AND THE MEASUREMENT THAT PRODUCED IT.
 //
 // runtime.SetFinalizer's finalizer is invoked through Delegate.DynamicInvoke, which binds through the

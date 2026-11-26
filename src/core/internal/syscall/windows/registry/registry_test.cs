@@ -1,6 +1,21 @@
 // Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The test file: DERIVED FROM src/internal/syscall/windows/registry/registry_test.go, Go 1.26.11, funcs
+//   randKeyName, TestReadSubKeyNames, TestCreateOpenDeleteKey, setValues, enumerateValues, testErrNotExist,
+//   testErrUnexpectedType, testGetStringValue, testGetIntegerValue, testGetBinaryValue, testGetValue, testValues,
+//   testStat, deleteValues, TestValues, TestExpandString, TestInvalidValues, TestGetMUIStringValue. Go's tests and
+//   comments.
+// - testGetStringsValue: DERIVED FROM src/internal/syscall/windows/registry/registry_test.go, Go 1.24.13, func
+//   testGetStringsValue. Compares with the file's own equalStringSlice, as Go 1.24.13 did.
+// - GetDynamicTimeZoneInformation: INSPIRED BY src/internal/syscall/windows/registry/registry_test.go, Go 1.26.11,
+//   func GetDynamicTimeZoneInformation. The same call, with the record marshalled natively.
+// - equalStringSlice, toSystemtime, copyNativeName: original go2cs code. Helpers of that marshalling.
 //go:build windows
 
 // Hand-owned: TestGetMUIStringValue's own local GetDynamicTimeZoneInformation helper hands the
