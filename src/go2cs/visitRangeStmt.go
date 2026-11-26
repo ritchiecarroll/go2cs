@@ -882,7 +882,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
 		default:
-			v.writeOutput("foreach (%s%s in range(len(%s)))", decl, iterExpr, rangeExpr)
+			v.writeOutput("foreach (%s%s in range(%s(%s)))", decl, iterExpr, v.golibCall("len"), rangeExpr)
 		}
 	} else {
 		// Handle slice, array, and map types

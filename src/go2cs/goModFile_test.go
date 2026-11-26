@@ -148,9 +148,13 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 
 	tmp := t.TempDir()
 
+	// flags are extra converter arguments for the arms that set them (the stack-append arm opts in: a -recurse
+	// conversion resolves -stack-append off by default).
+	var flags []string
+
 	runWith := func(moduleCache, cwd, dir string, extra ...string) (string, string, error) {
 		output := t.TempDir()
-		cmd := exec.Command(driverBinary(t), "-recurse", "-go2cspath", treeSrc, dir, output)
+		cmd := exec.Command(driverBinary(t), append(append([]string{"-recurse"}, flags...), "-go2cspath", treeSrc, dir, output)...)
 		cmd.Dir = cwd
 		cmd.Env = append(append(os.Environ(), "GOMODCACHE="+moduleCache, "GOFLAGS=", "GOPROXY=off", "GOWORK=off", "GOTOOLCHAIN=local", "GONOSUMDB=*",
 			"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp), extra...)
@@ -272,6 +276,8 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 		writeModuleFile(t, filepath.Join(hint, "sappend.go"), stackAppendEmissionFixture)
 		writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "hint", "@v", "v1.0.0.mod"), "module example.com/hint\n")
 		twinModCache, twinDir := twinCache(t, "example.com/hint@v1.0.0", map[string]string{"sappend.go": stackAppendEmissionFixture, "go.mod": "module example.com/hint\n"})
+		flags = []string{"-stack-append=on"}
+		t.Cleanup(func() { flags = nil })
 
 		combined, cacheOut, err := run(hint)
 

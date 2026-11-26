@@ -31,7 +31,7 @@ using bufio = bufio_package;
 using fmt = fmt_package;
 using io = io_package;
 using net = net_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class textproto_package {
 
@@ -116,7 +116,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
 internal static (nuint id, error err) Cmd⁔(/*this*/ ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     nuint id = default;
     error err = default;
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     id = Ꮡc.of(Conn.ᏑPipeline).Next();
     Ꮡc.of(Conn.ᏑPipeline).StartRequest(id);

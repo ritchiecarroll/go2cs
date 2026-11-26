@@ -96,7 +96,7 @@ func deriveReExportedTypeAliases(pkg *packages.Package) [][2]string {
 	for _, name := range scope.Names() {
 		// Only an EXPORTED name can be referenced from another package, and the exporter records
 		// only those (visitTypeSpec's getAccess gate).
-		if getAccess(name) != "public" {
+		if getGoAccess(name) != "public" {
 			continue
 		}
 

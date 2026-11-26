@@ -971,7 +971,9 @@ func holdsAll(have, want map[string]bool) bool {
 	return true
 }
 
-var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!?;)$`)
+// A variadic pack's prelude is a view (`.sslice()`), the heap slice (`var xs = xsʗp.slice();`) or, for a pack
+// only forwarded, the pack itself (`var xs = xsʗp;`, wall E): all three are the converter's prelude.
+var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= [\pL\pN_@]+ʗp(\.slice\(\))?;|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!?;)$`)
 
 var csDeclRe = regexp.MustCompile(`^(\[[^\]]*\]\s*)*(public|internal|private|protected|partial|static|readonly|unsafe|const|ref|file|new)\b`)
 
@@ -996,6 +998,11 @@ func csBodyRange(cs *csFile, ln int) (int, int, bool) {
 	for l := ln; l <= len(cs.lines) && l < ln+5000; l++ {
 		code := cs.codeText[l-1]
 		if open == 0 && strings.Contains(code, "=>") && !strings.Contains(code, "{") {
+			// An array-dims OVERLOAD's arity-1 forwarder (`Make<T>(T value) => Make<T, ᴀnone>(value);`) is the
+			// line the declaration is found at; the Go body is the arity-2 method declared on the next line.
+			if l == ln && strings.Contains(code, "ᴀnone>(") {
+				continue
+			}
 			return 0, 0, false
 		}
 		for _, ch := range code {

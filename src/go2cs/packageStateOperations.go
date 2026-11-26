@@ -52,6 +52,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoRouteActive = false
 	cgoBindingsWritten = false
 	cgoRouteFunctions = nil
+	cgoRouteVariables = nil
 	cgoCheckClosures = nil
 	currentPackagePath = pkg.PkgPath
 	packageInfoSystemClashes = systemUsingClashes(pkg.Types)
@@ -113,6 +114,7 @@ func resetPackageState(pkg *packages.Package) {
 	liftRecordsRead = make(map[string]bool)
 	packageConstraintLiftNames = make(map[string]string)
 	resetInlineConstraintState()
+	resetArrayDimsRecords()
 	packageLiftedTypeNames = hashset.HashSet[string]{}
 	productionLiftedTypeNames = nil
 	productionAliasLiftedTypes = nil
@@ -160,6 +162,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}
 	packageHandOwnedMethods = map[*types.Func]bool{}
+	packageHandOwnedFuncs = map[*types.Func]bool{}
 
 	// Capture the package's own source directory for the README's validation badge, which has to
 	// look at the Go sources the conversion never compiles (the `_test.go` files) to tell a package
@@ -222,6 +225,7 @@ func newFileEntry(file *ast.File, filePath string, manualConversion bool) FileEn
 		identEscapesHeap: map[types.Object]bool{},
 		sstringEligible:  map[types.Object]bool{},
 		ssliceEligible:   map[types.Object]bool{},
+		packForwardOnly:  map[types.Object]bool{},
 		sstringConvExprs: map[*ast.CallExpr]bool{},
 		manualConversion: manualConversion,
 	}
@@ -281,6 +285,7 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		identEscapesHeap:          fileEntry.identEscapesHeap,
 		sstringEligible:           fileEntry.sstringEligible,
 		ssliceEligible:            fileEntry.ssliceEligible,
+		packForwardOnly:           fileEntry.packForwardOnly,
 		sstringConvExprs:          fileEntry.sstringConvExprs,
 	}
 }

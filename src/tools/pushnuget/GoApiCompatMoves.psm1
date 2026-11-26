@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
-    Generates the binary-compatibility suppressions of three kinds of announced break: a public method that left a
+    Generates the binary-compatibility suppressions of four kinds of announced break: a public method that left a
     package class for a class marked [GoPromotedHost(typeof(S))] or [GoMethodHost(typeof(S))], unchanged in every
-    other respect; a name that dropped go2cs's Delta prefix (OQ2), unchanged in every other respect; and a struct
-    that no longer needs a value clone, which loses go.IGoValueClone and its Clone() and nothing else.
+    other respect; a name that dropped go2cs's Delta prefix (OQ2), unchanged in every other respect; a struct
+    that no longer needs a value clone, which loses go.IGoValueClone and its Clone() and nothing else; and a variadic
+    parameter whose type went from System.Span<T> to golib's go.variadic<T>, unchanged in every other respect.
 
 .DESCRIPTION
     1.26.11.1 moved every struct's same-package promoted-method forwarders out of the package class into a class of
@@ -42,7 +43,22 @@
     extends) and that method, and nothing else, gets the two diagnostics the engine reports: CP0008 for the type and
     CP0002 for the method.
 
-    Only a move, a rename or a clone drop gets an entry. Every other removed or changed member is returned as REFUSED with its
+    THE VARIADIC TAIL is the fourth kind (wall E, inbox/P2/20261120T121230Z-COORD.md; the surface ruling,
+    inbox/P2/20261120T135029Z-COORD.md). A Go variadic parameter was a params System.Span<T>, which a spread f(s...)
+    could fill only with a copy of the slice; it is now a params go.variadic<T>, a pack that carries the caller's
+    slice itself, as Go hands it over. A removed method is that change when its type declares, under the same name, a
+    method whose return type, type parameters and every other parameter are the same, and whose one changed parameter
+    went from System.Span<X> to go.variadic<X>, X unchanged, and is params (the one waiver is a delegate's
+    BeginInvoke, which repeats the tail without the mark just before its callback and state; Invoke shows the mark):
+    CP0002 for the old method, and CP0006 for the new one where an interface declares it; the new method must be one
+    the baseline lacks. A get-only property whose type went from System.Span<X> to go.variadic<X> under the same id
+    (the spread property of golib's slice<T> and of a named slice type) is a CP0002 by its getter, and a CP0006 too
+    where an interface declares it; a get-only property an interface ADDS that hides a base interface's spread
+    property of the baseline, with that change and nothing else (golib's ISlice<T> over IArray<T>), is a CP0006.
+    A METHOD whose return type made that change is refused (P3 145156Z, COORD
+    inbox/P2/20261120T145250Z-COORD.md).
+
+    Only a move, a rename, a clone drop or a variadic tail gets an entry. Every other removed or changed member is returned as REFUSED with its
     reason, and the guard (GoApiCompat.psm1) still reads it red: a break nobody announced.
 
     The surface is read with the Roslyn that PowerShell 7 ships for Add-Type, so the documentation ids are the ones
@@ -96,6 +112,7 @@ namespace Go2cs.ApiCompatMoves
         public List<Move> Moves = new List<Move>();
         public List<Rename> Renames = new List<Rename>();
         public List<Rename> Clones = new List<Rename>();
+        public List<Rename> Variadics = new List<Rename>();
         public List<Refusal> Refused = new List<Refusal>();
     }
 
@@ -187,6 +204,13 @@ namespace Go2cs.ApiCompatMoves
                         }
                         else
                             result.Renames.Add(new Rename { DiagnosticId = entry.Value is INamedTypeSymbol ? "CP0001" : "CP0002", Target = entry.Key, Now = now });
+                    }
+                    else if (VariadicTail(entry.Value, before, after, out now))
+                    {
+                        result.Variadics.Add(new Rename { DiagnosticId = "CP0002", Target = entry.Key, Now = now });
+
+                        if (entry.Value.ContainingType.TypeKind == TypeKind.Interface)
+                            result.Variadics.Add(new Rename { DiagnosticId = "CP0006", Target = now, Now = now });
                     }
                     else
                         result.Refused.Add(new Refusal { Target = entry.Key, Reason = reason });
@@ -552,6 +576,8 @@ namespace Go2cs.ApiCompatMoves
                 {
                     if (inInterface && !(now is INamedTypeSymbol) && before.ContainsKey(Id(now.ContainingType)) && removedByStripped.ContainsKey(entry.Key))
                         result.Renames.Add(new Rename { DiagnosticId = "CP0006", Target = entry.Key, Now = entry.Key });
+                    else if (inInterface && before.ContainsKey(Id(now.ContainingType)) && HidesSpread(now, before))
+                        result.Variadics.Add(new Rename { DiagnosticId = "CP0006", Target = entry.Key, Now = entry.Key });
 
                     continue;
                 }
@@ -562,7 +588,11 @@ namespace Go2cs.ApiCompatMoves
 
                     if (had != has)
                     {
-                        if (Strip(had) == has)
+                        // The Delta drop, or the variadic tail's spread property: the same accessor entries, each
+                        // under its own kind.
+                        List<Rename> kind = Strip(had) == has ? result.Renames : PackShape(was) == has ? result.Variadics : null;
+
+                        if (kind != null)
                         {
                             // The engine names a property by its accessors: the getter keeps its id, the setter's
                             // takes the value's type.
@@ -582,10 +612,10 @@ namespace Go2cs.ApiCompatMoves
 
                             foreach (KeyValuePair<string, string> target in targets)
                             {
-                                result.Renames.Add(new Rename { DiagnosticId = "CP0002", Target = target.Key, Now = target.Value });
+                                kind.Add(new Rename { DiagnosticId = "CP0002", Target = target.Key, Now = target.Value });
 
                                 if (inInterface && target.Value.Length > 0)
-                                    result.Renames.Add(new Rename { DiagnosticId = "CP0006", Target = target.Value, Now = target.Value });
+                                    kind.Add(new Rename { DiagnosticId = "CP0006", Target = target.Value, Now = target.Value });
                             }
                         }
                         else
@@ -632,6 +662,127 @@ namespace Go2cs.ApiCompatMoves
                     }
                 }
             }
+        }
+
+        // THE VARIADIC TAIL. Each assembly is loaded alone, so neither System.Span<T> nor go.variadic<T> resolves; both
+        // are compared by their full names, which the unresolved types keep.
+        private const string SpanPrefix = "global::System.Span<";
+        private const string PackPrefix = "global::go.variadic<";
+
+        // A type's name with System.Span<X> made go.variadic<X>; null for any other type.
+        private static string AsPack(string type)
+        {
+            return type.StartsWith(SpanPrefix, StringComparison.Ordinal) ? PackPrefix + type.Substring(SpanPrefix.Length) : null;
+        }
+
+        // A get-only property's Shape with a System.Span<X> type made go.variadic<X>, the spread property's change;
+        // null for anything else, a method returning a span included (P3 145156Z, COORD 145250Z).
+        // The variadic tail's spread property added to an interface: a get-only property that hides, under its own name,
+        // a base interface's spread property the baseline declared, and is that property with System.Span<X> made
+        // go.variadic<X> and nothing else (golib's ISlice<T> hides IArray<T>'s Span<T> spread with a variadic<T> one).
+        // The engine reports the added interface member, CP0006; the base property is unchanged and reports nothing.
+        private static bool HidesSpread(ISymbol added, Dictionary<string, ISymbol> before)
+        {
+            IPropertySymbol property = added as IPropertySymbol;
+
+            if (property == null || property.GetMethod == null || property.SetMethod != null || property.IsIndexer)
+                return false;
+
+            string shape = Shape(property);
+
+            foreach (INamedTypeSymbol baseInterface in property.ContainingType.AllInterfaces)
+                foreach (IPropertySymbol hidden in baseInterface.GetMembers(property.Name).OfType<IPropertySymbol>())
+                    // A generic base is reached constructed (IArray<T> of ISlice<T>'s T): its member is named by its
+                    // definition, and its shape read constructed, in the hiding interface's own type parameters.
+                    if (before.ContainsKey(Id(hidden.OriginalDefinition)) && PackShape(hidden) == shape)
+                        return true;
+
+            return false;
+        }
+
+        private static string PackShape(ISymbol symbol)
+        {
+            IPropertySymbol property = symbol as IPropertySymbol;
+
+            if (property == null || property.GetMethod == null || property.SetMethod != null)
+                return null;
+
+            string pack = AsPack(property.Type.ToDisplayString(s_type));
+
+            return pack == null ? null : property.RefKind + " " + pack;
+        }
+
+        // Whether a parameter is params. A params collection (params System.Span<X>, params go.variadic<X>) is marked in
+        // metadata by System.Runtime.CompilerServices.ParamCollectionAttribute, which only a Roslyn that knows C# 13
+        // reads as params: the one PowerShell 7.4 ships for Add-Type predates it, reports IsParams false and keeps the
+        // attribute as an ordinary one, so a variadic tail read there was refused (train 11, COORD 2026-11-24T23:14:29Z).
+        // The attribute is matched by name, since each assembly is loaded alone and nothing resolves it.
+        private static bool IsParams(IParameterSymbol parameter)
+        {
+            return parameter.IsParams ||
+                   parameter.GetAttributes().Any(attribute => attribute.AttributeClass != null && attribute.AttributeClass.Name == "ParamCollectionAttribute");
+        }
+
+        // A delegate by its base type's name, for the reason IsStruct gives.
+        private static bool IsDelegate(INamedTypeSymbol type)
+        {
+            return type.TypeKind == TypeKind.Delegate || (type.BaseType != null && type.BaseType.ToDisplayString(s_type) == "global::System.MulticastDelegate");
+        }
+
+        // A removed method is the variadic tail when its type, still in the surface, declares a NEW method (one the
+        // baseline did not have) of the same name, kind, accessibility, return type and type parameters whose parameters
+        // keep every name, ref kind and type but one, a System.Span<X> that is now a go.variadic<X> and is params. The
+        // one waiver is a delegate's BeginInvoke, which repeats its Invoke's tail without the mark, just before its
+        // AsyncCallback and state: a delegate's Invoke must show the mark like any method. Two changed parameters,
+        // another element type, another span type, a span that is not params or anything else changed is refused.
+        private static bool VariadicTail(ISymbol removed, Dictionary<string, ISymbol> before, Dictionary<string, ISymbol> after, out string now)
+        {
+            now = null;
+            IMethodSymbol method = removed as IMethodSymbol;
+            ISymbol owner;
+
+            if (method == null || method.ContainingType == null || !after.TryGetValue(Id(method.ContainingType), out owner) || !(owner is INamedTypeSymbol))
+                return false;
+
+            // BeginInvoke(..., tail, AsyncCallback callback, object @object): the tail is third from the end.
+            int beginInvokeTail = IsDelegate(method.ContainingType) && method.Name == "BeginInvoke" ? method.Parameters.Length - 3 : -1;
+
+            foreach (IMethodSymbol other in ((INamedTypeSymbol)owner).GetMembers(method.Name).OfType<IMethodSymbol>())
+            {
+                if (other.IsStatic != method.IsStatic || other.MethodKind != method.MethodKind || other.DeclaredAccessibility != method.DeclaredAccessibility ||
+                    other.TypeParameters.Length != method.TypeParameters.Length || other.Parameters.Length != method.Parameters.Length || Shape(other) != Shape(method) ||
+                    before.ContainsKey(Id(other)))
+                {
+                    continue;
+                }
+
+                int changed = 0;
+                bool same = true;
+
+                for (int i = 0; i < method.Parameters.Length && same; i++)
+                {
+                    IParameterSymbol was = method.Parameters[i], has = other.Parameters[i];
+                    string had = was.Type.ToDisplayString(s_type), hasType = has.Type.ToDisplayString(s_type);
+
+                    if (was.Name != has.Name || was.RefKind != has.RefKind)
+                        same = false;
+                    else if (had != hasType)
+                    {
+                        if (AsPack(had) == hasType && (IsParams(has) || i == beginInvokeTail))
+                            changed++;
+                        else
+                            same = false;
+                    }
+                }
+
+                if (same && changed == 1)
+                {
+                    now = Id(other);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // THE CLONE DROP. A struct whose C# value copy is incomplete on its own implements golib's IGoValueClone (which
@@ -1016,6 +1167,7 @@ function Get-GoApiCompatPackageMoves {
             foreach ($move in $found.Moves) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = 'CP0002'; Kind = 'move'; Target = $move.Target; Host = $move.Host }) }
             foreach ($rename in $found.Renames) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = $rename.DiagnosticId; Kind = 'rename'; Target = $rename.Target; Host = $rename.Now }) }
             foreach ($clone in $found.Clones) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = $clone.DiagnosticId; Kind = 'clone'; Target = $clone.Target; Host = $clone.Now }) }
+            foreach ($tail in $found.Variadics) { $entries.Add([pscustomobject]@{ Asset = $asset; DiagnosticId = $tail.DiagnosticId; Kind = 'variadic'; Target = $tail.Target; Host = $tail.Now }) }
             foreach ($refusal in $found.Refused) { $refused.Add([pscustomobject]@{ Asset = $asset; Target = $refusal.Target; Reason = $refusal.Reason }) }
         }
     }

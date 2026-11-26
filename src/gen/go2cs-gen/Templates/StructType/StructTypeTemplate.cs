@@ -49,6 +49,15 @@ internal class StructTypeTemplate : TemplateBase
     // bytes with the field Go places at the same offset, so equality and hashing skip them
     // (docs/phase4/DESIGN-array-value-storage.md, 7.6.2).
     public HashSet<string> AlignmentCarrierMembers = [];
+
+    // The fields carrying a [GoName] stamp, by unescaped C# name: the Go name, which starts with the Δ rename marker
+    // (StructDeclarationSyntaxExtensions.GetGoNameMembers).
+    public Dictionary<string, string> GoNameMembers = new(StringComparer.Ordinal);
+
+    // A member's scope by its Go name: the [GoName] stamp where the field carries one (Δt and Δfoo are exported in Go),
+    // else the export rule over the emitted name.
+    private string MemberScope(string memberName) =>
+        GetStampedScope(GoNameMembers.TryGetValue(memberName.TrimStart('@'), out string? goName) ? goName : null, GetSimpleName(memberName));
     // The instance fields of a [GoInlineLayout] struct, in declaration order; null for every other struct. Non-null
     // emits the IGoManagedLayout part golib's inline-layout gate reads (7.6.3).
     public List<(string spelling, string name)>? InlineLayoutFields;
@@ -151,7 +160,11 @@ internal class StructTypeTemplate : TemplateBase
             // Blank/underscore fields (e.g. an embedded unexported marker like `_ noCopy`)
             // are not exported and must not drive a public constructor — their type can be
             // less accessible than the struct, which makes a public ctor invalid (CS0051).
-            return !simpleName.StartsWith("_") && GetScope(simpleName) == "public";
+            // A field whose Go name starts with Δ carries it in a [GoName] stamp: Go exports `Δt`, while the name rule
+            // reads the emitted Δ as the collision marker and would drop the field from the public constructor.
+            string scope = GoNameMembers.TryGetValue(item.memberName.TrimStart('@'), out string? goName) ? GetGoScope(goName) : GetScope(simpleName);
+
+            return !simpleName.StartsWith("_") && scope == "public";
         }).ToList();
 
     public override string TemplateBody =>
@@ -311,7 +324,10 @@ internal class StructTypeTemplate : TemplateBase
                     continue;
                 }
 
-                string goName = csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
+                // A field whose Go name starts with Δ carries it in a [GoName] stamp (GoNameMembers), which golib's
+                // projection reads first; any other Δ-led name lost the converter's rename marker.
+                string goName = GoNameMembers.TryGetValue(csName, out string? stamped) ? stamped :
+                    csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
 
                 if (!keys.Add(goName))
                     continue;
@@ -484,7 +500,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (DeclaredEmbedFields.Contains(memberName))
                     continue;
 
-                string memberScope = GetScope(GetSimpleName(memberName));
+                string memberScope = MemberScope(memberName);
                 result.Append($"\r\n{TypeElemIndent}[global::System.Diagnostics.CodeAnalysis.UnscopedRef] {memberScope} partial ref {typeName} {memberName} => ref {CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)};");
             }
 
@@ -505,7 +521,7 @@ internal class StructTypeTemplate : TemplateBase
                 // promoted member TYPE (a generic embed's field carries `Point`, out of scope here).
                 Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
 
-                foreach ((string typeName, string memberName, int depth) in GetPromotedStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth, string? goName) in GetPromotedStructMembers(promotedStructType))
                 {
                     // A blank `_` field (padding / embedded unexported marker) is never promoted or
                     // selectable in Go; emitting an accessor for it collides with the enclosing
@@ -522,7 +538,8 @@ internal class StructTypeTemplate : TemplateBase
                     // Scope derives from the MEMBER name (its exportedness), matching the box-field
                     // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
                     // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
-                    string typeScope = GetScope(GetSimpleName(memberName));
+                    // A Δ-led Go name reads from its stamp, as the declared field's own scope does.
+                    string typeScope = GetStampedScope(goName, GetSimpleName(memberName));
 
                     // A promoted-field accessor whose name equals the ENCLOSING type name is CS0542
                     // (a member cannot share its type's name) — debug/gosym's `type Func struct{ *Sym }`
@@ -558,7 +575,7 @@ internal class StructTypeTemplate : TemplateBase
             {
                 Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
 
-                foreach ((string typeName, string memberName, int depth) in GetPromotedStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth, string? goName) in GetPromotedStructMembers(promotedStructType))
                 {
                     // Blank `_` field — unaddressable in Go, and its `Ꮡ_` would collide with the
                     // enclosing struct's own `Ꮡ_` (CS0111). Every uniquified spelling counts; see
@@ -580,7 +597,8 @@ internal class StructTypeTemplate : TemplateBase
                     // Scope derives from the MEMBER name (its exportedness), matching the box-field
                     // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
                     // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
-                    string typeScope = GetScope(GetSimpleName(memberName));
+                    // A Δ-led Go name reads from its stamp, as the declared field's own scope does.
+                    string typeScope = GetStampedScope(goName, GetSimpleName(memberName));
                     // StructName (with type parameters), not NonGenericStructName — a GENERIC
                     // struct's instance param must carry them (Δentry<K, V>, CS0305); the
                     // promoted-struct MEMBER access strips its type arguments (the property is
@@ -639,7 +657,7 @@ internal class StructTypeTemplate : TemplateBase
 
             foreach ((string promotedStructType, _, _, _, _) in StructMembers.Where(item => item.isPromotedStruct))
             {
-                foreach ((_, string memberName, int memberDepth) in GetPromotedStructMembers(promotedStructType))
+                foreach ((_, string memberName, int memberDepth, _) in GetPromotedStructMembers(promotedStructType))
                 {
                     string name = GetSimpleName(memberName);
 
@@ -672,7 +690,9 @@ internal class StructTypeTemplate : TemplateBase
         return !(memberDepth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName));
     }
 
-    private IEnumerable<(string typeName, string memberName, int depth)> GetPromotedStructMembers(string structTypeName)
+    // goName is the member's [GoName] stamp where it has one: a Go name that starts with Δ, which the emitted name cannot
+    // tell from the converter's own Δ rename, so the promoted accessor's scope reads it (GetStampedScope).
+    private IEnumerable<(string typeName, string memberName, int depth, string? goName)> GetPromotedStructMembers(string structTypeName)
     {
         // Collect the embedded struct's members TRANSITIVELY: a member promoted into the
         // enclosing struct may itself come from a NESTED embedded struct (Go promotes through
@@ -694,7 +714,7 @@ internal class StructTypeTemplate : TemplateBase
         // Feeding the counter every occurrence does not re-open the case it was written for
         // (macho's `FatArch`, Cpu at depth 1 and depth 2): minDepth 1 with count 1 still
         // emits the depth-1 accessor and skips the depth-2 one.
-        List<(string typeName, string memberName, int depth)> collected = [];
+        List<(string typeName, string memberName, int depth, string? goName)> collected = [];
 
         collect(structTypeName, [], 1);
 
@@ -744,15 +764,17 @@ internal class StructTypeTemplate : TemplateBase
                 // metadata type's own embeds is not chased (none of the runtime's cross-package
                 // embeds need it); the emitted single-hop accessor resolves through the embedded
                 // type's own generated promotion when it exists.
-                foreach ((string fieldTypeName, string fieldName) in getMetadataStructFields(typeName))
-                    collected.Add((fieldTypeName, fieldName, depth));
+                foreach ((string fieldTypeName, string fieldName, string? fieldGoName) in getMetadataStructFields(typeName))
+                    collected.Add((fieldTypeName, fieldName, depth, fieldGoName));
 
                 return;
             }
 
+            Dictionary<string, string> goNames = structDecl.GetGoNameMembers();
+
             foreach ((string memberType, string memberName, _, bool isEmbedded, _) in structDecl.GetStructMembers(compilation!, true))
             {
-                collected.Add((memberType, memberName, depth));
+                collected.Add((memberType, memberName, depth, goNames.TryGetValue(memberName.TrimStart('@'), out string? memberGoName) ? memberGoName : null));
 
                 // An embedded struct field contributes its own members transitively. The
                 // converter emits every embed - value or POINTER - as a `partial ref`
@@ -765,7 +787,7 @@ internal class StructTypeTemplate : TemplateBase
             }
         }
 
-        IEnumerable<(string typeName, string fieldName)> getMetadataStructFields(string typeName)
+        IEnumerable<(string typeName, string fieldName, string? goName)> getMetadataStructFields(string typeName)
         {
             // Normalize the source-form type reference to a CLR metadata name: strip the ж<>
             // pointer wrapper, the `global::` prefix and `@` identifier escapes, root it in the
@@ -821,7 +843,7 @@ internal class StructTypeTemplate : TemplateBase
                 // Identifier.Text, which GetStructMembers's source-based sibling reads) —
                 // escape it before it reaches emitted C# (runtime's white-box AddrRange
                 // promoting addrRange.base: CS1519/CS1001/CS1002 in the generated accessor).
-                yield return (fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(fieldSymbol.Name));
+                yield return (fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(fieldSymbol.Name), GetGoNameStamp(fieldSymbol));
             }
 
             // A REFERENCED assembly's generated wrapper exposes its embedded member and its
@@ -839,7 +861,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (property.IsIndexer || GetSimpleName(property.Name) == "_")
                     continue;
 
-                yield return (property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(property.Name));
+                yield return (property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(property.Name), null);
             }
         }
     }
@@ -1288,7 +1310,7 @@ internal class StructTypeTemplate : TemplateBase
                 // public, while the forwarder is written over the embed's type ARGUMENTS, held here as text.
                 // The rescue is taken only when each argument's name reads exported, so a forwarder over
                 // `Base<hidden>` is not made public over `hidden` (CS0050).
-                bool exportedMethod = GetScope(GetSimpleName(method.Name)) == "public" &&
+                bool exportedMethod = GetStampedScope(method.GoName, GetSimpleName(method.Name)) == "public" &&
                     typeArgMap.Values.All(argument => GetScope(GetSimpleName(argument)) == "public");
 
                 if (method.ReturnType != "void")
@@ -1398,11 +1420,11 @@ internal class StructTypeTemplate : TemplateBase
                         string embedBox = method.PromotedDepth > 1 && method.ViaField is { } deepField && EmitsPromotedFieldReference(promotedStructType, promotedMemberName, deepField, method.PromotedDepth - 1)
                             ? GetUnsanitizedIdentifier(deepField)
                             : GetUnsanitizedIdentifier(promotedMemberName);
-                        string shimScope = GetScope(GetSimpleName(method.Name)) == "public" ? methodScope : "internal";
+                        string shimScope = GetStampedScope(method.GoName, GetSimpleName(method.Name)) == "public" ? methodScope : "internal";
                         string shimReceiver = ReceiverName(method.Parameters);
 
                         m_promotedForwarders++;
-                        result.Append($"\r\n    {shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{shimReceiver}");
+                        result.Append($"\r\n    {GoNameStamp(method)}{shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{shimReceiver}");
 
                         if (method.Parameters.Length > 1)
                         {
@@ -1444,7 +1466,7 @@ internal class StructTypeTemplate : TemplateBase
                 string receiver = ReceiverName(method.Parameters);
 
                 m_promotedForwarders++;
-                result.Append($"\r\n    {PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{QualifiedStructName} {receiver}");
+                result.Append($"\r\n    {GoNameStamp(method)}{PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{QualifiedStructName} {receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1457,7 +1479,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append(");");
 
                 // Add pointer extension method
-                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{receiver}");
+                result.Append($"\r\n    {GoNameStamp(method)}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1671,8 +1693,8 @@ internal class StructTypeTemplate : TemplateBase
             // an unexported method across packages too, but nothing outside its own package can
             // name it, and an interface carrying one is satisfiable only from that package
             // (UnexportedMethodPackageMatches), so it is unobservable here. The Go name is read
-            // with the Δ marker and an `@` escape stripped.
-            if (isCross && (method.DeclaredAccessibility != Accessibility.Public || !IsGoExportedName(method.Name)))
+            // from its [GoName] stamp where it carries one (Δm is exported), else with the Δ marker and an `@` escape stripped.
+            if (isCross && (method.DeclaredAccessibility != Accessibility.Public || !(GetGoNameStamp(method) is { } goName ? GetGoScope(goName) == "public" : IsGoExportedName(method.Name))))
                 continue;
 
             IParameterSymbol receiver = method.Parameters[0];
@@ -1796,6 +1818,11 @@ internal class StructTypeTemplate : TemplateBase
     // ---------------------------------------------------------------------------------------------
 
     // The Go name of an emitted member: the Δ collision marker and an `@` keyword escape stripped.
+    // A promoted method's forwarder carries the promoted method's [GoName] stamp, so the enclosing type's method set
+    // reports the Go name (ΔFoo) where the marker rule would drop the leading Δ.
+    private static string GoNameStamp(MethodInfo method) =>
+        method.GoName is { } goName ? $"[global::go.GoName(\"{goName}\")] " : "";
+
     private static string GoName(string emitted)
     {
         string name = emitted.StartsWith("@", StringComparison.Ordinal) ? emitted[1..] : emitted;
@@ -1851,7 +1878,7 @@ internal class StructTypeTemplate : TemplateBase
             foreach (INamedTypeSymbol each in iface.AllInterfaces.Prepend(iface))
             {
                 foreach (IMethodSymbol member in each.GetMembers().OfType<IMethodSymbol>().Where(m => !m.IsStatic))
-                    names.Add(GoName(member.Name));
+                    names.Add(GoNameOf(member));
             }
 
             foreach (string name in names)
@@ -1869,10 +1896,10 @@ internal class StructTypeTemplate : TemplateBase
                 HashSet<string> own = new(StringComparer.Ordinal);
 
                 foreach (MethodInfo m in decl.GetExtensionMethods(comp) ?? [])
-                    own.Add(GoName(m.Name));
+                    own.Add(m.ProjectedGoName);
 
                 foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp))
-                    own.Add(GoName(m.Name));
+                    own.Add(m.ProjectedGoName);
 
                 foreach (string name in own)
                     add(name);
@@ -1965,7 +1992,7 @@ internal class StructTypeTemplate : TemplateBase
                     receiver = box.TypeArguments[0];
 
                 if (SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, embed.OriginalDefinition))
-                    (inSibling ? siblingSurface : surface).Add(GoName(method.Name));
+                    (inSibling ? siblingSurface : surface).Add(GoNameOf(method));
             }
 
             foreach (ISymbol member in embed.GetMembers())
@@ -1983,7 +2010,7 @@ internal class StructTypeTemplate : TemplateBase
 
                     if (legacyInline || isGoEmbedded(field) && StructDeclarationSyntaxExtensions.IsPromotingEmbedType(field.Type))
                     {
-                        addTo(fieldsHere, GoName(legacyInline ? field.Name[1..] : field.Name), 1);
+                        addTo(fieldsHere, legacyInline ? GoName(field.Name[1..]) : GoNameOf(field), 1);
 
                         ITypeSymbol inline = field.Type;
 
@@ -2001,12 +2028,12 @@ internal class StructTypeTemplate : TemplateBase
                         continue;
                     }
 
-                    addTo(fieldsHere, GoName(field.Name), 1);
+                    addTo(fieldsHere, GoNameOf(field), 1);
 
                     if (isGoEmbedded(field) && field.Type is INamedTypeSymbol { TypeKind: TypeKind.Interface } iface)
                     {
                         foreach (string name in iface.AllInterfaces.Prepend(iface).SelectMany(i => i.GetMembers().OfType<IMethodSymbol>())
-                                     .Where(m => !m.IsStatic).Select(m => GoName(m.Name)).Distinct(StringComparer.Ordinal))
+                                     .Where(m => !m.IsStatic).Select(m => GoNameOf(m)).Distinct(StringComparer.Ordinal))
                             addTo(subCross, name, 1);
                     }
                 }
@@ -2053,7 +2080,7 @@ internal class StructTypeTemplate : TemplateBase
         // it when two occur at that depth; a name that occurs once is promoted, unambiguously,
         // whatever the depths are. A name that occurs twice or more is left exactly as it was —
         // not minted, and not counted against the same-package promotions either.
-        if (!TreeNameCounts.TryGetValue(GoName(method.Name), out int occurrences) || occurrences != 1)
+        if (!TreeNameCounts.TryGetValue(method.ProjectedGoName, out int occurrences) || occurrences != 1)
             return;
 
         // The forwarder is as visible as the struct, and it is skipped when its signature names
@@ -2081,7 +2108,7 @@ internal class StructTypeTemplate : TemplateBase
             // A box primary through a DIRECT value embed: the pointer-set shim alone, descending
             // through the embed's box-field accessor exactly as the same-package path emits it.
             string embedBox = GetUnsanitizedIdentifier(promotedMemberName);
-            m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams}) => {AddressPrefix}{receiver}.of({qualified}.{AddressPrefix}{embedBox}).{method.Name}({args});");
+            m_xpkg.Append($"\r\n    {GoNameStamp(method)}{scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams}) => {AddressPrefix}{receiver}.of({qualified}.{AddressPrefix}{embedBox}).{method.Name}({args});");
             return;
         }
 
@@ -2103,8 +2130,8 @@ internal class StructTypeTemplate : TemplateBase
         string recvMod = pointerSetOnly ? "ref " : "";
         string goRecv = pointerSetOnly ? "[global::go.GoRecv] " : "";
 
-        m_xpkg.Append($"\r\n    {PromotedMark}{goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
-        m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams})");
+        m_xpkg.Append($"\r\n    {GoNameStamp(method)}{PromotedMark}{goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
+        m_xpkg.Append($"\r\n    {GoNameStamp(method)}{scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams})");
         m_xpkg.Append($"\r\n    {{\r\n        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;\r\n        {ret}{receiver}.{embedAccess}.{method.Name}({args});\r\n    }}");
     }
 
@@ -2364,7 +2391,7 @@ internal class StructTypeTemplate : TemplateBase
                 // even when its type's simple name is lowercase (`array<nuint>` → GetScope would give
                 // `internal`, making `other.of(ITab.ᏑFun)` unreachable, CS0117). Derive the scope from
                 // the member name (its exportedness), as the field declaration itself does.
-                string fieldScope = GetScope(GetSimpleName(memberName));
+                string fieldScope = MemberScope(memberName);
 
                 // A readonly zero-size field answers the shared per-type slot (see ReadOnlyZeroSizeMembers).
                 string target = ReadOnlyZeroSizeMembers.Contains(memberName) ? ZeroSizeSlotRef(typeName) : $"ref instance.{memberName}";

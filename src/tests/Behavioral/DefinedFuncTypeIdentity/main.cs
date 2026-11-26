@@ -6,7 +6,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using hooks = DefinedFuncTypeIdentity.hooks_package;
 using DefinedFuncTypeIdentity;
-using ꓸꓸꓸF = Span<main_package.F>;
+using ꓸꓸꓸF = variadic<main_package.F>;
 
 partial class main_package {
 
@@ -28,8 +28,8 @@ internal static void show(@string label, any v) {
 
 internal static @string takeF(F f) { return fmt.Sprint(f("x") == nil); }
 internal static @string takePlain(Func<@string, error> f) { return fmt.Sprint(f("y") == nil); }
-internal static F retF(Func<@string, error> plain) { return NilSafeDelegateConversion<F, Func<@string, error>>(plain); }
-internal static Func<@string, error> retPlain(F f) { return NilSafeDelegateConversion<Func<@string, error>, F>(f); }
+internal static F retF(Func<@string, error> plain) { return builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain); }
+internal static Func<@string, error> retPlain(F f) { return builtin.NilSafeDelegateConversion<Func<@string, error>, F>(f); }
 
 internal static nint variadicF(params ꓸꓸꓸF fsʗp) {
     var fs = fsʗp.sslice();
@@ -49,7 +49,7 @@ internal static @string /*out*/ deferF(F f) {
     @string @out = default;
     GoFrame ᒐ = default;
     try {
-        defer(NilSafeDelegateConversion<Func<@string, error>, F>(f), (@string)"deferred", ref ᒐ);
+        defer(builtin.NilSafeDelegateConversion<Func<@string, error>, F>(f), (@string)"deferred", ref ᒐ);
         @out = "deferred call";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -95,44 +95,44 @@ internal static void main() {
         break;
     }}
 
-    F a = NilSafeDelegateConversion<F, Func<@string, error>>(plain);
-    Func<@string, error> b = NilSafeDelegateConversion<Func<@string, error>, F>(f);
+    F a = builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain);
+    Func<@string, error> b = builtin.NilSafeDelegateConversion<Func<@string, error>, F>(f);
     fmt.Println("assign", a("") == nil, b("") == nil);
-    fmt.Println("argument", takeF(NilSafeDelegateConversion<F, Func<@string, error>>(plain)), takePlain(NilSafeDelegateConversion<Func<@string, error>, F>(f)));
+    fmt.Println("argument", takeF(builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain)), takePlain(builtin.NilSafeDelegateConversion<Func<@string, error>, F>(f)));
     fmt.Println("return", retF(plain)("") == nil, retPlain(f)("") == nil);
-    var h = new holder(f: NilSafeDelegateConversion<F, Func<@string, error>>(plain), fs: [NilSafeDelegateConversion<F, Func<@string, error>>(plain), f]);
+    var h = new holder(f: builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain), fs: [builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain), f]);
     fmt.Println("composite", h.f("") == nil, len(h.fs));
     var ch = new channel<F>(1);
-    ch.ᐸꟷ(NilSafeDelegateConversion<F, Func<@string, error>>(plain));
+    ch.ᐸꟷ(builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain));
     fmt.Println("channel", (ᐸꟷ(ch))("") == nil);
-    var fs = append(slice<F>([]), NilSafeDelegateConversion<F, Func<@string, error>>(plain), f);
-    fmt.Println("append", len(fs), variadicF(NilSafeDelegateConversion<F, Func<@string, error>>(plain), f), variadicF(fs.ꓸꓸꓸ));
-    fmt.Println("generic", generic(f), generic(plain), generic<F>(NilSafeDelegateConversion<F, Func<@string, error>>(plain)));
+    var fs = append(slice<F>([]), builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain), f);
+    fmt.Println("append", len(fs), variadicF(builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain), f), variadicF(fs.ꓸꓸꓸ));
+    fmt.Println("generic", generic(f), generic(plain), generic<F>(builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain)));
     var s = new stringer("m");
 
     var sʗ1 = s;
     F mv = (@string p1) => sʗ1.check(p1);
     var sʗ2 = s;
-    fmt.Println("method value", mv("") == nil, NilSafeDelegateConversion<F, Func<@string, error>>((@string p1) => sʗ2.check(p1))("") == nil);
+    fmt.Println("method value", mv("") == nil, builtin.NilSafeDelegateConversion<F, Func<@string, error>>((@string p1) => sʗ2.check(p1))("") == nil);
     F lit = [GoFunc("main.func5")] (@string _Δp0) => fmt.Errorf("lit"u8);
     fmt.Println("func literal", lit("").Error());
     F none = default;
     fmt.Println("nil", none == nil, f != nil);
-    fmt.Println("conversion", NilSafeDelegateConversion<F, Func<@string, error>>(plain)("") == nil, NilSafeDelegateConversion<Func<@string, error>, F>(f)("") == nil);
+    fmt.Println("conversion", builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain)("") == nil, builtin.NilSafeDelegateConversion<Func<@string, error>, F>(f)("") == nil);
 
     nint n = default;
     Func<@string, error> cancel = default;
     (n, var cancelᴛ1) = pairF();
-    cancel = NilSafeDelegateConversion<Func<@string, error>, F>(cancelᴛ1);
+    cancel = builtin.NilSafeDelegateConversion<Func<@string, error>, F>(cancelᴛ1);
     fmt.Println("tuple", n, cancel("") == nil);
     fmt.Println("defer", deferF(f));
     var table = new array<handler>(3){[1] = new handler(((Func<ж<node>, nint, nint>)(main_package.add))), [2] = new handler(((Func<ж<node>, nint, nint>)(main_package.mul)))};
-    var byName = new map<@string, F>{["plain"] = NilSafeDelegateConversion<F, Func<@string, error>>(plain), ["f"] = f};
+    var byName = new map<@string, F>{["plain"] = builtin.NilSafeDelegateConversion<F, Func<@string, error>>(plain), ["f"] = f};
     fmt.Println("keyed", table[1](Ꮡ(new node(2)), 3), table[2](Ꮡ(new node(2)), 3), table[0] == nil, byName["plain"]("") == nil, len(byName));
 
-    fmt.Println("hooks", hooks.Apply([GoFunc("main.func6")] (nint x) => x * 3, 2), hooks.Raw(NilSafeDelegateConversion<Func<nint, nint>, hooks.Handler>(hooks.Make(5)), 1), hooks.Apply(hooks.Make(1), 1));
+    fmt.Println("hooks", hooks.Apply([GoFunc("main.func6")] (nint x) => x * 3, 2), hooks.Raw(builtin.NilSafeDelegateConversion<Func<nint, nint>, hooks.Handler>(hooks.Make(5)), 1), hooks.Apply(hooks.Make(1), 1));
 
-    Alias al = NilSafeDelegateConversion<Alias, F>(f);
+    Alias al = builtin.NilSafeDelegateConversion<Alias, F>(f);
     fmt.Println("alias", al("") == nil);
     G g = [GoFunc("main.func7")] (nint x) => x + 1;
     fmt.Println("method type", g.Twice(1));

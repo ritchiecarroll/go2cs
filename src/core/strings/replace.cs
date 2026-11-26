@@ -5,7 +5,7 @@ namespace go;
 
 using io = io_package;
 using Δsync = sync_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class strings_package {
 

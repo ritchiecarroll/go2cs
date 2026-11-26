@@ -16,7 +16,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 // - Transformer for reordering?
 // - Transformer (validator, really) for Bidi Rule.
 using bytes = bytes_package;
-using ꓸꓸꓸOption = Span<bidi_package.Option>;
+using ꓸꓸꓸOption = variadic<bidi_package.Option>;
 
 partial class bidi_package {
 

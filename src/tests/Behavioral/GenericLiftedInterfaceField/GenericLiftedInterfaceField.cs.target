@@ -49,7 +49,7 @@ internal static newCounter_R0 newCounter() { return new counterжnewCounter_R0(�
 internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
     if (c.excluded != nil) {
         var (t, found) = c.excluded.query(s); if (found) {
-            T zeroΔ1 = GoZero<T>();
+            T zeroΔ1 = builtin.GoZero<T>();
             _ = t;
             return (zeroΔ1, false);
         }
@@ -61,7 +61,7 @@ internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
         }
     }
 
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     return (zero, false);
 }
 

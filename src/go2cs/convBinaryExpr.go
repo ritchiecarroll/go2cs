@@ -955,7 +955,7 @@ func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) strin
 	}
 
 	if tp, ok := types.Unalias(v.getType(expr, false)).(*types.TypeParam); ok && typeParamIsInteger(tp) {
-		return fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(tp), converted)
+		return fmt.Sprintf("builtin.ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(tp), converted)
 	}
 
 	return castOf(width, converted)
@@ -2064,7 +2064,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 		if tv, ok := v.info.Types[other]; ok && tv.Value != nil {
 			if otherType := v.info.TypeOf(other); otherType != nil {
 				if basic, isBasic := otherType.(*types.Basic); types.Identical(otherType, tp) || (isBasic && basic.Info()&types.IsUntyped != 0) {
-					return fmt.Sprintf("ConvertToType<%s>(%s)", v.getCSharpTypeName(tp), otherOperand)
+					return fmt.Sprintf("builtin.ConvertToType<%s>(%s)", v.getCSharpTypeName(tp), otherOperand)
 				}
 			}
 		}
@@ -2146,6 +2146,17 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				// int (which never routes through AreEqual) stays untouched.
 				leftOperand = v.applyUntypedConstBoxCast(binaryExpr.X, leftOperand)
 				rightOperand = v.applyUntypedConstBoxCast(binaryExpr.Y, rightOperand)
+
+				// The POINTER operand of a comparison against an EMPTY interface is converted to that interface
+				// first, as Go does (`x == p` is `x == any(p)`), so a nil one crosses as its typed nil: bare, AreEqual
+				// compared the interface's typed nil box with a C# null and answered false where Go answers true
+				// (NamedPointerNilInterface's `x==p` for a named pointer and `z==up` for a *T). A non-nil pointer is
+				// unchanged by the boundary treatment, so box identity still decides.
+				if lhsIsInterface && rhsIsPointer {
+					rightOperand = v.boxPointerIntoEmptyInterface(lhsType, binaryExpr.Y, rightOperand)
+				} else if rhsIsInterface && lhsIsPointer {
+					leftOperand = v.boxPointerIntoEmptyInterface(rhsType, binaryExpr.X, leftOperand)
+				}
 
 				// Handle interface comparison with special runtime function
 				if binaryOp == "==" {

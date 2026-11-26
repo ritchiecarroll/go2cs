@@ -61,6 +61,15 @@ GO2CS_PROBE_EXPORT int go2cs_probe_add_into(struct go2cs_probe_pair *dst, const 
     return dst == x;
 }
 
+// The struct image door's mixed case (cgo Phase 3, increment 3.4, DESIGN-cgo-phase3-marshaling 19.9): a struct and an
+// int that may name one Go value. Go hands C one memory; go2cs refuses rather than hand C two copies of it.
+GO2CS_PROBE_EXPORT int go2cs_probe_pair_and_int(struct go2cs_probe_pair *dst, int *n)
+{
+    dst->a += *n;
+    *n = dst->b;
+    return dst->a;
+}
+
 // Doubles the union's member the tag names, and returns the tag.
 GO2CS_PROBE_EXPORT int go2cs_probe_tagged_double(struct go2cs_probe_tagged *tagged)
 {
@@ -287,4 +296,154 @@ GO2CS_PROBE_EXPORT void *go2cs_probe_address(void)
     address->addr = 0x7f000001u;
 
     return address;
+}
+
+// Increment 3.2 seat 1b's pressure arm (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18 item 4, 18.1 COORD (b)): fills
+// size bytes one at a time, pausing between them, so that a compacting collection on another thread runs while C writes
+// Go memory the wrapper holds pinned. Byte i is 'a' + i % 26. Returns size.
+#if defined(_WIN32)
+__declspec(dllimport) void __stdcall Sleep(unsigned long milliseconds);
+
+static void go2cs_probe_pause(int micros)
+{
+    Sleep((unsigned long)(micros >= 1000 ? micros / 1000 : 1));
+}
+#else
+#include <time.h>
+
+static void go2cs_probe_pause(int micros)
+{
+    struct timespec pause = { micros / 1000000, (long)(micros % 1000000) * 1000L };
+    nanosleep(&pause, NULL);
+}
+#endif
+
+GO2CS_PROBE_EXPORT int go2cs_probe_slow_fill(char *buffer, int size, int micros)
+{
+    for (int i = 0; i < size; i++)
+    {
+        buffer[i] = (char)('a' + i % 26);
+        go2cs_probe_pause(micros);
+    }
+
+    return size;
+}
+
+// cgo Phase 3, increment 3.2 seat 2 (H's sizing item 1): words C RETURNS to Go through a stack copy the wrapper made.
+// Each stores a pointer where Go reads it back: a member of a struct (a parser's cursor), an out-parameter's word, and a
+// node's own next (a one-node ring, as a list's init leaves it).
+struct go2cs_probe_cursor
+{
+    int n;
+    char *cur;
+};
+
+// Item 1(a): a pointer MEMBER C writes into a struct it was handed. cursor->cur = buffer + k; returns k.
+GO2CS_PROBE_EXPORT int go2cs_probe_cursor_set(struct go2cs_probe_cursor *cursor, char *buffer, int k)
+{
+    cursor->n = k;
+    cursor->cur = buffer + k;
+    return k;
+}
+
+// Item 1(a), the result's side: the same cursor, returned BY VALUE.
+GO2CS_PROBE_EXPORT struct go2cs_probe_cursor go2cs_probe_cursor_at(char *buffer, int k)
+{
+    struct go2cs_probe_cursor cursor = { k, buffer + k };
+    return cursor;
+}
+
+// Item 1(b): an out-parameter's word that is the pointer C was handed. *out = a; returns *a.
+GO2CS_PROBE_EXPORT int go2cs_probe_pick(int *a, int **out)
+{
+    *out = a;
+    return *a;
+}
+
+// Item 1(b), interior: the address of the second int of the pair C was handed. *out = &pair->b; returns pair->b.
+GO2CS_PROBE_EXPORT int go2cs_probe_pick_b(struct go2cs_probe_pair *pair, int **out)
+{
+    *out = &pair->b;
+    return pair->b;
+}
+
+// A member that is the struct's own address: node->next = node, as a ring's init leaves it.
+GO2CS_PROBE_EXPORT void go2cs_probe_node_ring(struct go2cs_probe_node *node)
+{
+    node->next = node;
+}
+
+// Item 1(b)'s near-miss (H, 2026-11-24): the same address as an argument C was handed, through another pointee type.
+// *out = (char *)a; returns *a.
+GO2CS_PROBE_EXPORT int go2cs_probe_pick_as_char(int *a, char **out)
+{
+    *out = (char *)a;
+    return *a;
+}
+
+// Item 2, the argv shape (.5 cgo, DESIGN-cgo-phase3-marshaling 18.12.3; H's verdict (A), the word mirror): a NULL-ended
+// array of C strings. Returns count * 100 + the strings' total length, so a dropped or swapped word reads differently.
+GO2CS_PROBE_EXPORT int go2cs_probe_argv_count(char **argv)
+{
+    int count = 0;
+    int length = 0;
+
+    for (; argv[count] != NULL; count++)
+        for (const char *c = argv[count]; *c != 0; c++)
+            length++;
+
+    return count * 100 + length;
+}
+
+// The same through a void pointer: the void door's argv.
+GO2CS_PROBE_EXPORT int go2cs_probe_argv_count_void(void *argv)
+{
+    return go2cs_probe_argv_count((char **)argv);
+}
+
+// C fills the first n words with C strings it owns, and leaves the rest alone.
+GO2CS_PROBE_EXPORT int go2cs_probe_argv_fill(char **argv, int n)
+{
+    static char *const words[] = { "c0", "c11", "c222", "c3333" };
+
+    for (int i = 0; i < n && i < 4; i++)
+        argv[i] = words[i];
+
+    return n;
+}
+
+// H's point 2: C stores the address of argv[2] into argv[0], a pointer into the array it was handed.
+GO2CS_PROBE_EXPORT void go2cs_probe_argv_self(char **argv)
+{
+    argv[0] = (char *)&argv[2];
+}
+
+// C global variables (cgo item 3, C.x): an int, a struct with padding between its fields, and an errno-style int a
+// call sets. Go reads and writes each in place; so does go2cs, through a box over the symbol's exported address.
+struct go2cs_probe_gauge
+{
+    int count;
+    long long total;
+};
+
+GO2CS_PROBE_EXPORT int go2cs_probe_counter = 3;
+GO2CS_PROBE_EXPORT struct go2cs_probe_gauge go2cs_probe_gauge_now = { 1, 100 };
+GO2CS_PROBE_EXPORT int go2cs_probe_last_error;
+
+// Adds step to the counter and folds it into the gauge, as C code that owns these globals would. A negative step is
+// refused: the counter is left as it was and go2cs_probe_last_error reads 22 (EINVAL's value on linux), as errno would.
+GO2CS_PROBE_EXPORT int go2cs_probe_bump(int step)
+{
+    if (step < 0)
+    {
+        go2cs_probe_last_error = 22;
+        return -1;
+    }
+
+    go2cs_probe_last_error = 0;
+    go2cs_probe_counter += step;
+    go2cs_probe_gauge_now.count++;
+    go2cs_probe_gauge_now.total += go2cs_probe_counter;
+
+    return go2cs_probe_counter;
 }

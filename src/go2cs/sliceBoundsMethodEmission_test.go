@@ -162,7 +162,7 @@ func main() {
 		{"two constant bounds within int32", "sink = s[1..3];"},
 		{"the whole-value form", "sink = s[..];"},
 		{"a constant bound on a string", "sink = str[1..];"},
-		{"a ~[]E type parameter keeps subslice", "return subslice<S, E>(s, i);"},
+		{"a ~[]E type parameter keeps subslice", "return builtin.subslice<S, E>(s, i);"},
 	}
 
 	for _, k := range kept {

@@ -1,6 +1,20 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// Provenance: derived from src/reflect/value.go, Go go1.26.11 (license of record: LICENSES/BSD-3-Clause.txt).
+// This file is a hand-owned companion ([module: GoManualConversion]) and MIXES ported and original code. Each member
+// the converted value.cs displaces here follows the Go function of the same name in value.go: Addr, Append,
+// AppendSlice, Bool, Bytes, Call, CallSlice, Cap, Clear, Close, Complex, Convert, Copy, Elem, Field, Float, Grow,
+// Index, Int, Interface, InterfaceData, IsNil, IsZero, Len, MakeChan, MakeMap, MakeMapWithSize, MakeSlice, Method,
+// New, NewAt, NumField, Pointer, Select, Set, SetBool, SetBytes, SetCap, SetComplex, SetFloat, SetInt, SetLen,
+// SetString, SetUint, SetZero, Slice, SliceAt, String, Type, TypeAssert, Uint, UnsafeAddr, UnsafePointer, ValueOf,
+// Zero, extendSlice, mustBe, mustBeAssignable, mustBeAssignableSlow, mustBeExported, mustBeExportedSlow, recv,
+// runes, send, setRunes, unpackEface, valueInterface and valueMethodName. Where a member's body departs from Go's
+// shape, its own comment says so (valueMethodName threads the caller's name through [CallerMemberName] in place of
+// Go's runtime.Callers climb). The managed-model machinery the members call (golib's GoReflect bridge, the box and
+// token helpers) is original go2cs code and not a port.
+
 using go;
 using go.@internal;
 using System;
@@ -11,7 +25,7 @@ using strconv = go.strconv_package;
 using @unsafe = go.unsafe_package;
 // value.cs declares this alias file-scoped, so a member MOVED here for hand-owning cannot see it.
 // Spelled identically to the emission so the displaced signature matches the generated one exactly.
-using ꓸꓸꓸValue = System.Span<go.reflect_package.Value>;
+using ꓸꓸꓸValue = go.variadic<go.reflect_package.Value>;
 
 // Hand-finished conversion (the reflection bridge — Phase 4, value side). Go's reflect.Value reads the
 // value through v.ptr as flat memory at computed field/element offsets — reinterpreting an interface's
@@ -2376,17 +2390,10 @@ public static slice<Value> CallSlice(this Value v, slice<Value> @in) {
     // The final argument is checked against the func's own []T parameter — which is exactly what
     // marshalCallArg does, so Go's assignability rule AND its "CallSlice using X as type []T" panic
     // text come for free rather than being restated here.
-    Value tailArg = @in[fixedCount];
-    marshalCallArg(tailArg, ins[^1]);
-    System.Type tailElem = ins[^1].GetGenericArguments()[0];
-    nint tailLen = tailArg.Len();
-    // `Array` alone is reflect.Array (a Kind constant is in scope here), so this one is qualified —
-    // the same collision callVariadic annotates.
-    System.Array tail = System.Array.CreateInstance(tailElem, (int)tailLen);
-    for (nint i = 0; i < tailLen; i++) {
-        tail.SetValue(marshalCallArg(tailArg.Index(i), tailElem), (int)i);
-    }
-    return callResults(GoReflect.InvokeVariadic(del, args, tail), outs);
+    // The marshalled slice itself is the tail: Go's CallSlice hands the callee the caller's slice, so
+    // element writes in the callee are visible through it (golib InvokeVariadicSlice keeps the header).
+    object? tail = marshalCallArg(@in[fixedCount], ins[^1]);
+    return callResults(GoReflect.InvokeVariadicSlice(del, args, tail), outs);
 }
 
 } partial class reflect_package {
@@ -2703,6 +2710,15 @@ internal static @string valueMethodName(string method) {
     // `reflect.Value.` prefix from the FIRST PARAMETER'S TYPE, so `Append(ΔValue s, ...)` -- a package
     // function the emission gives a ΔValue first parameter -- matched, and it manufactured
     // "reflect.Value.Append" where Go says "unknown method".
+    //
+    // A Go method's body is the C# method `<name>⁔` (the converter's glyph suffix; U+2054 is connector
+    // punctuation, which no Go identifier can spell), and its extension forwarder `<name>` is a
+    // [StackTraceHidden] one-liner, so [CallerMemberName] captures the BODY's name. The Go method is the name
+    // without the suffix, as golib's frame naming reads it (GoSyntheticPC): reflect's TestValuePanic printed
+    // "call of reflect.Value.Recv⁔ on string Value".
+    if (method.Length > 1 && method[^1] == '\u2054')
+        method = method[..^1];
+
     return method.Length != 0 && char.IsUpper(method[0])
         ? (@string)("reflect.Value." + method)
         : "unknown method"u8;

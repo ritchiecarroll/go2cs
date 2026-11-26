@@ -1495,6 +1495,12 @@ own element type, so it scored a view over a reference-bearing struct as crossin
   `ANumberStaysRefusedWhileAnyPointerThatPinsItsStorageIsAlive`, and the pin-extent arms' numbers.
   - Also the pinning and retaining mints of a pointer REBUILT from a Go array's number. Their native box has no
     source, so 3.2 has no storage to fix and refuses them as numbers.
+  - **Amended 2026-11-24 (seat 1b; COORD ruling (a), inbox H 20261124T021216Z):** the premise "their native box has
+    no source" has been false since `d87e1dd863` (2026-11-13). The number-to-pointer conversion keeps the live Go box
+    the number resolved to (`NativeDerivation.KeptResolved`), so the box chain names the array's pinned storage and
+    13.4 (M3) classes it as that box. The pinning and retaining mints of this form CROSS. In Go,
+    `(*byte)(unsafe.Pointer(&array))` is a valid pointer into Go memory that holds no Go pointers, and cgo accepts it.
+    The bare mint and the number held in a variable stay refused. The sentence above stays as written.
 - **The end-to-end arms** (`cgoP3Arms`; the converter mints `unsafe.Pointer(&x)` as `FromPinnedBox`, so the arms
   whose pointer is written in the call carry their box). **22 flip to Go's output:**
   - `goinnerdefer`, `goinnergo`, `govoid`;
@@ -2743,3 +2749,551 @@ at the same site.
 - **A NIT from the review of 1a's fold:** an `IsCMemoryAlone` value with no native identity now gets its own named
   refusal in WriteWord, instead of the Go-pointer text. No row constructs it: a zero native box is nil, and
   `slice.OverNativeMemory` refuses a nil base. The comment at the arm says so.
+
+### 18.12 Amendment 2026-11-24: seat 1b (S-B2b), the pinned class, shape (i) and B-10 (posted before code; .6)
+
+COORD's GO NOW (2026-11-23) cuts 1b off master `97cca467a2`, with no P3 design read before code: P3 reviews the seat.
+1b carries 18 items 2 to 5 (the pinned class, the out-parameter, the pressure arm, cmd/cgo's `_cgoIndex` and
+`_cgoSlice` closures) and 18.7 finding 2's B-10. B-12 is already on master, from S-B1 (`UnsafePointerWordTests.B12_*`),
+and 1b only keeps it green.
+
+**What moved since 18.1, read at `97cca467a2`.** The doors are as 18.1 read them. C2's train-5 seat changed only the
+two refusal TEXTS (`3dc05f72e1`: "is not supported yet, so go2cs refuses the call"), and both test anchors quote the new
+text. The flip population is the one 18.1 counted: GolibTests 15 uses (Phase3 8, Derived 4, Review2 2, PinExtents 1)
+and `cgoPhase3_test.go`'s 24 arms (22 flip, 2 stay as numbers), plus the three write-through arms.
+
+**1. The pin target (golib).** The void door gains a third answer beside nil and C memory: a PINNED Go argument,
+returned as (the root storage, a byte offset). The root is found ON THE BOX (M2), never from a number (M3):
+- a managed box (standard, element or field reference): its `PinnableStorage`, an `Array`;
+- a native box with a retained source: that source, recursively; a native box over a `PinnedBuffer`: the buffer's
+  array;
+- anything else (an order token, a native box that aliases one, a view over a reference-bearing struct, a number with
+  no box): no root. A token or a reference-bearing root is refused with cgo's own text, "argument of cgo function has
+  Go pointer to unpinned Go pointer"; a number stays refused with today's text.
+- The offset is read under a `fixed` over the root, at the door: the pointer's number minus the root's base when the
+  root is pinned at that number already (every `FromPinnedBox` mint, every derived pointer, every view whose
+  reinterpret pinned the root), and the box's own slot address otherwise (a `FromBox` mint, whose number was transient).
+  The offset must land inside the root's bytes, or the door refuses by name: a `fixed` that cannot reach the bytes it
+  would hand over is stop line 3 below.
+
+**2. The wrapper (converter).** A void parameter emits a `GoCgoPin` local from the door and a pattern-based `fixed`
+over it, nested in parameter order, the innermost block holding the transition bracket and the call (13.5's order:
+classify every argument first, then pin, then call). The pin's `GetPinnableReference` is the root's data reference,
+or a null reference for nil and C memory, which pins nothing. The address handed to C is the pinned base plus the
+offset, or the number. No `GCHandle`, no `PinnedBuffer`, no finalizer, no index entry (18's pin path).
+- The typed pointer doors take the same pin for an ELEMENT of a Go array (`ElemRefBox`), today refused: C is handed the
+  element's address in the pinned array, uncopied. A whole struct keeps its mirror.
+
+**3. B-10 (18.6 finding 3, 18.7 finding 2, with P3's confirm (A)).** Before the pin, the door asks the word table
+(`GoPointerWords`) for any live entry over the WHOLE root, and refuses one with cgocheck's text. The arms are 18.7's
+seven, less the two helper doors (A) released: `VoidPointer`; `StructPointer` with an array field and with a `uintptr`
+field; `CopyBytes`; `CopyString`. The helpers read Go memory as bytes (no lookup), and their arms assert the read.
+
+**4. Shape (i), the out-parameter.** A `**C.T` parameter (`&db`, `char **`) crosses as one stack word: copied in by
+`PointerMember` (nil 0, a C pointer its address, a Go pointer cgo's panic), handed to C by the word's address, and
+copied back by `PointerMemberBack` (0 nil, the address it went in as keeps its box, anything else C memory). The slot
+itself is a managed one: a native slot (`&l.next` over C memory) is handed over by its own address, uncopied.
+
+**5. cmd/cgo's index and slice closures.** `_cgoIndex` and `_cgoSlice` check closures lower to the direct call, as the
+address and variable forms already do, and both refusals in `cgoRoute.go` retire.
+
+**6. The pressure arm (18.1 COORD (b)).** In GolibTests' CgoProbeTests: a slow C fill into a pinned Go buffer while
+another thread runs `GC.Collect(2, Forced, true, compacting: true)`; Go reads C's write in every one of N rounds. An
+unpinned twin must be shown to move, or the arm is Inconclusive.
+
+**Predictions** (scored as worded, at the seat's tip):
+- **P-1 corpus footprint, 0 files on all four targets.** Everything is behind `-cgo` plus golib's `GoCgoArgs`, and the
+  standard library converts with `CGO_ENABLED=0`. The two-seeded comparison.
+- **P-2 the flip set is 18.1's I-2 list, exactly.** GolibTests: the 18 hand-overs named there cross; the reference-
+  bearing and token forms change to cgo's text; every number stays refused with today's text. End to end: the 22 arms
+  print Go's output, `govoidnumber` and `govoidexpr` stay refused, and the three write-through arms print Go's output.
+- **P-3 B-10:** five refusal arms with cgocheck's text, two helper arms that read the bytes.
+- **P-4 shape (i):** strtol's `char **` arm reads Go's output, and `s6nextset` keeps its named deviation unless 1b's
+  out-parameter reaches it (posted either way).
+- **P-5 the pressure arm:** C's write read in every round, with the unpinned twin shown to move.
+- **P-6 gates**, all unfiltered: GolibTests Release and Debug, GenTests, `go test ./...`, CNR, the footprint, the full
+  behavioral run, `go2cs.slnx`, and hosted release-smoke, converter-cgo, cgo-e2e and golib-tests on three OSes.
+
+**Stop lines.**
+- Any NUMBER that crosses into Go memory.
+- A token or a reference-bearing root that crosses.
+- A `fixed` that cannot reach the bytes it hands over (refused by name instead).
+- A door that hands C a root holding a word-table entry.
+- A cgo wrapper made async, an iterator or a resumable twin (13.5); G's twin generator is read for this before READY.
+- Any corpus line moved.
+
+— H (2026-11-24)
+
+#### 18.12.1 Record 2026-11-24: seat 1b as built, the readings so far, and the battery's predictions (before the battery)
+
+**As built** (branch `claude/h-cgo-1b`, off `97cca467a2`):
+- **The pinned door.** `GoCgoArgs.PinVoidPointer` returns a `GoCgoPin`, and the wrapper holds it with a pattern-based
+  `fixed` around the call. The root is found ON THE BOX in one of three ways: `NativeDerivation.HeldSource` with
+  `TryHeldTarget` (a box that holds its storage still), a native box's own `PinnedBuffer`, or a managed box's pinnable
+  storage with its slot's offset read under a `fixed`. A token or a reference-bearing root is refused with cgo's text.
+  A word-table entry over the root is refused too (B-10). Every number stays refused with today's text. `VoidPointer`
+  is unchanged: it is the classify-only door an earlier wrapper calls.
+- **The scalar door (item 2, narrowed).** `GoCgoArgs.ScalarPointer` pins an element of a Go array, or a typed view over Go
+  storage, when the pointee is ONE C SCALAR (`GoCgoStructPointer.Pinned`). A scalar's layout is the same in C and in
+  the CLR. A struct ELEMENT stays refused, because its CLR layout is not C's, and a whole struct keeps its mirror.
+  The struct element is a named residual.
+- **The helpers (item 3).** `GoStringOf`, `GoStringNOf` and `GoBytesOf` read Go memory under a `fixed`, as Go functions,
+  with no word-table lookup (P3's confirm (A)). A read past the object's end, and a C string with no NUL inside the
+  storage, are refused by name.
+- **B-10 on the other doors.** The mirror asks the struct's own range of its storage. An inline array member's copy-in
+  asks the array's own storage (`RequireNoPublishedWordIn`): go2cs keeps an array's elements apart from the struct.
+  `C.CBytes` and `C.CString` ask the bytes they copy, before the allocation. Every lookup sits behind
+  `GoPointerWords.AnyTable`.
+- **Shape (i), the out-parameter (item 4).** `GoCgoArgs.OutParameter`, with `**C.T` classified as `ж<ж<T>>`. One stack
+  word is copied in by `PointerMember` and back by `PointerMemberBack`. A slot in C memory crosses by its own address;
+  a nil slot is NULL.
+- **cmd/cgo's index and slice closures (item 5)** are recognised, and both refusals retire.
+- **The pressure arm (item 6).** `probe.c` gains `go2cs_probe_slow_fill`, and the CgoProbeTests arm drives it.
+- **13.5's stop line** (no async, iterator or resumable twin) holds by construction. G's `TwinGenerator` never twins a
+  method that is extern, carries `LibraryImport`, holds a `fixed`, or sits in an unsafe class (`TwinGenerator.cs`, the
+  native-wrapper rule). The bindings class is `static unsafe partial`.
+
+**Readings so far, on H (GolibTests at Debug, filtered to cgo and the word table: 154/0/7):**
+- **P-2, MISSED as worded: 2 of 36 GolibTests hand-overs (34 MET).** The rebuilt-from-number form keeps its resolved
+  source, so its pinning and retaining mints cross. COORD ruled (a) (inbox H `20261124T021216Z`), and 18.1 carries the
+  dated amendment. The nine-form set read as predicted. The 25 end-to-end flips (22 + 3) are written into
+  `cgoP3Arms`, and the hosted cgo-e2e leg scores them.
+- **One more flip, outside 18.1's list:** Phase 2's `AnElementOfAGoScalarArrayIsRefusedBeforeTheCall` is the scalar door's
+  case. It becomes `AnElementOfAGoScalarArrayIsPinnedAndCWritesIt`: a real ucrtbase `frexp` writes the element in place,
+  and its neighbours are untouched.
+- **P-3, B-10: MET on the arms that can be built.** The void door, the mirror's `uintptr` field, an inline array member
+  and `C.CBytes` each cross before the store and refuse after it, and `C.CBytes` over bytes before the word still
+  crosses. The helpers read their bytes. `C.CString`'s lookup has no arm, since no test can publish a word into a
+  string's storage: code-read only.
+- **P-4, shape (i): MET on H with the real ucrtbase `strtol`.** The Go slot comes back pointing past the digits, a nil
+  slot is NULL, a Go pointer in the slot is refused, and a slot in C memory is written there. The hosted `outstrtol` arm
+  covers `&end` as Go writes it. `s6nextset` keeps its named deviation: its slot is a ref-lowered helper parameter,
+  never a wrapper argument, so 1b's out-parameter does not reach it.
+- **P-5, the pressure arm: NOT MEASURED on H** (no probe library). The hosted golib-tests legs require the probe.
+- **Named residuals:** a struct element (above); an `endptr` that C points into PINNED GO memory comes back as a raw
+  native box, not as the Go element it is.
+
+**The battery's predictions** (H, at the tip that commits this record, base `97cca467a2`; all gates unfiltered):
+- **B-1 corpus footprint: 0 files on all four targets** (the two-seeded `-stdlib`, converter A = base against B = tip).
+  Every converter change is on the `-cgo` route, and the corpus converts with `CGO_ENABLED=0`.
+- **B-2 GolibTests Release and Debug: empty failed sets.** The Debug-only skip set is the gated set plus the probe
+  arms, by name.
+- **B-3 GenTests: all pass.** go2cs-gen is untouched.
+- **B-4 go test ./... ok; repoguard ok; `GO2CS_CGO_BUILD=1 -run TestCgo` ok** (the e2e program is hosted, so it is NOT MEASURED here).
+- **B-5 CNR byte-identical.** No behavioral project is on the `-cgo` route.
+- **B-6 full behavioral: the same PASS set as master.** golib changed, so the full suite runs.
+- **B-7 `go2cs.slnx` builds**, 0 errors, since golib's API changed.
+
+— H (2026-11-24)
+
+**The battery's score** (H, run from a copy at `0656e4b99c`, base `97cca467a2`, every leg unfiltered, `EXIT 0`, tree
+clean after each purge):
+- **B-1 MET: 0 files, 0/0 lines on all four targets** (windows-amd64, linux-amd64, darwin-amd64, linux-arm64). Both arms
+  rc 0, degraded 0, emitted-newer equal per target (109, 118, 123, 117).
+- **B-2 MET on the failed sets, MISSED as worded on the skip clause.** Release 3161/0/54, Debug 3135/0/80, both failed
+  sets empty, Release-only skips empty. The Debug-only set is 26 names, all JIT-gated tests already on master; no cgo
+  test is in it. The probe arms are not in it: they read Inconclusive at BOTH configurations here (no probe library),
+  so "plus the probe arms" named the wrong set. They are measured only on the hosted legs.
+- **B-3 MET:** GenTests 814/0/0.
+- **B-4 MET:** `go test ./...` 11 ok, 0 FAIL, 0 cached; repoguard ok; `GO2CS_CGO_BUILD=1 -run TestCgo` ok.
+- **B-5 MET:** CNR NO REGRESSION, 1171 packages byte-identical, 12 platform-exclusive skipped by name, 0 NOT MEASURED.
+- **B-6 MET:** full behavioral rc 0, 1017 compared, 0 failed, 8 NOT COMPARED. The enumeration is master's (CNR above).
+- **B-7 MET:** `go2cs.slnx` Debug, 0 errors.
+
+Not measured on H, owed to the hosted legs: the pressure arm (P-5), the probe arms, the 25 flipped e2e arms with
+goindex, goindexfill, goslicefill and outstrtol, converter-cgo on linux and darwin, and release-smoke.
+
+— H (2026-11-24, after the battery)
+
+#### 18.12.2 Record 2026-11-24: the hosted rounds after the battery, and P3's review folded (r2 to r6)
+
+**Hosted rounds (os-matrix, each on a new `claude/h-cgo-1b-rN` ref; no posted SHA replaced).**
+- r3 to r4: 15 view arms refused, then 3. Fixed by the derivation walk (`ae2ef3b20f`: TryPinTarget walks
+  `NativeDerivedFrom` to the first box holding a pin) and by `85cdef62df`: a reinterpret view of Go storage pins its ROOT
+  (goindexfill and goslicefill had taken the one-scalar stack mirror, so C wrote 8 bytes into a 1-byte copy), and the
+  helper and the walk take a window's anchor and an element's identity (goviewelemstring).
+- r5 at `85cdef62df`: cgo-e2e green on linux, darwin and windows (69/69 TestCgoPhase3ProgramRunsAsGoDoes arms each),
+  golib-tests green on linux and windows, release-smoke green. darwin golib-tests passed every test (3121/0/57) and was
+  red only on its expected-skip gate (a sampling-profiler threshold test ran where it is listed as skipped); r4's darwin
+  red was a different threshold test (the token-table bound). Posted to COORD as a FINDING, not a 1b defect.
+
+**P3's review of `85cdef62df`: CHANGES (COORD inbox H 20261124T173809Z), folded at `958a5124d0`.** The walk, the offsets
+and the pin lifetime read sound. Each item is folded red-first with a row:
+1. MUST: OutParameter refuses an element of a Go array of C pointers by name (its one-word mirror is not the array C may
+   read or fill); `&end` still crosses. Rows: GolibTests PinnedAnOutParameterOverAnArrayElementIsRefusedByName, e2e
+   outstrtodelem (C# refuses with the text, Go prints).
+2. ScalarPointer and TryHelperPin name an element by its identity (RootNumber), so `&h.name[0]` with `name [8]C.char`
+   over a view crosses. Read on H against a converted program first: refused at the old number for the char * C fills
+   and for C.GoString; after, ABCD lands at offset 8 and C.GoString reads it. Rows: e2e goviewcelemstring,
+   goviewcelemfill (GolibTests cannot build the inline-array struct).
+3. A reinterpret view whose root no door can pin, over a value wider than T, is refused by name instead of mirrored.
+   Row: PinnedAWideReinterpretViewNoDoorCanPinIsRefusedNotMirrored.
+4. Residual 1 (endptr) is CLOSED: inside the wrapper's `fixed`, after the call, each word C returned (an out-parameter's
+   word; a pointer result other than the pointer it was handed) is checked against each pinned argument, and a word in
+   that storage is refused by name (GoCgoArgs.RequireWordOutsidePin over GoCgoPin.Holds). The wrapper goldens move at
+   exactly strtol (five targets) and gmtime_r (four). Rows: PinnedAWordCReturnsInsidePinnedGoMemoryIsRefusedByName, e2e
+   outstrtodgo.
+5. Residual 2 (C.CString B-10) has its row, PinnedB10_CStringAsksTheStringsOwnWindow: green at the old code as P3 read it,
+   red with StringSize's check removed, restored byte-identical.
+6. HoldsAnyEntry tests a word's overlap with the range, not its first byte. Row: PinnedB10_ARangeStartingInsideAWordHoldsIt.
+
+**Readings at `958a5124d0`.** Hosted cgo-e2e r6 (45456514538 linux, 45456535113 darwin, 45456563570 windows): 73/73 arms
+pass on each OS and on both darwin RIDs (the 69 plus the four new; the two refusal arms refuse with their text). On H:
+GenTests 814/0/0; GolibTests Release 3168/0/54 and Debug 3142/0/80 (total 3222 = the r5 tip's 3217 + 5), failed sets
+empty, Release-only skips empty, Debug-only skips the JIT-gated set already on master.
+On H, the rest of the battery from a copy at `958a5124d0` (base `85cdef62df`), every leg unfiltered, tree clean after each
+purge: converter `go test ./...` 11 ok, 0 FAIL, 0 cached; repoguard ok; `GO2CS_CGO_BUILD=1 -run TestCgo` ok; CNR NO
+REGRESSION, 1171 packages byte-identical, 12 platform-exclusive skipped by name, 0 NOT MEASURED; `go2cs.slnx` Debug 0
+errors.
+
+Residuals still standing: the endptr class is closed for out-parameter words and pointer results; a void pointer C
+returns into pinned Go memory still crosses as its number (a number names no box, M3). Handing C a whole Go array of C
+pointers, pinned, is a later seat. The full behavioral suite is the train's (route #7, twin 4).
+
+— H (2026-11-24)
+
+#### 18.12.3 Record 2026-11-24: P3's read of the fold, CLEAR WITH NITS, and the NITs folded
+
+P3 read the fold at `8d0c6c9de5`: CLEAR WITH NITS (COORD inbox H 20261124T204626Z). Each NIT is folded:
+- **One past the end does not cross.** GoCgoPin.Holds now includes the storage's end, so C's write cursor `buf + n`
+  is refused by name, not minted as a native box over the managed heap. The unit row's one-past-end control is now a
+  refusal. It read red with the old comparison and green after.
+- **Behavioral rows for the two refusals, each with its near-miss** (owner rule 2026-11-22):
+  - resultstrtokgo: strtok over a Go buffer returns `&b[2]`. csFails, with the refusal's text.
+  - resultstrcpyself: strcpy returns the destination it was handed, the identity return under a pin. Prints as Go does.
+  - goviewwide: a char * over a 4-byte field of a struct holding a Go reference. csFails, with item 3's text.
+  - goviewsame: the same struct's one-byte field keeps the one-char copy.
+  The wide shape was read on H first, through a converted program. The converter emits
+  `Ꮡs.Ꮡn.Reinterpret<int32, int8>()`, and the door refuses it with item 3's text. The same-size field takes the copy.
+- **The two other unchecked return routes are on the BOARD** (2026-11-24, H), to be cured later:
+  - a pointer member C writes into a mirrored struct;
+  - an out-parameter word that is a stack mirror's address.
+  18.12.2's residual paragraph covers only the void result. Read it with this block.
+- **The refusal reads** "... and go2cs cannot represent a pointer into Go memory that C returned, so it refuses the
+  result". Its old text ("C must not keep a Go pointer") was wrong for strtod's endptr, which C does not keep.
+
+— H (2026-11-24)
+
+## 19. Amendment 2026-11-24: increment 3.4, the harness and net's resolver (plan, posted before code; .6)
+
+Section 7 is the harness's first text, and section 9's P8 its first prediction. This block reads what section 7 left
+NOT READ, scores P8, and plans the increment. It stacks on seat 1b (`claude/h-cgo-1b-r7`, `8d0c6c9de5`), the converter
+the readings below were taken with. Code waits for COORD's GO and a review.
+
+### 19.1 Read before this plan (go1.26.11; linux/amd64 unless named)
+
+- **R1. The mix is sound by file selection.** `go list -deps net` with cgo off and on: of net's 65 dependencies, 64
+  select identical files. net itself swaps cgo_stub.go for cgo_unix.go and adds cgo_linux.go, cgo_resnew.go,
+  cgo_socknew.go, cgo_unix_cgo.go and cgo_unix_cgo_res.go. runtime/cgo joins the closure, and the cgo route already drops
+  that import (cgoRoute.go, the `"runtime/cgo"` filter). The test side adds one file, cgo_unix_test.go, which holds the
+  seven tests. So section 7's "sound only if no package net imports changes its API with cgo on" is READ: none does.
+- **R2. P8, scored as worded: MET, at the BASE.** The first hosted reading (45456887239, master's converter) refused one
+  use: getaddrinfo's parameter 4, `res **C.struct_addrinfo`. Master has no out-parameter shape at all; seat 1b adds it.
+  The candidate the prediction named (res_search) was wrong.
+- **R3. P8', on 1b's tip: the conversion is clean.** Hosted 45482558650 (probe `629d1b9bff`, never landed): exit 0,
+  0 refusals, 70 files written. getaddrinfo's `res` takes 1b's OutParameter. Bound: free, freeaddrinfo, gai_strerror,
+  getaddrinfo, getnameinfo and res_search, each to libc.so.6 (malloc was past the probe's window, not missing).
+- **R4. `-cgo` refuses `-tests`** (loaderEnvironment.go, checkCgoFlag: "the test drivers' loads stay at
+  CGO_ENABLED=0"). That is the increment's main converter work.
+- **R5. darwin needs no cgo for these seven.** cgo_unix_test.go builds under `!netgo && ((cgo && unix) || darwin)`.
+  darwin's resolver, cgo_unix_syscall.go, reaches libSystem through syscall, and the cgo-off corpus already carries it
+  (net/darwin/cgo_unix.cs, cgo_unix_syscall.cs). NOT READ: whether the seven pass there. net is banked on windows only.
+
+### 19.2 The plan: three seats, each behind `-cgo` except the workflow's
+
+- **4a. `-cgo` with `-tests`, for ONE package into a scratch root.** checkCgoFlag admits the pair when the conversion
+  is a single package whose output root is not under the repository's `src/core`.
+  - The production variant loads cgo-on, as `-cgo` does today.
+  - The test variants load cgo-on too, so cgo_unix_test.go is selected.
+  - Every other package stays the corpus's cgo-off build, referenced from the seeded root, as R1 shows is sound.
+  - The bindings file, its library set and its link line are the production package's.
+  - Red: a converter test whose fixture package has a cgo production file and a `_test.go` calling it. It is refused
+    today with R4's text, and after the change it converts and builds the test host.
+- **4b. The hosted leg.** A linux leg on os-matrix (the existing cgo-e2e job's toolchain):
+  - Seed a scratch root from `src/core`.
+  - Run `go2cs -cgo -tests -test-action all -test-filter '^TestCgoLookup' <GOROOT>/src/net <root>/core/net`.
+  - Compare against `go test -json`.
+  - Red: before 4a the conversion refuses (R4). After it, the seven compare.
+- **4c. The first run-time reds, if any.** Each is read on the leg before any fix, and named. The candidates read so far:
+  - res_search bound by its plain name to libc.so.6. Section 7's `-lresolv` line, and glibc's `__res_search`, are
+    NOT READ.
+  - The test host's build against a cgo-on net in a cgo-off closure.
+
+The darwin reading (R5) needs no code: one sweep-shard dispatch of net on darwin with `-test-filter '^TestCgoLookup'`.
+
+### 19.3 Predictions, scored as worded
+
+- **Q1.** 4a, 4b and 4c move 0 corpus bytes on every target. CNR is byte-identical, and GolibTests rises by new rows only.
+- **Q2.** After 4a, the linux leg converts net cgo-on with its tests, with 0 refusals (R3 plus the test file, which uses
+  no C).
+- **Q3.** The first build of that test host has at least one red not named in 19.2 (P8's successor: one new layer, one
+  new red).
+- **Q4.** Once it builds, the seven pass on linux against Go. Most likely red first: the two `...WithCancel` tests,
+  where a cancelled context races a blocking C call (section 9's "most likely red").
+- **Q5.** darwin's cgo-off run of the seven passes 7 of 7 with no code.
+
+### 19.4 Stop lines
+
+S-A to S-F (section 10) stand. Added:
+- **S-G.** `-cgo -tests` needs any package OTHER than the one converted to load cgo-on: stop and post.
+- **S-H.** A fix in 4c would change a corpus file or golib's cgo-off behaviour: stop, post the design (S-D's twin).
+
+### 19.5 Questions for COORD
+
+- **Q-F. Base.** 4a stacks on 1b, whose out-parameter R3 needs. Lean: cut on 1b's tip now, and rebase once train 11
+  lands it.
+- **Q-G. The darwin reading.** Lean: dispatch it now, since it needs no code.
+- **Q-H. Review.** Lean: P3 reads 19.2 and 19.4 before code, as for 1b and 1c.
+
+— H (2026-11-24)
+
+### 19.6 Record 2026-11-24: seat 4a as built, and 4b's first readings (Q2 and Q3 scored)
+
+**4a, as built** (`bb16815729`, then `533034372b`; COORD's GO, inbox H 20261124T204626Z). checkCgoFlag admits -tests.
+Under -cgo, three loads of the converted package run cgo-on (packageTestLoaderEnv): the variants load and the sibling
+closure (testConversion.go), and the marker-glyph scan. The oracle runs cgo-on too (cgoOracleEnv). linknameOperations'
+load of another package's closure keeps the loader pin (S-G). checkCgoTestsOutput refuses an output under the core of a
+go2cs root whose parent holds git metadata (S-D).
+- Rows: the flag table's tests row now reads accepted.
+- TestOnlyTheConvertedPackagesTestLoadsAndTheOracleTurnCgoOn and TestACgoTestsConversionNeverWritesTheRepositorysCorpus
+  each read red with their arm neutered, restored byte-identical.
+- TestACgoPackageConvertsWithItsTestsAndMatchesGo is hosted only (a C compiler). Its first run (45488939174) read -cgo
+  -tests ACCEPTED, then refused the fixture's C.abs by name: gcc compiles abs as a builtin, so cmd/cgo's binary imports
+  no abs symbol. That is the fixture, not the seat. With strtod (45491374366): status validated, 2/2 tests pass on both
+  sides, matched.
+
+**4b's first readings** (throwaway probe refs, never landed: a test that seeds a scratch root from src/core, src/gen,
+the two props and gen's one outside input, then runs `-cgo -tests -test-action all -test-filter '^TestCgoLookup'` over
+GOROOT's net, linux, cgo-e2e stage).
+- Probe 1 (45493678255): the conversion of net cgo-on WITH its tests completed and reached the host's publish. The
+  publish failed on the probe's own seed: go2cs-gen embeds src/go2cs/fieldAccessCollisions.txt. Seeded from then on.
+- **Q2 MET**: net converts cgo-on with its tests, 0 refusals.
+- **Q3 MET as worded**: the host's first build has one red that 19.2 does not name, six times. It is CS0102 and CS0111
+  in core/net/linux/cgo_stub.cs: cgoAvailable, cgoLookupHost, cgoLookupPort, cgoLookupIP, cgoLookupCNAME, cgoLookupPTR.
+  The seeded root holds the corpus's cgo-off selection, in which cgo_stub.go stands for the resolver. The cgo-on
+  selection swaps it for cgo_unix.go (R1), and a single-package conversion writes only what it selects. So both files
+  compile. This is corpus.md's MIXED-state class ("declarations MIGRATE while the stale other-selection file remains"),
+  met in a scratch root by construction.
+- **The cure proposed for 4c**, posted before code:
+  - Under -cgo -tests, the converter removes from the OUTPUT the C# of each production file that the corpus's cgo-off
+    selection holds and the cgo-on load deselected. The converter's own two loads decide that set (its selection, never
+    a second tag engine), wherever the layout put the file (flat or a key folder).
+  - Today the set is cgo_stub.go alone (R1).
+  - A hand-owned file is never removed: one in that set is refused by name instead.
+  - Corpus bytes 0: the output is a scratch root by checkCgoTestsOutput.
+- Q4 and Q5 are not reached yet.
+
+— H (2026-11-24)
+
+### 19.7 Record 2026-11-25: seat 4c as built, net's seven measured (Q4 scored), and the next door (design, before code)
+
+**4c, as built** (COORD's GO with four bounds, inbox H 20261124T231602Z). Each fix answers one red of net's cgo-on test
+host, read on a probe before the fix and named:
+- **The cgo-off file the cgo-on load deselects** (`ad25cb8b26`, bounded at `d737f336dc`; cgoDeselectedOutputs.go).
+  - Scope and printing: only on the -cgo -tests path. A file is removed only when its leading // lines equal its
+    source's, the converter's own emission header, //go:build included. That was read against the real pair first:
+    core/net/linux/cgo_stub.cs matches net/cgo_stub.go and not net/dial.go.
+  - Refusals: any other file in the set, and a hand-owned one, are refused by name.
+  - Every removal is printed; -cgo-removals-dry-run lists the set and removes none.
+  - Rows: unit arms for the key folder, flat, the dry run, an empty output, the hand-owned refusal, the
+    no-header refusal, and the -tests-only scope. Each neutered check read red.
+  - Hosted TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub: red without the removal (45510163430: CS0111 on
+    Name in name_stub.cs), green with it (45510136498 and later).
+- **A file that writes C.<member> gets its `using C`** (`2f93f8e971`).
+  - net's cgo_unix.go converts to _C_socklen_t, an alias another file declares as C.socklen_t, a TYPEDEF. The cast
+    rendered (C.@uint) in a file whose syntax names no cmd/cgo declaration, so it got no alias: CS0246 (probe
+    45510185924).
+  - cgoPseudoPackageReference now records a C.-qualified write, and visitFile adds the alias.
+  - Row: 4a's fixture gains csize = C.size_t and Pair(), a tuple returning csize(math.MaxInt8).
+  - Two shapes did not reproduce the red and are recorded: a variable's conversion, and a constant to a base type's
+    alias (45512989670, 45515592828). Both render the alias by name.
+  - The typedef shape read red on the old converter (45519513514: CS0246 in cgot4_plain.cs) and green with the fix
+    (45519537504).
+- **One C pseudo-package stamp per test assembly** (`6f5924f326`).
+  - package_test_info.cs and the internal test unit were both stamped: CS0579 on netꓸC_package (probe 45513467921).
+  - The unit now keeps its `using C` and drops the stamp (cgoPseudoPackageStampElsewhere, set around that write).
+  - Row: TestATestUnitCarriesNoSecondCgoPseudoPackageStamp (neutered: red).
+
+**The battery at the fold** (fd4b52323c, then fbcc065ba7). CNR NO REGRESSION, 1171 byte-identical, 0 NOT MEASURED.
+The converter's go test read two doc reds at fd4b52323c, fixed at fbcc065ba7: the new flag's row in CommandLine.md (and
+-cgo's text no longer says -tests is refused), and nine provenance notes the seat had moved. To move fewer of them, the
+dry-run flag sets a package-level variable rather than adding an Options field. At fbcc065ba7: 11 ok, 0 FAIL.
+
+**Q4 scored, MISSED as worded** (probe 45515647233; net, linux, -cgo -tests -test-filter '^TestCgoLookup'). The host
+builds with 0 errors. Go passes all seven.
+- go2cs passes TestCgoLookupIP, TestCgoLookupIPWithCancel, TestCgoLookupPort and TestCgoLookupPortWithCancel.
+- TestCgoLookupPTR and TestCgoLookupPTRWithCancel fail on a NAMED refusal: "the struct_sockaddr pointer handed to
+  C.getnameinfo is a native pointer minted from managed storage ..., which C must not write through".
+- TestCgoLookupCNAME is UNMEASURED: the refusal panicked on PTRWithCancel's goroutine, which ends the test binary
+  before CNAME runs. Go's own binary would end the same way on such a panic, so this is collateral, not a second red.
+- The prediction's named first red (the WithCancel pair) was wrong: both IPWithCancel and PortWithCancel pass.
+
+**The next door, PTR's (design for P3, before code).**
+
+The shape:
+- cgoSockaddrInet4 (cgo_socknew.go) returns `(*C.struct_sockaddr)(unsafe.Pointer(&sa))`, where sa is a Go
+  syscall.RawSockaddrInet4.
+- getnameinfo READS salen bytes through it. salen is the Go struct's size (16 for IPv4, 28 for IPv6), not
+  sizeof(struct sockaddr).
+- The pointer is a reinterpret view whose ROOT is a Go struct of another type, and StructPointer refuses every native
+  box not genuinely native.
+
+The proposed arm:
+- When the view's root (ReinterpretRoot, or the held source the walk reaches) is a Go value of a struct type S0 that
+  NativeStructMarshal can image (MarshalledSizeOf(S0) known: scalars and inline arrays, no Go pointer), the door
+  ENCODES the root into a native buffer of S0's Go size and hands C its address.
+- After the call it DECODES the buffer back into the root, so a C write lands in Go memory, as Go's does.
+- The buffer is sized by S0, not by T: C reads salen bytes, and for IPv6 that is past sizeof(struct sockaddr).
+- B-10 as for a mirror: a published unsafe.Pointer word over the root's bytes is cgo's panic.
+- A root holding a Go pointer stays refused by name.
+
+Why the converter changes too: StructPointer has no pin and no buffer today. The wrapper gains the arm the scalar door
+already has: an out GoCgoPin over the image, held in the existing `fixed` nesting, plus a copy-back call after it. The
+wrapper goldens move at every struct-pointer parameter; the count is in the plan before code.
+
+Rows:
+- e2e: getnameinfo over a Go sockaddr view for IPv4 and IPv6, printing as Go does.
+- The near-miss: a root with a Go pointer field, refused by name.
+- A C write through such a view landing in the Go struct.
+- GolibTests arms for encode, decode and the refusal.
+
+Questions for COORD and P3:
+- Is this arm in 3.4, or a seat of its own?
+- Image-and-copy-back, or refuse and disclose PTR?
+
+Lean: in 3.4, since it is net's own shape and the last red between the seven and Go.
+
+— H (2026-11-25)
+
+### 19.8 Record 2026-11-25: P3's verdict on 4a and 4c folded (COORD: not seated until folded), and P3's three questions answered
+
+P3's verdict on 4a/4c (relayed in COORD inbox H 20261124T232124Z) was missed at first: the inbox watcher was not
+running when it arrived. COORD held both seats (inbox H 20261125T021805Z). It is folded at `bb3bdc99e3`:
+- **MUST 1 (4a).** checkCgoTestsOutput judged the ROOT. It now judges the OUTPUT.
+  - repositoryCorpusOf resolves every symlink on the path (the longest existing prefix), then refuses an ancestor named
+    `core` whose grandparent holds .git (a directory or a worktree's file).
+  - Route (a), an explicit -go2cspath elsewhere with the output inside a repository's src/core, and route (b), a scratch
+    src that is a symlink to a repository's src, each have a row. Both read red with the predicate neutered.
+  - 4c's removal asks the same predicate for each file, with its own row.
+- **SHOULD 2, ruled in.** -cgo -tests refuses a root without `.go2cs-cgo-scratch-root`, which the seed step writes. The
+  repository's src and a deployed %GOPATH%/src/go2cs both lack it. Row; red when neutered.
+  - The hosted rows seed their own marked scratch root (seedCgoScratchRoot): core, gen, the two props, go2cs-gen's
+    collision list, and the marker.
+- **MUST 3 (4c).** Candidates are looked for only in the folders this target resolves to (its key folders that hold
+  sources, and flat), and every folder holding one is checked. Rows: darwin's same-name copy stays when linux's goes
+  (red when darwin is let in); a key-folder copy and a flat copy are both removed.
+- **SHOULD 4.** An `<stem>_impl.cs` companion beside the file refuses by name. Row; red when neutered.
+- **SHOULD 5.** The set's three conditions are written at cgoDeselectedOutputs:
+  - production GoFiles only;
+  - both loads at the same GOOS, GOARCH and flags;
+  - compared by cleaned SOURCE paths, never CompiledGoFiles. The comparison is by cleaned full path now, not base name.
+- **SHOULD 6.** The removal makes a scratch root one-way, so 4b's leg seeds one fresh root per arm: the cgo-on arm and
+  the cgo-off control never share one. The probe and both hosted rows already seed per run.
+- **NIT 7, a named limit.** The stack-append harvest pins CGO_ENABLED=0 (stackAppendHints.go:702). An append in a file
+  the cgo-on load selects (net's cgo_unix.go) gets no harvested capacity hint under -cgo -tests. That is a performance
+  limit; behaviour is unchanged.
+
+**P3's three could-not-confirms:**
+1. **resolveGo2CSPath keeps an explicit root: CONFIRMED.** It returns before any self-location when the configured root
+   is a working go2cs root (isGo2CSRoot), so route (a) was real, and MUST 1 closes it.
+2. **The neutered-arm rows.** Each was read red with its arm neutered, then restored byte-identical (cmp):
+   - the corpus predicate (routes a, b and the per-file arm);
+   - the marker;
+   - darwin let into the folder set;
+   - the companion check;
+   - the scope guard;
+   - the header check;
+   - the stamp switch;
+   - the removal's record of the stale path.
+3. **A stale _test.cs from the seed cannot compile into the host: CONFIRMED by reading.** A `.tests.csproj` sets
+   EnableDefaultCompileItems=false and lists its compile items, and each -tests conversion rewrites that list for its own
+   target, so a seeded _test.cs not selected this run is never listed. The production project excludes test artifacts.
+
+**Readings at `bb3bdc99e3`.**
+- Hosted (45534235178): TestACgoPackageConvertsWithItsTestsAndMatchesGo,
+  TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub and TestACgoTestsConversionNeverWritesTheRepositorysCorpus
+  (all six arms, route (b) included) PASS on linux.
+- net probe (45534257167): unchanged, 4 of 7 passing. The PTR pair is refused at the struct door; CNAME is unmeasured.
+- Battery on H at `bb3bdc99e3`: converter go test ./... 11 ok, 0 FAIL, 0 cached; CNR NO REGRESSION, 1171
+  byte-identical, 0 NOT MEASURED.
+
+The PTR door is ruled into 3.4 (image and copy-back). Before code, P3 reads 19.7 and the wrapper golden count is posted.
+
+— H (2026-11-25)
+
+### 19.9 Record 2026-11-25: the struct image door as built (P3's B4 to B8)
+
+The door is cut from the A fold (`2bc39a6265`). Prediction posted before the goldens were regenerated: 39 StructPointer
+sites in 27 wrappers move, and nothing else. MET exactly (linux: gmtime_r, add_into, hfa_scale, tagged_double, uname;
+windows: GetSystemTime, PtInRect, UnionRect, _gmtime64_s, add_into, hfa_scale, tagged_double; the arm64 and darwin
+goldens likewise).
+
+As built:
+- **golib.** `GoCgoImages` (one per call, declared by every wrapper that takes a struct pointer) holds the roots a call
+  hands C. New `StructPointer` and `ScalarPointer` overloads take it by ref. The image arm runs only for a NativeBox that
+  is not genuinely native and aliases an order token whose root `ManagedPointerTokens` resolves.
+- **B4.** The root is found through the token. A view at a non-zero offset into it is refused by name. P3's field shape
+  (`&sa.Addr`) never reaches the arm: a field view aliases the field's own storage and takes the mirror of exactly its
+  bytes; unsafe.Add over the whole view's token is refused upstream as pointer arithmetic. Row asserts both.
+- **B5.** One image per root per call, keyed by ReferentObject; a second view shares the first buffer. A root handed as
+  an image and through the mirror or the scalar door, in either order, is refused by name ("name the same Go value").
+- **B6 / B7.** Decoded back only when C changed the image (byte compare against the encoded copy), so an untouched image
+  decodes nothing and a goroutine's write during the call survives.
+- **B8.** The buffer is max(root's Go size, T's C size), the tail zeroed. Seam: GoCgoPin.StorageLength.
+- B-10 as for the mirror; a root holding a Go pointer is refused by name.
+- **Converter.** cgoStructWrappers emits the images local, `ref images` at every struct and scalar pointer door, the
+  struct parameters inside the existing `fixed` nesting, and `images.CopyBack()` after the mirror copy-backs.
+- **Limit.** C's writes land at copy-back, not live: docs/Limitations.md, beside the scalar door.
+
+Rows:
+- GolibTests GoCgoImagesTests, 8 rows, all pass. Neutered controls, each red, restored byte-identical (cmp): the image
+  arm, B6 (decode unconditionally), B5 sharing, B5 mixed, B8 (root size only).
+- e2e (testdata/cgo/p3): `imgaddinto` hands one Go value as three views (dst == x == y); Go prints `imgaddinto 1 4 7`,
+  where three copies would print 0 4 5. `imgmixed` hands a view and a pointer into the same value; refused by name.
+- probe.c gains go2cs_probe_pair_and_int for imgmixed.
+
+Readings (offline, H): converter `go test -run Cgo` ok; GolibTests cgo slice 246 passed, 0 failed, 9 skipped. Hosted
+cgo-e2e, golib-tests and the net probe follow as their own lines.
+
+**Addendum (same day): the first hosted reading, and B5 across allocations.**
+- Hosted cgo-e2e at `2d5b9b6083`: imgaddinto printed `1 4 7` on both sides, but imgmixed was not refused; go2cs printed
+  Go's `imgmixed 5 5 3`. The emitted program (a probe-only dump) showed why: the fixture's goPairHost is laid out inline
+  by the converter (GoInlineLayout, explicit layout), so both views pinned its own storage and C got one memory with no
+  image. Neither arm reached the door; the output was right because nothing was copied.
+- The arms now use net's own root, syscall.RawSockaddrInet4, which the corpus emits with its arrays as managed
+  references. goPairHost stays as the control arm `inlinemixed`, which runs as Go does.
+- That shape exposed a B5 gap. A pointer into the root's array (`(*C.int)(unsafe.Pointer(&sa.Addr))`, or
+  `&sa.Addr[0]`) pins Addr's own backing, which is neither sa's box nor its view, so an image of sa and that pin would
+  have handed C two copies of Addr, the image's copy-back overwriting what C wrote through the pin. B5 is now keyed by
+  ALLOCATIONS: an image claims its root and every backing array inside the root's value, another door claims its root
+  and the storage it pins, and any overlap between an image and another door is refused by name.
+- Row APointerIntoAnArrayInsideAnImagedRootIsRefusedEitherWay (both shapes, both orders). Neutered controls, each red,
+  restored byte-identical: the image's backings left out; the pin's storage left out. A third arm (a view resolved to
+  its token's root) was dropped: every shape that needs it also pins, so no row could redden it.
+- GolibTests NoUncountedBackingAllocations named the image buffer; it is allocated through AllocationCounter now.
+- Net probe on the door (hosted, linux): all seven TestCgoLookup tests pass, PTR, PTRWithCancel and CNAME included.
+
+
+— H (2026-11-25)
+
+#### 19.9.2 Addendum 2026-11-25: P3's CHANGES on 7adc8e619c folded (COORD inbox H 20261125T171758Z)
+
+- **MUST, a larger second view.** The first view's image is sized max(root, its C struct) and pinned, so it cannot
+  grow. A second view of the same root with a larger C struct was handed that short buffer, and C would read and write
+  past it. It is now refused by name ("C structs of different sizes ... the larger comes second"). The other order
+  shares one buffer of the larger size. Rows: ASecondLargerViewOfAnImagedRootIsRefusedByName (4 then 16, refused) and
+  ALargerViewFirstThenASmallerOneShareOneImage (16 then 4, one 16-byte image).
+- **NIT 2.** An image is shared only with the same root's image (keys[0] the same reference). Any other image/image
+  overlap is refused by name. Row: TwoRootsSharingABackingAreNotHandedOneImage, two boxes over one value whose struct
+  copy did not clone its arrays.
+- **NIT 3.** Row ASliceTakenBeforeTheCallStillAliasesTheRootAfterCopyBack, on syscall.RawSockaddrInet4. The fresh
+  decoded value is stored in place by WriteBoxSlot for an IGoValueAssign struct, which go2cs-gen gives every
+  [GoValueClone] struct, so `sa.Addr[:]` taken before the call still aliases the root after copy-back. The row's first
+  form used a hand-written test struct with no IGoValueAssign and read RED (the slice kept the old array): the in-place
+  path is the whole property, and only converted value-clone structs take it.
+- **Controls.** The size check neutered reds the MUST row alone; the same-root check neutered reds NIT 2's row alone;
+  both restored byte-identical (cmp), 13/13.
+- **P3's two open reads.** (a) The struct door's plain path returns only Nil, Mirror or Native, never Pinned, and a
+  Mirror is claimed; Pinned comes only from the image arm, the scalar door and the out-parameter door, and the
+  wrapper's ref-images overloads claim the scalar door's. (b) CopyBack after a throw: every refusal is raised before
+  the call, and C cannot throw into the wrapper, so CopyBack runs after every call that reached C.

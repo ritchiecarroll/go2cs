@@ -13,7 +13,7 @@ using go.@internal;
 using go.@internal.trace;
 using iter = iter_package;
 using time = time_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class testtrace_package {
 
@@ -461,7 +461,7 @@ partial struct errAccumulator {
 }
 
 internal static void Errorf⁔(/*this*/ ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     e.errs = append(e.errs, fmt.Errorf(f, args.ꓸꓸꓸ));
 }

@@ -1,0 +1,19 @@
+# AR-4 env plain=None twinned=('', 'true') shard-twin-names plain=None twinned=85134
+shard	row	p_word	p_count	t_word	t_count	p_matched	t_matched	disclosed_equal	t_eq_bank	t_eq_plain	model	p_twins	t_twins	t_test	p_wall	t_wall
+AR-4	compress/lzw	ABSENT	-1	PASS	17	None	17	NO	yes	bank	reference	-1	4470	0	-1	30
+AR-4	crypto/internal/fips140/edwards25519/field	ABSENT	-1	PASS	15	None	15	NO	yes	bank	reference	-1	5642	0	-1	26
+AR-4	crypto/internal/fips140/nistec	ABSENT	-1	PASS	44	None	44	NO	yes	bank	reference	-1	5455	0	-1	28
+AR-4	crypto/mlkem	ABSENT	-1	PASS	8	None	8	NO	yes	bank	reference	-1	5776	0	-1	30
+AR-4	debug/plan9obj	ABSENT	-1	PASS	2	None	2	NO	yes	bank	reference	-1	3585	0	-1	296
+AR-4	embed/internal/embedtest	ABSENT	-1	PASS	7	None	7	NO	yes	bank	unknown	-1	3926	0	-1	17
+AR-4	encoding/json	ABSENT	-1	PASS	550	None	550	NO	yes	bank	reference	-1	18055	0	-1	170
+AR-4	encoding/pem	ABSENT	-1	PASS	18	None	18	NO	yes	bank	reference	-1	4210	0	-1	27
+AR-4	image/gif	ABSENT	-1	PASS	28	None	28	NO	yes	bank	reference	-1	5365	0	-1	22
+AR-4	image/png	ABSENT	-1	PASS	28	None	28	NO	yes	bank	reference	-1	5123	0	-1	26
+AR-4	internal/saferio	ABSENT	-1	PASS	17	None	17	NO	yes	bank	reference	-1	3546	0	-1	12
+AR-4	path/filepath	ABSENT	-1	PASS	54	None	54	NO	yes	bank	reference	-1	4274	0	-1	19
+AR-4	runtime/pprof	ABSENT	-1	FAIL	-1	None	146	NO	NO	bank	reference	-1	7238	0	-1	1284
+AR-4	sort	ABSENT	-1	FAIL	-1	None	None	yes	NO	bank	-	-1	-1	-1	-1	13
+AR-4	strings	ABSENT	-1	PASS	68	None	68	NO	yes	bank	reference	-1	4433	0	-1	32
+AR-4	testing/quick	ABSENT	-1	PASS	8	None	8	NO	yes	bank	reference	-1	4036	0	-1	13
+# summary rows=16 plain PASS=0 twinned EQUAL-bank=14 twinned EQUAL-plain=0

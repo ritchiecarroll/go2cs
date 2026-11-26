@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 // A variadic pack that is only READ, COPIED FROM or FORWARDED is converted as a stack view of the
-// incoming span (REC-C, docs/phase4/DESIGN-slice-idiom-allocations.md §A) instead of a heap copy.
+// incoming pack (REC-C, docs/phase4/DESIGN-slice-idiom-allocations.md §A) instead of a heap copy.
 // The forwarded case is also a semantics case: Go's `f(xs...)` passes the slice itself, so a callee
 // that writes an element writes the CALLER's storage. A converted pack copy used to hide that write.
 
@@ -41,11 +41,11 @@ func describe(format string, args ...any) string {
 	return fmt.Sprintf(format, args...)
 }
 
-// Refused shapes keep the heap copy: appending INTO the pack, writing it as copy's destination,
+// Refused shapes keep the heap slice: appending INTO the pack, writing it as copy's destination,
 // returning it, and capturing it (a deferred closure included). Their calls below pass FRESH
-// argument lists, because a refused pack is still a copy, and a spread of a caller's slice into one
-// would expose that copy (Go writes and returns the caller's storage there too) -- a separate,
-// pre-existing divergence this test does not claim to fix.
+// argument lists. A spread of a caller's slice into one hands over the caller's slice itself, so
+// the callee writes and returns the caller's storage, as in Go; VariadicSpreadHeapAlias tests
+// that.
 func into(xs ...int) []int { return append(xs, 4) }
 
 func copyInto(xs ...int) int { return copy(xs, []int{7, 7}) }

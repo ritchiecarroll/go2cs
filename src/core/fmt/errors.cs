@@ -7,7 +7,7 @@ using errors = errors_package;
 using stringslite = @internal.stringslite_package;
 using slices = slices_package;
 using @internal;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class fmt_package {
 
@@ -23,7 +23,7 @@ partial class fmt_package {
 // the error interface. The %w verb is otherwise a synonym for %v.
 public static error /*err*/ Errorf(sstring format, params ꓸꓸꓸany aʗp) {
     error err = default;
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     // This function has been split in a somewhat unnatural way
     // so that both it and the errors.New call can be inlined.

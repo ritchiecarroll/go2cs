@@ -67,7 +67,7 @@ partial struct pool<T> {
 
 internal static (T, bool) take<T>(this ref pool<T> p) {
     if (len(p.items) == 0) {
-        T zero = GoZero<T>();
+        T zero = builtin.GoZero<T>();
         return (zero, false);
     }
     var v = p.items[len(p.items) - 1];

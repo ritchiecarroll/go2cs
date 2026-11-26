@@ -74,7 +74,7 @@ using System.Runtime.CompilerServices;
 namespace go.net;
 
 using static go.net.url_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 [GoPackage("url")]
 public static partial class url_package

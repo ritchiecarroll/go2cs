@@ -15,8 +15,6 @@
 using go;
 using static go.main_package;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -132,6 +130,6 @@ public static partial class main_package
 // the body's frame as the Go method.
 // <MethodForwarders>
 partial class mainᴛQ {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Δ(this Q _Δp0) => main_package.Δ⁔(_Δp0);
+    [GoName("Δ")] [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Δ(this Q _Δp0) => main_package.Δ⁔(_Δp0);
 }
 // </MethodForwarders>

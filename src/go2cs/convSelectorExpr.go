@@ -74,8 +74,52 @@ func typeCollidingFieldName(name string) string {
 
 // fieldCollidesWithType reports whether a field selector's name equals the C# type name of the
 // struct it belongs to (`type Node struct{ Node *Node }` → field `Node` in struct `Node`).
+//
+// A PROMOTED field is also renamed where it collides with the struct that DECLARES it: the declaration carries the
+// rename, and the generator promotes the member under it. Go names the two differently where C# does not, so the
+// promotion is legal Go: `type slice struct{ Δslice int }` declares ΔΔslice, and `type X struct{ slice }` reaches it
+// as x.Δslice, emitted x.ΔΔslice (X's own Δslice is the embed).
 func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
-	return fieldCollidesWithOwnerType(sel.Name, v.info.TypeOf(x))
+	xType := v.info.TypeOf(x)
+
+	if fieldCollidesWithOwnerType(sel.Name, xType) {
+		return true
+	}
+
+	if xType == nil {
+		return false
+	}
+
+	field, path, _ := types.LookupFieldOrMethod(xType, true, v.pkg, sel.Name)
+
+	if _, isField := field.(*types.Var); !isField || len(path) < 2 {
+		return false
+	}
+
+	owner := xType
+
+	for _, index := range path[:len(path)-1] {
+		structType, isStruct := derefStructUnderlying(owner)
+
+		if !isStruct || index >= structType.NumFields() {
+			return false
+		}
+
+		owner = structType.Field(index).Type()
+	}
+
+	return fieldCollidesWithOwnerType(sel.Name, owner)
+}
+
+// derefStructUnderlying is the struct under t, through one pointer.
+func derefStructUnderlying(t types.Type) (*types.Struct, bool) {
+	if ptr, isPtr := t.Underlying().(*types.Pointer); isPtr {
+		t = ptr.Elem()
+	}
+
+	structType, isStruct := t.Underlying().(*types.Struct)
+
+	return structType, isStruct
 }
 
 // fieldCollidesWithOwnerType is fieldCollidesWithType's answer from the owning struct's TYPE, for a field reached
@@ -105,7 +149,61 @@ func fieldCollidesWithOwnerType(fieldName string, xType types.Type) bool {
 		return false
 	}
 
-	return getSanitizedIdentifier(fieldName) == getSanitizedIdentifier(obj.Name())
+	return fieldCollidesWithTypeName(fieldName, obj.Name())
+}
+
+// fieldCollidesWithTypeName is the one rule, read by the field's declaration and by every access, for
+// whether a field of a package-level struct is renamed (typeCollidingFieldName) away from its struct's
+// name. It holds when:
+//   - the GO names are equal (`type Node struct{ Node *Node }`);
+//   - the EMITTED names are equal, which C# forbids (CS0542) whatever the Go names are: runtime-style
+//     `type slice struct{ Δslice int }` emits the type `Δslice` (a golib reserved name) and the field
+//     `Δslice` (a Δ-led Go name is emitted as written), and a keyword's `@` escape is not part of the
+//     name (`@file` is `file`);
+//   - the sanitized names are equal, the access sites' rule before the Go-name and emitted-name cases
+//     were written down, kept so no access changes spelling (`type file struct{ file *os.File }`: the
+//     type `Δfile`, the field `@file`).
+//
+// A Δ-led Go name is never compared with its marker removed: `type Δv struct{ v int }` declares the
+// field `v` in the struct `Δv`, which C# accepts, so it is not renamed.
+func fieldCollidesWithTypeName(goFieldName string, goTypeName string) bool {
+	if goFieldName == goTypeName {
+		return true
+	}
+
+	typeName := getSanitizedIdentifier(goTypeName)
+
+	if strings.TrimPrefix(getCoreSanitizedIdentifier(goFieldName), "@") == strings.TrimPrefix(typeName, "@") {
+		return true
+	}
+
+	return getSanitizedIdentifier(goFieldName) == typeName
+}
+
+// structGoAccess is the access of the struct a promoted forwarder extends: Go's rule over a package-level
+// struct's Go name (getGoAccess), and the emitted name's for a lifted one.
+func structGoAccess(owner types.Type, structTypeName string) string {
+	if named, ok := types.Unalias(owner).(*types.Named); ok {
+		if obj := named.Obj(); obj.Pkg() != nil && obj.Parent() == obj.Pkg().Scope() {
+			return getGoAccess(obj.Name())
+		}
+	}
+
+	return getAccess(structTypeName)
+}
+
+// structFieldDeclCollides is fieldCollidesWithOwnerType for a field's DECLARATION, where the owner may be a
+// lifted (function-local or anonymous) struct emitted under the composed name structTypeName. A
+// package-level struct reads the rule its accesses read; a lifted one keeps the declaration's compare
+// against its emitted name, which its accesses never rename (fieldCollidesWithOwnerType answers false).
+func structFieldDeclCollides(goFieldName string, owner types.Type, structTypeName string) bool {
+	if named, ok := types.Unalias(owner).(*types.Named); ok {
+		if obj := named.Obj(); obj.Pkg() != nil && obj.Parent() == obj.Pkg().Scope() {
+			return fieldCollidesWithTypeName(goFieldName, obj.Name())
+		}
+	}
+
+	return strings.TrimPrefix(getCoreSanitizedIdentifier(goFieldName), "@") == strings.TrimPrefix(strings.TrimPrefix(structTypeName, ShadowVarMarker), "@")
 }
 
 // valueMethodHasBoxTwin reports whether go2cs-gen's RecvGenerator gives the VALUE-receiver method fn a
@@ -1372,7 +1470,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 					// wrapperRecv: a nil receiver faults IN the wrapper, as Go's does, raised as the
 					// wrapper's own panic (the emitter's marker runtime.Callers keeps the frame on).
-					return fmt.Sprintf("((%s)(%s(%s) => wrapperRecv(p0).%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, false), strings.Join(params, ", "), methodName, strings.Join(args, ", "))
+					return fmt.Sprintf("((%s)(%s(%s) => builtin.wrapperRecv(p0).%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, false), strings.Join(params, ", "), methodName, strings.Join(args, ", "))
 				}
 			}
 		}
@@ -3077,12 +3175,12 @@ func (v *Visitor) methodExpressionWrapperReceiver(sel *types.Selection) string {
 
 				message := fmt.Sprintf("value method %s.%s.%s called using nil *%s pointer", pkgPath, typeName, sel.Obj().Name(), typeName)
 
-				return fmt.Sprintf("panicwrapRecv(p0, %q)", message)
+				return fmt.Sprintf("builtin.panicwrapRecv(p0, %q)", message)
 			}
 		}
 	}
 
-	return "wrapperRecv(p0)"
+	return "builtin.wrapperRecv(p0)"
 }
 
 // methodExpressionWrapperMark spells the [GoWrapper] attribute for a method expression the converter

@@ -419,6 +419,12 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			resultExpr = v.applyTypedNilUnsafePointerBox(v.getType(expr, false), v.unsafePointerExprNeverRendersNull(expr), resultExpr)
 		}
 
+		// The NAMED-pointer sibling (`type P *T`): its wrapper class's zero value is a null reference, so a nil one
+		// crosses as the type's canonical typed nil.
+		if callContext != nil && callContext.anyBoxedNamedPointerArgs[i] && !spreadArg && !totalReplacement {
+			resultExpr = v.applyTypedNilNamedPointerBox(v.getType(expr, false), v.namedPointerExprNeverRendersNull(expr), resultExpr)
+		}
+
 		// The TYPE-PARAMETER sibling: `fmt.Sprintf("%T", e)` and `[]any{e}` inside a generic body, where E may be a nil
 		// pointer or func at run time (errors_test's testAsType named its subtests by `%T` of a nil *fs.PathError).
 		if callContext != nil && callContext.anyBoxedTypeParamArgs[i] && !spreadArg && !totalReplacement {
@@ -495,9 +501,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		if callContext != nil && callContext.nilSafeDelegateArgs != nil {
 			if typeArgs, ok := callContext.nilSafeDelegateArgs[i]; ok && len(typeArgs) > 0 {
 				if label, value, found := strings.Cut(resultExpr, ": "); found && isSimpleIdentifierName(label) {
-					resultExpr = fmt.Sprintf("%s: NilSafeDelegateConversion<%s>(%s)", label, typeArgs, value)
+					resultExpr = fmt.Sprintf("%s: builtin.NilSafeDelegateConversion<%s>(%s)", label, typeArgs, value)
 				} else {
-					resultExpr = fmt.Sprintf("NilSafeDelegateConversion<%s>(%s)", typeArgs, resultExpr)
+					resultExpr = fmt.Sprintf("builtin.NilSafeDelegateConversion<%s>(%s)", typeArgs, resultExpr)
 				}
 			}
 		}

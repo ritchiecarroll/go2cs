@@ -85,7 +85,7 @@ namespace go.testing;
 using static go.testing.fstest_package;
 using fs = go.io.fs_package;
 using time = go.time_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("fstest")]
 public static partial class fstest_package

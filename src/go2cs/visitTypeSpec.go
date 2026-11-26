@@ -248,7 +248,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// whole type (docs/PLAN-marker-comment-parity.md, section 11). Where no record is written (a
 		// hand-owned file, the -tests bridge unit) it stays in the converted file.
 		if definedOverInterface && !v.inFunction {
-			carrierAccess := getAccess(name)
+			carrierAccess := getGoAccess(typeSpec.Name.Name)
 			carrierName := aliasName + DescriptorCarrierSuffix
 			localNameAttr := fmt.Sprintf("[GoLocalName(\"%s\")] ", typeSpec.Name.Name)
 
@@ -267,7 +267,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// A C typedef is not: cgo keeps C types out of a package's exported surface, whatever the case of the C name.
 		_, isCgo := cgoPseudoPackageNames[typeSpec.Name.Name]
 
-		if !v.inFunction && !isCgo && getAccess(name) == "public" {
+		if !v.inFunction && !isCgo && getGoAccess(typeSpec.Name.Name) == "public" {
 			packageLock.Lock()
 			exportedTypeAliases[name] = typeName
 			packageLock.Unlock()
@@ -322,6 +322,10 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	// `context_test.go` and taken by the exported `XTestParentFinishesChild` that `x_test.go` calls).
 	// Publicization therefore outranks the default, and the inline arm supplies that default.
 	if v.isPublicizedType(typeSpec.Name) {
+		v.pendingTypeAccess = "public "
+	} else if strings.HasPrefix(typeSpec.Name.Name, ShadowVarMarker) && v.localTypeAccess() == "" {
+		// Go exports a package-level type whose name starts with Δ (an upper-case letter), and every rule that
+		// reads the EMITTED name removes the Δ rename marker first, so the modifier is set from the Go name.
 		v.pendingTypeAccess = "public "
 	} else if _, isCgo := cgoPseudoPackageNames[typeSpec.Name.Name]; isCgo && generatedTypeScope(getSanitizedIdentifier(name)) == "public" {
 		// A C name carries no Go export meaning: Go's own name for a C type is cmd/cgo's unexported _Ctype_ one, so
@@ -632,7 +636,13 @@ func (v *Visitor) localNameAttrFor(identType types.Type) string {
 		}
 	}
 
+	// A package-level type whose Go name starts with Δ keeps that name for reflection in a [GoName] stamp:
+	// golib removes one leading Δ from an unstamped name, the converter's rename marker.
 	if !v.inFunction {
+		if named, ok := identType.(*types.Named); ok {
+			return goNameAttr(named.Obj().Name(), getSanitizedIdentifier(named.Obj().Name()))
+		}
+
 		return ""
 	}
 

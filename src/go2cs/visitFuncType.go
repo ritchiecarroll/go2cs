@@ -34,6 +34,21 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 	localName := v.localNameAttrFor(identType)
 	name, target, finish := v.liftLocalTypeDecl(name, identType)
 
+	// The delegate's access follows its Go name at package level (getGoAccess: a Δ-led name is exported), as its
+	// [GoName] stamp does (localNameAttrFor); a lifted local delegate keeps its emitted name's.
+	access := getAccess(name)
+
+	if named, ok := identType.(*types.Named); ok && !v.inFunction {
+		access = getGoAccess(named.Obj().Name())
+
+		// An unexported func type an exported declaration names is publicized, as every other type kind is
+		// (visitTypeSpec's pendingTypeAccess): a public member whose signature holds an internal delegate is
+		// CS0050/CS0051. sort's tests: `func OrderedBy(less ...lessFunc)`, exported, over `type lessFunc func(…)`.
+		if packagePublicizedTypes[named.Obj()] {
+			access = "public"
+		}
+	}
+
 	if len(constraints) > 0 {
 		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
 	}
@@ -43,7 +58,7 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 	}
 
 	v.writePendingTypeDoc(target)
-	v.writeString(target, "%s%s delegate %s %s%s(%s)%s;", localName, getAccess(name), resultsSignature, name, typeParams, parameterSignature, constraints)
+	v.writeString(target, "%s%s delegate %s %s%s(%s)%s;", localName, access, resultsSignature, name, typeParams, parameterSignature, constraints)
 	target.WriteString(v.newline)
 	finish()
 }

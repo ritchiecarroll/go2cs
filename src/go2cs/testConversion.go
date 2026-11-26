@@ -804,7 +804,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Dir:        inputPath,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 		ParseFile: parseFileUnparenAddressOperands,
@@ -1383,6 +1383,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	// class-qualified. Computed from the loaded variants before either converts, and session-scoped
 	// — resetPackageState does not clear it.
 	testAmbiguousLocalTypeNames = ambiguousVariantTypeNames(internal, external)
+	testDeltaLedTypeNames = deltaLedTypeNames(internal, external)
 	testInternalDeclaredNames = internalTestDeclaredNames(internal)
 
 	// Cleared for every package, filled only by the recompile-model seed below: the alias bindings a
@@ -1771,6 +1772,26 @@ func metadataClassPrefix(namespace, goPackageName string) string {
 	return namespace + "." + getSanitizedImport(goPackageName+PackageSuffix)
 }
 
+// deltaLedTypeNames collects the package-level type names either loaded `-tests` variant declares whose Go name
+// starts with the Δ rename marker (testDeltaLedTypeNames).
+func deltaLedTypeNames(variants ...*packages.Package) hashset.HashSet[string] {
+	names := hashset.HashSet[string]{}
+
+	for _, variant := range variants {
+		if variant == nil || variant.Types == nil {
+			continue
+		}
+
+		for _, name := range variant.Types.Scope().Names() {
+			if _, ok := variant.Types.Scope().Lookup(name).(*types.TypeName); ok && strings.HasPrefix(name, ShadowVarMarker) {
+				names.Add(name)
+			}
+		}
+	}
+
+	return names
+}
+
 // ambiguousVariantTypeNames returns the simple type names declared by BOTH `-tests` variants: the
 // package under test (production + its internal `_test.go` files) and the external `<pkg>_test`
 // suite. Both classes are `using static`-imported by the merged metadata, so a bare reference to
@@ -1991,7 +2012,7 @@ func collectSiblingTestClosure(inputPath string, options Options) {
 		Dir:        absolute,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}, ".")
@@ -3167,6 +3188,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		seedProductionAliasLifts(pkg, productionInfoPath)
 		seedProductionInterfaceAliases(pkg, productionInfoPath, options)
 		seedProductionDynamicTypeLifts(productionInfoPath)
+		seedProductionArrayDimsCompanions(productionInfoPath)
 	}
 
 	// The EXTERNAL variant additionally inherits the INTERNAL variant's purely-anonymous lifts.
@@ -3896,7 +3918,7 @@ func splitWhiteboxVariantRecords(bridgeTypeNames hashset.HashSet[string], bridge
 			name = strings.TrimSuffix(trimmed, ">")
 		}
 
-		return !strings.Contains(name, ".") && bridgeTypeNames.Contains(strings.TrimPrefix(name, ShadowVarMarker))
+		return !strings.Contains(name, ".") && containsEmittedName(bridgeTypeNames, name)
 	}
 
 	splitImplements := func(source map[string]hashset.HashSet[string], bridge, test map[string]hashset.HashSet[string]) {
@@ -4059,7 +4081,12 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
 		packageMethodHolders = bridgeHolders
+
+		// The test assembly takes the C pseudo-package's stamp from package_test_info.cs, written below; this unit
+		// carries none (CS0579 otherwise, on a cgo-on package).
+		cgoPseudoPackageStampElsewhere = true
 		writePackageInfoFile(unitPath, true)
+		cgoPseudoPackageStampElsewhere = false
 
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
 		packageEmittedTypeAccess = savedAccess
@@ -6271,7 +6298,7 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 		}
 
 		qualifier := argument[match[2]:match[3]]
-		name := strings.TrimPrefix(strings.TrimPrefix(argument[match[1]:], "."), "Δ")
+		name := strings.TrimPrefix(argument[match[1]:], ".")
 
 		// A generic instantiation (`Checker<nint>`) seeds its declaration: the converter emits a generic interface's
 		// bases from the declared type (getStructuralInterfaceBases), so the walk looks up the same one.
@@ -6288,7 +6315,7 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 				continue
 			}
 
-			typeName, isTypeName := typesByPath[path].Scope().Lookup(name).(*types.TypeName)
+			typeName, isTypeName := lookupEmittedTypeName(typesByPath[path].Scope(), name)
 
 			if !isTypeName {
 				continue
@@ -6304,6 +6331,23 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 	}
 
 	return result
+}
+
+// lookupEmittedTypeName resolves an EMITTED type spelling in a Go scope: the Go name itself, or the Go name the
+// converter renamed with the Δ marker when the spelling
+// is not a Go name of the scope. A Go name that itself starts with Δ is emitted as written, so `ΔMatrix`
+// resolves to `ΔMatrix`, never to a `Matrix` beside it.
+func lookupEmittedTypeName(scope *types.Scope, emitted string) (*types.TypeName, bool) {
+	if typeName, ok := scope.Lookup(emitted).(*types.TypeName); ok {
+		return typeName, true
+	}
+
+	if trimmed, renamed := strings.CutPrefix(emitted, ShadowVarMarker); renamed {
+		typeName, ok := scope.Lookup(trimmed).(*types.TypeName)
+		return typeName, ok
+	}
+
+	return nil, false
 }
 
 // sameNameCandidates returns the methods of pkg's non-interface named types, value and pointer receivers alike (the
@@ -7454,9 +7498,11 @@ func classifyTestSources(inputPath string, included hashset.HashSet[string], com
 // digest (F7): any option that changes emitted C# invalidates the manifest. Machine-specific
 // paths (goRoot/goPath/go2csPath) are deliberately excluded so digests stay machine-portable.
 func conversionOptionsDigest(options Options) string {
-	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t",
+	// stack-append is the resolved mode: a package converted with -stack-append=off and then compared without it is
+	// stale, not a default run, because its emission has no stack-append buffers.
+	return fmt.Sprintf("uco=%t;var=%t;indent=%d;comments=%t;cgo=%t;stack-append=%t",
 		options.useChannelOperators, options.preferVarDecl, options.indentSpaces,
-		options.includeComments, options.parseCgoTargets)
+		options.includeComments, options.parseCgoTargets, stackAppendEnabled(options))
 }
 
 // runtimeSourcesDigest hashes the hand-owned runtime the converted tests build against (golib +
@@ -8240,6 +8286,11 @@ type testEnvironmentRecord struct {
 	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
 	OracleGOARCH string `json:"oracleGoarch,omitempty"`
 
+	// StackAppend is "off" when the run's -stack-append mode resolved off: its emission has no stack-append buffers, so
+	// cap() after a non-escaping append, and an allocation count that reads it, can differ from a default -tests run.
+	// Omitted when the mode resolved on, the -tests default, so every default record is unchanged.
+	StackAppend string `json:"stackAppend,omitempty"`
+
 	// OracleBuildTags is the oracle `go test` child's build tags, recorded only when they differ from the
 	// conversion's (oracleBuildTagsRecord): every row but math/big's own drops math_big_pure_go, so Go ran
 	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise. A POINTER so an
@@ -8298,6 +8349,10 @@ func testEnvironmentFromOptions(options Options) testEnvironmentRecord {
 
 	if oracle := oracleOptions(options); oracle.targetPlatform != options.targetPlatform {
 		_, record.OracleGOARCH, _ = strings.Cut(oracle.targetPlatform, "/")
+	}
+
+	if !stackAppendEnabled(options) {
+		record.StackAppend = "off"
 	}
 
 	return record
@@ -11400,7 +11455,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	}
 
 	goArgs := oracleTestArgs(options, packagePath, hostFatalSkip)
-	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
+	goOutput, goErr := runCommandWithTimeoutEnv(testChildTimeout(options), inputPath, oracleOptions(options), cgoOracleEnv(options), "go", goArgs...)
 
 	// Captured immediately after the real oracle run, same directory, same options — see
 	// oracleGoVersion's own doc comment for why this is not `go env GOROOT`.

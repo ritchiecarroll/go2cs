@@ -19,8 +19,8 @@ using encoding;
 using go.@internal;
 using go.@internal.trace;
 using io = io_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸuint64 = Span<uint64>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸuint64 = variadic<uint64>;
 
 partial class testgen_package {
 
@@ -98,7 +98,7 @@ internal static void ExpectSuccess⁔(/*this*/ ref Trace t) {
 // of the names in Specs() result for the version that was passed to
 // this trace.
 internal static void RawEvent⁔(/*this*/ ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     t.events = append(t.events, t.createEvent(typ, data, args.ꓸꓸꓸ));
 }
@@ -464,7 +464,7 @@ internal static uint64 uintArgFor⁔(/*this*/ ref Batch b, any arg, @string argS
 // of the names in Specs() result for the version that was passed to
 // this trace.
 internal static void RawEvent⁔(/*this*/ ref Batch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     var ev = b.gen.trace.createEvent(typ, data, args.ꓸꓸꓸ);
 

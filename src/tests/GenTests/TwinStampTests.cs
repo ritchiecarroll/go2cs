@@ -256,6 +256,46 @@ public class TwinStampTests
         CollectionAssert.AreEqual(new[] { (1 << 16) | 2, (2 << 16) | 2 }, calls, "each leaf call's place among the statement's two");
     }
 
+    // A call whose Go name starts with Δ ([GoName] stamped) beside a call of the name without it: the runtime reads the
+    // stamped name as written (managed_impl.cs goCalleeName), so the two are calls of two names, each one of one.
+    private const string StampedName = """
+        using System;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class stamped_package
+        {
+            internal static channel<nint> ch;
+
+            [GoName("Δleaf")] internal static nint Δleaf() { return ᐸꟷ(ch); }
+
+            internal static nint leaf() { return ᐸꟷ(ch); }
+
+            internal static nint add(nint a, nint b) => a + b;
+
+            internal static nint mid()
+            {
+                nint v = add(Δleaf(),
+                    leaf());
+                return v;
+            }
+        }
+        """;
+
+    [TestMethod]
+    public void AStampedCallIsCountedUnderItsGoName()
+    {
+        using Built built = Build(StampedName);
+        (Type machine, System.Reflection.MethodInfo kickoff) = built.Twins().Single(twin => twin.Machine.Name.StartsWith("<midꞏtwin>", StringComparison.Ordinal));
+        CustomAttributeData stamp = Stamp(kickoff) ?? throw new AssertFailedException($"{machine.Name} carries no stamp");
+
+        int[] calls = [.. ((IEnumerable<CustomAttributeTypedArgument>)stamp.ConstructorArguments[4].Value!).Select(argument => (int)argument.Value!)];
+
+        // Δleaf and leaf are two Go names: each call is 1 of 1. Removing the stamped Δ would count them 1 of 2 and 2 of 2.
+        CollectionAssert.AreEqual(new[] { (1 << 16) | 1, (1 << 16) | 1 }, calls, "each call's place among the statement's calls of its own Go name");
+    }
+
     // ---- the oracle ----
 
     // Every state machine of a twin or of an async literal in one: its stamp's await list against the compiler's.

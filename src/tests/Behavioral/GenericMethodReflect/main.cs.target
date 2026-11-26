@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
@@ -31,7 +31,7 @@ public static K Key<K, V>(this Pair<K, V> p) { return p.k; }
 public static @string String<K, V>(this Pair<K, V> p) { return fmt.Sprintf("%v=%v"u8, (p.k).OrTypedNilOf(), (p.v).OrTypedNilOf()); }
 
 public static V /*old*/ Swap<K, V>(this ref Pair<K, V> p, V v) {
-    V old = GoZero<V>();
+    V old = builtin.GoZero<V>();
 
     (old, p.v) = (p.v, v);
     return old;
@@ -104,13 +104,11 @@ internal static @string names(reflect.Type t) {
 
 internal static slice<reflect.Value> args(params ꓸꓸꓸany valuesʗp) {
     var values = valuesʗp.sslice();
-    var inᴷ = new stackAppend<reflect.Value>(moves: true);
 
     slice<reflect.Value> @in = default;
     foreach (var (_, a) in range(values)) {
-        @in = append(inᴷ, @in, reflect.ValueOf(a));
+        @in = append(@in, reflect.ValueOf(a));
     }
-    @in = move2heap(inᴷ, @in);
     return @in;
 }
 

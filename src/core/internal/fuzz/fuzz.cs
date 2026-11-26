@@ -30,8 +30,8 @@ using global::go.@internal;
 using global::go.io;
 using global::go.math;
 using path;
-using ꓸꓸꓸCorpusEntry = Span<CorpusEntry>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸCorpusEntry = variadic<CorpusEntry>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class fuzz_package {
 
@@ -1098,7 +1098,7 @@ internal static bool shouldPrintDebugInfo() {
 }
 
 internal static void debugLogf⁔(/*this*/ ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     @string t = time.Now().Format("2006-01-02 15:04:05.999999999");
     fmt.Fprintf(c.opts.Log, t + " DEBUG "u8 + format + "\n"u8, args.ꓸꓸꓸ);

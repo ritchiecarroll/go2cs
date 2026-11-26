@@ -264,6 +264,9 @@
   <!-- The symbol files beside a single-file host, on every publish (see the file). -->
   <Import Project="$(MSBuildThisFileDirectory)go.lib.symbols.targets" Condition="'$(GoLibSymbolsTargetsImported)' != 'true'" />
 
+  <!-- The twin opt-in, GoTwinsFor (see the file): a consumer of the go.* packages builds with twins as a clone does. -->
+  <Import Project="$(MSBuildThisFileDirectory)go.lib.twins.targets" Condition="'$(GoLibTwinsTargetsImported)' != 'true'" />
+
   <!--
     THE BUILD-SIDE GO2CS DIAGNOSTIC REGISTRY. A GO2CS code in the range 3000-3999 is raised in the C# build by
     go2cs's MSBuild targets, and this file is the only targets file that raises one. Each code is ONE property in
@@ -330,8 +333,9 @@
     its suppression files. Set GoAllowBelowBreakFloor=true to build anyway: each error becomes a warning with the same
     code, and the build goes on.
   -->
-  <!-- 1.26.11.2, the .5 release: the floor moves once for every .5 break together (the named-func-type break and
-       the variadic<T> spelling among them). A Go patch release before .5 ships moves it with that release's version. -->
+  <!-- 1.26.11.2, the .5 release: it moves the floor ONCE for every .5 break together, among them Tour 4's array
+       literals, the named-func-type break and wall E's go.variadic<T> (COORD 2026-11-20T13:50:29Z). A Go patch release
+       before .5 ships moves it with that release's version. -->
   <PropertyGroup>
     <GoBreakFloor>1.26.11.2</GoBreakFloor>
   </PropertyGroup>
@@ -419,30 +423,9 @@
            Text="The build stops here, before compiling: @(_GoBreakFloorBelow->Count()) go2cs-built package(s) named above are below go.* $(GoBreakFloor). Set GoAllowBelowBreakFloor=true to build anyway at your own risk." />
   </Target>
 
-  <!--
-    THE ROLL-FORWARD. The go.* packages target the .NET 10 runtime, and so does a program converted against them. On a
-    machine with only a newer .NET (the .NET 11 SDK alone, say), such a program builds and publishes, but running the
-    build fails at launch: "You must install or update .NET to run this application", because the .NET 10 runtime it
-    asks for is not there. RollForward=Major lets the program run on the newer major runtime ONLY when no .NET 10
-    runtime is installed; a machine that has .NET 10 still runs it on .NET 10, exactly as before. The go.* packages are
-    validated on .NET 10; a project that wants the refusal back sets RollForward=Disable (or LatestMinor) itself.
-    Executables only, console or Windows GUI (a library has no runtime of its own to choose); a converted test host is
-    an executable too and rolls forward the same way. A RollForward the project sets itself always wins, and so does a
-    runtimeconfig.template.json: a project that brings its own template owns its runtime options (with both, the SDK
-    would write rollForward twice). A self-contained publish carries its own runtime and is unaffected. A project
-    reference to golib never imports buildTransitive, so the corpus and its goldens are untouched.
-  -->
-  <!-- 2026-11-20 (c6a1b0761e, SDK usability): measured with an isolated .NET 11.0.100 SDK as
-       the only .NET on the box. A -recurse=nuget hello program built 0/0 and its apphost exited 150 with the missing
-       framework 10.0.0; built against this file it ran on 11.0.0, and the same exe on a box with 10.0.15 installed
-       bound 10.0.15 (host trace). After review (9b672cc964): WinExe added; with a runtimeconfig.template.json that set
-       rollForward LatestPatch, the first cut produced a runtimeconfig.json carrying "rollForward" TWICE (Major, then
-       LatestPatch), so a template now turns the default off. UserRuntimeConfig is defined in Microsoft.NET.Sdk.targets
-       and may be unset when this file is read, so the default template path is checked too. The red/green arms are
-       src/tests/PackageTests/RollForward. -->
-  <PropertyGroup Condition="'$(RollForward)' == '' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe') and !Exists('$(UserRuntimeConfig)') and !Exists('$(MSBuildProjectDirectory)/runtimeconfig.template.json')">
-    <RollForward>Major</RollForward>
-  </PropertyGroup>
+  <!-- THE ROLL-FORWARD: an executable runs on a newer major .NET when no .NET 10 runtime is installed (see the
+       file). The output root of a `go2cs -recurse` conversion in local-reference mode imports the same file. -->
+  <Import Project="$(MSBuildThisFileDirectory)go.lib.rollforward.targets" Condition="'$(GoLibRollForwardTargetsImported)' != 'true'" />
 
   <!-- A converted package packed against the go.* packages (a `go2cs -recurse=nuget` conversion) writes its own
        usings into build/<PackageId>.props at pack time (see the file). Inert unless the project's Product is go2cs

@@ -9,7 +9,7 @@
       1.1  build G once in T (or take -Converter), and refuse unless G's corpus release is -Release
       1.2  G -recurse -tests -test-action all -platforms P -module-disclosures ... SRC VR      (watched for free disk)
       1.3  gate: exit 0, MODULE.md present; every row compared with the kit's counts (the prediction)
-      1.4  G -recurse=nuget [-provenance] -platforms P SRC PR                                   (watched for free disk)
+      1.4  G -recurse=nuget -stack-append=on [-provenance] -platforms P SRC PR                 (watched for free disk)
            -provenance when the row's LicenseSpdx asks each modified file to say so (Apache-2.0); the pack refuses
            a PR without it
       1.5  gate: every PR project's GoInputDigest equals its MODULE.md row (the binding)
@@ -256,7 +256,9 @@ try {
     # A license that asks each modified file to carry a notice that it was changed (Apache-2.0 section 4(b)) gets
     # go2cs's -provenance notice in every converted file; the pack refuses a PR without it.
     $provenanceArgs = @(if (Test-NugetgoProvenanceLicense $row.LicenseSpdx) { '-provenance' })
-    $rc = Invoke-Watched 'PR' (@('-recurse=nuget') + $provenanceArgs + @('-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'), $SRC, $PR)) (Join-Path $Work 'PR')
+    # -stack-append=on packs the emission 1.2 validated (-tests resolves it on, -recurse=nuget off); 1.5 binds the two by
+    # GoInputDigest, which records the mode (owner ruling, 2026-11-24).
+    $rc = Invoke-Watched 'PR' (@('-recurse=nuget', '-stack-append=on') + $provenanceArgs + @('-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'), $SRC, $PR)) (Join-Path $Work 'PR')
     if ($rc) { Refuse "1.4: -recurse=nuget exited $rc" }
     $prModule = Join-Path $PR "src/$modPath"
     $excluded = @($row.ExcludePackage)

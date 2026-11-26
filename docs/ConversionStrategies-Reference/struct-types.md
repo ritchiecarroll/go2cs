@@ -851,7 +851,7 @@ internal static nint convLocal(hertz h) {
   user-defined `==` candidates for `a == h` (CS9342), so the unnamed side is cast: `(hertz)a == h`. A `switch`
   whose tag and case value are one of each does the same in its `when` clause.
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246-596 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246-592 -->
 ```csharp
 internal static (bool, bool) sameLocal(anonBox_V a, hertz h) { return ((hertz)a == h, h != (hertz)a); }
 …
@@ -913,7 +913,7 @@ func laterTempo() (r struct{ Bpm int }) {
 }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:685-840 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:681-834 -->
 ```csharp
 internal static nint liftVar() {
     liftVar_x x = laterTempo();
@@ -1551,22 +1551,24 @@ the named-function convention `(@string format, params ꓸꓸꓸany argsʗp) => 
 against that `Action`), and calls through the value passed loose Go-style args as if `params`
 existed (`reportf("…"u8, (~f).typ)` — CS1503; `reportf("empty type set"u8)` — CS7036).
 
-The lowering targets a golib delegate family carrying a real C# 13 `params Span<T>` tail
+The lowering targets a golib delegate family carrying a real C# 13 `params variadic<T>` tail (golib's
+pack type; earlier releases used `params Span<T>`: see
+[Multi-Result Values](multi-result-and-comma-ok.md#multi-result-values-and-comma-ok-forms))
 (`src/core/golib/variadic.cs`; fixed-arity prefixes up to eight mirror the BCL Action/Func family,
 and the `ꓸꓸꓸ` suffix reads as Go's `...`):
 
 <!-- source: src/core/golib/variadic.cs:26, 53 -->
 ```csharp
-[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params variadic<TArg> args);
 …
-[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params variadic<TArg> args);
 ```
 
 `iifeDelegateType` — the single structural lowering every `getCSharpTypeName(*types.Signature)` routes
 through — names the family when `sig.Variadic()` and
 passes the variadic **element** type as the last type argument. Everything else then agrees with
 **zero changes** to the other emissions, because the parameter types match by identity
-(`ꓸꓸꓸT` *is* `Span<T>`):
+(`ꓸꓸꓸT` *is* `variadic<T>`):
 
 - the named-function convention (`internal static @string gather(@string prefix, params ꓸꓸꓸnint
   valsʗp)`) converts as a method group — `apply(gather)` stays bare;
@@ -1638,7 +1640,7 @@ value was then an arity error — `errorf("…", n)` CS1503 on a bare `n` agains
 `errorf("…", a, b)` CS1593 "does not take 3 arguments", `errorf("…")` CS7036 — which is the same
 family the lambda's explicit parameters were introduced to fix, one level in. The tail renders
 through `variadicParamType`, the same routine the named-function convention uses (a file-local
-`using ꓸꓸꓸT = Span<…>;` alias where one is mintable, inline `Span<T>` otherwise), so the forwarded
+`using ꓸꓸꓸT = variadic<…>;` alias where one is mintable, inline `variadic<T>` otherwise), so the forwarded
 argument binds the receiving `params ꓸꓸꓸany` parameter directly and the call inside the lambda is
 unchanged.
 
@@ -1666,9 +1668,9 @@ never reaches it.
 
 ## `reflect.Value.Call` over a variadic func value is TYPED dispatch — no reflective invoke can carry the tail
 
-The `params Span<T>` tail above is what makes a converted variadic callable and readable from Go
+The `params variadic<T>` tail above is what makes a converted variadic callable and readable from Go
 AND from C#. It also puts the value permanently out of reach of every reflective invoke path:
-`Span<T>` is a **ref struct**, and `Delegate.DynamicInvoke` and `MethodInfo.Invoke` both marshal
+`variadic<T>`, like the `Span<T>` it replaced, is a **ref struct**, and `Delegate.DynamicInvoke` and `MethodInfo.Invoke` both marshal
 their arguments through an `object?[]` a ref struct cannot enter. `System.Linq.Expressions`
 refuses one outright as well, so the method-value binder's `Expression.Lambda` approach
 (GoReflect.MethodSets.cs) does not generalize either. `reflect.Value.Call` therefore threw
@@ -1680,14 +1682,19 @@ One small generic trampoline per family arity — eighteen, the closed set golib
 declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
 an ordinary delegate, the `MakeGenericMethod` + `CreateDelegate` idiom GoReflect.FieldAccess.cs already uses:
 
-<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1927-1928 -->
+<!-- source: src/core/golib/GoReflect.TypeLayout.cs:1955-1956 -->
 ```csharp
-private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
-{ return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }
+private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, object? t)
+{ return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, variadicTail<TArg>(t)); }
 ```
 
-Inside the trampoline the tail is a `TArg[]` and its conversion to `Span<TArg>` is ordinary, so
-nothing is boxed and the tail ALIASES the array rather than copying it. Two consequences worth
+Inside the trampoline the tail is a slice and `variadicTail` hands it over as a SPREAD pack, so
+nothing is boxed and the callee receives the slice itself rather than a copy, as a Go `f(s...)`
+does. `Value.Call` packs its loose arguments into a fresh array first (Go builds a new slice for them
+too); `Value.CallSlice` passes the caller's own slice through `GoReflect.InvokeVariadicSlice`, so a
+callee's element writes reach the caller's backing array, as Go's `CallSlice` does.
+<!-- variadicTail: src/core/golib/GoReflect.TypeLayout.cs:1915-1923#1a17bc (a slice<TArg>, a named ISlice<TArg>, a TArg[] or null);
+     InvokeVariadicSlice: GoReflect.TypeLayout.cs:1823#e355fe. Wall E, COORD 2026-11-20T12:12:30Z. --> Two consequences worth
 stating: a panic inside the callee propagates natively (a direct call wraps nothing in a
 `TargetInvocationException`, unlike the fixed-arity `DynamicInvoke` path beside it), and a fixed
 prefix beyond the family's eight throws a named `NotImplementedException` rather than mis-indexing.
@@ -1744,7 +1751,7 @@ a typed Go func (`t.DNSStart(info)`), through `Value.Call`, and through composit
 
 The returned Value rides `typ`'s **own** descriptor box rather than a fresh `synthType`, so the
 dims cargo survives and `Type()` interns back to the caller's wrapper: `MakeFunc(t, fn).Type() == t`
-by identity. A VARIADIC func type's tail is `params Span<T>`, a byref-like type no expression tree can
+by identity. A VARIADIC func type's tail is `params variadic<T>`, a byref-like type no expression tree can
 carry, so `MakeGoFuncDelegate` builds it through a typed family (`makeVariadicFunc{N}`/`makeVariadicAction{N}`,
 golib's `GoReflect.MakeVariadicDelegate.cs`), the reverse of `InvokeVariadic`'s call trampolines above; the
 invoker receives the variadic parameter as its packed slice.

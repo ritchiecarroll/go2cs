@@ -41333,6 +41333,15 @@ as the record: they are the only `go test -c` numbers for the harvest.
 
 — P1 (2026-11-21)
 
+**2026-11-24 (P5, train 12, `claude/p5-stackappend-optin`).** The harvest now runs only when `-stack-append`
+resolves on: by default for `-stdlib` and `-tests`, and for a plain or `-recurse` conversion only with
+`-stack-append=on` (the owner's ruling on P5's stack-append scout, COORD 2026-11-24 17:50Z). A module conversion at
+the default runs no `go build -gcflags=-m` and never creates the probe cache, so trap 13's disk advice applies only to
+a run that opts in. `TestStackAppendOffRunsNoProbe` guards it: with the gate removed, its default arm reads four
+harvests and the cache created.
+
+— P5 (2026-11-24)
+
 ## 2026-11-17 — C2 (ruling C item 3, scope b): the `-recurse` importer seed, measured — windows recovers its one crossing; linux trades 5 reuses for 5; a second-order loss is OPEN
 
 **The rule, as built.** In a `-recurse` run with no flag, the converter seeds an import with an alias when two things
@@ -41932,6 +41941,46 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+## 2026-11-20 — P2 (wall E, .5): Go's spread hands the callee the slice itself; go2cs copied it
+
+Found by sqlite-cs (P5's TestPreUpdateHook divergence): a row scan wrote through `dest...` into a slice its caller
+held, and the writes were lost. Go's `f(s...)` passes `s` itself (same array, length and capacity), so a write to
+`args[i]` inside `f` is visible to the caller. go2cs passed a `params Span<T>` tail and its heap prologue copied the
+span into a fresh slice, so every such write landed in the copy.
+
+**Cut** (`claude/p2-wall-e-spread-alias`, COORD rulings 2026-11-20T12:12:30Z, 13:50:29Z, 14:03:02Z): the tail is
+golib's `variadic<T>`, a `readonly ref struct` that carries either the caller's slice (a spread) or the literal
+elements, with `using ꓸꓸꓸT = variadic<T>;` as the converted spelling. The heap prologue `.slice()` returns the
+spread slice itself; a literal pack still copies (a fresh array, as Go builds). A view prologue (`.sslice()`) stays
+for read-only uses; an element write of a basic or type-parameter pack takes the heap prologue, because C# hands a
+collection builder read-only static data for an all-constant primitive argument list. A forward `g(xs...)` binds the
+pack itself (`var xs = xsʗp;`) when it is the pack's sole use outside any loop, so a spread caller's slice reaches `g`.
+It is a binary break of every public variadic signature: 393 suppression entries in 57 packages, and the break floor
+moves to the .5 release.
+
+**Two rules recorded for later, neither a wrong answer today:**
+- *The sslice copy point.* `sslice<T>.ToSlice()` (and its implicit conversion to `slice<T>`) copies the window into
+  a new array (`src/core/golib/sslice.cs`). The converter admits the view prologue only for uses that never reach a
+  `slice<T>`, so no emitted pack crosses it. Any rule that widens the view's admission must route a spread pack's
+  slice around this conversion, or a callee's writes are lost again.
+- *Forwards in exclusive branches.* The forward rule counts forwards over the whole body (`escapeAnalysisOperations.go`,
+  forwards != 1 keeps the heap prologue), so `if c { g(xs...) } else { h(xs...) }` takes the heap prologue though each
+  path forwards once. Behavior is right either way (the heap prologue returns a spread's slice itself); the cost is a
+  literal pack's copy. A branch-exclusive count would keep the bind there.
+
+**Measurement lessons.** The footprint A/B ran three targets (amd64) and missed the linux/arm64 flavor; the hosted
+release-smoke's linux-arm64 cgo leg named it (CS0121 on `cgocaller`). A fourth-target run moved exactly one line.
+The suppression generator wrote 392 of the guard's 393 entries; the miss was an interface property ADDED over a base
+interface's unchanged one (golib's `ISlice<T>` over `IArray<T>`), which no removed-member route sees.
+
+**Perf row** (fmt, linux/amd64 JIT Release, one cloud box, 3 processes per arm interleaved, rounds 2-6, at
+`c423f1593e` and `4c16756345`): `fmt.Sprintf("%d %s", i, s)` floor 511.4 ns/op base, 545.2 ns/op cut (median 565.8
+and 582.6); `fmt.Sprint(args...)` floor 1095.1 base, 946.0 cut (median 1186.2 and 1079.1). The per-process spread is
+larger than either delta, so only the floors are read: the literal call costs about 34 ns more, the spread call about
+149 ns less. Go on the same box: 109.2 and 125.6 ns/op.
+
+— P2 (2026-11-20)
+
 **GoStmtValueReturn [Compile]: CUT (P4, 2026-11-23).** Root: the generator classifies a typed go literal as a twin
 launch whatever its return type, and goǃtwin (frozen) takes only `Action<…>` plus `Func<…, GoTask>`, so a literal
 returning a value (`go func(...) error {...}(...)`) is CS8030 in its plain half and CS8031 in its twin, and an explicit
@@ -41997,6 +42046,34 @@ holds for a promoted method that is NOT weak and parks: its forwarder is plain t
 **Owner.** Unassigned; COORD routes. Not in the N1 seat.
 
 — P4 (2026-11-23)
+
+## 2026-11-23 — P2 (.5 Δ cure, COORD 045750Z ruling 2b): the Δ-led field, method and type refusal is retired
+
+The i9 row of 2026-11-22 above (a Δ-led struct field, method or type refused with GO2CS2015) is closed by the durable
+cure it named. go2cs stamps `[GoName("<Go name>")]` on a field, method, forwarder or type whose Go name starts with Δ,
+or whose emitted name does not give the Go name back when one Δ is dropped (`ΔΔfile`, `ΔΔunion`). golib's three
+projection sites, the runtime's method-set reader and go2cs-gen read the stamp first and drop one Δ only without it.
+The `deltaProjectionReason` arm of the refusal is removed; the other GO2CS2015 arms stand. The KnownIssues entry
+`#delta-led-field-method-type-refused` is removed. Behavioral guard: `DeltaNameProjection`, compared with Go.
+
+— P2 (2026-11-23)
+
+## 2026-11-24 — P2 (.5 Δ cure seat; COORD 2026-11-24T05:20:52Z ruling): caller line under Native AOT reads 0
+
+**OPEN, candidate post-.5.** Under Native AOT, `runtime.Caller`'s line reads 0 where Go reads the call's line. The
+function name it reports matches Go. Measured on linux-x64 (.NET 10, go1.26.11) at the Δ cure tip 27691240dc with
+`dotnet publish -p:PublishAot=true -r linux-x64`:
+- `DeltaNameProjection`: every line equals Go except `frame: main.Δf 78` (Go) against `frame: main.Δf 0` (AOT).
+- Control, no Δ anywhere: `CallerLineCallSite` reads 9 of 9 rows false under AOT, where Go reads all 9 true.
+
+Same class as the owner's 2026-11-22 ruling on optimized frames (C2's M1): the JIT route has a documented opt-in (a
+`Debug` build or `DOTNET_JITMinOpts=1`); Native AOT has none, so this arm was unrecorded. KnownIssues carries one
+present-tense line under "In optimized code, `runtime.Caller` can report an earlier line". Not read further: where
+the runtime's frame reader gets its C# line under AOT, and whether a line table can reach it there.
+
+**Owner.** Unassigned; COORD routes. Not a wall now.
+
+— P2 (2026-11-24)
 
 ## 2026-11-24 — P5 (C45; COORD ruling 20261124T022736Z, D5 split out): a write through a string's data pointer reaches the string's shared backing (OPEN, candidate .5, owner P5)
 
@@ -42101,6 +42178,592 @@ already records cross-package renames for type references: foreignAliasedTypeNam
 **Owner.** Unassigned; COORD routes.
 
 — R (2026-11-24)
+
+## 2026-11-24 — H (cgo 3.2 seat 1b, claude/h-cgo-1b-r7 and its NIT fold; P3's read of the fold, COORD ruling: a board row each, cured later): two routes return a word from C unchecked
+
+Seat 1b checks two kinds of word C returns, inside the wrapper's `fixed`, against every pinned argument: an
+out-parameter's word, and a pointer result other than the pointer the call was handed. A word in pinned Go storage,
+including one past its end, is refused by name. P3 names two more routes that are NOT checked:
+
+**A pointer MEMBER C writes into a mirrored struct: OPEN.**
+- cgoStructWrappers.go copies the member back with PointerMemberBack after the `fixed` ends.
+- Scenario: `parse(&st, (*C.char)(unsafe.Pointer(&b[0])))` sets `st.cur = buf + 3`.
+- `st.cur` then becomes a native box over Go memory that can move.
+
+**An out-parameter word that is a stack MIRROR's address: OPEN.**
+- Scenario: `void pick(int *a, int **out)` stores `a` in `*out`, where `a` is one Go int that crosses as a stack copy.
+- The out word is that copy's address, minted as C memory (GoCgoArgs.PointerMemberBack). It names a dead stack slot
+  after the call returns.
+- The pointer result has an identity return for this case; the out-parameter has none. No `fixed` is involved, so the
+  check inside the `fixed` cannot reach it.
+
+**Also open, from the same seat:**
+- A void pointer C returns into pinned Go memory crosses as its number (M3: a number names no box).
+- Handing C a whole Go array of C pointers, pinned, is a later seat. Today such an element is refused by name.
+
+**Owner.** H, a later cgo seat; COORD routes. None gates train 11.
+
+— H (2026-11-24)
+
+
+## 2026-11-24 — P5 (pollBlock deadlock seat, claude/p5-pollblock-deadlock; P3 review 11:24Z, COORD 11:26Z): a goroutine that owns a Go-level lock and then waits for a P is safe only while every contender for that lock gives its P away when it blocks (OPEN rule, no defect today)
+
+**How found.** The darwin M:N closure hang (run 45358621509) was pollBlock disposing its park scope while it held
+`desc.Gate`: Dispose under M:N waits for a P (`GoScheduler.ExitBlocked`), and a carrier holding a P waited for that gate.
+The fix disposes after the gate is released. P3's read of it named three more sites with the same order, under a GO-level
+lock instead of a CLR one.
+
+**The sites.** `sync/mutex.cs` (contended `Lock`, both arms: the scope ends after the loop has taken `m.state`, so
+`ExitBlocked` runs while the goroutine owns the Mutex), and `internal/poll/fd_mutex_impl.cs` `rwlock` (the scope ends
+after the signaller handed the lock over). Each owns its lock, then waits for a P.
+
+**Why it holds today.** Every contender for those locks that waits parks first: a contended `Lock` parks with the
+hand-off (`Goroutine.Park`), the `Lockꞏtwin` path parks without holding a P (`ParkTwin`), and `rwlock` contenders take
+the same Park. `TryLock` never waits. So no contender holds a P while it waits for the lock, and the owner finds a P.
+
+**What would break it.** A contender that spins, or blocks a carrier without Park, while it holds a P. With one P (or
+every P held that way) the owner waits for a P and the contender waits for the lock: the pollBlock shape again, and it
+would read as a hang with no deadlock report. A new wait path on these locks, or a spin-then-park Mutex change, takes
+this row's check first.
+
+**Census (complete, P5 + P3).** Disposed under a CLR lock: only pollBlock (three flavours), fixed. Lock released inside
+the scope before the wait: `channel.cs` 620, 719, 1257; `RuntimeSemaphore` 229; `sync/runtime_impl.cs` 146;
+`sync/waitgroup.cs` 229. Lock taken and released inside the scope: `SyncTestBubble` 330, 426. No lock held at Dispose:
+`Coro.cs` 188, 202, 226; `runtime/park_impl.cs` 79; `time/time_impl.cs` 541, 555; `channel.cs` 2521, 2532. ParkTwin
+(no P-wait): `sync/mutex` 558, `time_impl` 595, `channel` 1019, 1055, 1344. Go-level lock owned at Dispose: the three
+sites above. Line numbers at master b2c9435159.
+
+**Owner.** None needed now; a seat that adds a contender to either lock owns the check.
+
+— P5 (2026-11-24)
+
+## 2026-11-24 — P4 (row 9 reading): one large -recurse convert can fill a laptop's disk with escape-probe cache
+
+**OPEN, measured once (linux/amd64 cloud box, master cb6def82a2).** The escape probe keeps its own Go build cache, apart
+from the user's GOCACHE (src/go2cs/stackAppendHints.go, `resolveProbeCacheDir`). It resolves in this order: `-probe-cache
+<dir>`, then `GO2CS_PROBE_CACHE`, then `go2cs/probe-cache` under the user cache directory (`os.UserCacheDir`:
+`~/.cache` on Linux, `%LocalAppData%` on Windows, `~/Library/Caches` on macOS). Go trims that cache only by its own age
+rule (entries unused for five days). The comment there sizes a cold run at about 175 MB on a ten-package module.
+
+The measurement: a `-recurse` (local) convert of the TypeScript tsc module (138 packages) started at 16:25:32Z with
+16 GB free. At 16:59Z, at package 119 of 138, a 2 GB free-space kill floor stopped it with 1.87 GB free. Afterwards
+the probe cache held 14 GB. About 4 GB of it already existed before the run (earlier builds on the box), so the
+convert itself added about 10 GB. That 10 GB is derived: 14.1 GB consumed in all, less 1.7 GB of ordinary go build
+cache, 1.3 GB in the work directory and about 1 GB of go-build temp files. The same convert at the .4 gates
+(before the probe existed) peaked at about 12 GB in all. A user converting a large module on a laptop meets the same
+growth, so this is a usability issue as well as a fleet one.
+
+**Candidate cures (not chosen):**
+(a) cap the cache's size, or trim it after each package;
+(b) clear the probe cache at the end of a `-recurse` run unless asked to keep it (a flag or the env override).
+
+**Owner.** Unassigned; COORD routes.
+
+— P4 (2026-11-24)
+
+## 2026-11-24 — i9 (nil named-pointer seat, claude/i9-nil-named-ptr-iface; COORD 10:59Z): a conversion between two named pointer types over one element does not compile, CS0030 (OPEN)
+
+**How found.** Writing a row for the nil named-pointer seat. With `type P *T` and `type P2 *T`, Go accepts
+`P(p2)` (the underlying types are identical) and a nil `p2` converts to a nil `P`. The converter emits the cast
+`(P)p2`, and the build fails: `CS0030: Cannot convert type 'go.main_package.P2' to 'go.main_package.P'`. go2cs-gen
+renders each named pointer type as its own wrapper class, and no conversion between two wrappers is declared.
+
+**Scope.** Every `P(q)` where `q`'s type is a different named pointer type over the same element (direct, or
+through a type name that resolves to the same pointer). `P(p)` (the identity) and `P(t)` with `t *T` compile and
+are guarded in NamedPointerNilInterface. Reached in std: not measured. The seat's footprint read 0 files on all
+four flavours, which says only that no std site changed emission, not that none exists.
+
+**Fix shape (not taken).** Either the converter routes the operand through the shared box (`new P(p2.m_value)`, or
+whatever accessor the wrapper exposes), or go2cs-gen emits an explicit conversion between wrappers of one element.
+The nil case must still come out as P's typed nil, not a null.
+
+**Owner.** Unassigned; COORD routes. Not in the nil named-pointer seat (its cure does not touch the conversion route).
+
+— i9 (2026-11-24)
+
+
+### 2026-11-24 — unsafe.StringData over static string bytes: an opt-in diagnostic isolates a write and reports it where a hook sees the next access
+
+**The default (owner ruling, COORD 20261124T133212Z).** `unsafe.StringData` over a string whose bytes are static data
+(a cached string literal, or a one-byte string from `@string`'s table) returns a pointer into storage the whole process
+shares, so a write through it changes every later equal literal and one-byte string. Go faults on that write. The owner
+ruled the protection an OPT-IN DIAGNOSTIC: "no need for normal runtime work where Go already protects converted code.
+This diagnostic covers other ways converted code might fail, for debugging, etc." The default is documented in
+`docs/Limitations.md` and pinned by a GolibTests row.
+
+**The diagnostic (`GO2CS_CHECK_STRING_WRITES=1`, COORD option A 20261124T103731Z).** golib
+`ReadOnlyStringBacking.Enabled` reads the variable once at start-up into a `static readonly bool`. On, `StringData`
+over static bytes returns a pointer into one private copy per backing, and the next access through a hook panics by
+name: a dereference of the box (`*p`, and every box `unsafe.Add` derives from it), or a later `unsafe.StringData` over
+the same backing. Off, nothing is registered: `StringLiteralCache.Insert`'s `Register` and `TryDataBox` are inlined
+tests of the flag, so `TryDataBox(w) ?? Ꮡ(w, 0)` folds to master's `Ꮡ(w, 0)`, and the record table sits in a nested
+class that is never initialized. A heap string is the same either way: Go mutates its sharers and so does go2cs.
+
+**The named limit (switch on).** A view that reads the storage directly takes no hook: a slice from
+`unsafe.Slice(p, n)`, and an array pointer `(*[N]byte)(unsafe.Pointer(p))` (`ElemRefBox.TryGetElementStorage`). A write
+through one still lands in the copy and reaches nothing else, but it is reported only if a later access goes through
+one of the two hooks. Go faults at the write itself; a managed box cannot observe a write through a ref or span it has
+already handed out.
+
+**`reflect.StringHeader` goes through the same door.** `ж.StringHeaderBox` mints its `Data` (the number shape's (H)
+and the pointer shape) through `ReadOnlyStringBacking.TryDataBox` first, so header Data equals `StringData` in both
+modes: off, both are `builtin.Ꮡ(window, 0)` as at master; on, both name the copy, which GolibTests
+`StringHeaderNumberTests` W4 caught as Data != StringData when only `StringData` was routed. `ElemRefBox`'s foreign arm
+answers `IElementRun.RunBacking` with the shadow for this one collection, so a header store of that Data
+(`HeaderWriteThroughTests`, Go's `TestWriteThroughHeader`) rebuilds the string over the shadow instead of refusing.
+
+**What the diagnostic does not cover: three cases, none of which panics** (counted by P3 at cf7e3b212b,
+COORD/20261124T130505Z-P3.md).
+(a) Hoisted literals: `private static readonly @string xˢᵇ = "..."u8;`, 10,799 declarations in 1,284 files under
+`src/core` (test files included), plus any user package converted with `-hoist-literals`
+(`hoistedLiteralOperations.go`). The backing is not a cached literal, so `StringData` over it aliases the shared bytes.
+P3's scenario: `_, err := strconv.ParseBool("x")`, then a write of 'p' through `StringData` of
+`err.(*strconv.NumError).Func`; Go faults, go2cs writes `strconv/number.cs` `parseBoolˢᵇ` and every later error reads
+"parseBool". (b) A non-hoisted `"..."u8` operand converts through `implicit operator @string(ReadOnlySpan<byte>)` into a
+fresh array per evaluation: a write is private to that value and unreported. (c) `unsafe.String(unsafe.StringData(lit),
+n)` builds a string over the shadow, which is not registered: it reads any later write to the shadow, and `StringData`
+over it returns an unchecked box. All three are in `docs/Limitations.md`.
+
+**What it costs.** Bench: 50,000 distinct C# literals converted through the cache, then 30 forced blocking gen-2
+collections and 20 M small allocations (gen-0 churn), plus 20 M `StringData` calls each on a heap string and on one
+literal; linux box, Release, 7 interleaved runs per arm, medians [min-max]:
+
+| arm | first use, 50k literals | gen-2 pause | gen-0 pause | StringData, literal | StringData, heap |
+|---|---|---|---|---|---|
+| master golib b2c9435159 | 34.1 ms [25.8-39.8] | 3.50 ms [2.76-3.66] | 708 us [643-746] | 18.5 ns [16.0-21.4] | 20.0 ns [18.2-22.6] |
+| the seat, switch off | 31.8 ms [26.0-34.2] | 3.44 ms [2.69-3.77] | 646 us [555-740] | 18.6 ns [15.4-20.1] | 19.9 ns [16.2-20.7] |
+| the seat, switch on | 42.6 ms [34.3-47.4] | 6.04 ms [5.02-6.45] | 1,929 us [1,804-2,646] | 38.3 ns [33.7-41.5] | 26.3 ns [23.5-31.5] |
+
+Off equals master within noise on every column; whole-process wall for the literal mode read 781 / 812 ms in that set
+and 811 / 787 ms in a second 15-run set of master and switch-off alone. On is cf7e3b212b's always-on cost (the weak
+table, a dependent handle per literal). P3's lower-cost layout (a dense literal array under the cache lock, records
+made at the first `StringData`) brought gen-2 to 3.96 ms and gen-0 to 756 us in an earlier set; the ruling lets a
+diagnostic keep the simpler layout, so the seat does. Kit: a scratch console app referencing golib and unsafe, built
+once at master golib and once at the seat; the switch-on arm is the seat binary with the variable set.
+
+**Guards.** GolibTests `ReadOnlyStringDataTests`: `WithTheSwitchOffAWriteThroughALiteralReachesEveryEqualLiteral` pins
+the default (red when run with the protection on: the write panics instead of reaching the equal literal), and
+`WithTheSwitchOnTheRowsInAChildPass` runs `ReadOnlyStringDataSwitchOnRows` (7 rows) in a child `dotnet test` with the
+variable set and asserts exactly 7 passed; each child row asserts the switch reached it (without the variable all 7
+fail by name). Those 7 rows were red at master on the literal, one-byte and `unsafe.Slice` arms, and with the
+next-access check neutered the same three fail by name ("did not report the write"); the 7th takes `StringData` of one
+literal on two threads at once and asserts equal pointers. Behavioral `StringDataIdentity` compares the identity,
+heap and near-miss arms against `go run` with the switch off.
+
+**Owner.** P5 (the seat). (b), (c) and the hook-free views are unassigned; COORD routes. (a) is the next row.
+
+— P5 (2026-11-24)
+
+### 2026-11-24 — OPEN: hoisted literal fields under GO2CS_CHECK_STRING_WRITES (after .5, diagnostic only)
+
+`GO2CS_CHECK_STRING_WRITES=1` does not cover a literal hoisted into a `static readonly` field (`xˢᵇ = "..."u8`; 10,799
+declarations in 1,284 files under `src/core`, plus any package converted with `-hoist-literals`): `StringData` over one
+still aliases the shared bytes, and a write changes that literal wherever it is used (P3's `strconv.ParseBool` scenario,
+row above). The cure considered was to register each hoisted field's backing at initialization. The owner dropped it
+from .5 (COORD 20261124T133212Z); if it is ever wanted, it is diagnostic-mode only, so the default path keeps doing no
+work. Not started; nothing is owed.
+
+**Owner.** Unassigned (P5 sized it). Post-.5.
+
+— P5 (2026-11-24)
+
+## 2026-11-24 — i9 (M:N row 9, COORD 183002Z): a package named by a C# keyword gets a bare `using internal = …;` in package_info.cs, and the file fails to parse (CURED in claude/i9-alias-keyword-escape)
+
+**How found.** TS row 9 at master cb6def82a2: the PLAIN typescript-go build failed in
+go-json-experiment's jsonflags with CS1041 ("Identifier expected; 'internal' is a keyword") and a cascade, 28 errors
+in one project. Three package_info.cs files carried `using internal = go.github.com.go_json_experiment.json.internal_package;`
+twice each: in the `<ImportedTypeAliases>` block and in the repeat after the namespace.
+
+**Cause.** 187c6f88d0 ("a method with a holder takes the suffix form", 2026-11-21) walks every named type in a
+forwarder's signature through `recordConversionPackageUsing`, which keyed `conversionPackageUsings` by the raw Go package
+name. Its older callers (recorded conversions) never met a keyword-named package, so the spelling had never been wrong
+in practice. The TS gates at f36b6b0d48 (2026-11-17) emitted an empty block for these files.
+
+**Cure.** The qualifier is spelled through `getSanitizedImport`, as every other import alias is, at the one place the
+map is keyed; the block and the post-namespace repeat both inherit it. Guarded by the behavioral project
+AliasKeywordPackage (packages named `internal` and `checked`, each named in a method signature on a defined integer type,
+plus a type alias): with master's converter it fails to compile (CS1001/CS1002/CS1514/CS1525 on `using checked = …`),
+with the cure it compiles and prints Go's output. Stdlib reach: none (no committed package_info.cs declares a bare
+keyword alias; footprint read with the seat).
+
+— i9 (2026-11-24)
+
+## 2026-11-24 — i9 (P3's finding 2 on the alias-keyword escape, COORD 214534Z): two same-named packages in one converted package share one package_info.cs alias, and the later write wins silently (OPEN)
+
+**Shape.** `conversionPackageUsings` is keyed by the qualifier for the whole converted PACKAGE, and a later write
+replaces an earlier one with no check. Go imports are per file, so file one may import "m/a/internal" and file two
+"m/b/internal", both unaliased. If each declares a method on a defined type naming its `internal.T`, package_info.cs
+gets ONE `using @internal = ...`, for whichever file wrote last, and the other file's forwarder resolves to the wrong
+package: CS0234, or the wrong type if both packages declare T.
+
+**Why here.** `internal` is the package name most likely to repeat, so it sits beside the escape seat; the escape itself
+does not cause or change it (read by P3 from the code, not reproduced).
+
+**Candidate cure, not cut.** Spell the qualifier inline on a conflict, as the forwarder alias path already does for its own
+names (methodHolder.go, a name bound to another referent is spelled through its referent). Wants a behavioral row with two
+same-named packages first.
+
+**Owner.** Unassigned; COORD routes.
+
+— i9 (2026-11-24)
+
+## 2026-11-24 — P1 (token-table seat): sysmon pins and registers a box on every GOMAXPROCS check
+
+**OPEN, post-.5 perf, not measured beyond the cadence.** The runtime's sysmon thread runs Go's own arm, "check if we
+need to update GOMAXPROCS at most once per second" (`sysmonCheckGOMAXPROCS`, src/core/runtime/managed_impl.cs).
+Each check reaches `getCPUCount`, whose `sched_getaffinity` call converts a fresh buffer box to an address, and that
+conversion goes through `ManagedPointerTokens.RegisterPinned`: one new token-table key per second on every golib host,
+for as long as the process lives, dropped only by the next sweep after a collection. Seen by instrumenting Register,
+RegisterPinned and Sweep on linux while rooting the darwin token-table failure (the "21 registrations the test never
+made"). The cost per check is one pin and one table entry; nothing here says it matters, only that it never stops.
+The token registry's own count is exact since the token-table seat, so the churn is visible in `RegisteredCount`.
+One reading moved with that seat: an overwrite of a key no longer counts, and so no longer calls
+`Q44RegistryCensus.Mint` either, so a Q44 mint count taken across the seat reads lower by the overwrites.
+
+**Likely seat.** Read the affinity mask without minting a token (a stack or reused native buffer for the syscall),
+if a measurement shows the per-second pin or the swept entries cost anything on a long-lived host.
+
+**Owner.** Unassigned; COORD routes.
+
+— P1 (2026-11-24)
+
+
+## 2026-11-24 — P5 (darwin/arm64 sizing, risk 1): variadic libc calls on Apple silicon are GREEN, saved by golib's stack slot
+
+**CLOSED, measured.** Apple's arm64 ABI passes the variadic part of a call on the stack, not in registers. Go's own
+trampolines do this (runtime/sys_darwin_arm64.s, open and fcntl: "arg 3 is variadic, pass on stack"). The darwin/arm64
+sizing asked whether go2cs's libc dispatch does the same, since a register-only dispatch would hand libc a stale stack
+word for the mode of open(O_CREAT), the flags of fcntl(F_SETFL) and the argument of ioctl, on osx-arm64 today.
+
+**Who saves it.** `GoLibcCall.Call` (src/core/golib/GoLibcCall.cs) routes through `VariadicStackSlot`, which on
+darwin/arm64 picks the argument Go's `syscallN_trampoline` stores at [sp] (the third at arity 3, the fourth at
+arities 4 and 6), and `CallWithVariadicStackSlot` passes it as a ninth argument, which lands at [sp]. It has done so
+since S9 (2026-10-02), whose first red was os.WriteFile's 0o644 on osx-arm64.
+
+**Measured.** Two live rows in `DarwinArm64VariadicSlotTests` (claude/p5-variadic-live, e439efbd01), each with a
+near-miss control that keeps the real value in the register and puts something else at [sp]:
+- open(O_CREAT|O_EXCL, 0640) under umask 0: the file is created 0640. The near-miss (0 at [sp]) creates it with no
+  permission bits on Apple silicon and 0640 on Intel.
+- fcntl(F_SETFL, flags|O_NONBLOCK): F_GETFL then reads O_NONBLOCK. The near-miss (the old flags at [sp]) leaves it
+  clear on Apple silicon and sets it on Intel.
+
+So the callee reads the stack slot on Apple silicon (the controls discriminate), and the dispatcher fills it.
+Hosted run 45503405339 (golib-tests, filter DarwinArm64VariadicSlotTests): osx-arm64 10 passed, 1 skipped (the
+linux-only strtol row); osx-x64 10 passed, 1 skipped (the same row): the controls read the register value there, as predicted.
+
+**For the flavour.** No dispatcher seat is owed. The darwin/arm64 flavour changes what is compiled, not this path,
+and the rows stay in GolibTests as its guard. ioctl was not probed: it shares the path, and its pointer argument
+would turn a wrong reading into a write through a stale word.
+
+**Owner.** None; closed.
+
+— P5 (2026-11-24)
+
+## 2026-11-25 — P2 (cgo item 4 census; COORD ruling 20261125T015543Z, option B): `unsafe.Pointer` of a method's own pointer receiver is refused when the receiver points into C memory (OPEN, named residual)
+
+**OPEN.** github.com/google/gopacket/afpacket v1.1.19 is the one package in the item 4 census (50 module refs) that
+meets all of H's criteria: no compiled C, no C in the preamble, C struct types (`struct_tpacket_hdr`/`2`/`3`,
+`sockaddr_ll`, `tpacket_block_desc`, an anonymous union field), libc and kernel headers only, linux/amd64 and
+linux/arm64. The `-cgo` route on linux/amd64 refuses it in 4 sites of one class, before anything is written:
+
+    afpacket/header.go(97,27): error GO2CS2001: unsafe.Pointer of a pointer of the method's own receiver type, inside
+    that method: go2cs mints that address from a reference, as a bare number it cannot tell from C memory. ...
+
+(the others are 103,55, 123,28 and 130,55). The receivers are `*v1header` and `*v2header`, defined as
+`C.struct_tpacket_hdr` and `C.struct_tpacket2_hdr`, and every value of them points into the ring the package
+`mmap`s, so in Go the receiver IS C memory. The methods add `C.sizeof_struct_*` to the receiver's address to reach
+the `sockaddr_ll` that follows the header. The refusal is loud, so nothing runs on a wrong address, but the package
+does not convert. Read at master cb6def82a2 plus cgo item 3 (d59d7ebe84), which does not touch this route.
+
+**What a cure owes.** A receiver whose value came from C memory (here a pointer the package derived from the `mmap`
+result) keeps that provenance into the method, so `unsafe.Pointer(h)` yields the C address and pointer arithmetic
+from it stays in C memory, while a receiver minted from a Go reference keeps today's refusal. The near-miss is a
+method on the same type called through a Go-allocated value, which must still refuse by name. afpacket's own tests
+(TestParseOptions only) never reach C, so a proof is a fleet behaviour row over a ring, and opening one needs
+CAP_NET_RAW.
+
+**Owner.** Unassigned (post-.5). Census kit and the route log are P2's scratch, not committed.
+
+— P2 (2026-11-25)
+
+
+## 2026-11-25 — P6 (COORD ruling 20261125T015627Z): the cgo pressure arm hangs on a 4-core Linux box (OPEN, not traced)
+
+**OPEN, measured, not traced.** GolibTests `CgoProbeTests.ThePinnedArmHoldsWhileCompactingCollectionsRunMidCall`
+(cgo Phase 3 seat 1b's pressure arm, 08a2052141, on claude/h-cgo-1b-r8; not on master) reaches no verdict. Reading
+at the 1b base 0cd2bc81d0, with nothing of P6's in the tree: GolibTests built `-c Release -p:GoTargetOS=linux`
+(build rc 0), the probe library compiled from that tree's `cgo-probe/probe.c` (gcc 13, `-shared -O2 -fPIC`), the one
+test run alone under `timeout 900`: killed at 900 s, no pass, fail or READING line. Control in the same tree and
+probe: `StrtolsErrnoReachesTheErrnoForm` passed in 292 ms. The same test hung the same way on P6's own branch
+before the reading (P6's cut does not touch it). Box: a Linux cloud container, 4 vCPU (Xeon 2.1 GHz), 15 GiB,
+.NET SDK 10.0.404, go1.26.11.
+
+**What the arm does.** Twelve rounds; in each, a collector thread loops `GC.Collect(MaxGeneration, Forced,
+blocking: true, compacting: true)` with a 4 KB allocation between collections, while the test thread waits for
+`OnAGoroutine` around `C.go2cs_probe_slow_fill` (48 bytes at 500 µs each, about 24 ms per round). Where it stops,
+in which round, and whether the C call ever returns is not known: the run was killed with no stack taken.
+
+**Candidate reading, unproven.** The collector never yields between blocking compacting collections, so a thread
+returning from native code (which must wait for each collection to finish) or the goroutine handoff around it may
+never get a window on a box this small. A stack (`dotnet-stack` on the test host, or `createdump`) is the next
+measurement, before any cure; then the same run with a yield or a short sleep in the collector loop as the one-axis
+arm.
+
+**Owner.** Unassigned; COORD routes. P6 can take the stack if routed.
+
+— P6 (2026-11-25)
+
+
+**Update 2026-11-25 (P6): CLOSED by train 11.** The cure landed as `d6f84692c2` (merged at `08e113cb0b`): the
+collector sleeps 1 ms after each collection, stops in a `finally`, and each round asserts that at least one collection
+ran while the C call was open. Red-first arms on the 4-core box, 3 runs each: unchanged arm hangs; `Thread.Yield` and
+`Thread.Sleep(0)` red; `Thread.Sleep(1)` passes (the unpinned twin moved in 12 of 12 rounds, at least 4 mid-call
+collections in every round). The cure without the sleep reds by name; without the collections it reds on the
+mid-call assert. No product cause: the hang was the test's collector starving the thread's return from native code.
+
+— P6 (2026-11-25)
+
+## 2026-11-25 — P1 (COORD routing 20261125T130447Z, claude/p1-tbhelper-retire): testing's TestTBHelper disclosure RETIRED; the 2026-11-05 row is CLOSED
+
+**Finding.** `TestTBHelper` now passes on master `1c556c35a5`, so its `structural` disclosure (the 2026-11-05 row
+above, and G's 2026-11-01 row before it) was orphaned. The disclosure's own reason said a Debug build passes. Since
+`bb6267d0e4` (train 6) every `*.tests` host builds with `<Optimize>false</Optimize>`
+(`src/core/golib/buildTransitive/go.lib.symbols.targets`), so the optimized JIT no longer drops the two statement
+boundaries and the caller lines read `:86` and `:87` as Go does. The same change is the root of sync's `TestPoolGC`
+red (P1, routed to P2 by COORD ruling 20261125T151316Z), which is why `testing` must stay OFF P2's optimized-test-host
+list: putting it on would bring this disclosure back.
+
+**Reads.** linux-x64: three filtered sweeps at `1c556c35a5`, each 83 matched, TestTBHelper passing; the host run
+directly passes it 3 of 3. windows/amd64: hosted sweep-shard run 45643733976, 83 matched against the banked 82, the
+only red the count itself. darwin and linux-arm64 are owed: the darwin run was still queued at commit, and the
+linux-arm64 dispatch returned HTTP 500 three times. The roster carries `linux-arm64: pending` and no `darwin:`
+segment until those land.
+
+**Change.** The manifest entry is removed (`src/core/testing/go2cs_test_disclosures.json`), the windows proof page is
+the hosted run's render, and the roster row reads 83 + 2. `check-roster-format.ps1` passes 1914 checks.
+
+— P1 (2026-11-25)
+
+**Update 2026-11-25 (P1): darwin read.** os-matrix run 45643741101 at `1c556c35a5` read `testing` on both mac RIDs
+at 81 matched + 4 disclosed, TestTBHelper passing (the row's DISC word was only the old 80 + 5 expectation). The row
+banks `darwin: 81 + 4` (evidence `docs/phase4/rebank-1.26.10.3/darwin/reread/P1-TBH.tsv`). linux-arm64 stays pending.
+
+— P1 (2026-11-25)
+
+## 2026-11-25 — P2 (COORD rulings 20261125T145958Z, 150830Z, 151334Z): unoptimized test hosts change allocation and liveness verdicts (CURED for context and sync)
+
+**Class.** Since `de46ae4938` (11-23) every converted stdlib test assembly is compiled `Optimize=false`, so
+`runtime.Caller` reads per-call lines. That also changes what a test can OBSERVE of the code it measures. Two kinds:
+- **Allocation.** A want-0 `testing.AllocsPerRun` body no longer inlines the call it measures, so a box the JIT elided
+  is allocated again. context `TestAllocs`: `Background()` boxes `backgroundCtx` into `Context`, 24 B a run (2,400 B
+  over 100). JitDisasmSummary: every `go.context.tests` method MinOpts, `Background()` FullOpts but not inlined.
+- **Liveness.** A spill slot of the unoptimized frame keeps a value live that Go lets the collector take. sync
+  `TestPoolGC`: 98 of 100 pooled values cleaned up where Go allows one survivor (P1's root and bisect, first bad
+  `bb6267d0e4`, the train that carried the switch).
+
+**Both arms, linux-x64, same sources.** context at `a3bf724219` (its host does not compile at master before that cut):
+as built FAIL x2, `-p:GoTestOptimize=true` PASS x2; with the list below the whole row reads 62/62, EQUAL its bank. sync
+at master `1c556c35a5`: P1's arms (FAIL 6/6, PASS 3/3, the rest of the suite identical); with the list, 48 matching and
+9 disclosed, EQUAL its bank.
+
+**Probe of the cheaper cure, NO.** `[MethodImpl(MethodImplOptions.AggressiveOptimization)]` on the measured lambda, on a
+static local function or on a static method: 24 B a run each, at TieredCompilation 1 and 0, all compiled MinOpts. The
+assembly's DisableOptimizations wins. Control, the same source with `Optimize=true`: 0 B (AO arms 0 at TC=1 too).
+
+**Cure.** `GoOptimizedTestHosts` in golib's `go.lib.symbols.targets`, beside the switch: `context.tests=TestAllocs;
+sync.tests=TestPoolGC`. A listed stdlib host (root namespace `go`) builds with `GoTestOptimize=true`; an explicit
+`-p:GoTestOptimize=false` still builds it unoptimized for the A/B arm. `testOptimizedHosts_test.go` holds the admission
+rule: each entry names a test its package has, and no listed package reads caller lines (`runtime.Caller`,
+`Callers`, `CallersFrames`, or an expected `x_test.go:N` string). Made to fail: a misnamed test and a `testing.tests`
+entry each red by name; its control asserts the predicate fires on `testing` and `log`.
+
+**Reach (census, go/parser over the 269 roster ids, go1.26.11).** 110 test functions call `AllocsPerRun`, in 48 banked
+rows. R's waves 0-2 read the whole linux roster at `7d8e14c094` (which carries the switch): every one of the 48 reads
+EQUAL there except context (masked by CS1503), sort (masked by CS0051, i9's cut; `TestSearchWrappersDontAlloc` unread),
+runtime (host died first; its want-0 alloc tests unread at master), unique and internal/zstd. Measured locally, NOT this
+class: unique `TestHandle` fails with the test assembly optimized as well (FullOpts confirmed); internal/zstd validates
+as built (its `TestAlloc` skips on both sides). runtime is the third candidate once its finalizer death is attributed.
+
+**Owner.** P2 (this seat). Not listed: testing (its `TestTBHelper` reads caller lines and is cured by the switch).
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): unique IS this class; my "not this class" above was wrong, by the instrument.** P6 bisected
+unique `TestHandle` to `bb6267d0e4` (the switch) and read the whole row optimized at master: 27 matching, 12 disclosed,
+the .4 bank. My optimized arm ran the host with TIERED compilation on, so `TestHandle` ran at tier 0 (unoptimized code
+again) while my FullOpts check ran at `DOTNET_TieredCompilation=0`, which the pipeline uses. Re-run at TC=0 on the same
+publish: `TestHandle` PASS twice; the other failures are the row's banked disclosures. Mechanism (P6): `testHandle`
+holds two Handles in frame locals across `drainMaps`/`checkMapsFor`; a DisableOptimizations frame keeps them live to the
+method's end. `unique.tests=TestHandle` joins `GoOptimizedTestHosts`. Lesson: an optimized arm is read at the
+pipeline's own tiering (TC=0), and the opt-level check runs under the same setting as the verdict it vouches for.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): weak and crypto/internal/fips140cache join the list (COORD 155114Z, the finalizer/GC
+family).** Both arms at master `1c556c35a5`, linux-x64, optimized arm at `DOTNET_TieredCompilation=0` with FullOpts
+confirmed: weak as built fails TestPointer, TestPointerEquality, TestImmortalPointer, TestIssue69210, TestIssue70739 and
+TestPointerCleanup (in flight at the deadline), optimized PASS on the whole suite; fips140cache as built TestCache
+abandoned at the 15 m per-test deadline, optimized PASS. With the list, through `-tests all`: weak validated 9/9,
+fips140cache 1/1, unique 27 matching + 12 disclosed (its bank). The list's condition first read only root namespace
+`go`, which a nested package's host (`go.crypto.@internal`) does not have, so fips140cache's entry changed nothing; it
+now matches `go` or `go.*`, as the switch does, and `TestOptimizedTestHostsEvaluateOptimized` evaluates every listed
+project (made to fail on the narrow condition: it named fips140cache). runtime/pprof is P1's; runtime is still open.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): runtime/pprof joins the list under a NAMED caller-line exception (COORD 182736Z).** P1 rooted
+TestGoroutineCounts (hangs on fingReady, 15 m deadline) and TestGoroutineProfileConcurrency/finalizer_present
+("finalizer did not run") to the same class: a finalizer on new(*T), the local dropped, runtime.GC(); the unoptimized
+frame keeps the object alive. Bisect at TC0: first bad bb6267d0e4. A/B at master, TC0: optimized PASS 3/3 and 2/2, as
+built FAIL 3/3 and TIMEOUT. pprof_test.go calls runtime.Callers, so the guard refuses the entry; P1's full linux sweep
+at 89820c0df1 + the entry, TC0, read 148 matching + 8 disclosed in both arms, equal to the bank (595 s; as built FAIL in
+1,510 s). The guard now admits a caller-reading package only through `callerLineExceptions`, whose citation must carry a
+date and an equal sweep's counts, and flags an exception with no readers or no listed host (made to fail both ways).
+
+— P2 (2026-11-25)
+
+
+
+## 2026-11-25 — P1 (note, COORD ruling 20261125T160648Z): `syscall` and `internal/zstd` linux readings off the bank are the recorded HOST properties, confirmed by a third host — NOTE, no retire, no re-bank
+
+**Readings.** R's D2/T6 wave-2 dispatch (W2Rp 45632007896 and its twinned arm W2Rt 45632015338, master
+`1c556c35a5`, hosted linux runners) read `syscall` at 50 matched + 9 disclosed against the linux-x64 bank of 42 + 17,
+and `internal/zstd` at 535 + 1 against 536. Both arms read the same.
+
+**Both are on record already.**
+- `syscall`: G's 2026-11-10 note above. The 42 + 17 is a root host's reading; an unprivileged runner reads 50 + 9,
+  because twelve root-only tests skip on both sides there and count as matched. COORD ruled it a host artifact then.
+  The roster carries it (`linux: 42 + 17 (linux-x64; linux-arm64: 50 + 9)`). R's runners are the third host to read
+  50 + 9 unprivileged.
+- `internal/zstd`: the one is `TestAlloc`, already in the manifest (class `deferred`, platforms darwin and linux,
+  `got 274495 allocs, want 0`). It runs only where a `zstd` binary is on `PATH`; hosted ubuntu runners have one, so it
+  fires there. The roster carries it (`linux: 536 (linux-x64; linux-arm64: 535 + 1)`).
+
+**Control.** A linux-x64 filtered sweep of each row at `1c556c35a5` on a root host with no `zstd` binary: `syscall`
+PASS 42 with its 17 disclosures, `internal/zstd` PASS 536. So the eight `syscall` disclosures still fire where their
+tests run, and retiring them would turn a root host red.
+
+**Ruled (COORD, 2026-11-25):** no retire, no re-bank; this note is the record.
+
+— P1 (2026-11-25)
+
+
+## 2026-11-25 — R (D2/T6 linux reading, COORD 20261125T155057Z): fifteen linux rows no longer read the 1.26.11.1 bank at master 08e113cb0b (OPEN, routed)
+
+**Measured, hosted linux-x64, go1.26.11.** The rows are from D2/T6's sweep of the 236 linux rows against a twinned
+standard library ([DATA-mn-d2-t6-linux.md](DATA-mn-d2-t6-linux.md)). Each non-EQUAL row was re-read twins-off and
+twins-on at the same tree, `7d8e14c094` (master `08e113cb0b` plus a CI-only cut).
+
+- 14 of the 15 fail the same way with twins off. They are master drift since the bank's tree `280a01952c`, and none is
+  caused by the twinned build.
+- 1 (internal/runtime/gc/scan) depends on the runner's CPU.
+- Matching counts are go == csharp per name in each row's `go2cs_test_comparison.json`, identical in both arms.
+
+| row | reading at 08e113cb0b (both arms) | owner (COORD 155057Z) |
+|---|---|---|
+| context | test host CS1503 at `goǃ(pcancelʗ1, cause)`: a named func-type value has no `goǃ` rung since d5796d7f4d | P2, reported cured |
+| net/url | test host CS0426, `typeof(encoding.json_package)` binds net/url's own `type encoding` | i9, reported cured |
+| sort | test host CS0051, `variadic<sort_test_package.lessFunc>` less accessible than `OrderedBy` (train 11's variadic<T>) | i9, cut |
+| sync | TestPoolGC Go=pass C#=fail; matched 47 | P1/P2, optimized-host list |
+| runtime | host exit 2, `panic: finalizer did not start` (TestStackGrowth's watchdog, stack_test.go:132); 227 divergences, the same names in both arms | P2, optimized-host A/B |
+| weak | TestPointer; matched 5 | P2, optimized-host A/B |
+| runtime/pprof | TestGoroutineProfileConcurrency/finalizer_present; matched 146 | P2, optimized-host A/B |
+| crypto/internal/fips140cache | TestCache hits the host's 15m per-test deadline; matched 0 | P2, optimized-host A/B |
+| unique | TestMakeAllocs, TestHandle; matched 16 | P6 |
+| testing | DISC 83: TestTBHelper passes, so its disclosure is orphaned | P1 |
+| syscall | DISC 50: 9 disclosed against the linux expectation of 17 | P1 |
+| internal/zstd | DISC 535: 1 disclosed against 0 | P1 |
+| reflect | TestConvert; matched 444 | i9 |
+| log/slog | TestCallDepth; matched 227. It fails twins-off too, so twin frames are not its cause | i9 |
+| internal/runtime/gc/scan | the converted `scan.CanAVX512()` reads false on AVX-512 hardware; C# results identical in all reads; the Go oracle runs 6,166 AVX512 rows only where the runner has AVX-512 | R |
+
+The finalizer and GC grouping (runtime, weak, runtime/pprof, fips140cache, beside sync) is a reading from the failing
+test names, not a root.
+
+gc/scan: on a runner without AVX-512, Go skips the AVX512 tests (`expand_amd64_test.go:16: no AVX512`) and the row
+PASSes at 3095. On one with AVX-512 the row FAILs, whatever the stdlib build. A cure makes the converted probe read the
+hardware as Go does, so the verdict does not depend on the runner.
+
+— R (2026-11-25)
+
+
+## 2026-11-25 — i9 (COORD 20261125T182241Z): at TieredCompilation=0 a frame reported at IL offset 0 settles at the method's first line (OPEN, older than train 4)
+
+**OPEN, measured.** The return-site resolver in `src/core/runtime/managed_impl.cs` (returnSiteILOffset,
+suspendedAtReportedCall, calleeSettledCallSite) misplaces a caller frame's line when the optimizing JIT reports that
+frame at IL offset 0. returnSiteILOffset reads the first call at or after offset 0, which is the method's first
+statement. calleeSettledCallSite searches only the statement holding the reported offset, which holds no call of
+the callee, so nothing settles. Go names the line of the call the frame is suspended in.
+
+**Reading.** The reduced probe in `docs/phase4/data/tc0-offset0-probe/` (Go source, `go.out`, and the readings with
+the resolver's own view). Built `-c Release` on windows/amd64 at master 1c556c35a5 and run with
+`DOTNET_TieredCompilation=0`: `main`'s frame reads line 10 (its first statement) for method calls on lines 11 and
+13, and the leaf frame calling `runtime.Callers` reads one line early. The package-level call reads right. Tiered,
+and tiered with TieredPGO=0, every line equals Go's. Byte-identical readings on 1f2a9afdfc (train 4 before the
+glyph-methods merge), so this predates the forwarder chain. A one-axis A/B with the forwarders flipped to
+NoInlining left it unchanged.
+
+**Scope.** TC0 only, so the `-tests` hosts (Release, tiering off) and a user program run that way. Production
+stays optimized and exact caller lines are opt-in (owner ruling 2026-11-22), so a cure must cost production nothing.
+No banked row is known to reach it: the probe finds it, and log/slog's TestCallDepth was a DIFFERENT TC0 case (the
+frame reported AT its call, refused because the callee was a forwarder of a `ж` overload; cured on
+claude/i9-slog-calldepth-recv, which does not reach this one).
+
+**Next measurement, not a design.** Read what the JIT's debug info records for `main` at TC0 (the native-to-IL map
+around each call), to learn whether offset 0 is all the frame carries or the resolver drops a better mapping.
+
+**Owner.** Unassigned; COORD routes.
+
+— i9 (2026-11-25)
+
+**Update 2026-11-25 (P2): runtime joins the list under a named caller-line exception (COORD 205136Z).** Hosted linux
+sweeps, one axis (the same tree with and without `runtime.tests=TestStackGrowth`): optimized, run 45690857278 at
+932aa2dcc8, "PASS runtime 11094 [1949s]", equal to the bank; as built, run 45690862879 at fa2531cc3b, "FAIL runtime
+[4483s]": the host died on "panic: finalizer did not start" from TestStackGrowth's watchdog (stack_test.go:132),
+11161 Go rows against 11025 C# (truncated). runtime's tests read caller lines in seven files, and as built the row cannot
+complete, so the exception cites the whole row optimized equal to the bank rather than a both-arms verdict comparison.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P1): linux-arm64 read; the retirement is complete on every RID.** os-matrix sweep-shard run
+45715124443 (arch both) at master `473c18062e` read `testing` at 83 matched + 2 disclosed on linux-x64 and linux-arm64,
+the divergent names `TestAllocsPerRun` and `TestMorePanic` on both. The row's linux note reads
+`(linux-x64; linux-arm64: 83 + 2)` (evidence `docs/phase4/rebank-1.26.10.4/linux-arm64/evidence/h10-go1.26.11/P1-TBH-L1.tsv`,
+collected by `docs/phase4/la64-s7/collect.py`), and the Linux arm64 line returns to 236 of 236.
+
+— P1 (2026-11-25)
+
+## 2026-11-25 — R (finding 5; COORD 20261125T165433Z, R1 172300Z, same train 172751Z): CURED, internal/runtime/gc/scan's AVX-512 kernels run where Go runs them; nine CPU flags stay unmapped, each its own census (OPEN)
+
+**Cured: P2's row of 2026-10-16** ("three AVX512 tests skip in C# where Go runs them — FEATURE GAP"), re-met by D2/T6 as
+its finding 5. The cut follows that row's retirement path.
+- `internal/cpu/amd64/cpu_x86_impl.cs` reads `HasAVX512BITALG` from CPUID leaf 7, ECX bit 12, under `HasAVX512F`,
+  exactly as doinit does. .NET 10 has no `Avx512Bitalg`.
+- `internal/runtime/gc/scan/amd64/scan_amd64_impl.cs` gives `ExpandAVX512`, `scanSpanPackedAVX512` and `FilterNilAVX512`
+  managed bodies. Their contracts are read from the assembly: overwrite all 16 words; in order with zeros included;
+  an order-preserving compaction. Each returns what Go's kernel returns.
+- The row's count is host-dependent and annotated with the R1 family form: floor 3095 linux-x64 and 19 windows,
+  plus exactly `TestExpandAVX512/…` (+3076), `TestScanSpanPackedAVX512/…` (+3076), `TestFilterNilAVX512/…` (+14) on
+  an AVX-512 host. The sizes are derived from two hosted AVX-512 reads.
+- Design: [DESIGN-scan-avx512-kernels.md](DESIGN-scan-avx512-kernels.md), P3 APPROVE WITH CHANGES, folded.
+
+**OPEN: the nine flags `cpu_x86_impl.cs` still leaves false** (no System.Runtime.Intrinsics surface in .NET 10).
+Each one turned on is its own census: what reads it in the corpus, and whether a managed body exists behind it.
+
+| flag | what reads it in the corpus |
+|---|---|
+| `HasERMS`, `HasFSRM` | runtime's memmove choice (`cpuflags_amd64`, `useREPMOV = isERMSNiceCPU && HasERMS && HasFSRM`) |
+| `HasADX`, `HasSHA` | `crypto/internal/fips140deps/cpu` (`X86HasADX`, `X86HasSHA`): the bignum and SHA assembly paths. The corpus is the purego flavour, so a consumer census comes first |
+| `HasRDTSCP` | runtime's `cputicks` in asm_amd64.s, through `offsetX86HasRDTSCP` |
+| `HasVAES`, `HasAVX512VAES`, `HasAVX512VNNI`, `HasAVX512VPOPCNTDQ` | no reader outside `internal/cpu` today (vendored x/sys/cpu keeps its own flags) |
+
+Unmapped (false) is the conservative direction: a consumer gated on one takes its portable path. Turning one on where
+its gated path is assembly with no managed body would trade a skip for a throwing stub, which is the trap the scan
+kernels were.
 
 ## 2026-11-25 — R (M:N row 13, N5; COORD's I4 ruling 20261125T015518Z): on R-LAPTOP (Windows) one wake in a few runs waits most of a CPU step under the M:N scheduler (host-only)
 

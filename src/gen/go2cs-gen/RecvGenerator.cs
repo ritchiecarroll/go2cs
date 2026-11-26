@@ -69,7 +69,7 @@ public class RecvGenerator : ISourceGenerator
             // type — W3a); a bare name-casing read here cannot see that and would re-widen a method the
             // converter deliberately narrowed to `internal`, producing this generated overload `public`
             // over a signature the converter's own copy is not (CS0050/CS0051 in the OPPOSITE direction).
-            string scope = GetExplicitAccessModifier(methodSyntax) ?? GetScope(identifier);
+            string scope = GetExplicitAccessModifier(methodSyntax) ?? GetStampedScope(GetGoNameStamp(methodSyntax.AttributeLists), identifier);
 
             // The RECEIVER TYPE's accessibility is read from its SYMBOL, never from the Go export case
             // of its name — the same shared rule (Common.EffectiveScopeIsPublic) every sibling generator
@@ -125,6 +125,7 @@ public class RecvGenerator : ISourceGenerator
                 NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
                 CallerFrame = callerFrame,
                 OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
+                GoName = GetGoNameStamp(methodSyntax.AttributeLists),
                 UsingStatements = usingStatements
             }
             .Generate();
@@ -167,7 +168,7 @@ public class RecvGenerator : ISourceGenerator
             string packageClassName = methodSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
             string identifier = methodSyntax.Identifier.Text;
-            string scope = GetExplicitAccessModifier(methodSyntax) ?? GetScope(identifier);
+            string scope = GetExplicitAccessModifier(methodSyntax) ?? GetStampedScope(GetGoNameStamp(methodSyntax.AttributeLists), identifier);
             MethodInfo method = methodSyntax.GetMethodInfo(context.Compilation);
 
             string generatedSource = new ReceiverMethodTemplate
@@ -182,6 +183,7 @@ public class RecvGenerator : ISourceGenerator
                 NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
                 CallerFrame = callerFrame,
                 OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
+                GoName = GetGoNameStamp(methodSyntax.AttributeLists),
                 ValueReceiver = true,
                 UsingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel)
             }

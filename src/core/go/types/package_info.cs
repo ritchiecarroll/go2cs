@@ -316,8 +316,8 @@ using errors = global::go.@internal.types.errors_package;
 using io = global::go.io_package;
 using iter = global::go.iter_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸastꓸExpr = Span<global::go.go.ast_package.Expr>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸastꓸExpr = variadic<global::go.go.ast_package.Expr>;
 
 [GoPackage("types")]
 public static partial class types_package

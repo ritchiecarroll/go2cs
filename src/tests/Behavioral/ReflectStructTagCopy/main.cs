@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 partial class main_package {
 
-partial struct record {
+partial struct Δrecord {
     public nint Version;
     public @string Name; /*`json:"name" asn1:"optional,explicit,tag:0"`*/
     public slice<byte> Data; /*`json:"data,omitempty"`*/
@@ -46,7 +46,7 @@ partial struct outer {
 }
 
 internal static void main() {
-    var t = reflect.TypeOf(new record());
+    var t = reflect.TypeOf(new Δrecord());
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
@@ -84,7 +84,7 @@ internal static void main() {
     n = reflect.Copy(reflect.ValueOf(nilDst), reflect.ValueOf(slice<byte>([1, 2])));
     fmt.Println("copy nil dst:", n);
 
-    foreach (var (_, vΔ1) in range(slice<any>([new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), (counter)0, new record()]))) {
+    foreach (var (_, vΔ1) in range(slice<any>([new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), (counter)0, new Δrecord()]))) {
         var rt = reflect.TypeOf(vΔ1);
         fmt.Printf("named %-12s name=%q pkg=%q\n"u8, rt.Kind(), rt.Name(), rt.PkgPath());
     }

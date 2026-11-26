@@ -115,7 +115,7 @@ public static ж<Type> TypeOf(any aʗp) {
 }
 
 public static ж<Type> TypeFor<T>() {
-    T v = GoZero<T>();
+    T v = builtin.GoZero<T>();
     var t = TypeOf((v).OrTypedNilOf()); if (t != nil) {
         return t;
     }

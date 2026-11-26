@@ -123,15 +123,19 @@ public sealed partial class TwinGenerator
         // arguments are evaluated before it): what the runtime counted in the plain method's IL, now counted here.
         private int CallOrdinal(SyntaxNode original)
         {
+            // A call's Go name as the runtime reads it (managed_impl.cs goCalleeName): a [GoName] stamp, else every leading Δ off.
+            static string GoCalleeName(IMethodSymbol method) =>
+                method.Name.StartsWith("Δ", System.StringComparison.Ordinal) && Common.GetGoNameStamp(method) is { } stamp ? stamp : method.Name.TrimStart('Δ');
+
             if (original is not InvocationExpressionSyntax call || m_model.GetSymbolInfo(call).Symbol is not IMethodSymbol target)
                 return 0;
 
-            string name = target.Name.TrimStart('Δ');
+            string name = GoCalleeName(target);
             int ordinal = 0, total = 0;
 
             foreach (InvocationExpressionSyntax other in PostOrder(SequenceNode(original)))
             {
-                if (m_model.GetSymbolInfo(other).Symbol is not IMethodSymbol callee || callee.Name.TrimStart('Δ') != name)
+                if (m_model.GetSymbolInfo(other).Symbol is not IMethodSymbol callee || GoCalleeName(callee) != name)
                     continue;
 
                 total++;
@@ -461,7 +465,10 @@ public sealed partial class TwinGenerator
             void Earlier(ExpressionSyntax expression)
             {
                 TypeInfo info = m_model.GetTypeInfo(expression);
-                refLike |= info.Type is { IsRefLikeType: true } || info.ConvertedType is { IsRefLikeType: true };
+                // M:N row 19, rule 2: the value C# holds is the CONVERTED one. A u8 literal handed to an @string
+                // parameter (gob's getBaseType(""u8, …)) is converted where it is evaluated, so the span never lives
+                // across a later await; one handed to a ref struct parameter (fmt's sstring format) still does.
+                refLike |= (info.ConvertedType ?? info.Type) is { IsRefLikeType: true };
 
                 ExpressionSyntax bare = expression;
 
@@ -474,7 +481,16 @@ public sealed partial class TwinGenerator
                 // a field of a value or through a pointer, a unary operand, a binary left operand and a numeric cast all
                 // read the call's write; a nil pointer panics after the call's side effect). So the call moves ahead, as
                 // gc runs it, and Rule S derives the refs again before the read.
-                if (!m_spilled.Contains(bare) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue &&
+                // M:N row 19, rule 1: a cast of a call that already moved reads the spilled temporary, so it is
+                // a pure read too (debug/elf's `Off: (uint64)bo.Uint32(…)` arguments, math/big's `(Word)(nuint)r.Uint32()`).
+                // A COPYING conversion was probed too: gc runs `string(f())` after a later call in the same statement
+                // (`use(string(f()), h())` with h writing f's bytes prints "Nld", go1.26.11), the order this move gives.
+                ExpressionSyntax core = bare;
+
+                while (core is ParenthesizedExpressionSyntax or CastExpressionSyntax)
+                    core = core is ParenthesizedExpressionSyntax inner ? inner.Expression : ((CastExpressionSyntax)core).Expression;
+
+                if (!m_spilled.Contains(bare) && !m_spilled.Contains(core) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue &&
                     !IsPureRead(bare))
                     Block("earlier:" + bare.Kind());
             }

@@ -5,7 +5,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 using fmt = fmt_package;
 using log = log_package;
-using ꓸꓸꓸClass = Span<bidi_package.Class>;
+using ꓸꓸꓸClass = variadic<bidi_package.Class>;
 
 partial class bidi_package {
 

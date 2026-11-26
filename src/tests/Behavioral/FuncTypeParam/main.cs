@@ -57,7 +57,7 @@ internal static void main() {
     ref var raw = ref heap(new int32(), out var Ꮡraw);
     raw = 21;
     var ld = atomic.LoadInt32;
-    fmt.Println(ld(Ꮡraw), loadTwice(NilSafeDelegateConversion<loadFunc, Func<ж<int32>, int32>>(ld), Ꮡraw));
+    fmt.Println(ld(Ꮡraw), loadTwice(builtin.NilSafeDelegateConversion<loadFunc, Func<ж<int32>, int32>>(ld), Ꮡraw));
 
     var rd = readPlusOne;
     fmt.Println(rd(Ꮡv), apply(Ꮡv, rd));

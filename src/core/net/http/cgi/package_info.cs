@@ -84,7 +84,7 @@ namespace go.net.http;
 using static go.net.http.cgi_package;
 using http = go.net.http_package;
 using io = go.io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("cgi")]
 public static partial class cgi_package

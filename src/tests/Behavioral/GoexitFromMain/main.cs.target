@@ -172,7 +172,7 @@ internal static void armF() {
             runtime.Goexit();
         };
 
-        var (next, stop) = iter.Pull(NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(seq));
+        var (next, stop) = iter.Pull(builtin.NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(seq));
         var stopʗ1 = stop;
         defer(stopʗ1, ref ᒐ);
 

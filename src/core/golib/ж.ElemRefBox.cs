@@ -39,7 +39,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun, INativeRooted, INativeViewAnchor
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun, INativeRooted, INativeViewAnchor, ICgoWordElement
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.
@@ -57,9 +57,9 @@ namespace go;
 
     internal override ref object? ElementViews => ref m_views;
 
-    // The native marshals' run source (NativeStructMarshal.CallDeep and the shared darwin/linux marshal): the
-    // fast arm's backing and absolute index. The foreign arm has no contiguous backing, so it answers none.
-    Array? IElementRun.RunBacking => m_backing;
+    // The native marshals' and header boxes' run source: the fast arm's backing and absolute index. The foreign arm has
+    // no contiguous backing and answers none, except a ReadOnlyStringBacking, whose shadow is its canonical storage.
+    Array? IElementRun.RunBacking => (Array?)m_backing ?? (m_foreign as ReadOnlyStringBacking)?.Source;
 
     nint IElementRun.RunIndex => m_index;
 
@@ -419,6 +419,23 @@ namespace go;
     internal override (IArray, int)? ArrayRef =>
         m_foreign is not null ? (m_foreign, (int)m_index) :
         m_backing is not null ? (new array<T>(m_backing), (int)m_index) : null;
+
+    // cgo .5 item 2, the void door (GoCgoArgs.PinVoidPointer): an element of managed storage of pointer boxes crosses as
+    // a word mirror of the whole backing array. An element of a native window has a native address and crosses by it.
+    bool ICgoWordElement.TryCgoWordMirror([NotNullWhen(true)] out GoCgoWordMirror? mirror, out nint index)
+    {
+        mirror = null;
+        index = 0;
+
+        if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(ж<>) || NativeElementAddress != 0)
+            return false;
+
+        if (!TryGetElementStorage(out T[]? backing, out index) || index >= backing.Length)
+            return false;
+
+        mirror = new GoCgoWordMirror((object?[])(object)backing, mint: null);
+        return true;
+    }
 
     /// <inheritdoc/>
     internal override bool TryGetElementStorage([NotNullWhen(true)] out T[]? backing, out nint index)

@@ -4,7 +4,7 @@ namespace go;
 
 using fmt = fmt_package;
 using os = os_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
@@ -31,7 +31,7 @@ internal static @string show(any x) { return fmt.Sprintf("%v %T"u8, x, x); }
 internal static any ret(int8 a) { return (int8)(a + a); }
 
 internal static @string variadic(params ꓸꓸꓸany xsʗp) {
-    var xs = xsʗp.sslice();
+    var xs = xsʗp;
 
     return fmt.Sprint(xs.ꓸꓸꓸ);
 }

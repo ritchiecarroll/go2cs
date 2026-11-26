@@ -61,7 +61,7 @@ using utf8 = go.unicode.utf8_package;
 using @unsafe = unsafe_package;
 using @internal;
 using go.unicode;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 
 partial class reflect_package {
 

@@ -102,7 +102,7 @@ namespace go.text.template;
 
 using static go.text.template.parse_package;
 using strings = go.strings_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("parse")]
 public static partial class parse_package
@@ -380,7 +380,7 @@ partial class parseᴛTree {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) => parse_package.recover⁔(Ꮡt, Ꮡerrp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) => parse_package.startParse⁔(ref t, funcs, Ꮡlex, treeSet);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stopParse(this ref Tree t) => parse_package.stopParse⁔(ref t);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) => parse_package.Parse⁔(Ꮡt, text, leftDelim, rightDelim, treeSet, funcsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params variadic<map<@string, any>> funcsʗp) => parse_package.Parse⁔(Ꮡt, text, leftDelim, rightDelim, treeSet, funcsʗp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ж<Tree> Ꮡt) => parse_package.add⁔(Ꮡt);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parse(this ж<Tree> Ꮡt) => parse_package.parse⁔(Ꮡt);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseDefinition(this ж<Tree> Ꮡt) => parse_package.parseDefinition⁔(Ꮡt);
