@@ -42545,4 +42545,27 @@ writes decodes as a C pointer) and SHOULDs folded in (20.8).
 — H (2026-11-26)
 
 
+## OPEN 2026-11-26 (H): cgo S4, linux-x64 cgo-e2e passed on the `_Ctype_size_t` bug (the converted main.cs is unread)
+
+**What is measured.** At S4 alone (3450839689), linux-x64 cgo-e2e (run 45730132792) passed. It did not skip the arm:
+- `govoidnumberwrite` ran both ways. go2cs's build compiled and printed `govoidnumberwrite [0 7 7 0]`, the same as Go.
+- The same arm on windows (run 45794298603) failed CS0246 `_Ctype_size_t` at main.cs(396,62).
+- go2cs's offline probe of cmd/cgo's closure for `C.memset(p, 7, 2)`, with size_t as an alias of ulong, emits the bad
+  cast. So linux's real cmd/cgo must have declared memset's third argument at something other than the size_t alias.
+
+**What is not.** The converted linux main.cs itself. It is not in the job log or the uploaded summary, and this box has
+no C compiler to rerun linux's cmd/cgo. The likeliest cause, unmeasured: GCC's builtin memset declares the parameter at
+the base type (unsigned long), so cmd/cgo's DWARF gives `_Ctype_ulong`, a defined type the old cast already mapped.
+
+**Why it does not hold S6.** The cure's evidence is the windows red, the offline guard and its red-first control, and
+the green legs off linux-x64 (windows, darwin, linux-arm64). The S4 cure's near-miss arms (P3, F1) now give linux-x64 an
+arm the bug reaches: `typedefwide` passes a constant at uint64_t, which glibc declares as a typedef of a typedef, so
+cmd/cgo writes an alias chain there with no builtin in the way.
+
+**Closes when** one linux-x64 converted main.cs at 3450839689 is read, or when a linux run of the pre-cure converter
+fails `typedefwide`.
+**Owner.** H.
+
+— H (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
