@@ -223,8 +223,8 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 - **L** `go.lib` carries golib's `NOTICE`: the `go.lib` arm B restored holds `NOTICE` at its root, identical (line endings
   normalized) to `src/core/golib/NOTICE`, which reproduces Go's notice, conditions and disclaimer for the parts of
   golib derived from Go, as BSD-3 clause 2 asks of a binary package. `golib.csproj` packs the file only when it exists,
-  so a pack that loses it is otherwise silent. It gates, except against a `published_version` feed (measured there:
-  releases up to 1.26.11.1 shipped without the file).
+  so a pack that loses it is otherwise silent. It gates for a folder feed and for a `published_version` above
+  1.26.11.1; at or below 1.26.11.1 it is measured only (those releases shipped without the file).
 - **T** the twin opt-in reaches a program converted OUTSIDE the repository ([Async twins](AsyncTwins.md)):
   `PackageTests/TwinOptIn`, a goroutine program that imports nothing, converted three ways — `-recurse=nuget`
   against the feed, `-recurse` against this tree's `src`, and `-recurse` against a `deploy-core.ps1` root staged in

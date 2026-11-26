@@ -786,7 +786,9 @@ func handOwnClassificationProblems(population map[string]bool, list string) []st
 // TestLicensingHandOwnsAreClassified is the floor under TestLicensingGoProvenanceHeaders, which reads only files that
 // carry a block: a new hand-own that follows Go and carries none would pass it. Here every hand-owned file in src/core
 // (an *_impl.cs, or a .cs with an uncommented GoManualConversion marker, outside golib, go2cs, go.arrays and
-// go2cs.CpuProfiler) is headed or classified on testdata/licensing/handown-unheaded.txt.
+// go2cs.CpuProfiler) is headed or classified on testdata/licensing/handown-unheaded.txt. The walk reads the files on disk,
+// not git's index, so a stray untracked *_impl.cs under src/core is red on that box too (the safe direction). golib is
+// outside the population: its headed files are read by the header test, and the gap is a BOARD line (2026-11-26).
 func TestLicensingHandOwnsAreClassified(t *testing.T) {
 	head := "// Copyright 2009 The Go Authors. All rights reserved.\n//\n// PROVENANCE:\n// - f: DERIVED FROM src/a/b.go, Go 1.26.11, func f.\n"
 	if !hasProvenanceBlock(head) || hasProvenanceBlock("// PROVENANCE — later\n") {
@@ -819,6 +821,7 @@ func TestLicensingHandOwnsAreClassified(t *testing.T) {
 	}
 	marker := regexp.MustCompile(`(?m)^\s*\[module:\s*(?:go\.)?GoManualConversion\]`)
 	population := map[string]bool{}
+	// Walk the files on disk under src/core, whether or not git tracks them.
 	err = filepath.WalkDir("../core", func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return err

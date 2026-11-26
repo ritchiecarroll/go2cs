@@ -42784,4 +42784,15 @@ kernels were.
 
 — P5 (2026-11-26)
 
+## 2026-11-26 — P5 (guard-floor seat, P3 20261126T193143Z NIT 3; COORD 20261126T193812Z): golib is outside the hand-own floor (OPEN)
+
+- **A new golib file that follows Go and carries no PROVENANCE block passes both licensing guards.**
+  `TestLicensingGoProvenanceHeaders` reads only files that carry a block, and `TestLicensingHandOwnsAreClassified`
+  (the floor, `claude/p5-attr-t17`) skips golib because its population rule, an `*_impl.cs` or a `GoManualConversion`
+  marker, does not describe golib: every golib file is hand-written. Today the three golib parts derived from Go are
+  headed and named in `src/core/golib/NOTICE`. Until a rule fits golib, P3's seat read of each golib diff is the check:
+  a part that follows a Go function takes a block and a NOTICE entry in the same seat.
+
+— P5 (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

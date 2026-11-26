@@ -36,8 +36,9 @@
                             deliberate break: it needs -ConsumerOverride citing the moved break floor and the release
                             notes' Upgrading entry, and the verdict line reads OVERRIDE.
       L  GOLIB NOTICE       the go.lib arm B restored carries NOTICE at its root, identical to src/core/golib/NOTICE
-                            (Go's notice for go.lib's derived parts). It gates for a folder feed; against a published
-                            version it is a measurement, since releases up to 1.26.11.1 shipped without the file.
+                            (Go's notice for go.lib's derived parts). It gates for a folder feed and for a published
+                            version above 1.26.11.1; at or below 1.26.11.1 it is a measurement, since those releases
+                            shipped without the file.
       T  TWIN OPT-IN        TwinOptIn (a goroutine program that imports nothing), converted with -recurse=nuget
                             against the feed, -recurse against this repository's src, and -recurse against a
                             deploy-core.ps1 root staged under -WorkRoot; each built without and with GoTwinsFor. No
@@ -645,8 +646,9 @@ if ($publishedFeed) { $symbolVerdicts += $twinNuget } else { $verdicts += $twinN
 # go.lib ships three parts derived from Go (src/core/golib/NOTICE names them), so BSD-3 clause 2 asks the binary package
 # to reproduce Go's notice, conditions and disclaimer. golib.csproj packs NOTICE only when the file exists, so a pack that
 # loses it is silent. The arm reads the go.lib arm B restored into its fresh cache (what a consumer receives) and compares
-# it with this tree's file, line endings normalized. It gates for a folder feed (the pre-publish pack); for a published
-# version it is a measurement, because every go.lib up to 1.26.11.1 shipped without the file.
+# it with this tree's file, line endings normalized. It gates for a folder feed (the pre-publish pack) and for a published
+# version above 1.26.11.1. A published version at or below 1.26.11.1 is only measured, because every go.lib up to it
+# shipped without the file. The comparison reads the numeric part before any '-' suffix; a version that does not parse gates.
 function Get-NoticeVerdict {
     $name = 'L-golib-notice'
     $source = Join-Path $repoSrc 'core/golib/NOTICE'
@@ -661,7 +663,10 @@ function Get-NoticeVerdict {
     return "PASS ($name): go.lib $Version carries NOTICE at its root, identical to src/core/golib/NOTICE ($(@($want.TrimEnd("`n") -split "`n").Count) lines)"
 }
 $noticeVerdict = Get-NoticeVerdict
-if ($publishedFeed) { $symbolVerdicts += $noticeVerdict } else { $verdicts += $noticeVerdict }
+$noticeFloor = [version]'1.26.11.1'
+$noticeCore = $null
+$noticeMeasureOnly = $publishedFeed -and [version]::TryParse(($Version -split '-', 2)[0], [ref]$noticeCore) -and ($noticeCore -le $noticeFloor)
+if ($noticeMeasureOnly) { $symbolVerdicts += $noticeVerdict } else { $verdicts += $noticeVerdict }
 
 # ---- verdicts ------------------------------------------------------------------------------------
 if ($GateWalkthrough) { $verdicts += $walkVerdict }

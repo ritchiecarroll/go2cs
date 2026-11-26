@@ -638,6 +638,8 @@ for a folder feed (the pre-publish pack) and is a measurement against a publishe
 the pack without the file (FAIL, no NOTICE) and the pack with one word of the license changed (FAIL, differs), plus an
 absent restore (FAIL, not read); the whole script parses with 0 errors. Not yet run on a hosted release-smoke leg.
 
+Amended after P3's read of 060f239d72 (20261126T193143Z, SHOULD 1; COORD 20261126T193812Z): arm L now also gates a published feed whose version is above 1.26.11.1, and is measured only at or below it. The comparison reads the numeric part before any `-` suffix, and a version that does not parse gates. Decision table run under pwsh: 1.26.11.1, 1.26.11.1-ci.7 and 1.26.11.0 published measure; 1.26.11.2, 1.26.11.2-ci.1, 1.27.0.1 and an unparsable version published gate; any folder feed gates.
+
 **Guard floor (SHOULD 3b).** `TestLicensingHandOwnsAreClassified` (`src/go2cs/licensing_test.go`) walks the sweep's
 population: every `*_impl.cs`, or `.cs` with an uncommented `GoManualConversion` marker, outside golib, go2cs,
 go.arrays and go2cs.CpuProfiler. Each must carry a PROVENANCE block or a row on

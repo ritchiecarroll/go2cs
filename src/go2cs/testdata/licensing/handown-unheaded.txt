@@ -9,6 +9,8 @@
 #            original code. Q4 ruled glue is own. Nothing in the file follows a Go function's statements or contract.
 #   pending  follows Go, and its header lands elsewhere; the row says where, after " -- ".
 # A file that gains a PROVENANCE block leaves this list in the same commit; the guard refuses a file classified both ways.
+# The lane that adds a hand-own adds its block or its row in its own seat. P3 reads every change to this list at seat
+# reads, as it reads the headers: a new "own" row is a claim that nothing in the file follows Go.
 #
 # Derivation: the 94 files of the 2026-11-26 sweep left unheaded (docs/phase4/DATA-go-attribution-scout-2026-11-26.md,
 # Step 2 results and P3's read folded: 92 own or glue, 1 bodies plus original code, 1 skipped).
