@@ -1988,6 +1988,25 @@ jobs:
           & dotnet tool restore *>&1 | Tee-Object -FilePath $log
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::dotnet tool restore failed with exit $LASTEXITCODE"; exit $LASTEXITCODE }
 
+          # DIAGNOSTIC ONLY (claude/p4-darwin-slow-diag, never for a train): on a mac, sample the runner every 60 s
+          # while go test runs, for the osx-arm64 slowness row (BOARD, P4, 2026-11-26).
+          $sampler = $null
+          if ($IsMacOS) {
+              $samplerLog = Join-Path $art "sampler-$goos-$rid.log"
+              $samplerScript = Join-Path $art 'sampler.sh'
+              @(
+                  'while true; do'
+                  '  echo "==== $(date -u +%H:%M:%S)"; uptime; sysctl vm.swapusage'
+                  '  vm_stat | egrep "Pages free|Pageouts|Swapins|Swapouts"'
+                  '  echo "procs $(ps -A | wc -l) dotnet $(pgrep dotnet | wc -l) go2cs $(pgrep -f go2cs | wc -l)"'
+                  '  echo "-- top cpu"; ps -Ao pid,ppid,pcpu,rss,etime,command -r | head -9 | cut -c1-220'
+                  '  echo "-- top mem"; ps -Ao pid,ppid,pcpu,rss,etime,command -m | head -7 | cut -c1-220'
+                  '  sleep 60'
+                  'done'
+              ) | Set-Content -LiteralPath $samplerScript -Encoding ascii
+              $sampler = Start-Process -FilePath 'bash' -ArgumentList $samplerScript -RedirectStandardOutput $samplerLog -RedirectStandardError "$samplerLog.err" -PassThru
+          }
+
           Push-Location 'src/go2cs'
           try {
               # 50m stays the limit on every leg, osx-arm64 included: there the go2cs package runs past it, and past
@@ -1996,7 +2015,10 @@ jobs:
               & go test -buildvcs=false -count=1 -timeout 50m ./... *>&1 | Tee-Object -FilePath $log -Append
               $runExit = $LASTEXITCODE
           }
-          finally { Pop-Location }
+          finally {
+              Pop-Location
+              if ($sampler) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
+          }
 
           # Each package's verdict and every failing test by name; the full output is the artifact.
           $lines = @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue)
