@@ -414,6 +414,10 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "govoidnumber"},
 		{name: "govoidexpr"},
 		{name: "govoidnumberwrite"},
+		// The S4 cure's near misses (P3, F1): a typedef of a typedef (uint64_t) and a typedef'd enum, each a constant
+		// cmd/cgo's check closure declares at the typedef.
+		{name: "typedefwide"},
+		{name: "typedefenum"},
 		{name: "wordtoken", csFails: cgoP3WordToken},
 		{name: "wordint"},
 		// S6 (design 21): a pointer C keeps past the call, pinned with runtime.Pinner, read back after a collection.
@@ -744,10 +748,23 @@ func TestCgoAnArgumentDeclaredAtACTypedefCastsToItsPseudoPackageName(t *testing.
 	// The capture names memset's library, for this test alone (the package's tests run serially).
 	cgoPhase2Libraries["memset"] = "libc.so.6"
 	defer delete(cgoPhase2Libraries, "memset")
+	// P3's near misses (F1): a typedef of a typedef, as glibc declares uint64_t, and a typedef'd enum.
+	cgoPhase2Libraries["go2cs_probe_wide_into"] = "libgo2csprobe.so"
+	defer delete(cgoPhase2Libraries, "go2cs_probe_wide_into")
+	cgoPhase2Libraries["go2cs_probe_color_into"] = "libgo2csprobe.so"
+	defer delete(cgoPhase2Libraries, "go2cs_probe_color_into")
 	files["cgo_import.go"] = strings.Replace(cgoOfflineImportFile(cgoPhase2Libraries), "package cgophase2", "package cgophase3", 1)
 	files["fixture.cgo1.go"] += `
 func fillSeven(p unsafe.Pointer) {
 	func() _cgo_unsafe.Pointer{ _cgo0 := p; var _cgo1 _Ctype_int = 7; var _cgo2 _Ctype_size_t = 2; _cgoCheckPointer(_cgo0, nil); return _Cfunc_memset(_cgo0, _cgo1, _cgo2); }()
+}
+
+func wideInto(dst *_Ctype_uint64_t) _Ctype_uint64_t {
+	return func() _Ctype_uint64_t{ _cgo0 := dst; var _cgo1 _Ctype_uint64_t = 0x123456789; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_probe_wide_into(_cgo0, _cgo1); }()
+}
+
+func colorInto(dst *_Ctype_int) _Ctype_int {
+	return func() _Ctype_int{ _cgo0 := dst; var _cgo1 _Ctype_go2cs_probe_color = 4; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_probe_color_into(_cgo0, _cgo1); }()
 }
 `
 	files["cgo_gotypes.go"] += `
@@ -755,6 +772,44 @@ func fillSeven(p unsafe.Pointer) {
 //go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_memset _cgo_55dd9c1e1280_Cfunc_memset
 var __cgofn__cgo_55dd9c1e1280_Cfunc_memset byte
 var _cgo_55dd9c1e1280_Cfunc_memset = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_memset)
+
+type _Ctype_uint uint32
+
+type _Ctype___uint64_t = _Ctype_ulong
+
+type _Ctype_uint64_t = _Ctype___uint64_t
+
+type _Ctype_go2cs_probe_color = _Ctype_uint
+
+//go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into
+//go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into _cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into
+var __cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into byte
+var _cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into)
+
+//go:cgo_unsafe_args
+func _Cfunc_go2cs_probe_wide_into(p0 *_Ctype_uint64_t, p1 _Ctype_uint64_t) (r1 _Ctype_uint64_t) {
+	_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into, uintptr(unsafe.Pointer(&p0)))
+	if _Cgo_always_false {
+		_Cgo_use(p0)
+		_Cgo_use(p1)
+	}
+	return
+}
+
+//go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into
+//go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into _cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into
+var __cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into byte
+var _cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into)
+
+//go:cgo_unsafe_args
+func _Cfunc_go2cs_probe_color_into(p0 *_Ctype_int, p1 _Ctype_go2cs_probe_color) (r1 _Ctype_int) {
+	_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into, uintptr(unsafe.Pointer(&p0)))
+	if _Cgo_always_false {
+		_Cgo_use(p0)
+		_Cgo_use(p1)
+	}
+	return
+}
 
 //go:cgo_unsafe_args
 func _Cfunc_memset(p0 unsafe.Pointer, p1 _Ctype_int, p2 _Ctype_size_t) (r1 unsafe.Pointer) {
@@ -777,7 +832,28 @@ func _Cfunc_memset(p0 unsafe.Pointer, p1 _Ctype_int, p2 _Ctype_size_t) (r1 unsaf
 		t.Errorf("the call does not read %q", want)
 	}
 
+	// The near misses name their own typedef, never what it aliases: the typedef of a typedef stops at the name the
+	// parameter was declared at, and the enum's typedef is not its uint.
+	for _, want := range []string{"(Cꓸuint64_t)(0x123456789UL)", "(Cꓸgo2cs_probe_color)(4)"} {
+		if !strings.Contains(converted, want) {
+			t.Errorf("the near miss does not read %q; the calls read:\n%s", want, cgoLinesContaining(converted, "_into("))
+		}
+	}
+
 	if strings.Contains(converted, "_Ctype_") {
 		t.Errorf("a cmd/cgo Go name reached the C#")
 	}
+}
+
+// cgoLinesContaining returns the lines of text that contain substr, for a failure message that shows what was emitted.
+func cgoLinesContaining(text, substr string) string {
+	var lines []string
+
+	for _, line := range strings.Split(text, "\n") {
+		if strings.Contains(line, substr) {
+			lines = append(lines, strings.TrimSpace(line))
+		}
+	}
+
+	return strings.Join(lines, "\n")
 }

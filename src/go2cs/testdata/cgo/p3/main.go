@@ -26,6 +26,9 @@ int go2cs_probe_text_fill(char *buffer, int size);
 long go2cs_probe_sum(const void *bytes, int count);
 void *go2cs_probe_same(void *pointer);
 uintptr_t go2cs_probe_word(uintptr_t word);
+typedef enum { go2cs_probe_red = 1, go2cs_probe_green = 2, go2cs_probe_blue = 4 } go2cs_probe_color;
+uint64_t go2cs_probe_wide_into(uint64_t *dst, uint64_t value);
+int go2cs_probe_color_into(int *dst, go2cs_probe_color color);
 void go2cs_probe_keep(void *pointer);
 int go2cs_probe_kept(void);
 char *go2cs_probe_log_new(void);
@@ -307,6 +310,18 @@ func main() {
 		n := uintptr(unsafe.Pointer(&x))
 		C.memset(unsafe.Pointer(n+1), 7, 2)
 		fmt.Println("govoidnumberwrite", x)
+	case "typedefwide":
+		// The S4 cure's near miss (P3, F1): a uint64_t parameter, a typedef of a typedef on glibc, handed a constant above
+		// 2^32 beside a pointer, so cmd/cgo's check closure declares the constant at the typedef. It must cross whole:
+		// 4886718345, and C hands back its high word, 1.
+		var out C.uint64_t
+		high := C.go2cs_probe_wide_into(&out, 0x123456789)
+		fmt.Println("typedefwide", uint64(out), uint64(high))
+	case "typedefenum":
+		// The same near miss at a typedef'd enum: blue (4) crosses, C stores 40 and returns 4.
+		var out C.int
+		got := C.go2cs_probe_color_into(&out, 4)
+		fmt.Println("typedefenum", int(out), int(got))
 	case "wordtoken":
 		// S4, P3's read: a uintptr_t parameter handed the number of a Go value whose type holds Go pointers. Go hands C
 		// its address; go2cs's number for it is a token that names no memory, so the call is refused by name.

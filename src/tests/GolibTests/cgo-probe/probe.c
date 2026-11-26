@@ -212,6 +212,28 @@ GO2CS_PROBE_EXPORT uintptr_t go2cs_probe_word(uintptr_t word)
     return word;
 }
 
+// The near misses of the S4 cure (P3's read, F1): a parameter cmd/cgo declares at a C typedef, beside a pointer so the
+// call takes cmd/cgo's check closure, which declares the constant at that typedef. uint64_t is a typedef of a typedef on
+// glibc (over __uint64_t); go2cs_probe_color is a typedef'd enum.
+typedef enum
+{
+    go2cs_probe_red = 1,
+    go2cs_probe_green = 2,
+    go2cs_probe_blue = 4
+} go2cs_probe_color;
+
+GO2CS_PROBE_EXPORT uint64_t go2cs_probe_wide_into(uint64_t *dst, uint64_t value)
+{
+    *dst = value;
+    return value >> 32;
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_color_into(int *dst, go2cs_probe_color color)
+{
+    *dst = (int)color * 10;
+    return (int)color;
+}
+
 // A pointer C KEEPS past the call, and a later call that reads through it (cgo S6, design 21: legal in Go only when a
 // runtime.Pinner pins the memory).
 static void *go2cs_probe_kept_pointer;
