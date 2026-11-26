@@ -1,6 +1,12 @@
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - Swapper: INSPIRED BY src/internal/reflectlite/swapper.go, Go 1.26.11, func Swapper. The same swap function,
+//   through golib's slice indexer in place of flat memory moves.
 using System;
 
 // Hand-finished conversion (the reflection bridge — Phase 4). Go's Swapper reads the slice

@@ -4,6 +4,21 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - SockaddrInet4.sockaddr, SockaddrInet6.sockaddr, Bind, Connect, SetsockoptIPMreq, SetsockoptIPv6Mreq, ConnectEx,
+//   RawSockaddrAny.Sockaddr, Getsockname, Getpeername: INSPIRED BY src/syscall/syscall_windows.go, Go 1.26.11, funcs
+//   Bind, Connect, SetsockoptIPMreq, SetsockoptIPv6Mreq, ConnectEx, Getsockname, Getpeername; methods
+//   SockaddrInet4.sockaddr, SockaddrInet6.sockaddr, RawSockaddrAny.Sockaddr. The same encodings and contracts, with
+//   every address built in or read from a native buffer.
+// - swapBytes, the native sockaddr readers and writers, flattenRawSockaddr, writeRawSockaddr and the Go* seams:
+//   original go2cs code.
 
 // Hand-written implementations of the SOCKET-ADDRESS surface -- the sockaddr family of the syscall
 // STRUCT-PASSING seam catalogued in docs/phase4/BOARD-next-validation-candidates.md. This is the

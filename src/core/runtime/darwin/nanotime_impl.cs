@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - nanotime1: INSPIRED BY src/runtime/sys_darwin.go, Go 1.26.11, func nanotime1. The same monotonic clock, read from
+//   golib's source in place of the mach timebase trampoline.
 
 // runtime.nanotime1 — darwin's monotonic clock, realized on the same golib source the other two
 // flavors already read.

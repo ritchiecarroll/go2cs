@@ -3,6 +3,18 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - cansemacquire, SemaBucket.Queue, SemaBucket.Dequeue, Acquire: INSPIRED BY src/runtime/sema.go, Go 1.26.11, funcs
+//   cansemacquire, semacquire1; methods semaRoot.queue, semaRoot.dequeue. The same atomic count, FIFO or LIFO queue
+//   and acquire order, per address in a managed table.
+// - Release's handoff over golib's goroutines and the bucket table: original go2cs code.
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;

@@ -1,6 +1,19 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - The converted output: DERIVED FROM src/runtime/mfinal.go, Go 1.26.11, funcs lockRankMayQueueFinalizer,
+//   queuefinalizer, iterate_finq, wakefing, finalizercommit, finReadQueueStats, runFinalizers,
+//   isGoPointerWithoutSpan. Go's code and comments.
+// - SetFinalizer, createfing, blockUntilEmptyFinalizerQueue, KeepAlive: INSPIRED BY src/runtime/mfinal.go, Go
+//   1.26.11, funcs SetFinalizer, createfing, blockUntilEmptyFinalizerQueue, KeepAlive. The same contract over CLR
+//   finalization and golib's runner.
+// - the finalizer registry and runner: ReferentOf, Hold, Finalized, Cancel, EnsureRunner, Enqueue, WaitForIdle, Run,
+//   Dispatch: original go2cs code. The managed machinery.
 // Garbage collector: finalizers and block profiling.
 
 // go2cs HAND-OWNED (frozen converted output + one native replacement): SetFinalizer's converted

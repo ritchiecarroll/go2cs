@@ -214,9 +214,9 @@ is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/gol
      Mprotect(b[:pagesize],
      PROT_NONE) and Munmap(b) answered `invalid argument` (the kernel was handed a managed element address); writes
      landed
-     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:2018
+     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:2028
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
-     src/core/golib/slice.cs:311 (`The single creation door for a native-backed slice`). -->
+     src/core/golib/slice.cs:321 (`The single creation door for a native-backed slice`). -->
 
 ## The CryptoAPI chain seam — when a native record must be READ as a struct and HANDED BACK as a pointer
 
@@ -1120,7 +1120,7 @@ conversion of `os` keeps `dir_unix.go`'s pure-Go readdir. The guard is the opera
 
 **The testing shim's compile-only benchmark surface and `CoverMode` (`core/testing/testing.cs`).** Capability-excluded test and benchmark declarations still **compile** — exclusion gates the run registry, not emission — so every member their bodies reference must exist even though the code never executes (a broken emission inside an excluded test blocks the whole package build)<!-- the strings/bytes blocker map, B6 -->. The `B` surface (`N`, `Run`, `ReportAllocs`, `SetBytes`, `ResetTimer`, `StartTimer`, `StopTimer`, `Errorf`, `Fatal`, `Fatalf`) is therefore compile-only: safe non-throwing no-ops, with the params-taking members carrying explicit `ж<B>` overloads exactly as `T`'s do (ref-like `params` Spans are outside the RecvGenerator's synthesis). `testing.CoverMode()` returns `""` — not a stub-lie but Go's exact coverage-off value: the sole caller across the strings/bytes suites (strings' TestIndexRune) branches on `CoverMode() == ""` and so takes the same path as an uncovered `go test` run. Guarded by `TestingRuntimeTests.BenchmarkCompileSurfaceIsNoOpAndCoverModeReportsCoverageOff`, which compile-references every member through both receiver shapes and asserts the coverage-off semantic — removing any member fails the suite at build.
 
-**The same rule extends to `testing.F`.**<!-- history: 2026-07-20 --> A `Fuzz*` declaration is classified disclosed-unsupported in the manifest exactly as a benchmark is (`testConversion.go` emits the `fuzz`/"deferred to Phase 4D" entry), but its converted body still compiles into the test assembly — and `F` simply did not exist, so math/big's `func FuzzExpMont(f *testing.F)` (nat_test.go) failed the whole package build with CS0426 *the type name 'F' does not exist in the type 'testing_package'*. `F` now mirrors `B`: a compile-only struct whose members are safe non-throwing no-ops, with explicit `ж<F>` overloads on the params-taking members. Its member set is Go 1.23's full public surface for `*testing.F` — the `TB` members it inherits from the embedded `common`, plus its own `Add` and `Fuzz` — declared complete under the same anti-drift rule as `TB` above rather than trimmed to today's callers. `Fuzz` takes a **`System.Delegate`**: a Go fuzz target's signature is arbitrary (`*testing.T` followed by the fuzzed argument types), and the converted body is an explicitly-typed lambda, so C# infers its natural `Action<…>` and converts — no per-arity overload set is needed. Nothing is invoked and no seed corpus is retained, because there is no fuzzing engine to consume either. This is not math/big-specific: many stdlib packages ship fuzz targets (archive/tar, archive/zip, compress/gzip, encoding/csv, encoding/json, html, image/{gif,jpeg,png}, net/netip, time, syscall, …), every one of which would hit the identical build blocker. The set follows the corpus's Go version: `Chdir` and `Context`, which Go 1.24 added to `TB` and `F` inherits from `common`, joined it, and so did Go 1.25/1.26's `Attr`, `Output` and `ArtifactDir` (`src/core/testing/testing.cs:906-920`).
+**The same rule extends to `testing.F`.**<!-- history: 2026-07-20 --> A `Fuzz*` declaration is classified disclosed-unsupported in the manifest exactly as a benchmark is (`testConversion.go` emits the `fuzz`/"deferred to Phase 4D" entry), but its converted body still compiles into the test assembly — and `F` simply did not exist, so math/big's `func FuzzExpMont(f *testing.F)` (nat_test.go) failed the whole package build with CS0426 *the type name 'F' does not exist in the type 'testing_package'*. `F` now mirrors `B`: a compile-only struct whose members are safe non-throwing no-ops, with explicit `ж<F>` overloads on the params-taking members. Its member set is Go 1.23's full public surface for `*testing.F` — the `TB` members it inherits from the embedded `common`, plus its own `Add` and `Fuzz` — declared complete under the same anti-drift rule as `TB` above rather than trimmed to today's callers. `Fuzz` takes a **`System.Delegate`**: a Go fuzz target's signature is arbitrary (`*testing.T` followed by the fuzzed argument types), and the converted body is an explicitly-typed lambda, so C# infers its natural `Action<…>` and converts — no per-arity overload set is needed. Nothing is invoked and no seed corpus is retained, because there is no fuzzing engine to consume either. This is not math/big-specific: many stdlib packages ship fuzz targets (archive/tar, archive/zip, compress/gzip, encoding/csv, encoding/json, html, image/{gif,jpeg,png}, net/netip, time, syscall, …), every one of which would hit the identical build blocker. The set follows the corpus's Go version: `Chdir` and `Context`, which Go 1.24 added to `TB` and `F` inherits from `common`, joined it, and so did Go 1.25/1.26's `Attr`, `Output` and `ArtifactDir` (`src/core/testing/testing.cs:923-937`).
 
 **A hand-owned struct declares the zero-value constructor the generator would have given it.** go2cs-gen writes a `T(NilType _)` constructor for every converted struct, and the converter binds it wherever it writes a struct's zero value without a literal: the zero of an address-taken package-level `var x T` reads `new StaticBox<T>(new T(nil))`. testing's `T`, `M`, `B`, `PB` and `F` are hand-written C# structs with no generator behind them, so each declares `public X(NilType _) { }` itself, and a hand-owned struct a converted package may hold that way owes the same constructor. An empty composite literal does not need it<!-- since parity seat #21 (Z1) -->: `&testing.T{}` (testify's require tests construct one) reads `Ꮡ(new testing.T())`, which binds the parameterless constructor every C# struct has (see [An empty struct literal `T{}` reads `new T()`](struct-types.md#an-empty-struct-literal-t-reads-new-t)). Guarded by the `TestingStructZeroLiteral` behavioral test.
 
@@ -1153,9 +1153,9 @@ borrow expressions; each word-size function is a single expression with no `Uint
 `Math.BigMul` too. Measured on linux/amd64 (the minimum over seven processes), the P-256 field multiply went from 122 to 95 ns and nistec's P-256
 `ScalarMult` from 1470 to 1295 µs. Guarded by GolibTests' `MathBitsLeafTests` and the `MathBitsLeaves`
 behavioral test, whose output matches Go over the edge cases and a 100,000-value sweep.
-<!-- src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`,
-     :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
-     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2914 (`"math/bits": {`);
+<!-- src/core/math/bits/bits_impl.cs:159 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`,
+     :129 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
+     :70-71 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2914 (`"math/bits": {`);
      src/tests/Behavioral/MathBitsLeaves/main.go:37 (`for i := 0; i < 100000; i++ {`); commit d89ec81a23. -->
 
 ## A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub
@@ -3716,9 +3716,9 @@ The fork is confined to the **slot representation** and keeps every other line o
 the packed `head`/`tail`, the fullness test, the CAS protocol, the single-producer/multi-consumer
 contract, and the entire `poolChain` half:
 
-<!-- source: src/core/sync/poolqueue.cs:73-78 -->
+<!-- source: src/core/sync/poolqueue.cs:79-84 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
-<!-- source: src/core/sync/poolqueue.cs:75-80 -->
+<!-- source: src/core/sync/poolqueue.cs:81-86 -->
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
 // managed reference, so the slot holds that reference directly; see the file header for why the
@@ -3891,7 +3891,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5557 (`INLINED PANIC SITES`), :5565 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5618 (`INLINED PANIC SITES`), :5626 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -4265,8 +4265,8 @@ statement it replaces, and maps no other line, so a traceback's `created by` lin
 The guard `TestHandOwnedGoStatementsMapToGo` checks every tracked hand-owned file under `src/core` against the pinned
 GOROOT: one record per file, each `goǃ(` line mapped to a Go `go` statement, and every other line left unmapped.
 <!-- src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283 `func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`;
-     examples: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AP0B3AMAANsD")]`),
-     src/core/net/windows/lookup_windows.cs:55 (`[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs",`). -->
+     examples: src/core/sync/waitgroup.cs:37 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIYC3AMAANsD")]`),
+     src/core/net/windows/lookup_windows.cs:64 (`[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs",`). -->
 
 **The path is SPELLED Go's way, whichever file it names.** Which source a frame's path points
 at and how that path is written are separate questions, and only the first is deferred. Go records
@@ -4616,7 +4616,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3717-3738 -->
+<!-- source: src/core/reflect/value_impl.cs:3745-3766 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {
@@ -4866,7 +4866,7 @@ product times R⁻¹ out. Its body is a straight-line Montgomery multiply genera
 measurement record. It is constant time, like fiat's: no loop, no branch, constant limb indexes, carries by
 `math/bits`' own formulas, and a masked final subtraction. Square is the same multiply:
 
-<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_impl.cs:435-437 -->
+<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_impl.cs:467-469 -->
 ```csharp
 internal static void p521Square(ref p521MontgomeryDomainFieldElement out1, ref p521MontgomeryDomainFieldElement arg1) {
     p521Mul(ref out1, ref arg1, ref arg1);

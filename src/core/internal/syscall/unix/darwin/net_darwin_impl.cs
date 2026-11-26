@@ -4,6 +4,22 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2022 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Getaddrinfo, Freeaddrinfo: DERIVED FROM src/internal/syscall/unix/net_darwin.go, Go 1.26.11, funcs Getaddrinfo,
+//   Freeaddrinfo. Go's calls, with the addrinfo chain transcribed into managed records.
+// - RecvfromInet4, RecvfromInet6, SendtoInet4, SendtoInet6, RecvmsgInet4, RecvmsgInet6, SendmsgNInet4, SendmsgNInet6:
+//   bodies for the bodyless Go declarations of the same names in src/internal/syscall/unix/net.go. Original go2cs
+//   code.
+// - syscall_syscall, syscall_syscallPtr, syscall_syscall6, syscall_syscall6X, syscall_syscall9, gostring: bodies for
+//   the bodyless Go declarations of the same names in src/internal/syscall/unix/net_darwin.go. Original go2cs code.
+// - transcribeChain: original go2cs code. Copies the native addrinfo chain.
 
 // Hand-written implementations of net.go's //go:linkname datagram helpers for the DARWIN flavor --
 // the darwin companion of internal/syscall/unix/linux/net_linux_impl.cs (whose header carries the

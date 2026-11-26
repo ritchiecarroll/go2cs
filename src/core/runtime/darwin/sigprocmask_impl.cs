@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - sigprocmask: INSPIRED BY src/runtime/sys_darwin.go, Go 1.26.11, func sigprocmask. The same libc call, with the
+//   masks encoded and decoded across the native boundary.
+// - GoSigprocmask: original go2cs code. A test seam.
 
 // The darwin run layer's increment 5 (2026-09-04): runtime.sigprocmask, the darwin flavour's
 // signal-mask primitive, realized over the same libc entry point Go's own trampoline calls.

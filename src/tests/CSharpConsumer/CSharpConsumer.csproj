@@ -17,8 +17,10 @@
     <NoWarn>$(NoWarn);CS8981</NoWarn>
   </PropertyGroup>
 
+  <!-- Not during a restore: an IDE that loads every project under the repository (VS Code's C# Dev Kit with no default
+       solution) restores this one too, and the error there failed the whole restore. A real build still stops here. -->
   <Target Name="RequireConvertedRoot" BeforeTargets="ResolveProjectReferences;CollectPackageReferences">
-    <Error Condition="'$(ConsumerConvertedRoot)' == ''" Text="ConsumerConvertedRoot is not set: build this project through run-csharp-consumer.ps1, which converts the modules it references." />
+    <Error Condition="'$(ConsumerConvertedRoot)' == '' and '$(MSBuildIsRestoring)' != 'true'" Text="ConsumerConvertedRoot is not set: build this project through run-csharp-consumer.ps1, which converts the modules it references." />
   </Target>
 
   <ItemGroup Condition="'$(ConsumerConvertedRoot)' != ''">

@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - ᴛCpuinitFlags: DERIVED FROM src/runtime/proc.go, Go 1.26.11, func cpuinit. Its copy of internal/cpu's flags into
+//   the runtime's, in a module initializer.
 
 // The runtime's own CPU feature flags (cpuflags.go: x86HasAVX, x86HasFMA, x86HasPOPCNT, x86HasSSE41
 // and the arm/arm64/loong64/riscv64 ones) are set in ONE place in Go: cpuinit (proc.go), which

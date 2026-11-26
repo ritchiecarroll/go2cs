@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - _DnsQuery, DnsRecordListFree: INSPIRED BY src/syscall/zsyscall_windows.go (generated from the declarations in
+//   src/syscall/syscall_windows.go, whose notice this file carries), Go 1.26.11, funcs _DnsQuery, DnsRecordListFree.
+//   The native record list is copied into managed records and freed by the native call.
+// - the copy and payload helpers: original go2cs code.
 
 // Hand-written implementation of the DNS RECORD pair -- _DnsQuery and DnsRecordListFree -- the
 // third-fork member the ptrout census deferred by name ("it belongs to a `net` DNS arc"). This is

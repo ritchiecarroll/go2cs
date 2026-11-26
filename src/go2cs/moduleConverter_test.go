@@ -9,6 +9,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -283,6 +284,42 @@ func TestRecurseLocalRefsPinTheTargetPlatform(t *testing.T) {
 // buildTransitive (go.lib.targets, which imports go.lib.rollforward.targets) never reaches it, and on a machine with
 // only a newer .NET it exited 150 at launch. The output root imports the file itself, with the guard. A -recurse=nuget
 // output root needs no import (the package brings it), and the guard keeps the two from stacking either way.
+// TestRecurseTargetsDoNotDependOnAForeignProps: run in place in a deploy-core root, -recurse keeps deploy-core's
+// Directory.Build.props (it is not the converter's) but writes its own Directory.Build.targets. The generator-output
+// redirection there spells $(Go2csArtifactsRoot)gen\$(Go2csArtifactToken), and only the converter's props defines
+// those two properties; left unguarded, both read empty, every project shares "gen\" and csc fails CS2021. The
+// in-place gate arm is src/tests/PackageTests/LocalRefsPlatform (IN-PLACE).
+func TestRecurseTargetsDoNotDependOnAForeignProps(t *testing.T) {
+	const guard = `<PropertyGroup Condition="'$(EmitCompilerGeneratedFiles)' == 'true' and '$(Go2csArtifactsRoot)' != '' and '$(Go2csArtifactToken)' != ''">`
+
+	root := t.TempDir()
+	foreign := "<Project>\r\n  <PropertyGroup>\r\n    <go2csPath>$(MSBuildThisFileDirectory)</go2csPath>\r\n  </PropertyGroup>\r\n</Project>\r\n"
+
+	if err := os.WriteFile(filepath.Join(root, "Directory.Build.props"), []byte(foreign), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	NewModuleConverter(Options{go2csPath: root, recurseOutputRoot: root, recurse: true, targetPlatform: "linux/amd64"}).generateRecurseBuildFiles()
+
+	if props := readGenerated(t, filepath.Join(root, "Directory.Build.props")); props != foreign {
+		t.Errorf("the foreign Directory.Build.props was rewritten:\n%s", props)
+	}
+
+	targets := strings.ReplaceAll(readGenerated(t, filepath.Join(root, "Directory.Build.targets")), "\r\n", "\n")
+
+	for _, line := range strings.Split(targets, "\n") {
+		if (strings.Contains(line, "$(Go2csArtifactsRoot)") || strings.Contains(line, "$(Go2csArtifactToken)")) && !strings.Contains(line, guard) {
+			if !strings.Contains(targets, "  "+guard+"\n"+line+"\n") {
+				t.Errorf("Directory.Build.targets reads a property only the converter's props defines, outside the guard:\n%s", line)
+			}
+		}
+	}
+
+	if !strings.Contains(targets, guard) {
+		t.Errorf("Directory.Build.targets does not guard the generator-output redirection:\n%s", targets)
+	}
+}
+
 func TestRecurseLocalRefsImportTheRollForward(t *testing.T) {
 	const want = `<Import Project="$(go2csPath)core/golib/buildTransitive/go.lib.rollforward.targets"`
 
