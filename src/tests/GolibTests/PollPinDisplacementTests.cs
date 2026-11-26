@@ -189,7 +189,54 @@ public class PollPinDisplacementTests
             // The deterministic half. On loopback the kernel copies a datagram inside the call, before a compaction can
             // move it, so the bytes alone cannot tell a retained buffer from an unheld one (an unpinned-address control read
             // green 3 of 3). The record must have retained at least one box per send.
+            // RetainedForFlight is process-wide, so ">= count" is also met by sends from another test class running at the same
+            // time. MSTest runs this assembly's classes one after another today; a parallel run would weaken this half, not
+            // break it.
             Assert.IsTrue(GoAsyncIO.RetainedForFlight - retainedBefore >= count, $"each WriteToInet4 send retains its buffer's box through the record (retained {GoAsyncIO.RetainedForFlight - retainedBefore} for {count} sends)");
+
+            // WriteMsgUDP (fd.WriteMsg -> WSASendMsg) and ReadMsgUDP (fd.ReadMsg -> WSARecvMsg) stage their buffers through
+            // stageWSABufs as well (P3, S6 r8). RetainForFlight ignores a key with no record, by design, so an edit that staged
+            // either under another key would drop its retention with no other row red. One of each, each read across its own
+            // call. The receive is the path where a moved buffer is written by the kernel.
+            (ж<net_package.UDPConn>? udpSender, bool sok) = sender._<ж<net_package.UDPConn>>(ᐧ);
+            Assert.IsTrue(sok, "the udp4 sender is a *UDPConn");
+            (ж<net_package.UDPConn>? udpReceiver, bool rok) = receiver._<ж<net_package.UDPConn>>(ᐧ);
+            Assert.IsTrue(rok, "the udp4 receiver is a *UDPConn");
+
+            (long sendRose, long receiveRose) = OnAGoroutine(() =>
+            {
+                (ж<net_package.UDPAddr>? to, bool aok) = receiver.LocalAddr()._<ж<net_package.UDPAddr>>(ᐧ);
+                Assert.IsTrue(aok, "the receiver's address is a *UDPAddr");
+
+                byte[] bytes = new byte[size];
+
+                for (int i = 0; i < size; i++)
+                    bytes[i] = (byte)(i * 13 + 5);
+
+                long before = GoAsyncIO.RetainedForFlight;
+                (nint written, nint _, error werr) = udpSender!.WriteMsgUDP(new slice<byte>(bytes), default, to!);
+                long sent = GoAsyncIO.RetainedForFlight - before;
+                Assert.IsNull(werr, $"WriteMsgUDP: {werr}");
+                // Not asserted: Go 1.26's (*FD).WriteMsg hands WSASendMsg a nil byte count and returns its submit's qty, so an
+                // immediate completion on a socket that skips the sync notification reports 0. Real Go on this host prints
+                // n=0 for the same loopback send, and the receive below reads all 1400 bytes.
+                _ = written;
+
+                slice<byte> got = new slice<byte>(new byte[size + 16]);
+                before = GoAsyncIO.RetainedForFlight;
+                (nint n, nint _, nint _, ж<net_package.UDPAddr> _, error rerr2) = udpReceiver!.ReadMsgUDP(got, default);
+                long received = GoAsyncIO.RetainedForFlight - before;
+                Assert.IsNull(rerr2, $"ReadMsgUDP: {rerr2}");
+                Assert.AreEqual((nint)size, n, "ReadMsgUDP reports every byte received");
+
+                for (int i = 0; i < size; i++)
+                    Assert.AreEqual((byte)(i * 13 + 5), got[i], $"ReadMsgUDP byte {i}");
+
+                return (sent, received);
+            });
+
+            Assert.IsTrue(sendRose >= 1, $"WriteMsgUDP retains its buffer's box through the record (retained {sendRose})");
+            Assert.IsTrue(receiveRose >= 1, $"ReadMsgUDP retains its buffer's box through the record (retained {receiveRose})");
         }
         finally
         {

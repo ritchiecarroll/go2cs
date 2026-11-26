@@ -675,10 +675,6 @@ namespace go.golib;
 }
 
 /// <summary>
-/// Implemented by a submitting package's per-operation state to expose the operation's native
-/// control block to the package that harvests its result.
-/// </summary>
-/// <summary>
 /// A record that can keep an object reachable for the flight of its current submission (cgo S6, design 21.10 and
 /// COORD's hardening ruling): the submitting package hands it a buffer's pinning box, and the record holds the box until
 /// its next rearm, so the box's own pin outlives the call that handed the OS its address.
@@ -694,6 +690,10 @@ namespace go.golib;
     void RetainForFlight(object box);
 }
 
+/// <summary>
+/// Implemented by a submitting package's per-operation state to expose the operation's native
+/// control block to the package that harvests its result.
+/// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)] public interface IGoAsyncOperation
 {
     /// <summary>
