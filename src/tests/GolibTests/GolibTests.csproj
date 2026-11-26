@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>annotations</Nullable>
 
     <IsPackable>false</IsPackable>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
