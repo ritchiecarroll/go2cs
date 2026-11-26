@@ -3948,3 +3948,29 @@ One hosted-only fault came up along the way. The first push of `pinnerkeepstruct
 (`cc4bd6fe0b`), and the preamble's new prototypes sit below its own definition.
 
 — H (2026-11-26)
+
+### 21.12 Record 2026-11-26: the (F)-only sends hardened (COORD inbox H 20261126T055209Z); 21.10's rows amended
+
+COORD accepted 21.10 and ruled the hardening into S6. `internal/syscall/windows`' `stageWSABufs`, shared by
+`WSASendtoInet4/6`, `WSASendMsg` and `WSARecvMsg`, now retains each buffer's box through the operation record for the
+flight, as `syscall`'s `writeWSABufs` does.
+- **The seam.** It goes through golib: `GoAsyncIO.RetainForFlight`, and a new OPTIONAL interface `IGoAsyncRetainer`.
+  `IGoAsyncOperation` is not widened. `syscall`'s `OverlappedOp` implements the interface over its existing pin list,
+  cleared at the same `Rearm`.
+- **Amended rows of 21.10** (the dated amendment; 21.10 itself is not rewritten):
+  - :1041 `WriteTo` via `WSASendtoInet4/6`, :1078 `WriteToInet4` and :1115 `WriteToInet6` read **B+F**, not "F only".
+  - `WriteToInet4` (:1078) is **RUN**, through row `AWriteToInet4SendCarriesItsOwnBytesWhileTheHeapCompacts` on Windows.
+    That row sends 200 datagrams through `UDPConn.WriteTo` on udp4 (`fd.writeToInet4` → `WSASendtoInet4`) while another
+    thread compacts the heap.
+  - :1115 and the `WriteTo` route share the same function (`prepareSendto` → `stageWSABufs`) and stay **READ**.
+- **What the row can and cannot show.** It has two halves:
+  - **Bytes:** every datagram arrives with its own buffer's bytes. The unpinned-address control (the kernel handed
+    `Unsafe.AsPointer` of the same bytes, with no retention) left this half GREEN in 3 of 3 runs. On loopback the kernel
+    copies a datagram inside the call, before a compaction can move it, so the bytes half is a smoke arm.
+  - **Retention:** the record retained at least one box per send, read through a test seam
+    (`GoAsyncIO.RetainedForFlight`). With the retention line removed this half reads "retained 0 for 200 sends", so it
+    is the discriminating half.
+- **The compactor sleeps 1 ms per collection.** Without the sleep, the send goroutine starved for 60 s in 3 of 3 runs.
+  That is the BOARD's 2026-11-25 collector hang, with the same cure.
+
+— H (2026-11-26)
