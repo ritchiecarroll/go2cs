@@ -512,3 +512,54 @@ the same contract in go2cs's own shape; "cites only" means the name match is a c
 Tally: 3 files hold derived parts, 14 are inspired, 5 cite only. The three derived parts are the ones where
 Go's notice would apply most clearly; whether that means a header in golib, which packs only its MIT LICENSE,
 is the ruling Q3 left open.
+
+## Q3 ruled: golib headers (amended 2026-11-26)
+
+<!-- P5, on COORD 20261126T080412Z (Q3 ruling, by analogy with the owner's fiat ruling "Notice in files only").
+     Commits on top of dc58daa7fb and 3b6ad8d976. -->
+
+**What was done.** The 17 golib files of the Q3 table above that hold derived or inspired parts carry the
+step 2 header shape, inserted under golib's own MIT notice: a lead sentence, Go's notice once, then
+`// PROVENANCE, part by part:` with one bullet per Go part and one for the original rest. The 5 cite-only
+files are unchanged. go.lib's package metadata, its packed LICENSE and NOTICE are unchanged.
+
+| golib file | Go parts |
+|---|---|
+| `GoReflect.FinalizerBinding.cs` | derived: `runtime/mfinal.go` `SetFinalizer` (the binding switch and its panic texts) |
+| `slice.cs` | derived: `runtime/slice.go` `nextslicecap` |
+| `runtime/SyncTestBubble.cs` | derived: `runtime/runtime2.go` `waitReason.isIdleInSynctest`; inspired: `runtime/synctest.go` `incActive`, `decActive`, `maybeWakeLocked` |
+| `GoLibcCall.cs` | inspired: `runtime/sys_darwin.go` `syscall_rawsyscalln` |
+| `GoMemProfile.cs` | inspired: `runtime/malloc.go` `mallocgc`, `profilealloc`, `nextSample` |
+| `GoReflect.TypeNaming.cs` | inspired: `go/types/typestring.go` `typeWriter.typ` |
+| `GoReflect.ValueMarshalling.cs` | inspired: `reflect/type.go` `directlyAssignable`, `haveIdenticalType`, `haveIdenticalUnderlyingType`; `reflect/value.go` `Value.Convert`, `convertOp` |
+| `PanicException.cs` | inspired: `runtime/panic.go` `preprintpanics` |
+| `builtin.WindowsLongPaths.cs` | inspired: `runtime/os_windows.go` `initLongPathSupport` |
+| `channel.cs` | inspired: `runtime/chan.go` `chansend`, `chanrecv`, `send`, `recv` |
+| `runtime/CrashReport.cs` | inspired: `runtime/panic.go` `printpanics` |
+| `runtime/ExecutionTracer.cs` | inspired: `runtime/trace.go` `StopTrace`, `ReadTrace`; `runtime/tracetime.go` `traceSyncBatch` |
+| `runtime/Goroutine.cs` | inspired: `runtime/proc.go` `gopark`, `goready`, `gcount` |
+| `runtime/RuntimeErrorPanic.cs` | inspired: `runtime/error.go` `panicwrap`; `runtime/panic.go` `panicdivide`, `panicmem`; `runtime/iface.go` `panicnildottype` |
+| `runtime/RuntimeSemaphore.cs` | inspired: `runtime/sema.go` `cansemacquire`, `semaRoot.queue`, `semaRoot.dequeue`, `semacquire1` |
+| `stackAppend.cs` | inspired: `cmd/compile/internal/ssagen/ssa.go` `state.getBackingStoreInfoForAppend`, `state.append` |
+| `string.cs` | inspired: `runtime/string.go` `concatstrings` |
+
+Every part cites Go 1.26.11, and every Go name was checked against the file it names before the header was
+written. `GoReflect.ValueMarshalling.cs` already carried Go's notice and a `// Provenance:` paragraph; the new
+block replaces them (the 10 deleted lines of the golib diff). All golib changes are comments.
+
+**Guard.** It fits: `TestLicensingGoProvenanceHeaders` no longer skips golib, and it fails if the walk reaches
+no golib file with a PROVENANCE block, so a later skip cannot turn the golib half off without a red. Red
+controls on the real tree: deleting Go's copyright line from `string.cs` made the guard fail naming that file;
+putting golib back on the skip list made it fail with the golib liveness message. Both restored and checked by
+sha256. The gap is the same as in the rest of src/core: a file that follows Go and carries no PROVENANCE block
+at all is not seen by the guard.
+
+**Line citations, and a correction to step 2.** The golib headers move every line below them, so citations of
+the 17 files were moved the same way as in step 2: 41 citations in the living docs, each checked to name the
+same text at HEAD and in the worktree, including 5 on continuation lines and 2 given as a bare `slice.cs`. No
+code comment cites a moved golib line.
+Correction: the four `docs/PLAN-*.md` files and `docs/DESIGN-aeshash-arm64.md` cite lines at a stated commit
+("At 30ad20e17e", "at 59ee0d21bf", "Taken at 4aebdadc1a"), so their line numbers are right as written and must
+not move. Step 2 had moved 26 of its 114 citations in those five files (one of them, a `:31` continuation in
+PLAN-cgo-interop, onto the wrong file); those five files are restored to their base text, which leaves 88 step 2
+citations, all in living docs, `.claude` rules and skills, and code comments.
