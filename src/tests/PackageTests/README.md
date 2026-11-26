@@ -102,8 +102,8 @@ from git (tracked files only, so no `bin`/`obj` can hide a skipped restore) and 
   `<host GOOS>/riscv64` by name;
 - IN-PLACE: `deploy-core.ps1 -Target` stages the same root, and plain `go2cs -recurse -go2cspath <deploy root>`, with no
   output root, converts into the deploy root itself. The conversion keeps deploy-core's `Directory.Build.props` and
-  writes only its targets, so the build passes exactly the flags `docs/ConvertingAModule.md` names for the host; it
-  builds and prints what `go run` prints.
+  writes only its targets, so the platform default is the one deploy-core recorded; `dotnet build` and `dotnet run`
+  with no flags build the program and print what `go run` prints.
 
 ```text
 pwsh src/tests/PackageTests/LocalRefsPlatform/test-local-refs-platform.ps1 [-Converter <go2cs>] [-Repository <clone>]
@@ -113,7 +113,9 @@ Read red-first on linux-x64: with the restore half removed from the converter, D
 project the runtime references only on linux (release-smoke 45729437375 read the same on both linux legs), and
 OVERRIDE still passes; with it, both arms PASS. IN-PLACE read red-first on linux-x64 with the converter at 582c50e1dd:
 `CS2021` for `deploy/core/internal/godebugs/gen/`, because the targets' generator-output path read two properties only
-the converter's own props defines; with the guard all three arms PASS.
+the converter's own props defines; with the guard all three arms PASS. With no flags, IN-PLACE read red at
+148d7a8f68, whose deploy-core recorded no platform (the linux build compiled the windows runtime); green once
+deploy-core records it.
 
 # `BreakFloor`: a package built below the go.* break floor fails the build
 
