@@ -1,6 +1,13 @@
 // Copyright 2022 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - Bool, Int32, Int64, Uint32, Uint64, Uintptr, Pointer, b32: INSPIRED BY src/sync/atomic/type.go, Go 1.26.11, func
+//   b32; the methods of Bool, Int32, Int64, Uint32, Uint64, Uintptr, Pointer. Go's types and doc comments kept; the
+//   method bodies use Volatile and Interlocked in place of the package functions.
 using go;
 
 // Hand-finished conversion. Pointer<T> below is rewritten to store its value as a managed ж<T>

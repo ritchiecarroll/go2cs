@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2019 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - addrRanges.init, addrRanges.add, addrRanges.cloneInto: DERIVED FROM src/runtime/mranges.go, Go 1.26.11, methods
+//   addrRanges.init, addrRanges.add, addrRanges.cloneInto. Go's bodies and comments, with the backing grown as a
+//   managed slice.
+// - rebaseRanges, GoAddrRangesProbe: original go2cs code. Helper and test seam.
 
 // addrRanges.init, addrRanges.add and addrRanges.cloneInto, hand-owned (increment 7 of the runtime
 // row, Q-memory W2a; the three are displaced through manualConversionFuncs, so mranges.cs carries a

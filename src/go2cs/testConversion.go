@@ -4406,7 +4406,7 @@ func supportedTestCapabilities() []string {
 		// testing.Testing reports whether the binary is a test binary. The host has implemented it
 		// since the one-tree consolidation (core/testing/testing.cs) and the capability list simply
 		// never named it -- an omission train 18 recorded in the same breath as the admission census
-		// ("the host implements testing.Testing at testing.cs:672, but the capability list omits the
+		// ("the host implements testing.Testing at testing.cs:689, but the capability list omits the
 		// name"). Roster impact measured before widening, per the charter: a GOROOT-wide scan of
 		// every *_test.go for `testing.Testing()` returns exactly ONE file, testing's own
 		// testing_test.go, so no validated package gains or loses a test by this.

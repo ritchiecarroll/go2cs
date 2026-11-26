@@ -4,6 +4,28 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notices they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2009,2010 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Exec: DERIVED FROM src/syscall/exec_unix.go, Go 1.26.11, func Exec. Execve receives unmanaged copies of argv and
+//   envp, and the converted GOOS branch ladder is dropped.
+// - forkExec: INSPIRED BY src/syscall/exec_unix.go, Go 1.26.11, func forkExec. Go's argument validation kept; the
+//   child is started with posix_spawn in place of fork and exec.
+// - pipe: INSPIRED BY src/syscall/zsyscall_darwin_amd64.go (generated from the declarations in
+//   src/syscall/syscall_darwin.go, whose notice this file carries), Go 1.26.11, func pipe. Libc's pipe writes a
+//   native pair that is copied into the caller's array.
+// - runtime_BeforeExec, runtime_AfterExec, the posix_spawn seam and the native surface: original go2cs code.
+//   Runtime_BeforeExec and runtime_AfterExec are empty bodies for bodyless declarations.
 
 // The darwin exec seam -- forkExec over posix_spawn(3), Exec over an unmanaged execve(2), and the
 // pipe both stand on -- darwin increment 10 (b), 2026-09-05: the darwin companion of the linux

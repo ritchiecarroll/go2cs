@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2022 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - newUserArena, userArena.new, userArena.slice, userArena.free, arena_heapify: INSPIRED BY src/runtime/arena.go, Go
+//   1.26.11, funcs newUserArena, arena_heapify; methods userArena.new, userArena.slice, userArena.free. The same
+//   arena contract over managed allocations, without chunks or faulting addresses.
+// - userArenaNew, userArenaKeep, userArenaIsMember and the other userArena* helpers, and the GoUserArena* test seams:
+//   original go2cs code. The managed bookkeeping.
 
 // User arenas (arena.go) over managed allocations.
 //

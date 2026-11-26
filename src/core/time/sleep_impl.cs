@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - syncTimer: INSPIRED BY src/time/sleep.go, Go 1.26.11, func syncTimer. The same synchronous-channel test over a
+//   managed channel identity.
 
 // syncTimer is Go 1.23's `*(*unsafe.Pointer)(unsafe.Pointer(&c))` (time/sleep.go): the channel
 // handed to the runtime's timer as a raw pointer, so a synchronous timer channel can be told apart

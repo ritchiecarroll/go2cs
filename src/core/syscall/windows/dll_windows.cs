@@ -1,6 +1,27 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - DLLError.Error, DLLError.Unwrap, LoadDLL, MustLoadDLL, DLL.FindProc, DLL.MustFindProc, DLL.Release, Proc.Addr,
+//   Proc.Call, LazyDLL.mustLoad, LazyDLL.Handle, LazyDLL.NewProc, NewLazyDLL, LazyProc.mustFind, LazyProc.Addr,
+//   LazyProc.Call: DERIVED FROM src/syscall/dll_windows.go, Go 1.26.11, funcs LoadDLL, MustLoadDLL, NewLazyDLL;
+//   methods DLLError.Error, DLLError.Unwrap, DLL.FindProc, DLL.MustFindProc, DLL.Release, Proc.Addr, Proc.Call,
+//   LazyDLL.mustLoad, LazyDLL.Handle, LazyDLL.NewProc, LazyProc.mustFind, LazyProc.Addr, LazyProc.Call. The converted
+//   output.
+// - LazyDLL.Load, LazyProc.Find, loadlibrary, loadsystemlibrary, getprocaddress: INSPIRED BY
+//   src/syscall/dll_windows.go, Go 1.26.11, funcs loadlibrary, loadsystemlibrary, getprocaddress; methods
+//   LazyDLL.Load, LazyProc.Find. The lazy loads use a double-checked lock in place of atomic pointer loads, and the
+//   library calls are P/Invokes.
+// - syscalln: bodies for the bodyless Go declarations of the same names in src/syscall/dll_windows.go. Original go2cs
+//   code.
+// - Syscall, Syscall6, Syscall9, Syscall12, Syscall15, Syscall18, SyscallN: original go2cs code. Written as
+//   forwarders to syscalln while Go declared these bodyless (through Go 1.25.14); Go 1.26.11 gives them bodies with
+//   the same contract.
+// - callNative, loadLibraryImpl and the token-call refusals: original go2cs code.
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted dll_windows.go output).
 // Two parts of this file cannot work as literally converted:

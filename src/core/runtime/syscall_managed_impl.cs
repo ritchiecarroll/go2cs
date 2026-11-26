@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - entersyscall, reentersyscall, entersyscallblock, exitsyscall: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs
+//   entersyscall, reentersyscall, entersyscallblock, exitsyscall. The same status transitions and syscall frame
+//   record, with no P to hand off.
+// - enterSyscall, the syscall* forwarders, the callback enter and exit, and the Go* seams: original go2cs code.
+//   Helpers and test seams.
 
 // The entersyscall FAMILY -- entersyscall, reentersyscall, entersyscallblock, exitsyscall --
 // hand-owned (COORD ruling 2026-09-22; registered in manualConversionFuncs["runtime"]).

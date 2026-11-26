@@ -1,6 +1,12 @@
 // Copyright 2022 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - OnceFunc, OnceValue, OnceValues: DERIVED FROM src/sync/oncefunc.go, Go 1.24.13, funcs OnceFunc, OnceValue,
+//   OnceValues. A captured panic is replayed with its value.
 using System.Runtime.ExceptionServices;
 
 [module: go.GoManualConversion]

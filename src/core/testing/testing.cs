@@ -4,6 +4,23 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2013 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - T.Deadline: INSPIRED BY src/testing/testing.go, Go 1.26.11, method T.Deadline. The earlier of the package
+//   deadline and the host's per-test deadline.
+// - AllocsPerRun: INSPIRED BY src/testing/allocs.go, Go 1.26.11, func AllocsPerRun. The same warm-up and average,
+//   measured with the CLR's allocation counters.
+// - the rest of the public testing surface, which carries Go's names over go2cs's test host: original go2cs code.
 
 using System;
 using System.Collections.Generic;

@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - adjustTokenPrivileges: DERIVED FROM src/internal/syscall/windows/zsyscall_windows.go (generated from the
+//   declarations in src/internal/syscall/windows/security_windows.go, whose notice this file carries), Go 1.24.13,
+//   func adjustTokenPrivileges. The generated call and error mapping, with the privileges record marshalled natively.
+// - toNativeTokenPrivileges, fromNativeTokenPrivileges: original go2cs code. That marshalling.
 
 // The privilege-adjustment member of the STRUCT-PASSING class: a generated wrapper that hands the
 // kernel the address of a managed struct whose fields are not where the native record wants them.

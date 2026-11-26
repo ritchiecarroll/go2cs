@@ -1,6 +1,17 @@
 // Copyright 2013 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - Pool.Put, Pool.Get, Pool.getSlow, poolCleanup, init: DERIVED FROM src/sync/pool.go, Go 1.26.11, funcs
+//   poolCleanup, init; methods Pool.Put, Pool.Get, Pool.getSlow. Go's algorithm, with the per-P index, the race hooks
+//   and the cleanup registration replaced.
+// - Pool.pin, Pool.pinSlow: INSPIRED BY src/sync/pool.go, Go 1.26.11, methods Pool.pin, Pool.pinSlow. The same per-P
+//   shard lookup, keyed by thread in place of P.
+// - stateOf: original go2cs code.
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted pool.go output — a member of the
 // native sync family alongside Mutex/RWMutex/WaitGroup, the runtime hooks in runtime_impl.cs, and the
