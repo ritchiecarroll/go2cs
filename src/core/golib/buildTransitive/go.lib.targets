@@ -264,6 +264,9 @@
   <!-- The symbol files beside a single-file host, on every publish (see the file). -->
   <Import Project="$(MSBuildThisFileDirectory)go.lib.symbols.targets" Condition="'$(GoLibSymbolsTargetsImported)' != 'true'" />
 
+  <!-- The twin opt-in, GoTwinsFor (see the file): a consumer of the go.* packages builds with twins as a clone does. -->
+  <Import Project="$(MSBuildThisFileDirectory)go.lib.twins.targets" Condition="'$(GoLibTwinsTargetsImported)' != 'true'" />
+
   <!--
     THE BUILD-SIDE GO2CS DIAGNOSTIC REGISTRY. A GO2CS code in the range 3000-3999 is raised in the C# build by
     go2cs's MSBuild targets, and this file is the only targets file that raises one. Each code is ONE property in

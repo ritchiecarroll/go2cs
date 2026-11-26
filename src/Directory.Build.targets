@@ -68,37 +68,32 @@
     <PublishReadyToRun>false</PublishReadyToRun>
     <SelfContained>true</SelfContained>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(GoTwinsFor)' != '' and $([System.String]::Copy(';$(GoTwinsFor);').Contains(';$(MSBuildProjectName);'))">
-    <GoTwins>true</GoTwins>
-    <GoTwinsIface Condition="'$(GoTwinsIface)' == ''">$(GoTwinsForIface)</GoTwinsIface>
-    <GoTwinsIfaceAll Condition="'$(GoTwinsIfaceAll)' == ''">$(GoTwinsForIfaceAll)</GoTwinsIfaceAll>
-  </PropertyGroup>
+  <!--
+    The consumer half of the twin switch (GoTwinsFor and its mapping, the properties go2cs-gen reads that a consumer
+    may set, and the GoTwinEntry startup rule) is golib's own, core/golib/buildTransitive/go.lib.twins.targets, so a
+    program converted OUTSIDE this tree gets it too (go.lib.targets for NuGet consumers, the -recurse output root's
+    Directory.Build.targets for local references). Until 2026-11-25 it lived only here, and a program converted
+    anywhere else built without twins and said nothing (R, COORD 20261125T182108Z). What follows is the repository's
+    half: the prototype arms, which only go2cs's own measurements set.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.twins.targets"
+          Condition="'$(GoLibTwinsTargetsImported)' != 'true' and Exists('$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.twins.targets')" />
   <ItemGroup>
-    <CompilerVisibleProperty Include="GoTwins" />
     <CompilerVisibleProperty Include="GoTwinsGo" />
     <CompilerVisibleProperty Include="GoTwinsPairs" />
     <CompilerVisibleProperty Include="GoTwinsCallerRule" />
-    <CompilerVisibleProperty Include="GoTwinsIface" />
-    <CompilerVisibleProperty Include="GoTwinsIfaceAll" />
     <CompilerVisibleProperty Include="GoTwinsIfaceUnmark" />
     <CompilerVisibleProperty Include="GoTwinsBoxRecv" />
     <CompilerVisibleProperty Include="GoTwinsBoxForwarders" />
     <CompilerVisibleProperty Include="GoTwinsBoxCopy" />
     <CompilerVisibleProperty Include="GoTwinsBoxParam" />
     <CompilerVisibleProperty Include="GoTwinsBoxArgCopy" />
-    <CompilerVisibleProperty Include="GoTwinsSiblings" />
-    <CompilerVisibleProperty Include="GoTwinsTiming" />
     <CompilerVisibleProperty Include="GoTwinsArm" />
     <CompilerVisibleProperty Include="GoTwinsGuardDrop" />
     <CompilerVisibleProperty Include="GoTwinsForwarders" />
     <CompilerVisibleProperty Include="GoTwinsGuardWarn" />
-    <CompilerVisibleProperty Include="GoTwinsWeak" />
-    <CompilerVisibleProperty Include="GoTwinsCut" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTwinsRefuse)' != ''">
     <AdditionalFiles Include="$(GoTwinsRefuse)" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(GoTwins)' == 'true' and '$(OutputType)' == 'Exe'">
-    <StartupObject>go.GoTwinEntry</StartupObject>
-  </PropertyGroup>
 </Project>
