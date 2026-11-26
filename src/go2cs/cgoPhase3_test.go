@@ -748,7 +748,8 @@ func TestCgoAnArgumentDeclaredAtACTypedefCastsToItsPseudoPackageName(t *testing.
 	// The capture names memset's library, for this test alone (the package's tests run serially).
 	cgoPhase2Libraries["memset"] = "libc.so.6"
 	defer delete(cgoPhase2Libraries, "memset")
-	// P3's near misses (F1): a typedef of a typedef, as glibc declares uint64_t, and a typedef'd enum.
+	// P3's near misses (F1): a typedef of a typedef, as glibc declares uint64_t, and a typedef'd enum, each beside a void
+	// pointer, which is what makes cmd/cgo write the closure (a typed pointer to a C integer takes none).
 	cgoPhase2Libraries["go2cs_probe_wide_into"] = "libgo2csprobe.so"
 	defer delete(cgoPhase2Libraries, "go2cs_probe_wide_into")
 	cgoPhase2Libraries["go2cs_probe_color_into"] = "libgo2csprobe.so"
@@ -759,11 +760,11 @@ func fillSeven(p unsafe.Pointer) {
 	func() _cgo_unsafe.Pointer{ _cgo0 := p; var _cgo1 _Ctype_int = 7; var _cgo2 _Ctype_size_t = 2; _cgoCheckPointer(_cgo0, nil); return _Cfunc_memset(_cgo0, _cgo1, _cgo2); }()
 }
 
-func wideInto(dst *_Ctype_uint64_t) _Ctype_uint64_t {
+func wideInto(dst unsafe.Pointer) _Ctype_uint64_t {
 	return func() _Ctype_uint64_t{ _cgo0 := dst; var _cgo1 _Ctype_uint64_t = 0x123456789; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_probe_wide_into(_cgo0, _cgo1); }()
 }
 
-func colorInto(dst *_Ctype_int) _Ctype_int {
+func colorInto(dst unsafe.Pointer) _Ctype_int {
 	return func() _Ctype_int{ _cgo0 := dst; var _cgo1 _Ctype_go2cs_probe_color = 4; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_probe_color_into(_cgo0, _cgo1); }()
 }
 `
@@ -787,7 +788,7 @@ var __cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into byte
 var _cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into)
 
 //go:cgo_unsafe_args
-func _Cfunc_go2cs_probe_wide_into(p0 *_Ctype_uint64_t, p1 _Ctype_uint64_t) (r1 _Ctype_uint64_t) {
+func _Cfunc_go2cs_probe_wide_into(p0 unsafe.Pointer, p1 _Ctype_uint64_t) (r1 _Ctype_uint64_t) {
 	_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into, uintptr(unsafe.Pointer(&p0)))
 	if _Cgo_always_false {
 		_Cgo_use(p0)
@@ -802,7 +803,7 @@ var __cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into byte
 var _cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into)
 
 //go:cgo_unsafe_args
-func _Cfunc_go2cs_probe_color_into(p0 *_Ctype_int, p1 _Ctype_go2cs_probe_color) (r1 _Ctype_int) {
+func _Cfunc_go2cs_probe_color_into(p0 unsafe.Pointer, p1 _Ctype_go2cs_probe_color) (r1 _Ctype_int) {
 	_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_go2cs_probe_color_into, uintptr(unsafe.Pointer(&p0)))
 	if _Cgo_always_false {
 		_Cgo_use(p0)

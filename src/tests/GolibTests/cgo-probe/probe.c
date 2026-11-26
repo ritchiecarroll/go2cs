@@ -212,9 +212,10 @@ GO2CS_PROBE_EXPORT uintptr_t go2cs_probe_word(uintptr_t word)
     return word;
 }
 
-// The near misses of the S4 cure (P3's read, F1): a parameter cmd/cgo declares at a C typedef, beside a pointer so the
-// call takes cmd/cgo's check closure, which declares the constant at that typedef. uint64_t is a typedef of a typedef on
-// glibc (over __uint64_t); go2cs_probe_color is a typedef'd enum.
+// The near misses of the S4 cure (P3's read, F1): a parameter cmd/cgo declares at a C typedef, beside a void pointer. A
+// void pointer is what makes cmd/cgo write its check closure, which declares the constant at that typedef; a typed
+// pointer to a C integer needs no check, takes no closure, and so never reaches the cast. uint64_t is a typedef of a
+// typedef on glibc (over __uint64_t); go2cs_probe_color is a typedef'd enum.
 typedef enum
 {
     go2cs_probe_red = 1,
@@ -222,15 +223,15 @@ typedef enum
     go2cs_probe_blue = 4
 } go2cs_probe_color;
 
-GO2CS_PROBE_EXPORT uint64_t go2cs_probe_wide_into(uint64_t *dst, uint64_t value)
+GO2CS_PROBE_EXPORT uint64_t go2cs_probe_wide_into(void *dst, uint64_t value)
 {
-    *dst = value;
+    *(uint64_t *)dst = value;
     return value >> 32;
 }
 
-GO2CS_PROBE_EXPORT int go2cs_probe_color_into(int *dst, go2cs_probe_color color)
+GO2CS_PROBE_EXPORT int go2cs_probe_color_into(void *dst, go2cs_probe_color color)
 {
-    *dst = (int)color * 10;
+    *(int *)dst = (int)color * 10;
     return (int)color;
 }
 
