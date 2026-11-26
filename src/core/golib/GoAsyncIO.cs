@@ -473,10 +473,13 @@ namespace go.golib;
     /// would be owned by nobody.
     /// </para>
     /// </remarks>
-    internal static void ReplaceOperationFactoryForTesting(Func<nuint, object, nint, object>? factory)
+    internal static Func<nuint, object, nint, object>? ReplaceOperationFactoryForTesting(Func<nuint, object, nint, object>? factory)
     {
+        // Returns the factory it displaced, so a test that installs a fake can put the real one back: a fake left
+        // installed answers every later REAL submit in the process (a fake record staging at 0x7000 took the WriteToInet4
+        // compaction row down in the full suite with a nil-dereference panic, cgo S6).
         s_operationState.Clear();
-        Interlocked.Exchange(ref s_operationFactory, factory);
+        return Interlocked.Exchange(ref s_operationFactory, factory);
     }
 
     /// <summary>
