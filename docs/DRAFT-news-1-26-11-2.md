@@ -58,169 +58,43 @@
      month too) and "X.X.X.X" are placeholders, set as the last change before the release tag, here, in the README
      block's first line and in its link anchor (GoCorpusMigration.md, the release ritual, item 1). -->
 
-**NuGet 1.26.11.2.** **[PENDING: G's M:N rows]** Goroutines can run on a small pool of threads, as Go runs them,
-in any converted program built with async twins, the go.* packages included. Converted C# reads closer to the Go it
+**NuGet 1.26.11.2.** go2cs converts Go source code into C# that a Go developer can read, and runs it on .NET
+with Go's behavior: slices, maps, channels, goroutines, `defer` and interfaces work as they do in Go, and the
+converted Go standard library is published as NuGet packages. **[PENDING: G's M:N rows]** In this release,
+goroutines can run on a small pool of threads, as Go runs them, in a converted program built with async twins.
+A spread call `f(s...)` hands the callee the caller's slice, as in Go, and the converted C# reads closer to the Go it
 came from: an array literal is `array<nint>([1, 2, 3])`, package `main` keeps its methods beside its functions, and a
-stack trace names each function as Go does. A spread call `f(s...)` hands the callee the caller's slice, as in Go.
-`go2cs -cgo` converts a package with its tests, and `go2cs -recurse -cgo` converts a module's cgo packages with the
-module; modules whose tests use testify convert and match Go's test results. Assemblies compiled against 1.26.11.1
-must be rebuilt, and C# written by hand against converted code may need the changes listed first, under
-*Upgrading from 1.26.11.1*.
+stack trace names each function as Go does. `go2cs -cgo` converts a package that calls C together with its tests,
+and more of Go's own test suites match their Go results.
 <!-- 2026-11-23 (P1): the lead summarizes the bullets below; each claim carries its source there. -->
 <!-- 2026-11-26 (P4): the M:N sentence is the headline COORD named, PENDING on G's rows (the .5 plan, COORD ruling
-     2026-11-23); drop it at release if they miss, and with it "the go.* packages included", which rests on the twin
-     opt-in (QUEUED, train 15). The variadic, -cgo -tests and rebuild sentences: their bullets below. -->
-
-**Upgrading from 1.26.11.1.**
-
-- **[LANDED cb6def82a2]** **Rebuild what you built against 1.26.11.1.** This release changes members that compiled
-  code binds: a defined func type is now a delegate of its own, a variadic parameter is golib's `variadic<T>`, and
-  `net/http/fcgi`'s `record` type is spelled `Δrecord` (each below). An assembly or nugetgo package compiled against
-  go.* 1.26.11.1 that reaches one of them fails at run time with `MissingMethodException` or a similar error. The
-  build refuses the combination first: a package built below the new break floor is error `GO2CS3002`, which names
-  the package ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.11.2, and move each `nugetgo.*`
-  reference to its 1.26.11.2 revision.
-  <!-- 2026-11-26 (P4): train 10, merge cb6def82a2 (claude/coord-t10-floor a9e098be0c; golib c2b489c27c "the break
-       floor moves to 1.26.11.2, the .5 release"): <GoBreakFloor>1.26.11.2</GoBreakFloor> in
-       src/core/golib/buildTransitive/go.lib.targets at d6805be2e8. The breaks and their compatibility suppressions:
-       D (train 10, d62a18c559), wall E (train 11, 58124df9a9; pushnuget 4c16756345, ba6d705847), fcgi's holder
-       (train 12, c46de600d9). Shaped on the 1.26.11.1 entry's first Upgrading bullet. PENDING on the publish, not on
-       a merge: the nugetgo sentence holds once the release's nugetgo wave has published. -->
-- **[LANDED 58124df9a9]** **A variadic parameter is golib's `variadic<T>`, and a spread passes the caller's slice.**
-  On every converted platform, a Go `...T` parameter is now `params variadic<T>` (read through the alias
-  `params ꓸꓸꓸT`), where it was `params Span<T>`. For a spread call `f(s...)` the pack carries the caller's slice
-  itself, so the callee's writes into it, and a slice it returns, share the caller's array, as in Go. Before, a
-  callee that kept, returned, captured or appended to its parameter worked on a copy of a spread's elements, and the
-  caller's slice missed its writes (a lost write in modernc.org/sqlite's row scan). The alias keeps its shape,
-  `using ꓸꓸꓸT = variadic<…>;`. Compiled code that calls a converted variadic function must be rebuilt (above). See
-  [Slices and arrays](ConversionStrategies.md#slices-and-arrays).
-  <!-- 2026-11-26 (P4): train 11, merge 58124df9a9 (claude/p2-wall-e-spread-alias ddff8b8319; inbox/P2
-       20261120T121230Z-COORD.md, surface ruling 20261120T135029Z). The text: ConversionStrategies.md, "Variadic
-       parameters are packs" and "A spread passes the slice itself"; ConversionStrategies-Reference/
-       multi-result-and-comma-ok.md, "The pack is golib's variadic<T>"; behavioral VariadicSpreadHeapAlias and
-       VariadicPackPassThrough. -->
-- **[LANDED 07483fc78a]** **An unnamed array literal now reads `array<nint>([1, 2, 3])`.**
-  On every converted platform, a Go array literal of an unnamed array type converts to a call of golib's
-  `array<T>(…)` over a C# collection expression, where it was `new nint[]{1, 2, 3}.array()`. C# source written by
-  hand outside namespace `go` that has `using static go.builtin` and reaches a static member of golib's array or
-  slice type, such as `array<T>.Alias`, now fails to compile with CS0119, because the builtin functions `array<T>(…)`
-  and `slice<T>(…)` are found first. Write `go.array<T>.Alias` and `go.slice<T>` instead. See
-  [Public surface](PublicSurface.md).
-  <!-- P1 Tour item 4, READY 2026-11-19 01:50Z (inbox/COORD/20261119T015056Z-P1.md), claude/p1-vp-array-literal
-       c9c62bed56. The emitted form: 09efdde4df (converter + golib) and the regen 49a75818de, measured on windows/amd64,
-       linux/amd64, darwin/amd64 and linux/arm64. The CS0119 break: docs/PublicSurface.md (63a8fd6037), accepted by
-       COORD 2026-11-14 without the priced fix. Named, keyed, sparse and empty literals, and named array types, keep
-       their earlier forms (convCompositeLit.go arrayLiteralTakesBuiltin). -->
-  <!-- 2026-11-23 (P1): landed by train 1, merge 07483fc78a (claude/p1-vp-array-literal cc3d1c1d26). -->
-- **[LANDED 098b83f9a1]** **Package `main` keeps its methods in the package class.** On every
-  converted platform, a method of a type declared in package `main` is now a member of `main_package`, beside the
-  package's functions, as the Go file reads; it was a member of a separate holder class, `mainᴛ<Type>`. A type of
-  `main` keeps its holder only where one of its methods has the name of something the package reads bare (a
-  package-level name, a universe name such as `len`, an import's name, or a member of golib's `builtin` class),
-  which the method would otherwise hide. Library packages keep their holders. C# source written by hand against a
-  converted program that names `mainᴛ<Type>` names `main_package` instead.
-  <!-- P1 main-holders, owner ruling 2026-11-18 (FLEET 11-19), READY at a2035f6656 2026-11-19 21:12Z
-       (inbox/COORD/20261119T211252Z-P1.md; P3's read 20261119T212356Z-P3.md). The rule and the clash list:
-       docs/ConversionStrategies.md, "Package main keeps its methods in the package class" (383eeb05c3, b9195efa78);
-       the converter 4d22819305 and 3a5109de87; a type a test file adds a method to keeps its holder, a2035f6656. -->
-  <!-- 2026-11-23 (P1): landed by train 1, merge 098b83f9a1 (claude/p1-main-holders ea04c09f95). Dropped the bullet's
-       last sentence, "A converted file whose last method sits in a holder now closes it with a bare `}`.": since
-       train 4's c1-glyph-methods (027073dd1f, converter 187c6f88d0) no converted file switches into a holder, so the
-       sentence no longer describes the emission. -->
-- **[LANDED 027073dd1f]** **A library method's body is now a static method of the package class.** On every
-  converted platform, the body of a Go method in a library package is written as Go wrote it, in the package class,
-  named with a `⁔` after the Go name (`Add⁔`), its receiver the first parameter. The method with the Go name, in the
-  receiver type's method holder (`timeᴛTime`), is a one-line forwarder to it that `package_info.cs` declares, so
-  calls, interfaces and method sets read as before and a stack trace shows one frame, named as Go names the method
-  (`time.Time.Month`). The forwarders keep the methods' names, access and signatures, so C# source that calls a Go
-  method compiles unchanged; the `⁔` body is internal and is not for hand-written code to call. A type of `main` that
-  keeps its holder (above) takes the same form.
-  <!-- 2026-11-23 (P1): train 4, merge 027073dd1f (claude/c1-glyph-methods 94ec8ab494); the converter 187c6f88d0 ("a
-       method with a holder takes the suffix form"), 149dab1f70 (promoted forwarders), the corpus regen 0bf1e9dabf.
-       The text: docs/ConversionStrategies.md, "A library method's body stands in the package class, named
-       `<Name>⁔`" and "A method named like a built-in does not hide it". -->
-- **[LANDED 0f93005fbd]** **A Go method on a named slice or array type takes the
-  generated wrapper member of the same name.** A Go method named `Slice`, `Append`, `ToSpan`, `GetEnumerator`,
-  `Length`, `Source`, `Capacity`, `Low`, `High`, `Available`, `IsNil`, `Make` or `Wrap` on a named slice or array type
-  (or on a type defined over a named array) now runs when Go code calls it; before, the wrapper's own member of that
-  name could run instead, silently when the call fit its parameters. The wrapper member stays reachable through its
-  golib interface, e.g. `((ISlice)s).Capacity`; an array's `Slice`, which no interface declares, becomes `ΔSlice`. A
-  type named like one of those members now converts as well. C# source written by hand that called such a member on
-  such a type calls it through the interface instead.
-  <!-- R7 seat 1 (COORD 212140Z, the name-collision campaign; P3's read inbox/COORD/20261122T061749Z-P3.md, its wording).
-       The rule: ISliceTypeTemplate / IArrayTypeTemplate / IArrayViewTypeTemplate ClaimableMembers, bf8153dbb8; the
-       guard GenTests NamedSliceArrayClaimedMemberTests; behavioral NamedSliceMethodShadow b5c2b6b7a2. Census by the
-       generator over src/core's 4126 generated slice/array/struct wrappers: the only claiming types are hash/fnv's
-       sum128 and sum128a (Clone, claimed before this seat). sqlite-cs's modules and typescript-go, by the syntactic
-       census: no slice or array type claims a listed name. -->
-  <!-- 2026-11-23 (P1): landed by train 4, merge 0f93005fbd (claude/r-r7-slice-array 59c61e4734). The member list read
-       again at 97cca467a2 from ISliceTypeTemplate.ClaimableMembers (it also lists Clone, claimed before this
-       change). -->
-- **[LANDED 11f0a5dde1]** **The same holds for named channel, map, numeric,
-  string and pointer types.** A Go method named `Capacity`, `Length`, `IsClosed`, `IsUnbuffered`, `Receive`,
-  `Received`, `Receiving`, `Sending`, `Make` or `GetEnumerator` on a named channel; `Length`, `IsNil`, `Count`, `Make`
-  or `GetEnumerator` on a named map; `CompareTo` on a named number; or `Length`, `CompareTo` or `GetEnumerator` on a
-  named string now runs when Go code calls it, and the type still ranges, selects, sorts and measures as Go's does. A
-  type named like one of its own wrapper's members converts as well, a named pointer type included: `type Value
-  *[3]int`, `type of *point`. The member stays reachable through its golib interface where one declares it, e.g.
-  `((IChannel)ch).Capacity`, and becomes `Δ<name>` otherwise (`ΔIsClosed`); a pointer type named `Value` reads its
-  pointee through `Value‿`. With `-uco=false`, a channel whose type declares one of those methods is sent to and
-  received from with the default mode's operators. Slicing a named pointer to an unnamed array (`type P *[3]int`,
-  `p[1:]`) also converts now. C# source written by hand that called such a member on such a type calls it through
-  the interface instead.
-  <!-- R7 seat 2: GenTests NamedChanMapNumericClaimedMemberTests (red b6733d8a1a); behavioral NamedChanMapNumericShadow;
-       go2cs TestNamedChanMethodModeSpelling; the fix 62f1816922. Census over std at go1.26.11 through go/types, four
-       targets (windows, linux, darwin amd64; linux arm64), 966-968 packages each: the only claiming types are net/http
-       Header, net/textproto MIMEHeader and net/url Values (Add, Set: claimed before this seat), no named pointer or
-       channel carries a listed name, and no site slices a named pointer to an array. -->
-- **[LANDED 1c9c6a224e, da3273f975]** **golib's `GoFrame` is a plain struct, not a `ref struct`.** `GoFrame` holds
-  the deferred calls of one call of a converted function. The C# compiler no longer refuses a copy, a store, boxing or
-  a capture of it; the source generator does, with error `GO2CS0016`, which names the site. A frame may only be a
-  local initialized to `default`, a `ref` parameter or argument, or the receiver of its own members. The rule also
-  runs where `RunAnalyzers` is `false`, and cannot be turned off. With `RunAnalyzers` set to `false`, one part is not
-  checked: a use that binds only with code another source generator writes, such as a `defer(…, ref ᒐ)` whose lambda
-  names a generated member, because the analyzer that checks those uses does not run. F# and Visual Basic get no
-  check. Hand-written C# that follows the converted `defer` pattern keeps the frame a local of its function and passes
-  it only by `ref`. See [Public surface](PublicSurface.md) and [Diagnostic codes](DiagnosticCodes.md).
-  <!-- 2026-11-23 (P1), CQ-6: the ref-struct drop 1b8cc2658c (with 95165eb212), landed by train 3, merge 1c9c6a224e
-       (claude/g-mn-proto-b1 1cfee4a63e); GO2CS0016 (GoFrameRuleGenerator) and its analyzer net (GoFrameRuleAnalyzer)
-       landed by train 3, merge da3273f975 (claude/h-mn-origin-table 1fc98cd07c). The caveat: GoFrameRuleAnalyzer's
-       remarks ("A project that sets it keeps the generator's rule and loses only this net"), the GO2CS0016 row of
-       DiagnosticCodes.md, PLAN-public-surface-stability.md (item 8, 2026-11-20). Disclosed in PublicSurface.md, tier 2,
-       in the same pass. -->
-- **[LANDED e25362aedc, 528c057cfa]** **A Go name spelled with a letter go2cs uses in generated
-  names refuses its package.** A package that declares an identifier spelled with one of those letters (`Ꮡ`, `ᴛ`, `ж`
-  and the others), or a `Δ` name equal to one go2cs generates in that package, stops with error `GO2CS2015`, which
-  names each identifier: such a name could bind silently to a generated one. Every other `Δ` name converts, and a
-  struct field, method or type whose name starts with `Δ` keeps its Go name in reflection, encoding and `fmt` output.
-  Rename a refused identifier ([Diagnostic codes](DiagnosticCodes.md)).
-  <!-- 2026-11-24 (P2, .5 Δ cure seat claude/p2-delta-go-name): the cure retires the Δ-led field, method and type arm
-       and its KnownIssues entry (#delta-led-field-method-type-refused); this entry's link pointed there. Text
-       adjusted to the cured state; P4 owns this file and may reword. -->
-  <!-- 2026-11-23 (P1): train 4, merge e25362aedc (claude/i9-marker-glyph-refusal b1105e20a5); the refusal a0806c5d38,
-       the folds 577eb7138e, 7286bd1e0e, b1105e20a5; behavioral DeltaNameEdgeCases 1cea7c8bdb. The text: the GO2CS2015
-       row of DiagnosticCodes.md and KnownIssues.md "A Go struct field, method or type whose name starts with `Δ`
-       refuses its package". -->
-- **[LANDED 27edc19447]** **One C# type for each anonymous Go type in a package.** A Go struct or interface type
-  written without a name now becomes one C# type in each package, which every site that spells it uses, so some
-  generated names a hand-written C# file could have named (`Box_T`, `pair_T`) are gone. Those names were never a promise:
-  [Public surface](PublicSurface.md) now lists them as names that can change in any release. Name the declared Go
-  type instead.
-  <!-- 2026-11-23 (P1): train 2, merge 27edc19447 (claude/p4-lift-dedup 29f9c49496); the converter bdaa9df223 ("one
-       lift per anonymous type; a public site reuses a lift declared public"); COORD ruling 2026-11-20 on board (jj),
-       cited in PublicSurface.md tier 3. -->
-- **[LANDED c7cba87148, c46de600d9]** **A Go type named `record` is spelled `Δrecord`.** At the start
-  of a C# member, `record` begins a record declaration, so a Go type declared with that name now takes the `Δ` prefix,
-  like other names C# reserves. In the converted standard library this renames `net/http/fcgi`'s `record` type, and its
-  method holder `fcgiᴛrecord` becomes `fcgiᴛΔrecord`. C# source written by hand that names the old spelling names the new
-  one. See [Shadowing](ConversionStrategies-Reference/shadowing.md).
-  <!-- 2026-11-25 (i9): owner ruling COORD 020915Z ("Δrecord, as ruled"); the seat claude/i9-alias-keyword-escape
-       bf4cc3a23d; release-smoke's binary-compatibility guard read the holder's CP0001 on the train 12 union (417fd87146,
-       run 45583774592), suppressed in src/core/net/http/fcgi/CompatibilitySuppressions.xml (COORD 2026-11-25T12:24:43Z). -->
-  <!-- 2026-11-26 (P4): landed by train 12, merges c7cba87148 (claude/i9-alias-keyword-escape bf4cc3a23d) and
-       c46de600d9 (claude/i9-t12-fcgi-suppression 60dd63d952). -->
+     2026-11-23); drop it at release if they miss. The variadic and -cgo -tests sentences: their bullets below.
+     Owner steer 2026-11-26 (COORD 11:36Z): the release is the first of a wider announcement, so the lead is written
+     for a first-time reader (what go2cs does, then what this release adds), and every upgrade note, break and warning
+     is in one short section near the bottom, *Upgrading from an earlier release*; nothing about upgrading goes in the
+     lead or the headline sections. The 11-23 lead's "go.* packages included" (the twin opt-in) and its rebuild
+     sentence are dropped here for that reason. -->
 
 **What changed.**
+
+- **[LANDED 58124df9a9]** **A spread call passes the caller's slice, as in Go.** In `f(s...)` the callee now works on
+  the caller's slice itself, so its writes, and a slice it returns, share the caller's array; before, it worked on a
+  copy, and the caller missed its writes (a lost write in modernc.org/sqlite's row scan). See
+  [Slices and arrays](ConversionStrategies.md#slices-and-arrays).
+- **[LANDED 07483fc78a, 098b83f9a1, 027073dd1f]** **Converted C# reads closer to Go.** An array literal is
+  `array<nint>([1, 2, 3])`; a method of a type in package `main` is a member of the package class beside its
+  functions, as the Go file reads; and a library method's body is written in the package class as Go wrote it, with a
+  one-line forwarder keeping its name on the type.
+- **[LANDED 0f93005fbd, 11f0a5dde1]** **A Go method on a named slice, array, channel, map, number, string or pointer type
+  runs when Go code calls it**, even where its name matches a member of the C# wrapper type (`Length`, `Capacity`,
+  `Make` and others). Before, the wrapper's own member could run instead, silently when the call fit its parameters.
+- **[LANDED e25362aedc, 528c057cfa, c7cba87148]** **Go names that collide with go2cs's own convert or stop by name.** A
+  `Δ` name converts and keeps its Go name in reflection, encoding and `fmt` output; an identifier spelled with a
+  letter go2cs reserves for generated names stops the package with error `GO2CS2015`, which names it; and a Go type
+  named `record` converts, spelled `Δrecord`.
+<!-- 2026-11-26 (P4, owner steer via COORD 11:36Z): these four bullets give a first-time reader the features that the
+     11-23 pass described only under Upgrading; the hand-written-C# consequences are in *Upgrading from an earlier
+     release* at the bottom. Sources: the same merges, cited in that section's kept 11-23 text. -->
 
 - **[LANDED 5cd4536a09]** **A generic under a method-set constraint that is not
   self-referential now converts within its own package.** On every converted platform, a generic function or type
@@ -380,9 +254,7 @@ must be rebuilt, and C# written by hand against converted code may need the chan
   type switch now tell `type F func(string) error` from `func(string) error`, as Go does. Exported types of the
   standard library change this way, among them `context.CancelFunc` and `CancelCauseFunc`, `bufio.SplitFunc`,
   `io/fs.WalkDirFunc`, `path/filepath.WalkFunc`, `go/types.Qualifier` and `archive/zip`'s `Compressor` and
-  `Decompressor`. Compiled C# code that passed or received `Action` or `Func<…>` there must be rebuilt; C# source
-  that assigns a lambda to one of these types compiles unchanged, and source that assigns an `Action` or `Func<…>`
-  value wraps it, as in `new CancelFunc(action)`. See
+  `Decompressor`. See
   [Every defined func type declares its own delegate](ConversionStrategies-Reference/struct-types.md#every-defined-func-type-declares-its-own-delegate).
   <!-- C2's D seat, COORD rulings 2026-11-23 02:36Z (cure 1) and 05:38Z (the break floor moves at the .5 release,
        F = R; this line and the binary-compatibility suppressions are owed by the seat). The thirty types are the
@@ -672,6 +544,181 @@ must be rebuilt, and C# written by hand against converted code may need the chan
      reads (see the known issue above; drop both bullets together if the fix ships). <!- - Batch 319, P4 a0d69468d4.
      - ->" The known-issue bullet itself stays, rewritten as the fix, under The go2cs tool. -->
 
+**Upgrading from an earlier release.**
+
+Use of earlier releases is expected to be low, so this list is brief. Each item affects only code compiled against,
+or written by hand beside, an earlier go.* release.
+
+- **[LANDED cb6def82a2]** **Rebuild what you built against 1.26.11.1**, and move each `nugetgo.*` reference to its
+  1.26.11.2 revision. A build that mixes the two stops with error `GO2CS3002`, which names the package
+  ([Diagnostic codes](DiagnosticCodes.md)).
+- **[LANDED 58124df9a9]** A Go `...T` parameter is now `params variadic<T>`, where it was `params Span<T>`.
+- **[LANDED d62a18c559]** A defined func type is now a delegate of its own (see *What changed*). Hand-written C# that
+  assigns an `Action` or `Func<…>` value to one wraps it, as in `new CancelFunc(action)`; a lambda needs no change.
+- **[LANDED 07483fc78a]** Hand-written C# with `using static go.builtin` writes `go.array<T>` and `go.slice<T>` for
+  their static members (CS0119 otherwise).
+- **[LANDED 098b83f9a1]** Hand-written C# that named `mainᴛ<Type>` names `main_package`.
+- **[LANDED 0f93005fbd, 11f0a5dde1]** A wrapper member that a Go method now hides is reached through its golib
+  interface, e.g. `((ISlice)s).Capacity`, or as `Δ<name>`.
+- **[LANDED 1c9c6a224e, da3273f975]** golib's `GoFrame` is a plain struct; a copy, store, boxing or capture of it is
+  error `GO2CS0016`.
+- **[LANDED 27edc19447]** Generated names of anonymous Go types (`Box_T`, `pair_T`) are gone; name the declared Go type.
+- **[LANDED c7cba87148, c46de600d9]** `net/http/fcgi`'s `record` type is `Δrecord`, its holder `fcgiᴛΔrecord`.
+<!-- 2026-11-26 (P4, owner steer via COORD 11:36Z: "any upgrade notes or warnings can go in their own section towards
+     the bottom. Less critical for breaking changes from prior releases since use is still expected to be very low").
+     Moved from the top of the entry and shortened to one line each. The D line points at the D bullet under What
+     changed; that bullet's sentence on compiled and hand-written C# moved here (2026-11-26). The 11-23 text of this
+     section, with its source comments, is kept below for release day, its inner comment markers spelled with a space:
+**Upgrading from 1.26.11.1.**
+
+- **[LANDED cb6def82a2]** **Rebuild what you built against 1.26.11.1.** This release changes members that compiled
+  code binds: a defined func type is now a delegate of its own, a variadic parameter is golib's `variadic<T>`, and
+  `net/http/fcgi`'s `record` type is spelled `Δrecord` (each below). An assembly or nugetgo package compiled against
+  go.* 1.26.11.1 that reaches one of them fails at run time with `MissingMethodException` or a similar error. The
+  build refuses the combination first: a package built below the new break floor is error `GO2CS3002`, which names
+  the package ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.11.2, and move each `nugetgo.*`
+  reference to its 1.26.11.2 revision.
+  <!- - 2026-11-26 (P4): train 10, merge cb6def82a2 (claude/coord-t10-floor a9e098be0c; golib c2b489c27c "the break
+       floor moves to 1.26.11.2, the .5 release"): <GoBreakFloor>1.26.11.2</GoBreakFloor> in
+       src/core/golib/buildTransitive/go.lib.targets at d6805be2e8. The breaks and their compatibility suppressions:
+       D (train 10, d62a18c559), wall E (train 11, 58124df9a9; pushnuget 4c16756345, ba6d705847), fcgi's holder
+       (train 12, c46de600d9). Shaped on the 1.26.11.1 entry's first Upgrading bullet. PENDING on the publish, not on
+       a merge: the nugetgo sentence holds once the release's nugetgo wave has published. - ->
+- **[LANDED 58124df9a9]** **A variadic parameter is golib's `variadic<T>`, and a spread passes the caller's slice.**
+  On every converted platform, a Go `...T` parameter is now `params variadic<T>` (read through the alias
+  `params ꓸꓸꓸT`), where it was `params Span<T>`. For a spread call `f(s...)` the pack carries the caller's slice
+  itself, so the callee's writes into it, and a slice it returns, share the caller's array, as in Go. Before, a
+  callee that kept, returned, captured or appended to its parameter worked on a copy of a spread's elements, and the
+  caller's slice missed its writes (a lost write in modernc.org/sqlite's row scan). The alias keeps its shape,
+  `using ꓸꓸꓸT = variadic<…>;`. Compiled code that calls a converted variadic function must be rebuilt (above). See
+  [Slices and arrays](ConversionStrategies.md#slices-and-arrays).
+  <!- - 2026-11-26 (P4): train 11, merge 58124df9a9 (claude/p2-wall-e-spread-alias ddff8b8319; inbox/P2
+       20261120T121230Z-COORD.md, surface ruling 20261120T135029Z). The text: ConversionStrategies.md, "Variadic
+       parameters are packs" and "A spread passes the slice itself"; ConversionStrategies-Reference/
+       multi-result-and-comma-ok.md, "The pack is golib's variadic<T>"; behavioral VariadicSpreadHeapAlias and
+       VariadicPackPassThrough. - ->
+- **[LANDED 07483fc78a]** **An unnamed array literal now reads `array<nint>([1, 2, 3])`.**
+  On every converted platform, a Go array literal of an unnamed array type converts to a call of golib's
+  `array<T>(…)` over a C# collection expression, where it was `new nint[]{1, 2, 3}.array()`. C# source written by
+  hand outside namespace `go` that has `using static go.builtin` and reaches a static member of golib's array or
+  slice type, such as `array<T>.Alias`, now fails to compile with CS0119, because the builtin functions `array<T>(…)`
+  and `slice<T>(…)` are found first. Write `go.array<T>.Alias` and `go.slice<T>` instead. See
+  [Public surface](PublicSurface.md).
+  <!- - P1 Tour item 4, READY 2026-11-19 01:50Z (inbox/COORD/20261119T015056Z-P1.md), claude/p1-vp-array-literal
+       c9c62bed56. The emitted form: 09efdde4df (converter + golib) and the regen 49a75818de, measured on windows/amd64,
+       linux/amd64, darwin/amd64 and linux/arm64. The CS0119 break: docs/PublicSurface.md (63a8fd6037), accepted by
+       COORD 2026-11-14 without the priced fix. Named, keyed, sparse and empty literals, and named array types, keep
+       their earlier forms (convCompositeLit.go arrayLiteralTakesBuiltin). - ->
+  <!- - 2026-11-23 (P1): landed by train 1, merge 07483fc78a (claude/p1-vp-array-literal cc3d1c1d26). - ->
+- **[LANDED 098b83f9a1]** **Package `main` keeps its methods in the package class.** On every
+  converted platform, a method of a type declared in package `main` is now a member of `main_package`, beside the
+  package's functions, as the Go file reads; it was a member of a separate holder class, `mainᴛ<Type>`. A type of
+  `main` keeps its holder only where one of its methods has the name of something the package reads bare (a
+  package-level name, a universe name such as `len`, an import's name, or a member of golib's `builtin` class),
+  which the method would otherwise hide. Library packages keep their holders. C# source written by hand against a
+  converted program that names `mainᴛ<Type>` names `main_package` instead.
+  <!- - P1 main-holders, owner ruling 2026-11-18 (FLEET 11-19), READY at a2035f6656 2026-11-19 21:12Z
+       (inbox/COORD/20261119T211252Z-P1.md; P3's read 20261119T212356Z-P3.md). The rule and the clash list:
+       docs/ConversionStrategies.md, "Package main keeps its methods in the package class" (383eeb05c3, b9195efa78);
+       the converter 4d22819305 and 3a5109de87; a type a test file adds a method to keeps its holder, a2035f6656. - ->
+  <!- - 2026-11-23 (P1): landed by train 1, merge 098b83f9a1 (claude/p1-main-holders ea04c09f95). Dropped the bullet's
+       last sentence, "A converted file whose last method sits in a holder now closes it with a bare `}`.": since
+       train 4's c1-glyph-methods (027073dd1f, converter 187c6f88d0) no converted file switches into a holder, so the
+       sentence no longer describes the emission. - ->
+- **[LANDED 027073dd1f]** **A library method's body is now a static method of the package class.** On every
+  converted platform, the body of a Go method in a library package is written as Go wrote it, in the package class,
+  named with a `⁔` after the Go name (`Add⁔`), its receiver the first parameter. The method with the Go name, in the
+  receiver type's method holder (`timeᴛTime`), is a one-line forwarder to it that `package_info.cs` declares, so
+  calls, interfaces and method sets read as before and a stack trace shows one frame, named as Go names the method
+  (`time.Time.Month`). The forwarders keep the methods' names, access and signatures, so C# source that calls a Go
+  method compiles unchanged; the `⁔` body is internal and is not for hand-written code to call. A type of `main` that
+  keeps its holder (above) takes the same form.
+  <!- - 2026-11-23 (P1): train 4, merge 027073dd1f (claude/c1-glyph-methods 94ec8ab494); the converter 187c6f88d0 ("a
+       method with a holder takes the suffix form"), 149dab1f70 (promoted forwarders), the corpus regen 0bf1e9dabf.
+       The text: docs/ConversionStrategies.md, "A library method's body stands in the package class, named
+       `<Name>⁔`" and "A method named like a built-in does not hide it". - ->
+- **[LANDED 0f93005fbd]** **A Go method on a named slice or array type takes the
+  generated wrapper member of the same name.** A Go method named `Slice`, `Append`, `ToSpan`, `GetEnumerator`,
+  `Length`, `Source`, `Capacity`, `Low`, `High`, `Available`, `IsNil`, `Make` or `Wrap` on a named slice or array type
+  (or on a type defined over a named array) now runs when Go code calls it; before, the wrapper's own member of that
+  name could run instead, silently when the call fit its parameters. The wrapper member stays reachable through its
+  golib interface, e.g. `((ISlice)s).Capacity`; an array's `Slice`, which no interface declares, becomes `ΔSlice`. A
+  type named like one of those members now converts as well. C# source written by hand that called such a member on
+  such a type calls it through the interface instead.
+  <!- - R7 seat 1 (COORD 212140Z, the name-collision campaign; P3's read inbox/COORD/20261122T061749Z-P3.md, its wording).
+       The rule: ISliceTypeTemplate / IArrayTypeTemplate / IArrayViewTypeTemplate ClaimableMembers, bf8153dbb8; the
+       guard GenTests NamedSliceArrayClaimedMemberTests; behavioral NamedSliceMethodShadow b5c2b6b7a2. Census by the
+       generator over src/core's 4126 generated slice/array/struct wrappers: the only claiming types are hash/fnv's
+       sum128 and sum128a (Clone, claimed before this seat). sqlite-cs's modules and typescript-go, by the syntactic
+       census: no slice or array type claims a listed name. - ->
+  <!- - 2026-11-23 (P1): landed by train 4, merge 0f93005fbd (claude/r-r7-slice-array 59c61e4734). The member list read
+       again at 97cca467a2 from ISliceTypeTemplate.ClaimableMembers (it also lists Clone, claimed before this
+       change). - ->
+- **[LANDED 11f0a5dde1]** **The same holds for named channel, map, numeric,
+  string and pointer types.** A Go method named `Capacity`, `Length`, `IsClosed`, `IsUnbuffered`, `Receive`,
+  `Received`, `Receiving`, `Sending`, `Make` or `GetEnumerator` on a named channel; `Length`, `IsNil`, `Count`, `Make`
+  or `GetEnumerator` on a named map; `CompareTo` on a named number; or `Length`, `CompareTo` or `GetEnumerator` on a
+  named string now runs when Go code calls it, and the type still ranges, selects, sorts and measures as Go's does. A
+  type named like one of its own wrapper's members converts as well, a named pointer type included: `type Value
+  *[3]int`, `type of *point`. The member stays reachable through its golib interface where one declares it, e.g.
+  `((IChannel)ch).Capacity`, and becomes `Δ<name>` otherwise (`ΔIsClosed`); a pointer type named `Value` reads its
+  pointee through `Value‿`. With `-uco=false`, a channel whose type declares one of those methods is sent to and
+  received from with the default mode's operators. Slicing a named pointer to an unnamed array (`type P *[3]int`,
+  `p[1:]`) also converts now. C# source written by hand that called such a member on such a type calls it through
+  the interface instead.
+  <!- - R7 seat 2: GenTests NamedChanMapNumericClaimedMemberTests (red b6733d8a1a); behavioral NamedChanMapNumericShadow;
+       go2cs TestNamedChanMethodModeSpelling; the fix 62f1816922. Census over std at go1.26.11 through go/types, four
+       targets (windows, linux, darwin amd64; linux arm64), 966-968 packages each: the only claiming types are net/http
+       Header, net/textproto MIMEHeader and net/url Values (Add, Set: claimed before this seat), no named pointer or
+       channel carries a listed name, and no site slices a named pointer to an array. - ->
+- **[LANDED 1c9c6a224e, da3273f975]** **golib's `GoFrame` is a plain struct, not a `ref struct`.** `GoFrame` holds
+  the deferred calls of one call of a converted function. The C# compiler no longer refuses a copy, a store, boxing or
+  a capture of it; the source generator does, with error `GO2CS0016`, which names the site. A frame may only be a
+  local initialized to `default`, a `ref` parameter or argument, or the receiver of its own members. The rule also
+  runs where `RunAnalyzers` is `false`, and cannot be turned off. With `RunAnalyzers` set to `false`, one part is not
+  checked: a use that binds only with code another source generator writes, such as a `defer(…, ref ᒐ)` whose lambda
+  names a generated member, because the analyzer that checks those uses does not run. F# and Visual Basic get no
+  check. Hand-written C# that follows the converted `defer` pattern keeps the frame a local of its function and passes
+  it only by `ref`. See [Public surface](PublicSurface.md) and [Diagnostic codes](DiagnosticCodes.md).
+  <!- - 2026-11-23 (P1), CQ-6: the ref-struct drop 1b8cc2658c (with 95165eb212), landed by train 3, merge 1c9c6a224e
+       (claude/g-mn-proto-b1 1cfee4a63e); GO2CS0016 (GoFrameRuleGenerator) and its analyzer net (GoFrameRuleAnalyzer)
+       landed by train 3, merge da3273f975 (claude/h-mn-origin-table 1fc98cd07c). The caveat: GoFrameRuleAnalyzer's
+       remarks ("A project that sets it keeps the generator's rule and loses only this net"), the GO2CS0016 row of
+       DiagnosticCodes.md, PLAN-public-surface-stability.md (item 8, 2026-11-20). Disclosed in PublicSurface.md, tier 2,
+       in the same pass. - ->
+- **[LANDED e25362aedc, 528c057cfa]** **A Go name spelled with a letter go2cs uses in generated
+  names refuses its package.** A package that declares an identifier spelled with one of those letters (`Ꮡ`, `ᴛ`, `ж`
+  and the others), or a `Δ` name equal to one go2cs generates in that package, stops with error `GO2CS2015`, which
+  names each identifier: such a name could bind silently to a generated one. Every other `Δ` name converts, and a
+  struct field, method or type whose name starts with `Δ` keeps its Go name in reflection, encoding and `fmt` output.
+  Rename a refused identifier ([Diagnostic codes](DiagnosticCodes.md)).
+  <!- - 2026-11-24 (P2, .5 Δ cure seat claude/p2-delta-go-name): the cure retires the Δ-led field, method and type arm
+       and its KnownIssues entry (#delta-led-field-method-type-refused); this entry's link pointed there. Text
+       adjusted to the cured state; P4 owns this file and may reword. - ->
+  <!- - 2026-11-23 (P1): train 4, merge e25362aedc (claude/i9-marker-glyph-refusal b1105e20a5); the refusal a0806c5d38,
+       the folds 577eb7138e, 7286bd1e0e, b1105e20a5; behavioral DeltaNameEdgeCases 1cea7c8bdb. The text: the GO2CS2015
+       row of DiagnosticCodes.md and KnownIssues.md "A Go struct field, method or type whose name starts with `Δ`
+       refuses its package". - ->
+- **[LANDED 27edc19447]** **One C# type for each anonymous Go type in a package.** A Go struct or interface type
+  written without a name now becomes one C# type in each package, which every site that spells it uses, so some
+  generated names a hand-written C# file could have named (`Box_T`, `pair_T`) are gone. Those names were never a promise:
+  [Public surface](PublicSurface.md) now lists them as names that can change in any release. Name the declared Go
+  type instead.
+  <!- - 2026-11-23 (P1): train 2, merge 27edc19447 (claude/p4-lift-dedup 29f9c49496); the converter bdaa9df223 ("one
+       lift per anonymous type; a public site reuses a lift declared public"); COORD ruling 2026-11-20 on board (jj),
+       cited in PublicSurface.md tier 3. - ->
+- **[LANDED c7cba87148, c46de600d9]** **A Go type named `record` is spelled `Δrecord`.** At the start
+  of a C# member, `record` begins a record declaration, so a Go type declared with that name now takes the `Δ` prefix,
+  like other names C# reserves. In the converted standard library this renames `net/http/fcgi`'s `record` type, and its
+  method holder `fcgiᴛrecord` becomes `fcgiᴛΔrecord`. C# source written by hand that names the old spelling names the new
+  one. See [Shadowing](ConversionStrategies-Reference/shadowing.md).
+  <!- - 2026-11-25 (i9): owner ruling COORD 020915Z ("Δrecord, as ruled"); the seat claude/i9-alias-keyword-escape
+       bf4cc3a23d; release-smoke's binary-compatibility guard read the holder's CP0001 on the train 12 union (417fd87146,
+       run 45583774592), suppressed in src/core/net/http/fcgi/CompatibilitySuppressions.xml (COORD 2026-11-25T12:24:43Z). - ->
+  <!- - 2026-11-26 (P4): landed by train 12, merges c7cba87148 (claude/i9-alias-keyword-escape bf4cc3a23d) and
+       c46de600d9 (claude/i9-t12-fcgi-suppression 60dd63d952). - ->
+-->
+
 ---
 
 ## README NEWS block, held for release day
@@ -692,7 +739,6 @@ must be rebuilt, and C# written by hand against converted code may need the chan
      block quotes no roster figure (check-roster-format 2e). -->
 **November XX, 2026, NuGet X.X.X.X.** Goroutines can run on a small pool of threads, as Go runs them, in an
 experimental build that is off unless you opt in. A variadic parameter passes the caller's slice itself, as Go
-does, and `go2cs -cgo` combines with `-tests`, so a cgo package's own Go tests convert and run. Rebuild what you built
-against 1.26.11.1; the notes list the changes C# written by hand may need.
+does, and `go2cs -cgo` combines with `-tests`, so a cgo package's own Go tests convert and run.
 [Full announcement](NEWS.md#november-xx-2026--title-picked-at-release).
 ```
