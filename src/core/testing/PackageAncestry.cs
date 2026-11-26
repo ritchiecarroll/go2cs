@@ -196,7 +196,9 @@ internal static class PackageAncestry
 
     /// <summary>
     /// The go.mod handed over for a module that ships none: <see cref="ModuleGoModEnvironmentVariable"/> when it is set,
-    /// else, with a root that came from the record, the recorded go.mod (<see cref="RecordedModuleGoModKey"/>).
+    /// else, with a root that came from the record, the recorded go.mod (<see cref="RecordedModuleGoModKey"/>). The
+    /// narrowing runs one way: a recorded go.mod never pairs with a root set by hand, while a go.mod set by hand still
+    /// pairs with a recorded root, as the variable wins everywhere it is set (the pipeline sets both or neither).
     /// </summary>
     public static string? ResolveModuleGoMod(bool rootRecorded)
     {
