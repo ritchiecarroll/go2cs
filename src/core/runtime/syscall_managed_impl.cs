@@ -51,6 +51,11 @@ partial class runtime_package
     // the status before the P release, as Go orders it (COORD's Q2 ruling). The seam does golib's half today (a
     // returning main reads a goroutine inside a system call as not runnable), and is where an M:N scheduler releases
     // the P.
+    //
+    // The seam can refuse the entry (a transition already open: "already inside a native call"). Then the status moves
+    // back before the refusal propagates, so a refused entry leaves both halves as they were, as a refused exit does.
+    // Every caller enters OUTSIDE its try, so no exitsyscall runs for a refused entry; without the rollback the
+    // goroutine stayed _Gsyscall with no seam entered.
     private static void enterSyscall(NativeCallHint hint)
     {
         ж<g> gp = getg();
@@ -58,7 +63,15 @@ partial class runtime_package
         if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
             throw new PanicException($"runtime: entersyscall on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
 
-        GoNativeCall.Enter(hint);
+        try
+        {
+            GoNativeCall.Enter(hint);
+        }
+        catch
+        {
+            gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning);
+            throw;
+        }
     }
 
     // The mirror: the seam first (the P reacquired, under M:N), then the status. An exit from a status other than
@@ -144,15 +157,28 @@ partial class runtime_package
         if (entered == 0)
             return;
 
-        if ((entered & 2) != 0)
+        if ((entered & 2) == 0)
         {
-            ж<g> gp = getg();
-
-            if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
-                throw new PanicException($"runtime: a callback returns to native code on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+            GoNativeCall.ReturnToNative();
+            return;
         }
 
-        GoNativeCall.ReturnToNative();
+        ж<g> gp = getg();
+
+        if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
+            throw new PanicException($"runtime: a callback returns to native code on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+
+        // The seam can refuse (the callback left a native call of its own open); the status moves back first, as a
+        // refused entersyscall's does, so it matches the depth the refusal leaves.
+        try
+        {
+            GoNativeCall.ReturnToNative();
+        }
+        catch
+        {
+            gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning);
+            throw;
+        }
     }
 
     // TEST SEAMS (pinner_impl.cs's pattern; GolibTests is not in the InternalsVisibleTo grant).

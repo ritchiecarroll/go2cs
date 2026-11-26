@@ -42767,4 +42767,16 @@ kernels were.
 
 — R (2026-11-25)
 
+## 2026-11-26 — P2 (COORD 20261126T091914Z, P3's F7): a refused native-call seam left the goroutine _Gsyscall (CURED, pre-existing)
+`runtime/syscall_managed_impl.cs` moved the goroutine's status BEFORE the GoNativeCall half in two places, and the
+seam can refuse by throwing. `enterSyscall` set `_Gsyscall`, then `GoNativeCall.Enter` refused a second entry
+("already inside a native call"); every caller enters outside its `try`, so no `exitsyscall` ran and the goroutine
+stayed `_Gsyscall` with no seam entered. `syscallCallbackExit` set `_Gsyscall`, then `ReturnToNative` refused when
+the callback left a native call of its own open. Both now roll the status back before the refusal propagates; the
+order (status before the P release, the Q2 ruling) and the normal path are unchanged. No banked row is known to
+reach either refusal. Rows: `RuntimeSyscallFamilyTests.AnEntryWhoseSeamThrowsLeavesTheStatusRunning` and
+`.ACallbackExitWhoseSeamThrowsLeavesTheStatusRunning`, each red at master (status 3) before its cure.
+
+— P2 (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
