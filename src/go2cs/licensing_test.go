@@ -569,6 +569,138 @@ func TestLicensingPackageBoundaries(t *testing.T) {
 	}
 }
 
+// goProvenanceProblems checks one hand-written standard-library file's Go attribution header: the
+// "// PROVENANCE" block under the go2cs notice that says which parts follow which Go files. A file
+// with no such block is not checked. A file with one must carry, above the block, the notice of the
+// code it follows (Go's copyright line and BSD line, or fiat-crypto's notice for code fiat-crypto
+// generated), name a license of record that exists under LICENSES/, and give every DERIVED FROM or
+// INSPIRED BY bullet a GOROOT-relative source path and the Go version the code was last read against.
+func goProvenanceProblems(text string, licenses string) []string {
+	lines := strings.Split(strings.ReplaceAll(strings.TrimPrefix(text, "\ufeff"), "\r\n", "\n"), "\n")
+	block := -1
+	for i, line := range lines[:min(len(lines), 300)] {
+		if line == "// PROVENANCE:" || line == "// PROVENANCE, part by part:" {
+			block = i
+			break
+		}
+	}
+	if block < 0 {
+		return nil
+	}
+	var problems []string
+	head := strings.Join(lines[:block], "\n")
+	goNotice := regexp.MustCompile(`(?m)^// Copyright \d{4}(?:[,-] ?\d{4})* The Go Authors\. All rights reserved\.\n// Use of this source code is governed by a BSD-style\n`)
+	fiatNotice := regexp.MustCompile(`(?m)^// Copyright \(c\) [\d-]+ The fiat-crypto Authors\. All rights reserved\.`)
+	if !goNotice.MatchString(head) && !fiatNotice.MatchString(head) {
+		problems = append(problems, "PROVENANCE block without a Go notice (Copyright line and BSD line) above it")
+	}
+	// The lead sentence wraps, so the license of record is read from the comment text as one paragraph.
+	flat := strings.ReplaceAll(head, "\n// ", " ")
+	record := regexp.MustCompile(`license of record: (LICENSES/[\w.-]+\.txt)(?: and (LICENSES/[\w.-]+\.txt))?`).FindStringSubmatch(flat)
+	if record == nil {
+		problems = append(problems, "PROVENANCE block without a license of record")
+	} else {
+		for _, name := range record[1:] {
+			if name == "" {
+				continue
+			}
+			if _, err := os.Stat(filepath.Join(licenses, filepath.Base(name))); err != nil {
+				problems = append(problems, "license of record "+name+" does not exist")
+			}
+		}
+	}
+	var bullets []string
+	for _, line := range lines[block+1:] {
+		switch {
+		case strings.HasPrefix(line, "// - "):
+			bullets = append(bullets, strings.TrimPrefix(line, "// - "))
+		case strings.HasPrefix(line, "//   ") && len(bullets) > 0:
+			bullets[len(bullets)-1] += " " + strings.TrimPrefix(line, "//   ")
+		default:
+			goto done
+		}
+	}
+done:
+	if len(bullets) == 0 {
+		problems = append(problems, "PROVENANCE block with no bullets")
+	}
+	source := regexp.MustCompile(`(?:DERIVED FROM|INSPIRED BY) src/[\w./-]+\.(?:go|s|c)\b`)
+	version := regexp.MustCompile(`, Go \d+\.\d+(?:\.\d+)?,`)
+	for _, bullet := range bullets {
+		if !strings.Contains(bullet, "DERIVED FROM") && !strings.Contains(bullet, "INSPIRED BY") {
+			continue
+		}
+		if !source.MatchString(bullet) {
+			problems = append(problems, "bullet without a GOROOT-relative source path: "+bullet)
+		}
+		if !version.MatchString(bullet) {
+			problems = append(problems, "bullet without a Go version: "+bullet)
+		}
+	}
+	return problems
+}
+
+// TestLicensingGoProvenanceHeaders holds every hand-written src/core file that says it follows Go to
+// the attribution rule: Go's notice verbatim, and a provenance block whose bullets name the Go file
+// and version. Its fixtures prove each refusal fires before the corpus walk is believed.
+func TestLicensingGoProvenanceHeaders(t *testing.T) {
+	licenses := "../../LICENSES"
+	notice := "// Copyright 2009 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n"
+	lead := "//\n// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):\n//\n"
+	good := "// - f: DERIVED FROM src/a/b.go, Go 1.26.11, func f.\n"
+	fixtures := []struct {
+		name, text, want string
+	}{
+		{"accepted", lead + notice + "//\n// PROVENANCE:\n" + good, ""},
+		{"fiat accepted", strings.Replace(lead, "BSD-3-Clause", "BSD-1-Clause", 1) + "// Copyright (c) 2015-2020 The fiat-crypto Authors. All rights reserved.\n//\n// PROVENANCE:\n" + good, ""},
+		{"no notice", lead + "//\n// PROVENANCE:\n" + good, "without a Go notice"},
+		{"no path", lead + notice + "//\n// PROVENANCE:\n// - f: DERIVED FROM b.go, Go 1.26.11, func f.\n", "without a GOROOT-relative source path"},
+		{"no version", lead + notice + "//\n// PROVENANCE:\n// - f: INSPIRED BY src/a/b.go, func f.\n", "without a Go version"},
+		{"no record", "//\n" + notice + "//\n// PROVENANCE:\n" + good, "without a license of record"},
+		{"missing record", strings.Replace(lead, "BSD-3-Clause", "BSD-9-Clause", 1) + notice + "//\n// PROVENANCE:\n" + good, "does not exist"},
+	}
+	for _, fixture := range fixtures {
+		problems := strings.Join(goProvenanceProblems(fixture.text, licenses), "\n")
+		if fixture.want == "" && problems != "" || fixture.want != "" && !strings.Contains(problems, fixture.want) {
+			t.Errorf("fixture %q: got %q, want %q", fixture.name, problems, fixture.want)
+		}
+	}
+	checked := 0
+	err := filepath.WalkDir("../core", func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			switch entry.Name() {
+			case "bin", "obj", "Generated", ".vs", "golib", "go.arrays", "go2cs":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".cs") {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if !strings.Contains(string(data), "// PROVENANCE") {
+			return nil
+		}
+		checked++
+		for _, problem := range goProvenanceProblems(string(data), licenses) {
+			t.Errorf("%s: %s", filepath.ToSlash(path), problem)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if checked == 0 {
+		t.Fatal("no src/core file carries a PROVENANCE block: the walk read nothing")
+	}
+}
+
 func TestLicensingLibraryConversion(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	root := t.TempDir()

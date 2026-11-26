@@ -685,6 +685,16 @@ lands with the hop on the version branch, never on master ahead of it.
      the waiter queue the managed lock core documents as not modelled). C1 76e4026ae, i9 fd4611ae7 + 8c0f26247,
      C2 9a98cfa8; ruled 6cee25f56 and 8be44bbc0. -->
 
+**A hand-own's provenance version moves only when the hand-own is re-read.** Each hand-written file that
+follows Go carries a `// PROVENANCE` block whose bullets give the Go version the code was last read against
+(`DERIVED FROM src/<path>, Go <version>, …`). A hand-own re-synced at a hop (H6, or this slot's census)
+updates its bullet's version to the new release in the same commit. A hand-own that was not re-read keeps
+the old version, even where the hop moved the rest of the corpus. `TestLicensingGoProvenanceHeaders` refuses
+a bullet with no path or version and a block with no Go notice; it cannot tell whether a version is current.
+<!-- 2026-11-26, P5 attribution sweep (COORD 20261126T055140Z, P3 finding F4). The sweep's own version
+     check diffed every DERIVED FROM function across Go 1.23.12, 1.24.13, 1.25.14 and 1.26.11 and pinned 11
+     parts to the older release their code still follows, and moved the windows Syscall family to original code (docs/phase4/DATA-go-attribution-scout-2026-11-26.md). -->
+
 **A corpus migration is that regen.** Schedule the bundle **before H5**, for one reason: H5's overlay
 diff is the migration's primary signal, and every un-levelled artifact is noise inside it. Levelling
 first is what makes the upstream delta readable.
@@ -1564,7 +1574,7 @@ executor.
      branch claude/c1-h5-rederive-patch at ded03d469 — record docs/phase4/PATCH-h5-c1-1-runtime-rederives.md, applier
      src/apply-h5-c1-1-rederives.sh (usage :15-19; precondition :59-70; --verify :266-269; self-test python3 arms 7-8), train 49, not
      landed. <patch-ref> = ded03d469 or its landed successor. <mcleanup-ref> = claude/c1-mcleanup-handown (23d07f742 on 2026-09-13; its
-     src/core/runtime changes are mfinal.cs, mcleanup.cs, mcleanup.cs.auto; mfinal.cs:197 reads GoFinalizerQueue.EnsureRunner()) or
+     src/core/runtime changes are mfinal.cs, mcleanup.cs, mcleanup.cs.auto; mfinal.cs:210 reads GoFinalizerQueue.EnsureRunner()) or
      its successor. `git archive` writes blobs with working-tree conversion, as a checkout would. Readings on lane R's box, fifth
      rehearsal: 120 unique sites, ASM 194-188-188, all in runtime2.cs and mfinal.cs. MEASURED 2026-09-13 on lane R's box, on the fifth
      rehearsal's post-H5c scratch (101 applied): the root still had runtime/internal/sys holding runtime.internal.sys.csproj,
