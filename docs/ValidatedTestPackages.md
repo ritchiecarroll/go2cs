@@ -642,6 +642,17 @@ says what that proves and what it does not.
      banked verdict missing — proven against the package's committed proof page at HEAD. Anything
      outside the named set still fails. The phrase "host-conditional" is reserved for this
      annotation; an older sweep that predates it simply keeps enforcing the floor.
+     A FAMILY in that list (R1, 2026-11-25; COORD 20261125T172300Z and 172751Z) names a parent and
+     all of its subtests, for a capability that spawns too many rows to name one by one: `Parent/…`
+     followed by its exact size, as in `TestExpandAVX512/…` (+3076). The size is derived from the
+     evidence and checked by the sweep. A family is all or nothing, since Go runs none of it or all
+     of it: the sweep accepts the floor plus exactly the sizes of the families that ran, every extra
+     row agreeing on both runtimes, and a parent that ran its family must pass on both sides (its
+     only allowed change from the floor, where it skips). On an OS-annotated row there is no
+     committed proof page for that OS, so the floor's name set is the live record outside the
+     families, and it must number exactly the annotation's floor plus its disclosed count.
+     src/_roster.ps1 Test-HostConditionalDelta is the rule; check-roster-format.ps1 section 1b2c
+     proves it with fixtures.
      Per-OS expectations: a row that has validated on a non-Windows OS records that OS's arithmetic
      as its own middle-dot segment, placed LAST in the What-it-exercises cell, immediately before
      the · [proof](…) link: "· linux: 302" alone, or "· linux: 18 + 1" when that OS discloses. The
