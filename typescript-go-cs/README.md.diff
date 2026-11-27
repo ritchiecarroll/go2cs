@@ -5,7 +5,7 @@
  - **No hand edits:** none of the converted C# is edited by hand.
  
 +TypeScript's own Go tests, converted to C# and run against native `go test`, are tracked in [TESTS.md](TESTS.md): the
-+unit tests of four compiler packages match native on go2cs's development tree, with fixes newer than 1.26.11.1.
++unit tests of four compiler packages match native at go2cs master, with fixes newer than 1.26.11.1.
 +
  ## What is not covered
  
