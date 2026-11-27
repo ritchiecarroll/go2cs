@@ -28,6 +28,10 @@ import (
 //   - jit-dotnet:  dotnet.exe probe.dll, the JIT.
 //   - aot:         Native AOT, default settings (the control: CFG off, so the program takes the default arm).
 //   - aot-cfg:     Native AOT with <ControlFlowGuard>Guard</ControlFlowGuard>.
+//   - aot-cfg-nomark:  aot-cfg's binary, the PAGE_TARGETS_INVALID mapping without the marking call: whether page+0 is
+//     callable at all when the mark is skipped.
+//   - aot-cfg-default: aot-cfg's binary, the page mapped as without CFG (read-write, then executable, every location
+//     valid).
 //
 // Each reading names its runtime and whether the process runs with CFG, then, where CFG is on, whether the marking
 // call returns, and whether page+0 and page+16 are callable. Recorded, not asserted: the design takes its CFG arm from
@@ -46,6 +50,7 @@ internal static unsafe partial class Probe
     private static int Main(string[] args)
     {
         bool call16 = args.Length > 0 && args[0] == "16";
+        string mode = args.Length > 1 ? args[1] : "";
         Console.WriteLine("runtime: " + (RuntimeFeature.IsDynamicCodeSupported ? "jit" : "aot"));
 
         uint policy = 0;
@@ -57,6 +62,9 @@ internal static unsafe partial class Probe
 
         bool cfg = (policy & 1) != 0;
         Console.WriteLine("cfg: " + (cfg ? 1 : 0));
+
+        // "default" maps the page as a process without CFG would, whatever the process runs with
+        if (mode == "default") { cfg = false; Console.WriteLine("mode: default"); }
 
         nint page = cfg
             ? win32VirtualAlloc(0, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READ | PAGE_TARGETS)
@@ -73,7 +81,9 @@ internal static unsafe partial class Probe
 
         if (!win32VirtualProtect(page, 4096, PAGE_EXECUTE_READ | (cfg ? PAGE_TARGETS : 0), out old)) { Console.WriteLine("step-failed: VirtualProtect-rx " + Marshal.GetLastPInvokeError()); return 3; }
 
-        if (cfg)
+        if (cfg && mode == "nomark")
+            Console.WriteLine("mode: nomark");
+        else if (cfg)
         {
             nuint* target = stackalloc nuint[2];
             target[0] = 0; // offset 0
@@ -194,5 +204,7 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 		"-p:ControlFlowGuard=Guard", "-p:IntermediateOutputPath="+filepath.Join(dir, "objcfg")+string(filepath.Separator),
 		"-o", filepath.Join(dir, "aotcfg")) {
 		run("aot-cfg", filepath.Join(dir, "aotcfg", "probe.exe"), "16")
+		run("aot-cfg-nomark", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "nomark")
+		run("aot-cfg-default", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "default")
 	}
 }
