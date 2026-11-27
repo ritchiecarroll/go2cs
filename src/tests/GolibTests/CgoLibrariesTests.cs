@@ -363,4 +363,43 @@ public class CgoLibrariesTests
             }
         }
     }
+
+    // P3's read of the Resolve fix: a name with a dot and no .dll, the usual .NET spelling, loads as name.dll, as the
+    // runtime's own windows probing has it; a name ending in .dll or .exe, in any case, is taken as it is.
+    [TestMethod]
+    public void WindowsCandidatesAddDllUnlessTheNameEndsInDllOrExe()
+    {
+        CollectionAssert.AreEqual(new[] { "Vendor.Native.dll", "Vendor.Native" }, GoCgoLibraries.WindowsCandidates("Vendor.Native"));
+        CollectionAssert.AreEqual(new[] { "go2csdllx.dll", "go2csdllx" }, GoCgoLibraries.WindowsCandidates("go2csdllx"));
+        CollectionAssert.AreEqual(new[] { "go2csdllx.DLL" }, GoCgoLibraries.WindowsCandidates("go2csdllx.DLL"));
+        CollectionAssert.AreEqual(new[] { "tool.exe" }, GoCgoLibraries.WindowsCandidates("tool.exe"));
+    }
+
+    // P3's SHOULD: an unowned name is searched where the runtime's probing would load it by absolute path, in its order:
+    // every NATIVE_DLL_SEARCH_DIRECTORIES entry the host set, then the assembly's directory, then the base directory.
+    [TestMethod]
+    public void UnownedDirectoriesFollowTheRuntimesProbingOrder()
+    {
+        List<string> directories = GoCgoLibraries.UnownedDirectories(s_assembly);
+        string trim(string directory) => Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
+        int indexOf(string directory) => directories.FindIndex(known => string.Equals(known, trim(directory), StringComparison.OrdinalIgnoreCase));
+
+        string[] hostList = (AppContext.GetData("NATIVE_DLL_SEARCH_DIRECTORIES") as string ?? "")
+            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        Assert.AreNotEqual(0, hostList.Length, "the test host sets NATIVE_DLL_SEARCH_DIRECTORIES, so the arm below can fail");
+
+        int assembly = indexOf(Path.GetDirectoryName(s_assembly.Location)!);
+        Assert.AreNotEqual(-1, assembly, "the assembly's directory is searched");
+        Assert.AreNotEqual(-1, indexOf(AppContext.BaseDirectory), "the base directory is searched");
+
+        foreach (string directory in hostList)
+        {
+            int index = indexOf(directory);
+            Assert.AreNotEqual(-1, index, $"{directory} from NATIVE_DLL_SEARCH_DIRECTORIES is searched");
+            Assert.IsTrue(index <= assembly, $"{directory} from NATIVE_DLL_SEARCH_DIRECTORIES is searched no later than the assembly's directory");
+        }
+
+        Assert.AreEqual(directories.Count, directories.Distinct(StringComparer.OrdinalIgnoreCase).Count(), "no directory is searched twice");
+    }
 }
