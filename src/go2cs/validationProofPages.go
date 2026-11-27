@@ -450,10 +450,10 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 	case 0:
 	case 1:
 		page.WriteString("\n1 test is withdrawn from both sides and not counted above; see\n" +
-			"[Withdrawn from both sides](#withdrawn-from-both-sides).\n")
+			"[Host-fatal tests, withdrawn from both sides](#host-fatal-tests-withdrawn-from-both-sides).\n")
 	default:
 		fmt.Fprintf(&page, "\n%d tests are withdrawn from both sides and not counted above; see\n"+
-			"[Withdrawn from both sides](#withdrawn-from-both-sides).\n", len(withdrawn))
+			"[Host-fatal tests, withdrawn from both sides](#host-fatal-tests-withdrawn-from-both-sides).\n", len(withdrawn))
 	}
 
 	// Package-level notes from the hand-owned disclosure manifest: caveats about the
@@ -724,7 +724,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 	}
 
 	if len(withdrawn) > 0 {
-		page.WriteString("\n## Withdrawn from both sides\n\n")
+		page.WriteString("\n## Host-fatal tests, withdrawn from both sides\n\n")
 		fmt.Fprintf(&page, "A %s test takes the converted test host's whole process down, by a crash or by a hang that\n", proofCodeSpan(hostFatalClass))
 		page.WriteString("consumes the deadline, so every test after it would lose its verdict too. It is withdrawn from\n")
 		page.WriteString("**both** sides by name, is not claimed by the matched count above, and is pinned with its reason\n")

@@ -11,6 +11,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -402,16 +403,127 @@ func TestProofPageNamesHostFatalWithdrawals(t *testing.T) {
 		t.Fatalf("a host-fatal entry must not move the totals line (divergent-only, roster ruling 2026-10-26);\n got %q\nwant %q", totals(page), totals(plain))
 	}
 
-	if !strings.Contains(page, "\n## Withdrawn from both sides\n") {
+	if !strings.Contains(page, "\n## Host-fatal tests, withdrawn from both sides\n") {
 		t.Error("the page has no section for host-fatal withdrawals")
 	}
 	if !strings.Contains(page, "- `TestWithdrawnFault` (`host-fatal`) — because TestWithdrawnFault\n") {
 		t.Error("the page does not name the withdrawn test with its class and reason")
 	}
-	if !strings.Contains(page, "1 test is withdrawn from both sides") {
-		t.Error("the totals paragraph does not point to the withdrawal")
+	if !strings.Contains(page, "1 test is withdrawn from both sides and not counted above; see\n"+
+		"[Host-fatal tests, withdrawn from both sides](#host-fatal-tests-withdrawn-from-both-sides).\n") {
+		t.Error("the totals paragraph does not point to the withdrawal section's anchor")
 	}
-	if strings.Contains(plain, "Withdrawn from both sides") || strings.Contains(plain, "withdrawn from both sides and") {
+	if strings.Contains(plain, "withdrawn from both sides") {
 		t.Error("a page with no host-fatal entry gained the withdrawal wording")
+	}
+}
+
+// The plural pointer and the section's order: two entries added out of order read sorted, under one count.
+func TestProofPageNamesHostFatalWithdrawalsSortedAndCounted(t *testing.T) {
+	comparison, disclosures := loadProofFixture(t)
+
+	for name, d := range hostFatal("TestZuluFault", "TestAlphaFault") {
+		disclosures[name] = d
+	}
+	page := renderValidationProofPage(fixtureProvenance(), comparison, disclosures, nil)
+
+	if !strings.Contains(page, "2 tests are withdrawn from both sides and not counted above; see\n") {
+		t.Error("two host-fatal entries do not read as a plural count")
+	}
+
+	alpha := strings.Index(page, "- `TestAlphaFault` (`host-fatal`)")
+	zulu := strings.Index(page, "- `TestZuluFault` (`host-fatal`)")
+	if alpha < 0 || zulu < 0 || alpha > zulu {
+		t.Errorf("the section must list both entries, sorted: TestAlphaFault at %d, TestZuluFault at %d", alpha, zulu)
+	}
+}
+
+// committedPagesOwedHostFatalSection are the committed proof pages written before the renderer named host-fatal
+// tests (8482bd339a). Each picks the section up at its next re-validation on its own platform (COORD ruling a1: no
+// hand-edited generated pages; BOARD 2026-11-27). The list may only SHRINK: a page here that already names every
+// in-scope host-fatal test fails, so its row is removed the day it is regenerated.
+var committedPagesOwedHostFatalSection = map[string]bool{
+	"runtime":       true,
+	"runtime/pprof": true,
+}
+
+var proofPageHeadingPattern = regexp.MustCompile("(?m)^# `([^`]+)` — validation proof$")
+
+// Never hidden, on the committed pages too (P3 on a42d87b6df): every proof page under docs/validation/current names
+// each host-fatal test its row's manifest scopes to the page's platform, in the generated section.
+func TestCommittedProofPagesNameTheirHostFatalTests(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pagesDir := filepath.Join(root, "docs", "validation", "current")
+	entries, err := os.ReadDir(pagesDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	read, withHostFatal := 0, 0
+	stillOwed := map[string]bool{}
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
+			continue
+		}
+
+		data, err := os.ReadFile(filepath.Join(pagesDir, entry.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		page := strings.ReplaceAll(string(data), "\r\n", "\n")
+
+		heading := proofPageHeadingPattern.FindStringSubmatch(page)
+		platform := proofPagePlatformPattern.FindStringSubmatch(page)
+		if heading == nil || platform == nil {
+			continue
+		}
+		read++
+
+		importPath, goos := heading[1], platform[1]
+		disclosures, _, _, err := loadTestDisclosures(filepath.Join(root, "src", "core", filepath.FromSlash(importPath)), goos)
+		if err != nil {
+			t.Errorf("%s: its manifest does not load for %s: %v", entry.Name(), goos, err)
+			continue
+		}
+
+		names := proofHostFatalNames(disclosures)
+		if len(names) == 0 {
+			continue
+		}
+		withHostFatal++
+
+		_, section, _ := strings.Cut(page, "\n## Host-fatal tests, withdrawn from both sides\n")
+		section, _, _ = strings.Cut(section, "\n## ")
+
+		var missing []string
+		for _, name := range names {
+			if !strings.Contains(section, "- `"+name+"` (`host-fatal`)") {
+				missing = append(missing, name)
+			}
+		}
+
+		switch {
+		case len(missing) > 0 && committedPagesOwedHostFatalSection[importPath]:
+			stillOwed[importPath] = true
+		case len(missing) > 0:
+			t.Errorf("%s (%s) does not name its in-scope host-fatal test(s) %s: regenerate the page", entry.Name(), goos, strings.Join(missing, ", "))
+		}
+	}
+
+	// The list only shrinks: an entry whose page owes nothing (regenerated, no in-scope host-fatal test, or no page)
+	// is removed.
+	for importPath := range committedPagesOwedHostFatalSection {
+		if !stillOwed[importPath] {
+			t.Errorf("committedPagesOwedHostFatalSection names %q, whose committed page owes no host-fatal name: remove it", importPath)
+		}
+	}
+
+	if read == 0 || withHostFatal == 0 {
+		t.Fatalf("read %d proof page(s), %d with an in-scope host-fatal entry: the walk no longer reaches the pages it guards", read, withHostFatal)
 	}
 }
