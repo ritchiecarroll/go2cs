@@ -252,7 +252,7 @@ internal static (fuzzResult min, error err) minimize⁔(/*this*/ ж<worker> Ꮡw
         if (w.coordinator.opts.MinimizeTimeout != 0) {
             Action cancel = default;
             (ctx, var cancelᴛ1) = context.WithTimeout(ctx, w.coordinator.opts.MinimizeTimeout);
-            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
+            cancel = builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
@@ -445,7 +445,7 @@ internal static partial error stop⁔(/*this*/ ж<worker> Ꮡw) {
         throw panic("worker was not started successfully");
     }
     var selᴛ11 = w.termC;
-    switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
     case 0 when selᴛ11.ꟷᐳ(out _): {
         // Worker already terminated.
         if (w.client == nil) {
@@ -788,7 +788,7 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
         if (args.Timeout != 0) {
             Action cancel = default;
             (ctx, var cancelᴛ1) = context.WithTimeout(ctx, args.Timeout);
-            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
+            cancel = builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
@@ -852,7 +852,7 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
 
         for (;;) {
             var selᴛ14 = ctx.Done();
-            switch (trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
             case 0 when selᴛ14.ꟷᐳ(out _): {
                 goto ᒐdone;
             }
@@ -913,7 +913,7 @@ internal static minimizeResponse /*resp*/ minimize⁔(/*this*/ ж<workerServer> 
         if (args.Timeout != 0) {
             Action cancel = default;
             (ctx, var cancelᴛ1) = context.WithTimeout(ctx, args.Timeout);
-            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
+            cancel = builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }

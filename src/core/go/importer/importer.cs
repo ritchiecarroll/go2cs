@@ -119,7 +119,7 @@ internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ref gcimports 
     if (mode != 0) {
         throw panic("mode must be 0");
     }
-    return gcimporter.Import(m.fset, m.packages, path, srcDir, NilSafeDelegateConversion<Func<@string, (io.ReadCloser, error)>, Lookup>(m.lookup));
+    return gcimporter.Import(m.fset, m.packages, path, srcDir, builtin.NilSafeDelegateConversion<Func<@string, (io.ReadCloser, error)>, Lookup>(m.lookup));
 }
 
 // gccgo importer
@@ -137,7 +137,7 @@ internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ref gccgoimpor
     if (mode != 0) {
         throw panic("mode must be 0");
     }
-    return m.importer(m.packages, path, srcDir, NilSafeDelegateConversion<Func<@string, (io.ReadCloser, error)>, Lookup>(m.lookup));
+    return m.importer(m.packages, path, srcDir, builtin.NilSafeDelegateConversion<Func<@string, (io.ReadCloser, error)>, Lookup>(m.lookup));
 }
 
 } // end importer_package

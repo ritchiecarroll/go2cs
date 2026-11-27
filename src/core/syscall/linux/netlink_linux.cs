@@ -191,7 +191,7 @@ public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ж<NetlinkM
         attrs = append(attrsᴷ, attrs, ra);
         b = b.slice(alen);
     }
-    attrs = move2heap(attrsᴷ, attrs);
+    attrs = builtin.move2heap(attrsᴷ, attrs);
     return (attrs, default);
 }
 

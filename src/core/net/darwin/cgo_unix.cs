@@ -52,7 +52,7 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
     GoFrame ᒐ = default;
     try {
         var err = acquireThread(ctx); if (err != nil) {
-            T zero = GoZero<T>();
+            T zero = builtin.GoZero<T>();
             return (zero, new DNSErrorжerror(newDNSError(mapErr(err), lookupName, ""u8)));
         }
 
@@ -82,7 +82,7 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
             return (r.res, r.err);
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
-            T zero = GoZero<T>();
+            T zero = builtin.GoZero<T>();
             return (zero, new DNSErrorжerror(newDNSError(mapErr(ctx.Err()), lookupName, ""u8)));
         }}
         return default;
@@ -106,7 +106,7 @@ internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context 
 
         hosts = append(hostsᴷ, hosts, Ꮡaddr.String());
     }
-    hosts = move2heap(hostsᴷ, hosts);
+    hosts = builtin.move2heap(hostsᴷ, hosts);
     return (hosts, default);
 }
 

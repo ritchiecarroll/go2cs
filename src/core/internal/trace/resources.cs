@@ -194,7 +194,7 @@ public static ResourceID MakeResourceID<T>(T id)
         rd.Kind = ResourceThread;
         break;
     }}
-    rd.id = (int64)ConvertToUInt64<T>(id);
+    rd.id = (int64)builtin.ConvertToUInt64<T>(id);
     return rd;
 }
 

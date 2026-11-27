@@ -22,7 +22,7 @@ A conversion to a **named func type** — `metricReader(read)` where `type metri
 
 <!-- source: src/core/runtime/metrics.cs:566-567 -->
 ```csharp
-    var recvʗ1 = NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
+    var recvʗ1 = builtin.NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
     d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => recvʗ1.compute(p1, p2);
 ```
 

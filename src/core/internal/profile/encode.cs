@@ -279,8 +279,8 @@ internal static error postDecode⁔(/*this*/ ж<Profile> Ꮡp) {
         s.locationIDX = default;
     }
 
-    (p.DropFrames, err) = getString(p.stringTable, ref nonnil(ref p).dropFramesX, err);
-    (p.KeepFrames, err) = getString(p.stringTable, ref nonnil(ref p).keepFramesX, err);
+    (p.DropFrames, err) = getString(p.stringTable, ref builtin.nonnil(ref p).dropFramesX, err);
+    (p.KeepFrames, err) = getString(p.stringTable, ref builtin.nonnil(ref p).keepFramesX, err);
 
     {
         var pt = p.PeriodType; if (pt == nil) {
@@ -303,7 +303,7 @@ internal static error postDecode⁔(/*this*/ ж<Profile> Ꮡp) {
     }
 
     p.commentX = default;
-    (p.DefaultSampleType, err) = getString(p.stringTable, ref nonnil(ref p).defaultSampleTypeX, err);
+    (p.DefaultSampleType, err) = getString(p.stringTable, ref builtin.nonnil(ref p).defaultSampleTypeX, err);
     p.stringTable = default;
     return err;
 }

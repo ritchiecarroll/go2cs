@@ -1487,7 +1487,7 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
             ret = append(retᴷ, ret, typ);
         }
     }
-    ret = move2heap(retᴷ, ret);
+    ret = builtin.move2heap(retᴷ, ret);
     return ret;
 }
 

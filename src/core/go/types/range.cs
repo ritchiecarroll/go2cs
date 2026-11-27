@@ -171,7 +171,7 @@ internal static void rangeStmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext inn
             // declare variables
             if (len(vars) > 0) {
                 token.Pos scopePos = rangeStmt.Body.Pos();
-                vars = move2heap(varsᴷ, vars);
+                vars = builtin.move2heap(varsᴷ, vars);
                 foreach (var (_, obj) in range(vars)) {
                     Ꮡcheck.declare(check.scope, nil, /* recordDef already called */ new VarжObject(obj), scopePos);
                 }

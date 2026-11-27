@@ -96,7 +96,7 @@ public static T Arg<W, T>(ж<Func> Ꮡfn)
 
     ref var loc = ref heap<locReg>(new locReg(cls: regClassGP, reg: fn.nArgs), out var Ꮡloc);
     fn.nArgs++;
-    W x = GoZero<W>();
+    W x = builtin.GoZero<W>();
     var o = Ꮡ(new op(Δop: "arg", kind: x.kind(), c: loc));
     Ꮡfn.attach(o);
     return x.wrap(o);

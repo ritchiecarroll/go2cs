@@ -20,7 +20,7 @@ namespace go.math;
 using godebug = @internal.godebug_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using @internal;
 using go.sync;
 
@@ -283,7 +283,7 @@ internal static (nint n, error err) Read⁔(/*this*/ ж<Rand> Ꮡr, slice<byte> 
     case ж<runtimeSource> src: {
         return src.read(p, Ꮡr.ᏑreadVal, Ꮡr.ᏑreadPos);
     }}
-    return read(p, r.src, ref nonnil(ref r).readVal, ref nonnil(ref r).readPos);
+    return read(p, r.src, ref builtin.nonnil(ref r).readVal, ref builtin.nonnil(ref r).readPos);
 }
 
 internal static (nint n, error err) read(slice<byte> p, Source src, ref int64 readVal, ref int8 readPos) {

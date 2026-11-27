@@ -156,7 +156,7 @@ private static readonly @string overflowingCoordinateˢᵇ = "overflowing coordi
 internal static (Point p, error err) pointFromAffine⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
 {
-    Point p = GoZero<Point>();
+    Point p = builtin.GoZero<Point>();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 

@@ -27,7 +27,7 @@ internal static UntypedInt p521ElementLen => 66;
 internal static ж<P521Element> One⁔(/*this*/ ж<P521Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    p521SetOne(ref nonnil(ref e).x);
+    p521SetOne(ref builtin.nonnil(ref e).x);
     return Ꮡe;
 }
 
@@ -67,7 +67,7 @@ internal static slice<byte> bytes⁔(/*this*/ ж<P521Element> Ꮡe, /*[66]*/ ж<
     ref var @out = ref Ꮡout.DerefOrNull();
 
     p521NonMontgomeryDomainFieldElement tmp = default;
-    p521FromMontgomery(ref tmp, ref nonnil(ref e).x);
+    p521FromMontgomery(ref tmp, ref builtin.nonnil(ref e).x);
     var ᴛ1 = tmp.Value;
     p521ToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ1);
     p521InvertEndianness(@out[..]);
@@ -102,7 +102,7 @@ internal static (ж<P521Element>, error) SetBytes⁔(/*this*/ ж<P521Element> �
     p521NonMontgomeryDomainFieldElement tmp = default;
     var ᴛ2 = tmp.Value;
     p521FromBytes(ref ᴛ2, ref @in);
-    p521ToMontgomery(ref nonnil(ref e).x, ref tmp);
+    p521ToMontgomery(ref builtin.nonnil(ref e).x, ref tmp);
     return (Ꮡe, default);
 }
 
@@ -112,7 +112,7 @@ internal static ж<P521Element> Add⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p521Add(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p521Add(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -122,7 +122,7 @@ internal static ж<P521Element> Sub⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p521Sub(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p521Sub(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -132,7 +132,7 @@ internal static ж<P521Element> Mul⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p521Mul(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p521Mul(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -141,7 +141,7 @@ internal static ж<P521Element> Square⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    p521Square(ref nonnil(ref e).x, ref nonnil(ref t).x);
+    p521Square(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t).x);
     return Ꮡe;
 }
 
@@ -151,11 +151,11 @@ internal static ж<P521Element> Select⁔(/*this*/ ж<P521Element> Ꮡv, ж<P521
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var ᴛ3 = nonnil(ref v).x.Value;
+    var ᴛ3 = builtin.nonnil(ref v).x.Value;
 
-    var ᴛ4 = nonnil(ref b).x.Value;
+    var ᴛ4 = builtin.nonnil(ref b).x.Value;
 
-    var ᴛ5 = nonnil(ref a).x.Value;
+    var ᴛ5 = builtin.nonnil(ref a).x.Value;
     p521Selectznz(ref ᴛ3, (p521Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;

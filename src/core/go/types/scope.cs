@@ -98,7 +98,7 @@ internal static slice<Object> lookupIgnoringCase⁔(/*this*/ ref Scope s, @strin
             matches = append(matchesᴷ, matches, s.Lookup(n));
         }
     }
-    matches = move2heap(matchesᴷ, matches);
+    matches = builtin.move2heap(matchesᴷ, matches);
     return matches;
 }
 

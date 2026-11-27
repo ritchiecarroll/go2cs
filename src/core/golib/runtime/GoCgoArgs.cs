@@ -99,8 +99,19 @@ namespace go.golib;
     {
         pin = default;
 
+        if (pointer is not null && GoPinTable.Any && TryPinnerHeld(pointer, function, out pin))
+        {
+            address = 0;
+            images.ClaimOther(OtherKeys(pointer, pin), function);
+            return GoCgoStructPointer.Pinned;
+        }
+
         if (pointer is NativeBox<T> native && !IsGenuinelyNative(native) && native.AliasesAnOrderToken && ImageRoot(native, function) is { } root)
         {
+            // An image is a copy: C keeping its address after the call would keep the copy's, not the Go value's (S6).
+            if (GoPinTable.Any && GoPinTable.IsPinned(root.Key))
+                throw PinnerHeldRefused(function, typeof(T), "a view of a Go value no door can hand over in place");
+
             address = 0;
             pin = images.Image(GoCgoImages.ImageKeys(root.Key, root.Value), root.Box, root.Value, root.Type, root.Size, Math.Max(root.Size, NativeStructMarshal.ImageSizeOf(typeof(T)) ?? (nuint)Unsafe.SizeOf<T>()), function);
             return GoCgoStructPointer.Pinned;
@@ -220,6 +231,12 @@ namespace go.golib;
                 throw Refused(function, typeof(T), $"a reinterpret view of a {rootSize}-byte Go value whose storage go2cs cannot hold still, and C may write past one {typeof(T).Name} into it");
 
             default:
+                if (GoPinTable.Any && TryPinnerHeld(pointer, function, out pin))
+                {
+                    address = 0;
+                    return GoCgoStructPointer.Pinned;
+                }
+
                 return StructPointer(pointer, function, out address);
         }
     }
@@ -240,6 +257,8 @@ namespace go.golib;
 
         if (slot is null || slot.IsNilPointer)
             return GoCgoStructPointer.Nil;
+
+        RefusePinnerHeldCopy(slot, typeof(ж<U>), function);
 
         if (slot is NativeBox<ж<U>> native)
         {
@@ -283,6 +302,8 @@ namespace go.golib;
 
         if (slot is not ElemRefBox<ж<U>> element)
             return OutParameter(slot, function, out word, out original);
+
+        RefusePinnerHeldCopy(slot, typeof(ж<U>), function);
 
         word = 0;
         original = null;
@@ -425,6 +446,12 @@ namespace go.golib;
         if (ManagedPointerTokens.IsTaggedToken(number))
             throw GoPointerToUnpinnedGoPointer();
 
+        // A NUMBER of Go memory (design 20.4 S4): `unsafe.Pointer(uintptr(unsafe.Pointer(&x)))`, in one expression or
+        // through a variable, with or without an offset. It crosses as the pin of the storage it names, found through
+        // the record its mint left, never trusted as an address.
+        if (PinNumber(number, function) is { } numberPin)
+            return numberPin;
+
         string? what = GoMemory(pointer, out nuint address);
 
         if (what is not null)
@@ -445,11 +472,68 @@ namespace go.golib;
 
         if (pointer is IUnsafePointer { RetainedSource: ICgoWordElement element } && element.TryCgoWordMirror(out GoCgoWordMirror? words, out nint index))
         {
+            RefusePinnerHeldCopy(element, typeof(uintptr), function);
             mirror = words;
             return words.PinAt(index);
         }
 
         return PinVoidPointer(pointer, function);
+    }
+
+    // A number of Go memory handed to a void pointer (design 20.4 S4, with P3's conditions and COORD's ruling on Q3: both
+    // forms). Null when the number names no Go memory golib knows, so the door goes on to its other tests (C memory crosses
+    // as its number). The number is never trusted as an address: the record its mint left names the storage, the storage
+    // is pinned for the call as any void pointer's is, and the offset is bounded by that storage.
+    // - An exact address the registry resolves (`uintptr(unsafe.Pointer(&x))`): its box's storage, at the box's slot.
+    // - An interior address inside a pin golib holds (`... + off`): that pin's storage, at the offset, inside its extent.
+    // - An entry whose box has been collected: refused by name.
+    // A number past a pin's end crosses as its number and pins nothing, as the pin-extent index rules (end-exclusive,
+    // docs/phase4/DESIGN-cgo-pin-extents.md): one past the end is the end cursor of a begin/end pair, whose begin pins the
+    // storage. Residue (stated in the design, 20.4 S4): a number further past, or one whose collected entry the sweep has
+    // already removed, names nothing golib can see and crosses as C memory, as a wild pointer does under Go; and a token id
+    // reused after its box died can name another live box (ids wrap at 2^29), remote and no worse than Go's use-after-free.
+    private static unsafe GoCgoPin? PinNumber(nuint number, string function)
+    {
+        if (ManagedPointerTokens.HoldsCollectedEntry(number))
+            throw VoidRefused(function, "a number naming a Go value that has been collected");
+
+        if (ManagedPointerTokens.Resolve(number) is { } registered && registered is not INativeRooted { IsGenuinelyNativeRoot: true })
+        {
+            if (!TryPinTarget(registered, number, out Array? root, out nint offset))
+                throw VoidRefused(function, "a number naming Go memory whose storage go2cs cannot hold still for the call");
+
+            RequireCrossable(root);
+            return new GoCgoPin(root, offset);
+        }
+
+        if (PinExtents.Find(number) is { } held && held.PinnedTarget is Array heldRoot && held.TryExtent(out nuint start, out nuint end) && number >= start && number < end)
+        {
+            RequireCrossable(heldRoot);
+            return new GoCgoPin(heldRoot, (nint)(number - start));
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// What C receives for a 64-bit integer parameter (design 20.4 S4 and 20.10, P3's reads): the integer as it is,
+    /// unless it is a TOKEN go2cs MINTED, the number it gives <c>uintptr(unsafe.Pointer(p))</c> for a Go value that has no
+    /// address (it holds Go references). Go would hand C that value's address; a token names no memory, so C would receive
+    /// silent garbage, and the call is refused by name instead. Any other integer crosses, a real address of Go memory
+    /// included: an integer is what Go lets C see.
+    /// </summary>
+    /// <remarks>
+    /// The bit pattern alone is not the test (P3's MUST on 53d4da880e): one 64-bit value in four has bit 63 set and bit
+    /// 47 clear, so a hash or an opaque id would be refused where Go passes it. A tagged number is refused only when the
+    /// registry holds an entry for it, live or collected. Every token the box-to-uintptr operator mints is registered
+    /// there (its reference-bearing arm, ж.cs), so a minted token is always seen; a tagged number never minted crosses.
+    /// </remarks>
+    public static ulong Word(ulong value, string function)
+    {
+        if (ManagedPointerTokens.IsTaggedToken((nuint)value) && (ManagedPointerTokens.HoldsCollectedEntry((nuint)value) || ManagedPointerTokens.Resolve((nuint)value) is not null))
+            throw RuntimeErrorPanic.ErrorString($"cgo: the pointer-sized integer handed to C.{function} is go2cs's token for a Go value that has no address (it holds Go references), not that value's address; C would receive a number that names no memory, so go2cs refuses the call");
+
+        return value;
     }
 
     // The pin for a pointer that carries its box. The box decides (M2): its storage, found through the derivations it
@@ -582,6 +666,48 @@ namespace go.golib;
 
     private static PanicException GoPointerToUnpinnedGoPointer() =>
         RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go pointer");
+
+    // cgo S6 (DESIGN-cgo-phase3-marshaling 21.3 (b), 21.7 SHOULD 3): a pointer into a value pinned with runtime.Pinner, which
+    // C may KEEP past the call, never crosses as a stack mirror or an image, whose address is a copy's. It crosses in place,
+    // held still by the Pinner's own handle (and the wrapper's `fixed` for the call), when its CLR layout is its C layout:
+    // the storage holds no reference (the S1 condition). A pinned value that fails the test is refused by name. False when
+    // nothing pinned the pointer's value, so the door's call-scoped answer stands.
+    private static bool TryPinnerHeld<T>(ж<T> pointer, string function, out GoCgoPin pin)
+    {
+        pin = default;
+
+        if (pointer.IsNilPointer || pointer is NativeBox<T> { NativeAddress: not 0 } native && IsGenuinelyNative(native))
+            return false;
+
+        bool held = GoPinTable.IsPinned(pointer.ReferentObject);
+        bool located = TryPinTarget(pointer, 0, out Array? root, out nint offset);
+
+        if (located)
+            held |= GoPinTable.HoldsStorage(root!);
+
+        if (!held)
+            return false;
+
+        if (!located || RuntimeHelpers.IsReferenceOrContainsReferences<T>() || NativeStructMarshal.ContainsReferences(root!.GetType().GetElementType()!))
+            throw PinnerHeldRefused(function, typeof(T), "a Go value whose Go layout is not its C layout");
+
+        RequireCrossable(root!);
+        pin = new GoCgoPin(root!, offset);
+        return true;
+    }
+
+    // cgo S6, P3's MUST 1 on 2ce6812305: the out-parameter door and the void door's word-mirror arm hand C a COPY of a Go
+    // pointer slot (one stack word, or a mirror of the whole array of C pointers). C keeping that address after the call
+    // keeps a dead stack word or a mirror the wrapper copies back once. A slot pinned with runtime.Pinner says C may keep
+    // it, and a slot holds a reference here, so it has no in-place answer: refused by name. Unpinned slots are unchanged.
+    private static void RefusePinnerHeldCopy(object box, Type type, string function)
+    {
+        if (GoPinTable.Any && box is INilPointer { IsNilPointer: false } pointer && GoPinTable.IsPinned(pointer.ReferentObject))
+            throw PinnerHeldRefused(function, type, "a Go pointer slot go2cs hands C as a copy (a stack word, or a word mirror of its array)");
+    }
+
+    private static PanicException PinnerHeldRefused(string function, Type type, string what) =>
+        RuntimeErrorPanic.ErrorString($"cgo: the {type.Name} pointer handed to C.{function} is pinned with runtime.Pinner, so C may keep it past the call, and it is {what}; go2cs cannot hand C that value's own memory, so it refuses the call (docs/Limitations.md#cgo)");
 
     private static PanicException VoidRefused(string function, string what) =>
         RuntimeErrorPanic.ErrorString($"cgo: the void pointer handed to C.{function} is {what}, and handing C a pointer into Go memory is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");

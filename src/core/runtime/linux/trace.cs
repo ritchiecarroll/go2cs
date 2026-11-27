@@ -1023,7 +1023,7 @@ internal static void wake⁔(/*this*/ ж<wakeableSleep> Ꮡs) {
         // want to block on the receiver waking up. This also
         // effectively batches together wakeup notifications.
         var selᴛ3 = s.wakeup.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-        switch (trySelect(selᴛ3)) {
+        switch (builtin.trySelect(selᴛ3)) {
         case 0: {
             break;
         }

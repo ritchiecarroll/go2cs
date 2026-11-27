@@ -468,6 +468,20 @@ namespace go;
     /// <see cref="IsTokenArithmetic"/> has already answered true, i.e. on a path that refused
     /// unconditionally before the step existed, so no conversion that works today reaches it.
     /// </summary>
+    /// <summary>
+    /// Whether the table still holds an entry for <paramref name="number"/> whose box has been collected, with no live
+    /// earlier registrant to answer for it (cgo's number door, design 20.4 S4, P3's "a dead box is refused"). Asked
+    /// BEFORE <see cref="Resolve"/>, which removes such an entry. An entry the opportunistic sweep has already removed
+    /// answers false: that number is then indistinguishable from C memory (the stated residue).
+    /// </summary>
+    internal static bool HoldsCollectedEntry(nuint number)
+    {
+        if (number == 0 || Volatile.Read(ref s_count) == 0 || !s_table.TryGetValue(number, out WeakReference<object>? weak))
+            return false;
+
+        return !weak.TryGetTarget(out _) && Resolve(number) is null;
+    }
+
     internal static object? ResolveArithmeticBase(nuint number, out nuint offset)
     {
         nuint allocationBase = number & ~(nuint)0xFFFFFFFFu;

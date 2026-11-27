@@ -6,7 +6,7 @@ namespace go.crypto.@internal.fips140;
 using bytes = bytes_package;
 using fips140 = go.crypto.@internal.fips140_package;
 using bigmod = go.crypto.@internal.fips140.bigmod_package;
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using errors = errors_package;
 using sync = sync_package;
 using go.crypto.@internal;

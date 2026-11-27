@@ -275,7 +275,7 @@ internal static (slice<rawExtension>, error) extractRawExtensions(ref clientHell
         }
         rawExtensions = append(rawExtensionsᴷ, rawExtensions, new rawExtension(extension, extData));
     }
-    rawExtensions = move2heap(rawExtensionsᴷ, rawExtensions);
+    rawExtensions = builtin.move2heap(rawExtensionsᴷ, rawExtensions);
     return (rawExtensions, default);
 }
 

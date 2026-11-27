@@ -4,7 +4,7 @@
 namespace go;
 
 using errors = errors_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 
 partial class os_package {
 

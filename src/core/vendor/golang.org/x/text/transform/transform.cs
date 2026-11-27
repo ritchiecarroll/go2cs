@@ -522,7 +522,7 @@ internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ ref chai
 
 // Deprecated: Use runes.Remove instead.
 public static Transformer RemoveFunc(Func<rune, bool> f) {
-    return new removeFᴠTransformer(NilSafeDelegateConversion<removeF, Func<rune, bool>>(f));
+    return new removeFᴠTransformer(builtin.NilSafeDelegateConversion<removeF, Func<rune, bool>>(f));
 }
 
 internal delegate bool removeF(rune r);

@@ -11,8 +11,8 @@ using io = io_package;
 using mathrand = math.rand.rand_package;
 using sync = sync_package;
 using testing = testing_package;
-// blank import: crypto.rand_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/rand" (init forced in ImportInitializers)
+// import _ "unsafe" (nothing to initialize)
 using @internal;
 using math.rand;
 using rand = math.rand.rand_package;

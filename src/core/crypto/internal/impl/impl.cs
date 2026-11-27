@@ -55,7 +55,7 @@ public static slice<@string> Packages() {
             seen[i.Package] = true;
         }
     }
-    pkgs = move2heap(pkgsᴷ, pkgs);
+    pkgs = builtin.move2heap(pkgsᴷ, pkgs);
     return pkgs;
 }
 
@@ -71,7 +71,7 @@ public static slice<@string> List(@string pkg) {
             names = append(namesᴷ, names, i.Name);
         }
     }
-    names = move2heap(namesᴷ, names);
+    names = builtin.move2heap(namesᴷ, names);
     return names;
 }
 

@@ -40,7 +40,7 @@ using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 

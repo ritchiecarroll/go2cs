@@ -76,7 +76,7 @@ internal class InterfaceAdapterImplTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append("\r\n\r\n        ");
 
-                if (method.IsInaccessibleMarker)
+                if (method.IsInaccessibleMarker && method.ForwardTargetReachable != true)
                 {
                     result.Append($"{method.ReturnType} {method.GetSignature()}{(method.ReturnType == "void" ? " { }" : " => default!;")}");
                     continue;

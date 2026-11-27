@@ -230,7 +230,7 @@ internal static error writePAXHeader⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> �
     var fmtStr = [GoFunc("(*Writer).writePAXHeader.func1")] (slice<byte> b, @string s) => {
         Ꮡf.Value.formatString(b, toASCII(s));
     };
-    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, NilSafeDelegateConversion<stringFormatter, Action<slice<byte>, @string>>(fmtStr), new numberFormatter(Ꮡf.formatOctal));
+    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, builtin.NilSafeDelegateConversion<stringFormatter, Action<slice<byte>, @string>>(fmtStr), new numberFormatter(Ꮡf.formatOctal));
     blk.setFormat(FormatPAX);
     {
         var err = tw.writeRawHeader(blk, hdr.Size, hdr.Typeflag); if (err != nil) {

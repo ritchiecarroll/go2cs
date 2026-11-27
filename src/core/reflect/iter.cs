@@ -15,7 +15,7 @@ internal static iter.Seq<Value> rangeNum<T, N>(N num, Type t)
     return [GoFunc("rangeNum[...].func1")] (Func<Value, bool> yield) => {
         var convert = t.PkgPath() != ""u8;
         // cannot use range T(v) because no core type.
-        for (var i = ConvertToType<T>(0); i < ConvertToType<T>(ConvertToUInt64<N>(num)); i++) {
+        for (var i = builtin.ConvertToType<T>(0); i < builtin.ConvertToType<T>(builtin.ConvertToUInt64<N>(num)); i++) {
             var tmp = ValueOf(i);
             // if the iteration value type is define by
             // type T built-in type.

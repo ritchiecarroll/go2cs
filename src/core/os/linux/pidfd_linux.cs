@@ -17,7 +17,7 @@ using unix = @internal.syscall.unix_package;
 using runtime = runtime_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal.syscall;
 
 partial class os_package {

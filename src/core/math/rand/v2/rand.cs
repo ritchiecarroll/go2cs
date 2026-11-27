@@ -18,7 +18,7 @@
 namespace go.math.rand;
 
 using bits = go.math.bits_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using go.math;
 
 partial class rand_package {
@@ -328,10 +328,10 @@ public static nuint UintN(nuint n) { return globalRand.UintN(n); }
 public static Int N<Int>(Int n)
     where Int : /* intType */ IAdditionOperators<Int, Int, Int>, ISubtractionOperators<Int, Int, Int>, IMultiplyOperators<Int, Int, Int>, IDivisionOperators<Int, Int, Int>, IIncrementOperators<Int>, IDecrementOperators<Int>, IUnaryNegationOperators<Int, Int>, IModulusOperators<Int, Int, Int>, IBitwiseOperators<Int, Int, Int>, IShiftOperators<Int, int, Int>, IEqualityOperators<Int, Int, bool>, IComparisonOperators<Int, Int, bool>, new()
 {
-    if (n <= ConvertToType<Int>(0)) {
+    if (n <= builtin.ConvertToType<Int>(0)) {
         throw panic("invalid argument to N");
     }
-    return ConvertToType<Int>(globalRand.uint64n(ConvertToUInt64<Int>(n)));
+    return builtin.ConvertToType<Int>(globalRand.uint64n(builtin.ConvertToUInt64<Int>(n)));
 }
 
 partial interface intType<ΔT> /*operators = Sum, Arithmetic, Integer, Comparable, Ordered*/ {

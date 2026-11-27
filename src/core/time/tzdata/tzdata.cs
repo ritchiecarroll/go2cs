@@ -21,7 +21,7 @@ namespace go.time;
 // The test for this package is time/tzdata_test.go.
 using errors = errors_package;
 using syscall = syscall_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 
 partial class tzdata_package {
 

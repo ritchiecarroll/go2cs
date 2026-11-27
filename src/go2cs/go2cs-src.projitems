@@ -82,6 +82,8 @@
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)candidateFixpoint_test.go" />
     <None Include="$(MSBuildThisFileDirectory)markerGlyphRefusal.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignUnexportedPromotionRefusal.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignUnexportedPromotionRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)markerGlyphRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetgoCgoPackSuite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)paramSkipWindowFrames_test.go" />

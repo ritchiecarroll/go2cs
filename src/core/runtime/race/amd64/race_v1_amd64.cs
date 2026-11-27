@@ -4,7 +4,7 @@
 //go:build (linux && !amd64.v3) || darwin || freebsd || netbsd || openbsd || windows
 namespace go.runtime;
 
-// blank import: go.runtime.race.@internal.amd64v1_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "runtime/race/internal/amd64v1" (nothing to initialize)
 
 partial class race_package {
 

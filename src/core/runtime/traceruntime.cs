@@ -6,7 +6,7 @@ namespace go;
 
 using atomic = @internal.runtime.atomic_package;
 using tracev2 = @internal.trace.tracev2_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using @internal.runtime;
 using @internal.trace;
 

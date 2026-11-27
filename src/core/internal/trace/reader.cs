@@ -210,7 +210,7 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
         // This should be by far the most common case
         if (len(r.frontier) == 0) {
             var evalᴛ2 = dumpFrontier(r.frontier);
-            var evalᴛ3 = dumpOrdering(ref nonnil(ref r).order);
+            var evalᴛ3 = dumpOrdering(ref builtin.nonnil(ref r).order);
             (var eᴛ12, err) = (new Event(), fmt.Errorf("broken trace: frontier is empty:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, evalᴛ2, evalᴛ3)); e.AssignFrom(eᴛ12); goto ᒐdone;
         }
         {
@@ -234,7 +234,7 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
                 }
                 if (!success) {
                     var evalᴛ4 = dumpFrontier(r.frontier);
-                    var evalᴛ5 = dumpOrdering(ref nonnil(ref r).order);
+                    var evalᴛ5 = dumpOrdering(ref builtin.nonnil(ref r).order);
                     (var eᴛ15, err) = (new Event(), fmt.Errorf("broken trace: failed to advance: frontier:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, evalᴛ4, evalᴛ5)); e.AssignFrom(eᴛ15); goto ᒐdone;
                 }
             }

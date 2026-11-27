@@ -7,7 +7,7 @@ using cmp = cmp_package;
 using bytealg = @internal.bytealg_package;
 using strconv = @internal.strconv_package;
 using slices = slices_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
 using vendor.golang.org.x.net.dns;

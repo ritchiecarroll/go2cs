@@ -10,7 +10,7 @@ using fs = go.io.fs_package;
 using runtime = runtime_package;
 using atomic = go.sync.atomic_package;
 using syscall = syscall_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using @internal;
 using @internal.syscall;
 using go.io;

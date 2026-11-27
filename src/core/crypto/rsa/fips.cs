@@ -78,7 +78,7 @@ public static (slice<byte>, error) SignPSS(io.Reader random, ж<PrivateKey> Ꮡp
     ref var priv = ref Ꮡpriv.DerefOrNull();
     ref var opts = ref Ꮡopts.DerefOrNull();
 
-    var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+    var errΔ1 = checkPublicKeySize(ref builtin.nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
         return (default, errΔ1);
     }
 
@@ -308,7 +308,7 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, io.Reader rand
 internal static (slice<byte>, error) decryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+    var errΔ1 = checkPublicKeySize(ref builtin.nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
         return (default, errΔ1);
     }
 
@@ -376,7 +376,7 @@ public static (slice<byte>, error) SignPKCS1v15(io.Reader random, ж<PrivateKey>
         hashName = hash.String();
     }
 
-    var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+    var errΔ1 = checkPublicKeySize(ref builtin.nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
         return (default, errΔ1);
     }
 
@@ -511,7 +511,7 @@ internal static error checkFIPS140OnlyPrivateKey(ref PrivateKey priv) {
     if (!fips140only.Enforced()) {
         return default;
     }
-    var err = checkFIPS140OnlyPublicKey(ref nonnil(ref priv).PublicKey); if (err != nil) {
+    var err = checkFIPS140OnlyPublicKey(ref builtin.nonnil(ref priv).PublicKey); if (err != nil) {
         return err;
     }
     if (len(priv.Primes) != 2) {
