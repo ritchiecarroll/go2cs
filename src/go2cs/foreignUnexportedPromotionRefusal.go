@@ -7,14 +7,22 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // The refusal BY NAME of a conversion to an interface whose UNEXPORTED method the value satisfies only through a
-// CONCRETE method promoted from another package, checked before any file is written (GO2CS2016).
+// CONCRETE method promoted from another package, where the converted adapter would call the wrong method or return a
+// silent zero, checked before any file is written (GO2CS2016).
 //
 // Go qualifies an unexported method name by its package. `type U struct{ lib.T }` with `func (U) m()` declares two
 // methods m: lib.T's (lib.m), promoted, and U's own (main.m). An interface of lib's that declares m is satisfied by
 // lib.m, so `lib.CallM(u)` calls lib.m. go2cs-gen's adapter maps an interface member by its bare name, so the same
-// call reaches main.m: the converted program prints main.m where Go prints lib.m. Without an own m the adapter calls
-// lib.T's m, which is internal to lib's assembly and cannot be called from the adapter's. Either way the adapter is
-// wrong, so the conversion is refused until the adapter can call through the promotion path.
+// call reaches main.m: the converted program prints main.m where Go prints lib.m. Without an own m the adapter cannot
+// call lib.T's m, which is internal to lib's assembly, and stubs it: a no-op for a method with no results, and a zero
+// value for a method that returns one.
+//
+// So the gate refuses exactly two cases: (a) the source type has a method of that bare name of its own (the wrong
+// method), and (b) the unexported method returns a value (the stub's silent zero). A method with no results and no
+// own-named rival converts as before, because its stub is a no-op: that is the sealed-marker idiom every generated
+// gRPC server uses (`type server struct{ pb.UnimplementedGreeterServer }`, whose mustEmbedUnimplementedGreeterServer()
+// is promoted from pb and does nothing). What that leaves silent is a void marker whose Go body has an effect
+// (docs/KnownIssues.md names it).
 //
 // Promotion through an embedded INTERFACE field is not refused: the adapter forwards to the field's interface member,
 // which is public in C# and dispatches to the dynamic value's own method, the method Go calls
@@ -22,9 +30,11 @@
 // Promotion from a type of the SAME package is not refused either: both sides are in one assembly, and Go's name
 // qualification agrees with the bare name there.
 //
-// The gate examines the conversions the source writes: assignment, a typed var, a call argument, a return value, a
-// composite literal element, a channel send, an explicit conversion and an equality comparison. A type assertion
-// asks at run time and records no adapter, so it is outside the gate (docs/KnownIssues.md names that case).
+// The gate examines the conversions the source writes: assignment (a redeclared variable of := included), a typed var,
+// a call argument, a return value, each of them from a multi-value call too, a composite literal element, a channel
+// send, an explicit conversion, an equality comparison, a switch case against its tag, a map index or delete key, a
+// range assignment, and a type argument checked against its constraint. A type assertion asks at run time and records
+// no adapter, so it is outside the gate (docs/KnownIssues.md names that case).
 
 package main
 
@@ -63,6 +73,13 @@ func (refusal *foreignUnexportedPromotionRefusal) report() {
 	}
 }
 
+// foreignUnexportedPromotionKey identifies one converted value: a multi-value call yields one value per result, all at
+// the call's position.
+type foreignUnexportedPromotionKey struct {
+	pos   token.Pos
+	index int
+}
+
 // refuseForeignUnexportedPromotions finds every refused conversion in pkg. It returns nil when there is none.
 func refuseForeignUnexportedPromotions(pkg *packages.Package) *foreignUnexportedPromotionRefusal {
 	if pkg.TypesInfo == nil || pkg.Types == nil {
@@ -70,23 +87,77 @@ func refuseForeignUnexportedPromotions(pkg *packages.Package) *foreignUnexported
 	}
 
 	info := pkg.TypesInfo
-	seen := map[token.Pos]bool{}
+	seen := map[foreignUnexportedPromotionKey]bool{}
 	var sites []foreignUnexportedPromotionSite
 
-	check := func(expr ast.Expr, target types.Type) {
-		if expr == nil || target == nil || seen[expr.Pos()] {
+	// checkType refuses converting a value of type source, at pos, to target.
+	checkType := func(pos token.Pos, index int, source, target types.Type) {
+		key := foreignUnexportedPromotionKey{pos, index}
+
+		if source == nil || target == nil || seen[key] {
 			return
 		}
 
+		if _, isTypeParam := target.(*types.TypeParam); isTypeParam {
+			// A value passed for a type parameter is not converted to an interface; its type argument is checked
+			// against the constraint at the instantiation below.
+			return
+		}
+
+		if text := foreignUnexportedPromotionText(source, target, pkg.Types, "is converted to"); text != "" {
+			seen[key] = true
+			sites = append(sites, foreignUnexportedPromotionSite{position: pkg.Fset.Position(pos), text: text})
+		}
+	}
+
+	// values is the type of each value expr yields: one per result for a multi-value call, none for nil or a type.
+	values := func(expr ast.Expr) []types.Type {
 		tv, ok := info.Types[expr]
 
 		if !ok || tv.Type == nil || tv.IsNil() || tv.IsType() {
+			return nil
+		}
+
+		if tuple, ok := tv.Type.(*types.Tuple); ok {
+			result := make([]types.Type, tuple.Len())
+
+			for i := range result {
+				result[i] = tuple.At(i).Type()
+			}
+
+			return result
+		}
+
+		return []types.Type{tv.Type}
+	}
+
+	check := func(expr ast.Expr, target types.Type) {
+		if expr == nil {
 			return
 		}
 
-		if text := foreignUnexportedPromotionText(tv.Type, target, pkg.Types); text != "" {
-			seen[expr.Pos()] = true
-			sites = append(sites, foreignUnexportedPromotionSite{position: pkg.Fset.Position(expr.Pos()), text: text})
+		if sources := values(expr); len(sources) == 1 {
+			checkType(expr.Pos(), 0, sources[0], target)
+		}
+	}
+
+	// checkList pairs the values of exprs with targets, either one expression per target or one multi-value call
+	// for all of them. A nil target is not a conversion.
+	checkList := func(exprs []ast.Expr, targets []types.Type) {
+		if len(exprs) == 1 && len(targets) > 1 {
+			if sources := values(exprs[0]); len(sources) == len(targets) {
+				for i, source := range sources {
+					checkType(exprs[0].Pos(), i, source, targets[i])
+				}
+			}
+
+			return
+		}
+
+		if len(exprs) == len(targets) {
+			for i, expr := range exprs {
+				check(expr, targets[i])
+			}
 		}
 	}
 
@@ -122,29 +193,37 @@ func refuseForeignUnexportedPromotions(pkg *packages.Package) *foreignUnexported
 					return true
 				}
 
-				results := funcResults[len(funcResults)-1]
-
-				if results != nil && len(n.Results) == results.Len() {
-					for i, result := range n.Results {
-						check(result, results.At(i).Type())
-					}
+				if results := funcResults[len(funcResults)-1]; results != nil {
+					checkList(n.Results, tupleTypes(results))
 				}
 			case *ast.AssignStmt:
-				if len(n.Lhs) == len(n.Rhs) && n.Tok != token.DEFINE {
-					for i, rhs := range n.Rhs {
-						check(rhs, info.TypeOf(n.Lhs[i]))
+				if n.Tok == token.ASSIGN || n.Tok == token.DEFINE {
+					targets := make([]types.Type, len(n.Lhs))
+
+					for i, lhs := range n.Lhs {
+						// A variable := declares takes the value's own type; one it redeclares is assigned to.
+						if ident, ok := lhs.(*ast.Ident); ok && (ident.Name == "_" || info.Defs[ident] != nil) {
+							continue
+						}
+
+						targets[i] = info.TypeOf(lhs)
 					}
+
+					checkList(n.Rhs, targets)
 				}
 			case *ast.ValueSpec:
-				if n.Type != nil && len(n.Values) == len(n.Names) {
+				if n.Type != nil && len(n.Values) > 0 {
 					target := info.TypeOf(n.Type)
+					targets := make([]types.Type, len(n.Names))
 
-					for _, value := range n.Values {
-						check(value, target)
+					for i := range targets {
+						targets[i] = target
 					}
+
+					checkList(n.Values, targets)
 				}
 			case *ast.CallExpr:
-				checkCallArguments(info, n, check)
+				checkCallArguments(info, n, check, checkList)
 			case *ast.CompositeLit:
 				checkCompositeElements(info, n, check)
 			case *ast.SendStmt:
@@ -156,12 +235,73 @@ func refuseForeignUnexportedPromotions(pkg *packages.Package) *foreignUnexported
 					check(n.X, info.TypeOf(n.Y))
 					check(n.Y, info.TypeOf(n.X))
 				}
+			case *ast.SwitchStmt:
+				if n.Tag != nil && n.Body != nil {
+					tagType := info.TypeOf(n.Tag)
+
+					for _, clause := range n.Body.List {
+						if caseClause, ok := clause.(*ast.CaseClause); ok {
+							for _, expr := range caseClause.List {
+								check(expr, tagType)
+								check(n.Tag, info.TypeOf(expr))
+							}
+						}
+					}
+				}
+			case *ast.IndexExpr:
+				if mapType, ok := underlyingOf(info.TypeOf(n.X)).(*types.Map); ok {
+					check(n.Index, mapType.Key())
+				}
+			case *ast.RangeStmt:
+				if n.Tok == token.ASSIGN {
+					key, value := rangeValueTypes(info.TypeOf(n.X))
+
+					for _, pair := range []struct {
+						expr   ast.Expr
+						source types.Type
+					}{{n.Key, key}, {n.Value, value}} {
+						if pair.expr != nil {
+							checkType(pair.expr.Pos(), 0, pair.source, info.TypeOf(pair.expr))
+						}
+					}
+				}
 			}
 
 			return true
 		}
 
 		ast.Inspect(file, visit)
+	}
+
+	// A type argument meets its constraint by the same bare-name binding the adapter uses.
+	for ident, instance := range info.Instances {
+		var typeParams *types.TypeParamList
+
+		switch obj := info.Uses[ident].(type) {
+		case *types.Func:
+			typeParams = obj.Signature().TypeParams()
+		case *types.TypeName:
+			if named, ok := types.Unalias(obj.Type()).(*types.Named); ok {
+				typeParams = named.TypeParams()
+			}
+		}
+
+		if typeParams == nil || instance.TypeArgs == nil {
+			continue
+		}
+
+		for i := 0; i < typeParams.Len() && i < instance.TypeArgs.Len(); i++ {
+			key := foreignUnexportedPromotionKey{ident.Pos(), i}
+
+			if seen[key] {
+				continue
+			}
+
+			if text := foreignUnexportedPromotionText(instance.TypeArgs.At(i), typeParams.At(i).Constraint(), pkg.Types, "is a type argument for a type parameter constrained by"); text != "" {
+				seen[key] = true
+				sites = append(sites, foreignUnexportedPromotionSite{position: pkg.Fset.Position(ident.Pos()), text: text})
+			}
+		}
 	}
 
 	if len(sites) == 0 {
@@ -173,15 +313,71 @@ func refuseForeignUnexportedPromotions(pkg *packages.Package) *foreignUnexported
 			return sites[i].position.Filename < sites[j].position.Filename
 		}
 
-		return sites[i].position.Offset < sites[j].position.Offset
+		if sites[i].position.Offset != sites[j].position.Offset {
+			return sites[i].position.Offset < sites[j].position.Offset
+		}
+
+		return sites[i].text < sites[j].text
 	})
 
 	return &foreignUnexportedPromotionRefusal{pkgPath: pkg.PkgPath, sites: sites}
 }
 
-// checkCallArguments checks each argument of a call against its parameter, and an explicit conversion's operand
-// against the converted-to type.
-func checkCallArguments(info *types.Info, call *ast.CallExpr, check func(ast.Expr, types.Type)) {
+// tupleTypes is the type of each member of tuple.
+func tupleTypes(tuple *types.Tuple) []types.Type {
+	result := make([]types.Type, tuple.Len())
+
+	for i := range result {
+		result[i] = tuple.At(i).Type()
+	}
+
+	return result
+}
+
+// rangeValueTypes is the type of the key and of the value a range over a value of type t yields, nil where it yields
+// none.
+func rangeValueTypes(t types.Type) (key, value types.Type) {
+	switch u := underlyingOf(t).(type) {
+	case *types.Basic:
+		if u.Info()&types.IsString != 0 {
+			return types.Typ[types.Int], types.Typ[types.Rune]
+		}
+
+		return u, nil
+	case *types.Slice:
+		return types.Typ[types.Int], u.Elem()
+	case *types.Array:
+		return types.Typ[types.Int], u.Elem()
+	case *types.Pointer:
+		if array, ok := underlyingOf(u.Elem()).(*types.Array); ok {
+			return types.Typ[types.Int], array.Elem()
+		}
+	case *types.Map:
+		return u.Key(), u.Elem()
+	case *types.Chan:
+		return u.Elem(), nil
+	case *types.Signature:
+		if u.Params().Len() == 1 {
+			if yield, ok := underlyingOf(u.Params().At(0).Type()).(*types.Signature); ok {
+				params := yield.Params()
+
+				if params.Len() > 0 {
+					key = params.At(0).Type()
+				}
+
+				if params.Len() > 1 {
+					value = params.At(1).Type()
+				}
+			}
+		}
+	}
+
+	return key, value
+}
+
+// checkCallArguments checks each argument of a call against its parameter (a multi-value call's results included),
+// and an explicit conversion's operand against the converted-to type.
+func checkCallArguments(info *types.Info, call *ast.CallExpr, check func(ast.Expr, types.Type), checkList func([]ast.Expr, []types.Type)) {
 	funType, ok := info.Types[call.Fun]
 
 	if !ok {
@@ -196,6 +392,7 @@ func checkCallArguments(info *types.Info, call *ast.CallExpr, check func(ast.Exp
 		return
 	}
 
+	// A builtin's recorded signature is the call site's own, so delete(m, k) and append(s, v) read like any call.
 	signature, ok := underlyingOf(funType.Type).(*types.Signature)
 
 	if !ok {
@@ -203,25 +400,32 @@ func checkCallArguments(info *types.Info, call *ast.CallExpr, check func(ast.Exp
 	}
 
 	params := signature.Params()
+	count := len(call.Args)
 
-	for i, arg := range call.Args {
-		var target types.Type
+	if count == 1 {
+		if tuple, ok := info.TypeOf(call.Args[0]).(*types.Tuple); ok {
+			count = tuple.Len()
+		}
+	}
 
+	targets := make([]types.Type, count)
+
+	for i := range targets {
 		switch {
 		case signature.Variadic() && i >= params.Len()-1:
 			if call.Ellipsis.IsValid() {
 				continue
 			}
 
-			if slice, ok := params.At(params.Len() - 1).Type().(*types.Slice); ok {
-				target = slice.Elem()
+			if slice, ok := underlyingOf(params.At(params.Len() - 1).Type()).(*types.Slice); ok {
+				targets[i] = slice.Elem()
 			}
 		case i < params.Len():
-			target = params.At(i).Type()
+			targets[i] = params.At(i).Type()
 		}
-
-		check(arg, target)
 	}
+
+	checkList(call.Args, targets)
 }
 
 // checkCompositeElements checks each element of a composite literal against its field, element or key type.
@@ -274,10 +478,11 @@ func checkElements(elements []ast.Expr, key, elem types.Type, check func(ast.Exp
 	}
 }
 
-// foreignUnexportedPromotionText is the diagnostic text when converting a value of type source to target is refused,
-// or "" when it is not: target is an interface with an unexported method that source satisfies only through a
-// CONCRETE method promoted from a package other than source's own.
-func foreignUnexportedPromotionText(source, target types.Type, current *types.Package) string {
+// foreignUnexportedPromotionText is the diagnostic text when using a value of type source as target is refused, or ""
+// when it is not. target is an interface with an unexported method that source satisfies only through a CONCRETE method
+// promoted from a package other than source's own, and either source has a method of that bare name of its own or the
+// method returns a value. how says what the use is: "is converted to", or a type argument's.
+func foreignUnexportedPromotionText(source, target types.Type, current *types.Package, how string) string {
 	targetInterface, ok := underlyingOf(target).(*types.Interface)
 
 	if !ok || types.IsInterface(source) {
@@ -314,10 +519,32 @@ func foreignUnexportedPromotionText(source, target types.Type, current *types.Pa
 			continue
 		}
 
-		return fmt.Sprintf("%s is converted to %s, whose unexported method %s it satisfies only through %s's %s, promoted from package %s. Go keeps that method apart from any %s of %s's own package; go2cs maps an interface method by its bare name, so the converted call would reach the wrong method or one it cannot call. go2cs refuses this conversion",
-			types.TypeString(source, types.RelativeTo(current)), types.TypeString(target, types.RelativeTo(current)), method.Name(),
-			types.TypeString(receiver.Type(), types.RelativeTo(current)), method.Name(), promoted.Pkg().Path(), method.Name(),
-			types.TypeString(source, types.RelativeTo(current)))
+		// A rival: a method of the same bare name in source's own package, which the adapter would bind instead.
+		rival, _, _ := types.LookupFieldOrMethod(source, true, ownPackage, method.Name())
+		rivalFunc, hasRival := rival.(*types.Func)
+		hasRival = hasRival && rivalFunc.Pkg() == ownPackage
+
+		returnsValue := promoted.Signature().Results().Len() > 0
+
+		if !hasRival && !returnsValue {
+			// A void method with no rival: the adapter's stub is a no-op, the sealed-marker idiom.
+			continue
+		}
+
+		sourceName := types.TypeString(source, types.RelativeTo(current))
+		receiverName := types.TypeString(receiver.Type(), types.RelativeTo(current))
+
+		lead := fmt.Sprintf("%s %s %s, whose unexported method %s it satisfies only through %s's %s, promoted from package %s",
+			sourceName, how, types.TypeString(target, types.RelativeTo(current)), method.Name(), receiverName, method.Name(),
+			promoted.Pkg().Path())
+
+		if hasRival {
+			return fmt.Sprintf("%s. %s declares a method %s of its own, which Go keeps apart from %s's; go2cs maps an interface method by its bare name, so the converted call would reach %s's %s where Go calls %s's. go2cs refuses this conversion",
+				lead, sourceName, method.Name(), receiverName, sourceName, method.Name(), receiverName)
+		}
+
+		return fmt.Sprintf("%s. That method is internal to package %s, so the converted adapter cannot call it and would return a zero value where Go returns its result. go2cs refuses this conversion",
+			lead, promoted.Pkg().Path())
 	}
 
 	return ""

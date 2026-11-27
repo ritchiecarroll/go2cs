@@ -42,7 +42,7 @@ var warnRefusedCodes = map[string]string{
 	diagnosticInlineArrayMixedPair:              "its downgraded site is silent: one side's inline bytes would be read as the other's array<T> references",
 	diagnosticAsmForwardSignatureRefused:        "a whole-package refusal, so there is no per-site code to produce",
 	diagnosticShapeWitnessRefused:               "its downgraded sites have no witness to name, so they would not compile",
-	diagnosticForeignUnexportedPromotionRefused: "its downgraded site is silent: the adapter would call the type's own method of that name, or fail to compile against a method internal to another assembly",
+	diagnosticForeignUnexportedPromotionRefused: "its downgraded site is silent: the adapter would call the type's own method of that name, or return a zero value for a method internal to another assembly",
 }
 
 // parseWarnCodes reads -warn's comma-separated list. An unknown code, or a known code that is not allowed, is an

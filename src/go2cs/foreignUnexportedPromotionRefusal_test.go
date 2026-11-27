@@ -39,6 +39,22 @@ func (mark) sentinel() {}
 var Mark Sentinel = mark{}
 
 func IsMarked(x any) bool { _, ok := x.(Sentinel); return ok }
+
+// Sealed is the generated-gRPC shape: an interface sealed by a void unexported marker that an exported struct supplies.
+type Sealed interface {
+	Hello() string
+	mustEmbedSealed()
+}
+
+type UnimplementedSealed struct{}
+
+func (UnimplementedSealed) Hello() string  { return "unimplemented" }
+func (UnimplementedSealed) mustEmbedSealed() {}
+
+func Greet(s Sealed) string { return s.Hello() }
+
+// F binds its type argument's m through the constraint.
+func F[X I](x X) string { return x.m() }
 `
 
 const foreignUnexportedMain = `package main
@@ -93,7 +109,7 @@ func TestForeignUnexportedPromotionRefusedThroughTheCommandLine(t *testing.T) {
 		t.Errorf("the human-readable refusal line is missing\nstderr:\n%s", stderr)
 	}
 
-	requireStderrLine(t, stderr, dir, "main.go", "(19,12): error GO2CS2016: U is converted to J, whose unexported method m it satisfies only through example/fup/lib.T's m, promoted from package example/fup/lib. Go keeps that method apart from any m of U's own package; go2cs maps an interface method by its bare name, so the converted call would reach the wrong method or one it cannot call. go2cs refuses this conversion")
+	requireStderrLine(t, stderr, dir, "main.go", "(19,12): error GO2CS2016: U is converted to J, whose unexported method m it satisfies only through example/fup/lib.T's m, promoted from package example/fup/lib. U declares a method m of its own, which Go keeps apart from example/fup/lib.T's; go2cs maps an interface method by its bare name, so the converted call would reach U's m where Go calls example/fup/lib.T's. go2cs refuses this conversion")
 }
 
 // TestForeignUnexportedPromotionSites: each conversion form the gate reads is refused, and each near miss converts.
@@ -117,14 +133,33 @@ func TestForeignUnexportedPromotionSites(t *testing.T) {
 		{"variadic", `func g(is ...lib.I) {}; func main() { g(U{}, &U{}) }`, 2},
 		{"comparison", `func main() { var i lib.I; _ = i == U{} }`, 1},
 		{"closure return", `func main() { f := func() lib.I { return U{} }; _ = f }`, 1},
+		{"multi-value assignment", `func f() (U, error) { return U{}, nil }; func main() { var i lib.I; var err error; i, err = f(); _, _ = i, err }`, 1},
+		{"multi-value var", `func f() (U, U) { return U{}, U{} }; func main() { var i, j lib.I = f(); _, _ = i, j }`, 2},
+		{"multi-value return", `func f() (U, error) { return U{}, nil }; func g() (lib.I, error) { return f() }; func main() { _, _ = g() }`, 1},
+		{"multi-value argument", `func f() (U, U) { return U{}, U{} }; func g(a, b lib.I) {}; func main() { g(f()) }`, 2},
+		{"redeclared by define", `func f() (U, error) { return U{}, nil }; func main() { var i lib.I; i, err := f(); _, _ = i, err }`, 1},
+		{"switch case", `func main() { var i lib.I; switch i { case U{}: } }`, 1},
+		{"switch tag", `func main() { var i lib.I; switch (U{}) { case i: } }`, 1},
+		{"map index", `func main() { m := map[lib.I]int{}; _ = m[U{}] }`, 1},
+		{"delete", `func main() { m := map[lib.I]int{}; delete(m, U{}) }`, 1},
+		{"append", `func main() { var s []lib.I; s = append(s, U{}); _ = s }`, 1},
+		{"range assignment", `func main() { var i lib.I; for _, i = range []U{{}} {}; _ = i }`, 1},
+		{"type argument", `func main() { _ = lib.F(U{}) }`, 1},
+		{"explicit type argument", `func main() { _ = lib.F[U](U{}) }`, 1},
+		{"value result, no rival", `type W struct{ lib.T }; func main() { var i lib.I = W{}; _ = i }`, 1},
+		{"void marker with a rival", `type V struct{ lib.UnimplementedSealed }; func (V) mustEmbedSealed() {}; func main() { _ = lib.Greet(V{}) }`, 1},
 
 		// Near misses: no conversion to an interface with lib's unexported method, an interface FIELD promotion,
-		// the exported method alone, or a type assertion (asked at run time; KnownIssues names it).
+		// the exported method alone, a type assertion (asked at run time; KnownIssues names it), and the sealed
+		// marker: a void unexported method with no rival, whose adapter stub is a no-op as its Go body is.
 		{"any", `func main() { var a any = U{}; _ = a }`, 0},
 		{"exported only", `type N interface{ Name() string }; func main() { var n N = U{}; _ = n }`, 0},
 		{"interface field", `type S struct{ lib.Sentinel }; func main() { _ = lib.IsMarked(S{lib.Mark}); var s lib.Sentinel = S{lib.Mark}; _ = s }`, 0},
 		{"own package", `type I2 interface{ m() string }; func main() { var i I2 = U{}; _ = i }`, 0},
 		{"type assertion", `func main() { var a any = U{}; _, _ = a.(lib.I) }`, 0},
+		{"sealed marker", `type V struct{ lib.UnimplementedSealed }; func (V) Hello() string { return "hi" }; func main() { _ = lib.Greet(V{}); _ = lib.Greet(&V{}); var s lib.Sealed = V{}; _ = s }`, 0},
+		{"sealed marker, default method", `type Q struct{ lib.UnimplementedSealed }; func main() { _ = lib.Greet(Q{}) }`, 0},
+		{"define", `func f() (U, error) { return U{}, nil }; func main() { u, err := f(); _, _ = u, err }`, 0},
 	}
 
 	for _, c := range cases {
