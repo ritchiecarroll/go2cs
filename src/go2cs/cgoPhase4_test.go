@@ -42,7 +42,7 @@ func main() {
 	h, err := C.halve(8)
 	fmt.Println("halve 8", h, err == nil)
 	h, err = C.halve(7)
-	fmt.Println("halve 7", h, err != nil)
+	fmt.Println("halve 7", h, err != nil, err)
 }
 `
 
@@ -69,6 +69,41 @@ func main() {
 }
 `
 
+// cgoPhase4MixedProgram holds a bound function and a side-built one in one package (review of 500b0855c7, #6): C.cos
+// binds libm's export, and cos_twice, which the preamble defines, calls that same cos from inside the side library.
+const cgoPhase4MixedProgram = `package main
+
+/*
+#cgo LDFLAGS: -lm
+#include <math.h>
+static double cos_twice(double v) { return 2 * cos(v); }
+*/
+import "C"
+
+import "fmt"
+
+func main() {
+	fmt.Println("cos", C.cos(0))
+	fmt.Println("cos_twice", C.cos_twice(0))
+}
+`
+
+// cgoPhase4ShadowProgram defines, with no -lm, a non-static function whose name a library the host process already
+// loads also exports (review of 500b0855c7, #4): Go links the preamble's own definition, and so must the side library.
+const cgoPhase4ShadowProgram = `package main
+
+/*
+double gamma(double v) { return 7; }
+*/
+import "C"
+
+import "fmt"
+
+func main() {
+	fmt.Println("gamma", C.gamma(2))
+}
+`
+
 // The design's §3 red. Arm 1 converts on every leg with a C compiler and the probe; arm 2 builds the converted program
 // and runs it against go's own build where the build tests are on (cgo-e2e, GO2CS_CGO_BUILD=1).
 func TestCgoPhase4APreambleDefinedFunctionConvertsAndRunsAsGoDoes(t *testing.T) {
@@ -80,6 +115,59 @@ func TestCgoPhase4BPreambleDefinedVariableConvertsAndRunsAsGoDoes(t *testing.T) 
 	runCgoPhase4(t, cgoPhase4VariableProgram)
 }
 
+// A bound function and a side-built one, side by side, the side-built one calling a library (review of 500b0855c7, #6).
+func TestCgoPhase4CBoundAndSideBuiltConvertAndRunAsGoDoes(t *testing.T) {
+	runCgoPhase4(t, cgoPhase4MixedProgram)
+}
+
+// A preamble definition is the one called, where a library the process holds exports the same name (review of
+// 500b0855c7, #4): an ELF side library binds its own definitions first.
+func TestCgoPhase4DAPreambleDefinitionIsNotShadowedByALoadedLibrary(t *testing.T) {
+	runCgoPhase4(t, cgoPhase4ShadowProgram)
+}
+
+// cmd/go adds a package's #cgo pkg-config flags at build time, which go list's CgoCFLAGS does not carry, so a side build
+// would compile with other flags than cmd/cgo's (review of 500b0855c7, #1): it is refused by name.
+func TestCgoPhase4EASideBuildUnderPkgConfigIsRefusedByName(t *testing.T) {
+	probeDir := cgoRealProbeDir(t)
+
+	if _, err := exec.LookPath("pkg-config"); err != nil {
+		t.Skipf("no pkg-config on PATH here: NOT MEASURED")
+	}
+
+	pcDir := t.TempDir()
+	writeCgoFixture(t, pcDir, "go2cspc.pc", "Name: go2cspc\nDescription: go2cs pkg-config fixture\nVersion: 1\nCflags: -DGO2CS_PC=7\nLibs:\n")
+	t.Setenv("PKG_CONFIG_PATH", pcDir)
+
+	program := "package main\n\n/*\n#cgo pkg-config: go2cspc\nstatic int pc(void) { return GO2CS_PC; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"pc\", C.pc()) }\n"
+	combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{"main.go": program})
+	requireNothingWritten(t, output, err, combined)
+	requireCgoUseRefused(t, cgoRefusalLines(combined), "main.go(", "C.pc", "pkg-config")
+}
+
+// A name the preamble defines and a library the package links also exports is refused by name, never bound to the
+// library's (review of 500b0855c7, #5): cmd/cgo compiles the preamble's own, so the library's is not what C calls.
+func TestCgoPhase4FAPreambleDefinitionALibraryAlsoExportsIsRefusedByName(t *testing.T) {
+	probeDir := cgoRealProbeDir(t)
+	program := "package main\n\n/*\nstatic int isatty(int fd) { return 42; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"isatty\", C.isatty(0)) }\n"
+	combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{"main.go": program})
+	requireNothingWritten(t, output, err, combined)
+	requireCgoUseRefused(t, cgoRefusalLines(combined), "main.go(", "C.isatty")
+}
+
+// cgoPhase4PathNeedles are the path spellings a side library must not carry: the side build's work-directory stem, and
+// the temporary root and the package directory, each with either separator.
+func cgoPhase4PathNeedles(module string) []string {
+	needles := []string{"go2cs-cgo-side"}
+
+	for _, path := range []string{os.TempDir(), module} {
+		path = strings.TrimRight(path, `/\`)
+		needles = append(needles, path, filepath.ToSlash(path), strings.ReplaceAll(path, "/", `\`))
+	}
+
+	return needles
+}
+
 // runCgoPhase4 converts program as package main, and where the build tests are on, builds it with go and with dotnet
 // and compares the two runs.
 func runCgoPhase4(t *testing.T, program string) {
@@ -89,7 +177,7 @@ func runCgoPhase4(t *testing.T, program string) {
 	target := runtime.GOOS + "/" + runtime.GOARCH
 	files := map[string]string{"main.go": program}
 
-	combined, _, output, err := convertCgoReal(t, probeDir, files)
+	combined, input, output, err := convertCgoReal(t, probeDir, files)
 
 	if err != nil {
 		for _, line := range cgoRefusalLinesIn(combined, "") {
@@ -108,6 +196,16 @@ func runCgoPhase4(t *testing.T, program string) {
 
 	if library := filepath.Join(sideDir, cgoSideLibraryFile(runtime.GOOS, "main", "example.com/cgoreal")); !fileExists(library) {
 		t.Errorf("the conversion wrote no side library %s", library)
+	} else {
+		// The library names no conversion path (the owner's machine-path rule; review of 500b0855c7, #2): not the side
+		// build's work directory, not the temporary root, and not the package's own directory.
+		contents, _ := os.ReadFile(library)
+
+		for _, needle := range cgoPhase4PathNeedles(input) {
+			if strings.Contains(string(contents), needle) {
+				t.Errorf("READING %s: the side library %s carries the conversion path %q", target, filepath.Base(library), needle)
+			}
+		}
 	}
 
 	if os.Getenv(cgoBuildEnv) != "1" {
