@@ -350,6 +350,17 @@ too**, so the part of D4 that answers this seats WITH D2 (R6).
   arm64 branch (`hash_impl.cs` `initHashAlgorithm` keys on the process and needs no change, PREDICTION) and
   crypto/tls's `hasGCMAsmARM64`, reusing DESIGN-aeshash-arm64.md; x/sys/cpu's `cpu_other_arm64.go` (E's one added
   vendored file, whose `doinit` detects nothing, as in Go).
+- **D4 as cut (2026-11-27, P5; COORD approved the plan at 21:45Z).** The row compares `cpu.ARM64` with Go's own
+  `internal/cpu` reading on the same Mac, taken by a `go test` of the standard library's `internal/cpu` with one
+  test file added through `-overlay` (no GOROOT edit, no linkname). The crypto/tls consumer is a behavioral row: the
+  client's cipher-suite order as the server's `GetConfigForClient` sees it, which puts AES-GCM first only when
+  `hasAESGCMHardwareSupport` holds. **Scope:** each Mac leg reads the flavour its RID ships, so osx-arm64 reads E
+  on Apple silicon and osx-x64 reads D on an Intel Mac. After D6 no shipped RID runs D on Apple silicon, so D's
+  Apple-silicon path (the process-keyed stand-in, `darwin-amd64/cpu_arm64_process_darwin_impl.cs`) is read by no
+  hosted leg: GolibTests' `InternalCpuGodebugTests` carries its own Apple-silicon assertions for that path, but no
+  leg has run them on an arm64 process since D5 bound osx-arm64 to E, and none compares it with Go. COORD ruled
+  on 2026-11-27 that no forced-arch leg is needed now; a consumer who pins osx-arm64 to a pre-D6 package is the one
+  who would run that path.
 
 ## 6. CI (D5), and what flips by itself at D2
 
