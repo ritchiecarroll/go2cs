@@ -4,6 +4,8 @@
 # run 45021456943, GOROOT exported. A whole-suite run only: a filtered run is not compared.
 # A line that starts with '?' is a MAY-SKIP entry: the test decides its own skip from a measurement near its floor
 # here, so the leg accepts either outcome. At most one per manifest, and its reason starts "MAY SKIP:".
+# Since D5 (the osx-arm64 leg binds GoTargetArch=arm64, the darwin/arm64 flavour) the build leaves out InternalCpuGodebugTests.cs,
+# which drives the amd64 flavour's internal/cpu hand-owns, as the linux/arm64 leg does: its four entries here left with it.
 ABoxDerivedFromStorageThatCannotBePinnedIsItsOwnClassWhateverThePointee  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
 ABoxedReferenceRvalueIsCollectedOnceTheBoxIsCleared  # measures the caller-spill condition, Ꮡ NOT inlined at full optimization: run GolibTests -c Release with DOTNET_JitNoInline=1 (in a small frame Ꮡ inlines, and...
 ACensusPathWithoutPidIsMadePerProcess_BecauseASharedPathDESTROYSBlocks  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
@@ -26,22 +28,18 @@ AToolchainChildThatSetsItsOwnGodebugKeepsTheJunctionSetting  # the junction fall
 AValueKindPointeeThatHoldsAReferenceIsB2a  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
 AdjacentRangesCoalesceIntoOne  # the memory primitives are the linux flavour's
 AnAssemblyFirstBoundUnderAnAnonymousTokenLoadsOnceTheClosureIsPreloaded  # anonymous-token impersonation is a Windows capability
-AnEmptyOrNonCpuGodebugLeavesEveryFlagAlone  # not an x86 host: internal/cpu registers no x86 options here
 AnEmptySetClonesEmpty  # the memory primitives are the linux flavour's
 AnExplicitSettingDoesNotFollow  # no process affinity to change on this host; hw.ncpu does not change while a process runs
 AnUnsafePointerOverManagedStorageIsRefusedByNameAndNotCountedAsB2a  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
-AnX64ProcessLeavesArm64Unfilled  # not an x86 host: internal/cpu registers no x86 options here
 Arm1_SamePointeeType_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
 Arm2_DifferentPointeeTypeAtOffsetZero_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
 Arm3_InsideALiveBlockButNotTheToken_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
 Arm4_ARealAddress_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
 CloneRefusesByName  # GoCloneProbe exists only in the linux flavour of the runtime
-CpuAesOffClearsHasAesAndNothingElse  # not an x86 host: internal/cpu registers no x86 options here
 DenseTimersCostTheServiceThreadLittleCpu  # reads a thread's CPU time by its OS thread id, which this platform's ProcessThread does not carry
 GOMAXPROCSFollowsAnAffinityChange  # no process affinity to change on this host; hw.ncpu does not change while a process runs
 GetpidAnswersTheProcessId  # GoGetpidProbe exists only in the linux flavour of the runtime
 GotracebackWerAtStartReachesEnableWerAndClearsTheFaultBox  # enableWER acts only on Windows; elsewhere it is Go's own empty stub
-LinuxArm64OsInitMapsTheKernelsHwcapAsGoDoes  # not an arm64 process on Linux
 MultiBlockAbsorbMatchesTheOsImplementation  # OS SHA-3 unavailable; the FIPS vector tests still cover the single-block path.
 OnWindowsTheSameLibraryInTheApplicationDirectoryLoads  # only windows searches the application directory, as a Go binary's loader does: NOT MEASURED here
 RuntimeX86FlagsMatchInternalCpu  # not an x86 host: Go copies other flags there
