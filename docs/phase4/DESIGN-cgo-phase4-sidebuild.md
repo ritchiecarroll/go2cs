@@ -270,7 +270,7 @@ increment. Its library-on-host questions are RECON §6's.
 | #5 a preamble definition a library also exports | A guard row (TestCgoPhase4F), named per target, since the UCRT exports `_isatty`, not `isatty`. |
 | #6 the errno value; a bound and a side-built function together | Rows in TestCgoPhase4A and TestCgoPhase4C. |
 | #7 thread flag, failure texts, stale output, Go's notice | `-pthread`/`-mthreads` as cmd/go passes them; failure-text rows; stale `*.side.c` and library cleanup; cgoSidePreamble carries Go's notice with its PROVENANCE. |
-| (c) a relative `#cgo -I` | **RETRACTED (2026-11-27).** The claim, from the go-sqlite3 census, was that a relative `#cgo CFLAGS: -Isub/dir` resolves against the side compile's temp directory. It does not: go/build makes a relative -I or -L absolute when it reads the directives (`src/go/build/build.go:1801-1818`, Go 1.26.11, "In 1.9 we changed to ... relative -I or -L options to be absolute"). The red, TestCgoPhase4G at 75e26c872b, converted pre-cure, refuting its own premise. G stays as a guard row. The side compile still runs in the package directory, which matches cmd/go's working directory, but fixes no measured defect. |
+| (c) a relative `#cgo -I` | **RETRACTED (2026-11-27).** The claim, from the go-sqlite3 census, was that a relative `#cgo CFLAGS: -Isub/dir` resolves against the side compile's temp directory. It does not: go/build makes a relative -I or -L absolute when it reads the directives (`src/go/build/build.go:1810-1828`, `makePathsAbsolute`, Go 1.26.11; its comment at 1801-1805 says "In 1.9 we changed to ... relative -I or -L options to be absolute"). The red, TestCgoPhase4G at 75e26c872b, converted pre-cure, refuting its own premise. G stays as a guard row. The side compile still runs in the package directory, which matches cmd/go's working directory, but fixes no measured defect. |
 
 **Known gap (COORD's ruling (b), 2026-11-27): a non-static function one file's preamble defines and another file
 calls.** go-sqlite3 has the shape: callback.go calls `_sqlite3_result_text`, and sqlite3.go's preamble defines it.
@@ -285,4 +285,16 @@ cmd/cgo-imports check then refuses it by name. Go compiles and calls the preambl
 silent binding to the library's function, but it is not Go-faithful. The cure is Phase 4b's row 1: a name the file's
 own unit defines is side-built without asking the probe. TestCgoPhase4F then becomes a parity row. BOARD entry of
 2026-11-27.
+
+**The second review's fixes (2026-11-27, the review of ef369204c9).**
+- **Rows a refusal owes.** TestCgoPhase4H covers darwin's dependent check and windows' dependent load flags. Each has
+  a negative control: a never-merge probe branch with the check off, where the row is red.
+- **Path mapping that matches Go.** The side compile follows go2cs's own -trimpath, which is ON by default. Trimmed, it
+  takes cmd/go's -trimpath mapping exactly: the module directory to `/_/<module path>[@version]` (`\\_\_\<path>` on
+  windows), GOROOT to `/_/GOROOT`, and the package directory to its import path outside any module (exec.go
+  2294-2342). Untrimmed, it maps only its work directory, as a plain go build does (cgoSideTrim). TestCgoPhase4I holds
+  a header's `__FILE__` to go's under each mode.
+- **The flag probe.** cmd/go's: -ffile-prefix-map, else -fdebug-prefix-map, else none.
+- **The windows load failure** names "or one of its dependencies".
+- **R1** asserts no debug section in the library.
 

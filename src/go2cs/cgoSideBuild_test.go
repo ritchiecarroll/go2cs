@@ -386,3 +386,57 @@ func TestCgoDarwinInstallNameRefusesWhatDyldWouldSearch(t *testing.T) {
 		}
 	}
 }
+
+// The side compile's -trimpath mapping is cmd/go's (review of ef369204c9, #2): a module's directory to /_/<module path>,
+// a module-cache directory with its version, GOROOT to /_/GOROOT whatever the setting, and nothing else untrimmed.
+func TestCgoSideTrimMapsAsCmdGoDoes(t *testing.T) {
+	root := t.TempDir()
+	module := filepath.Join(root, "mod")
+	cached := filepath.Join(root, "cache", "example.com", "dep@v1.2.3")
+	goRoot := filepath.Join(root, "goroot")
+
+	for dir, goMod := range map[string]string{module: "module example.com/mod\n", cached: "module example.com/dep\n"} {
+		if err := os.MkdirAll(filepath.Join(dir, "sub"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := os.MkdirAll(filepath.Join(goRoot, "src", "net"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	slash := func(goos, path string) string {
+		if goos == "windows" {
+			return filepath.Join(`\\_\_`, path)
+		}
+
+		return filepath.Join("/_", path)
+	}
+
+	for _, goos := range []string{"linux", "windows"} {
+		for _, row := range []struct {
+			name     string
+			trim     cgoSideTrim
+			from, to string
+		}{
+			{"module", cgoSideTrim{trimmed: true, packageDir: filepath.Join(module, "sub")}, module, slash(goos, "example.com/mod")},
+			{"module cache", cgoSideTrim{trimmed: true, packageDir: filepath.Join(cached, "sub")}, cached, slash(goos, "example.com/dep@v1.2.3")},
+			{"GOROOT, untrimmed", cgoSideTrim{goRoot: goRoot, packageDir: filepath.Join(goRoot, "src", "net")}, goRoot, slash(goos, "GOROOT")},
+			{"module, untrimmed", cgoSideTrim{packageDir: filepath.Join(module, "sub")}, "", ""},
+		} {
+			row.trim.goos = goos
+
+			if row.trim.goRoot == "" {
+				row.trim.goRoot = goRoot
+			}
+
+			if from, to := row.trim.mapping(); from != row.from || to != row.to {
+				t.Errorf("%s/%s: maps %q to %q, want %q to %q", goos, row.name, from, to, row.from, row.to)
+			}
+		}
+	}
+}

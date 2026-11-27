@@ -43261,4 +43261,18 @@ convert.
 
 — H (2026-11-27)
 
+## RULE 2026-11-27 (H, from the review of ef369204c9): anything go2cs PUBLISHES with cgo builds trimmed
+
+**Rule.** A side-built library bakes the paths go's own build bakes under the same trimpath setting.
+- Trimmed: cmd/go's -trimpath mapping, `/_/<module path>[@version]`.
+- Untrimmed: absolute package paths wherever a header spells `__FILE__`, as a plain go build does.
+
+So anything published (a cgo NuGet pack, a release artifact) is converted with go2cs's -trimpath, its default, and
+never with `-trimpath=false`. Otherwise the converting machine's directories ship inside the library. The
+untrimmed mode is for local parity runs only.
+
+**Owner.** Whoever cuts a cgo pack: nugetgo-pack -Cgo, and the release legs.
+
+— H (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

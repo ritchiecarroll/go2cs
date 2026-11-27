@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -262,6 +263,113 @@ func cgoSideCompileFlags(load cgoLoad, options Options, pkg *packages.Package) (
 	return append(flags, listed.CgoCFLAGS...), listed.CgoPkgConfig, nil
 }
 
+// cgoSideTrim is the path mapping cmd/go hands CC for a package's cgo compiles under -trimpath, and always for a
+// GOROOT package (cmd/go/internal/work/exec.go, ccompile, 2294-2342): from the module's directory to /_/<module
+// path>[@version] (\\_\_\<path> on windows), from GOROOT to /_/GOROOT, or, outside any module, from the package
+// directory to its import path. go2cs's -trimpath (on by default: commandLineOptions.go, noTrimPath) is the setting it
+// follows, so a side build bakes the paths go's own build bakes under the same setting (review of ef369204c9, #2,
+// COORD's ruling). Untrimmed, a non-GOROOT package maps nothing beyond the work directory, as a plain go build does.
+type cgoSideTrim struct {
+	trimmed    bool
+	goos       string
+	goRoot     string
+	packageDir string
+	importPath string
+}
+
+// mapping is the trim's from and to, or "" "" when it maps nothing.
+func (trim cgoSideTrim) mapping() (string, string) {
+	from, toPath := "", ""
+
+	switch {
+	case trim.goRoot != "" && isPathUnder(trim.packageDir, filepath.Join(trim.goRoot, "src")):
+		from, toPath = trim.goRoot, "GOROOT"
+	case !trim.trimmed:
+		return "", ""
+	default:
+		root := moduleRootDir(trim.packageDir)
+		goMod, found := goModFile(root)
+		modulePath := ""
+
+		if found {
+			modulePath = readModuleFromGoMod(goMod)
+		}
+
+		if modulePath == "" {
+			from, toPath = trim.packageDir, trim.importPath
+			break
+		}
+
+		from, toPath = root, modulePath
+
+		// A module-cache module's directory is <path>@<version>, and cmd/go writes <path>@<version>.
+		if _, version, cached := strings.Cut(filepath.Base(root), "@"); cached && version != "" {
+			toPath += "@" + version
+		}
+	}
+
+	if trim.goos == "windows" {
+		return strings.TrimRight(from, `/\`), filepath.Join(`\\_\_`, toPath)
+	}
+
+	return strings.TrimRight(from, `/\`), filepath.Join("/_", toPath)
+}
+
+// cgoSidePrefixMaps are the path mappings every side compile takes: the side build's work directory to ".", as cmd/go
+// maps its own work directory (work/exec.go, compilerCmd), and the trim's mapping (cgoSideTrim). Each uses
+// -ffile-prefix-map where the compiler takes it, and otherwise -fdebug-prefix-map, as cmd/go probes for them; a compiler
+// that takes neither gets none.
+func cgoSidePrefixMaps(toolchain cgoToolchain, workDir string, trim cgoSideTrim) []string {
+	flag := "-ffile-prefix-map"
+
+	if !cgoSideFlagSupported(toolchain, flag+"=a=b") {
+		flag = "-fdebug-prefix-map"
+
+		if !cgoSideFlagSupported(toolchain, flag+"=a=b") {
+			return nil
+		}
+	}
+
+	maps := []string{flag + "=" + strings.TrimRight(workDir, `/\`) + "=."}
+
+	if from, to := trim.mapping(); from != "" {
+		maps = append(maps, flag+"="+from+"="+to)
+	}
+
+	return maps
+}
+
+var (
+	cgoSideFlagMutex sync.Mutex
+	cgoSideFlags     = map[string]bool{} // keyed by the compiler command and the flag: one probe per run
+)
+
+// cgoSideFlagSupported reports whether the compiler takes a flag, probed as cmd/go probes (work/exec.go,
+// gccSupportsFlag): a compile of an empty C file with the flag, which must succeed and say nothing of an unknown or
+// unused option.
+func cgoSideFlagSupported(toolchain cgoToolchain, flag string) bool {
+	key := strings.Join(toolchain.cc, "\x00") + "\x00" + flag
+
+	cgoSideFlagMutex.Lock()
+	defer cgoSideFlagMutex.Unlock()
+
+	if supported, cached := cgoSideFlags[key]; cached {
+		return supported
+	}
+
+	args := append(append(append([]string{}, toolchain.cc[1:]...), toolchain.arch...), flag, "-c", "-x", "c", "-", "-o", os.DevNull)
+	cmd := exec.Command(toolchain.cc[0], args...)
+	cmd.Env = append(os.Environ(), toolchain.env...)
+	cmd.Stdin = strings.NewReader("")
+	out, err := cmd.CombinedOutput()
+	text := strings.ToLower(string(out))
+	supported := err == nil && !strings.Contains(text, "unrecognized") && !strings.Contains(text, "unknown") && !strings.Contains(text, "unused")
+
+	cgoSideFlags[key] = supported
+
+	return supported
+}
+
 // cgoSideThreadFlag is the flag cmd/go hands CC on every cgo compile and link for the target (work/exec.go,
 // compilerCmd): -mthreads on windows, -pthread elsewhere.
 func cgoSideThreadFlag(goos string) string {
@@ -293,10 +401,9 @@ func cgoSideFailure(step, file, output string) error {
 
 // cgoSideCompile compiles one unit's text to an object file. It runs in the package directory, which matches the
 // directory cmd/go runs each cgo compile in. A relative #cgo -I or -L needs no help from that: go/build makes both
-// absolute when it reads the directives (src/go/build/build.go, 1801-1818). The unit and its object stay in dir. The side build's work directory is mapped to "." in every path the compiler records, as cmd/go
-// maps its own work directory (work/exec.go, compilerCmd: -ffile-prefix-map), so no conversion path reaches the object
-// (review of 500b0855c7, #2).
-func cgoSideCompile(toolchain cgoToolchain, goos string, flags []string, unit cgoSideUnit, dir, workDir, packageDir string) (string, error) {
+// absolute when it reads the directives (src/go/build/build.go, 1810-1828). The unit and its object stay in dir.
+// prefixMaps are the path mappings every side compile takes (cgoSidePrefixMaps).
+func cgoSideCompile(toolchain cgoToolchain, goos string, flags []string, unit cgoSideUnit, dir, packageDir string, prefixMaps []string) (string, error) {
 	source := filepath.Join(dir, unit.file+".side.c")
 	object := filepath.Join(dir, unit.file+".side.o")
 
@@ -310,7 +417,7 @@ func cgoSideCompile(toolchain cgoToolchain, goos string, flags []string, unit cg
 		args = append(args, "-fPIC")
 	}
 
-	args = append(args, cgoSideThreadFlag(goos), "-ffile-prefix-map="+strings.TrimRight(workDir, `/\`)+"=.")
+	args = append(append(args, cgoSideThreadFlag(goos)), prefixMaps...)
 
 	cmd := exec.Command(toolchain.cc[0], append(args, "-c", "-o", object, source)...)
 	cmd.Dir = packageDir
@@ -443,7 +550,7 @@ func cgoSideLink(toolchain cgoToolchain, goos string, flags cgoLinkFlags, object
 // define. A unit is compiled once with every candidate, its object read for which it defines, and compiled again with
 // those alone, so a name only declared never reaches the link (where it would resolve to a library, or statically). It
 // returns the build (nil when no preamble defines any candidate) and the names no preamble defines.
-func cgoSideBuildUnits(toolchain cgoToolchain, goos, packageDir string, compileFlags []string, linkFlags cgoLinkFlags, candidates []cgoSideUnit, library string) (*cgoSideBuild, []string, error) {
+func cgoSideBuildUnits(toolchain cgoToolchain, goos, packageDir string, compileFlags []string, linkFlags cgoLinkFlags, candidates []cgoSideUnit, library string, trim cgoSideTrim) (*cgoSideBuild, []string, error) {
 	workDir, err := os.MkdirTemp("", "go2cs-cgo-side-")
 
 	if err != nil {
@@ -452,6 +559,7 @@ func cgoSideBuildUnits(toolchain cgoToolchain, goos, packageDir string, compileF
 
 	defer os.RemoveAll(workDir)
 
+	prefixMaps := cgoSidePrefixMaps(toolchain, workDir, trim)
 	build := &cgoSideBuild{library: library}
 	var undefined, objects []string
 
@@ -465,7 +573,7 @@ func cgoSideBuildUnits(toolchain cgoToolchain, goos, packageDir string, compileF
 			}
 		}
 
-		object, err := cgoSideCompile(toolchain, goos, compileFlags, candidate, classifyDir, workDir, packageDir)
+		object, err := cgoSideCompile(toolchain, goos, compileFlags, candidate, classifyDir, packageDir, prefixMaps)
 
 		if err != nil {
 			return nil, nil, err
@@ -492,7 +600,7 @@ func cgoSideBuildUnits(toolchain cgoToolchain, goos, packageDir string, compileF
 			continue
 		}
 
-		if object, err = cgoSideCompile(toolchain, goos, compileFlags, unit, buildDir, workDir, packageDir); err != nil {
+		if object, err = cgoSideCompile(toolchain, goos, compileFlags, unit, buildDir, packageDir, prefixMaps); err != nil {
 			return nil, nil, err
 		}
 
@@ -733,7 +841,8 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 		return nil, refusals, nil
 	}
 
-	build, undefined, err := cgoSideBuildUnits(toolchain, goos, pkg.Dir, compileFlags, flags, candidates, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath))
+	trim := cgoSideTrim{trimmed: !options.noTrimPath, goos: goos, goRoot: options.goRoot, packageDir: pkg.Dir, importPath: pkg.PkgPath}
+	build, undefined, err := cgoSideBuildUnits(toolchain, goos, pkg.Dir, compileFlags, flags, candidates, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath), trim)
 
 	if err != nil {
 		return nil, nil, err

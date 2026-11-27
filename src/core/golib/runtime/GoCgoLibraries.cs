@@ -122,7 +122,7 @@ namespace go.golib;
             NativeLibrary.TryLoad(path, out handle);
 
         if (!loaded)
-            throw new DllNotFoundException($"cgo: the side-built library {file}, which holds the C that {assembly.GetName().Name}'s cgo preambles define, was not found or did not load at {path}; it is a build output beside the assembly, and the current directory is never searched (docs/Limitations.md#cgo)");
+            throw new DllNotFoundException($"cgo: the side-built library {file}, which holds the C that {assembly.GetName().Name}'s cgo preambles define, or one of its dependencies was not found or did not load at {path}; it is a build output beside the assembly, and the current directory is never searched (docs/Limitations.md#cgo)");
 
         if (!NativeLibrary.TryGetExport(handle, symbol, out nint table) || table == 0)
             throw new EntryPointNotFoundException($"cgo: the side-built library {file} exports no table {symbol} (docs/Limitations.md#cgo)");
