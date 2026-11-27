@@ -4771,7 +4771,7 @@ a stack-only pack of the arguments that, for a spread call `f(s...)`, carries th
 The parameter is renamed with a `ʗp` suffix, which marks an incoming parameter the body redeclares, so
 the body can declare the Go name `xs` as a slice ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 <!-- A type-parameter element type has no legal alias name and keeps `params variadic<T>`. -->
-<!-- The ʗp suffix is also used for a boxed VALUE parameter (src/go2cs/convFuncLit.go:702#b268ee, :749#0e4ad6, :823#075a45), so it is not glossed as "pack"; glyph table: this page's Reading Converted Code section (#reading-converted-code-names-and-glyphs). -->
+<!-- The ʗp suffix is also used for a boxed VALUE parameter (src/go2cs/convFuncLit.go:708#b268ee, :755#0e4ad6, :829#075a45), so it is not glossed as "pack"; glyph table: this page's Reading Converted Code section (#reading-converted-code-names-and-glyphs). -->
 
 <!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:10-19 -->
 ```go

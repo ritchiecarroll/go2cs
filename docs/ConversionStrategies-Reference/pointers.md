@@ -2053,7 +2053,7 @@ That Go-`int` exemption is **narrowed, not absolute**: it holds only while every
 
 A **func value** element marks its arm not-fully-typed too: a func literal, a method value (`timer.Stop`), a named function used as a value (`time.Now`) or an instantiated generic function used as a value (`id[int]`, emitted `id<nint>`) renders as a C# lambda or method group, and neither has a type of its own inside a tuple literal. A method expression (`(*T).Len`) does not count: it renders as a cast to its signature's delegate, which is typed. A literal whose every arm holds one, declared with `:=` and used as a value (so it is not emitted as a local function), has no arm to infer from (CS8917, then CS8130 at each deconstruction). x/time/rate's `(*Limiter).WaitN` has the shape, `newTimer := func(d time.Duration) (<-chan time.Time, func() bool, func()) { …; return timer.C, timer.Stop, func() {} }`, passed on to `lim.wait`:
 
-<!-- source: src/tests/Behavioral/FuncLitTupleResultInfer/main.cs.target:26-32 -->
+<!-- source: src/tests/Behavioral/FuncLitTupleResultInfer/main.cs.target:28-34 -->
 ```csharp
 var mk = [GoFunc("main.func1")] (/*<-*/channel<time.Time>, Func<bool>, Action) (time.Duration d) => {
     var chΔ1 = new channel<time.Time>(1);
