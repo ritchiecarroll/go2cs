@@ -222,26 +222,11 @@ func cgoSideLibraryItem(projectFileContents, folder, library string) string {
 // #cgo pkg-config arguments: cmd/go runs pkg-config at build time and adds its flags (work/exec.go, getPkgConfigFlags),
 // which go list's CgoCFLAGS never carry, so a package that names any is refused a side build by name (review of
 // 500b0855c7, #1).
-func cgoSideCompileFlags(load cgoLoad, options Options, pkg *packages.Package) ([]string, []string, error) {
+func cgoSideCompileFlags(load cgoLoad, listed cgoSideListing, pkg *packages.Package) ([]string, []string, error) {
 	env, err := cgoGoEnv(load, "CGO_CPPFLAGS", "CGO_CFLAGS")
 
 	if err != nil {
 		return nil, nil, err
-	}
-
-	cmd := exec.Command("go", append(append([]string{"list", "-e", "-json=CgoCPPFLAGS,CgoCFLAGS,CgoPkgConfig"}, options.loaderBuildFlags()...), ".")...)
-	cmd.Env = load.env
-	cmd.Dir = pkg.Dir
-	out, err := cmd.Output()
-
-	if err != nil {
-		return nil, nil, fmt.Errorf("cgo: go list of the package's C flags: %w", err)
-	}
-
-	var listed struct{ CgoCPPFLAGS, CgoCFLAGS, CgoPkgConfig []string }
-
-	if err := json.Unmarshal(out, &listed); err != nil {
-		return nil, nil, fmt.Errorf("cgo: go list of the package's C flags: %w", err)
 	}
 
 	flags := []string{"-I", pkg.Dir}
@@ -263,48 +248,109 @@ func cgoSideCompileFlags(load cgoLoad, options Options, pkg *packages.Package) (
 	return append(flags, listed.CgoCFLAGS...), listed.CgoPkgConfig, nil
 }
 
+// cgoSideListing is what go list reports of the package for its side build: its C flags, and the identity cmd/go's
+// path mapping reads (Dir, ImportPath, Root, Goroot and Module; work/exec.go, ccompile).
+type cgoSideListing struct {
+	CgoCPPFLAGS, CgoCFLAGS, CgoPkgConfig []string
+	Dir, ImportPath, Root                string
+	Goroot                               bool
+	Module                               *cgoListedModule
+}
+
+// cgoListedModule is the part of go list's Module the mapping reads. For a module replaced by a local directory, Dir is
+// the replacement's and Version the required one; for a vendored module, Dir is empty.
+type cgoListedModule struct{ Path, Version, Dir string }
+
+// cgoSideList lists the package in the load's own directory, by its import path, so a package of a replaced or
+// vendored module is listed in the main module's context, as cmd/go builds it.
+func cgoSideList(load cgoLoad, options Options, pkg *packages.Package) (cgoSideListing, error) {
+	fields := "-json=CgoCPPFLAGS,CgoCFLAGS,CgoPkgConfig,Dir,ImportPath,Root,Goroot,Module"
+	cmd := exec.Command("go", append(append([]string{"list", "-e", fields}, options.loaderBuildFlags()...), pkg.PkgPath)...)
+	cmd.Env = load.env
+	cmd.Dir = load.dir
+	out, err := cmd.Output()
+
+	if err != nil {
+		return cgoSideListing{}, fmt.Errorf("cgo: go list of the package's C flags and module: %w", err)
+	}
+
+	var listed cgoSideListing
+
+	if err := json.Unmarshal(out, &listed); err != nil {
+		return cgoSideListing{}, fmt.Errorf("cgo: go list of the package's C flags and module: %w", err)
+	}
+
+	return listed, nil
+}
+
 // cgoSideTrim is the path mapping cmd/go hands CC for a package's cgo compiles under -trimpath, and always for a
-// GOROOT package (cmd/go/internal/work/exec.go, ccompile, 2294-2342): from the module's directory to /_/<module
-// path>[@version] (\\_\_\<path> on windows), from GOROOT to /_/GOROOT, or, outside any module, from the package
-// directory to its import path. go2cs's -trimpath (on by default: commandLineOptions.go, noTrimPath) is the setting it
-// follows, so a side build bakes the paths go's own build bakes under the same setting (review of ef369204c9, #2,
-// COORD's ruling). Untrimmed, a non-GOROOT package maps nothing beyond the work directory, as a plain go build does.
+// GOROOT package (cmd/go/internal/work/exec.go, ccompile, 2288-2340). It maps from the module go list reports, never
+// one re-derived from a directory's name and go.mod (review of 823978ff1a, #1): the module's directory to
+// /_/<module path>[@version] (\\_\_\<path> on windows), a vendored module's vendor directory to /_/vendor, GOROOT
+// to /_/GOROOT, a GOPATH package's root to /_/GOPATH, and, with no root at all, the package directory to its import
+// path. go2cs's -trimpath (on by default: commandLineOptions.go, noTrimPath) is the setting it follows, so a side build
+// bakes the paths go's own build bakes under the same setting (review of ef369204c9, #2, COORD's ruling). Untrimmed,
+// a non-GOROOT package maps nothing beyond the work directory, as a plain go build does.
 type cgoSideTrim struct {
 	trimmed    bool
 	goos       string
-	goRoot     string
+	goroot     bool
+	root       string
 	packageDir string
 	importPath string
+	module     *cgoListedModule
+
+	// vendorDir is the directory a vendored module's files are read from, as modload.VendorDir reports it: beside
+	// go.work in workspace mode, else in the main module's root.
+	vendorDir string
+}
+
+// cgoSideTrimOf builds the trim for a listed package. Only a vendored module asks go env for the vendor directory.
+func cgoSideTrimOf(load cgoLoad, listed cgoSideListing, trimmed bool, goos string) (cgoSideTrim, error) {
+	trim := cgoSideTrim{trimmed: trimmed, goos: goos, goroot: listed.Goroot, root: listed.Root, packageDir: listed.Dir, importPath: listed.ImportPath, module: listed.Module}
+
+	if (trimmed || listed.Goroot) && listed.Module != nil && listed.Module.Dir == "" {
+		env, err := cgoGoEnv(load, "GOWORK", "GOMOD")
+
+		if err != nil {
+			return cgoSideTrim{}, err
+		}
+
+		switch {
+		case env[0] != "" && env[0] != "off":
+			trim.vendorDir = filepath.Join(filepath.Dir(env[0]), "vendor")
+		case env[1] != "" && env[1] != os.DevNull:
+			trim.vendorDir = filepath.Join(filepath.Dir(env[1]), "vendor")
+		default:
+			return cgoSideTrim{}, fmt.Errorf("cgo: %s is a vendored module's package, and no main module names its vendor directory", listed.ImportPath)
+		}
+	}
+
+	return trim, nil
 }
 
 // mapping is the trim's from and to, or "" "" when it maps nothing.
 func (trim cgoSideTrim) mapping() (string, string) {
-	from, toPath := "", ""
+	if !trim.trimmed && !trim.goroot {
+		return "", ""
+	}
+
+	var from, toPath string
 
 	switch {
-	case trim.goRoot != "" && isPathUnder(trim.packageDir, filepath.Join(trim.goRoot, "src")):
-		from, toPath = trim.goRoot, "GOROOT"
-	case !trim.trimmed:
-		return "", ""
+	case trim.module == nil && trim.root == "":
+		from, toPath = trim.packageDir, trim.importPath
+	case trim.module == nil && trim.goroot:
+		from, toPath = trim.root, "GOROOT"
+	case trim.module == nil:
+		from, toPath = trim.root, "GOPATH"
+	case trim.module.Dir == "":
+		from, toPath = trim.vendorDir, "vendor"
 	default:
-		root := moduleRootDir(trim.packageDir)
-		goMod, found := goModFile(root)
-		modulePath := ""
+		from, toPath = trim.module.Dir, trim.module.Path
 
-		if found {
-			modulePath = readModuleFromGoMod(goMod)
-		}
-
-		if modulePath == "" {
-			from, toPath = trim.packageDir, trim.importPath
-			break
-		}
-
-		from, toPath = root, modulePath
-
-		// A module-cache module's directory is <path>@<version>, and cmd/go writes <path>@<version>.
-		if _, version, cached := strings.Cut(filepath.Base(root), "@"); cached && version != "" {
-			toPath += "@" + version
+		if trim.module.Version != "" {
+			toPath += "@" + trim.module.Version
 		}
 	}
 
@@ -825,7 +871,13 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 		return nil, nil, err
 	}
 
-	compileFlags, pkgConfig, err := cgoSideCompileFlags(load, options, pkg)
+	listed, err := cgoSideList(load, options, pkg)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	compileFlags, pkgConfig, err := cgoSideCompileFlags(load, listed, pkg)
 
 	if err != nil {
 		return nil, nil, err
@@ -841,7 +893,12 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 		return nil, refusals, nil
 	}
 
-	trim := cgoSideTrim{trimmed: !options.noTrimPath, goos: goos, goRoot: options.goRoot, packageDir: pkg.Dir, importPath: pkg.PkgPath}
+	trim, err := cgoSideTrimOf(load, listed, !options.noTrimPath, goos)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
 	build, undefined, err := cgoSideBuildUnits(toolchain, goos, pkg.Dir, compileFlags, flags, candidates, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath), trim)
 
 	if err != nil {

@@ -9,7 +9,6 @@
 package main
 
 import (
-	"encoding/json"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -389,27 +388,16 @@ func TestCgoDarwinInstallNameRefusesWhatDyldWouldSearch(t *testing.T) {
 	}
 }
 
-// The side compile's -trimpath mapping is cmd/go's (review of ef369204c9, #2): a module's directory to /_/<module path>,
-// a module-cache directory with its version, GOROOT to /_/GOROOT whatever the setting, and nothing else untrimmed.
+// The side compile's -trimpath mapping is cmd/go's (review of ef369204c9, #2; work/exec.go, ccompile), read from the
+// fields go list reports (review of 823978ff1a, #1): a module's directory to /_/<module path>[@version], GOROOT to
+// /_/GOROOT whatever the setting, a GOPATH root to /_/GOPATH, a rootless package's directory to its import path, and
+// nothing else untrimmed.
 func TestCgoSideTrimMapsAsCmdGoDoes(t *testing.T) {
 	root := t.TempDir()
 	module := filepath.Join(root, "mod")
 	cached := filepath.Join(root, "cache", "example.com", "dep@v1.2.3")
 	goRoot := filepath.Join(root, "goroot")
-
-	for dir, goMod := range map[string]string{module: "module example.com/mod\n", cached: "module example.com/dep\n"} {
-		if err := os.MkdirAll(filepath.Join(dir, "sub"), 0o755); err != nil {
-			t.Fatal(err)
-		}
-
-		if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0o644); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := os.MkdirAll(filepath.Join(goRoot, "src", "net"), 0o755); err != nil {
-		t.Fatal(err)
-	}
+	goPath := filepath.Join(root, "gopath")
 
 	slash := func(goos, path string) string {
 		if goos == "windows" {
@@ -425,16 +413,14 @@ func TestCgoSideTrimMapsAsCmdGoDoes(t *testing.T) {
 			trim     cgoSideTrim
 			from, to string
 		}{
-			{"module", cgoSideTrim{trimmed: true, packageDir: filepath.Join(module, "sub")}, module, slash(goos, "example.com/mod")},
-			{"module cache", cgoSideTrim{trimmed: true, packageDir: filepath.Join(cached, "sub")}, cached, slash(goos, "example.com/dep@v1.2.3")},
-			{"GOROOT, untrimmed", cgoSideTrim{goRoot: goRoot, packageDir: filepath.Join(goRoot, "src", "net")}, goRoot, slash(goos, "GOROOT")},
-			{"module, untrimmed", cgoSideTrim{packageDir: filepath.Join(module, "sub")}, "", ""},
+			{"module", cgoSideTrim{trimmed: true, root: module, packageDir: filepath.Join(module, "sub"), module: &cgoListedModule{Path: "example.com/mod", Dir: module}}, module, slash(goos, "example.com/mod")},
+			{"module cache", cgoSideTrim{trimmed: true, root: cached, packageDir: filepath.Join(cached, "sub"), module: &cgoListedModule{Path: "example.com/dep", Version: "v1.2.3", Dir: cached}}, cached, slash(goos, "example.com/dep@v1.2.3")},
+			{"GOROOT, untrimmed", cgoSideTrim{goroot: true, root: goRoot, packageDir: filepath.Join(goRoot, "src", "net")}, goRoot, slash(goos, "GOROOT")},
+			{"GOPATH", cgoSideTrim{trimmed: true, root: goPath, packageDir: filepath.Join(goPath, "src", "x")}, goPath, slash(goos, "GOPATH")},
+			{"no root", cgoSideTrim{trimmed: true, packageDir: filepath.Join(root, "loose"), importPath: "command-line-arguments"}, filepath.Join(root, "loose"), slash(goos, "command-line-arguments")},
+			{"module, untrimmed", cgoSideTrim{root: module, packageDir: filepath.Join(module, "sub"), module: &cgoListedModule{Path: "example.com/mod", Dir: module}}, "", ""},
 		} {
 			row.trim.goos = goos
-
-			if row.trim.goRoot == "" {
-				row.trim.goRoot = goRoot
-			}
 
 			if from, to := row.trim.mapping(); from != row.from || to != row.to {
 				t.Errorf("%s/%s: maps %q to %q, want %q to %q", goos, row.name, from, to, row.from, row.to)
@@ -517,25 +503,21 @@ func TestCgoSideTrimTakesTheModuleGoListReports(t *testing.T) {
 	}
 }
 
-// cgoSideTrimForTest builds the trim for one package as the conversion builds it.
+// cgoSideTrimForTest builds the trim for one package as the conversion builds it (cgoSideList, cgoSideTrimOf).
 func cgoSideTrimForTest(t *testing.T, load cgoLoad, pattern, goos string) cgoSideTrim {
 	t.Helper()
 
-	cmd := exec.Command("go", "list", "-json=Dir,ImportPath", pattern)
-	cmd.Env = load.env
-	cmd.Dir = load.dir
-	out, err := cmd.Output()
+	listed, err := cgoSideList(load, Options{}, &packages.Package{PkgPath: pattern})
 
 	if err != nil {
-		t.Fatalf("go list %s in %s: %v", pattern, load.dir, err)
-	}
-
-	var listed struct{ Dir, ImportPath string }
-
-	if err := json.Unmarshal(out, &listed); err != nil {
 		t.Fatal(err)
 	}
 
-	// As cgoSideBuild builds it at 823978ff1a (cgoSideBuild.go:844).
-	return cgoSideTrim{trimmed: true, goos: goos, packageDir: listed.Dir, importPath: listed.ImportPath}
+	trim, err := cgoSideTrimOf(load, listed, true, goos)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return trim
 }
