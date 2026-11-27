@@ -230,7 +230,7 @@ func cgoSideCompileFlags(load cgoLoad, listed cgoSideListing, pkg *packages.Pack
 		return nil, nil, err
 	}
 
-	flags := []string{"-I", pkg.Dir}
+	flags := []string{"-I", listed.dir(pkg)}
 
 	for i, value := range env {
 		fields, err := cgoQuotedSplit(value)
@@ -256,6 +256,18 @@ type cgoSideListing struct {
 	Dir, ImportPath, Root                string
 	Goroot                               bool
 	Module                               *cgoListedModule
+}
+
+// dir is the package directory as go list reports it, which is the one cmd/go compiles in and hands CC with -I. It
+// can differ from the loader's spelling of the same directory: on darwin /var is a symlink to /private/var, and go's
+// build bakes /private/var/... where pkg.Dir reads /var/... (row I untrimmed, darwin, 46065874032). The loader's
+// spelling stands in only when go list reports none.
+func (listed cgoSideListing) dir(pkg *packages.Package) string {
+	if listed.Dir != "" {
+		return listed.Dir
+	}
+
+	return pkg.Dir
 }
 
 // cgoListedModule is the part of go list's Module the mapping reads. For a module replaced by a local directory, Dir is
@@ -923,16 +935,19 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 		return nil, nil, err
 	}
 
-	// Each preamble is read once the trim is known, under the #line name go's build would give it.
+	// Each preamble is read once the trim is known, under the #line name go's build would give it: the source's path in
+	// the package directory go list reports, as cmd/cgo's absolute path names it.
+	packageDir := listed.dir(pkg)
+
 	for i := range candidates {
 		path := sourcePaths[candidates[i].file]
 
-		if candidates[i].preamble, err = cgoSidePreamble(path, trim.lineName(path)); err != nil {
+		if candidates[i].preamble, err = cgoSidePreamble(path, trim.lineName(filepath.Join(packageDir, filepath.Base(path)))); err != nil {
 			return nil, nil, fmt.Errorf("cgo: the import \"C\" source %s cannot be read for its preamble: %w", candidates[i].file, err)
 		}
 	}
 
-	build, undefined, err := cgoSideBuildUnits(toolchain, goos, pkg.Dir, compileFlags, flags, candidates, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath), trim)
+	build, undefined, err := cgoSideBuildUnits(toolchain, goos, packageDir, compileFlags, flags, candidates, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath), trim)
 
 	if err != nil {
 		return nil, nil, err
