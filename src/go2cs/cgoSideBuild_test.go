@@ -17,6 +17,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -553,5 +554,70 @@ func TestCgoSideTrimLineNameIsTheMappedSource(t *testing.T) {
 				t.Errorf("%s/%s: names %q, want %q", goos, row.name, got, row.want)
 			}
 		}
+	}
+}
+
+// cgoNoNulCompiler is a compiler stand-in that cannot write the null device: given -o NUL it fails, as a compiler that
+// cannot open NUL for output does, and given any other -o it writes that file and succeeds.
+const cgoNoNulCompiler = `package main
+
+import (
+	"fmt"
+	"os"
+	"strings"
+)
+
+func main() {
+	for i, arg := range os.Args {
+		if arg == "-o" && i+1 < len(os.Args) {
+			out := os.Args[i+1]
+
+			if strings.EqualFold(out, os.DevNull) {
+				fmt.Fprintln(os.Stderr, "error: cannot open output file "+out)
+				os.Exit(1)
+			}
+
+			if err := os.WriteFile(out, nil, 0o644); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+		}
+	}
+}
+`
+
+// On a windows host the flag probe writes to a file in the side build's work directory, as cmd/go's does
+// (work/exec.go, gccSupportsFlag: os.CreateTemp on windows and ios), not to NUL. A compiler that cannot write NUL would
+// otherwise fail both prefix-map probes, take no map, and bake absolute paths with no word said (review of 823978ff1a,
+// #3). The probe's file does not outlive the probe.
+func TestCgoSideFlagProbeWritesAFileOnWindowsAsCmdGoDoes(t *testing.T) {
+	if runtime.GOOS != "windows" && runtime.GOOS != "ios" {
+		t.Skipf("on %s cmd/go probes into %s too: NOT MEASURED here", runtime.GOOS, os.DevNull)
+	}
+
+	tools := t.TempDir()
+	source := filepath.Join(tools, "cc.go")
+	compiler := filepath.Join(tools, "cc.exe")
+
+	if err := os.WriteFile(source, []byte(cgoNoNulCompiler), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	build := exec.Command("go", "build", "-o", compiler, source)
+	build.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local", "CGO_ENABLED=0")
+
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("the stand-in compiler did not build: %v\n%s", err, out)
+	}
+
+	workDir := t.TempDir()
+	maps := cgoSidePrefixMaps(cgoToolchain{cc: []string{compiler}}, workDir, cgoSideTrim{})
+
+	if len(maps) == 0 || !strings.HasPrefix(maps[0], "-ffile-prefix-map=") {
+		t.Errorf("a compiler that cannot write %s took no prefix map: %q", os.DevNull, maps)
+	}
+
+	if left, _ := os.ReadDir(workDir); len(left) > 0 {
+		t.Errorf("the probe left %d file(s) in the work directory", len(left))
 	}
 }
