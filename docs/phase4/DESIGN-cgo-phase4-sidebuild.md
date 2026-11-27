@@ -256,3 +256,25 @@ increment. Its library-on-host questions are RECON §6's.
 | a Go string in a side-built signature | refused before any C runs, by the wrapper's existing scalar check ("is not a scalar"). No name reaches the side build with one |
 | a declared-only name (undefined in the object) | today's text, word for word |
 | the side compile or link fails | names the file, with the compiler's first diagnostic line through `cgoToolchainLine` |
+
+## 6. Amendment, 2026-11-27: the review of 500b0855c7, and a known gap
+
+**The review's fixes** (COORD's relay of the review, 2026-11-27). Each landed red first wherever a hosted shape could fail.
+
+| Finding | Fix |
+|---|---|
+| #1 `#cgo pkg-config` flags reach cmd/cgo's compile but not `go list`'s CgoCFLAGS | A side build is refused by name when CgoPkgConfig is non-empty. The red was the silent shape: a define selecting code that compiles either way converted with exit 0. |
+| #2 the library carried conversion paths | Every compile maps the work directory (`-ffile-prefix-map=<work>=.`), and the link strips debug info (`-Wl,-S`). |
+| #3 the side library's own dependents | On windows, SideTable loads with SafeDirectories and UseDllDirectoryForDependencies. On darwin, the converter refuses a dependent named by anything but an absolute install name. This was read, not red: no hosted shape fails. |
+| #4 ELF global-scope binding | `-Wl,-Bsymbolic`. Red on linux: a preamble `gamma` lost to the host's libm (go 7, go2cs 0). |
+| #5 a preamble definition a library also exports | A guard row (TestCgoPhase4F), named per target, since the UCRT exports `_isatty`, not `isatty`. |
+| #6 the errno value; a bound and a side-built function together | Rows in TestCgoPhase4A and TestCgoPhase4C. |
+| #7 thread flag, failure texts, stale output, Go's notice | `-pthread`/`-mthreads` as cmd/go passes them; failure-text rows; stale `*.side.c` and library cleanup; cgoSidePreamble carries Go's notice with its PROVENANCE. |
+| (c) a relative `#cgo -I` | **RETRACTED (2026-11-27).** The claim, from the go-sqlite3 census, was that a relative `#cgo CFLAGS: -Isub/dir` resolves against the side compile's temp directory. It does not: go/build makes a relative -I or -L absolute when it reads the directives (`src/go/build/build.go:1801-1818`, Go 1.26.11, "In 1.9 we changed to ... relative -I or -L options to be absolute"). The red, TestCgoPhase4G at 75e26c872b, converted pre-cure, refuting its own premise. G stays as a guard row. The side compile still runs in the package directory, which matches cmd/go's working directory, but fixes no measured defect. |
+
+**Known gap (COORD's ruling (b), 2026-11-27): a non-static function one file's preamble defines and another file
+calls.** go-sqlite3 has the shape: callback.go calls `_sqlite3_result_text`, and sqlite3.go's preamble defines it.
+Phase 4 classifies a name by the object of the unit that hosts it (its first use's file), where the name is only
+declared. So the name is refused with today's text, by name: loud, never silently wrong. The cure is Phase 4b's
+classification by any of the package's objects defining the name as a global symbol. BOARD entry of 2026-11-27.
+

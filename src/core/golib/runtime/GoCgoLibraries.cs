@@ -114,7 +114,14 @@ namespace go.golib;
         string directory = assembly.Location.Length > 0 ? Path.GetDirectoryName(assembly.Location)! : AppContext.BaseDirectory;
         string path = Path.GetFullPath(Path.Combine(directory, file));
 
-        if (!NativeLibrary.TryLoad(path, out nint handle))
+        // On windows the side library's own dependencies are held to Phase 2's rule too (review of 500b0855c7, #3): they
+        // load from its directory and the safe directories, never the current directory or PATH. On darwin the converter
+        // refused any dependency named by anything but an absolute install name when it linked the library.
+        bool loaded = OperatingSystem.IsWindows() ?
+            NativeLibrary.TryLoad(path, assembly, DllImportSearchPath.SafeDirectories | DllImportSearchPath.UseDllDirectoryForDependencies, out nint handle) :
+            NativeLibrary.TryLoad(path, out handle);
+
+        if (!loaded)
             throw new DllNotFoundException($"cgo: the side-built library {file}, which holds the C that {assembly.GetName().Name}'s cgo preambles define, was not found or did not load at {path}; it is a build output beside the assembly, and the current directory is never searched (docs/Limitations.md#cgo)");
 
         if (!NativeLibrary.TryGetExport(handle, symbol, out nint table) || table == 0)

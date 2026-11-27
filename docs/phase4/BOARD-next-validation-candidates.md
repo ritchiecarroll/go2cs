@@ -43061,4 +43061,23 @@ it. 82d80089d9 passes `unsafe.Pointer(&out)`, as memset does, and the probe abov
 
 — H (2026-11-26)
 
+## OPEN 2026-11-27 (H): cgo Phase 4, a non-static function one preamble defines and another file calls is refused (loud, by name)
+
+**Finding.** Found in the go-sqlite3 v1.14.53 census (read only, 2026-11-27). callback.go calls
+`C._sqlite3_result_text` and `C._sqlite3_result_blob`, which callback.go's preamble only declares; sqlite3.go's preamble
+DEFINES them, not static. cmd/cgo resolves such a call at the link. Phase 4 (claude/h-cgo-p4-sidebuild) puts each name
+in the translation unit of the first file that uses it, and classifies it by that unit's object alone. There the name is
+undefined, so the route refuses it with today's text ("... go2cs does not compile C yet"), at its use, by name.
+
+**Severity.** The refusal is loud and named, so nothing is silently wrong. A package that relies on the shape does not
+convert.
+
+**Ruling.** COORD, 2026-11-27: the cure lands in Phase 4b (a package's own C files). 4b classifies a name by ANY of the
+package's objects that defines it as a GLOBAL symbol, its other preamble units included, and the side link resolves the
+table entry inside the library. The gap is recorded in DESIGN-cgo-phase4-sidebuild.md §6.
+
+**Owner.** H, in 4b.
+
+— H (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

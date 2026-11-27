@@ -281,3 +281,94 @@ func TestCgoSideFormIsTheSideBuiltNamesAlone(t *testing.T) {
 		}
 	}
 }
+
+// A side compile or link that fails is refused naming the file and the compiler's first diagnostic line, printable
+// ASCII only and capped, never the compiler's whole output (review of 500b0855c7, #7).
+func TestCgoSideFailureNamesTheFileAndTheFirstDiagnostic(t *testing.T) {
+	output := "In file included from main.go:3:\nmain.go:5:3: error: unknown type name 'flot'\nmain.go:9:1: error: second\n"
+
+	if got, want := cgoSideFailure("compile", "main.go", output).Error(), "cgo: the side build of main.go's preamble did not compile: main.go:5:3: error: unknown type name 'flot'"; got != want {
+		t.Errorf("compile failure %q, want %q", got, want)
+	}
+
+	if got, want := cgoSideFailure("link", "libgo2cs-cgo-main-a9d3bf20.so", "ld: cannot find -lnone\r\ncollect2: ld returned 1 exit status\r\n").Error(), "cgo: the side build of libgo2cs-cgo-main-a9d3bf20.so's preamble did not link: ld: cannot find -lnone"; got != want {
+		t.Errorf("link failure %q, want %q", got, want)
+	}
+
+	if got := cgoSideFailure("link", "x", "no diagnostic word\nsecond line\n").Error(); got != "cgo: the side build of x's preamble did not link: no diagnostic word" {
+		t.Errorf("a failure with no error line reads %q", got)
+	}
+
+	if got := cgoSideFailure("compile", "x", "error \u2028"+strings.Repeat("e", 200)).Error(); strings.ContainsRune(got, '\u2028') || len(got) > len("cgo: the side build of x's preamble did not compile: ")+cgoToolchainLineLimit {
+		t.Errorf("a failure line is not sanitized and capped: %q", got)
+	}
+}
+
+// pkg-config's refusal names the function and every pkg-config argument (review of 500b0855c7, #1).
+func TestCgoSidePkgConfigRefusalNamesTheFunctionAndTheArguments(t *testing.T) {
+	got := cgoSidePkgConfigRefusal("pc", []string{"--static", "fuse"})
+
+	for _, want := range []string{"C.pc:", "#cgo pkg-config (--static fuse)", "refused"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the refusal %q does not carry %q", got, want)
+		}
+	}
+}
+
+// A reconversion removes what an earlier side build wrote and this one does not, and nothing else (review of
+// 500b0855c7, #7).
+func TestCgoSideBuildCleanRemovesOnlyStaleSideOutput(t *testing.T) {
+	dir := t.TempDir()
+
+	for _, name := range []string{"a.go.side.c", "b.go.side.c", "libgo2cs-cgo-main-a9d3bf20.so", "go2cs-cgo-old-00000000.dll", "notes.txt", "libother.so"} {
+		if err := os.WriteFile(filepath.Join(dir, name), nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	build := &cgoSideBuild{library: "libgo2cs-cgo-main-a9d3bf20.so", units: []cgoSideUnit{{file: "a.go"}}}
+
+	if err := cgoSideBuildClean(dir, build); err != nil {
+		t.Fatal(err)
+	}
+
+	var left []string
+
+	entries, _ := os.ReadDir(dir)
+
+	for _, entry := range entries {
+		left = append(left, entry.Name())
+	}
+
+	if got, want := strings.Join(left, ","), "a.go.side.c,libgo2cs-cgo-main-a9d3bf20.so,libother.so,notes.txt"; got != want {
+		t.Errorf("left %q, want %q", got, want)
+	}
+
+	if err := cgoSideBuildClean(dir, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	left = nil
+	entries, _ = os.ReadDir(dir)
+
+	for _, entry := range entries {
+		left = append(left, entry.Name())
+	}
+
+	if got, want := strings.Join(left, ","), "libother.so,notes.txt"; got != want {
+		t.Errorf("with nothing side-built, left %q, want %q", got, want)
+	}
+
+	if err := cgoSideBuildClean(filepath.Join(dir, "none"), nil); err != nil {
+		t.Errorf("a folder that does not exist: %v", err)
+	}
+}
+
+// cmd/go's thread flag, per target (work/exec.go, compilerCmd).
+func TestCgoSideThreadFlagIsCmdGos(t *testing.T) {
+	for goos, want := range map[string]string{"windows": "-mthreads", "linux": "-pthread", "darwin": "-pthread"} {
+		if got := cgoSideThreadFlag(goos); got != want {
+			t.Errorf("%s: %q, want %q", goos, got, want)
+		}
+	}
+}

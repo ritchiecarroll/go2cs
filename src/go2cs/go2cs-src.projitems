@@ -142,6 +142,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoSelectedRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSideBuild.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSideBuild_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoSidePreamble.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSourceIdentity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoStructWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift.go" />
