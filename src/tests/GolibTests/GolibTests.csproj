@@ -195,6 +195,13 @@
     <Compile Remove="DarwinArm64CpuStartupTests.cs" />
   </ItemGroup>
 
+  <!-- D4's row: internal/cpu.ARM64 against Go's own reading on the same Mac, in each darwin flavour (osx-arm64 runs
+       darwin/arm64, osx-x64 runs darwin/amd64). Its helpers and their own arms (InternalCpuArm64Reading.cs) build on
+       every flavour. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="DarwinCpuArm64AgainstGoTests.cs" />
+  </ItemGroup>
+
   <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).
        - InternalCpuGodebugTests drives internal/cpu's amd64/ hand-owns (cpu_x86_impl.cs, cpu_arm64_process_impl.cs)
          through their probes. The arm64 flavours start internal/cpu elsewhere, each read by its own test file:

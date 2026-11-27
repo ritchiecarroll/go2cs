@@ -2914,6 +2914,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckThisRefReceiverTC0() => CheckTarget("ThisRefReceiverTC0");
 
     [TestMethod]
+    public void CheckTlsClientSuiteOrder() => CheckTarget("TlsClientSuiteOrder");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]
