@@ -150,7 +150,7 @@ function Write-Readings([hashtable] $arms, [string] $dir, [string] $headLine)
     foreach ($a in $armNames)
     {
         $x = $arms[$a]
-        $md.Add("    arm ${a}: sha=$($x.sha) twinned=$($x.twinned) runs=$($x.runs) jit-build=$($x.jitBuildSeconds)s aot-publish=$($x.aotPublishSeconds)s stdout=$($x.stdoutSha16) warnings $($warningIds -join '/')=$($x.warnings -join '/')")
+        $md.Add("    arm ${a}: sha=$($x.sha) twinned=$($x.twinned) runs=$($x.runs) jit-build=$($x.jitBuildSeconds)s aot-publish=$(if ($null -eq $x.aotPublishSeconds) { 'n/a' } else { "$($x.aotPublishSeconds)s" }) stdout=$($x.stdoutSha16) warnings $($warningIds -join '/')=$($x.warnings -join '/')")
     }
     $rehearsal = @($armNames | Where-Object { $arms[$_].noAot -or $arms[$_].runs -lt 3 })
     if ($rehearsal.Count -gt 0) { $md.Add('    REHEARSAL: -NoAot or fewer than 3 runs in an arm, so this is not row 16c; T3 needs both legs.') }

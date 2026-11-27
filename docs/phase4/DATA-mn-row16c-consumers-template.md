@@ -188,7 +188,50 @@ error. Do not work around it inside the run.
 
 ## The rehearsal (C2's box, JIT only)
 
-(filled in below from the hello run)
+2026-11-27, C2. The run proves the kit's mechanics; it is **not a T3 reading**:
+
+- the consumer is a hello program, not sqlite-cs or TypeScript-go-cs;
+- the box is a shared 4-core cloud container;
+- 2 runs per arm, of a 0.7 s program;
+- JIT only.
+
+Setup:
+
+- Tree 317b273e58.
+- Linux x64, 4 cores, SDK 10.0.404.
+- The consumer is `example.com/hello`: 200,000 `fmt.Fprintf` calls into a `strings.Builder`, then a print of the
+  length and the argument count.
+- Converted with `go2cs -recurse -go2cspath <tree>/src`: 1 app package referencing 61 standard library packages.
+- Invocation: `-Runs 2 -NoAot -DiskFloorGB 3 -TwinArm` (the switch on).
+
+What the mechanics did:
+
+- The pin check read the consumer's `go2csPath` as this tree's `src` and passed.
+- Every arm purged, built, read `TargetPath` and ran.
+- Stdout was byte-equal to native `go run` in all 9 runs: hash `6E819D6B43711A12`, `579380 2`.
+- GO2CS0017/0018/0021 read 0/0/0 in every arm.
+- The JSON round trip and `-ScoreFrom` printed the same readings.
+- The run exited 2, a miss. The REHEARSAL label printed.
+
+| arm | JIT build (purged src/core + consumer) | runs (s) | median (s) |
+|---|---:|---|---:|
+| plainA | 356 s | 0.628, 0.758 | 0.693 |
+| plainB | 355 s | 0.683, 0.740 | 0.711 |
+| twins | 584 s | 0.731, 0.788 | 0.760 |
+
+The script scored JIT as A/A band 2.63%, twins / mean 1.0820, beyond A/A 5.57%, **MISSED**. AOT was NOT MEASURED.
+
+The miss is reported as read, and it is not evidence about T3 either way:
+
+- the run-to-run spread inside one arm (0.13 s in plainA) is larger than the difference being scored;
+- with two runs the A/A band is itself one draw;
+- the program spends much of 0.7 s in start-up, which is exactly where a larger set of assemblies would show up first.
+
+What it does say: on a real T3 leg, -Runs must be large enough that the A/A band means something. That is why the
+template asks for 21 runs of sqlite's sub-second demo.
+
+Not gated, reported: the purged closure build read 1.64x plain (584 / 355.5 s). That is in stage (c)'s 1.5-1.8x band
+for T2, on one hello closure on a shared box. It is not row 16b's reading.
 
 ## Not covered here
 
