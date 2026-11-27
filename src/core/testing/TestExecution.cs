@@ -136,6 +136,9 @@ public sealed partial class TestExecution
     private int m_logsDropped;
     private int m_ownerThread;
     private Goroutine? m_ownerGoroutine;
+    // Set when Execute ran the test as its twin (DESIGN-mn-test-twin.md). A twin moves between carrier threads, so the
+    // owner check then compares goroutines (OnOwnersGoroutine); the plain path keeps the thread check.
+    private bool m_twinPath;
     private int m_tempDirSequence;
 
     // Go's common.tempDir (makeTempDir, testing.go:1431): the test's PARENT temp directory, made on the
@@ -836,7 +839,7 @@ public sealed partial class TestExecution
     /// </remarks>
     private bool InOwnersBubble() =>
         m_ownerGoroutine is not null &&
-        Environment.CurrentManagedThreadId != m_ownerThread &&
+        !OnOwnersGoroutine() &&
         (SyncTestBubble.Current?.Root == m_ownerGoroutine ||
          // A synctest.Test child (Go 1.25) runs on a bubble MEMBER, not the bubble's root, so its waiver
          // is the same rule keyed on its own bubble: any other goroutine of that bubble may end it.
@@ -2360,7 +2363,19 @@ public sealed partial class TestExecution
         testing_package.T t = new() { Execution = this };
         try
         {
-            action(new StandardBox<testing_package.T>(t));
+            ж<testing_package.T> box = new StandardBox<testing_package.T>(t);
+
+            // Under the M:N scheduler a top-level test with a twin runs as its twin, multiplexed (DESIGN-mn-test-twin.md).
+            // With the scheduler off nothing below is read: the plain call is today's path, byte for byte.
+            if (GoScheduler.Enabled && m_parent is null && !m_isSynctest && TwinOf(action) is { } twin)
+            {
+                m_twinPath = true;
+                Goroutine.RunTwin(() => action(box), () => twin(box));
+            }
+            else
+            {
+                action(box);
+            }
         }
         catch (TestAbortException)
         {
@@ -2619,7 +2634,7 @@ public sealed partial class TestExecution
     /// </remarks>
     private bool TryEnsureOwner(string operation)
     {
-        if (Environment.CurrentManagedThreadId == m_ownerThread)
+        if (OnOwnersGoroutine())
             return true;
 
         string message = $"testing: {operation} called from a goroutine other than the test goroutine for {Name}";
@@ -2649,6 +2664,38 @@ public sealed partial class TestExecution
 
         return false;
     }
+
+    /// <summary>Whether the caller is this test's own goroutine: the goroutine itself on the twin path, its thread otherwise.</summary>
+    private bool OnOwnersGoroutine() =>
+        m_twinPath && m_ownerGoroutine is not null
+            ? ReferenceEquals(Goroutine.Current, m_ownerGoroutine)
+            : Environment.CurrentManagedThreadId == m_ownerThread;
+
+    // Each test method's twin, found once (null: it has none).
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodInfo, Func<ж<testing_package.T>, GoTask>?> s_twins = new();
+
+    /// <summary>
+    /// The twin go2cs-gen generated for a top-level test function: <c>&lt;Name&gt;ꞏtwin</c> in the same type, with the
+    /// same parameters, returning <see cref="GoTask"/>, and stamped <see cref="GoTwinOfAttribute"/> with that type and
+    /// name. A closure (a subtest literal) is out of this cut and has none here. Read only under the scheduler.
+    /// </summary>
+    private static Func<ж<testing_package.T>, GoTask>? TwinOf(Action<ж<testing_package.T>> action) =>
+        action.Target is not null ? null : s_twins.GetOrAdd(action.Method, static method =>
+        {
+            if (!method.IsStatic || method.DeclaringType is not { } host)
+                return null;
+
+            System.Reflection.MethodInfo? twin = host.GetMethod(method.Name + "ꞏtwin",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.DeclaredOnly,
+                binder: null, method.GetParameters().Select(parameter => parameter.ParameterType).ToArray(), modifiers: null);
+
+            if (twin is null || twin.ReturnType != typeof(GoTask) ||
+                System.Reflection.CustomAttributeExtensions.GetCustomAttribute<GoTwinOfAttribute>(twin) is not { } stamp ||
+                stamp.Host != host || stamp.Name != method.Name)
+                return null;
+
+            return twin.CreateDelegate<Func<ж<testing_package.T>, GoTask>>();
+        });
 
     /// <summary>
     /// Rewrites a subtest name the way Go's <c>testing.rewrite</c> does: whitespace folds to

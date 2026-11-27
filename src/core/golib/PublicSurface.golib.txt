@@ -1343,3 +1343,7 @@ go.golib.GoTwinOfAttribute :: property System.String Name { get; }
 go.golib.GoTwinOfAttribute :: property System.Type Host { get; }
 go.golib.GoTwinOfAttribute :: property System.Type[] Parameters { get; }
 go.golib.GoTwinOfAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
+# The test host's twin entry (decided 2026-11-27, G on docs/phase4/DESIGN-mn-test-twin.md): the testing package's
+# TestExecution, compiled into every converted test host, calls it, so it is frozen like the named twin entry points;
+# hidden (EditorBrowsable Never), never tier 1.
+go.golib.Goroutine :: method static System.Void RunTwin(System.Action, System.Func<go.golib.GoTask>)

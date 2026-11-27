@@ -294,7 +294,9 @@ public class PublicSurfaceTests
     private static readonly (string Type, string[] Names)[] s_mnFrozenMembers =
     [
         ("go.builtin", ["RunMainꞏtwin", "goǃtwin", "selectꞏtwin", "ᐸꟷꞏtwin", "Goschedꞏtwin"]),
-        ("go.channel`1", ["ᐸꟷꞏtwin"])
+        ("go.channel`1", ["ᐸꟷꞏtwin"]),
+        // The converted test host enters a test's twin through it (DESIGN-mn-test-twin.md; G's ruling 2026-11-27).
+        ("go.golib.Goroutine", ["RunTwin"])
     ];
 
     private static string ShapeSignature(Type type)

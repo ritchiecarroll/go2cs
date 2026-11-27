@@ -74,3 +74,53 @@ today. Defers run inside the twin, where the body's own defers are.
   `builtin.RunTestꞏtwin` beside `RunMainꞏtwin`.
 - **The red row's home** (4.1).
 - **Order:** the train 18 aim stands if this note is ruled on today.
+
+## 6. Rulings, and the cut as built (amended 2026-11-27)
+
+G ruled the same day: "The cut is right; cut it now, for train 18." COORD set the order (the twin cut first, then
+16c's legs, then F2's V8 row). What the rulings changed against sections 2 to 5:
+
+- **The entry's home.** `Goroutine.RunTwin`, hidden (`EditorBrowsable Never`), in PublicSurface's `[mn-frozen]` set
+  (not the ordinary surface that 2(a) proposed): every converted test host compiles `testing`, which calls it. No
+  public `MultiplexingEnabled` flag: `testing` reads the existing `GoScheduler.Enabled`.
+- **The lookup is by stamp, not by name alone.** `TwinOf` takes `<Name>ꞏtwin` in the test method's declaring type
+  with the same parameters, returning `GoTask`, and requires its `[GoTwinOf]` to name that type and that method. It
+  is cached per `MethodInfo`, and runs only when `GoScheduler.Enabled`. A closure (`action.Target` not null) has none.
+- **A fourth fallback.** `RunTwin` is also `body()` when the goroutine is already multiplexed: there is no thread to
+  leave.
+- **The startup rule.** A twinned `Exe` starts through `go.GoTwinEntry`, which go2cs-gen emits only for a Go
+  `main`. A converted test host has none, so a twinned host failed to build (CS1555). `go.lib.twins.targets` sets
+  `GoTwinsTestHost` for a project named `*.tests` that has `go2cs_test_host.cs`, and that project keeps its own
+  `Main`. P6 met the same CS1555 in four module arms (x/sync, conc, pubsub, go-cache; COORD 062609Z).
+- **Scope, narrowed.** Top-level tests only (`m_parent` null), and not a synctest child. Native AOT is not this
+  cut's target: the lookup is reflection, and an AOT-published twinned host was not built or run here.
+
+**As built** (branch `claude/r-mn-test-twin`):
+
+- golib: `RunTwin` and `RunMainTwin` share one core, `RunOnScheduler`. `RunTwin` carries the goroutine's logical
+  state (panic and defer state, `GoThreadState`) with it, as `Unmount` does. Main still starts from the defaults.
+- testing: `Execute` takes the twin path under the conditions above, and sets `m_twinPath`. On that path,
+  `TryEnsureOwner` and `InOwnersBubble` compare `Goroutine.Current` with `m_ownerGoroutine`; otherwise they keep the
+  thread check.
+- The red row lives in `src/tests/PackageTests/TwinTestHost` (`test-twin-test-host.ps1`, six arms). The fallbacks
+  are GolibTests rows in a child process (`GoroutineRunTwinTests`).
+
+**Measured on R-LAPTOP:**
+
+- The red row before the cut: arms A and F failed (no READING line: the scheduler never started). B, C, D and E
+  held.
+- After the cut, every arm holds:
+  - A, TestParks: parks=101.
+  - B, `GO2CS_MN` unset: the scheduler never starts.
+  - C, a test with no twin: runs plain.
+  - D, `t.Fatal` inside the twin: a test FAIL, not an infrastructure error.
+  - E, `t.Fatal` from a started goroutine: still refused.
+  - F, `t.Parallel` and then a park: parks=22.
+- `sensed=` reads n/a until N5's step 3a merges.
+- Each gate was made to fail once, then restored byte-identical:
+
+  | Gate | Plant | Red |
+  |---|---|---|
+  | Build | Pre-cut targets | CS1555 "Could not find 'go.GoTwinEntry'" |
+  | PublicSurface | Drop the RunTwin line | A violation that names it |
+  | RunTwin rows | Drop the locked-thread fallback | Exactly the `locked` row |
