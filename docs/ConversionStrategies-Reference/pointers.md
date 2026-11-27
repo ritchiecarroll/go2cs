@@ -2050,6 +2050,21 @@ A declared element the literal's natural type already matches (`int32` for an IN
 
 That Go-`int` exemption is **narrowed, not absolute**: it holds only while every numeric arm at the declared-`int` position is a literal. When such a position carries BOTH a bare-`0` arm (naturally C# `int`) AND a **non-literal** Go-`int` arm (`i + 1` → C# `nint`) — and the other tuple slots on the non-literal arms are typeless (`default!`), leaving a single naturally-typed literal arm to drive inference — C# infers the delegate's first element as `int`, so the `nint` arm then fails to convert (CS0029/CS1662) and the assignment-inferred delegate is rejected at the invariant use site (CS0407). This is bufio `ExampleScanner_*`'s `onComma := func(…) (advance int, token []byte, err error) { …; return i+1, data[:i], nil; …; return 0, data, ErrFinalToken; }`. The multi-result scan therefore additionally records, per declared-`int` position, whether an int-LITERAL arm and a non-literal `nint`-expression arm both occur; when they do, the explicit `(nint, …)` return type is forced (`(nint advance, slice<byte> token, error err) (…) => …`) and each arm converts in place. The all-literal `return 0, err` shape has no non-literal arm, so it keeps its inferred emission untouched — the corpus is undisturbed (the behavioral corpus is byte-identical <!-- across all 451 projects at landing -->). (Guarded by the `FuncLitNumericTupleReturn` extension — the `mixedIntArms`/`onComma` shape assigned and passed to a typed parameter, alongside the unchanged all-literal `intControl`; the pre-fix converter fails it with CS0029/CS1662/CS1503.)
 
+A **func value** element marks its arm not-fully-typed too: a func literal, a method value (`timer.Stop`) or a named function used as a value (`time.Now`) renders as a C# lambda or method group, and neither has a type of its own inside a tuple literal. A literal whose every arm holds one, declared with `:=` and used as a value (so it is not emitted as a local function), has no arm to infer from (CS8917, then CS8130 at each deconstruction). x/time/rate's `(*Limiter).WaitN` has the shape, `newTimer := func(d time.Duration) (<-chan time.Time, func() bool, func()) { …; return timer.C, timer.Stop, func() {} }`, passed on to `lim.wait`:
+
+<!-- source: src/tests/Behavioral/FuncLitTupleResultInfer/main.cs.target:26-32 -->
+```csharp
+var mk = [GoFunc("main.func1")] (/*<-*/channel<time.Time>, Func<bool>, Action) (time.Duration d) => {
+    var chΔ1 = new channel<time.Time>(1);
+    chΔ1.ᐸꟷ(time.Unix(0, (int64)d));
+    var cʗ2 = cʗ1;
+    return (chΔ1.AsRecvOnly(), cʗ1.Stop, [GoFunc("main.func1.1")] () => {
+        cʗ2.n += 10;
+    });
+```
+
+A literal with another, fully typed arm keeps inferred typing. <!-- 2026-11-27, P6: found by the M:N real-module scout (x/time v0.16.0 rate.cs:269, CS8917); rendersAsTypelessFuncValue in convFuncLit.go. -->Guarded by the `FuncLitTupleResultInfer` behavioral test (the method-value-plus-literal shape passed as a value, and a `(func() int, int)` literal passed as a value).
+
 ## Numeric-returning literals with untyped-constant arms state their return type
 The SINGLE-result numeric sibling of the string arm above <!-- history: added 2026-07-17, the Phase-4 blocker-map row B7b (strings ×3, bytes ×2) -->: a literal with a declared numeric result whose return arm references a **named untyped constant** — strings/bytes TestMap's `maxRune := func(rune) rune { return unicode.MaxRune }`. The const reference emits as a golib `Untyped*` wrapper reference (`Δunicode.MaxRune`, an `UntypedInt` static), and the wrapper's implicit conversions run in **both** directions with every numeric type. So in natural-inference position an all-const arm set infers the wrapper delegate — `var maxRune = (rune r) => Δunicode.MaxRune;` is `Func<rune, UntypedInt>`, rejected at the invariant-delegate `Map(maxRune, …)` call (CS1503) — and a mixed const/typed arm set (TestMap's `encode`, mixing `unicode.MaxRune`/`utf8.RuneSelf` with the `rune` parameter) has no unique best common type at all (CS8917). When any top-level return arm is a bare named untyped-const reference, the lambda states the declared return type explicitly and each arm converts in place:
 <!-- source: src/tests/Behavioral/FuncLitUntypedConstReturn/main.cs:24 -->

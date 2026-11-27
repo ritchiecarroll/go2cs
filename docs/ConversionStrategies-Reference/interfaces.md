@@ -1444,6 +1444,24 @@ return (new relayжReporter(ᴛ1), ᴛ2);
 Elements whose actual type is itself an interface are left alone (structural inheritance
 covers those). Guarded by `CrossPkgUser` (`getReporter` forwarding `makeRelay`).
 
+The same deconstruction converts a **func** element whose type renders as a different delegate
+than the declared result: a defined func type and its unnamed signature, either way round. Two
+delegate types have no implicit conversion, so the tuple cannot convert as a whole (CS0029);
+the element takes golib's nil-safe delegate conversion, as an assignment between the two types
+does:
+
+<!-- source: src/tests/Behavioral/NamedFuncTupleResult/main.cs.target:17-18 -->
+```csharp
+var (ᴛ1, ᴛ2) = named(parent);
+return (ᴛ1, builtin.NilSafeDelegateConversion<Action<error>, cancelFunc>(ᴛ2));
+```
+
+<!-- 2026-11-27, P6: found by the M:N real-module scout; x/sync v0.11.0's errgroup/go120.go returns
+     context.WithCancelCause's (Context, CancelCauseFunc) as (context.Context, func(error)), which
+     panjf2000/ants v2.12.1 requires in production. forwardedReturnNeedsConversion in visitReturnStmt.go. -->
+Guarded by `NamedFuncTupleResult` (a local named func type, the standard library's
+`context.CancelCauseFunc`, and the unnamed-to-named direction, vs Go).
+
 ## A multi-value call spread into a call's parameters in an assignment hoists into temps
 Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.newRange(t.parseControl("range"))`,
 where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner

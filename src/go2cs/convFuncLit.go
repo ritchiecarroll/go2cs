@@ -168,6 +168,31 @@ func (v *Visitor) funcLitReturnArmTypes(funcLit *ast.FuncLit) (armTypes []types.
 	return armTypes, hasSingleReturn, allArmsUntypedNil
 }
 
+// rendersAsTypelessFuncValue reports whether a return-arm element renders as a C# lambda or a method group: a
+// func literal, a method value (`timer.Stop`) or a named function used as a value (`time.Now`). Neither has a
+// type of its own inside a C# tuple literal, so an arm holding one contributes no natural type and cannot fix the
+// delegate of a literal declared with `var` (CS8917, then CS8130 at each deconstruction). x/time/rate's
+// (*Limiter).WaitN has the shape: `newTimer := func(d) (<-chan time.Time, func() bool, func()) { …; return
+// timer.C, timer.Stop, func() {} }`, passed on as a value.
+func (v *Visitor) rendersAsTypelessFuncValue(expr ast.Expr) bool {
+	switch e := ast.Unparen(expr).(type) {
+	case *ast.FuncLit:
+		return true
+	case *ast.SelectorExpr:
+		if sel, ok := v.info.Selections[e]; ok {
+			return sel.Kind() == types.MethodVal || sel.Kind() == types.MethodExpr
+		}
+
+		_, isFunc := v.info.Uses[e.Sel].(*types.Func)
+		return isFunc
+	case *ast.Ident:
+		_, isFunc := v.info.Uses[e].(*types.Func)
+		return isFunc
+	}
+
+	return false
+}
+
 // funcLitAllReturnArmsAreUntypedNil reports whether the literal returns a single value and EVERY
 // one of its own return arms is the untyped nil — the shape whose arms all render `default`, so
 // none contributes a natural type and C# cannot infer the delegate (CS8917).
@@ -1394,6 +1419,11 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 								fullyTyped = false
 								break
 							}
+						}
+
+						if v.rendersAsTypelessFuncValue(res) {
+							fullyTyped = false
+							break
 						}
 
 						if isStringBasicLit(res) {
