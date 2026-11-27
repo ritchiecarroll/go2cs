@@ -56,3 +56,45 @@ func GenericDynamic[T any](f func() T) T { return f() }
 func GenericFinalizer[T any](p *T) {
 	runtime.SetFinalizer(p, func(*T) {})
 }
+
+// The wait-twin reach controls (TestWaitTwinControls). NonGenericParker, above, parks through a channel: not W.
+
+// WaitOnly parks only through sync.WaitGroup.Wait: W.
+func WaitOnly(wg *sync.WaitGroup) { wg.Wait() }
+
+// waitHelper is WaitViaHelper's path to the wait.
+func waitHelper(wg *sync.WaitGroup) { wg.Wait() }
+
+// WaitViaHelper parks only through sync.WaitGroup.Wait, one call down: W.
+func WaitViaHelper(wg *sync.WaitGroup) { waitHelper(wg) }
+
+// CondOnly parks only through sync.Cond.Wait: C. Its c.L is an interface, so Lock and Unlock are dynamic calls and are
+// not followed.
+func CondOnly(c *sync.Cond) {
+	c.L.Lock()
+	c.Wait()
+	c.L.Unlock()
+}
+
+// WaitAndSend parks through sync.WaitGroup.Wait AND a channel send: neither W nor C.
+func WaitAndSend(wg *sync.WaitGroup, ch chan int) {
+	wg.Wait()
+	ch <- 1
+}
+
+// CondLocked waits on a Cond whose lock it holds through a concrete *sync.Mutex: literal reading not C (the lock is
+// another park point), locks-aside reading C.
+func CondLocked(mu *sync.Mutex, c *sync.Cond, ready *bool) {
+	mu.Lock()
+	for !*ready {
+		c.Wait()
+	}
+	mu.Unlock()
+}
+
+// WaitLocked takes a lock and waits on a WaitGroup: literal reading not W, locks-aside reading W.
+func WaitLocked(mu *sync.Mutex, wg *sync.WaitGroup) {
+	mu.Lock()
+	defer mu.Unlock()
+	wg.Wait()
+}

@@ -181,3 +181,58 @@ GOFLAGS=-mod=mod GOPROXY=off go run ./internal/e1census -label x/sync -list -dir
 go run ./internal/e1census -why crypto/x509.checkConstraints std
 go test -count=1 ./internal/e1census
 ```
+
+## Amendment 2026-11-27: the wait-twin reach census (COORD, from G)
+
+G settled the conc question above: conc's gap is the hand-owned `sync.WaitGroup.Wait`, not E1. This block sizes the
+payoff of a hand-written `sync.WaitGroup.Waitꞏtwin` and `sync.Cond.Waitꞏtwin` with the same tool (`-wait`,
+`internal/e1census/wait.go`). Every function is classified by the kinds of park point its static closure reaches: W
+(`WaitGroup.Wait`), C (`Cond.Wait`), L (a mutex or RWMutex lock) and O (a channel op, a select, a range over a channel,
+a go statement, `time.Sleep`). It reads W when it reaches W and nothing else, C likewise, and WC when it reaches only
+both. These are the functions those twins would newly twin.
+
+Two readings. In the LITERAL one a lock is another park point. The LOCKS-ASIDE one sets locks aside, as the generator
+does (a lock never makes its caller a twin). Every `Cond.Wait` caller holds its lock, so only the second reading can see
+a `Cond.Waitꞏtwin`'s reach.
+
+| module (version) | funcs | call WaitGroup.Wait / Cond.Wait directly | literal W / C / WC | locks-aside W / C / WC | exported among locks-aside W, C |
+|---|---:|---:|---:|---:|---:|
+| std (go1.26.11) | 18,867 | 14 / 5 | 0 / 0 / 0 | 1 / 6 / 0 | 1, 0 |
+| golang.org/x/sync v0.24.0 | 18 | 2 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1, 0 |
+| github.com/sourcegraph/conc v0.3.0 | 81 | 2 / 0 | 2 / 0 / 0 | 8 / 0 / 0 | 8, 0 |
+| github.com/cskr/pubsub/v2 v2.0.2 | 19 | 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 0, 0 |
+| github.com/patrickmn/go-cache v2.1.0+incompatible | 75 | 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 0, 0 |
+
+**The functions** (locks-aside; callers = distinct static callers across the load, so an entry point's own callers
+outside the module read 0):
+- std: W `net/http.(*Server).Close`. C `net/http.(*connReader).abortPendingRead` (3 callers), `(*http2pipe).Read` (2),
+  `(*response).finishRequest` (2), `(*conn).hijackLocked` (1), `(*response).sendExpectationFailed` (1),
+  `(*response).Hijack` (0). Every other direct caller of either wait in std also reaches an O park point (a channel op, a
+  select, a range over a channel, a go statement or `time.Sleep`); that is what keeps it out of W, C and WC with locks
+  aside.
+- x/sync: W `errgroup.(*Group).Wait`, the same in both readings.
+- conc: W `conc.(*WaitGroup).Wait` (3 callers) and `WaitAndRecover`, both W in the literal reading too. With locks
+  aside, also `pool.(*Pool).Wait` (3), `(*ErrorPool).Wait` (2), `(*ContextPool).Wait` (1), and `(*ResultPool).Wait`,
+  `(*ResultErrorPool).Wait`, `(*ResultContextPool).Wait`; 3 of the 8 are generic.
+- pubsub and go-cache: none. Every park point they reach is a channel op, a select, a go statement or a lock.
+
+**Controls** (`TestWaitTwinControls`):
+- a function that parks through a channel is not W;
+- `WaitOnly`, and `WaitViaHelper` one call down, are W;
+- `CondOnly` is C, with its `c.L` an interface so its Lock is dynamic;
+- `WaitAndSend` is neither;
+- the converter module's own `golang.org/x/sync/errgroup.(*Group).Wait` is W, since its `g.cancel` is a func-field call;
+- `CondLocked` and `WaitLocked` (a concrete `*sync.Mutex` held) are neither in the literal reading and C and W in the
+  locks-aside one.
+
+Red first: six breaks, each failing its own control, and every restore was byte-identical:
+1. a channel op counted as W;
+2. `WaitGroup.Wait` counted as other;
+3. `Cond.Wait` counted as other;
+4. a dynamic call counted as a park;
+5. kinds not carried through calls;
+6. locks not set aside in the second reading.
+
+**The modules** came from the Go module proxy (`proxy.golang.org`), with every hash checked against `sum.golang.org`.
+`go mod verify` reported all modules verified (owner's ruling 2026-11-27, relayed by COORD). x/sync is the converter
+module's own requirement, the same version as P6's pin.

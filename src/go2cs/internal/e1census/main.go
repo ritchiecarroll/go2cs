@@ -32,6 +32,8 @@ func main() {
 	label := flag.String("label", "", "the row's name in the output")
 	list := flag.Bool("list", false, "also print each parking generic and its first reason")
 	flag.BoolVar(&followRuntime, "runtime", false, "follow calls into package runtime and internal/runtime/... (off: the boundary census.go states)")
+	wait := flag.Bool("wait", false, "print the wait-twin reach row (wait.go): functions parking only through WaitGroup.Wait (W), only through Cond.Wait (C), or only through both (WC)")
+	top := flag.Int("top", 20, "with -wait: how many W, C and WC functions to list, most-called first (0 lists all)")
 	why := flag.String("why", "", "print how the named function (pkgpath.Name or pkgpath.(*Recv).Name) parks, in both readings")
 	flag.Parse()
 
@@ -55,6 +57,27 @@ func main() {
 	fmt.Printf("%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", r.Module, r.Funcs, r.Parkers, r.Generic, r.GenericExported,
 		r.GenericDirect, r.GenericTransitive, r.GenericParkersExported, r.GenericNoParkDynamic, r.GenericNoParkStatic,
 		r.GenericParksNoLocks, r.GenericParksNoLocksExported, r.ExportedFuncs, r.ExportedFuncParkers, r.ExportedFuncParkersNoLocks)
+	if *wait {
+		fmt.Println("wait\treading\tmodule\tfuncs\tparkers\tW\tC\tWC\tW-exported\tC-exported\tWC-exported\tcalls-WaitGroup.Wait\tcalls-Cond.Wait\tW-generic\tC-generic\tWC-generic")
+		for _, reading := range []struct {
+			name  string
+			aside bool
+		}{{"literal", false}, {"locks-aside", true}} {
+			w, waiters := c.waitSummary(*label, reading.aside)
+			fmt.Printf("WAIT\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", reading.name, w.Module, w.Funcs, w.Parkers,
+				w.W, w.C, w.WC, w.WExported, w.CExported, w.WCExported, w.DirectW, w.DirectC, w.WGeneric, w.CGeneric, w.WCGen)
+			for i, x := range waiters {
+				if *top > 0 && i >= *top {
+					break
+				}
+				exp := "unexported"
+				if x.Exported {
+					exp = "exported"
+				}
+				fmt.Printf("WAITER\t%s\t%s\t%s\t%s\tcallers=%d\n", reading.name, x.Class, x.Name, exp, x.Callers)
+			}
+		}
+	}
 	if *why != "" {
 		fmt.Println("WHY all-parks:", strings.Join(c.chain(*why, false), " -> "))
 		fmt.Println("WHY no-locks: ", strings.Join(c.chain(*why, true), " -> "))

@@ -79,6 +79,8 @@ type fn struct {
 	via       *types.Func // the callee that made it park, when it parks only transitively
 	strongs   bool        // parks without counting locks (the generator-aligned reading)
 	viaStrong *types.Func // the callee that made it park in that reading, when only transitively
+	dkinds    uint8       // the kinds of park its own body reaches (wait.go: W, C, O)
+	kinds     uint8       // the kinds its whole static closure reaches, after the fixpoint
 }
 
 // census is the result for one load.
@@ -175,7 +177,7 @@ func build(roots []*packages.Package) *census {
 	}
 
 	for _, f := range c.order {
-		f.parks, f.strongs = f.direct != "", f.strong != ""
+		f.parks, f.strongs, f.kinds = f.direct != "", f.strong != "", f.dkinds
 	}
 	for changed := true; changed; {
 		changed = false
@@ -190,6 +192,10 @@ func build(roots []*packages.Package) *census {
 				}
 				if !f.strongs && g.strongs {
 					f.strongs, f.viaStrong, changed = true, callee, true
+				}
+				if g.kinds&^f.kinds != 0 {
+					f.kinds |= g.kinds
+					changed = true
 				}
 			}
 		}
@@ -206,6 +212,7 @@ func scan(f *fn, info *types.Info) {
 		if f.strong == "" && !lockPrimitives[reason] {
 			f.strong = reason
 		}
+		f.dkinds |= kindOf(reason)
 	}
 	ast.Inspect(f.decl.Body, func(n ast.Node) bool {
 		switch n := n.(type) {
