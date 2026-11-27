@@ -209,7 +209,7 @@ func ab() (A, *B) { return A{"a"}, &B{2} }
 var x, y I = ab()
 ```
 
-<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:45-47 -->
+<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:59-61 -->
 ```csharp
 var (xᴛ1, yᴛ1) = ab();
 I x = xᴛ1;
@@ -218,16 +218,44 @@ I y = new BжI(yᴛ1);
 
 Each result goes through the conversion its own type needs. A pointer to an interface goes through its adapter (`BжI` above). A value of `any` takes the empty-interface boxing. A func value of another func type takes the nil-safe delegate conversion, so a nil func value stays nil:
 
-<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:55-57 -->
+<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:69-71 -->
 ```csharp
 var (fᴛ1, gᴛ1) = funcs();
 Action<error> f = builtin.NilSafeDelegateConversion<Action<error>, cancelFunc>(fᴛ1);
 Action<error> g = builtin.NilSafeDelegateConversion<Action<error>, cancelFunc>(gᴛ1);
 ```
 
-Without this form, the declaration assigned the whole result tuple to the first name and the zero value to the rest. C# accepts that without complaint wherever the tuple converts to `T`, as it does for `any` and other interfaces, so `var a, b any = pair()` printed `{1 x} <nil>` where Go prints `1 x`. A func-typed `T` failed to compile (CS0029). Like the untyped branch above, it is gated to names with no heap box. <!-- 2026-11-27, P6 F6: found from the F2/F3 seat's review probe (`var a, b func(error) = pair()`), confirmed silent for `any` by COORD at 317b273e58; typedTupleElementConversion in visitValueSpec.go. -->
+Without this form, the declaration assigned the whole result tuple to the first name and the zero value to the rest. C# accepts that without complaint wherever the tuple converts to `T`, as it does for `any` and other interfaces, so `var a, b any = pair()` printed `{1 x} <nil>` where Go prints `1 x`. A func-typed `T` failed to compile (CS0029). <!-- 2026-11-27, P6 F6: found from the F2/F3 seat's review probe (`var a, b func(error) = pair()`), confirmed silent for `any` by COORD at 317b273e58; typedTupleElementConversion in visitValueSpec.go. -->
 
-Guarded by `MultiVarDeclTuple`, compared with Go. It covers `any`, an interface whose two results both need a conversion, an interface where one result already has the declared type, func-typed targets including a nil value, and blank names.
+The same form takes Go's comma-ok expressions, which go/types types as a two-result tuple in a declaration exactly as in `:=`. A map index and a channel receive render their two-value forms, and a type assertion renders its tuple as it does anywhere:
+
+<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:99-101 -->
+```csharp
+var (mvᴛ1, mokᴛ1) = m["k", ꟷ];
+any mv = mvᴛ1;
+any mok = mokᴛ1;
+```
+
+A name whose address is taken is declared through its heap box and then assigned from its temporary, so a write through the pointer is seen by the name:
+
+<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:82-85 -->
+```csharp
+var (hᴛ1, kᴛ1) = pair();
+ref var h = ref heap<any>(out var Ꮡh);
+h = hᴛ1;
+any k = kᴛ1;
+```
+
+A typed package-level spec (`var ga, gb any = anys()`) goes through the package-level tuple path described above: the call is evaluated once into a hidden holder field, and each named field reads its component, converted to the declared type. That path takes a call or a type assertion. Go 1.26.11's own compiler fails with an internal compiler error on a package-level call whose results need an interface conversion, so the behavioral test covers only a call whose results already have the declared type:
+
+<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:37-39 -->
+```csharp
+internal static (any, any) tupleᴛ1ʗ = anys();
+internal static any ga = tupleᴛ1ʗ.Item1;
+internal static any gb = tupleᴛ1ʗ.Item2;
+```
+
+Guarded by `MultiVarDeclTuple`, compared with Go. It covers `any`, an interface whose two results both need a conversion, an interface where one result already has the declared type, func-typed targets including a nil value, blank names, an address-taken name, `any` over a non-nil and a nil pointer (a nil pointer is a non-nil interface), the map, type-assertion and channel comma-ok forms, and two package-level specs (a call and a type assertion). <!-- 2026-11-27, P6 F6 fold (COORD 124619Z review): the box, comma-ok, package-level and pointer arms. -->
 
 ---
 

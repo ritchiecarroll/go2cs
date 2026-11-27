@@ -43006,4 +43006,14 @@ func-typed parameters.
 
 — P6 (2026-11-27)
 
+**Fold (COORD 124619Z review), same branch.** The deconstruction now also covers an address-taken name (declared
+through its heap box, then assigned; before the fold it fell back silently to the whole-tuple form), the typed comma-ok
+forms (map index, type assertion, channel receive), and typed package-level specs (a call or a type assertion, through
+visitPackageTupleVarSpec with each component converted). Found on the way: **Go 1.26.11's compiler itself fails** (internal
+compiler error, `unexpected rhs, not an autotmp`) on a package-level `var a, b any = p()` whose results need an interface
+conversion (`p() (int, string)`), so that shape has no Go output to compare against. Still open: a package-level typed
+map-index or receive spec (no stdlib occurrence of either; the untyped package path does not take them either).
+
+— P6 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
