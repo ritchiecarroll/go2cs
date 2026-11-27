@@ -9,12 +9,14 @@
 package main
 
 import (
+	"encoding/json"
 	"go/ast"
 	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -439,4 +441,101 @@ func TestCgoSideTrimMapsAsCmdGoDoes(t *testing.T) {
 			}
 		}
 	}
+}
+
+// cgoSideTrimFixture writes three module shapes under root that a trim re-derived from a directory's name and go.mod
+// maps wrongly (review of 823978ff1a, #1): a module replaced by a local directory, whose go list Version is the
+// required one; a main module in a directory whose name holds an "@"; and a vendored module, whose go list Dir is
+// empty.
+func cgoSideTrimFixture(t *testing.T, root string) {
+	t.Helper()
+
+	replaced := "module example.com/main\n\ngo 1.26\n\nrequire example.com/dep v0.0.0\n\nreplace example.com/dep => ../dep\n"
+	imports := "package main\n\nimport _ \"example.com/dep\"\n\nfunc main() {}\n"
+
+	for path, contents := range map[string]string{
+		"dep/go.mod":    "module example.com/dep\n\ngo 1.26\n",
+		"dep/dep.go":    "package dep\n",
+		"main/go.mod":   replaced,
+		"main/main.go":  imports,
+		"at@dir/go.mod": "module example.com/at\n\ngo 1.26\n",
+		"at@dir/at.go":  "package at\n",
+		"vend/go.mod":   strings.Replace(replaced, "example.com/main", "example.com/vend", 1),
+		"vend/main.go":  imports,
+	} {
+		full := filepath.Join(root, filepath.FromSlash(path))
+
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(full, []byte(contents), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	vendor := exec.Command("go", "mod", "vendor")
+	vendor.Dir = filepath.Join(root, "vend")
+	vendor.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local")
+
+	if out, err := vendor.CombinedOutput(); err != nil {
+		t.Fatalf("go mod vendor: %v\n%s", err, out)
+	}
+}
+
+// The trim maps from the module go list reports, as cmd/go does (work/exec.go, ccompile: m.Dir to m.Path@m.Version,
+// and a vendored module's vendor directory to "vendor"), never from a module re-derived from the package directory's
+// name and go.mod (review of 823978ff1a, #1). Each expected mapping is written from exec.go's rule, not computed.
+func TestCgoSideTrimTakesTheModuleGoListReports(t *testing.T) {
+	root := t.TempDir()
+	cgoSideTrimFixture(t, root)
+
+	slash := func(goos, path string) string {
+		if goos == "windows" {
+			return filepath.Join(`\\_\_`, path)
+		}
+
+		return filepath.Join("/_", path)
+	}
+
+	for _, goos := range []string{"linux", "windows"} {
+		for _, row := range []struct {
+			name, loadDir, pattern string
+			from, to               string
+		}{
+			{"replaced by a local directory", "main", "example.com/dep", filepath.Join(root, "dep"), slash(goos, "example.com/dep@v0.0.0")},
+			{"an @ in the main module's directory", "at@dir", ".", filepath.Join(root, "at@dir"), slash(goos, "example.com/at")},
+			{"vendored", "vend", "example.com/dep", filepath.Join(root, "vend", "vendor"), slash(goos, "vendor")},
+		} {
+			load := cgoLoad{env: append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local"), dir: filepath.Join(root, row.loadDir)}
+			trim := cgoSideTrimForTest(t, load, row.pattern, goos)
+
+			if from, to := trim.mapping(); from != row.from || to != row.to {
+				t.Errorf("%s/%s: maps %q to %q, want %q to %q", goos, row.name, from, to, row.from, row.to)
+			}
+		}
+	}
+}
+
+// cgoSideTrimForTest builds the trim for one package as the conversion builds it.
+func cgoSideTrimForTest(t *testing.T, load cgoLoad, pattern, goos string) cgoSideTrim {
+	t.Helper()
+
+	cmd := exec.Command("go", "list", "-json=Dir,ImportPath", pattern)
+	cmd.Env = load.env
+	cmd.Dir = load.dir
+	out, err := cmd.Output()
+
+	if err != nil {
+		t.Fatalf("go list %s in %s: %v", pattern, load.dir, err)
+	}
+
+	var listed struct{ Dir, ImportPath string }
+
+	if err := json.Unmarshal(out, &listed); err != nil {
+		t.Fatal(err)
+	}
+
+	// As cgoSideBuild builds it at 823978ff1a (cgoSideBuild.go:844).
+	return cgoSideTrim{trimmed: true, goos: goos, packageDir: listed.Dir, importPath: listed.ImportPath}
 }
