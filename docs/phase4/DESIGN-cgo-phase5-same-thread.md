@@ -259,3 +259,14 @@ keys:
 **Still held:** no golib code before F1 lands. r1, r2 and the GO2CS_MN=1 leg run on F1's master. The owner rules
 OQ-1 with this read.
 
+**The owner's ruling on OQ-1 (2026-11-27, relayed by COORD, his words: "Option ii, recommended path").** Callback
+panics take option (ii), on G's five conditions above:
+- one slot on the Goroutine, keyed by the depth of the C call;
+- the slot drained in GoNativeCall.Exit, so a recorded panic is rethrown at every native-call return;
+- the short-circuit taken before ReenterManaged;
+- every exception caught, Goexit included;
+- rows against go run: an unrecovered panic, a recovered panic, and a second callback after a panic.
+
+GoNativeCall.Exit throwing changes the frozen contract. The Phase 5 seat's first commit lands this ruling as a dated
+amendment to DESIGN-native-call-seam, quoting the owner. Code still waits for F1 on master.
+
