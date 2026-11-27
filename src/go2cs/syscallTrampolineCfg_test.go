@@ -33,16 +33,25 @@ import (
 //     VirtualProtect(PAGE_EXECUTE_READ | PAGE_TARGETS_NO_UPDATE), then SetProcessValidCallTargets for offset 0 only.
 //   - both:       rw-narrow with offsets 0 and 16 marked. Recorded, not asserted: whether SetProcessValidCallTargets
 //     takes effect at all.
+//   - gpa:        rw-narrow with SetProcessValidCallTargets called through GetProcAddress's pointer, a CFG-checked
+//     indirect call, where every other arm imports it directly. Recorded, not asserted. (Reading 2, 46081898703: an
+//     indirect call to it ended the process with the CFG fast fail before it returned.)
 //
 // In every arm page+0 must be callable. In a narrowed arm a call to page+16 must end the process with the CFG fast
 // fail (STATUS_STACK_BUFFER_OVERRUN). The row reads NOT MEASURED where the C compiler cannot build with CFG
 // (-mguard=cf: clang, llvm-mingw's on the converter-cgo leg) or the process does not run with CFG on.
-const cfgProbeSource = `#include <windows.h>
+const cfgProbeSource = `#define SetProcessValidCallTargets go2cs_hidden_SetProcessValidCallTargets
+#include <windows.h>
 #include <stdio.h>
 #include <string.h>
+#undef SetProcessValidCallTargets
 
 typedef struct { ULONG_PTR Offset; ULONG_PTR Flags; } go2cs_cfg_target;
 typedef BOOL (WINAPI *go2cs_set_targets)(HANDLE, PVOID, SIZE_T, ULONG, go2cs_cfg_target *);
+
+/* Imported directly (an import library the row builds), as the C# side's [LibraryImport] binds it: the "gpa" arm
+   calls it through GetProcAddress's pointer instead, a CFG-checked indirect call. */
+__declspec(dllimport) BOOL WINAPI SetProcessValidCallTargets(HANDLE, PVOID, SIZE_T, ULONG, go2cs_cfg_target *);
 typedef BOOL (WINAPI *go2cs_get_policy)(HANDLE, int, PVOID, SIZE_T);
 typedef int (*go2cs_entry)(void);
 
@@ -53,7 +62,9 @@ static void fail(const char *step) { printf("step-failed: %s %lu\n", step, GetLa
 int main(int argc, char **argv) {
     const char *arm = argc > 1 ? argv[1] : "";
     HMODULE kernelbase = LoadLibraryW(L"kernelbase.dll");
-    go2cs_set_targets set_targets = (go2cs_set_targets)GetProcAddress(kernelbase, "SetProcessValidCallTargets");
+    go2cs_set_targets set_targets = strcmp(arm, "gpa") == 0
+        ? (go2cs_set_targets)GetProcAddress(kernelbase, "SetProcessValidCallTargets")
+        : SetProcessValidCallTargets;
     go2cs_get_policy get_policy = (go2cs_get_policy)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetProcessMitigationPolicy");
     DWORD policy = 0, old;
     SYSTEM_INFO si;
@@ -90,6 +101,8 @@ int main(int argc, char **argv) {
         /* "both" marks offset 16 too: the instrument's check that SetProcessValidCallTargets takes effect */
         go2cs_cfg_target targets[2] = { { 0, 1 /* CFG_CALL_TARGET_VALID */ }, { 16, 1 } };
         ULONG count = strcmp(arm, "both") == 0 ? 2 : 1;
+        printf("calling SetProcessValidCallTargets\n");
+        fflush(stdout);
         if (set_targets == NULL || !set_targets(GetCurrentProcess(), page, si.dwPageSize, count, targets)) fail("SetProcessValidCallTargets");
         printf("targets: %lu, flags %llu\n", count, (unsigned long long)targets[0].Flags);
         fflush(stdout);
@@ -118,7 +131,17 @@ func TestCgoSyscallTrampolinePageCallTargets(t *testing.T) {
 	source := writeCgoFixture(t, dir, "cfgprobe.c", cfgProbeSource)
 	probe := filepath.Join(dir, "cfgprobe.exe")
 
-	args := append(slices.Clone(toolchain.cc[1:]), "-O1", "-mguard=cf", "-o", probe, source)
+	// The import library for kernelbase's SetProcessValidCallTargets, from the dlltool beside the compiler.
+	dlltool := strings.TrimSuffix(toolchain.cc[0], filepath.Ext(toolchain.cc[0]))
+	dlltool = strings.TrimSuffix(dlltool, "clang") + "dlltool" + filepath.Ext(toolchain.cc[0])
+	def := writeCgoFixture(t, dir, "kernelbase.def", "LIBRARY kernelbase.dll\nEXPORTS\nSetProcessValidCallTargets\n")
+	implib := filepath.Join(dir, "libgo2cskernelbase.a")
+
+	if out, err := exec.Command(dlltool, "-m", "i386:x86-64", "-d", def, "-l", implib).CombinedOutput(); err != nil {
+		t.Skipf("NOT MEASURED: no dlltool beside %s to import SetProcessValidCallTargets (%v)\n%s", toolchain.cc[0], err, out)
+	}
+
+	args := append(slices.Clone(toolchain.cc[1:]), "-O1", "-mguard=cf", "-o", probe, source, implib)
 
 	if out, err := exec.Command(toolchain.cc[0], args...).CombinedOutput(); err != nil {
 		t.Skipf("NOT MEASURED: %v cannot build with Control Flow Guard (-mguard=cf): %v\n%s", toolchain.cc, err, out)
@@ -141,6 +164,11 @@ func TestCgoSyscallTrampolinePageCallTargets(t *testing.T) {
 			return "", 0
 		}
 	}
+
+	// Recorded, not asserted: whether SetProcessValidCallTargets takes effect at all (offsets 0 and 16 marked), and
+	// whether calling it through GetProcAddress's pointer passes CFG.
+	run("both")
+	run("gpa")
 
 	text, code := run("default")
 
