@@ -17,6 +17,8 @@
 // - initDarwinArm64FeatureDetection: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs cpuinit (its
 //   cpu.Initialize(env) call) and getGodebugEarly (GODEBUG from the environment). Same behaviour, go2cs's own
 //   shape: a module initializer that reads the process environment.
+// - GoDarwinArm64OptionsProbe: original go2cs code, a test probe. It calls the converted doinit and processOptions
+//   and ports no Go function.
 
 // darwin/arm64's osInit: cpu_arm64_darwin.go, displaced for the darwin/arm64 TARGET alone
 // (manualConversionFuncs["internal/cpu"]["osInit"], src/go2cs/manualTypeOperations.go), so the converted
@@ -45,7 +47,8 @@
 // processOptions: no GODEBUG option names it, and osInit leaves it false. Without this initializer every
 // cpu.ARM64 flag of this flavour read false on Apple silicon, and the AES hash, crypto and bytealg took the
 // fallbacks Go does not take there (P6's D5 golib-tests reading on osx-arm64, 2026-11-25; COORD ruled the fold
-// into D2). src/go2cs/cpuStartupFlavours_test.go requires such an initializer in every flavour.
+// into D2). src/go2cs/cpuStartupFlavours_test.go requires such an initializer in every flavour, and GolibTests'
+// DarwinArm64CpuStartupTests reads it on Apple silicon through GoDarwinArm64OptionsProbe below.
 [module: go.GoManualConversion]
 
 namespace go.@internal;
@@ -62,6 +65,34 @@ partial class cpu_package {
 [ModuleInitializer]
 internal static void initDarwinArm64FeatureDetection() {
     Initialize(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
+}
+
+/// <summary>
+/// GolibTests' probe (DarwinArm64CpuStartupTests, the darwin twin of linux-arm64's GoLinuxArm64OptionsProbe): applies
+/// <paramref name="godebug"/> exactly as start-up does. The converted doinit registers cpu_arm64.go's option table and
+/// calls osInit above; processOptions applies the GODEBUG options. The probe returns each option's name and resulting
+/// flag, then restores the flags and the table. Re-running doinit gives a fresh table, because processOptions leaves its
+/// Specified/Enable marks on the options it read.
+/// </summary>
+public static (string name, bool enabled)[] GoDarwinArm64OptionsProbe(string godebug) {
+    ARM64ᴛ1 saved = ARM64;
+    slice<option> savedOptions = options;
+
+    try {
+        doinit();
+        processOptions(godebug);
+
+        (string, bool)[] result = new (string, bool)[len(options)];
+
+        for (int i = 0; i < result.Length; i++)
+            result[i] = (options[i].Name.ToString(), options[i].Feature.Value);
+
+        return result;
+    }
+    finally {
+        ARM64 = saved;
+        options = savedOptions;
+    }
 }
 
 internal static void osInit() {

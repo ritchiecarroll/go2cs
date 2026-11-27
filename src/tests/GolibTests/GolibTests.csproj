@@ -183,10 +183,17 @@
     <Compile Remove="LinuxArm64RuntimeSyscallFlavourTests.cs" />
   </ItemGroup>
 
+  <!-- internal/cpu's darwin/arm64 start-up (darwin-arm64/cpu_arm64_darwin_impl.cs) and its options probe, which only
+       the darwin/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoTargetArch)' != 'arm64'">
+    <Compile Remove="DarwinArm64CpuStartupTests.cs" />
+  </ItemGroup>
+
   <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).
        - InternalCpuGodebugTests drives internal/cpu's amd64/ hand-owns (cpu_x86_impl.cs, cpu_arm64_process_impl.cs)
-         through their probes. The linux/arm64 flavour starts internal/cpu in linux-arm64/cpu_arm64_hwcap_impl.cs,
-         which has no probe yet.
+         through their probes. The arm64 flavours start internal/cpu elsewhere, each read by its own test file:
+         linux/arm64 in linux-arm64/cpu_arm64_hwcap_impl.cs (LinuxArm64CpuStartupTests), darwin/arm64 in
+         darwin-arm64/cpu_arm64_darwin_impl.cs (DarwinArm64CpuStartupTests).
        - LinuxAmd64NetpollFlavourTests names SYS_EPOLL_WAIT, which only amd64's table has; it is also linux-only. -->
   <ItemGroup Condition="'$(GoTargetArch)' == 'arm64'">
     <Compile Remove="InternalCpuGodebugTests.cs" />
