@@ -154,8 +154,8 @@ function Get-CorpusFlavorArch {
 # read darwin/amd64 while every instrument that dot-sources this file would have built darwin/arm64 (one leg, two
 # flavours: D3's red control on the stand-in passed on osx-arm64 because the leg built darwin/arm64). D5 binds the
 # osx-arm64 leg's GoTargetArch to arm64 (os-matrix.yml, plan) and removes the entry in the same cut, so an Apple-silicon
-# host builds its own flavour, darwin/arm64. The sweep's own pin ($SweepInterimPlatformPins, _roster.ps1) is a
-# separate fact and lasts to D7.
+# host builds its own flavour, darwin/arm64. The sweep's own pin ($SweepInterimPlatformPins, _roster.ps1) was a
+# separate fact and lasted to D7, which emptied it.
 $HostFlavorArchInterimPins = @{}
 
 # The ARCH of the corpus flavor this host's instruments build: Get-CorpusFlavorArch for the host, unless the host is
@@ -175,8 +175,8 @@ function Get-HostFlavorArch {
 # flavor was CONVERTED at, never the host's: a linux/arm64 host gets `arm64`, and so, since D5, does an
 # Apple-silicon host (darwin/arm64). 'amd64' is excluded by the value, exactly as
 # 'windows' is for GoTargetOS: it IS the csproj default. A pre-set variable or an explicit `-p:GoTargetArch`
-# still wins: run-validated-sweep.ps1's interim pin re-sets both variables to darwin/amd64 on an Apple-silicon
-# host until the bank re-reads the osx-arm64 cells (D7; Resolve-SweepPlatforms in _roster.ps1).
+# still wins: run-validated-sweep.ps1's -Platforms re-sets both variables to the target it names
+# (Resolve-SweepPlatforms in _roster.ps1; until D7 an interim pin did so to darwin/amd64 on an Apple-silicon host).
 if ([string]::IsNullOrEmpty($env:GoTargetArch) -and $HostGoos) {
     $hostFlavorArch = Get-HostFlavorArch -Goos $HostGoos -Goarch $HostGoarch
 

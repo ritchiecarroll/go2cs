@@ -254,14 +254,15 @@ function Get-SweepTargetGoarch {
     return 'amd64'
 }
 
-# THE darwin/arm64 INTERIM PIN (docs/phase4/DESIGN-darwin-arm64-flavour.md section 6, ruling R5; D7 REMOVES IT).
-# From the seat that adds darwin/arm64 to the corpus universe (D2) until the bank re-reads the osx-arm64 cells on that
-# flavour (D7), every banked darwin row still describes the darwin/amd64 flavour. Unpinned, a sweep on an Apple-silicon
-# host would convert and build each row at darwin/arm64 (the converter's -tests default follows the universe,
-# testsCorpusArch.go) and compare it with counts banked on darwin/amd64, so its reds would read as regressions. One
-# entry per host target that is pinned: the key is the host's GOOS/GOARCH, the value the -Platforms the sweep then
-# runs with. It holds before D2 as well, where it restates what the converter already does on that host.
-$SweepInterimPlatformPins = @{ 'darwin/arm64' = 'darwin/amd64' }
+# SWEEP INTERIM PINS: a host target whose sweep must convert and build its rows at another target than its own, for a
+# window a ruling names. One entry per pinned host: the key is the host's GOOS/GOARCH, the value the -Platforms the sweep
+# then runs with. EMPTY since D7 (docs/phase4/DESIGN-darwin-arm64-flavour.md section 7). From the seat that added
+# darwin/arm64 to the corpus universe (D2) to D7 it held 'darwin/arm64' = 'darwin/amd64' (section 6, ruling R5): every
+# banked darwin row described the darwin/amd64 flavour, so an Apple-silicon sweep converting at darwin/arm64 (the
+# converter's -tests default follows the universe, testsCorpusArch.go) would have read each difference as a
+# regression. D7 re-banks the osx-arm64 cells on darwin/arm64 and removes the entry in the same seat, so an
+# Apple-silicon host sweeps its own flavour, as every other host does.
+$SweepInterimPlatformPins = @{}
 
 <#
 .SYNOPSIS

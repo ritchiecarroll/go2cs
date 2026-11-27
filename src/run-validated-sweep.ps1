@@ -141,16 +141,17 @@ param(
     # no config: it is added after the execution args on either path below.
     [switch] $PublishBinlog,
     # Threads the converter's -test-oracle-goarch to every row: the GOARCH each row's ORACLE `go test` runs at, when it
-    # must differ from the target's. The osx-arm64 legs pass arm64: the darwin corpus is converted for darwin/amd64 and
-    # its converted host runs as a native arm64 process there, so an oracle at the target's arch ran under Rosetta and
-    # read Rosetta's behaviour as the package's (COORD's osx-arm64 oracle seat, ruling (A)). Empty, the default, adds
-    # nothing to any row's arguments.
+    # must differ from the target's. The osx-arm64 legs pass arm64: until D7 of docs/phase4/DESIGN-darwin-arm64-flavour.md
+    # their rows were converted for darwin/amd64 while the converted host ran as a native arm64 process, so an oracle at
+    # the target's arch ran under Rosetta and read Rosetta's behaviour as the package's (COORD's osx-arm64 oracle seat,
+    # ruling (A)). Since D7 those rows convert at darwin/arm64 and the value restates the target's own arch. Empty, the
+    # default, adds nothing to any row's arguments.
     [string] $TestOracleGoarch = '',
     # Threads the converter's -platforms to every row: the ONE os/arch target each row converts at and its test host
     # builds at. It must be a target of the corpus universe on this host's GOOS (Resolve-SweepPlatforms, _roster.ps1).
-    # Empty, the default, takes the interim pin where one applies to this host ($SweepInterimPlatformPins: an
-    # Apple-silicon host runs darwin/amd64 until D7 of docs/phase4/DESIGN-darwin-arm64-flavour.md re-banks the osx-arm64
-    # cells), and otherwise adds nothing to any row's arguments.
+    # Empty, the default, takes the interim pin where one applies to this host ($SweepInterimPlatformPins, EMPTY since
+    # D7 of docs/phase4/DESIGN-darwin-arm64-flavour.md re-banked the osx-arm64 cells on darwin/arm64), and otherwise adds
+    # nothing to any row's arguments.
     [string] $Platforms = '',
     # DIAGNOSTIC ONLY: a regex handed to the converter's -test-filter, which filters BOTH sides of the compare (go test
     # -run and the converted host --run). The os-matrix stack-probe stage runs one test of one row this way, so a hang
@@ -208,7 +209,7 @@ if ($freeGB -lt 25) {
 # reads to decide which OS's expectation this run is measuring against.
 . (Join-Path $PSScriptRoot '_roster.ps1')
 
-# ---- the row target (-Platforms, and the darwin/arm64 interim pin) --------------------------------
+# ---- the row target (-Platforms, and any interim pin) ----------------------------------------------
 # Resolved once, after _paths.ps1 has pinned GoTargetOS/GoTargetArch to the host's flavour: a resolved target
 # re-pins both to ITSELF, so the roster expectation (Get-SweepTargetGoos/-Goarch below) and every child dotnet
 # build read the flavour the rows are converted at, never the host's. Empty leaves both as _paths.ps1 set them.
@@ -216,7 +217,7 @@ $Platforms = Resolve-SweepPlatforms -Explicit $Platforms -HostGoos $HostGoos -Ho
 if ($Platforms) {
     $env:GoTargetOS = $Platforms.Split('/')[0]
     $env:GoTargetArch = $Platforms.Split('/')[1]
-    $pinNote = if ($Platforms -ceq $SweepInterimPlatformPins["$HostGoos/$HostGoarch"]) { ' (the interim pin for this host; D7 removes it)' } else { '' }
+    $pinNote = if ($Platforms -ceq $SweepInterimPlatformPins["$HostGoos/$HostGoarch"]) { ' (the interim pin for this host)' } else { '' }
     Write-Host "platforms: every row converts and builds at $Platforms$pinNote"
 }
 

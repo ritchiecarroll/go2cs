@@ -2220,7 +2220,7 @@ jobs:
           }
 
           $log = Join-Path $art "stack-probe-$goos-$rid.log"
-          # The sweep pins osx-arm64 rows to darwin/amd64 by itself until D7 (Resolve-SweepPlatforms, src/_roster.ps1).
+          # The sweep converts each row at the leg's own flavour (darwin/arm64 on osx-arm64 since D7; Resolve-SweepPlatforms, src/_roster.ps1).
           & ./src/run-validated-sweep.ps1 -Filter $row -Exact -TestTimeout $env:SWEEP_TEST_TIMEOUT -TestOracleGoarch $oracleGoarch -TestFilter $env:PROBE_TEST -IgnoreDiskPreflight *>&1 |
               Tee-Object -FilePath $log
           $sweepExit = $LASTEXITCODE
@@ -3011,13 +3011,14 @@ jobs:
           $sweepExit = 0
           $skipBuild = $false
 
-          # The osx-arm64 runner converts the darwin/amd64 corpus and runs its converted host as a NATIVE arm64 process,
-          # so its oracle runs at arm64 too, not as amd64 under Rosetta (COORD's osx-arm64 oracle seat, ruling (A); the
-          # converter's -test-oracle-goarch). Every other leg's host runs at the target's own arch: nothing is passed.
+          # The osx-arm64 runner's converted host runs as a NATIVE arm64 process, so its oracle runs at arm64 too, never as
+          # amd64 under Rosetta (COORD's osx-arm64 oracle seat, ruling (A); the converter's -test-oracle-goarch). Until D7 of
+          # docs/phase4/DESIGN-darwin-arm64-flavour.md that leg converted the darwin/amd64 corpus and this value differed from
+          # the target's arch; since D7 it converts darwin/arm64 and the value restates it. Every other leg passes nothing.
           $oracleGoarch = if ($env:RID -eq 'osx-arm64') { 'arm64' } else { '' }
-          # The row TARGET is the sweep's own (-Platforms; Resolve-SweepPlatforms, src/_roster.ps1): on osx-arm64 it pins
-          # darwin/amd64, the flavour every darwin row is banked on, until D7 of docs/phase4/DESIGN-darwin-arm64-flavour.md
-          # re-banks the osx-arm64 cells and removes the pin. Each row's verdict line names it ([platforms=...]).
+          # The row TARGET is the sweep's own (Resolve-SweepPlatforms, src/_roster.ps1): no -Platforms is passed, so each leg
+          # converts at its own flavour, darwin/arm64 on osx-arm64 since D7 removed the interim pin to darwin/amd64. The
+          # sweep's header names it ("target OS darwin (flavor arch ...)") and its timing file records the goarch.
           $failedRows = [System.Collections.Generic.List[string]]::new()
 
           foreach ($name in $names) {

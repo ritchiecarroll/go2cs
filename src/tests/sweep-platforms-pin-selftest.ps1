@@ -1,19 +1,19 @@
 <#
 .SYNOPSIS
-    Guards the sweep's row target: Resolve-SweepPlatforms and the darwin/arm64 interim pin.
+    Guards the sweep's row target: Resolve-SweepPlatforms and its interim-pin table, EMPTY since D7.
 
 .DESCRIPTION
     run-validated-sweep.ps1 converts and builds every row at the target Resolve-SweepPlatforms
     (src/_roster.ps1) answers: an explicit -Platforms, or the interim pin for this host
-    ($SweepInterimPlatformPins), or nothing. The pin is what keeps an Apple-silicon sweep on the
-    darwin/amd64 flavour, whose counts every darwin row is banked on, from the seat that adds
-    darwin/arm64 to the corpus universe (D2) until the bank re-reads the osx-arm64 cells (D7)
-    (docs/phase4/DESIGN-darwin-arm64-flavour.md section 6, ruling R5). Getting it wrong in one
-    direction makes every row of a hosted macos-15 sweep read a regression; in the other it lets a
-    sweep convert a row at a target no corpus flavour serves. Neither needs a Mac to exercise, so
-    it is exercised HERE, over the function and the table, with the host passed in.
-
-    The table assertion is the reminder: D7 removes the pin, and this file changes with it.
+    ($SweepInterimPlatformPins), or nothing. From the seat that added darwin/arm64 to the corpus
+    universe (D2) to D7, the table held one pin, darwin/arm64 -> darwin/amd64, which kept an
+    Apple-silicon sweep on the flavour every darwin row was banked on
+    (docs/phase4/DESIGN-darwin-arm64-flavour.md section 6, ruling R5). D7 re-banked the osx-arm64
+    cells on darwin/arm64 and emptied the table in the same seat (section 7), so an Apple-silicon
+    host now sweeps its own flavour. The table assertion holds it empty: a pin added later is a
+    ruling, and this file changes with it. The pin branch of the function is still exercised, with
+    a table passed in, so a future pin finds it working. None of it needs a Mac, so it is exercised
+    HERE, over the function and the table, with the host passed in.
 
         ./sweep-platforms-pin-selftest.ps1
 
@@ -43,25 +43,34 @@ $four = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64')
 $five = $four + @('darwin/arm64')
 
 Write-Host 'the interim pin table'
-Check 'one entry, darwin/arm64 -> darwin/amd64 (D7 removes it, and this assertion with it)' `
-    ($SweepInterimPlatformPins.Count -eq 1 -and $SweepInterimPlatformPins['darwin/arm64'] -ceq 'darwin/amd64') `
+Check 'empty since D7 (the darwin/arm64 -> darwin/amd64 pin came off with the osx-arm64 re-bank)' `
+    ($SweepInterimPlatformPins -is [hashtable] -and $SweepInterimPlatformPins.Count -eq 0) `
     "table: $(($SweepInterimPlatformPins.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ', ')"
 
-Write-Host 'no -Platforms'
-foreach ($u in @(@{ Name = 'four'; List = $four }, @{ Name = 'five'; List = $five })) {
-    $r = Resolve @{ Explicit = ''; HostGoos = 'darwin'; HostGoarch = 'arm64'; Universe = $u.List }
-    Check "an Apple-silicon host takes the pin at the $($u.Name)-target universe" ($r.Value -ceq 'darwin/amd64') "got '$($r.Value)' $($r.Error)"
-}
-foreach ($h in @(@('darwin', 'amd64'), @('linux', 'amd64'), @('linux', 'arm64'), @('windows', 'amd64'))) {
+Write-Host 'no -Platforms, the table as it stands'
+foreach ($h in @(@('darwin', 'arm64'), @('darwin', 'amd64'), @('linux', 'amd64'), @('linux', 'arm64'), @('windows', 'amd64'))) {
     $r = Resolve @{ Explicit = ''; HostGoos = $h[0]; HostGoarch = $h[1]; Universe = $five }
+    Check "a $($h[0])/$($h[1]) host passes nothing" ($r.Value -ceq '' -and -not $r.Error) "got '$($r.Value)' $($r.Error)"
+}
+
+Write-Host 'no -Platforms, a pin passed in (the branch a future pin takes)'
+$pin = @{ 'darwin/arm64' = 'darwin/amd64' }
+foreach ($u in @(@{ Name = 'four'; List = $four }, @{ Name = 'five'; List = $five })) {
+    $r = Resolve @{ Explicit = ''; HostGoos = 'darwin'; HostGoarch = 'arm64'; Universe = $u.List; Pins = $pin }
+    Check "a pinned host takes its pin at the $($u.Name)-target universe" ($r.Value -ceq 'darwin/amd64') "got '$($r.Value)' $($r.Error)"
+}
+foreach ($h in @(@('darwin', 'amd64'), @('linux', 'arm64'))) {
+    $r = Resolve @{ Explicit = ''; HostGoos = $h[0]; HostGoarch = $h[1]; Universe = $five; Pins = $pin }
     Check "a $($h[0])/$($h[1]) host passes nothing (near-miss of the pin)" ($r.Value -ceq '' -and -not $r.Error) "got '$($r.Value)' $($r.Error)"
 }
+$r = Resolve @{ Explicit = 'darwin/arm64'; HostGoos = 'darwin'; HostGoarch = 'arm64'; Universe = $five; Pins = $pin }
+Check 'an explicit -Platforms wins over a pin' ($r.Value -ceq 'darwin/arm64') "got '$($r.Value)' $($r.Error)"
 $r = Resolve @{ Explicit = ''; HostGoos = ''; HostGoarch = ''; Universe = $five }
 Check 'a host this harness cannot name passes nothing' ($r.Value -ceq '' -and -not $r.Error) "got '$($r.Value)' $($r.Error)"
 
 Write-Host 'an explicit -Platforms'
 $r = Resolve @{ Explicit = 'darwin/arm64'; HostGoos = 'darwin'; HostGoarch = 'arm64'; Universe = $five }
-Check 'wins over the pin once darwin/arm64 is in the universe (D7''s re-read)' ($r.Value -ceq 'darwin/arm64') "got '$($r.Value)' $($r.Error)"
+Check 'names darwin/arm64 on an Apple-silicon host' ($r.Value -ceq 'darwin/arm64') "got '$($r.Value)' $($r.Error)"
 $r = Resolve @{ Explicit = ' darwin/amd64 '; HostGoos = 'darwin'; HostGoarch = 'amd64'; Universe = $four }
 Check 'is trimmed' ($r.Value -ceq 'darwin/amd64') "got '$($r.Value)' $($r.Error)"
 $r = Resolve @{ Explicit = 'darwin/arm64'; HostGoos = 'darwin'; HostGoarch = 'arm64'; Universe = $four }
