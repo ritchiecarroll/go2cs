@@ -7,12 +7,18 @@ package main
 import (
 	"fmt"
 
+	"ForeignEmbedPromotedPointer/fam/left"
 	"ForeignEmbedPromotedPointer/lib"
 )
 
 type U struct {
 	lib.T
 	label string
+}
+
+// W embeds lib.V, which embeds lib.Inner: Tag is promoted two hops deep.
+type W struct {
+	lib.V
 }
 
 func main() {
@@ -30,4 +36,20 @@ func main() {
 	// A value U also satisfies Named, through the value adapter.
 	var byValue lib.Named = U{label: "v"}
 	fmt.Println(byValue.Name())
+
+	// A promoted method with arguments and two results, through the pointer adapter.
+	var adder lib.Adder = u
+	sum, err := adder.Add(3, 4)
+	fmt.Println(sum, err)
+	sum, err = adder.Add(50, 50)
+	fmt.Println(sum, err, u.Inc())
+
+	// Two hops: W -> lib.V -> lib.Inner.
+	w := &W{}
+	w.SetTag("w")
+	var tagger lib.Tagger = w
+	fmt.Println(tagger.Tag())
+
+	// From a package one namespace down: a sibling's embed and an ancestor namespace's embed.
+	fmt.Println(left.Right(), left.Lib())
 }

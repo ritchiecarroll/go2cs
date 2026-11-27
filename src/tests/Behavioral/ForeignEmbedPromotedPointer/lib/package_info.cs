@@ -39,9 +39,12 @@ using System.Runtime.CompilerServices;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Inner, Tagger>(Pointer = true)]
+[assembly: GoImplement<T, Adder>(Pointer = true)]
 [assembly: GoImplement<T, Counter>(Pointer = true)]
 [assembly: GoImplement<T, Named>(Pointer = true)]
 [assembly: GoImplement<T, Named>]
+[assembly: GoImplement<bigError, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -55,7 +58,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABEsloKC")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABEsloKCAAYSgpSCptqUAAkagg==")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignEmbedPromotedPointer;
@@ -72,9 +75,14 @@ public static partial class lib_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct bigError {}
+    public partial interface Adder {}
     public partial interface Counter {}
     public partial interface Named {}
+    public partial interface Tagger {}
+    public partial struct Inner {}
     public partial struct T {}
+    public partial struct V {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -94,7 +102,9 @@ public static partial class lib_package
 // in Go's declaration order.
 
 // <MethodHolders>
+[GoMethodHost(typeof(lib_package.Inner)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛInner;
 [GoMethodHost(typeof(lib_package.T)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛT;
+[GoMethodHost(typeof(lib_package.bigError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛbigError;
 // </MethodHolders>
 
 // A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
@@ -102,8 +112,16 @@ public static partial class lib_package
 // forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
 // the body's frame as the Go method.
 // <MethodForwarders>
+partial class libᴛInner {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetTag(this ref Inner i, @string tag) => lib_package.SetTag⁔(ref i, tag);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Tag(this ref Inner i) => lib_package.Tag⁔(ref i);
+}
 partial class libᴛT {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this T t) => lib_package.Name⁔(t);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Inc(this ref T t) => lib_package.Inc⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Add(this ref T t, nint a, nint b) => lib_package.Add⁔(ref t, a, b);
+}
+partial class libᴛbigError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this bigError _) => lib_package.Error⁔(_);
 }
 // </MethodForwarders>

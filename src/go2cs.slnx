@@ -611,6 +611,8 @@
     <Project Path="tests/Behavioral/ForeignDefinedConversion/ForeignDefinedConversion.csproj" />
     <Project Path="tests/Behavioral/ForeignDefinedConversion/levellib/ForeignDefinedConversion.levellib.csproj" />
     <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/ForeignEmbedPromotedPointer.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/fam/left/ForeignEmbedPromotedPointer.fam.left.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/fam/right/ForeignEmbedPromotedPointer.fam.right.csproj" />
     <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/lib/ForeignEmbedPromotedPointer.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/ForeignIfaceFieldPointer.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/addrlib/ForeignIfaceFieldPointer.addrlib.csproj" />

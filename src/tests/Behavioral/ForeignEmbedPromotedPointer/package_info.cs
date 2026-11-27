@@ -36,9 +36,11 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<U, go.ForeignEmbedPromotedPointer.lib_package.Adder>(Pointer = true)]
 [assembly: GoImplement<U, go.ForeignEmbedPromotedPointer.lib_package.Counter>(Pointer = true)]
 [assembly: GoImplement<U, go.ForeignEmbedPromotedPointer.lib_package.Named>(Pointer = true)]
 [assembly: GoImplement<U, go.ForeignEmbedPromotedPointer.lib_package.Named>]
+[assembly: GoImplement<W, go.ForeignEmbedPromotedPointer.lib_package.Tagger>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -56,7 +58,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0kgpaCloKCloI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMwgpaCloKCloKWgoKCgpaCgoKW")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -73,6 +75,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     public partial struct U {}
+    public partial struct W {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -82,6 +85,8 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸForeignEmbedPromotedPointerꓸfamꓸleft() => builtin.initPackage(typeof(ForeignEmbedPromotedPointer.fam.left_package));
+    [GoInit] internal static void initᴛᴛimportꓸForeignEmbedPromotedPointerꓸlib() => builtin.initPackage(typeof(ForeignEmbedPromotedPointer.lib_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
