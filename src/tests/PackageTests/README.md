@@ -31,6 +31,24 @@ validation-pack block already uses for the same population — `rewriteOfCorePac
 output-location test no fixture satisfies — but changing that gate risks silently un-publishing a
 real roster row's proof page, so it is a ruling for the roster owner rather than a fixture-side fix.
 
+# `TwinTestHost`: the test host runs a test's twin under M:N
+
+`TwinTestHost` is `ConvertedTestHarness`'s sibling for the M:N twin path (docs/phase4/DESIGN-mn-test-twin.md). It is
+a separate module because its test host is built WITH TWINS (`GoTwinsFor` names the production and the test project)
+and run with `GO2CS_MN=1`, which `ConvertedTestHarness` must never be. `test-twin-test-host.ps1` converts it with
+`go2cs -tests`, builds the twinned host, runs it once per test and reads the scheduler's `READING` line
+(`GO2CS_MN_READING=1`). With no twin path the scheduler never starts and prints no `READING` line, which the script
+reports as zero parks.
+
+```text
+pwsh src/tests/PackageTests/TwinTestHost/test-twin-test-host.ps1 [-Go2cs <converter>]
+```
+
+Six arms: a parking test runs as its twin (parks > 0) and stays plain with `GO2CS_MN` unset; a test with no twin runs
+plain; `t.Fatal` inside the twin fails the test, not the host; `t.Fatal` from a goroutine the test started is still
+refused; and a `t.Parallel` test runs as its twin, its `sensed=` count reported. Two of the tests fail on purpose,
+under `go test` too. `convert` and `build` publish no proof page, so a run leaves only the gitignored artifacts.
+
 # `ConsumerUsings`: the consumer usings gate
 
 `ConsumerUsings` is the consumer fixture for the global usings go.lib's `buildTransitive/go.lib.targets`
