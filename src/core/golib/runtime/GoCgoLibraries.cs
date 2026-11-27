@@ -63,7 +63,7 @@ namespace go.golib;
 
         List<GoCgoLibrary> owned = [.. libraries];
         s_registered.AddOrUpdate(assembly, new Registration(owned, target));
-        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target));
+        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target) is var handle and not 0 ? handle : ResolveUnowned(name, importing));
     }
 
     // What each cgo assembly registered, for a C variable's lookup (Variable), which loads its library by the same rules.
@@ -183,8 +183,8 @@ namespace go.golib;
         "the dynamic loader's search (LD_LIBRARY_PATH, the executable's run path, the loader cache and the system directories)";
 
     /// <summary>
-    /// The handle for a library the table owns, or 0 for a name it does not own, which keeps the runtime's own resolution
-    /// for any hand-owned import in the same assembly (§11.11). An owned library loads from where a Go binary's loader
+    /// The handle for a library the table owns, or 0 for a name it does not own, which the resolver then hands to
+    /// <see cref="ResolveUnowned"/> (§11.11). An owned library loads from where a Go binary's loader
     /// would find it: on windows the safe directories and the assembly's own, and elsewhere the system loader, with the
     /// captured SONAME or absolute install name. A miss throws, naming the -l flag, the captured name and the places
     /// tried, and never falls back to the runtime's probing, whose windows search includes the current directory.
@@ -213,11 +213,45 @@ namespace go.golib;
             if (handle != 0)
                 return handle;
 
-            throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}; the current directory is never searched (docs/Limitations.md#cgo)");
+            throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}{WindowsDependents}; the current directory is never searched (docs/Limitations.md#cgo)");
         }
 
         return 0;
     }
+
+    // On windows a library loads only with every library it imports found in the same places, so a miss may be a dependent.
+    private static string WindowsDependents => OperatingSystem.IsWindows() ? " (it, or a library it imports, is not in those places)" : "";
+
+    /// <summary>
+    /// The handle for a name the table does not own, a hand-owned import in the same assembly, or 0, which keeps the
+    /// runtime's own resolution. On windows the name loads as an owned library does, so its dependents are held to the
+    /// same places; a library beside the assembly or the application that does not load that way is refused, since the
+    /// runtime's probing would load it by absolute path and take its dependents from the current directory or PATH. A name
+    /// in neither place is the runtime's, as before. Elsewhere the runtime resolves it, as a Go binary's loader would.
+    /// </summary>
+    internal static nint ResolveUnowned(string name, Assembly assembly)
+    {
+        if (!OperatingSystem.IsWindows())
+            return 0;
+
+        nint handle = LoadOnWindows(name, assembly);
+
+        if (handle != 0)
+            return handle;
+
+        string file = Path.HasExtension(name) ? name : name + ".dll";
+
+        foreach (string directory in (string[])[AssemblyDirectory(assembly), AppContext.BaseDirectory])
+        {
+            if (File.Exists(Path.Combine(directory, file)))
+                throw new DllNotFoundException($"cgo: {name}, beside {directory}, did not load from {Places}{WindowsDependents}; the current directory is never searched (docs/Limitations.md#cgo)");
+        }
+
+        return 0;
+    }
+
+    private static string AssemblyDirectory(Assembly assembly) =>
+        assembly.Location.Length > 0 ? Path.GetDirectoryName(assembly.Location)! : AppContext.BaseDirectory;
 
     // On windows a bound library loads from the assembly's directory, then the application directory, System32 and the
     // AddDllDirectory directories, and its DEPENDENTS are held to the same places: LoadLibraryExW's LOAD_LIBRARY_SEARCH
@@ -225,10 +259,14 @@ namespace go.golib;
     // not hold the dependents: a dependent only in the current directory loaded
     // (TestCgoResolveHoldsABoundLibrarysDependentsOutOfTheCurrentDirectory, b927d8e4fb, cgo-e2e 46064580544 and
     // 46064584096), the shape Phase 4's side library measured first (TestCgoPhase4H, 46054089826).
+    // The loader takes a path of MAX_PATH (260) characters or more only in its \\?\ form, so a deep assembly directory is
+    // handed over that way, and LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR still reads the library's directory from it.
     private static nint LoadOnWindows(string name, Assembly assembly)
     {
-        string directory = assembly.Location.Length > 0 ? Path.GetDirectoryName(assembly.Location)! : AppContext.BaseDirectory;
-        string beside = Path.GetFullPath(Path.Combine(directory, name));
+        string beside = Path.GetFullPath(Path.Combine(AssemblyDirectory(assembly), Path.HasExtension(name) ? name : name + ".dll"));
+
+        if (beside.Length >= MaxPath && !beside.StartsWith(@"\\?\", StringComparison.Ordinal))
+            beside = beside.StartsWith(@"\\", StringComparison.Ordinal) ? @"\\?\UNC\" + beside[2..] : @"\\?\" + beside;
 
         nint handle = File.Exists(beside) ? LoadLibraryExW(beside, 0, LoadLibrarySearchDllLoadDir | LoadLibrarySearchDefaultDirs) : 0;
 
@@ -239,6 +277,7 @@ namespace go.golib;
     // System32 and the AddDllDirectory directories, for the library and every dependency it loads.
     private const uint LoadLibrarySearchDllLoadDir = 0x00000100;
     private const uint LoadLibrarySearchDefaultDirs = 0x00001000;
+    private const int MaxPath = 260;
 
     [LibraryImport("kernel32.dll", EntryPoint = "LoadLibraryExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
     private static partial nint LoadLibraryExW(string fileName, nint file, uint flags);
