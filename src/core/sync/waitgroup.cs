@@ -293,8 +293,9 @@ public static void Go(this ж<WaitGroup> Ꮡwg, Action f) {
 // The front is not async, so the zero-count return allocates nothing; the await runs outside Gate.
 //
 // NOT WEAK: a Wait with a non-zero count always parks, and its caller is exactly the goroutine that must give its carrier
-// back, so a call to Wait makes its caller a twin. sync is hand-owned and no generator runs over it, so the twin is
-// written here by hand, after Go so the go statement keeps the line its position record names.
+// back, so a call to Wait makes its caller a twin. Wait is hand-written, so its twin is too, after Go so the go statement
+// keeps the line its position record names. (In a twin build the generator runs over sync as well, sees this twin, and
+// emits none of its own, as for Lockꞏtwin.)
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public static GoTask Waitꞏtwin(this ж<WaitGroup> Ꮡwg) {
     if (!GoScheduler.OnCarrier) {

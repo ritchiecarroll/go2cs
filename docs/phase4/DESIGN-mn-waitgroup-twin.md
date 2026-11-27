@@ -5,7 +5,9 @@ build in .5". G's design, written out here for G's review before any code.
 
 ## 1. Why
 
-`sync` is hand-owned, so TwinGenerator never runs over it (TwinGenerator.cs, `IsHandOwnedAssembly`). A goroutine on the
+`Wait` lives in a hand-owned file of `sync` (waitgroup.cs), so its twin is hand-written too. (The generator does run
+over sync in a twin build: the hand-owned mark is on sync's files, not on the assembly. It sees a hand twin and emits
+none of its own, as for `Lockꞏtwin`; the census in section 6 reads that off the report.) A goroutine on the
 M:N scheduler that calls `wg.Wait()` runs the plain `Wait`, which blocks its carrier thread on `WaitGroupState.Idle`
 until the count reaches zero. Every such waiter holds a carrier: with K waiters and P procs, the scheduler starts
 carriers past P to keep the Ps running. `Mutex.Lockꞏtwin` (mutex.cs) closed the same hole for a contended lock; this
@@ -89,7 +91,7 @@ disassociation, the reset of `Bubbled`), so the synctest arms are unchanged.
   FREEZE-mn-surface.md quoting the owner. PublicSurface.golib.txt `[mn-frozen]` lists golib only, so it does not move.
 - **Gates.** GolibTests Release and Debug, unfiltered, `-p:GoTargetOS=linux`; converter `go test` (repoguard
   included); CNR; the behavioral row filtered, plain and `--mn`.
-- **sync's twin is unconditional.** sync is hand-owned and always carries `Waitꞏtwin`, with or without
+- **sync's twin is unconditional.** the twin is hand-written, so sync always carries `Waitꞏtwin`, with or without
   `GoStdlibTwins`, so an opted-in program on a PLAIN stdlib gains it too. R4's `--mn` build shows that.
 - **Census.** The stdlib built with `-p:GoStdlibTwins=true` at the base and at the cut; the report's `T` rows diffed.
   Prediction: the newly twinned set is the converted callers that park only through a WaitGroup wait, at most 10
