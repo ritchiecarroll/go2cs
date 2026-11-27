@@ -838,8 +838,7 @@ public class ImplementGenerator : ISourceGenerator
                             (string pointerEmbedName, INamedTypeSymbol pointerEmbedType, _) = declaringEmbeds[0];
                             string pointerEmbedNamespace = pointerEmbedType.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
 
-                            if (pointerEmbedNamespace != packageNamespace && pointerEmbedNamespace != Namespace &&
-                                !packageNamespace.StartsWith($"{pointerEmbedNamespace}.", StringComparison.Ordinal))
+                            if (!HostNamespaceVisible(pointerEmbedNamespace, packageNamespace))
                             {
                                 forwardStaticCalls[simpleName] = $"{GoMethodHosts.StaticClass(pointerEmbedType, simpleName)}.{simpleName}";
                             }
@@ -1029,8 +1028,7 @@ public class ImplementGenerator : ISourceGenerator
                                 // pointer-embed arm above does.
                                 string embedNamespace = embedTypeSymbol.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
 
-                                if (embedNamespace != packageNamespace && embedNamespace != Namespace &&
-                                    !packageNamespace.StartsWith($"{embedNamespace}.", StringComparison.Ordinal))
+                                if (!HostNamespaceVisible(embedNamespace, packageNamespace))
                                 {
                                     forwardStaticCalls[methodName] = $"{GoMethodHosts.StaticClass(embedTypeSymbol, methodName)}.{methodName}";
                                 }
@@ -1612,6 +1610,15 @@ public class ImplementGenerator : ISourceGenerator
     // The registrations of a package class's pointer adapters (each adapter's own ᴛRegisterAdapter), called from ONE
     // method its module initializer defers to golib's first adapter lookup that misses (DeferredRegistration), where a
     // module initializer per adapter compiled each one at startup.
+    /// <summary>
+    /// Whether code emitted in <paramref name="emittingNamespace"/> sees the extension methods of a host class
+    /// in <paramref name="hostNamespace"/> without a using: the same namespace, the root <c>go</c> namespace, or
+    /// an ancestor of the emitting one. A forwarder to a host it cannot see takes the host's static call instead.
+    /// </summary>
+    private static bool HostNamespaceVisible(string hostNamespace, string emittingNamespace) =>
+        hostNamespace == emittingNamespace || hostNamespace == Namespace ||
+        emittingNamespace.StartsWith($"{hostNamespace}.", StringComparison.Ordinal);
+
     private static void EmitAdapterRegistrations(GeneratorExecutionContext context, HashSet<string> emittedHintNames, Dictionary<(string packageNamespace, string packageName), List<string>> adapterRegistrations)
     {
         foreach (KeyValuePair<(string packageNamespace, string packageName), List<string>> package in adapterRegistrations)
