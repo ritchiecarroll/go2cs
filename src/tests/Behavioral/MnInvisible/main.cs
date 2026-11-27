@@ -183,7 +183,8 @@ internal static partial void v4(nint procs) {
     for (nint i = 0; i < wakes; i++) {
         var began = time.Now();
         time.Sleep(25 * time.Millisecond);
-        lat = append(lat, time.Since(began) - 25 * time.Millisecond);
+        var evalᴛ1 = time.Since(began);
+        lat = append(lat, evalᴛ1 - 25 * time.Millisecond);
     }
     close(stop);
     for (nint p = 0; p < procs; p++) {
@@ -192,8 +193,16 @@ internal static partial void v4(nint procs) {
     if (reading) {
         var latʗ1 = lat;
         sort.Slice(lat, [GoFunc("v4.func1")] (nint i, nint j) => latʗ1[i] < latʗ1[j]);
-        fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "reading: V4 step_ms=%d wakes=%d p50_ms=%.1f p99_ms=%.1f max_ms=%.1f\n"u8, step.Milliseconds(), len(lat),
-            ms(lat[len(lat) / 2]), ms(lat[len(lat) * 99 / 100]), ms(lat[len(lat) - 1]));
+        var evalᴛ2 = step.Milliseconds();
+        var evalᴛ3 = len(lat);
+        var evalᴛ4 = len(lat);
+        var evalᴛ5 = ms(lat[evalᴛ4 / 2]);
+        var evalᴛ6 = len(lat);
+        var evalᴛ7 = ms(lat[evalᴛ6 * 99 / 100]);
+        var evalᴛ8 = len(lat);
+        var evalᴛ9 = ms(lat[evalᴛ8 - 1]);
+        fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "reading: V4 step_ms=%d wakes=%d p50_ms=%.1f p99_ms=%.1f max_ms=%.1f\n"u8, evalᴛ2, evalᴛ3,
+            evalᴛ5, evalᴛ7, evalᴛ9);
     }
     fmt.Println("V4 every wake ran:", len(lat) == wakes);
 }
