@@ -42568,4 +42568,30 @@ fails `typedefwide`.
 
 — H (2026-11-26)
 
+## CLOSED 2026-11-26 (H): cgo S4, why linux-x64 passed on the `_Ctype_size_t` bug (amends the OPEN entry above)
+
+**Measured.** Two probe branches (not for merge) put the pre-cure cast back and printed the converted main.cs lines at
+the typedef'd calls.
+
+- claude/h-probe-s4-f4, on S6 r10. Runs 45905897040 (linux-x64) and 45905900686 (darwin):
+  - linux/amd64 emitted `C.memset((@unsafe.Pointer)(n + 1), (C.@int)(7), (C.@ulong)(2));`. On linux, cmd/cgo declares
+    memset's third argument at the base type, unsigned long, so the pre-cure cast had no alias to name. The leg ran the
+    arm and was right to pass. It simply does not reach the bug through memset.
+  - darwin/amd64 and darwin/arm64 emitted `(_Ctype_size_t)(2)`, the bug. Both arches failed, so the darwin legs
+    discriminate the cure, alongside windows.
+- claude/h-probe-s4-f1, on S6 r11 (82d80089d9). Runs 45908618071 (windows), 45908620875 (darwin), 45908623601 (linux):
+  - typedefwide emitted `(_Ctype_uint64_t)(0x123456789UL)` and failed CS0246 on all three. That includes linux, so
+    linux-x64 cgo-e2e now has an arm the bug reaches.
+  - typedefenum emitted `(C.go2cs_probe_color)(4)` and compiled. cmd/cgo declares a typedef'd enum as a DEFINED type,
+    not an alias, so that row never depended on the cure. It guards that the cure leaves a defined C type alone.
+
+**Correction to the OPEN entry.** It said the near-miss arm `typedefwide` already gave linux-x64 an arm the bug reaches.
+As first built (6a4e7f1331), it did not. Both arms passed a typed `&out`, which needs no pointer check, so cmd/cgo wrote
+no check closure and the calls carried no cast on any target. They passed before the cure because they never reached
+it. 82d80089d9 passes `unsafe.Pointer(&out)`, as memset does, and the probe above is that change measured.
+
+**Owner.** H. Nothing remains open on this entry.
+
+— H (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
