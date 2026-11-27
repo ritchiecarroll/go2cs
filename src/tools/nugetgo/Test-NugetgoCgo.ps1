@@ -50,7 +50,15 @@ foreach ($flavor in $want.Keys) {
     $triple = $null; try { $triple = Get-NugetgoCgoTriple -Flavor $flavor } catch { $triple = "threw: $($_.Exception.Message)" }
     Check "$flavor compiles for $($want[$flavor])" ($triple -ceq $want[$flavor]) "got $triple"
 }
-Check 'every packed flavor has a target' (@(Get-NugetgoFlavors | Where-Object { -not $want.Contains($_) }).Count -eq 0) "flavors $((Get-NugetgoFlavors) -join ',')"
+Check 'every packed flavor has a target' (@(Get-NugetgoFlavors -RidFlavors $cgo | Where-Object { -not $want.Contains($_) }).Count -eq 0) "flavors $((Get-NugetgoFlavors -RidFlavors $cgo) -join ',')"
+Check 'the -Cgo flavors leave out the excluded RIDs'' own flavors (darwin/arm64 since D6)' ((@(Get-NugetgoFlavors -RidFlavors $cgo) -join ',') -ceq 'windows/amd64,linux/amd64,darwin/amd64,linux/arm64') "flavors $((Get-NugetgoFlavors -RidFlavors $cgo) -join ',')"
+# nugetgo-pack.ps1 measures the flavors of the map it packs: a -Cgo pack's map leaves osx-arm64 out, and since D6 that
+# RID's flavor (darwin/arm64) is its own, so a flavor loop over the release's whole map would convert a flavor with no
+# C target and refuse every -Cgo pack. Every flavor call in the pack names the pack's map.
+$packText = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+$flavorCalls = @([regex]::Matches($packText, '(Get-NugetgoFlavors|Get-NugetgoFlavorDecision|Merge-NugetgoFlavorRequires|Get-NugetgoFlavorDisclosure)\b[^\r\n]*') | ForEach-Object { $_.Value })
+$unscoped = @($flavorCalls | Where-Object { $_ -notmatch '-RidFlavors \$ridFlavors' })
+Check 'nugetgo-pack.ps1 passes its own map to every flavor call' ($flavorCalls.Count -ge 6 -and $unscoped.Count -eq 0) "$($flavorCalls.Count) calls; without -RidFlavors `$ridFlavors: $($unscoped -join ' | ')"
 $unknown = $null; try { Get-NugetgoCgoTriple -Flavor 'freebsd/amd64' | Out-Null } catch { $unknown = $_.Exception.Message }
 Check 'a flavor with no target is refused by name' ($unknown -and $unknown.Contains('freebsd/amd64')) "got '$unknown'"
 Check 'CC is the zig path, cc and -target' ((Get-NugetgoCgoCompiler -Zig '/opt/zig/zig' -Flavor 'linux/arm64') -ceq '/opt/zig/zig cc -target aarch64-linux-gnu') "got $(Get-NugetgoCgoCompiler -Zig '/opt/zig/zig' -Flavor 'linux/arm64')"

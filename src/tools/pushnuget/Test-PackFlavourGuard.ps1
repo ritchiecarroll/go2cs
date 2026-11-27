@@ -2,8 +2,9 @@
 .SYNOPSIS
     Table-driven arms for .github/pack-flavour-guard.ps1, the os-matrix pack job's flavour guard (seat S6, COORD
     ruling 2026-11-10: the guard asserts what S6 ships). push-nuget.ps1 builds one flavour per GOOS/GOARCH pair of its
-    $ridFlavors map; the guard reads that map and refuses a pack where linux-arm64 is not built at linux/arm64, or any
-    other RID is not built at amd64. Every arm here runs the guard with -NoProbe (the map only, no MSBuild), against
+    $ridFlavors map; the guard reads that map and refuses a pack where an arm64 RID is not built at arm64 or an x64 RID
+    at amd64 (S6 for linux-arm64; D6 of DESIGN-darwin-arm64-flavour.md for osx-arm64, which shipped the darwin/amd64
+    flavour before it). Every arm here runs the guard with -NoProbe (the map only, no MSBuild), against
     push-nuget.ps1 itself and against copies whose map is mutated. Exit code = the number of failed cases.
 #>
 $ErrorActionPreference = 'Stop'
@@ -44,6 +45,8 @@ $r = Invoke-Guard $text 'as-is'
 Check 'no refusal' ($null -eq $r[1]) "refused: $($r[1])"
 Check 'it names linux-arm64 at linux/arm64' (@($r[0] | Where-Object { $_ -like '*linux-arm64*linux/arm64*' }).Count -ge 1) "got: $($r[0] -join ' | ')"
 Check 'it names win-x64 at windows/amd64' (@($r[0] | Where-Object { $_ -like '*win-x64*windows/amd64*' }).Count -ge 1) "got: $($r[0] -join ' | ')"
+Check 'it names osx-arm64 at darwin/arm64 (D6)' (@($r[0] | Where-Object { $_ -like '*osx-arm64*darwin/arm64*' }).Count -ge 1) "got: $($r[0] -join ' | ')"
+Check 'it names osx-x64 at darwin/amd64' (@($r[0] | Where-Object { $_ -like '*osx-x64*darwin/amd64*' }).Count -ge 1) "got: $($r[0] -join ' | ')"
 
 Write-Host 'the pair map reverted to the GOOS-only map before S6: refused'
 $r = Invoke-Guard (With-Map "    'win-x64'   = 'windows'`n    'linux-x64' = 'linux'`n    'osx-x64'   = 'darwin'`n    'osx-arm64' = 'darwin'") 'reverted'
@@ -52,10 +55,14 @@ $r = Invoke-Guard (With-Map "    'win-x64'     = 'windows'`n    'linux-x64'   = 
 Check 'a GOOS-only value is refused, naming its RID' ($null -ne $r[1] -and $r[1] -like '*win-x64*') "got: $($r[1])"
 
 Write-Host 'a pair at the wrong architecture: refused'
-$r = Invoke-Guard (With-Map "    'win-x64'     = 'windows/amd64'`n    'linux-x64'   = 'linux/amd64'`n    'osx-x64'     = 'darwin/amd64'`n    'osx-arm64'   = 'darwin/amd64'`n    'linux-arm64' = 'linux/amd64'") 'arm-at-amd64'
+$r = Invoke-Guard (With-Map "    'win-x64'     = 'windows/amd64'`n    'linux-x64'   = 'linux/amd64'`n    'osx-x64'     = 'darwin/amd64'`n    'osx-arm64'   = 'darwin/arm64'`n    'linux-arm64' = 'linux/amd64'") 'arm-at-amd64'
 Check 'linux-arm64 built at linux/amd64 is refused' ($null -ne $r[1] -and $r[1] -like '*linux-arm64*linux/arm64*') "got: $($r[1])"
-$r = Invoke-Guard (With-Map "    'win-x64'     = 'windows/arm64'`n    'linux-x64'   = 'linux/amd64'`n    'osx-x64'     = 'darwin/amd64'`n    'osx-arm64'   = 'darwin/amd64'`n    'linux-arm64' = 'linux/arm64'") 'win-at-arm64'
+$r = Invoke-Guard (With-Map "    'win-x64'     = 'windows/arm64'`n    'linux-x64'   = 'linux/amd64'`n    'osx-x64'     = 'darwin/amd64'`n    'osx-arm64'   = 'darwin/arm64'`n    'linux-arm64' = 'linux/arm64'") 'win-at-arm64'
 Check 'win-x64 built at arm64 is refused' ($null -ne $r[1] -and $r[1] -like '*win-x64*amd64*') "got: $($r[1])"
+$r = Invoke-Guard (With-Map "    'win-x64'     = 'windows/amd64'`n    'linux-x64'   = 'linux/amd64'`n    'osx-x64'     = 'darwin/amd64'`n    'osx-arm64'   = 'darwin/amd64'`n    'linux-arm64' = 'linux/arm64'") 'mac-twins'
+Check 'osx-arm64 built at darwin/amd64 (the map before D6) is refused' ($null -ne $r[1] -and $r[1] -like '*osx-arm64*darwin/arm64*') "got: $($r[1])"
+$r = Invoke-Guard (With-Map "    'win-x64'     = 'windows/amd64'`n    'linux-x64'   = 'linux/amd64'`n    'osx-x64'     = 'darwin/arm64'`n    'osx-arm64'   = 'darwin/arm64'`n    'linux-arm64' = 'linux/arm64'") 'x64-at-arm64'
+Check 'osx-x64 built at darwin/arm64 is refused' ($null -ne $r[1] -and $r[1] -like '*osx-x64*darwin/amd64*') "got: $($r[1])"
 
 Write-Host 'the pack job runs it'
 $yml = [System.IO.File]::ReadAllText((Join-Path $root '.github/workflows/os-matrix.yml'))

@@ -64,11 +64,10 @@ var ridFlavorEntry = regexp.MustCompile(`'([^']+)'\s*=\s*'([^']+)'`)
 
 // ridFlavoursShippedLater names the universe targets the RID maps do not ship YET, each with the seat that ships it. A
 // target joins the layout before the pack can carry it: darwin/arm64 joined the universe at D2 of
-// DESIGN-darwin-arm64-flavour.md, and osx-arm64 keeps shipping the darwin/amd64 flavour until D6 builds and verifies the
-// darwin/arm64 one (section 3). An entry whose target a map already ships fails, so the list cannot outlive its seat.
-var ridFlavoursShippedLater = map[string]string{
-	"darwin/arm64": "D6 of DESIGN-darwin-arm64-flavour.md moves osx-arm64 onto it (a section 11 stop line: D6 asks P2 before it packs)",
-}
+// DESIGN-darwin-arm64-flavour.md, and osx-arm64 shipped the darwin/amd64 flavour until D6 mapped it to darwin/arm64
+// (section 3), which emptied this list. An entry whose target a map already ships fails, so the list cannot outlive its
+// seat; the next target that joins the universe ahead of its pack is named here until its own packaging seat.
+var ridFlavoursShippedLater = map[string]string{}
 
 // ridFlavoursOwed is lineKeyedUniverse without the targets ridFlavoursShippedLater names, in universe order.
 func ridFlavoursOwed() []string {
