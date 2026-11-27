@@ -14,6 +14,8 @@ internal static bool Stop(this ref counter c) {
     return c.n > 0;
 }
 
+internal static T id<T>(T x) { return x; }
+
 internal static void use(Func<time.Duration, (/*<-*/channel<time.Time>, Func<bool>, Action)> gen) {
     var (ch, stop, adv) = gen(3);
     fmt.Println((ᐸꟷ(ch)).UnixNano(), stop());
@@ -50,6 +52,16 @@ internal static void main() {
         return h() + j;
     }
     fmt.Println(run(pair));
+
+    var cʗ5 = c;
+    var gen = [GoFunc("main.func4")] (Func<nint, nint>, nint) () => (id<nint>, cʗ5.n);
+    var (f, m) = gen();
+    fmt.Println(f(4), m);
+    [GoFunc("main.func5")] nint apply(Func<(Func<nint, nint>, nint)> p) {
+        var (h, j) = p();
+        return h(j);
+    }
+    fmt.Println(apply(gen));
 }
 
 } // end main_package

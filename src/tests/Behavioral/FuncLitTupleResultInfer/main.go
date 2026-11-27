@@ -9,6 +9,8 @@ type counter struct{ n int }
 
 func (c *counter) Stop() bool { c.n++; return c.n > 0 }
 
+func id[T any](x T) T { return x }
+
 // use takes the generator as a value, as x/time/rate's Limiter.wait does with its newTimer.
 func use(gen func(time.Duration) (<-chan time.Time, func() bool, func())) {
 	ch, stop, adv := gen(3)
@@ -37,4 +39,11 @@ func main() {
 	fmt.Println(g(), k)
 	run := func(p func() (func() int, int)) int { h, j := p(); return h() + j }
 	fmt.Println(run(pair))
+
+	// An instantiated generic function used as a value is a method group too.
+	gen := func() (func(int) int, int) { return id[int], c.n }
+	f, m := gen()
+	fmt.Println(f(4), m)
+	apply := func(p func() (func(int) int, int)) int { h, j := p(); return h(j) }
+	fmt.Println(apply(gen))
 }

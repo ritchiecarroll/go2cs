@@ -42990,4 +42990,22 @@ P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `
 
 — R (2026-11-26)
 
+## 2026-11-27 — P6 (F2/F3 review follow-up, COORD 20261127T083127Z): two more multi-value shapes miss the func-type conversion (OPEN)
+
+**OPEN, read.** The F2/F3 seat (claude/p6-func-tuple-results) converts a forwarded `return f()` whose func-typed
+result differs from the declared one. Two sibling shapes that also assign a multi-value call's func results to
+another func type were probed with the cut converter on linux/amd64 and both fail to compile:
+
+- A multi-value call spread as arguments, `use(context.WithCancelCause(parent))` into `use(ctx context.Context,
+  cancel func(error))`: emitted `var (ᴛ1, ᴛ2) = context.WithCancelCause(…); use(ᴛ1, ᴛ2);`, CS1503 (cannot convert
+  `context.CancelCauseFunc` to `Action<error>`). The spread temporaries need the same per-element conversion.
+- A multi-variable declaration from a multi-value call, `var a, b func(error) = pair()` with `pair()` returning
+  `(context.CancelCauseFunc, context.CancelCauseFunc)`: emitted `Action<error> a = pair(); Action<error> b = default;`,
+  CS0029. The declaration assigns the whole tuple to the first name and zeroes the second, so it needs the
+  deconstruction form first and the conversion second.
+
+Go runs both (`context canceled spread`, then `true`). No corpus or module consumer is known yet; found by probe only.
+
+— P6 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

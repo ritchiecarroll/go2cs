@@ -28,6 +28,13 @@ func back(parent context.Context) (context.Context, cancelFunc) {
 	return stdlib(parent)
 }
 
+// A nil named func value forwarded through an unnamed func result stays nil, as Go's assignment does.
+func none() (int, cancelFunc) { return 0, nil }
+
+func forwardNone() (int, func(error)) {
+	return none()
+}
+
 func main() {
 	for _, f := range []func(context.Context) (context.Context, func(error)){unnamed, stdlib} {
 		ctx, cancel := f(context.Background())
@@ -37,4 +44,6 @@ func main() {
 	ctx, cancel := back(context.Background())
 	cancel(errors.New("back"))
 	fmt.Println(ctx.Err(), context.Cause(ctx))
+	n, c := forwardNone()
+	fmt.Println(n, c == nil)
 }

@@ -1460,7 +1460,8 @@ return (ᴛ1, builtin.NilSafeDelegateConversion<Action<error>, cancelFunc>(ᴛ2)
      context.WithCancelCause's (Context, CancelCauseFunc) as (context.Context, func(error)), which
      panjf2000/ants v2.12.1 requires in production. forwardedReturnNeedsConversion in visitReturnStmt.go. -->
 Guarded by `NamedFuncTupleResult` (a local named func type, the standard library's
-`context.CancelCauseFunc`, and the unnamed-to-named direction, vs Go).
+`context.CancelCauseFunc`, the unnamed-to-named direction, and a nil named func value that must
+arrive nil, which the conversion keeps and a delegate constructor would not, vs Go).
 
 ## A multi-value call spread into a call's parameters in an assignment hoists into temps
 Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.newRange(t.parseControl("range"))`,

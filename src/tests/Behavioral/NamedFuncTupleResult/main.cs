@@ -28,6 +28,13 @@ internal static (context.Context, cancelFunc) back(context.Context parent) {
     return (ᴛ1, builtin.NilSafeDelegateConversion<cancelFunc, Action<error>>(ᴛ2));
 }
 
+internal static (nint, cancelFunc) none() { return (0, default); }
+
+internal static (nint, Action<error>) forwardNone() {
+    var (ᴛ1, ᴛ2) = none();
+    return (ᴛ1, builtin.NilSafeDelegateConversion<Action<error>, cancelFunc>(ᴛ2));
+}
+
 internal static void main() {
     foreach (var (_, f) in range(slice<Func<context.Context, (context.Context, Action<error>)>>([unnamed, stdlib]))) {
         var (ctxΔ1, cancelΔ1) = f(context.Background());
@@ -37,6 +44,8 @@ internal static void main() {
     var (ctx, cancel) = back(context.Background());
     cancel(errors.New("back"));
     fmt.Println(ctx.Err(), context.Cause(ctx));
+    var (n, c) = forwardNone();
+    fmt.Println(n, c == nil);
 }
 
 } // end main_package
