@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// osInitArm64 below is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2020 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - osInitArm64: DERIVED FROM src/internal/cpu/cpu_arm64_darwin.go, Go 1.26.11, func osInit. A port: Go's statements
+//   in Go's order, Go's comments verbatim, with the one ruled departure below (HasDIT).
 
 // darwin's osInit for an arm64 process: cpu_arm64_darwin.go, which the darwin/amd64 conversion does not
 // build. cpu_arm64_impl.cs calls it, and only on an arm64 process; it explains why the corpus needs it.
@@ -38,6 +48,8 @@ partial class cpu_package {
 static partial void osInitArm64() {
     // macOS 12 moved these to the hw.optional.arm tree, but as of Go 1.24 we
     // still support macOS 11. See [Determine Encryption Capabilities].
+    //
+    // [Determine Encryption Capabilities]: https://developer.apple.com/documentation/kernel/1387446-sysctlbyname/determining_instruction_set_characteristics#3918855
     ARM64.HasATOMICS = sysctlEnabled(slice<byte>("hw.optional.armv8_1_atomics\x00"u8));
     ARM64.HasCRC32 = sysctlEnabled(slice<byte>("hw.optional.armv8_crc32\x00"u8));
     ARM64.HasSHA512 = sysctlEnabled(slice<byte>("hw.optional.armv8_2_sha512\x00"u8));

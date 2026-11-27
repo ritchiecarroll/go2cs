@@ -220,6 +220,11 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   updated consumer and `consumer_override` must cite the break, `floor=<a.b.c.d>;news=<path>`: the tree's
   `GoBreakFloor`, above the previous release, and release notes holding its "Upgrading from <previous release>" entry.
   Either untrue fails the arm by name; with both true the verdict line reads `OVERRIDE`.
+- **L** `go.lib` carries golib's `NOTICE`: the `go.lib` arm B restored holds `NOTICE` at its root, identical (line endings
+  normalized) to `src/core/golib/NOTICE`, which reproduces Go's notice, conditions and disclaimer for the parts of
+  golib derived from Go, as BSD-3 clause 2 asks of a binary package. `golib.csproj` packs the file only when it exists,
+  so a pack that loses it is otherwise silent. It gates for a folder feed and for a `published_version` above
+  1.26.11.1; at or below 1.26.11.1 it is measured only (those releases shipped without the file).
 - **T** the twin opt-in reaches a program converted OUTSIDE the repository ([Async twins](AsyncTwins.md)):
   `PackageTests/TwinOptIn`, a goroutine program that imports nothing, converted three ways — `-recurse=nuget`
   against the feed, `-recurse` against this tree's `src`, and `-recurse` against a `deploy-core.ps1` root staged in
@@ -232,7 +237,7 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
        program converted outside the repository built without twins in all three modes; and deploy-core.ps1 did not
        stage go2cs/fieldAccessCollisions.txt, so a deployed go2cs-gen failed CS1566 from 810b9bb208 (2026-10-17). -->
 
-A leg is green when arms A-D, G and H pass. Dispatch it at the tree that ships, before every release:
+A leg is green when arms A-D, G, H and L pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (a converter that emits
 a runtime API the packages lack fails here). The pack job's budget is its own
 (240 min; measured 38-53 min).
