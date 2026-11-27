@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// osInit below is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2020 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - osInit: DERIVED FROM src/internal/cpu/cpu_arm64_darwin.go, Go 1.26.11, func osInit. A port: Go's statements in
+//   Go's order, Go's comments verbatim, with the one ruled departure below (HasDIT).
+// - initDarwinArm64FeatureDetection: INSPIRED BY src/runtime/proc.go, Go 1.26.11, funcs cpuinit (its
+//   cpu.Initialize(env) call) and getGodebugEarly (GODEBUG from the environment). Same behaviour, go2cs's own
+//   shape: a module initializer that reads the process environment.
 
 // darwin/arm64's osInit: cpu_arm64_darwin.go, displaced for the darwin/arm64 TARGET alone
 // (manualConversionFuncs["internal/cpu"]["osInit"], src/go2cs/manualTypeOperations.go), so the converted
