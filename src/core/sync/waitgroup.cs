@@ -294,7 +294,7 @@ public static void Go(this ж<WaitGroup> Ꮡwg, Action f) {
 //
 // NOT WEAK: a Wait with a non-zero count always parks, and its caller is exactly the goroutine that must give its carrier
 // back, so a call to Wait makes its caller a twin. Wait is hand-written, so its twin is too. (In a twin build the generator
-// runs over sync as well, sees this twin, and emits none of its own, as for Lockꞏtwin.)
+// runs over sync as well, sees this twin, and emits none of its own: its report reads `refused has-twin=1`.)
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public static GoTask Waitꞏtwin(this ж<WaitGroup> Ꮡwg) {
     if (!GoScheduler.OnCarrier) {

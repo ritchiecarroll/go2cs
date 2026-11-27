@@ -6,8 +6,9 @@ build in .5". G's design, written out here for G's review before any code.
 ## 1. Why
 
 `Wait` lives in a hand-owned file of `sync` (waitgroup.cs), so its twin is hand-written too. (The generator does run
-over sync in a twin build: the hand-owned mark is on sync's files, not on the assembly. It sees a hand twin and emits
-none of its own, as for `Lockꞏtwin`; the census in section 6 reads that off the report.) A goroutine on the
+over sync in a twin build: the hand-owned mark is on sync's files, not on the assembly. It sees the hand twin and emits
+none of its own: section 7 reads `refused has-twin=1` off sync's report. An earlier draft added "as for `Lockꞏtwin`";
+the report does not read that way for `Lock`, see section 7.) A goroutine on the
 M:N scheduler that calls `wg.Wait()` runs the plain `Wait`, which blocks its carrier thread on `WaitGroupState.Idle`
 until the count reaches zero. Every such waiter holds a carrier: with K waiters and P procs, the scheduler starts
 carriers past P to keep the Ps running. `Mutex.Lockꞏtwin` (mutex.cs) closed the same hole for a contended lock; this
@@ -115,6 +116,29 @@ disassociation, the reset of `Bubbled`), so the synctest arms are unchanged.
 - **R4:** `MnWaitGroup` passes all four phases plain and under `--mn`, Output compared with `go run`.
 - **R5:** the `--mn` build's twin report reads `candidates=9 twinned=4` with `T main.cs|14|waitAll|sites=1`. With the
   member hidden (renamed, then restored byte-identical) it reads `twinned=3 go-only=1` and has no `waitAll` row.
+- **Census** (the stdlib built `-c Release -p:GoStdlibTwins=true -p:GoTargetOS=linux`, twice in one tree: at the cut, and
+  at the cut with master's `waitgroup.cs` swapped in, so the member is the one axis; the file restored byte-identical).
+  358 twin reports at both arms, summing `candidates=32219 twinned=10518` at both. The `T` rows, keyed by file and
+  name, are the SAME SET: no function is newly twinned and none leaves. Eight functions that were already twins gain
+  one await site each, their `wg.Wait()`: `parseFiles` (go/internal/srcimporter), `Do` (internal/singleflight), `Close`
+  and `Shutdown` (net/http server.cs), `Close` (net/http/httptest server.cs), `ServeCodec` (net/rpc), `testFutureTimeout`
+  and `testConcurrentMethods` (vendor/golang.org/x/net/nettest). The `await-sites` lines sum to +8. srcimporter's
+  `go-only` reads 1 at the base and 0 at the cut (the report does not name the function; `parseFiles` is the only row
+  that moved there). No `outside-twins calls` count moved outside sync, so no converted stdlib `wg.Wait()` sits in a
+  function without a twin.
+- **The prediction of section 6, scored.** The bound held: 0 newly twinned against "at most 10", and none leave. The
+  mechanism it named did NOT show in the stdlib: no converted caller parks only through a WaitGroup wait, every one
+  was a twin already through another park site. So in the stdlib this seat changes 8 sites inside existing twins from
+  a call that blocks the carrier to a park, and the selection change is shown by R5 alone (`waitAll`). The package
+  list missed one of six: nettest, with 2 of the 8 functions.
+- **sync's own report (G's check).** At the cut it carries `refused has-twin=1 blocked=0`, a line the base arm does not
+  have, with `candidates=125 twinned=6` at both arms and no `T` row for WaitGroup's `Wait`: the generator sees the hand
+  twin and emits none. `Lock` does not read the same way: neither arm counts it under `has-twin`. The generator's match
+  compares parameter types as written (`TwinGenerator.HasTwinMember`), the plain `Lock` takes `ref Mutex` and
+  `Lockꞏtwin` takes the box, so that pair does not match; `Wait` and `Waitꞏtwin` both take the box. No report has a `T`
+  row for `Lock` either, so it gets no generated twin, for a reason the report does not name. The other sync lines that
+  moved: `outside-twins calls` 331 to 332 (the twin's off-carrier call of the plain `Wait`) and `Go`'s row, line 260 to
+  266.
 
 ## 8. Reviews (2026-11-27, relayed by COORD)
 
