@@ -453,15 +453,16 @@ func TestArrayDimsFactsMeasureATargetScope(t *testing.T) {
 			}()
 
 			computeArrayDimsFacts(production, inputs)
-		}()
 
-		// The answer, not only the absence of a panic: the facts' displaced test asks the registry with
-		// inputs.target, and noSink is displaced at darwin/arm64 and at no other target. The facts' own outputs
-		// cannot show it for this fixture, since an unexported displaced generic keeps its companion analysis,
-		// so the registry call is read directly; TestTargetScopedRegistrationConvertsEndToEnd reads the
-		// displacement in a whole conversion's emission.
-		if got, want := isManualFuncDeclInPackage(production.Types.Path(), inputs.target, noSink), target == "darwin/arm64"; got != want {
-			t.Errorf("%s: noSink displaced = %v, want %v", target, got, want)
-		}
+			// The answer, not only the absence of a panic: the facts' displaced test asks the registry with
+			// inputs.target, and noSink is displaced at darwin/arm64 and at no other target. The facts' own
+			// outputs cannot show it for this fixture, since an unexported displaced generic keeps its companion
+			// analysis, so the registry call is read directly; TestTargetScopedRegistrationConvertsEndToEnd reads
+			// the displacement in a whole conversion's emission. It sits inside the recover, so a regressed
+			// target fails this test and not the whole test binary.
+			if got, want := isManualFuncDeclInPackage(production.Types.Path(), inputs.target, noSink), target == "darwin/arm64"; got != want {
+				t.Errorf("%s: noSink displaced = %v, want %v", target, got, want)
+			}
+		}()
 	}
 }

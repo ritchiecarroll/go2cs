@@ -219,10 +219,14 @@ func f(options Options, scope goosScope) {
 	}
 }
 
-// TestTargetScopedRegistrationConvertsEndToEnd converts a module whose package holds a function registered for
-// darwin/arm64 alone, through the whole package conversion, at windows/amd64, darwin/amd64 and darwin/arm64. Each
-// run must finish with no dropped file (GO2CS2008) and no panic, and the function is displaced at darwin/arm64 and
-// emitted at the other two. TestRegistryLookupsReceiveTheFullTarget reads converter source for a registry callee
+// TestTargetScopedRegistrationConvertsEndToEnd converts a module whose package holds a function, a pointer-receiver
+// method and a package var, each registered for darwin/arm64 alone, through the whole package conversion, at
+// windows/amd64, darwin/amd64 and darwin/arm64, with literal hoisting on. Each run must finish with no dropped file
+// (GO2CS2008) and no panic, and each registered declaration is displaced at darwin/arm64 and emitted at the other
+// two. The fixture reaches the registry lookups in the array-dims facts, the emission, the hoisted-literal pass
+// (hoistedLiteralOperations.go, which a user package reaches only with hoistLiterals) and both hand-owned-member
+// passes (fieldAccess.go, methods and vars). manualTypeReceiverRefusal.go's lookup needs a pointer-receiver method
+// whose receiver is refused, and is a follow-up on the BOARD. TestRegistryLookupsReceiveTheFullTarget reads converter source for a registry callee
 // handed goosOfTarget(...) directly, so it cannot see a GOOS stored first and passed later: the array-dims facts
 // did exactly that (arrayDimsInputs held the GOOS in a field), goosScope.includes panicked on the os/arch entry,
 // and every target dropped internal/cpu's cpu.go until a five-target emission found it. This test reads every pass
@@ -236,18 +240,28 @@ func TestTargetScopedRegistrationConvertsEndToEnd(t *testing.T) {
 
 	const pkgPath = "example.com/scoped/lib"
 
-	previous, had := manualConversionFuncs[pkgPath]
-	manualConversionFuncs[pkgPath] = map[string]goosScope{"Scoped": {"darwin/arm64"}}
+	previousFuncs, hadFuncs := manualConversionFuncs[pkgPath]
+	previousVars, hadVars := manualConversionVars[pkgPath]
+	previousGoRoot := build.Default.GOROOT
+	manualConversionFuncs[pkgPath] = map[string]goosScope{"Scoped": {"darwin/arm64"}, "Box.Get": {"darwin/arm64"}}
+	manualConversionVars[pkgPath] = map[string]goosScope{"Shared": {"darwin/arm64"}}
 
 	takeDroppedFiles()
 
 	t.Cleanup(func() {
 		takeDroppedFiles()
+		build.Default.GOROOT = previousGoRoot
 
-		if had {
-			manualConversionFuncs[pkgPath] = previous
+		if hadFuncs {
+			manualConversionFuncs[pkgPath] = previousFuncs
 		} else {
 			delete(manualConversionFuncs, pkgPath)
+		}
+
+		if hadVars {
+			manualConversionVars[pkgPath] = previousVars
+		} else {
+			delete(manualConversionVars, pkgPath)
 		}
 	})
 
@@ -258,10 +272,16 @@ func TestTargetScopedRegistrationConvertsEndToEnd(t *testing.T) {
 
 func zero[T any]() T { var x T; return x }
 
-// Scoped is registered for darwin/arm64 alone.
+// Scoped, Box.Get and Shared are registered for darwin/arm64 alone.
 func Scoped() int { return len(zero[[4]byte]()) }
 
-func Kept() int { return Scoped() + 1 }
+type Box struct{ n int }
+
+func (b *Box) Get() int { return b.n }
+
+var Shared = []int{1, 2, 3}
+
+func Kept() int { var b Box; return Scoped() + b.Get() + Shared[0] }
 `)
 
 	for _, target := range []string{"windows/amd64", "darwin/amd64", "darwin/arm64"} {
@@ -276,6 +296,7 @@ func Kept() int { return Scoped() + 1 }
 			indentSpaces:        4,
 			preferVarDecl:       true,
 			useChannelOperators: true,
+			hoistLiterals:       true,
 		}
 
 		if options.goRoot == "" {
@@ -314,12 +335,18 @@ func Kept() int { return Scoped() + 1 }
 			t.Errorf("%s: no ᴀ4 dims type, so the array-dims facts did not run over the fixture:\n%s", target, emission)
 		}
 
-		placeholder := strings.Contains(emission, "func Scoped is hand-converted")
-		body := strings.Contains(emission, "public static nint Scoped()")
+		for _, member := range []struct{ name, placeholder, body string }{
+			{"Scoped", "func Scoped is hand-converted", "public static nint Scoped()"},
+			{"Box.Get", "func Get is hand-converted", "static nint Get⁔("},
+			{"Shared", "var Shared is hand-converted", "ᏑShared = new"},
+		} {
+			placeholder := strings.Contains(emission, member.placeholder)
+			body := strings.Contains(emission, member.body)
 
-		if displaced := target == "darwin/arm64"; placeholder != displaced || body == displaced {
-			t.Errorf("%s: Scoped displaced=%v (placeholder %v, body %v), want displaced=%v:\n%s",
-				target, placeholder && !body, placeholder, body, displaced, emission)
+			if displaced := target == "darwin/arm64"; placeholder != displaced || body == displaced {
+				t.Errorf("%s: %s displaced=%v (placeholder %v, body %v), want displaced=%v:\n%s",
+					target, member.name, placeholder && !body, placeholder, body, displaced, emission)
+			}
 		}
 	}
 }
