@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - throw, fatal: INSPIRED BY src/runtime/panic.go, Go 1.26.11, funcs throw, fatal. The same fatal report and exit,
+//   through golib's fatal path.
 
 // runtime.throw and runtime.fatal, hand-owned (the fatal path; the two are displaced through
 // manualConversionFuncs, so each flavour's panic.cs carries a placeholder where the converted body
@@ -24,7 +34,7 @@
 // IS FALSE FOR THE ONE CONTEXT THE runtime ROW HAS, and it is left standing rather than rewritten
 // because the remedy was chosen on it. Under the -tests HOST the pre-state did NOT exit: the
 // NotImplementedException from getcallerpc reaches the host's per-test catch, is recorded as one
-// `infrastructure-error` verdict, and the binary RUNS ON. testing/TestExecution.cs:301 states the
+// `infrastructure-error` verdict, and the binary RUNS ON. testing/TestExecution.cs:318 states the
 // mechanism in its own words — a raw .NET exception "is invisible to recover() and lands in the
 // host's INFRASTRUCTURE bucket". The premise holds only for a STANDALONE fatal, where nothing
 // catches; the row has no standalone fatals.

@@ -21,7 +21,8 @@ internal static void Put⁔(/*this*/ ref Box b, nint v) {
 
 internal static partial nint Take⁔(/*this*/ ref Box b) {
     nint v = ᐸꟷ(b.ch);
-    b.trail = append(b.trail, Frames("Take"));
+    var evalᴛ1 = Frames("Take");
+    b.trail = append(b.trail, evalᴛ1);
 
     return v;
 }

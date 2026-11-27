@@ -1670,7 +1670,22 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1). Only a
 		// generated forwarder that is VALUE-set while by-ref is marked, [GoCopyBound].
 		// A function or method whose Go name starts with Δ keeps it for golib in a [GoName] stamp.
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+goNameAttr(goFunctionName, csFunctionName)+noInliningAttribute)
+		attributes := forwarderPrefix + goNameAttr(goFunctionName, csFunctionName) + noInliningAttribute
+
+		// An EXPORTED generic that reaches a type-only sink gains the arity-2 ARRAY-DIMS OVERLOAD beside the
+		// arity every consumer already binds, which now forwards `ᴀnone` (arrayDimsCompanion.go). The overload
+		// is generated support surface (docs/PublicSurface.md tier 2), hidden from completion; the record
+		// tells a consumer in another assembly that it exists.
+		if funcDecl.Recv == nil && suffixHolder == "" && v.arrayDimsCompanionOverloaded(currentFuncType) {
+			forwarder := v.arrayDimsOverloadForwarder(functionAccess, v.useUnsafeFunc, resultSignature, declaredName, typeParams, declaredParameters, constraints)
+			attributes = goNameAttr(goFunctionName, csFunctionName) + forwarder + v.newline + v.indent(v.indentLevel) + "[" + methodHolderAttributes + "] " + attributes
+
+			if !v.isTestFileDecl(funcDecl.Pos()) {
+				publishArrayDimsCompanions(currentFuncType.Name(), v.arrayDimsCompanionParams(currentFuncType))
+			}
+		}
+
+		v.replaceMarker(functionAttributeMarker, attributes)
 	}
 
 	var funcExecutionContext string

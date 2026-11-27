@@ -90,7 +90,8 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 	// A clause statement that SPILLS an evaluating pre-statement -- a multi-value spread
 	// (`keep(next())` becomes `var (ᴛ1, ᴛ2) = next();` then `keep(ᴛ1, ᴛ2)`) or a ref-lowered
-	// temp, both of which advance tupleTempIndex -- cannot stay in a C# for-clause, which has no
+	// temp, both of which advance tupleTempIndex, or an operand-order hoist (operandOrder.go), which advances
+	// operandHoistCount -- cannot stay in a C# for-clause, which has no
 	// statement slot. The INIT runs once, first, so its spill goes before the loop. The COND runs
 	// before EVERY pass, so a spilling condition leaves the header and opens the body as
 	// `<spill> if (!(<cond>)) break;` (a spill hoisted before the loop would be evaluated once --
@@ -110,10 +111,10 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 		if forStmt.Cond != nil {
 			v.hoistedDecls = hoistBuf
-			tempsBefore := v.tupleTempIndex
-			cond = v.convExpr(forStmt.Cond, nil)
+			tempsBefore, hoistsBefore := v.tupleTempIndex, v.operandHoistCount
+			cond = v.convIfCond(forStmt.Cond)
 			v.hoistedDecls = savedHoist
-			condSpilled = v.tupleTempIndex != tempsBefore
+			condSpilled = v.tupleTempIndex != tempsBefore || v.operandHoistCount != hoistsBefore
 		}
 
 		if condSpilled {
@@ -223,10 +224,10 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 		if forStmt.Cond != nil {
 			v.hoistedDecls = condHoistBuf
-			tempsBefore := v.tupleTempIndex
-			cond = v.convExpr(forStmt.Cond, nil)
+			tempsBefore, hoistsBefore := v.tupleTempIndex, v.operandHoistCount
+			cond = v.convIfCond(forStmt.Cond)
 			v.hoistedDecls = savedHoist
-			condSpilled = v.tupleTempIndex != tempsBefore
+			condSpilled = v.tupleTempIndex != tempsBefore || v.operandHoistCount != hoistsBefore
 		}
 
 		// Replace the marker with the init clause's spill, the hoisted condition snapshot decls, and

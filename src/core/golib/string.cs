@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - operator + and the span-operand overloads: INSPIRED BY src/runtime/string.go, Go 1.26.11, func concatstrings. An
+//   only non-empty operand is the result, with no copy.
+// - the rest of @string: original go2cs code.
 
 // ReSharper disable CheckNamespace
 // ReSharper disable SpecifyACultureInStringConversionExplicitly

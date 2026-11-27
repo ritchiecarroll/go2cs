@@ -90,6 +90,75 @@ public class TwinOrderTests
                 }
                 return 0;
             }
+
+            // Row 19 rule 1, debug/elf's NewFile: a struct construction stored through a ref, each argument a CAST of a
+            // parking call. The first call moves, and the second sees `(nint)(int)ᴛ`, a cast of a value already
+            // spilled, before it: a pure read, so it moves too. Before the rule the cast read as an earlier evaluation.
+            public partial struct Hdr { public nint A; public nint B; }
+
+            public static nint castArgs()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                ref var h = ref heap<Hdr>(default, out var Ꮡh);
+                h = new Hdr(A: (nint)(int)Set(Ꮡa, 2, false), B: (nint)(int)Set(Ꮡa, 5, false));
+                return h.A * 10 + h.B;
+            }
+
+            // Row 19 rule 1, math/big's nat.random: the same through a binary operator's left operand.
+            public static nint castOperand()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                ref var h = ref heap<Hdr>(default, out var Ꮡh);
+                h.A = (nint)(int)Set(Ꮡa, 2, false) | (nint)(int)Set(Ꮡa, 5, false) << 4;
+                return h.A;
+            }
+
+            // Row 19 rule 1 over a COPYING cast (P3's read): `use(string(f()), h())`, f returning a shared []byte "old" and h
+            // writing b[0] = 'N'. gc converts after h runs and prints "Nld" (go1.26.11); the twin moves h too, so its
+            // conversion reads the spilled slice after h's write, as gc does. The plain method converts first ("old").
+            internal static slice<byte> shared = new(new byte[] { (byte)'o', (byte)'l', (byte)'d' });
+
+            public static slice<byte> bytesOf(bool block) { if (block) { ᐸꟷ(ch); } return shared; }
+
+            public static nint poke(bool block) { if (block) { ᐸꟷ(ch); } shared[0] = (byte)'N'; return 0; }
+
+            internal static @string use(@string s, nint k) => s;
+
+            public static @string castCopy()
+            {
+                ref var s = ref heap<@string>(default, out var Ꮡs);
+                s = use((@string)bytesOf(false), poke(false));
+                return s;
+            }
+
+            // Row 19 rule 2, encoding/gob's getBaseType(""u8, t.Elem()): a u8 literal handed to an @string parameter, then
+            // a parking call that cannot move ahead of its statement (gob's sits inside a call that moves; here, an if
+            // header), so it awaits in place. The argument C# holds is the @string the literal converts to, not the
+            // span, so nothing ref-like lives across the await.
+            public static nint named(@string s, nint a, bool block) { if (block) { ᐸꟷ(ch); } return len(s) * 10 + a; }
+
+            public static nint u8Named()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                if (named("ab"u8, Set(Ꮡa, 2, false), false) == 23) {
+                    return 1;
+                }
+                return 0;
+            }
+
+            // Row 19 rule 2's boundary, fmt's Sprintf (whose format is an sstring): the same literal handed to a ref struct
+            // parameter IS held across the await, so the call stays plain and the site is ref-blocked by name. A while
+            // header, which runs again each iteration, keeps the call in place (an if header moves it: row 19 M6).
+            public static nint spanned(ReadOnlySpan<byte> s, nint a, bool block) { if (block) { ᐸꟷ(ch); } return s.Length * 10 + a; }
+
+            public static nint u8Spanned()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                while (spanned("ab"u8, Set(Ꮡa, 2, false), false) != 23) {
+                    return 0;
+                }
+                return 1;
+            }
         }
         """;
 
@@ -131,6 +200,31 @@ public class TwinOrderTests
 
         StringAssert.Contains(twins, "if ((await Setꞏtwin(Ꮡe, 2, false)) == 3 && (Ꮡe.ValueSlot) == 2)", "inline re-derivation");
         Assert.AreEqual((nint)1, Twin(assembly, "ifHeader"));
+    }
+
+    [TestMethod]
+    public void ACastOfACallAlreadySpilledDoesNotPinTheNextCall_Row19Rule1()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        StringAssert.Contains(twins, "await Setꞏtwin(Ꮡa, 5, false)", "the second argument's call awaits: the cast before it reads a spilled value");
+        Assert.AreEqual((nint)33, Twin(assembly, "castArgs"), "3*10+3");
+        Assert.AreEqual((nint)51, Twin(assembly, "castOperand"), "3 | 3<<4");
+        Assert.AreEqual("Nld", Twin(assembly, "castCopy").ToString(), "gc converts after the later call writes the shared bytes");
+        Assert.IsFalse(twins.Contains("|castArgs|Set|") || twins.Contains("|castOperand|Set|") || twins.Contains("|castCopy|poke|"), "no ref-blocked row names these functions\n" + twins);
+    }
+
+    [TestMethod]
+    public void AU8LiteralConvertedToAStringParameterIsNotRefLike_Row19Rule2()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        StringAssert.Contains(twins, "(await namedꞏtwin(\"ab\"u8, (await Setꞏtwin(Ꮡa, 2, false)), false))", "the parking call awaits in place");
+        Assert.IsFalse(twins.Contains("|u8Named|Set|"), "no ref-blocked row names u8Named\n" + twins);
+        Assert.AreEqual((nint)1, Twin(assembly, "u8Named"), "the if header compared len(\"ab\")*10+3 with 23");
+
+        StringAssert.Contains(twins, "|u8Spanned|Set|ref-like-before|", "the ref struct parameter's literal still blocks the call, by name");
+        Assert.AreEqual((nint)1, Twin(assembly, "u8Spanned"));
     }
 
     private static readonly CSharpParseOptions Options = new(LanguageVersion.CSharp13);

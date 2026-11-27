@@ -58,7 +58,8 @@ internal static (nint n, error err) Write⁔(/*this*/ ж<recorder> Ꮡw, slice<b
             r.active.gen = ba.gen;
         }
         if (ba.time != 0 && (r.active.minTime == 0 || r.active.minTime > r.freq.mul(ba.time))) {
-            r.active.minTime = r.freq.mul(ba.time);
+            var evalᴛ1 = r.freq.mul(ba.time);
+            r.active.minTime = evalᴛ1;
         }
         r.active.size += len(ba.data);
         r.active.batches = append(r.active.batches, ba.data);

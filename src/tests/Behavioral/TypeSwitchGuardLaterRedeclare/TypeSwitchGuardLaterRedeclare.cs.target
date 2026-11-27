@@ -76,13 +76,15 @@ internal static @string describe(any v, bool nested) {
 internal static void main() {
     var e = errors.New("x");
     fmt.Println(kind(e, [GoFunc("main.func1")] bool (error _) => true));
-    fmt.Println(kind(e, reflect.TypeOf((nint)1)));
+    var evalᴛ1 = reflect.TypeOf((nint)1);
+    fmt.Println(kind(e, evalᴛ1));
     fmt.Println(kind(e, default));
     fmt.Println(kind(e, new EmptyStruct()));
 
     var eʗ1 = e;
     fmt.Println(errorType(e, [GoFunc("main.func2")] bool (error err) => AreEqual(err, eʗ1))());
-    fmt.Println(errorType(e, reflect.TypeOf(""))());
+    var evalᴛ2 = reflect.TypeOf("");
+    fmt.Println(errorType(e, evalᴛ2)());
     fmt.Println(errorType(e, 2.5D)());
 
     fmt.Println(describe((nint)7, true));

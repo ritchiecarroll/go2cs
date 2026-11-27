@@ -25,7 +25,8 @@ partial struct Package {
 // NewPackage returns a new Package for the given package path and name.
 // The package is not complete and contains no explicit imports.
 public static ж<Package> NewPackage(@string path, @string name) {
-    var scope = NewScope(Universe, nopos, nopos, fmt.Sprintf("package %q"u8, path));
+    var evalᴛ1 = fmt.Sprintf("package %q"u8, path);
+    var scope = NewScope(Universe, nopos, nopos, evalᴛ1);
     return Ꮡ(new Package(path: path, name: name, scope: scope));
 }
 

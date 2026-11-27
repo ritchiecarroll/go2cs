@@ -60,7 +60,7 @@ using static go.net.http.@internal.httpcommon_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/internal/httpcommon/httpcommon.go", "httpcommon.cs", "ABc44oKUgoKmqJKClKqigoKmqqKClAAHEoKmggA6doKCgoKCvKKCgpSokoKClKiSgoKoAExS4qaCpoKmgoKUgoKUgriCgoCCpIKCgqiSgoKCgoKCgpQACBKClIKmgoKm/IKCgpSCgoKUgpSCpoKipoIABBKCyoKClIKClLiigoKClIKUgpSUgqaClKaCpoKUgpSCAAcQgoKCgqaCuKaSgqamlIK4goIACAq0AAwglAAMFPKAgqSAgqSAgqSmooKigpSUlIKClAACIAANAqaCgoKUgqa4AAIQ0oKUgriUpAAjOIKCgqaCqJKCooLqgpTIyoLKgoKCgpSCgoK4pg==", "283-376:1;384-387:2;397-410:3")]
+[assembly: GoPositionMap("net/http/internal/httpcommon/httpcommon.go", "httpcommon.cs", "ABc44oKUgoKmqJKClKqigoKmqqKClAAHEoKmggA6doKCgoKCvKKCgpSokoKClKiSgoKoAExS4qaCpoKmgoKUgoKUgriCgoCCpIKCgqiSgoKCgoKCgpQACBKClIKmgoKm/IKCgpSCgoKUgpSCpoKipoIABBKCyoKClIKClLiigoKClIKUgpSUgqaClKaCpoKUgpSCAAcQgoKCgraCuKaSgqamlIK4goIACAq0AAwglAAMFPKAgqSAgqSAgqSmooKigpSUlIKClAACIAANAqaCgoKUgqa4AAIQ0oKUgriUpAAjOIKCgqaCqJKCooLqgpTIyoLKgoKCgpSCgoK4pg==", "283-376:1;384-387:2;397-410:3")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http.@internal;

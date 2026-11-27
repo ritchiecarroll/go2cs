@@ -92,7 +92,7 @@ converter test `TestSwitchAndSelectTempsAreNamedAfterTheIdentifier`.
 
 ## A switch on a `static readonly` constant tag compares in `when` guards
 A switch TAG that is itself a constant emitted as `static readonly` -- an untyped const's `UntypedInt` wrapper (`switch goarch.PtrSize`, reflect abi.go) or a `uintptr`-struct const -- cannot govern a C# switch on constant labels: the int case labels are not constants OF the wrapper struct type, and a constant pattern fails the same way (CS9135). The recorded tag type is no help (go/types records the untyped constant's DEFAULT type in tag position), so the gate is on the object resolution: a constant-valued tag that is not a true C# `const` takes the pattern switch with every clause in a `when` guard (the wrapper's `==` operators) and no constant pattern:
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:201-202 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:202-203 -->
 ```csharp
 switch (CrossPkgLib.Precision) {
 case var ᴛ when ᴛ == 1: {

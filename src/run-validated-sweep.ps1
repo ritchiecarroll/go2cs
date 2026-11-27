@@ -146,6 +146,12 @@ param(
     # read Rosetta's behaviour as the package's (COORD's osx-arm64 oracle seat, ruling (A)). Empty, the default, adds
     # nothing to any row's arguments.
     [string] $TestOracleGoarch = '',
+    # Threads the converter's -platforms to every row: the ONE os/arch target each row converts at and its test host
+    # builds at. It must be a target of the corpus universe on this host's GOOS (Resolve-SweepPlatforms, _roster.ps1).
+    # Empty, the default, takes the interim pin where one applies to this host ($SweepInterimPlatformPins: an
+    # Apple-silicon host runs darwin/amd64 until D7 of docs/phase4/DESIGN-darwin-arm64-flavour.md re-banks the osx-arm64
+    # cells), and otherwise adds nothing to any row's arguments.
+    [string] $Platforms = '',
     # DIAGNOSTIC ONLY: a regex handed to the converter's -test-filter, which filters BOTH sides of the compare (go test
     # -run and the converted host --run). The os-matrix stack-probe stage runs one test of one row this way, so a hang
     # can be dumped (COORD's ruling, 2026-11-08). A filtered row's counts are not its banked counts, so such a sweep
@@ -201,6 +207,18 @@ if ($freeGB -lt 25) {
 # _paths.ps1, which is what pins $env:GoTargetOS on a Linux host -- the variable Get-SweepTargetGoos
 # reads to decide which OS's expectation this run is measuring against.
 . (Join-Path $PSScriptRoot '_roster.ps1')
+
+# ---- the row target (-Platforms, and the darwin/arm64 interim pin) --------------------------------
+# Resolved once, after _paths.ps1 has pinned GoTargetOS/GoTargetArch to the host's flavour: a resolved target
+# re-pins both to ITSELF, so the roster expectation (Get-SweepTargetGoos/-Goarch below) and every child dotnet
+# build read the flavour the rows are converted at, never the host's. Empty leaves both as _paths.ps1 set them.
+$Platforms = Resolve-SweepPlatforms -Explicit $Platforms -HostGoos $HostGoos -HostGoarch $HostGoarch
+if ($Platforms) {
+    $env:GoTargetOS = $Platforms.Split('/')[0]
+    $env:GoTargetArch = $Platforms.Split('/')[1]
+    $pinNote = if ($Platforms -ceq $SweepInterimPlatformPins["$HostGoos/$HostGoarch"]) { ' (the interim pin for this host; D7 removes it)' } else { '' }
+    Write-Host "platforms: every row converts and builds at $Platforms$pinNote"
+}
 
 # ---- cgo pin, WHOLE RUN, every platform (coordinator ruling 2026-09-03, mailbox a29200e47) -------
 # Both comparison sides share ONE cgo state and the converted side can only be the corpus's, which
@@ -658,94 +676,9 @@ function ConvertTo-GoDuration([string] $value) {
 }
 
 # ---- host-conditional verdicts ------------------------------------------------------------------
-# A banked count is normally exact, but a verdict COUNT can be legitimately host-dependent:
-# path/filepath banks 61 on a host without symlink-creation privilege, where Go itself skips
-# TestWalkSymlinkRoot -- and on a host WITH the privilege the test runs and spawns its six
-# table-driven subtests, six verdict rows that simply do not exist on the banking host (the
-# skip->pass flips of the other privilege-gated tests are count-NEUTRAL; only rows that appear or
-# vanish move the count). Banking the larger number would false-red every unprivileged host, the
-# larger population -- so the roster banks the FLOOR and names the conditional verdicts, and the
-# sweep accepts floor+k ONLY when the k extra rows are exactly k of the named tests, agreeing on
-# both runtimes, with no banked verdict missing. Anything outside the named set still fails
-# loudly, exactly as before.
-#
-# The check needs the banked verdict NAME SET, not just the count -- count arithmetic alone would
-# wave through a lost banked row canceling against a rogue new one. That set is the package's
-# committed proof page (docs/validation/current/<pkg-dots>.md), read from HEAD deliberately: the
-# sweep run that just validated at the larger count has already REWRITTEN the working-tree page to
-# match itself, so only the committed copy still records what was banked.
-function Test-HostConditionalDelta {
-    param(
-        [int] $Expected,           # banked matching-verdict count (roster column 2, the floor)
-        [int] $Disclosed,          # banked disclosed count (roster column 3)
-        [string[]] $Conditional,   # the named host-conditional verdicts (roster annotation)
-        [int] $Got,                # the live run's validated count
-        $Comparison,               # the run's go2cs_test_comparison.json via ConvertFrom-ComparisonRecord:
-                                   # go/csharp are ORDINAL dictionaries (never PSObjects -- a PSObject
-                                   # cannot hold the legal case-only verdict-name pairs; see _roster.ps1)
-        [string[]] $BankedNames    # verdict names from the committed proof page's Verdicts table
-    )
-
-    # Local to this function -- nested definitions do not leak into the script scope.
-    function New-HostConditionalVerdictResult([bool] $accepted, [string[]] $extras, [string] $reason) {
-        return [PSCustomObject]@{ Accepted = $accepted; Extras = $extras; Reason = $reason }
-    }
-
-    $k = $Got - $Expected
-    if ($k -lt 1) {
-        return New-HostConditionalVerdictResult $false @() "count $Got is below the banked floor $Expected -- a lost verdict is never host-conditional"
-    }
-    if ($k -gt $Conditional.Count) {
-        return New-HostConditionalVerdictResult $false @() "count $Got exceeds the floor by $k, more than the $($Conditional.Count) named host-conditional verdicts"
-    }
-    if ($null -eq $Comparison -or $null -eq $Comparison.go -or $null -eq $Comparison.csharp) {
-        return New-HostConditionalVerdictResult $false @() 'comparison record carries no per-test verdict maps'
-    }
-
-    # A moved disclosed count shifts the same arithmetic this check relies on, and a disclosure
-    # appearing or retiring is roster maintenance, never host capability.
-    $liveDisclosed = if ($null -eq $Comparison.disclosed) { 0 } else { @($Comparison.disclosed).Count }
-    if ($liveDisclosed -ne $Disclosed) {
-        return New-HostConditionalVerdictResult $false @() "disclosed count moved ($liveDisclosed live vs $Disclosed banked) -- not a host-conditional shape"
-    }
-
-    # The proof page lists every compared verdict: the matched rows plus the disclosed-divergent
-    # ones. If page and roster disagree the banked evidence is inconsistent -- absorb nothing.
-    if ($BankedNames.Count -ne ($Expected + $Disclosed)) {
-        return New-HostConditionalVerdictResult $false @() "committed proof page lists $($BankedNames.Count) verdicts where the roster banks $Expected matched + $Disclosed disclosed -- page and table disagree"
-    }
-
-    $goMap = $Comparison.go
-    $csMap = $Comparison.csharp
-    $liveNames = @($goMap.Keys)
-
-    $missing = @($BankedNames | Where-Object { $liveNames -notcontains $_ })
-    if ($missing.Count -gt 0) {
-        return New-HostConditionalVerdictResult $false @() "banked verdicts missing from this run: $($missing -join ', ')"
-    }
-
-    $extras = @($liveNames | Where-Object { $BankedNames -notcontains $_ })
-    $outside = @($extras | Where-Object { $Conditional -notcontains $_ })
-    if ($outside.Count -gt 0) {
-        return New-HostConditionalVerdictResult $false @() "extra verdicts outside the named host-conditional set: $($outside -join ', ')"
-    }
-
-    # With nothing missing this equals $k by construction; a mismatch means the count and the
-    # verdict maps have come apart (a converter-side accounting change) -- refuse to absorb.
-    if ($extras.Count -ne $k) {
-        return New-HostConditionalVerdictResult $false @() "the $($extras.Count) extra verdict rows do not account for the count delta of $k"
-    }
-
-    foreach ($name in $extras) {
-        $goVerdict = $goMap[$name]
-        if (-not $csMap.ContainsKey($name) -or $csMap[$name] -ne $goVerdict) {
-            $csVerdict = if (-not $csMap.ContainsKey($name)) { 'absent' } else { $csMap[$name] }
-            return New-HostConditionalVerdictResult $false @() "conditional verdict ${name}: go '$goVerdict' vs C# '$csVerdict' -- the sides do not agree"
-        }
-    }
-
-    return New-HostConditionalVerdictResult $true $extras $null
-}
+# Test-HostConditionalDelta, the pure rule, lives in _roster.ps1 (dot-sourced above) beside its sibling
+# Test-HostConditionalDisclosureDelta, so check-roster-format.ps1 proves it with fixtures (R1, 2026-11-25:
+# the FAMILY form). Get-HostConditionalVerdict below reads the evidence and calls it.
 
 # ---- per-OS expectations -------------------------------------------------------------------------
 # The disclosed count this run produced. The converter's "Validated N tests against go test" line
@@ -841,6 +774,15 @@ function Get-HostConditionalVerdict {
         return [PSCustomObject]@{ Accepted = $false; Extras = @(); Reason = "unreadable comparison record at ${comparisonPath}: $comparisonError" }
     }
 
+    # An OS-annotated row (Source names the OS, not 'columns') with a host-conditional FAMILY has no committed page for
+    # its OS: the floor's name set is the live record outside the families, which the pure rule derives and counts
+    # against the annotation itself (R1, 2026-11-25). The Windows page is not read for it.
+    $families = @($Row.ConditionalFamilies | Where-Object { $null -ne $_ })
+    if ($Row.Effective.Source -ne 'columns' -and $families.Count -gt 0) {
+        return Test-HostConditionalDelta -Expected $Row.Effective.Expected -Disclosed $Row.Effective.Disclosed -Conditional $Row.Conditional `
+            -Families $families -Got $Got -Comparison $comparison -BankedNames $null
+    }
+
     # 2>$null is safe here: the sweep loop runs under 'Continue', so a missing page's stderr lines
     # become discarded ErrorRecords rather than a terminating abort (the 'Stop' hazard the drift
     # section documents), and the rejection below already names the path loudly.
@@ -864,9 +806,10 @@ function Get-HostConditionalVerdict {
     # records the banking host's verdict names, so on an OS-annotated row the page-vs-roster
     # cross-check rejects rather than absorbs -- honestly, and by design. Proof pages gain the OS
     # dimension at the anchor release, per the per-OS ruling; until then a non-Windows host
-    # exceeding an annotation is reported, never waved through.
+    # exceeding an annotation is reported, never waved through -- unless the row names a FAMILY,
+    # which took the live-floor path above.
     return Test-HostConditionalDelta -Expected $Row.Effective.Expected -Disclosed $Row.Effective.Disclosed -Conditional $Row.Conditional `
-        -Got $Got -Comparison $comparison -BankedNames $bankedNames.ToArray()
+        -Families $families -Got $Got -Comparison $comparison -BankedNames $bankedNames.ToArray()
 }
 
 # The FOURTH absorption's reader (Q31): a row naming host-conditional DISCLOSURES -- entries whose
@@ -1535,6 +1478,11 @@ foreach ($row in $rows) {
         $execSuffix += " [oracle-goarch=$TestOracleGoarch]"
     }
 
+    if ($Platforms) {
+        $execArgs += @('-platforms', $Platforms)
+        $execSuffix += " [platforms=$Platforms]"
+    }
+
     if ($TestFilter) {
         $execArgs += @('-test-filter', $TestFilter)
         $execSuffix += " [test-filter=$TestFilter, diagnostic]"
@@ -1657,7 +1605,7 @@ foreach ($row in $rows) {
                  else { Get-SweepRowClassification -Expectation $row.Effective -Got $got -GotDisclosed $gotDisclosed -TargetGoos $targetGoos }
         $hostConditional = $null
 
-        if (-not $Hop -and $class -ne 'pass' -and $row.Conditional.Count -gt 0) {
+        if (-not $Hop -and $class -ne 'pass' -and ($row.Conditional.Count + @($row.ConditionalFamilies | Where-Object { $null -ne $_ }).Count) -gt 0) {
             $hostConditional = Get-HostConditionalVerdict -Row $row -Got $got -OutDir $outDir
 
             if ($hostConditional.Accepted) {

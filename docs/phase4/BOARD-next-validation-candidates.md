@@ -42523,6 +42523,473 @@ mid-call assert. No product cause: the hang was the test's collector starving th
 
 — P6 (2026-11-25)
 
+## 2026-11-25 — P1 (COORD routing 20261125T130447Z, claude/p1-tbhelper-retire): testing's TestTBHelper disclosure RETIRED; the 2026-11-05 row is CLOSED
+
+**Finding.** `TestTBHelper` now passes on master `1c556c35a5`, so its `structural` disclosure (the 2026-11-05 row
+above, and G's 2026-11-01 row before it) was orphaned. The disclosure's own reason said a Debug build passes. Since
+`bb6267d0e4` (train 6) every `*.tests` host builds with `<Optimize>false</Optimize>`
+(`src/core/golib/buildTransitive/go.lib.symbols.targets`), so the optimized JIT no longer drops the two statement
+boundaries and the caller lines read `:86` and `:87` as Go does. The same change is the root of sync's `TestPoolGC`
+red (P1, routed to P2 by COORD ruling 20261125T151316Z), which is why `testing` must stay OFF P2's optimized-test-host
+list: putting it on would bring this disclosure back.
+
+**Reads.** linux-x64: three filtered sweeps at `1c556c35a5`, each 83 matched, TestTBHelper passing; the host run
+directly passes it 3 of 3. windows/amd64: hosted sweep-shard run 45643733976, 83 matched against the banked 82, the
+only red the count itself. darwin and linux-arm64 are owed: the darwin run was still queued at commit, and the
+linux-arm64 dispatch returned HTTP 500 three times. The roster carries `linux-arm64: pending` and no `darwin:`
+segment until those land.
+
+**Change.** The manifest entry is removed (`src/core/testing/go2cs_test_disclosures.json`), the windows proof page is
+the hosted run's render, and the roster row reads 83 + 2. `check-roster-format.ps1` passes 1914 checks.
+
+— P1 (2026-11-25)
+
+**Update 2026-11-25 (P1): darwin read.** os-matrix run 45643741101 at `1c556c35a5` read `testing` on both mac RIDs
+at 81 matched + 4 disclosed, TestTBHelper passing (the row's DISC word was only the old 80 + 5 expectation). The row
+banks `darwin: 81 + 4` (evidence `docs/phase4/rebank-1.26.10.3/darwin/reread/P1-TBH.tsv`). linux-arm64 stays pending.
+
+— P1 (2026-11-25)
+
+## 2026-11-25 — P2 (COORD rulings 20261125T145958Z, 150830Z, 151334Z): unoptimized test hosts change allocation and liveness verdicts (CURED for context and sync)
+
+**Class.** Since `de46ae4938` (11-23) every converted stdlib test assembly is compiled `Optimize=false`, so
+`runtime.Caller` reads per-call lines. That also changes what a test can OBSERVE of the code it measures. Two kinds:
+- **Allocation.** A want-0 `testing.AllocsPerRun` body no longer inlines the call it measures, so a box the JIT elided
+  is allocated again. context `TestAllocs`: `Background()` boxes `backgroundCtx` into `Context`, 24 B a run (2,400 B
+  over 100). JitDisasmSummary: every `go.context.tests` method MinOpts, `Background()` FullOpts but not inlined.
+- **Liveness.** A spill slot of the unoptimized frame keeps a value live that Go lets the collector take. sync
+  `TestPoolGC`: 98 of 100 pooled values cleaned up where Go allows one survivor (P1's root and bisect, first bad
+  `bb6267d0e4`, the train that carried the switch).
+
+**Both arms, linux-x64, same sources.** context at `a3bf724219` (its host does not compile at master before that cut):
+as built FAIL x2, `-p:GoTestOptimize=true` PASS x2; with the list below the whole row reads 62/62, EQUAL its bank. sync
+at master `1c556c35a5`: P1's arms (FAIL 6/6, PASS 3/3, the rest of the suite identical); with the list, 48 matching and
+9 disclosed, EQUAL its bank.
+
+**Probe of the cheaper cure, NO.** `[MethodImpl(MethodImplOptions.AggressiveOptimization)]` on the measured lambda, on a
+static local function or on a static method: 24 B a run each, at TieredCompilation 1 and 0, all compiled MinOpts. The
+assembly's DisableOptimizations wins. Control, the same source with `Optimize=true`: 0 B (AO arms 0 at TC=1 too).
+
+**Cure.** `GoOptimizedTestHosts` in golib's `go.lib.symbols.targets`, beside the switch: `context.tests=TestAllocs;
+sync.tests=TestPoolGC`. A listed stdlib host (root namespace `go`) builds with `GoTestOptimize=true`; an explicit
+`-p:GoTestOptimize=false` still builds it unoptimized for the A/B arm. `testOptimizedHosts_test.go` holds the admission
+rule: each entry names a test its package has, and no listed package reads caller lines (`runtime.Caller`,
+`Callers`, `CallersFrames`, or an expected `x_test.go:N` string). Made to fail: a misnamed test and a `testing.tests`
+entry each red by name; its control asserts the predicate fires on `testing` and `log`.
+
+**Reach (census, go/parser over the 269 roster ids, go1.26.11).** 110 test functions call `AllocsPerRun`, in 48 banked
+rows. R's waves 0-2 read the whole linux roster at `7d8e14c094` (which carries the switch): every one of the 48 reads
+EQUAL there except context (masked by CS1503), sort (masked by CS0051, i9's cut; `TestSearchWrappersDontAlloc` unread),
+runtime (host died first; its want-0 alloc tests unread at master), unique and internal/zstd. Measured locally, NOT this
+class: unique `TestHandle` fails with the test assembly optimized as well (FullOpts confirmed); internal/zstd validates
+as built (its `TestAlloc` skips on both sides). runtime is the third candidate once its finalizer death is attributed.
+
+**Owner.** P2 (this seat). Not listed: testing (its `TestTBHelper` reads caller lines and is cured by the switch).
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): unique IS this class; my "not this class" above was wrong, by the instrument.** P6 bisected
+unique `TestHandle` to `bb6267d0e4` (the switch) and read the whole row optimized at master: 27 matching, 12 disclosed,
+the .4 bank. My optimized arm ran the host with TIERED compilation on, so `TestHandle` ran at tier 0 (unoptimized code
+again) while my FullOpts check ran at `DOTNET_TieredCompilation=0`, which the pipeline uses. Re-run at TC=0 on the same
+publish: `TestHandle` PASS twice; the other failures are the row's banked disclosures. Mechanism (P6): `testHandle`
+holds two Handles in frame locals across `drainMaps`/`checkMapsFor`; a DisableOptimizations frame keeps them live to the
+method's end. `unique.tests=TestHandle` joins `GoOptimizedTestHosts`. Lesson: an optimized arm is read at the
+pipeline's own tiering (TC=0), and the opt-level check runs under the same setting as the verdict it vouches for.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): weak and crypto/internal/fips140cache join the list (COORD 155114Z, the finalizer/GC
+family).** Both arms at master `1c556c35a5`, linux-x64, optimized arm at `DOTNET_TieredCompilation=0` with FullOpts
+confirmed: weak as built fails TestPointer, TestPointerEquality, TestImmortalPointer, TestIssue69210, TestIssue70739 and
+TestPointerCleanup (in flight at the deadline), optimized PASS on the whole suite; fips140cache as built TestCache
+abandoned at the 15 m per-test deadline, optimized PASS. With the list, through `-tests all`: weak validated 9/9,
+fips140cache 1/1, unique 27 matching + 12 disclosed (its bank). The list's condition first read only root namespace
+`go`, which a nested package's host (`go.crypto.@internal`) does not have, so fips140cache's entry changed nothing; it
+now matches `go` or `go.*`, as the switch does, and `TestOptimizedTestHostsEvaluateOptimized` evaluates every listed
+project (made to fail on the narrow condition: it named fips140cache). runtime/pprof is P1's; runtime is still open.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P2): runtime/pprof joins the list under a NAMED caller-line exception (COORD 182736Z).** P1 rooted
+TestGoroutineCounts (hangs on fingReady, 15 m deadline) and TestGoroutineProfileConcurrency/finalizer_present
+("finalizer did not run") to the same class: a finalizer on new(*T), the local dropped, runtime.GC(); the unoptimized
+frame keeps the object alive. Bisect at TC0: first bad bb6267d0e4. A/B at master, TC0: optimized PASS 3/3 and 2/2, as
+built FAIL 3/3 and TIMEOUT. pprof_test.go calls runtime.Callers, so the guard refuses the entry; P1's full linux sweep
+at 89820c0df1 + the entry, TC0, read 148 matching + 8 disclosed in both arms, equal to the bank (595 s; as built FAIL in
+1,510 s). The guard now admits a caller-reading package only through `callerLineExceptions`, whose citation must carry a
+date and an equal sweep's counts, and flags an exception with no readers or no listed host (made to fail both ways).
+
+— P2 (2026-11-25)
+
+
+
+## 2026-11-25 — P1 (note, COORD ruling 20261125T160648Z): `syscall` and `internal/zstd` linux readings off the bank are the recorded HOST properties, confirmed by a third host — NOTE, no retire, no re-bank
+
+**Readings.** R's D2/T6 wave-2 dispatch (W2Rp 45632007896 and its twinned arm W2Rt 45632015338, master
+`1c556c35a5`, hosted linux runners) read `syscall` at 50 matched + 9 disclosed against the linux-x64 bank of 42 + 17,
+and `internal/zstd` at 535 + 1 against 536. Both arms read the same.
+
+**Both are on record already.**
+- `syscall`: G's 2026-11-10 note above. The 42 + 17 is a root host's reading; an unprivileged runner reads 50 + 9,
+  because twelve root-only tests skip on both sides there and count as matched. COORD ruled it a host artifact then.
+  The roster carries it (`linux: 42 + 17 (linux-x64; linux-arm64: 50 + 9)`). R's runners are the third host to read
+  50 + 9 unprivileged.
+- `internal/zstd`: the one is `TestAlloc`, already in the manifest (class `deferred`, platforms darwin and linux,
+  `got 274495 allocs, want 0`). It runs only where a `zstd` binary is on `PATH`; hosted ubuntu runners have one, so it
+  fires there. The roster carries it (`linux: 536 (linux-x64; linux-arm64: 535 + 1)`).
+
+**Control.** A linux-x64 filtered sweep of each row at `1c556c35a5` on a root host with no `zstd` binary: `syscall`
+PASS 42 with its 17 disclosures, `internal/zstd` PASS 536. So the eight `syscall` disclosures still fire where their
+tests run, and retiring them would turn a root host red.
+
+**Ruled (COORD, 2026-11-25):** no retire, no re-bank; this note is the record.
+
+— P1 (2026-11-25)
+
+
+## 2026-11-25 — R (D2/T6 linux reading, COORD 20261125T155057Z): fifteen linux rows no longer read the 1.26.11.1 bank at master 08e113cb0b (OPEN, routed)
+
+**Measured, hosted linux-x64, go1.26.11.** The rows are from D2/T6's sweep of the 236 linux rows against a twinned
+standard library ([DATA-mn-d2-t6-linux.md](DATA-mn-d2-t6-linux.md)). Each non-EQUAL row was re-read twins-off and
+twins-on at the same tree, `7d8e14c094` (master `08e113cb0b` plus a CI-only cut).
+
+- 14 of the 15 fail the same way with twins off. They are master drift since the bank's tree `280a01952c`, and none is
+  caused by the twinned build.
+- 1 (internal/runtime/gc/scan) depends on the runner's CPU.
+- Matching counts are go == csharp per name in each row's `go2cs_test_comparison.json`, identical in both arms.
+
+| row | reading at 08e113cb0b (both arms) | owner (COORD 155057Z) |
+|---|---|---|
+| context | test host CS1503 at `goǃ(pcancelʗ1, cause)`: a named func-type value has no `goǃ` rung since d5796d7f4d | P2, reported cured |
+| net/url | test host CS0426, `typeof(encoding.json_package)` binds net/url's own `type encoding` | i9, reported cured |
+| sort | test host CS0051, `variadic<sort_test_package.lessFunc>` less accessible than `OrderedBy` (train 11's variadic<T>) | i9, cut |
+| sync | TestPoolGC Go=pass C#=fail; matched 47 | P1/P2, optimized-host list |
+| runtime | host exit 2, `panic: finalizer did not start` (TestStackGrowth's watchdog, stack_test.go:132); 227 divergences, the same names in both arms | P2, optimized-host A/B |
+| weak | TestPointer; matched 5 | P2, optimized-host A/B |
+| runtime/pprof | TestGoroutineProfileConcurrency/finalizer_present; matched 146 | P2, optimized-host A/B |
+| crypto/internal/fips140cache | TestCache hits the host's 15m per-test deadline; matched 0 | P2, optimized-host A/B |
+| unique | TestMakeAllocs, TestHandle; matched 16 | P6 |
+| testing | DISC 83: TestTBHelper passes, so its disclosure is orphaned | P1 |
+| syscall | DISC 50: 9 disclosed against the linux expectation of 17 | P1 |
+| internal/zstd | DISC 535: 1 disclosed against 0 | P1 |
+| reflect | TestConvert; matched 444 | i9 |
+| log/slog | TestCallDepth; matched 227. It fails twins-off too, so twin frames are not its cause | i9 |
+| internal/runtime/gc/scan | the converted `scan.CanAVX512()` reads false on AVX-512 hardware; C# results identical in all reads; the Go oracle runs 6,166 AVX512 rows only where the runner has AVX-512 | R |
+
+The finalizer and GC grouping (runtime, weak, runtime/pprof, fips140cache, beside sync) is a reading from the failing
+test names, not a root.
+
+gc/scan: on a runner without AVX-512, Go skips the AVX512 tests (`expand_amd64_test.go:16: no AVX512`) and the row
+PASSes at 3095. On one with AVX-512 the row FAILs, whatever the stdlib build. A cure makes the converted probe read the
+hardware as Go does, so the verdict does not depend on the runner.
+
+— R (2026-11-25)
+
+
+## 2026-11-25 — i9 (COORD 20261125T182241Z): at TieredCompilation=0 a frame reported at IL offset 0 settles at the method's first line (OPEN, older than train 4)
+
+**OPEN, measured.** The return-site resolver in `src/core/runtime/managed_impl.cs` (returnSiteILOffset,
+suspendedAtReportedCall, calleeSettledCallSite) misplaces a caller frame's line when the optimizing JIT reports that
+frame at IL offset 0. returnSiteILOffset reads the first call at or after offset 0, which is the method's first
+statement. calleeSettledCallSite searches only the statement holding the reported offset, which holds no call of
+the callee, so nothing settles. Go names the line of the call the frame is suspended in.
+
+**Reading.** The reduced probe in `docs/phase4/data/tc0-offset0-probe/` (Go source, `go.out`, and the readings with
+the resolver's own view). Built `-c Release` on windows/amd64 at master 1c556c35a5 and run with
+`DOTNET_TieredCompilation=0`: `main`'s frame reads line 10 (its first statement) for method calls on lines 11 and
+13, and the leaf frame calling `runtime.Callers` reads one line early. The package-level call reads right. Tiered,
+and tiered with TieredPGO=0, every line equals Go's. Byte-identical readings on 1f2a9afdfc (train 4 before the
+glyph-methods merge), so this predates the forwarder chain. A one-axis A/B with the forwarders flipped to
+NoInlining left it unchanged.
+
+**Scope.** TC0 only, so the `-tests` hosts (Release, tiering off) and a user program run that way. Production
+stays optimized and exact caller lines are opt-in (owner ruling 2026-11-22), so a cure must cost production nothing.
+No banked row is known to reach it: the probe finds it, and log/slog's TestCallDepth was a DIFFERENT TC0 case (the
+frame reported AT its call, refused because the callee was a forwarder of a `ж` overload; cured on
+claude/i9-slog-calldepth-recv, which does not reach this one).
+
+**Next measurement, not a design.** Read what the JIT's debug info records for `main` at TC0 (the native-to-IL map
+around each call), to learn whether offset 0 is all the frame carries or the resolver drops a better mapping.
+
+**Owner.** Unassigned; COORD routes.
+
+— i9 (2026-11-25)
+
+**Update 2026-11-25 (P2): runtime joins the list under a named caller-line exception (COORD 205136Z).** Hosted linux
+sweeps, one axis (the same tree with and without `runtime.tests=TestStackGrowth`): optimized, run 45690857278 at
+932aa2dcc8, "PASS runtime 11094 [1949s]", equal to the bank; as built, run 45690862879 at fa2531cc3b, "FAIL runtime
+[4483s]": the host died on "panic: finalizer did not start" from TestStackGrowth's watchdog (stack_test.go:132),
+11161 Go rows against 11025 C# (truncated). runtime's tests read caller lines in seven files, and as built the row cannot
+complete, so the exception cites the whole row optimized equal to the bank rather than a both-arms verdict comparison.
+
+— P2 (2026-11-25)
+
+
+**Update 2026-11-25 (P1): linux-arm64 read; the retirement is complete on every RID.** os-matrix sweep-shard run
+45715124443 (arch both) at master `473c18062e` read `testing` at 83 matched + 2 disclosed on linux-x64 and linux-arm64,
+the divergent names `TestAllocsPerRun` and `TestMorePanic` on both. The row's linux note reads
+`(linux-x64; linux-arm64: 83 + 2)` (evidence `docs/phase4/rebank-1.26.10.4/linux-arm64/evidence/h10-go1.26.11/P1-TBH-L1.tsv`,
+collected by `docs/phase4/la64-s7/collect.py`), and the Linux arm64 line returns to 236 of 236.
+
+— P1 (2026-11-25)
+
+## 2026-11-25 — R (finding 5; COORD 20261125T165433Z, R1 172300Z, same train 172751Z): CURED, internal/runtime/gc/scan's AVX-512 kernels run where Go runs them; nine CPU flags stay unmapped, each its own census (OPEN)
+
+**Cured: P2's row of 2026-10-16** ("three AVX512 tests skip in C# where Go runs them — FEATURE GAP"), re-met by D2/T6 as
+its finding 5. The cut follows that row's retirement path.
+- `internal/cpu/amd64/cpu_x86_impl.cs` reads `HasAVX512BITALG` from CPUID leaf 7, ECX bit 12, under `HasAVX512F`,
+  exactly as doinit does. .NET 10 has no `Avx512Bitalg`.
+- `internal/runtime/gc/scan/amd64/scan_amd64_impl.cs` gives `ExpandAVX512`, `scanSpanPackedAVX512` and `FilterNilAVX512`
+  managed bodies. Their contracts are read from the assembly: overwrite all 16 words; in order with zeros included;
+  an order-preserving compaction. Each returns what Go's kernel returns.
+- The row's count is host-dependent and annotated with the R1 family form: floor 3095 linux-x64 and 19 windows,
+  plus exactly `TestExpandAVX512/…` (+3076), `TestScanSpanPackedAVX512/…` (+3076), `TestFilterNilAVX512/…` (+14) on
+  an AVX-512 host. The sizes are derived from two hosted AVX-512 reads.
+- Design: [DESIGN-scan-avx512-kernels.md](DESIGN-scan-avx512-kernels.md), P3 APPROVE WITH CHANGES, folded.
+
+**OPEN: the nine flags `cpu_x86_impl.cs` still leaves false** (no System.Runtime.Intrinsics surface in .NET 10).
+Each one turned on is its own census: what reads it in the corpus, and whether a managed body exists behind it.
+
+| flag | what reads it in the corpus |
+|---|---|
+| `HasERMS`, `HasFSRM` | runtime's memmove choice (`cpuflags_amd64`, `useREPMOV = isERMSNiceCPU && HasERMS && HasFSRM`) |
+| `HasADX`, `HasSHA` | `crypto/internal/fips140deps/cpu` (`X86HasADX`, `X86HasSHA`): the bignum and SHA assembly paths. The corpus is the purego flavour, so a consumer census comes first |
+| `HasRDTSCP` | runtime's `cputicks` in asm_amd64.s, through `offsetX86HasRDTSCP` |
+| `HasVAES`, `HasAVX512VAES`, `HasAVX512VNNI`, `HasAVX512VPOPCNTDQ` | no reader outside `internal/cpu` today (vendored x/sys/cpu keeps its own flags) |
+
+Unmapped (false) is the conservative direction: a consumer gated on one takes its portable path. Turning one on where
+its gated path is assembly with no managed body would trade a skip for a throwing stub, which is the trap the scan
+kernels were.
+
+## 2026-11-25 — R (M:N row 13, N5; COORD's I4 ruling 20261125T015518Z): on R-LAPTOP (Windows) one wake in a few runs waits most of a CPU step under the M:N scheduler (host-only)
+
+**OPEN, Windows host only, not rooted to a fix.** MnInvisible's V4 row (P goroutines in CPU steps of 200 ms between
+parks, one goroutine woken every 25 ms, 200 wakes) at GO2CS_MN_PROCS=8 on R-LAPTOP (16 hardware threads, Windows 11) reads
+p50 11-17 ms and p99 46-83 ms, and in 3 to 4 of every 5 runs one wake waits 150-225 ms. The same build in WSL (10 cores)
+reads p99 10-15 ms and a max of 11-23 ms at P = 4 and P = 8, and the default-mode floor on this host is p99 17-44 ms with
+an occasional 105-132 ms max of its own. So the tail belongs to this host. The hosted linux P = 4 run is the gate of record.
+
+**What it is not** (one axis each, 3-5 runs, all at row 13's branch, uncommitted arms):
+- the run-next slot: GO2CS_MN_RUNNEXT=0 leaves the max at 183-191 ms;
+- the monitor's priority: ThreadPriority.AboveNormal leaves 182-187 ms in 3 of 5;
+- the monitor starting carrier threads itself: a starter thread that starts them leaves 165-183 ms in 3 of 5;
+- idle carriers retiring after 100 ms: never retiring them leaves 117-183 ms, with no carrier re-created.
+
+**What the traces show.** In each long wait the monitor's tick spends 130-200 ms in its injection loop, in AddCarrier
+(27-64 ms each, several per tick: Thread.Start while 16 CPU-bound threads hold the 16 hardware threads); s_p.Release and
+s_carriersLock never reached 20 ms. Deferring the start moves the wait onto the queued wake rather than removing it.
+The injections come mostly from the CPU goroutines' own Gosched requeues (about 860 per 200 wakes at P = 8), which
+oversubscribe the host: Go would preempt instead, and go2cs cannot.
+
+**Likely seat.** The injection policy under CPU-bound load on a host with as many runnable threads as cores (an injection
+budget relative to idle hardware threads, or not injecting for a requeued Gosched), weighed against what 3c buys (V2 and
+MnSpinCap's spinners complete). Not cut.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-25)
+
+## 2026-11-25 — R (M:N row 13 follow-up, hosted darwin): os/exec Wait blocks invisibly on darwin under the M:N scheduler
+
+**OPEN, darwin only.** MnInvisible's C-exec census row (K goroutines blocked in exec.Cmd.Wait, warmed, GO2CS_MN=1) on
+hosted osx-x64 and osx-arm64 (run 45576163996, claude/r-mn-n5-sleep 010bb1ba92) reads handoffs 0, retakes 0 and
+injections 10-21 in each of three runs: the wait is invisible, and the scheduler answers it with injected threads. The
+same row on hosted linux reads retakes 15-16 and 0 injections (the native retake), and on hosted windows handoffs 576,
+retakes 16 and 0 injections. Released 3/3 everywhere, so nothing hangs; on darwin each waiter costs a carrier until the
+monitor injects one.
+
+**Likely seat.** darwin's process wait (wait4 through syscall's darwin path, or os's darwin-specific pidfd-less wait)
+reaching the native call without the runtime's entersyscall family, so GoNativeCall's depth stays even. Not traced.
+
+**Owner.** Unassigned; COORD routes (Q3's default: the lane on row 13).
+
+— R (2026-11-25)
+
+## 2026-11-25 — R (addendum to this BOARD's 2026-11-25 row on R-LAPTOP's wake tail): the tail is not that host's alone
+
+Hosted runs of MnInvisible V4 (run 45576158669, windows; run 45576163996, darwin) read twinned p99 well above each host's
+default-mode floor + 25 ms at 200 ms steps: win-x64 45.7-81.2 ms against a floor of 24.0-31.2; osx-arm64 43.1-133.7
+against 11.9-17.0; osx-x64 133.1-190.6 against 80.7-96.9. Hosted linux, the gate of record, reads 7-14 ms against 3-4.
+So the earlier row's "host-only" applies to linux as the exception rather than to R-LAPTOP: the tail shows on every
+non-linux host read so far. Its likely seat is unchanged.
+
+— R (2026-11-25)
+
+## 2026-11-26 — P2 (COORD 20261126T091914Z, P3's F7): a refused native-call seam left the goroutine _Gsyscall (CURED, pre-existing)
+`runtime/syscall_managed_impl.cs` moved the goroutine's status BEFORE the GoNativeCall half in two places, and the
+seam can refuse by throwing. `enterSyscall` set `_Gsyscall`, then `GoNativeCall.Enter` refused a second entry
+("already inside a native call"); every caller enters outside its `try`, so no `exitsyscall` ran and the goroutine
+stayed `_Gsyscall` with no seam entered. `syscallCallbackExit` set `_Gsyscall`, then `ReturnToNative` refused when
+the callback left a native call of its own open. Both now roll the status back before the refusal propagates; the
+order (status before the P release, the Q2 ruling) and the normal path are unchanged. No banked row is known to
+reach either refusal. Rows: `RuntimeSyscallFamilyTests.AnEntryWhoseSeamThrowsLeavesTheStatusRunning` and
+`.ACallbackExitWhoseSeamThrowsLeavesTheStatusRunning`, each red at master (status 3) before its cure.
+
+— P2 (2026-11-26)
+
+**2026-11-26 (P4): darwin go-test's "baseline two" were both test-side; a third red hid behind them on osx-arm64.**
+COORD 2026-11-26 10:10Z. Master's hosted darwin go-test (run 45779430120 at `d6805be2e8`) failed the same two tests on
+both macs, and every train read them as the baseline.
+
+- **TestRelativeGo2CSPathIsResolvedAtParseTime** (`/var` against `/private/var`). The converter is right: it resolves a
+  relative `-go2cspath` with `filepath.Abs`, as Go resolves any relative path, so from a shell it names the path the
+  user's working directory spells. The test's helper launch set `cmd.Env`, and `os/exec` sets `PWD` from `Dir` only
+  when `Env` is nil (go.dev/issue/50599), so the child inherited the parent's `PWD`, which did not name its working
+  directory, and `os.Getwd` fell back to the kernel's canonical `/private/var/...`. Fix: `runCLI` passes `PWD=dir`.
+  Reproduced on linux with `TMPDIR` on a symlinked directory: red at master with darwin's message shape, green with
+  the fix.
+- **TestRetiredHandOwnsHaveRows** ("is the commit in this clone?"). Not a shallow clone: go-test checks out with
+  `fetch-depth: 0` and `2e6cf71e48` is reachable from tags. `git grep` exited 1, which means no match. The marker
+  predicate spelled whitespace `\s`, which the regex library git uses on macOS reads as a literal `s` in an extended
+  expression (git sets `REG_ENHANCED` there for basic expressions only). Fix: `[[:space:]]`, the same files at both
+  baseline SHAs and at HEAD on linux (146, 186, 225); an exit 1 now says the census matched nothing. The guard stays
+  real on hosted runs. `src/handown-baseline.ps1` keeps `\s`: it runs where `\s` is accepted.
+- **The hidden third red.** In the same run the osx-arm64 leg's `go2cs` package hit `panic: test timed out after
+  50m0s`; the step summary kept only `ok`/`FAIL`/`---` lines, so the leg still read as "baseline two", and every
+  `go2cs` test after the kill point had not run there. The summary now leads with each `panic:` line and the tests
+  under its `running tests:` block. The limit stays 50m (COORD 13:29Z); the slowness is the next row.
+
+Hosted reads on `claude/p4-darwin-go-test`: run 45800091628 at `642184ab1d3`, osx-x64 green and osx-arm64 timed out
+at 50m (repoguard ok); run 45809558237 at `ae26fe533ef` (go test limit 100m on darwin, since withdrawn), osx-x64 green
+and osx-arm64 timed out at 100m, the new summary naming the test.
+
+— P4 (2026-11-26)
+
+**2026-11-26 (P4): OPEN. On osx-arm64 the converter's `go2cs` test package runs at least 16x slower than on linux.**
+`TestUntypedRegionShapesConvertWithoutPanic` takes 59 s on a 4-core linux box (go1.26.11, local) and was still running
+at 15m44s when run 45809558237's 100-minute limit killed the package, its subtests about 8 s each (each loads `fmt`
+and `strings` through `go/packages`). osx-x64 finishes the whole package in about 32 minutes, so the 3-core arm64
+runner's usual factor (about 1.5x) does not explain it. Until it is understood, darwin go-test on osx-arm64 cannot be
+green, and the summary names the timeout. Next measurement: per-subtest times with `-v` on both macs, filtered to
+that test (a converter-cgo dispatch on the seat branch).
+
+**Owner.** P4, diagnosing (COORD 2026-11-26 13:29Z).
+
+— P4 (2026-11-26)
+
+**Update 2026-11-26 (P4): the osx-arm64 slowness is memory pressure from the `go2cs` test binary.** Two readings.
+(a) Alone, the slow test is fast there: a `-v` run filtered to `TestUntypedRegionShapesConvertWithoutPanic`
+(converter-cgo dispatch, run 45828947158) passed in 68.5 s on osx-arm64 and 102.1 s on osx-x64, subtests about 0.5-1 s.
+(b) A sampler every 60 s during the full darwin go-test (diagnostic branch `claude/p4-darwin-slow-diag`, run
+45833624874, never for a train) on the 3-core, 7 GB macos-15 runner: free memory stayed near 2,000-4,000 pages (about
+30-60 MB) from the first minutes on, pageouts climbed the whole run (1,058 to 26,536), swap reached 1.1 GB by minute 20,
+and the load average sat at 13-30 while the busiest process, `go2cs.test`, used about one core. `go2cs.test`'s
+resident set read 1.3-2.0 GB whenever it was in the top five, and below the list (paged out or compressed) for eight
+minutes while it was the top CPU process. No leftover processes: `dotnet` count 0 at almost every sample and the
+process count flat. So the cause is (1) memory pressure, not (2) leftover processes or (3) oversubscription: the test
+binary's own heap does not fit beside the system on that runner, and its threads wait on page faults. osx-x64's runner
+has twice the memory, which is why it finishes. Next: a one-axis run with `GOMEMLIMIT` set for the darwin go test,
+and, separately, what in the `go2cs` tests keeps that much heap live.
+
+— P4 (2026-11-26)
+
+**2026-11-26, INSTRUMENT (P1, COORD 112357Z):** `src/tests/PackageTests/LocalRefsPlatform` is run BY HAND only: no
+workflow and no `release-smoke.ps1` arm names it. Its three arms (DEFAULT, OVERRIDE, IN-PLACE) are the only gate that
+builds a local-reference `-recurse` conversion from a clean, git-extracted runtime root, and IN-PLACE is the only one
+that converts inside a `deploy-core.ps1` root; every train's `go test` holds the emitted text, not the build. All
+readings so far are linux-x64. Wiring it into a hosted stage was left out of the in-place seat as not cheap: each leg
+would build the runtime closure three times.
+
+— P1 (2026-11-26)
+
+## 2026-11-26 — R (finding 5 nit 1; P3 20261126T064531Z, COORD 064719Z): on an OS-annotated row with families, the floor is checked by COUNT only (OPEN, stated gap)
+
+**OPEN, read.** In `src/_roster.ps1` `Test-HostConditionalDelta`, an OS-annotated row has no committed proof page for
+that OS (the page is the banking host's). So `-BankedNames $null` takes the floor's names from the live record outside
+the families, and checks only that they number floor + disclosed. A run that lost one banked verdict and gained another
+outside the families would pass that check. The families themselves stay all-or-nothing, and their parent must pass on
+both sides. Today one row uses this branch: `internal/runtime/gc/scan`, linux and darwin. `docs/ValidatedTestPackages.md`
+states the gap. **What removes it:** a committed proof page per OS (the floor's verdict names for linux and for darwin),
+which the branch would then cross-check by name, as it does for an exact-name row. Owner: unrouted.
+
+— R (2026-11-26)
+
+## 2026-11-26 — P5 (Go attribution seat, P3 20261126T170601Z NITs 6 and 7; COORD 20261126T180158Z): two hand-own attribution rows (OPEN)
+
+- **NIT 6: `internal/cpu/darwin/cpu_arm64_darwin_impl.cs` is DERIVED and its Go notice and PROVENANCE block are on the
+  darwin/arm64 branch only** (D2, `claude/p5-darwin-arm64-flip` f6830223fb, where the file moves to `darwin-arm64/`).
+  The attribution sweep skipped it so the two branches would not both edit it. Closes when D2 lands; if D2 is dropped,
+  the file takes the sweep's header on master.
+- **NIT 7: 11 hand-owned parts follow an older Go release than the corpus (1.26.11)**, each pinned in its header: one at
+  1.23.12 (`os/wait_waitid.go` `Process.blockUntilWaitable`, the raw waitid loop where 1.26.11 calls `unix.Waitid`) and
+  ten at 1.24.13 (`sync/oncefunc.go` `OnceFunc`/`OnceValue`/`OnceValues`; six `internal/syscall/windows` and two `syscall`
+  zsyscall parts over the fixed-arity `Syscall` form; `registry_test.go` `testGetStringsValue`). The full list is the F4
+  table in [DATA-go-attribution-scout-2026-11-26.md](DATA-go-attribution-scout-2026-11-26.md) ("Version check"). At least
+  one is a behaviour gap, not form only: 1.26.11's `oncefunc` clears `f` in the defer even when `f` panics, and the 1.24
+  shape does not. The next hop re-reads these parts against the corpus release, and each header moves only when its part
+  is re-read (runbook rule, `docs/GoCorpusMigration.md`).
+
+— P5 (2026-11-26)
+
+**Update 2026-11-26 (P4): the osx-arm64 slowness is a converter memory leak, and the cure is a seat.** Two readings.
+
+*A soft memory limit is not a cure.* With `GOMEMLIMIT=1GiB` on the mac go-test step (diagnostic run 45846772957),
+swap stayed at zero and pageouts fell from 26,536 to 4,004 against the no-limit sampler run 45833624874, but the
+go2cs test binary's CPU doubled (garbage collection against a live heap above the limit) and the package still hit
+the 50m panic, at test 1528 of 1966 where the three no-limit runs had reached 1586, 1657 and 1714.
+
+*The cause.* A heap profile of the go2cs package on linux (`go test -memprofile`, inuse_space at the end) read 4.7
+GB live, all `go/types` objects from `go/packages` loads, with peak RSS near 11 GB. Five process-global caches were
+keyed by objects of one load and never emptied: `importedGenericFuncInfo` (a dependency's whole `types.Info`),
+`importedGenericFuncDecls`, `declaredStructsByPackage`, `foreignDerivedAliases` and `descriptorCompanionCache`.
+Every load makes new objects, so an old entry is never hit again, but it keeps that load's type graph alive. A
+`-stdlib` run loads once per package, so it grows the same way.
+
+*The cure.* `resetLoadScopedCaches` empties them at the root hand-in in `collectCaptureModeMethods`, guarded by
+`TestLoadScopedCachesEmptyAtEachRoot`. Measured on linux/amd64 at master 51f4d4b37a, one axis: peak RSS 10.96 GB to
+3.53 GB, live heap at the end 4.66 GB to 1.36 GB, the same tests and failures. Owed before this row closes: the
+two-seeded `-stdlib` reconvert on every target, before against after, read as zero emission change (P5), and one
+osx-arm64 go-test run inside 50m.
+
+— P4 (2026-11-26)
+
+**2026-11-26 (P4, from P3's review of the cache seat): OPEN. Within one root, the first asker decides the
+generic-function lookup.** `importedGenericFuncDecls` and `importedGenericFuncInfo` cache, per owning package, the
+generic function declarations `genericFuncSource` finds through `loadedPackageSource(currentLoadedPackage, owner)`,
+which searches only the current root and its direct imports, and they cache a miss as an empty set. The route
+pre-pass asks with `currentLoadedPackage` re-pointed at a dependency (`newGenericRouteVisitor`), so for a root R that
+calls `d.F[T]` where `d.F` calls `o.G[T]` and R does not import `o`, the answer depends on which phase asks first.
+The cache seat keeps the first answer for the whole root (it empties the caches only where a root's work starts, and
+`TestLoadScopedCachesHoldAcrossTheRoutePrePass` holds that), which is master's behavior. A cure would key the two maps
+by root and owner, or stop caching a miss taken under a re-pointed root. No standard-library package has the shape
+(P5's two-seeded reconvert at 0dabfea028a moved nothing); a `-recurse` module is not measured.
+
+**Owner.** Unassigned.
+
+— P4 (2026-11-26)
+
+## 2026-11-26 — P5 (guard-floor seat, P3 20261126T193143Z NIT 3; COORD 20261126T193812Z): golib is outside the hand-own floor (OPEN)
+
+- **A new golib file that follows Go and carries no PROVENANCE block passes both licensing guards.**
+  `TestLicensingGoProvenanceHeaders` reads only files that carry a block, and `TestLicensingHandOwnsAreClassified`
+  (the floor, `claude/p5-attr-t17`) skips golib because its population rule, an `*_impl.cs` or a `GoManualConversion`
+  marker, does not describe golib: every golib file is hand-written. Today the three golib parts derived from Go are
+  headed and named in `src/core/golib/NOTICE`. Until a rule fits golib, P3's seat read of each golib diff is the check:
+  a part that follows a Go function takes a block and a NOTICE entry in the same seat.
+
+— P5 (2026-11-26)
+
+
+## 2026-11-26 — R (P3 F7, COORD 20261126T071719Z): `enterSyscall` moves the status before `GoNativeCall.Enter`, which can throw (CLOSED by P2's cure, train 16)
+
+**OPEN, read.** In `src/core/runtime/syscall_managed_impl.cs` `enterSyscall` CASes the goroutine `_Grunning` →
+`_Gsyscall` and only then calls `GoNativeCall.Enter`, which throws `OutOfOrder` when the goroutine is already inside
+a native call. A throw there leaves the goroutine `_Gsyscall` with no transition open, and the caller's `finally`
+never pairs it (the throw is inside the enter, before the `try`). The order itself is ruled (status first, as Go
+orders it; COORD's Q2 ruling, quoted in the method's comment); the gap is only the unwinding of the first half when
+the second half refuses. Pre-existing and not changed by the darwin syscall bracket (claude/r-darwin-syscall-bracket),
+which reaches `enterSyscall` through the same `syscallEntersyscall` as linux and the three hand-owned darwin sites.
+No caller is known to reach the throw: it needs a nested enter, which is itself a caller defect.
+
+**CLOSED 2026-11-26** by P2's enterSyscall/callback-exit rollback (claude/p2-entersyscall-rollback 1add69f766, train 16;
+P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `_Grunning` before the refusal propagates.
+
+— R (2026-11-26)
+
 ## RESIDUAL 2026-11-26 (H): cgo S3, a struct whose CLR layout is not Go's handed to C as `void *` (DEFERRED by COORD)
 
 **Ruling.** COORD (inbox H 20261126T002923Z) deferred S3 of DESIGN-cgo-phase3-marshaling.md 20.4. There is no .5 work.

@@ -189,7 +189,8 @@ internal static bool contains⁔(/*this*/ ж<CertPool> Ꮡs, ж<Certificate> Ꮡ
     if (Ꮡs == nil) {
         return false;
     }
-    return s.haveSum[sha256.Sum224(cert.Raw)];
+    var evalᴛ1 = sha256.Sum224(cert.Raw);
+    return s.haveSum[evalᴛ1];
 }
 
 // AddCert adds a certificate to a pool.

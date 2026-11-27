@@ -61,7 +61,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("hash/maphash/maphash.go", "maphash.cs", "ACNWAAgCgoKmgoKCgqYAAhYACAKCgpSCgpQAJ1rSgoKCvKKClIKCqqK4goKClJSCuIKCgoK4goKqtIKCgoKClIKUgoKCgqaCgqiSggACENKClIKCqqKCgqiSgpSCggACFPKCqJKCgqaCpqyyggAKGICWgJaSgoKssoKossqClA==")]
-[assembly: GoPositionMap("hash/maphash/maphash_purego.go", "maphash_purego.cs", "ABYsgoK4goKUpoKmgoKCAAYQgoKCkpSCgoKCgoKCgpSUgoKmlKS0goKkpoKmgqaCpoKCpoKCgoKmgoKosoKUgoKCpIKCgqSCgqaClKSCpIKCgriClKSCgoKkgqSCpLiCgqSClKaCgoKUgoKCgpSCpoKClA==")]
+[assembly: GoPositionMap("hash/maphash/maphash_purego.go", "maphash_purego.cs", "ABYsgoK4goKUpoKmgoKCAAYQgoKCkpSCgoKCgrLCwpSUgrKmlKS0goKkpoKmgqaCpoKCpoKCgoKmgoKosoKUgoKCpIKCgqSCgqaClKSCpIKCgriClKSCgoKkgqSCpLiCgqSClKaCgoKUgoKCgpSCpoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

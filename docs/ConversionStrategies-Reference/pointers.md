@@ -333,7 +333,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
-<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:114-118 -->
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:116-120 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -470,7 +470,7 @@ The same edge covers **mutually** recursive closures (`even`/`odd`, each literal
 ## A nested closure's capture snapshot reads the enclosing closure's snapshot
 When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and captured by NESTED closures, it is not box-ref'd — it is snapshot-copied: the converter declares `var mʗ1 = m;` before the closure and the closure uses `mʗ1`, so the uncapturable `ref`-local `m` is never referenced inside the lambda. The snapshot chain must be threaded through each level. A capture generated for an **inner** closure that lands inside an **outer** closure's body must read the outer closure's snapshot, not the enclosing method's ref-local — the shape testing/fuzz.go's `run` closure has, capturing `fn := reflect.ValueOf(ff)` (a heap-boxed `reflect.Value`) and spawning `go tRunner(t, func(t){ … fn.Call(args) })` from inside itself, where the method-level `fn` is a ref-local uncapturable inside a closure (CS8175). The guard's own shape emits it:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:37-47 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:37-48 -->
 ```csharp
 ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
@@ -480,7 +480,8 @@ var pʗ1 = p;
     var outʗ2 = outʗ1;
     var pʗ2 = pʗ1;
     goǃ([GoFunc("nestedStructCapture.func1.1")] () => {
-        outʗ2.ᐸꟷ(pʗ2.sum());
+        var evalᴛ1 = pʗ2.sum();
+        outʗ2.ᐸꟷ(evalᴛ1);
     });
 }
 ```
@@ -523,7 +524,7 @@ behavioral corpus has 0 besides the new extension. -->
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
-<!-- source: src/core/crypto/x509/windows/verify.cs:785-788 -->
+<!-- source: src/core/crypto/x509/windows/verify.cs:787-790 -->
 ```csharp
 if (sigChecks == nil) {
     sigChecks = @new<nint>();
@@ -793,7 +794,7 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
-<!-- source: src/core/debug/elf/file.cs:358-362 -->
+<!-- source: src/core/debug/elf/file.cs:360-364 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
 …
@@ -864,7 +865,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1699-1707 -->
+<!-- source: src/core/unsafe/unsafe.cs:1709-1717 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -1117,7 +1118,7 @@ func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Sockl
 }
 ```
 
-<!-- source: src/core/syscall/darwin/zsyscall_darwin_amd64.cs:236-258 -->
+<!-- source: src/core/syscall/darwin-amd64/zsyscall_darwin_amd64.cs:236-258 -->
 ```csharp
 internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags, ж<RawSockaddrAny> from, ж<_Socklen> fromlen) {
     nint n = default;
@@ -1152,7 +1153,7 @@ func int32Hash(i uint32, seed uintptr) uintptr {
 }
 ```
 
-<!-- source: src/core/runtime/alg.cs:392-398 -->
+<!-- source: src/core/runtime/alg.cs:393-399 -->
 ```csharp
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
@@ -1163,7 +1164,7 @@ internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
 }
 ```
 
-Boundaries, each guarded in `syscallFunnelSet_test.go`: a BARE `f(unsafe.Pointer(&x))` argument is not bridged (the Pointer retains its box through the call) and records nothing; a package-level variable's box is a static field and records nothing; an outer CONVERSION (`n := uintptr(noescape(unsafe.Pointer(&i)))`, runtime's `stdcallN` / `mstart0` shape) records nothing, because a stored number is outside the class — a KeepAlive after the store would hold the box exactly as far as the store. The drain is per STATEMENT: a box named inside an `if` condition is kept alive by the first statement after the call (inside the body or after the `if` — a use on any path after the call keeps the local live at it); a `for` INIT/POST clause, emitted inside the C# header where no statement can follow, is refused by name (`rejectForClauseKeepAlive`), as a deferred or spawned call is (the contract is statement-scoped and a `defer` runs at unwind); a function literal converts its body against an EMPTY pending list and restores the enclosing statement's afterwards, so a box the enclosing call named before its literal argument was converted is never drained inside the lambda. `src/syscall-keepalive-census.ps1` walks the converted emission: every captured temp has exactly one KeepAlive (arm 1), hand-own pointer arguments are held across their call (arm 2), and no raw pointer-derived funnel argument remains (arm 3) <!-- arm 3 was red on the pre-cut darwin emission, which had never been through the funnel path: RED 104 -->.
+Boundaries, each guarded in `syscallFunnelSet_test.go`: a BARE `f(unsafe.Pointer(&x))` argument is not bridged (the Pointer retains its box through the call) and records nothing; a package-level variable's box is a static field and records nothing; an outer CONVERSION (`n := uintptr(noescape(unsafe.Pointer(&i)))`, runtime's `stdcallN` / `mstart0` shape) records nothing, because a stored number is outside the class — a KeepAlive after the store would hold the box exactly as far as the store. The drain is per STATEMENT: a box named inside an `if` condition is kept alive by the first statement after the call (inside the body or after the `if` — a use on any path after the call keeps the local live at it); a `for` INIT/POST clause, emitted inside the C# header where no statement can follow, is refused by name (`rejectForClauseKeepAlive`), as a deferred or spawned call is (the contract is statement-scoped and a `defer` runs at unwind); a function literal converts its body against an EMPTY pending list and restores the enclosing statement's afterwards, so a box the enclosing call named before its literal argument was converted is never drained inside the lambda. `src/archived/scripts/syscall-keepalive-census.ps1` (archived; no gate runs it) walks the converted emission: every captured temp has exactly one KeepAlive (arm 1), hand-own pointer arguments are held across their call (arm 2), and no raw pointer-derived funnel argument remains (arm 3) <!-- arm 3 was red on the pre-cut darwin emission, which had never been through the funnel path: RED 104 -->.
 
 ## A call that returns an `unsafe.Pointer` is emitted as the call itself — the pointer keeps what it carries
 
@@ -1589,7 +1590,7 @@ internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
 }
 ```
 
-The conversion back, `@unsafe.Pointer.To<T>`, is the number conversion: it and `ж<T>`'s `explicit operator ж<T>(uintptr)` share one body, `ж<T>.FromNumber`. <!-- src/core/unsafe/unsafe.cs:652 `return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);` (To<T>(Pointer? p)); src/core/golib/ж.cs:1145 `return FromNumber(value, carried: null);` (the uintptr operator). The sample spelled the cast (ж<bool>)(uintptr)(…) until the interior-pointer cut (837a413fdc); the .4 -tests regen moved the cited test file to the new spelling. --> That body builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
+The conversion back, `@unsafe.Pointer.To<T>`, is the number conversion: it and `ж<T>`'s `explicit operator ж<T>(uintptr)` share one body, `ж<T>.FromNumber`. <!-- src/core/unsafe/unsafe.cs:662 `return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);` (To<T>(Pointer? p)); src/core/golib/ж.cs:1145 `return FromNumber(value, carried: null);` (the uintptr operator). The sample spelled the cast (ж<bool>)(uintptr)(…) until the interior-pointer cut (837a413fdc); the .4 -tests regen moved the cited test file to the new spelling. --> That body builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
 
 The information needed to do better is never actually lost. `reflect.Value.Addr` surfaces the **real aliasing box** — an addressable Value already carries `addrBox`, minted by `GoReflect.FieldAliasBox` — and only the projection to a scalar discards it. So golib's `ManagedPointerTokens` (`golib/ж.PointerTokens.cs`) remembers the association the projection drops: the token that was handed out, and the box it named. `reflectPointerToken` registers on the way out, and the `uintptr → ж<T>` operator consults the table **first**, so a token that came from there recovers its own box and aliases the original storage exactly as Go's pointer would. Everything else keeps the native-address route.
 
@@ -1811,7 +1812,7 @@ Nine coupled rules, each first needed by one of those packages:
   `go.math.bits_package.Mul64(a, b)`. When a test-only declaration is specifically responsible, the
   statement also explains the otherwise surprising spelling:
 
-  <!-- source: src/core/hash/maphash/maphash_purego.cs:104 -->
+  <!-- source: src/core/hash/maphash/maphash_purego.cs:118 -->
   ```csharp
   var (hi, lo) = bits.Mul64(a, b);
   ```
@@ -3245,10 +3246,13 @@ its generator writes for turning a number into a pointer (`ptr` below):
 	(*[4]int32)(ptr(p))[1] = 7
 	fmt.Println("store, then read        :", (*[4]int32)(ptr(p))[1], (*[4]int32)(ptr(p))[0], peek(p, 8))
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:94-95 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:95-99 -->
 ```csharp
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4) = 7;
-    fmt.Println("store, then read        :", @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4), @unsafe.Pointer.ElementRef<int32>(ptr(p), 0, 4), peek(p, 8));
+    var evalᴛ2 = ptr(p);
+    var evalᴛ3 = ptr(p);
+    var evalᴛ4 = peek(p, 8);
+    fmt.Println("store, then read        :", @unsafe.Pointer.ElementRef<int32>(evalᴛ2, 1, 4), @unsafe.Pointer.ElementRef<int32>(evalᴛ3, 0, 4), evalᴛ4);
 ```
 
 The conversion and the form applied to it are emitted together as one call of an **element door** on
@@ -3275,7 +3279,7 @@ increment and a field of a struct element are all the one emitted form:
 	(*[4]int32)(ptr(p))[1]++
 	(*[4]int32)(ptr(p))[2] |= 0x0102
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:97-99 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:101-103 -->
 ```csharp
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4) += 3;
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4)++;
@@ -3285,7 +3289,7 @@ increment and a field of a struct element are all the one emitted form:
 ```go
 	(*[3]pair)(ptr(p))[1].a = 5
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:119 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:128 -->
 ```csharp
     @unsafe.Pointer.ElementRef<pair>(ptr(p), 1, 3).a = 5;
 ```
@@ -3298,7 +3302,7 @@ memory, and it can be converted and advanced like any other pointer:
 	e := &(*[4]int32)(ptr(p))[2]
 	*e = 9
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:112-113 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:120-121 -->
 ```csharp
     var e = @unsafe.Pointer.Element<int32>(ptr(p), 2, 4);
     e.Value = 9;
@@ -3312,7 +3316,7 @@ is:
 ```go
 	*(*[4]byte)(ptr(q + 4)) = *(*[4]byte)(ptr(p))
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:134 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:143 -->
 ```csharp
     @unsafe.Pointer.StoreArray<byte>(ptr(q + 4), 4, @unsafe.Pointer.LoadArray<byte>(ptr(p), 4));
 ```
@@ -3321,7 +3325,7 @@ is:
 	*(*sixteen)(ptr(nm)) = id
 	back := *(*sixteen)(ptr(nm))
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:151-152 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:165-166 -->
 ```csharp
     @unsafe.Pointer.StoreArray<byte>(ptr(nm), 16, id);
     var back = (nativeMemory_sixteen)@unsafe.Pointer.LoadArray<byte>(ptr(nm), 16);
@@ -3351,7 +3355,7 @@ dereference that reads only the index runs `N` rounds the same way:
 ```go
 	fmt.Println("len, cap Go, 64 behind  :", len(*(*[4]byte)(g)), cap(*(*[4]byte)(g)), cap((*[4]byte)(g)))
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:229 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:244 -->
 ```csharp
     fmt.Println("len, cap Go, 64 behind  :", 4, 4, 4);
 ```
@@ -3359,7 +3363,7 @@ dereference that reads only the index runs `N` rounds the same way:
 ```go
 	for i := range *(*[4]byte)(g) {
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:236 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:251 -->
 ```csharp
     foreach (var i in range(4)) {
 ```
@@ -3370,7 +3374,7 @@ array, and an operand with a call in it runs the call once.
 ```go
 	for _, b := range *(*[4]byte)(g) {
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:253 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:268 -->
 ```csharp
     foreach (var (_, b) in range(@unsafe.Pointer.LoadArray<byte>(g, 4))) {
 ```
@@ -3378,7 +3382,7 @@ array, and an operand with a call in it runs the call once.
 ```go
 	fmt.Println("len with a call         :", len(*(*[4]byte)(ptr(p))))
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:231 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:246 -->
 ```csharp
     fmt.Println("len with a call         :", len(@unsafe.Pointer.LoadArray<byte>(ptr(p), 4)));
 ```
@@ -3390,7 +3394,7 @@ the array's `N` elements:
 ```go
 	for i, b := range (*[4]byte)(g) {
 ```
-<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:272 -->
+<!-- source: src/tests/Behavioral/ArrayPointerElementDoors/main.cs.target:287 -->
 ```csharp
     foreach (var (i, b) in range(@unsafe.Pointer.View<byte>(g, 0, 4, 4))) {
 ```

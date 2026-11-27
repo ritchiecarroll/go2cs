@@ -362,7 +362,8 @@ internal static void runOne(@string arm, @string kind, probe p) {
             }
         }, ref ᒐ);
         var a = build(arm, kind);
-        fmt.Println(arm, kind, p.name, "=", p.run(a));
+        var evalᴛ1 = p.run(a);
+        fmt.Println(arm, kind, p.name, "=", evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

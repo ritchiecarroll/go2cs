@@ -347,13 +347,17 @@ private static readonly @string cpuˢᵇ = "cpu"u8;
 internal static error build⁔(/*this*/ ж<profileBuilder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    b.end = time.Now();
+    var evalᴛ1 = time.Now();
+    b.end = evalᴛ1;
 
-    b.pb.int64Opt(tagProfile_TimeNanos, b.start.UnixNano());
+    var evalᴛ2 = b.start.UnixNano();
+    b.pb.int64Opt(tagProfile_TimeNanos, evalᴛ2);
     if (b.havePeriod) { // must be CPU profile
         b.pbValueType(tagProfile_SampleType, samplesˢ, countˢ);
         b.pbValueType(tagProfile_SampleType, cpuˢ, nanosecondsˢ);
-        b.pb.int64Opt(tagProfile_DurationNanos, b.end.Sub(b.start).Nanoseconds());
+        var evalᴛ3 = b.end.Sub(b.start);
+        var evalᴛ4 = evalᴛ3.Nanoseconds();
+        b.pb.int64Opt(tagProfile_DurationNanos, evalᴛ4);
         b.pbValueType(tagProfile_PeriodType, cpuˢ, nanosecondsˢ);
         b.pb.int64Opt(tagProfile_Period, b.period);
     }
@@ -645,11 +649,12 @@ internal static uint64 emitLocation⁔(/*this*/ ж<profileBuilder> Ꮡb) {
             if (funcID == 0) {
                 funcID = (uint64)len(b.funcs) + 1;
                 b.funcs[funcName] = (nint)funcID;
+                var evalᴛ1 = runtime_FrameStartLine(Ꮡframe);
                 newFuncs = append(newFuncs, new emitLocation_newFunc(
                     id: funcID,
                     name: funcName,
                     @file: frame.File,
-                    startLine: (int64)runtime_FrameStartLine(Ꮡframe)
+                    startLine: (int64)evalᴛ1
                 ));
             }
             b.pbLine(tagLocation_Line, funcID, (int64)frame.Line);

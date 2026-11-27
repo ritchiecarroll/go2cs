@@ -1,0 +1,49 @@
+<Project>
+  <!--
+    go.lib.rollforward.targets - Gbtc
+    Copyright © 2026 The go2cs Authors. All rights reserved.
+
+    Use of this source code is governed by an MIT-style license
+    that can be found in the LICENSE file.
+  -->
+
+  <!--
+    THE ROLL-FORWARD. The go.* packages target the .NET 10 runtime, and so does a program converted against them. On a
+    machine with only a newer .NET (the .NET 11 SDK alone, say), such a program builds and publishes, but running the
+    build fails at launch: "You must install or update .NET to run this application", because the .NET 10 runtime it
+    asks for is not there. RollForward=Major lets the program run on the newer major runtime ONLY when no .NET 10
+    runtime is installed; a machine that has .NET 10 still runs it on .NET 10, exactly as before. The go.* packages are
+    validated on .NET 10; a project that wants the refusal back sets RollForward=Disable (or LatestMinor) itself.
+    Executables only, console or Windows GUI (a library has no runtime of its own to choose); a converted test host is
+    an executable too and rolls forward the same way. A RollForward the project sets itself always wins, and so does a
+    runtimeconfig.template.json: a project that brings its own template owns its runtime options (with both, the SDK
+    would write rollForward twice). A self-contained publish carries its own runtime and is unaffected. A project
+    reference to golib never imports buildTransitive, so the corpus and its goldens are untouched.
+
+    TWO importers: go.lib.targets (every NuGet consumer of a go.* package) and the Directory.Build.targets that
+    `go2cs -recurse` generates (a module conversion in local-reference mode, whose program references golib's
+    project and so never reads buildTransitive). NOT the repository's src/Directory.Build.targets: an in-tree
+    executable (a behavioral test, a -tests host) is part of the validation of record, which binds .NET 10, and
+    must keep refusing a newer runtime rather than roll onto it unseen. The guard property keeps a second import
+    inert.
+  -->
+  <!-- 2026-11-25 (P1, the local-refs gap): split out of go.lib.targets unchanged, so a -recurse conversion in
+       local-reference mode can import it. Measured on linux-x64 with an isolated .NET 11.0.100 SDK as the only .NET:
+       a local-refs hello program built 0/0 and exited 150 (runtimeconfig without rollForward); with Major it ran and
+       printed what `go run` prints. An in-repo behavioral test executable exits 150 the same way, by design. -->
+  <!-- 2026-11-20 (c6a1b0761e, SDK usability): measured with an isolated .NET 11.0.100 SDK as
+       the only .NET on the box. A -recurse=nuget hello program built 0/0 and its apphost exited 150 with the missing
+       framework 10.0.0; built against this file it ran on 11.0.0, and the same exe on a box with 10.0.15 installed
+       bound 10.0.15 (host trace). After review (9b672cc964): WinExe added; with a runtimeconfig.template.json that set
+       rollForward LatestPatch, the first cut produced a runtimeconfig.json carrying "rollForward" TWICE (Major, then
+       LatestPatch), so a template now turns the default off. UserRuntimeConfig is defined in Microsoft.NET.Sdk.targets
+       and may be unset when this file is read, so the default template path is checked too. The red/green arms are
+       src/tests/PackageTests/RollForward. -->
+  <PropertyGroup>
+    <GoLibRollForwardTargetsImported>true</GoLibRollForwardTargetsImported>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RollForward)' == '' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe') and !Exists('$(UserRuntimeConfig)') and !Exists('$(MSBuildProjectDirectory)/runtimeconfig.template.json')">
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+</Project>

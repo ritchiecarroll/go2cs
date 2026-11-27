@@ -4,6 +4,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2020 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - osInitArm64: DERIVED FROM src/internal/cpu/cpu_arm64_linux.go, Go 1.26.11, func osInit.
+// - hwcapInit, hwcapIsSet: DERIVED FROM src/internal/cpu/cpu_arm64_hwcap.go, Go 1.26.11, funcs hwcapInit, isSet. Go's
+//   statements and comments, with MIDR read through tryReadMIDR.
+// - tryReadMIDR: original go2cs code. Reads MIDR_EL1 from sysfs, which an amd64-converted corpus cannot read with
+//   MRS.
 
 // linux's osInit for an arm64 process: cpu_arm64_linux.go's osInit and cpu_arm64_hwcap.go's hwcapInit,
 // which the linux/amd64 conversion does not build. cpu_arm64_process_impl.cs calls it, and only on an
@@ -21,9 +34,10 @@
 //
 // TWO DEPARTURES FROM GO:
 //
-//   - HasDIT stays FALSE, the darwin ruling (COORD, 2026-11-06; darwin/cpu_arm64_darwin_impl.cs states
-//     the cause). The .NET runtime exposes no control for PSTATE.DIT, so a true flag would be a false
-//     security claim. Go would set it from HWCAP_DIT.
+//   - HasDIT stays FALSE, the darwin ruling (COORD, 2026-11-06;
+//     darwin-amd64/cpu_arm64_process_darwin_impl.cs states the cause). The .NET runtime exposes no
+//     control for PSTATE.DIT, so a true flag would be a false security claim. Go would set it from
+//     HWCAP_DIT.
 //
 //   - MIDR comes from sysfs. Go's getMIDR executes MRS MIDR_EL1, which the kernel traps and emulates
 //     when HWCAP_CPUID is set. Managed code cannot issue that instruction, so this reads the same

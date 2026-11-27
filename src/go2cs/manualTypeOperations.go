@@ -9,8 +9,10 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
+	"strings"
 )
 
 // Some Go declarations cannot be faithfully auto-converted because their semantics depend on
@@ -61,6 +63,13 @@ var manualConversionTypes = map[string]map[string]bool{
 // goosAny entry — both flavors need hand-owning — with each flavor's own *_impl.cs declaring its own
 // signature, which layout L3 already routes per GOOS. The registry decides WHETHER a declaration is
 // hand-owned; the hand-owned file decides what it looks like.
+//
+// AN ENTRY IS A GOOS OR A FULL `os/arch` TARGET. A GOOS entry ("darwin") covers every target of that
+// GOOS; a target entry ("darwin/amd64") covers that one target. The target form exists because a GOOS
+// can have more than one flavour (darwin/amd64 and darwin/arm64, DESIGN-darwin-arm64-flavour.md section
+// 4.2): a stand-in that serves only the amd64 flavour, such as runtime.GOARCH's, would otherwise displace
+// the arm64 flavour's converted declaration too. Matching is done by includes, the one entry point,
+// which takes the conversion's full target.
 type goosScope []string
 
 // goosAny scopes an entry to every target — the common case, and the zero value, so an entry that
@@ -104,14 +113,41 @@ var goosWindowsDarwin = goosScope{"windows", "darwin"}
 // the two that do.
 var goosLinuxDarwin = goosScope{"linux", "darwin"}
 
-// includes reports whether the scope covers the named target operating system.
-func (scope goosScope) includes(goos string) bool {
+// goosWindowsDarwinAmd64 scopes an entry to windows and to the darwin/amd64 target alone: runtime.GOARCH's
+// stand-ins and internal/buildcfg's defaultGOARCH. Each of those flavours is converted once, for amd64, and
+// its hand-own reads the process architecture so that a binary on Arm reports "arm64" as Go's does. The
+// darwin/arm64 flavour is converted FOR arm64, so its converted constant already says "arm64" and keeps it
+// (DESIGN-darwin-arm64-flavour.md section 4.2, ruling R3). Windows keeps its GOOS entry: it has one flavour.
+var goosWindowsDarwinAmd64 = goosScope{"windows", "darwin/amd64"}
+
+// includes reports whether the scope covers target, the conversion's FULL `os/arch` target. A GOOS entry
+// covers every target of that GOOS; an `os/arch` entry covers that one target.
+//
+// It is the one entry point, and every analysis pass hands it the same target the emission does
+// (isManualFuncDeclInPackage says why that matters). A bare GOOS still matches a GOOS entry, which is
+// what a disclosure's scope holds (validateDisclosurePlatforms refuses any other form there), but it can
+// never be measured against a target entry: "darwin" says nothing about which darwin flavour is meant, and
+// answering false would displace the declaration in emission and not in analysis, or the reverse. That
+// call is a programming error, so it panics with the entry and the argument rather than answering.
+func (scope goosScope) includes(target string) bool {
 	if len(scope) == 0 {
 		return true
 	}
 
-	for _, name := range scope {
-		if name == goos {
+	goos, _, isTarget := strings.Cut(target, "/")
+
+	// Refused before any entry is read, so the answer never depends on the entries' order.
+	if !isTarget {
+		for _, entry := range scope {
+			if strings.Contains(entry, "/") {
+				panic(fmt.Sprintf("goosScope.includes(%q): the scope %v holds the target entry %q, which a bare GOOS "+
+					"cannot be measured against; pass the conversion's full os/arch target", target, []string(scope), entry))
+			}
+		}
+	}
+
+	for _, entry := range scope {
+		if entry == target || entry == goos {
 			return true
 		}
 	}
@@ -152,22 +188,22 @@ var manualConversionVars = map[string]map[string]goosScope{
 // linux/amd64's, so it cannot run on linux/arm64 whatever GOARCH says, and needs a flavour of its own.
 var manualConversionConsts = map[string]map[string]goosScope{
 	"runtime": {
-		"GOARCH": goosWindowsDarwin,
+		"GOARCH": goosWindowsDarwinAmd64,
 	},
 	// Go's `const defaultGOARCH = runtime.GOARCH` (zbootstrap.go): folded, it would keep "amd64" beside a run-time
 	// runtime.GOARCH, and go/build's default context would compare the two and disagree.
 	"internal/buildcfg": {
-		"defaultGOARCH": goosWindowsDarwin,
+		"defaultGOARCH": goosWindowsDarwinAmd64,
 	},
 }
 
 // isManualConst reports whether the package-level const is displaced by manualConversionConsts for this
 // conversion's target.
 func (v *Visitor) isManualConst(goName string) bool {
-	return isManualConstInPackage(v.pkg.Path(), goosOfTarget(v.options.targetPlatform), goName)
+	return isManualConstInPackage(v.pkg.Path(), v.options.targetPlatform, goName)
 }
 
-func isManualConstInPackage(pkgPath string, goos string, goName string) bool {
+func isManualConstInPackage(pkgPath string, target string, goName string) bool {
 	constScopes, ok := manualConversionConsts[resolveGorootVendoredPath(pkgPath)]
 
 	if !ok {
@@ -176,16 +212,16 @@ func isManualConstInPackage(pkgPath string, goos string, goName string) bool {
 
 	scope, listed := constScopes[goName]
 
-	return listed && scope.includes(goos)
+	return listed && scope.includes(target)
 }
 
 // isManualVar reports whether the package-level var is displaced by manualConversionVars for this
 // conversion's target.
 func (v *Visitor) isManualVar(goName string) bool {
-	return isManualVarInPackage(v.pkg.Path(), goosOfTarget(v.options.targetPlatform), goName)
+	return isManualVarInPackage(v.pkg.Path(), v.options.targetPlatform, goName)
 }
 
-func isManualVarInPackage(pkgPath string, goos string, goName string) bool {
+func isManualVarInPackage(pkgPath string, target string, goName string) bool {
 	varScopes, ok := manualConversionVars[resolveGorootVendoredPath(pkgPath)]
 
 	if !ok {
@@ -194,7 +230,7 @@ func isManualVarInPackage(pkgPath string, goos string, goName string) bool {
 
 	scope, listed := varScopes[goName]
 
-	return listed && scope.includes(goos)
+	return listed && scope.includes(target)
 }
 
 // Free functions ("funcName") and methods on other types ("recvTypeName.funcName") owned by the
@@ -1201,6 +1237,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 	// guard into an infrastructure-error where Go reads 1 and walks on to a matching skip.
 	"internal/cpu": {
 		"getGOAMD64level": goosAny,
+		// osInit (cpu_arm64_darwin.go), for the darwin/arm64 TARGET alone: Go's body reads every Apple-silicon
+		// feature through sysctlbyname, and darwin-arm64/cpu_arm64_darwin_impl.cs carries it with one ruled
+		// departure, HasDIT stays false (COORD 2026-11-06: .NET cannot set PSTATE.DIT, so Go's DIT-dependent
+		// paths must not be told it is there). darwin/amd64 compiles no osInit: on an arm64 process its option
+		// table fills cpu.ARM64 through the classic partial osInitArm64, whose body is
+		// darwin-amd64/cpu_arm64_process_darwin_impl.cs (DESIGN-darwin-arm64-flavour.md section 5, ruling R6).
+		"osInit": goosScope{"darwin/arm64"},
 	},
 	// internal/runtime/atomic's Loadp — *(*unsafe.Pointer)(ptr) over a BARE unsafe.Pointer (the I5
 	// ruling, 2026-08-26). Go's body is real (atomic_amd64.go), but its converted form round-trips
@@ -2965,14 +3008,14 @@ func (v *Visitor) isManualBoxReceiverMethod(obj types.Object) bool {
 
 	scope, listed := funcScopes[named.Obj().Name()+"."+fn.Name()]
 
-	return listed && scope.includes(goosOfTarget(v.options.targetPlatform))
+	return listed && scope.includes(v.options.targetPlatform)
 }
 
 // isManualFuncDecl reports whether the function declaration is owned by a manual conversion:
 // either any method whose receiver base type is a manual type, or an explicitly listed
 // free function / foreign-receiver method.
 func (v *Visitor) isManualFuncDecl(funcDecl *ast.FuncDecl) bool {
-	return isManualFuncDeclInPackage(v.pkg.Path(), goosOfTarget(v.options.targetPlatform), funcDecl)
+	return isManualFuncDeclInPackage(v.pkg.Path(), v.options.targetPlatform, funcDecl)
 }
 
 // isManualFuncDeclInPackage is isManualFuncDecl's package-path-keyed core, callable from the
@@ -2980,9 +3023,10 @@ func (v *Visitor) isManualFuncDecl(funcDecl *ast.FuncDecl) bool {
 // must know which declarations emit only a placeholder comment — such a function never renders a
 // FunctionPrefixMarker, so it can never carry a hoisted field declaration).
 //
-// `goos` is the conversion's TARGET operating system, which decides whether a scoped entry applies
+// `target` is the conversion's full `os/arch` TARGET, which decides whether a scoped entry applies
 // here at all — see goosScope. The analysis passes must pass the same value emission will, or a
-// declaration would be hoisted-into and then emitted as a placeholder (or the reverse).
+// declaration would be hoisted-into and then emitted as a placeholder (or the reverse); every pass
+// hands in options.targetPlatform whole, never its GOOS half.
 // The registry is keyed by the package's ON-DISK path — for a GOROOT-vendored package the `vendor/`-
 // prefixed one, the key the dependency graph, the corpus directory and the ledger guards all use. The
 // type-checker spells that package WITHOUT the prefix (`golang.org/x/crypto/internal/alias`, because
@@ -2991,7 +3035,7 @@ func (v *Visitor) isManualFuncDecl(funcDecl *ast.FuncDecl) bool {
 // first; a registration under the on-disk key was otherwise never consulted (a two-seeded three-target
 // diff of the first vendored registration read ZERO paths). Idempotent for an already-prefixed key and
 // a no-op for every plain stdlib path.
-func isManualFuncDeclInPackage(pkgPath string, goos string, funcDecl *ast.FuncDecl) bool {
+func isManualFuncDeclInPackage(pkgPath string, target string, funcDecl *ast.FuncDecl) bool {
 	if funcDecl == nil || funcDecl.Name == nil {
 		return false
 	}
@@ -3038,7 +3082,7 @@ func isManualFuncDeclInPackage(pkgPath string, goos string, funcDecl *ast.FuncDe
 
 		scope, listed := funcScopes[key]
 
-		return listed && scope.includes(goos)
+		return listed && scope.includes(target)
 	}
 
 	return false

@@ -181,7 +181,8 @@ internal static slice<byte> appendIndexedName(slice<byte> dst, HeaderField f, ui
         n = 4;
     }
     dst = appendVarInt(dst, n, i);
-    dst[first] |= (byte)(encodeTypeByte(indexing, f.Sensitive));
+    var evalᴛ1 = encodeTypeByte(indexing, f.Sensitive);
+    dst[first] |= (byte)(evalᴛ1);
     return appendHpackString(dst, f.Value);
 }
 

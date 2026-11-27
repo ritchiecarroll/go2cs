@@ -108,6 +108,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
 - **[Multi-Assignment and Evaluation Order](multi-assignment.md)**
   - [A parallel `:=` of FUNCTION VALUES declares each target on its own](multi-assignment.md#a-parallel--of-function-values-declares-each-target-on-its-own)
   - [A multi-value RETURN reads its plain operands AFTER its calls](multi-assignment.md#a-multi-value-return-reads-its-plain-operands-after-its-calls)
+  - [A call runs before the plain operands of its statement](multi-assignment.md#a-call-runs-before-the-plain-operands-of-its-statement)
   - [A SELECTOR left-hand side counts as a reassignment — a field swap must stay simultaneous](multi-assignment.md#a-selector-left-hand-side-counts-as-a-reassignment--a-field-swap-must-stay-simultaneous)
   - [A STAR-DEREF of a CALL result counts as a reassignment — the last shape of the classification gap](multi-assignment.md#a-star-deref-of-a-call-result-counts-as-a-reassignment--the-last-shape-of-the-classification-gap)
   - [A dereferenced pointer CONVERSION as a tuple target writes through `.Value`](multi-assignment.md#a-dereferenced-pointer-conversion-as-a-tuple-target-writes-through-value)
@@ -231,6 +232,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`uintptr` as a generic numeric type argument](generic-constraints.md#uintptr-as-a-generic-numeric-type-argument)
   - [Union-constrained sub-slices ARE the type parameter](generic-constraints.md#union-constrained-sub-slices-are-the-type-parameter)
   - [Spreading a union-constrained value](generic-constraints.md#spreading-a-union-constrained-value)
+  - [An unnamed array type argument carries its length through an array-dims companion](generic-constraints.md#an-unnamed-array-type-argument-carries-its-length-through-an-array-dims-companion)
 - **[Type Aliasing](type-aliasing.md)**
   - [Type Definitions](type-aliasing.md#type-definitions)
   - [Type Alias Declarations](type-aliasing.md#type-alias-declarations)

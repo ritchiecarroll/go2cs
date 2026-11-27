@@ -47,7 +47,8 @@ internal static partial channel<@string> count(nint n) {
     var chʗ1 = ch;
     goǃ([GoFunc("count.func1")] () => {
         for (nint i = 0; i < n; i++) {
-            chʗ1.ᐸꟷ(fmt.Sprint(i));
+            var evalᴛ1 = fmt.Sprint(i);
+            chʗ1.ᐸꟷ(evalᴛ1);
         }
         close(chʗ1);
     });
@@ -112,7 +113,10 @@ internal static partial void main() {
     var done = new channel<@string>(1);
     var doneʗ1 = done;
     goǃ([GoFunc("main.func1")] () => {
-        doneʗ1.ᐸꟷ(walkRangeShape(reflect.ValueOf(new channel/*<-*/<nint>(0, GoChanDir.Send))));
+        var evalᴛ1 = new channel/*<-*/<nint>(0, GoChanDir.Send);
+        var evalᴛ2 = reflect.ValueOf(evalᴛ1);
+        var evalᴛ3 = walkRangeShape(evalᴛ2);
+        doneʗ1.ᐸꟷ(evalᴛ3);
     });
     var doneᴛ1 = done;
     var selᴛ2 = time.After((time.Duration)(5000000000L));

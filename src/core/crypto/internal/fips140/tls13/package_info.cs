@@ -61,7 +61,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "ABAegoK43IKCgoKCgpQ=", "16-36:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABAoAAkCAAgSlIKCgoKCgoKmooKUpqKClAAaKKLcgqqiAAsQgoIABRCiqqIABxCCggAFEKKqoqqiAAcUogAFEKIACQyCgoKCpqI=", "76-76:1", "", "93=extract/1/1/1;120=extract/1/1/1;145=extract/1/1/1;177=deriveSecret/1/1/1;186=deriveSecret/1/1/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABAoAAkCAAgSlIKCgoKCgoKmooKUpqKClAAaKKLcgqqiAAsQgoIABRCiqqIABxCCggAFEKKqoqqiAAcUogAFEKIACQyCgoKCtqI=", "76-76:1", "", "93=extract/1/1/1;120=extract/1/1/1;145=extract/1/1/1;177=deriveSecret/1/1/1;186=deriveSecret/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

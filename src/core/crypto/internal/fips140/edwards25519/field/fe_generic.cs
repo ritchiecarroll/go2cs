@@ -266,7 +266,8 @@ internal static ж<Element> carryPropagate⁔(/*this*/ ж<Element> Ꮡv) {
     // (l4>>51) is at most 64 - 51 = 13 bits, so (l4>>51)*19 is at most 18 bits, and
     // the final l0 will be at most 52 bits. Similarly for the rest.
     var l0 = v.l0;
-    v.l0 = (v.l0 & maskLow51Bits) + mul19(v.l4 >> 51);
+    var evalᴛ1 = mul19(v.l4 >> 51);
+    v.l0 = (v.l0 & maskLow51Bits) + evalᴛ1;
     v.l4 = (v.l4 & maskLow51Bits) + (v.l3 >> 51);
     v.l3 = (v.l3 & maskLow51Bits) + (v.l2 >> 51);
     v.l2 = (v.l2 & maskLow51Bits) + (v.l1 >> 51);

@@ -196,7 +196,8 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
     capturedOsArgs = captureOsArgs();
 
     if (s.debug) {
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= GOCOVERDIR is %s\n"u8, os.Getenv(gocoverdirˢ));
+        var evalᴛ1 = os.Getenv(gocoverdirˢ);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= GOCOVERDIR is %s\n"u8, evalᴛ1);
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= contents of covmetalist:\n"u8);
         foreach (var (k, vᴛ1) in range(ml)) {
             var b = vᴛ1.ΔClone();

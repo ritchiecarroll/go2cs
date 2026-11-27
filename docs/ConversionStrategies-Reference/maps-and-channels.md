@@ -570,7 +570,7 @@ never closed, a receive or send on it blocks forever, and in a `select` with a `
 is simply not chosen — so every probe must *report* "not ready" rather than dereference the absent
 core: `IsClosed` is `false`, `Length` and `Capacity` are 0, and the non-blocking send and receive
 report not-ready.
-<!-- src/core/golib/channel.cs:1814 `public bool IsClosed => m_core is not null && m_core.Closed;`.
+<!-- src/core/golib/channel.cs:1825 `public bool IsClosed => m_core is not null && m_core.Closed;`.
 history: the pre-hchan channel null-checked its backing fields in SendIsReady / ReceiveIsReady / Receiving, but
 IsClosed did not, so asking whether a nil channel was closed threw a NullReferenceException; that crashed every
 child process os/exec launched through a background context and was the last blocker on math/rand's
@@ -862,7 +862,7 @@ local's form). A plain `out var result` in the comm-clause label would leave `�
 (`visitSelectStmt.go`) receives into a uniquely-numbered temp and opens the clause body with the
 entry-time box pattern proven by the escaping-parameter preamble:
 
-<!-- source: src/core/internal/fuzz/fuzz.cs:266-267 -->
+<!-- source: src/core/internal/fuzz/fuzz.cs:267-268 -->
 ```csharp
 case 2 when selᴛ3.ꟷᐳ(out var resultᴛ1): {
     ref var result = ref heap(resultᴛ1, out var Ꮡresult);

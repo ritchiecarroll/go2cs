@@ -94,7 +94,8 @@ internal static partial void goCapture(nint n) {
 
 internal static void main() {
     var c = Ꮡ(new compiler());
-    c.scopes = append(c.scopes, c.newScope());
+    var evalᴛ1 = c.newScope();
+    c.scopes = append(c.scopes, evalᴛ1);
     c.define(false, nil);
     c.define(true, Ꮡ(new scope(id: 7)));
     twoCaptures();

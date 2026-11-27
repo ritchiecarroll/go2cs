@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"go/build"
 	"go/parser"
 	"go/token"
@@ -16,6 +17,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -566,6 +568,308 @@ func TestLicensingPackageBoundaries(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+// goProvenanceProblems checks one hand-written standard-library file's Go attribution header: the
+// "// PROVENANCE" block under the go2cs notice that says which parts follow which Go files. A file
+// with no "// PROVENANCE" text at all is not checked. A "// PROVENANCE" heading in any other shape, or the text
+// with no block line, is refused, so a block the checks below cannot read never passes unread. A file with one must carry, above the block, the notice of the
+// code it follows (Go's copyright line and BSD line, or fiat-crypto's notice for code fiat-crypto
+// generated), name a license of record that exists under LICENSES/, and give every DERIVED FROM or
+// INSPIRED BY bullet a GOROOT-relative source path and the Go version the code was last read against.
+func goProvenanceProblems(text string, licenses string) []string {
+	lines := strings.Split(strings.ReplaceAll(strings.TrimPrefix(text, "\ufeff"), "\r\n", "\n"), "\n")
+	block := -1
+	for i, line := range lines[:min(len(lines), 300)] {
+		if line == "// PROVENANCE:" || line == "// PROVENANCE, part by part:" {
+			block = i
+			break
+		}
+		if strings.HasPrefix(line, "// PROVENANCE") {
+			return []string{"PROVENANCE heading in another shape (want \"// PROVENANCE:\" or \"// PROVENANCE, part by part:\"): " + line}
+		}
+	}
+	if block < 0 {
+		if strings.Contains(text, "// PROVENANCE") {
+			return []string{"PROVENANCE text without a block line (\"// PROVENANCE:\" or \"// PROVENANCE, part by part:\") in the first 300 lines"}
+		}
+		return nil
+	}
+	var problems []string
+	head := strings.Join(lines[:block], "\n")
+	goNotice := regexp.MustCompile(`(?m)^// Copyright \d{4}(?:[,-] ?\d{4})* The Go Authors\. All rights reserved\.\n// Use of this source code is governed by a BSD-style\n`)
+	fiatNotice := regexp.MustCompile(`(?m)^// Copyright \(c\) [\d-]+ The fiat-crypto Authors\. All rights reserved\.`)
+	if !goNotice.MatchString(head) && !fiatNotice.MatchString(head) {
+		problems = append(problems, "PROVENANCE block without a Go notice (Copyright line and BSD line) above it")
+	}
+	// The lead sentence wraps, so the license of record is read from the comment text as one paragraph.
+	flat := strings.ReplaceAll(head, "\n// ", " ")
+	record := regexp.MustCompile(`license of record: (LICENSES/[\w.-]+\.txt)(?: and (LICENSES/[\w.-]+\.txt))?`).FindStringSubmatch(flat)
+	if record == nil {
+		problems = append(problems, "PROVENANCE block without a license of record")
+	} else {
+		for _, name := range record[1:] {
+			if name == "" {
+				continue
+			}
+			if _, err := os.Stat(filepath.Join(licenses, filepath.Base(name))); err != nil {
+				problems = append(problems, "license of record "+name+" does not exist")
+			}
+		}
+	}
+	var bullets []string
+	for _, line := range lines[block+1:] {
+		switch {
+		case strings.HasPrefix(line, "// - "):
+			bullets = append(bullets, strings.TrimPrefix(line, "// - "))
+		case strings.HasPrefix(line, "//   ") && len(bullets) > 0:
+			bullets[len(bullets)-1] += " " + strings.TrimPrefix(line, "//   ")
+		default:
+			goto done
+		}
+	}
+done:
+	if len(bullets) == 0 {
+		problems = append(problems, "PROVENANCE block with no bullets")
+	}
+	source := regexp.MustCompile(`(?:DERIVED FROM|INSPIRED BY) src/[\w./-]+\.(?:go|s|c)\b`)
+	version := regexp.MustCompile(`, Go \d+\.\d+(?:\.\d+)?,`)
+	for _, bullet := range bullets {
+		if !strings.Contains(bullet, "DERIVED FROM") && !strings.Contains(bullet, "INSPIRED BY") {
+			continue
+		}
+		if !source.MatchString(bullet) {
+			problems = append(problems, "bullet without a GOROOT-relative source path: "+bullet)
+		}
+		if !version.MatchString(bullet) {
+			problems = append(problems, "bullet without a Go version: "+bullet)
+		}
+	}
+	return problems
+}
+
+// TestLicensingGoProvenanceHeaders holds every hand-written src/core file that says it follows Go to
+// the attribution rule: Go's notice verbatim, and a provenance block whose bullets name the Go file
+// and version. golib is walked too: its files that follow Go carry the same header under golib's own
+// notice (COORD's Q3 ruling), and the walk must reach at least one of them. Its fixtures prove each
+// refusal fires before the corpus walk is believed.
+func TestLicensingGoProvenanceHeaders(t *testing.T) {
+	licenses := "../../LICENSES"
+	notice := "// Copyright 2009 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n"
+	lead := "//\n// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):\n//\n"
+	good := "// - f: DERIVED FROM src/a/b.go, Go 1.26.11, func f.\n"
+	fixtures := []struct {
+		name, text, want string
+	}{
+		{"accepted", lead + notice + "//\n// PROVENANCE:\n" + good, ""},
+		{"fiat accepted", strings.Replace(lead, "BSD-3-Clause", "BSD-1-Clause", 1) + "// Copyright (c) 2015-2020 The fiat-crypto Authors. All rights reserved.\n//\n// PROVENANCE:\n" + good, ""},
+		{"no notice", lead + "//\n// PROVENANCE:\n" + good, "without a Go notice"},
+		{"no path", lead + notice + "//\n// PROVENANCE:\n// - f: DERIVED FROM b.go, Go 1.26.11, func f.\n", "without a GOROOT-relative source path"},
+		{"no version", lead + notice + "//\n// PROVENANCE:\n// - f: INSPIRED BY src/a/b.go, func f.\n", "without a Go version"},
+		{"no record", "//\n" + notice + "//\n// PROVENANCE:\n" + good, "without a license of record"},
+		{"other heading", lead + notice + "//\n// PROVENANCE — Go 1.26.11. Which part comes from where:\n//\n//   f   DERIVED FROM: src/a/b.go, f\n", "in another shape"},
+		{"no block line", lead + notice + "//\n// The parts follow Go.\n\n    // PROVENANCE: src/a/b.go, Go 1.26.11\n", "without a block line"},
+		{"missing record", strings.Replace(lead, "BSD-3-Clause", "BSD-9-Clause", 1) + notice + "//\n// PROVENANCE:\n" + good, "does not exist"},
+	}
+	for _, fixture := range fixtures {
+		problems := strings.Join(goProvenanceProblems(fixture.text, licenses), "\n")
+		if fixture.want == "" && problems != "" || fixture.want != "" && !strings.Contains(problems, fixture.want) {
+			t.Errorf("fixture %q: got %q, want %q", fixture.name, problems, fixture.want)
+		}
+	}
+	checked, golibChecked := 0, 0
+	err := filepath.WalkDir("../core", func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			switch entry.Name() {
+			case "bin", "obj", "Generated", ".vs", "go.arrays", "go2cs":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".cs") {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if !strings.Contains(string(data), "// PROVENANCE") {
+			return nil
+		}
+		checked++
+		if strings.HasPrefix(filepath.ToSlash(path), "../core/golib/") {
+			golibChecked++
+		}
+		for _, problem := range goProvenanceProblems(string(data), licenses) {
+			t.Errorf("%s: %s", filepath.ToSlash(path), problem)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if checked == 0 {
+		t.Fatal("no src/core file carries a PROVENANCE block: the walk read nothing")
+	}
+	if golibChecked == 0 {
+		t.Fatal("no golib file carries a PROVENANCE block: the walk no longer reaches golib")
+	}
+}
+
+// hasProvenanceBlock reports whether text carries the block line goProvenanceProblems reads, in the same window.
+func hasProvenanceBlock(text string) bool {
+	lines := strings.Split(strings.ReplaceAll(strings.TrimPrefix(text, "\ufeff"), "\r\n", "\n"), "\n")
+	for _, line := range lines[:min(len(lines), 300)] {
+		if line == "// PROVENANCE:" || line == "// PROVENANCE, part by part:" {
+			return true
+		}
+	}
+	return false
+}
+
+// handOwnClassificationProblems checks the hand-owned population (path -> carries a PROVENANCE block) against the
+// unheaded list's text (testdata/licensing/handown-unheaded.txt): every file is headed or listed, never both, and every
+// row names a hand-owned file.
+func handOwnClassificationProblems(population map[string]bool, list string) []string {
+	var problems []string
+	listed := map[string]bool{}
+	for n, line := range strings.Split(strings.ReplaceAll(list, "\r\n", "\n"), "\n") {
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		row, note, _ := strings.Cut(line, " -- ")
+		class, path, ok := strings.Cut(row, " ")
+		switch {
+		case !ok || path == "" || strings.Contains(path, " "):
+			problems = append(problems, fmt.Sprintf("unheaded list line %d: want \"<class> <path>\": %q", n+1, line))
+			continue
+		case class != "own" && class != "pending":
+			problems = append(problems, fmt.Sprintf("unheaded list line %d: class %q is neither own nor pending", n+1, class))
+		case class == "pending" && strings.TrimSpace(note) == "":
+			problems = append(problems, fmt.Sprintf("unheaded list line %d: a pending row says where its header lands, after \" -- \"", n+1))
+		}
+		if listed[path] {
+			problems = append(problems, "unheaded list: "+path+" is listed twice")
+		}
+		listed[path] = true
+	}
+	paths := make([]string, 0, len(population))
+	for path := range population {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		switch headed := population[path]; {
+		case headed && listed[path]:
+			problems = append(problems, path+": carries a PROVENANCE block and has a row on the unheaded list; remove the row")
+		case !headed && !listed[path]:
+			problems = append(problems, path+": a hand-owned file with no PROVENANCE block and no row on the unheaded list; read it against its Go source, then head it or list it as own")
+		}
+	}
+	rows := make([]string, 0, len(listed))
+	for path := range listed {
+		rows = append(rows, path)
+	}
+	sort.Strings(rows)
+	for _, path := range rows {
+		if _, ok := population[path]; !ok {
+			problems = append(problems, "unheaded list: "+path+" is not a hand-owned file under src/core (moved, renamed or deleted?); update the row")
+		}
+	}
+	return problems
+}
+
+// TestLicensingHandOwnsAreClassified is the floor under TestLicensingGoProvenanceHeaders, which reads only files that
+// carry a block: a new hand-own that follows Go and carries none would pass it. Here every hand-owned file in src/core
+// (an *_impl.cs, or a .cs with an uncommented GoManualConversion marker, outside golib, go2cs, go.arrays and
+// go2cs.CpuProfiler) is headed or classified on testdata/licensing/handown-unheaded.txt. The walk reads the files on disk,
+// not git's index, so a stray untracked *_impl.cs under src/core is red on that box too (the safe direction). golib is
+// outside the population: its headed files are read by the header test, and the gap is a BOARD line (2026-11-26).
+func TestLicensingHandOwnsAreClassified(t *testing.T) {
+	head := "// Copyright 2009 The Go Authors. All rights reserved.\n//\n// PROVENANCE:\n// - f: DERIVED FROM src/a/b.go, Go 1.26.11, func f.\n"
+	if !hasProvenanceBlock(head) || hasProvenanceBlock("// PROVENANCE — later\n") {
+		t.Error("hasProvenanceBlock does not read the block line as goProvenanceProblems does")
+	}
+	fixtures := []struct {
+		name       string
+		population map[string]bool
+		list, want string
+	}{
+		{"classified", map[string]bool{"a/x_impl.cs": true, "a/y_impl.cs": false}, "# c\nown a/y_impl.cs\n", ""},
+		{"pending", map[string]bool{"a/y_impl.cs": false}, "pending a/y_impl.cs -- headed on branch B\n", ""},
+		{"unclassified", map[string]bool{"a/y_impl.cs": false}, "", "no row on the unheaded list"},
+		{"both", map[string]bool{"a/x_impl.cs": true}, "own a/x_impl.cs\n", "remove the row"},
+		{"stale row", map[string]bool{}, "own a/gone_impl.cs\n", "not a hand-owned file"},
+		{"pending without note", map[string]bool{"a/y_impl.cs": false}, "pending a/y_impl.cs\n", "says where its header lands"},
+		{"bad class", map[string]bool{"a/y_impl.cs": false}, "derived a/y_impl.cs\n", "neither own nor pending"},
+		{"twice", map[string]bool{"a/y_impl.cs": false}, "own a/y_impl.cs\nown a/y_impl.cs\n", "listed twice"},
+	}
+	for _, fixture := range fixtures {
+		problems := strings.Join(handOwnClassificationProblems(fixture.population, fixture.list), "\n")
+		if fixture.want == "" && problems != "" || fixture.want != "" && !strings.Contains(problems, fixture.want) {
+			t.Errorf("fixture %q: got %q, want %q", fixture.name, problems, fixture.want)
+		}
+	}
+
+	list, err := os.ReadFile("testdata/licensing/handown-unheaded.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	marker := regexp.MustCompile(`(?m)^\s*\[module:\s*(?:go\.)?GoManualConversion\]`)
+	population := map[string]bool{}
+	// Walk the files on disk under src/core, whether or not git tracks them.
+	err = filepath.WalkDir("../core", func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			switch entry.Name() {
+			case "bin", "obj", "Generated", ".vs":
+				return filepath.SkipDir
+			}
+			if filepath.Dir(path) == filepath.Clean("../core") {
+				switch entry.Name() {
+				case "golib", "go2cs", "go.arrays", "go2cs.CpuProfiler":
+					return filepath.SkipDir
+				}
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".cs") {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if !strings.HasSuffix(path, "_impl.cs") && !marker.Match(data) {
+			return nil
+		}
+		rel, err := filepath.Rel("../core", path)
+		if err != nil {
+			return err
+		}
+		population[filepath.ToSlash(rel)] = hasProvenanceBlock(string(data))
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	headed := 0
+	for _, h := range population {
+		if h {
+			headed++
+		}
+	}
+	if headed == 0 || headed == len(population) {
+		t.Fatalf("the walk found %d hand-owned file(s), %d headed: it no longer reads the population", len(population), headed)
+	}
+	for _, problem := range handOwnClassificationProblems(population, string(list)) {
+		t.Error(problem)
 	}
 }
 

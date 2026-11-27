@@ -53,7 +53,8 @@ imports the working-tree file explicitly. That is how the gate was read red-firs
 
 # `RollForward`: a program built against the packages runs on a newer major .NET
 
-`RollForward` is the consumer fixture for go.lib's roll-forward default in `buildTransitive/go.lib.targets`: an
+`RollForward` is the consumer fixture for go.lib's roll-forward default in `buildTransitive/go.lib.rollforward.targets`
+(imported by `go.lib.targets`, and by the output root of a `go2cs -recurse` conversion in local-reference mode): an
 executable that references the packages gets `RollForward=Major`, so on a machine with only a newer .NET (no 10.0
 runtime) the program still starts, while a machine that has .NET 10 keeps running it on .NET 10.
 `test-roll-forward.ps1` restores it from ONE feed into a fresh package cache and reads the `runtimeconfig.json` each
@@ -67,7 +68,10 @@ arm writes:
   so it could not test the clause;
 - TEMPLATE: with a `runtimeconfig.template.json` that sets `rollForward`, the template's value is the only key written;
 - LIBRARY: with `-p:OutputType=Library` the property stays unset;
-- CONTROL: a project-set `Disable` is written as such, proving the arm can fail.
+- CONTROL: a project-set `Disable` is written as such, proving the arm can fail;
+- LOCAL REFS: a program that references golib's PROJECT, under an output root whose `Directory.Build.targets` carries
+  the converter's own import line, gets `Major` and runs; LOCAL REFS, NO IMPORT is the same program without the line,
+  which writes no `rollForward` and, under `-DotnetRoot`, fails to start.
 
 With `-DotnetRoot <root>`, a dotnet root with no 10.0 runtime, the GREEN build is also RUN there and must start on a
 newer major, and the CONTROL build must fail to start with the missing-framework error. With `-TargetsFile`, a
@@ -83,6 +87,35 @@ arm writes no `rollForward` and fails to start, and with the working-tree file e
 runtime 11. Each clause of the property's condition was removed on a copy of the file, and each turned exactly its own
 arm red: the empty-value clause USER WINS and CONTROL (the two project-set values), the template checks TEMPLATE (the
 SDK then writes `rollForward` twice), `WinExe` WINEXE, and the `OutputType` clause LIBRARY.
+
+# `LocalRefsPlatform`: a local-reference conversion builds its own platform, from a clean tree
+
+`test-local-refs-platform.ps1` converts a small module with plain `go2cs -recurse` against a runtime root extracted
+from git (tracked files only, so no `bin`/`obj` can hide a skipped restore) and runs three arms:
+
+- DEFAULT: `dotnet build` and `dotnet run` with no flags build the program and print what `go run` prints. The output
+  root's props default `GoTargetOS`/`GoTargetArch` to the platform the tree was converted for, and its targets hand the
+  same two values to NuGet's restore walk, which ignores the `ProjectReference` metadata the build honors. It also
+  checks the output root's `.artifacts/gen` holds one directory per converted project, so a misspelt guard on that
+  redirection fails here (read red with the guard's token property misspelt);
+- OVERRIDE: `-p:GoTargetArch=riscv64` beats the default and reaches the referenced runtime, whose layout check refuses
+  `<host GOOS>/riscv64` by name;
+- IN-PLACE: `deploy-core.ps1 -Target` stages the same root, and plain `go2cs -recurse -go2cspath <deploy root>`, with no
+  output root, converts into the deploy root itself. The conversion keeps deploy-core's `Directory.Build.props` and
+  writes only its targets, so the platform default is the one deploy-core recorded; `dotnet build` and `dotnet run`
+  with no flags build the program and print what `go run` prints.
+
+```text
+pwsh src/tests/PackageTests/LocalRefsPlatform/test-local-refs-platform.ps1 [-Converter <go2cs>] [-Repository <clone>]
+```
+
+Read red-first on linux-x64: with the restore half removed from the converter, DEFAULT stops on `NETSDK1004` for a
+project the runtime references only on linux (release-smoke 45729437375 read the same on both linux legs), and
+OVERRIDE still passes; with it, both arms PASS. IN-PLACE read red-first on linux-x64 with the converter at 582c50e1dd:
+`CS2021` for `deploy/core/internal/godebugs/gen/`, because the targets' generator-output path read two properties only
+the converter's own props defines; with the guard all three arms PASS. With no flags, IN-PLACE read red at
+148d7a8f68, whose deploy-core recorded no platform (the linux build compiled the windows runtime); green once
+deploy-core records it.
 
 # `BreakFloor`: a package built below the go.* break floor fails the build
 
@@ -262,7 +295,7 @@ TIMEOUT on this arm is the same defect in its other shape;
 way, gating only with `-GateWalkthrough` and MEASURED without it; the `release-smoke` stage passes it on every
 leg; (E) `PublishSymbols` above, the guard and its AOT control against the same feed, MEASURED and never gating
 until it has read green on two trains; (F) `PackageSymbols` above (its AOT arm excepted: that is the `aot-smoke` stage), the
-packages' own symbol files, MEASURED and never gating on the same terms, its frame lines carried into the verdict. It exits 0 when the gating arms pass. The `release-smoke` stage of
+packages' own symbol files, MEASURED and never gating on the same terms, its frame lines carried into the verdict. (L) reads the `go.lib` arm B restored and requires `NOTICE` at its root, equal to `src/core/golib/NOTICE`; it gates for a folder feed and for a published version above 1.26.11.1, and is MEASURED against a published version at or below it. It exits 0 when the gating arms pass. The `release-smoke` stage of
 `.github/workflows/os-matrix.yml` packs the feed on Windows and runs this on all four shipped RIDs.
 `-Feed https://api.nuget.org/v3/index.json -Version <go.* version>` runs the same arms against a published
 release instead (a URL feed requires `-Version`; nuget.org is then the one source); the stage's `published_version`

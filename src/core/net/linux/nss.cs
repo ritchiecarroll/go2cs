@@ -65,7 +65,8 @@ internal static void tryUpdate⁔(/*this*/ ж<nsswitchConfig> Ꮡconf) {
         ᒐd1 = true;
 
         var now = time.Now();
-        if (conf.lastChecked.After(now.Add((time.Duration)(-5000000000L)))) {
+        var evalᴛ1 = now.Add((time.Duration)(-5000000000L));
+        if (conf.lastChecked.After(evalᴛ1)) {
             return;
         }
         conf.lastChecked = now;

@@ -113,7 +113,8 @@ internal static bool /*sent*/ sendActualType⁔(/*this*/ ж<Encoder> Ꮡenc, io.
     // Id:
     state.encodeInt(-(int64)info.id);
     // Type:
-    Ꮡenc.encode(state.b, reflect.ValueOf(info.wire), wireTypeUserInfo);
+    var evalᴛ1 = reflect.ValueOf(info.wire);
+    Ꮡenc.encode(state.b, evalᴛ1, wireTypeUserInfo);
     enc.writeMessage(w, state.b);
     if (enc.err != nil) {
         return sent;

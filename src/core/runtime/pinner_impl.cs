@@ -4,6 +4,25 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Pinner.Pin, Pinner.Unpin, isPinned, pinnerGetPinCounter: INSPIRED BY src/runtime/pinner.go, Go 1.26.11, funcs
+//   isPinned, pinnerGetPinCounter; methods Pinner.Pin, Pinner.Unpin. The same promise and observables over the CLR
+//   heap, with a pin table keyed by the allocation.
+// - cgoCheckPointer, checkArg, checkWords: INSPIRED BY src/runtime/cgocall.go, Go 1.26.11, funcs cgoCheckPointer,
+//   cgoCheckArg, cgoCheckUnknownPointer. The same rule, walked over the pointee's value by its Go type.
+// - the pin table, the referent helpers, the type-walk helpers and the Go* test seams: original go2cs code. The
+//   managed machinery.
 
 // go2cs HAND-OWNED companion — runtime.Pinner over the CLR heap (Q45).
 // Design and prediction on record: docs/phase4/DESIGN-runtime-pinner.md.

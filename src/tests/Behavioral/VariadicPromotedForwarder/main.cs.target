@@ -20,7 +20,8 @@ internal static @string Trace(this cached recvᴛ, @string format, params ꓸꓸ
 
 internal static @string Name(this ref cached c) {
     c.hits++;
-    return fmt.Sprintf("cached(%d):%s"u8, c.hits, c.Host.Name());
+    var evalᴛ1 = c.Host.Name();
+    return fmt.Sprintf("cached(%d):%s"u8, c.hits, evalᴛ1);
 }
 
 internal static void main() {

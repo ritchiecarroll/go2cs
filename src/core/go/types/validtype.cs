@@ -47,7 +47,11 @@ internal static bool validType0⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos,
                 pos = t.obj.pos;
             }
             check.indent++;
-            Ꮡcheck.trace(pos, validTypeSNestVPathVˢ, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
+            var evalᴛ1 = makeObjList(nest);
+            var evalᴛ2 = pathString(evalᴛ1);
+            var evalᴛ3 = makeObjList(path);
+            var evalᴛ4 = pathString(evalᴛ3);
+            Ꮡcheck.trace(pos, validTypeSNestVPathVˢ, typ, evalᴛ2, evalᴛ4);
             defer([GoFunc("(*Checker).validType0.func1")] () => {
                 Ꮡcheck.Value.indent--;
             }, ref ᒐ);
@@ -148,7 +152,9 @@ internal static bool validType0⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos,
                     // index of t in nest. Search again.
                     foreach (var (start, p) in range(path)) {
                         if (Identical(new NamedжType(p), new NamedжType(t))) {
-                            Ꮡcheck.cycleError(makeObjList(path.slice(start)), 0);
+                            var evalᴛ5 = path.slice(start);
+                            var evalᴛ6 = makeObjList(evalᴛ5);
+                            Ꮡcheck.cycleError(evalᴛ6, 0);
                             return false;
                         }
                     }
@@ -161,7 +167,9 @@ internal static bool validType0⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos,
             // must also be in path (invariant). But not every type in path is in nest, since
             // nest may be pruned (see below, *TypeParam case).
             t.Origin().unpack();
-            if (!Ꮡcheck.validType0(pos, t.Origin().rhs(), append(nestᴷ, nest, t), append(pathᴷ, path, t))) {
+            var evalᴛ7 = t.Origin();
+            var evalᴛ8 = evalᴛ7.rhs();
+            if (!Ꮡcheck.validType0(pos, evalᴛ8, append(nestᴷ, nest, t), append(pathᴷ, path, t))) {
                 return false;
             }
 

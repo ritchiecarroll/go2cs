@@ -19,12 +19,17 @@ internal static (Message, error) parseInterfaceMessage⁔(/*this*/ ref wireForma
     }
     nuint attrs = (nuint)nativeEndian.Uint32(b[4..8]);
 
+    var evalᴛ1 = new slice<Addr>(syscall.RTAX_MAX);
+    var evalᴛ2 = b[8..12];
+    var evalᴛ3 = nativeEndian.Uint32(evalᴛ2);
+    var evalᴛ4 = b[12..14];
+    var evalᴛ5 = nativeEndian.Uint16(evalᴛ4);
     var m = Ꮡ(new InterfaceMessage(
         Version: (nint)b[2],
         Type: (nint)b[3],
-        Addrs: new slice<Addr>(syscall.RTAX_MAX),
-        Flags: (nint)nativeEndian.Uint32(b[8..12]),
-        Index: (nint)nativeEndian.Uint16(b[12..14]),
+        Addrs: evalᴛ1,
+        Flags: (nint)evalᴛ3,
+        Index: (nint)evalᴛ5,
         extOff: w.extOff,
         raw: b.slice(0, l)
     ));
@@ -58,10 +63,12 @@ internal static (Message, error) parseInterfaceAddrMessage⁔(/*this*/ ref wireF
     if (len(b) < l) {
         return (default, errInvalidMessage);
     }
+    var evalᴛ1 = b[8..12];
+    var evalᴛ2 = nativeEndian.Uint32(evalᴛ1);
     var m = Ꮡ(new InterfaceAddrMessage(
         Version: (nint)b[2],
         Type: (nint)b[3],
-        Flags: (nint)nativeEndian.Uint32(b[8..12]),
+        Flags: (nint)evalᴛ2,
         raw: b.slice(0, l)
     ));
     if (Δruntime.GOOS == "netbsd"u8) {

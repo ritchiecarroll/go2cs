@@ -21,8 +21,8 @@ heap, so any test that counts allocations reads more than Go does.
 allocation reports at least 1, whether or not golib's counter sees it. So parity means removing the allocation. Taking
 it out of the counter changes nothing: an allocation the counter does not charge still fails a want-zero assert on
 its bytes. `AllocsPerRun` also calls the function once before it measures, so storage that is created on first use
-and reused afterwards does not show in the reading. <!-- src/core/testing/testing.cs:1133 (`if (allocated == 0L)`),
-:1116 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1038
+and reused afterwards does not show in the reading. <!-- src/core/testing/testing.cs:1150 (`if (allocated == 0L)`),
+:1133 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1055
 (`nonzero bytes with a nonzero count ⟹ the COUNT is reported, floored at 1;`). -->
 
 **Where Go decides.** Go makes the decision at one of two places:
@@ -179,7 +179,7 @@ and zeroes it, as Go zeroes a stack object.
 **S3 — an allocation the counter does not charge.** This is `stackAppend`'s model today: the buffer is allocated
 when it is taken and is left out of `AllocationCounter`. **Rejected for parity**, because the bytes are still
 allocated and a want-zero assert still fails. A `stackAppend` site on a want-zero path keeps reading nonzero until
-its buffer comes from S2. <!-- src/core/golib/stackAppend.cs:35-36
+its buffer comes from S2. <!-- src/core/golib/stackAppend.cs:47-48
 (`is allocated when it is taken and is not charged to`…`because Go's lives on the stack`). -->
 
 **S4 — inline the callee in the converter.** **Rejected**, because it breaks the one-for-one function boundaries the

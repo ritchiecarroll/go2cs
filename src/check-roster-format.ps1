@@ -598,6 +598,85 @@ Assert-Equal 'host-conditional-disclosure: a row naming nothing absorbs nothing'
 Assert-Equal 'host-conditional-disclosure: a record without verdict maps is refused' $false `
     (Test-HostConditionalDisclosureDelta -Expected 87 -Disclosed 1 -Names $hcdNames -Got 86 -GotDisclosed 2 -Comparison ([PSCustomObject]@{ disclosed = @('TestExtraFiles (platform-skip): x') })).Accepted
 
+# ---- 1b2c. the host-conditional FAMILY form (R1; COORD 20261125T172300Z and 172751Z) ---------------
+# A capability-gated test can spawn thousands of subtests (internal/runtime/gc/scan's AVX-512 kernels: 6,166 on a
+# hosted AVX-512 runner, none elsewhere), too many to name one by one. A FAMILY names a parent and its subtests:
+# `Parent/...` (U+2026) with its exact size `(+N)`, derived from the evidence. The sweep accepts the floor, or the floor
+# plus EXACTLY the sizes of the families that ran. Go runs none of a family or all of it, so a family is all or
+# nothing, and an in-between count fails. Every extra row agrees on both runtimes. A family's parent may change only
+# from skip to pass, on both sides. On an OS-annotated row (no committed proof page for that OS), the floor's name set
+# is the live record outside the families, and it must number exactly floor + disclosed.
+$ell = [string][char]0x2026      # U+2026 HORIZONTAL ELLIPSIS -- the family marker
+$famParsed = Read-FixtureRoster @(
+    "| [``fam/pkg``](https://x/fam) | 4 |  | Kernels $dot host-conditional (wide vectors): ``TestE/$ell`` (+3), ``TestS/$ell`` (+2), ``TestX`` $dot linux: 7 $dot [proof](p.md) |"
+)
+Assert-Equal 'family: the row parses' 1 $famParsed.Count
+Assert-Equal 'family: exact names stay in Conditional' 'TestX' ($famParsed[0].Conditional -join ',')
+Assert-Equal 'family: parents and sizes parse, in order' 'TestE:3,TestS:2' (($famParsed[0].ConditionalFamilies | ForEach-Object { "$($_.Parent):$($_.Size)" }) -join ',')
+Assert-Equal 'family: the OS annotation beside it still parses' 7 $famParsed[0].OS['linux'].Expected
+Assert-Equal 'family: a row without families carries none' 0 @($byName['cond/pkg'].ConditionalFamilies).Count
+Assert-Throws 'family: a family without its size is refused' {
+    Read-FixtureRoster @("| [``famnosize/pkg``](https://x/f) | 4 |  | K $dot host-conditional (w): ``TestE/$ell`` $dot [proof](p.md) |")
+} 'family'
+Assert-Throws 'family: a size on a plain name is refused' {
+    Read-FixtureRoster @("| [``sizenofam/pkg``](https://x/f) | 4 |  | K $dot host-conditional (w): ``TestE`` (+3) $dot [proof](p.md) |")
+} 'size'
+
+# The floor: 4 verdicts, both families' parents skipping on both sides. A capable host runs every subtest.
+$famFamilies = @([PSCustomObject]@{ Parent = 'TestE'; Size = 3 }, [PSCustomObject]@{ Parent = 'TestS'; Size = 2 })
+$famBanked = @('TestOther', 'TestA', 'TestE', 'TestS')
+function New-FamilyComparison([hashtable] $Go, [hashtable] $CSharp) {
+    return [PSCustomObject]@{ go = New-VerdictMap $Go; csharp = New-VerdictMap $CSharp }
+}
+$famAllGo = @{ TestOther = 'pass'; TestA = 'pass'; TestE = 'pass'; 'TestE/1' = 'pass'; 'TestE/2' = 'pass'; 'TestE/3' = 'pass'
+               TestS = 'pass'; 'TestS/1' = 'pass'; 'TestS/2' = 'pass' }
+$famAll = New-FamilyComparison $famAllGo $famAllGo
+$famOneGo = @{ TestOther = 'pass'; TestA = 'pass'; TestE = 'pass'; 'TestE/1' = 'pass'; 'TestE/2' = 'pass'; 'TestE/3' = 'pass'; TestS = 'skip' }
+$famOne = New-FamilyComparison $famOneGo $famOneGo
+$famPartialGo = @{ TestOther = 'pass'; TestA = 'pass'; TestE = 'pass'; 'TestE/1' = 'pass'; 'TestE/2' = 'pass'; TestS = 'skip' }
+$famPartial = New-FamilyComparison $famPartialGo $famPartialGo
+
+Assert-Equal 'family: a capable host, both families, floor + 3 + 2, is accepted' $true `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 9 -Comparison $famAll -BankedNames $famBanked).Accepted
+Assert-Equal 'family: one family ran and the other parent still skips (floor + 3), accepted' $true `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 7 -Comparison $famOne -BankedNames $famBanked).Accepted
+Assert-Equal 'family: a family that ran in PART (2 of 3) is refused' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 6 -Comparison $famPartial -BankedNames $famBanked).Accepted
+Assert-Equal 'family: the refusal names the family and its count' $true `
+    ((Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 6 -Comparison $famPartial -BankedNames $famBanked).Reason -match 'TestE.*2 of 3')
+Assert-Equal 'family: a count that is not floor plus whole families is refused' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 8 -Comparison $famAll -BankedNames $famBanked).Accepted
+$famDisagreeCs = $famAllGo.Clone(); $famDisagreeCs['TestE/2'] = 'skip'
+Assert-Equal 'family: a subtest the sides disagree on is refused' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 9 -Comparison (New-FamilyComparison $famAllGo $famDisagreeCs) -BankedNames $famBanked).Accepted
+$famParentCs = $famAllGo.Clone(); $famParentCs['TestE'] = 'skip'
+Assert-Equal 'family: a parent that ran its family must pass on BOTH sides' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 9 -Comparison (New-FamilyComparison $famAllGo $famParentCs) -BankedNames $famBanked).Accepted
+$famParentFail = $famAllGo.Clone(); $famParentFail['TestE'] = 'fail'
+Assert-Equal 'family: a parent that FAILS on both sides is not skip-to-pass, refused' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 9 -Comparison (New-FamilyComparison $famParentFail $famParentFail) -BankedNames $famBanked).Accepted
+$famOutsideGo = $famAllGo.Clone(); $famOutsideGo['TestZ/new'] = 'pass'
+Assert-Equal 'family: an extra row outside every family is refused' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 10 -Comparison (New-FamilyComparison $famOutsideGo $famOutsideGo) -BankedNames $famBanked).Accepted
+$famLostGo = $famAllGo.Clone(); [void]$famLostGo.Remove('TestA')
+Assert-Equal 'family: a banked verdict missing beside a full family is refused' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 8 -Comparison (New-FamilyComparison $famLostGo $famLostGo) -BankedNames $famBanked).Accepted
+Assert-Equal 'family: exact names and families together (floor + 1 + 3)' $true `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @('TestX') -Families $famFamilies -Got 8 `
+        -Comparison (New-FamilyComparison ($famOneGo + @{ TestX = 'pass' }) ($famOneGo + @{ TestX = 'pass' })) -BankedNames $famBanked).Accepted
+# The OS-annotated path: no committed page for this OS, so the floor's name set is the live record outside the families.
+Assert-Equal 'family: an OS-annotated row derives its floor from the live record, accepted' $true `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 9 -Comparison $famAll -BankedNames $null).Accepted
+Assert-Equal 'family: an OS-annotated row whose live floor is short of the annotation is refused' $false `
+    (Test-HostConditionalDelta -Expected 4 -Disclosed 0 -Conditional @() -Families $famFamilies -Got 8 -Comparison (New-FamilyComparison $famLostGo $famLostGo) -BankedNames $null).Accepted
+Assert-Equal 'family: with no family, a live-derived floor is never used' $false `
+    (Test-HostConditionalDelta -Expected 2 -Disclosed 0 -Conditional @('TestA') -Families @() -Got 3 `
+        -Comparison (New-FamilyComparison @{ TestOther = 'pass'; TestB = 'pass'; TestA = 'pass' } @{ TestOther = 'pass'; TestB = 'pass'; TestA = 'pass' }) -BankedNames $null).Accepted
+# The exact-name form keeps its contract: floor + k named rows, each agreeing.
+Assert-Equal 'exact names: the existing form still accepts floor + k named rows' $true `
+    (Test-HostConditionalDelta -Expected 2 -Disclosed 0 -Conditional @('TestA/one', 'TestA/two') -Got 4 `
+        -Comparison (New-FamilyComparison @{ TestOther = 'pass'; TestA = 'pass'; 'TestA/one' = 'pass'; 'TestA/two' = 'pass' } @{ TestOther = 'pass'; TestA = 'pass'; 'TestA/one' = 'pass'; 'TestA/two' = 'pass' }) -BankedNames @('TestOther', 'TestA')).Accepted
+
 # ---- 1b2a. the host-limited mirror -- the THIRD host state, exercised end to end ------------------
 # The shape the capability-absent rule refuses on its LAST check, and must go on refusing: the
 # capability was PRESENT, Go fanned the whole matrix out, and the converted side could not produce it

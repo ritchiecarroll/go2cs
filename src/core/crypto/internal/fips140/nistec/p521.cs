@@ -234,7 +234,8 @@ internal static slice<byte> bytesCompressed⁔(/*this*/ ref P521Point p, /*[67]*
     // Encode the sign of the y coordinate (indicated by the least significant
     // bit) as the encoding type (2 or 3).
     var buf = append(@out[..0], (byte)2);
-    buf[0] |= (byte)((byte)(y.Bytes()[p521ElementLength - 1] & 1));
+    var evalᴛ1 = y.Bytes();
+    buf[0] |= (byte)((byte)(evalᴛ1[p521ElementLength - 1] & 1));
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     return buf;
 }
@@ -434,9 +435,13 @@ internal static ж<array<p521Table>> generatorTable⁔(/*this*/ ref P521Point p)
         p521GeneratorTable = Ꮡ(new array<p521Table>(132));
         var @base = NewP521Point().SetGenerator();
         for (nint i = 0; i < (nint)(p521ElementLength * 2); i++) {
-            p521GeneratorTable.Value[i][0] = NewP521Point().Set(@base);
+            var evalᴛ1 = NewP521Point();
+            var evalᴛ2 = evalᴛ1.Set(@base);
+            p521GeneratorTable.Value[i][0] = evalᴛ2;
             for (nint j = 1; j < 15; j++) {
-                p521GeneratorTable.Value[i][j] = NewP521Point().Add(p521GeneratorTable.Value[i][j - 1], @base);
+                var evalᴛ3 = NewP521Point();
+                var evalᴛ4 = evalᴛ3.Add(p521GeneratorTable.Value[i][j - 1], @base);
+                p521GeneratorTable.Value[i][j] = evalᴛ4;
             }
             @base.Double(@base);
             @base.Double(@base);

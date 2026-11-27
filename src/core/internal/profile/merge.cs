@@ -141,7 +141,8 @@ internal static ж<Sample> mapSample⁔(/*this*/ ref profileMerger pm, ж<Sample
         NumUnit: new map<@string, slice<@string>>(len(src.NumLabel))
     ));
     foreach (var (i, l) in range(src.Location)) {
-        s.Location[i] = pm.mapLocation(l);
+        var evalᴛ1 = pm.mapLocation(l);
+        s.Location[i] = evalᴛ1;
     }
     foreach (var (kΔ1, v) in src.Label) {
         var vv = new slice<@string>(len(v));
@@ -229,7 +230,8 @@ internal static ж<Location> mapLocation⁔(/*this*/ ref profileMerger pm, ж<Lo
         IsFolded: src.IsFolded
     ));
     foreach (var (i, ln) in range(src.Line)) {
-        l.Line[i] = pm.mapLine(ln);
+        var evalᴛ1 = pm.mapLine(ln);
+        l.Line[i] = evalᴛ1;
     }
     // Check memoization table. Must be done on the remapped location to
     // account for the remapped mapping ID.

@@ -686,7 +686,9 @@ internal static (ж<PrivateKey>, error) privateKeyFromFIPS(elliptic.Curve curve,
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new PrivateKey(PublicKey: pub.Value, D: @new<big.Int>().SetBytes(priv.Bytes()))), default);
+    var evalᴛ1 = priv.Bytes();
+    var evalᴛ2 = @new<big.Int>().SetBytes(evalᴛ1);
+    return (Ꮡ(new PrivateKey(PublicKey: pub.Value, D: evalᴛ2)), default);
 }
 
 internal static (ж<ecdsa.PublicKey>, error) publicKeyToFIPS<P>(ж<ecdsa.Curve<P>> c, ref PublicKey pub)

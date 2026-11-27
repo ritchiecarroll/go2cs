@@ -172,6 +172,9 @@
        classes above are linux-only ones. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
     <Compile Remove="DarwinNativeTransitionTests.cs" />
+    <!-- The darwin syscall bracket's rows (docs/phase4/DESIGN-darwin-syscall-bracket.md) drive syscall's
+         GoSyscallnCall/GoRawSyscallnCall seams and the darwin keystones, which the darwin flavour alone declares. -->
+    <Compile Remove="DarwinSyscallBracketTests.cs" />
   </ItemGroup>
 
   <!-- S3's arm64 Stat_t mirror and its GoNativeStatLayoutProbe live in syscall/linux-arm64/, which only the
@@ -186,13 +189,23 @@
     <Compile Remove="LinuxArm64RuntimeSyscallFlavourTests.cs" />
   </ItemGroup>
 
+  <!-- internal/cpu's darwin/arm64 start-up (darwin-arm64/cpu_arm64_darwin_impl.cs) and its options probe, which only
+       the darwin/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoTargetArch)' != 'arm64'">
+    <Compile Remove="DarwinArm64CpuStartupTests.cs" />
+  </ItemGroup>
+
   <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).
        - InternalCpuGodebugTests drives internal/cpu's amd64/ hand-owns (cpu_x86_impl.cs, cpu_arm64_process_impl.cs)
-         through their probes. The linux/arm64 flavour starts internal/cpu in linux-arm64/cpu_arm64_hwcap_impl.cs,
-         which has no probe yet.
+         through their probes. The arm64 flavours start internal/cpu elsewhere, each read by its own test file:
+         linux/arm64 in linux-arm64/cpu_arm64_hwcap_impl.cs (LinuxArm64CpuStartupTests), darwin/arm64 in
+         darwin-arm64/cpu_arm64_darwin_impl.cs (DarwinArm64CpuStartupTests).
        - LinuxAmd64NetpollFlavourTests names SYS_EPOLL_WAIT, which only amd64's table has; it is also linux-only. -->
   <ItemGroup Condition="'$(GoTargetArch)' == 'arm64'">
     <Compile Remove="InternalCpuGodebugTests.cs" />
+    <!-- internal/runtime/gc/scan's AVX-512 kernels (scan/amd64/scan_amd64_impl.cs, R's finding 5) exist only in the
+         amd64 flavours; an arm64 build has no ExpandAVX512, FilterNilAVX512, ScanSpanPackedAVX512 or CanAVX512. -->
+    <Compile Remove="ScanAvx512KernelTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' == 'arm64'">
     <Compile Remove="LinuxAmd64NetpollFlavourTests.cs" />
@@ -337,6 +350,12 @@
     <!-- The synctest fake-time guards (SyncTestFakeTimeTests) drive time's Now / Sleep / NewTimer /
          AfterFunc inside a bubble, through its converted public surface over time_impl.cs. -->
     <ProjectReference Include="..\..\core\time\time.csproj" />
+
+    <!-- ScanAvx512KernelTests: internal/runtime/gc/scan's three AVX-512 kernels (managed bodies in
+         amd64/scan_amd64_impl.cs) against the package's own reference implementations, and
+         CanAVX512() against the hardware (internal/cpu's BITALG read). -->
+    <ProjectReference Include="..\..\core\internal\runtime\gc\scan\internal.runtime.gc.scan.csproj" />
+    <ProjectReference Include="..\..\core\internal\runtime\gc\internal.runtime.gc.csproj" />
 
     <!-- The synctest pull guards (SyncTestPullsTests) call internal/synctest's converted surface
          (Run, Wait, Acquire, Bubble.Release, Bubble.Run) over its hand-owned companion. -->

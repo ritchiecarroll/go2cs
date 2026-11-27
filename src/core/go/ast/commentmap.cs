@@ -80,8 +80,10 @@ internal static bool eol⁔(/*this*/ ref commentListReader r) {
 internal static void next⁔(/*this*/ ref commentListReader r) {
     if (!r.eol()) {
         r.comment = r.list[r.index];
-        r.pos = r.fset.Position(r.comment.Pos());
-        r.end = r.fset.Position(r.comment.End());
+        var evalᴛ1 = r.comment.Pos();
+        r.pos = r.fset.Position(evalᴛ1);
+        var evalᴛ2 = r.comment.End();
+        r.end = r.fset.Position(evalᴛ2);
         r.index++;
     }
 }

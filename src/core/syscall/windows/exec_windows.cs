@@ -1,6 +1,18 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - ForkLock, EscapeArg, appendEscapeArg, makeCmdLine, envSorted, createEnvBlock, CloseOnExec, SetNonblock, FullPath,
+//   isSlash, normalizeDir, volToUpper, joinExeDirAndFName, Exec: DERIVED FROM src/syscall/exec_windows.go, Go
+//   1.26.11, funcs EscapeArg, appendEscapeArg, makeCmdLine, envSorted, createEnvBlock, CloseOnExec, SetNonblock,
+//   FullPath, isSlash, normalizeDir, volToUpper, joinExeDirAndFName, Exec. The converted output.
+// - StartProcess: DERIVED FROM src/syscall/exec_windows.go, Go 1.26.11, func StartProcess. Go's order, validation and
+//   errors kept; the CreateProcessW structures and buffers are native mirrors in unmanaged memory.
+// - allocUTF16, composeChildDirectory, allocSecurityAttributes, freeAll: original go2cs code.
 // Fork, exec, wait, etc.
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted exec_windows.go output).

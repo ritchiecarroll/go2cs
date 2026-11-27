@@ -58,8 +58,8 @@
       <_GoLayoutArch Condition="'$(_GoLayoutArch)'==''">amd64</_GoLayoutArch>
       <_GoLayoutTarget>$(_GoLayoutOS)/$(_GoLayoutArch)</_GoLayoutTarget>
     </PropertyGroup>
-    <Error Condition="'$(_GoLayoutTarget)'!='windows/amd64' And '$(_GoLayoutTarget)'!='linux/amd64' And '$(_GoLayoutTarget)'!='darwin/amd64' And '$(_GoLayoutTarget)'!='linux/arm64'"
-           Text="go2cs: $(_GoLayoutTarget) is not a target the converted standard library is laid out for (windows/amd64, linux/amd64, darwin/amd64, linux/arm64); set GoTargetOS and GoTargetArch to one of them." />
+    <Error Condition="'$(_GoLayoutTarget)'!='windows/amd64' And '$(_GoLayoutTarget)'!='linux/amd64' And '$(_GoLayoutTarget)'!='darwin/amd64' And '$(_GoLayoutTarget)'!='linux/arm64' And '$(_GoLayoutTarget)'!='darwin/arm64'"
+           Text="go2cs: $(_GoLayoutTarget) is not a target the converted standard library is laid out for (windows/amd64, linux/amd64, darwin/amd64, linux/arm64, darwin/arm64); set GoTargetOS and GoTargetArch to one of them." />
   </Target>
 
   <!-- M:N row 7 piece 5 (DATA-mn-row7-r5.md, decision (a)): GoStdlibTwins builds every converted package of the

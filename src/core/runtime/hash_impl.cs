@@ -4,6 +4,28 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - GoMemhash, GoMemhash32, GoMemhash64, hashMix, hashR4, hashR8: DERIVED FROM src/runtime/hash64.go, Go 1.26.11,
+//   funcs memhashFallback, memhash32Fallback, memhash64Fallback, mix, r4, r8. Go's wyhash fallback arithmetic over
+//   the bytes the managed referent holds.
+// - strhashContent with GoMemhash: DERIVED FROM src/runtime/alg.go, Go 1.26.11, func strhashFallback. The string's
+//   content hashed as Go's fallback hashes it.
+// - GoAeshash, GoAeshash32, GoAeshash64 and the aes* helpers: DERIVED FROM src/runtime/asm_amd64.s, Go 1.26.11,
+//   assembly routines aeshashbody, memhash32, memhash64. Ported instruction for instruction onto .NET's AES
+//   intrinsics.
+// - ensureHashKey, initHashAlgorithm, selectAesHash, the Go*Pointer and Go*Dispatch seams, referentBytes and the
+//   other helpers: original go2cs code. Key set-up, dispatch and reading the managed referent.
 
 // runtime.memhash / memhash32 / memhash64 / strhash — the FLAT hash-stub family, bodied over Go's
 // own fallback arithmetic (hash64.go, the wyhash schedule) applied to the bytes the managed

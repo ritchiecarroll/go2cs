@@ -69,11 +69,11 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("math/rand/exp.go", "exp.cs", "ABI88oKCgoKClIKUgsoANWwAQYQB")]
-[assembly: GoPositionMap("math/rand/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKUppSCgoKCpoKUlILKABs4ACFE")]
+[assembly: GoPositionMap("math/rand/exp.go", "exp.cs", "ABI88oKCgoKClIKUosoANWwAQYQB")]
+[assembly: GoPositionMap("math/rand/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKUppSCgoKCpoKUlKLKABs4ACFE")]
 [assembly: GoPositionMap("math/rand/rand.go", "rand.cs", "ADFmwqaCgoIAECiigqrCgoKmgqiAloCWkoKUqICWkoKqooKUgpSCgoKUqqKClIKUgoKClAACGAAJAoKCgoKCgoKCpqqigpSClKgAESKCgoKUqMiCgoKUqqLcgoKClKyyggAIEoKCgpSCgr7SlKSUprKCgoKCgoKUlJSCgpSCggANGqaYooKokoKCgpTc7qaoAAkSgqaCpoKmwoKCggACLAATAoKUlKaCgoIAChaClJS8kJiQmJCYkJaAmqCaoJqgmJCYkJiQmqAAARDQAAEU8AABEuDusoKCgqaygoKCpqKCgqjCgoKCqqKClLrSgoKC")]
 [assembly: GoPositionMap("math/rand/rng.go", "rng.cs", "ABQwAKABxgKSvIKCgoKUqJKClIKClIKmgoKCgoKCgoKCgoLMkqiSgoKmgoKmgoI=")]
-[assembly: GoPositionMap("math/rand/zipf.go", "zipf.cs", "ABo2gqaCruKCgpSCgoKCgoKCgoKqwoKUlIKCgoKCgpSCpg==")]
+[assembly: GoPositionMap("math/rand/zipf.go", "zipf.cs", "ABo2graCvuKCgpSCgoKCgoKCgqKqwoKUlIKCgoKCgpSCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.math;

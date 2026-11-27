@@ -47,7 +47,7 @@ die(){ echo "$PROG: $*" >&2; exit 2; }
 # The repoguard test TestLayoutKeyListsAreTheUniverses holds this line to it; keep it on ONE line, in
 # this spelling. Layout L3 lays a package's files into a key folder per target: its GOOS, its GOARCH
 # or the pair (windows/, amd64/, linux-arm64/), and every folder list below is derived from this one.
-LAYOUT_UNIVERSE=(windows/amd64 linux/amd64 darwin/amd64 linux/arm64)
+LAYOUT_UNIVERSE=(windows/amd64 linux/amd64 darwin/amd64 linux/arm64 darwin/arm64)
 is_layout_key(){ # $1 = folder name -> 0 when the universe can lay a file into a folder of that name
   local t; for t in "${LAYOUT_UNIVERSE[@]}"; do
     case "$1" in "${t%/*}"|"${t#*/}"|"${t%/*}-${t#*/}") return 0 ;; esac

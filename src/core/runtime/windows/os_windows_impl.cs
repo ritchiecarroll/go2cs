@@ -4,6 +4,20 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - initSysDirectory, initLongPathSupport, the ᴛInit* steps of osinit, windows_QueryPerformanceCounter,
+//   windows_QueryPerformanceFrequency, getCPUCount: INSPIRED BY src/runtime/os_windows.go, Go 1.26.11, funcs
+//   initSysDirectory, initLongPathSupport, osinit, windows_QueryPerformanceCounter,
+//   windows_QueryPerformanceFrequency, getCPUCount. The same values, read through managed or P/Invoke calls in place
+//   of stdcall.
+// - requirePerformanceCounter: original go2cs code.
 
 // The runtime's Windows osinit residue - the snapshots a managed program can take for itself,
 // standing in for the initializers Go runs before any user code and go2cs emits already

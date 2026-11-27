@@ -747,7 +747,7 @@ that holds a reference, through a pointer reinterpreted from Go storage of anoth
 where it used to be read as if the layouts matched.
 <!-- docs/phase4/DESIGN-array-value-storage.md section 7 (the scout, 7.3 for the before-state:
      src/core/golib/runtime/RuntimeErrorPanic.cs refuses the whole-struct read) and its dated part-D and mixed-pair
-     amendments. The library: merge b6f3bbb44f (C2, I0-lib; go.arrays packed by src/core/golib/golib.csproj:158-176#f8f2d9,
+     amendments. The library: merge b6f3bbb44f (C2, I0-lib; go.arrays packed by src/core/golib/golib.csproj:162-180#f8f2d9,
      a pack without it fails). The converter: merge 817b56e8b0 (C2, I0 part D; std footprint 0; the census P1 on
      linux/amd64 over modernc.org/sqlite v1.62.0 and libc v1.80.1). Mixed pairs: merge 555e30c826 (C2,
      claude/c2-inline-pairs, 3c25375a04). Emission shape: src/tests/Behavioral/InlineArrayFields. The reflection
@@ -1174,7 +1174,7 @@ reported it abandoned instead of its own result. `t.Deadline()` now reports the 
      time"; GolibTests ProfilerOwnAllocationTests, child-process bound; found as an 84-minute hang of GolibTests Debug in
      batch 283's battery; no platform named). GOARCH: merge 26186c1739 (28cfcf657e darwin, 030725e30e windows: Windows on
      Arm UNMEASURED, no package ships for it; osx-arm64 debug/buildinfo 211, net/http/pprof 15, go/build 57, gcimporter
-     634 validate per the merge subject); KnownIssues.md:38-56#b91ee1 already describes the behaviour; NEWS 1.26.10.3 (line
+     634 validate per the merge subject); KnownIssues.md:38-63#6f3c81 already describes the behaviour; NEWS 1.26.10.3 (line
      229) called it planned work. FuncForPC: merge 40b021f8c4 (b20b20c5db; rows read as master on linux, darwin both
      RIDs and windows). os.Args: merge 813f55b5e8 (6a87a161f4: GolibTests WindowsCommandLineTests, windows/amd64; the
      self-re-exec limitation is disclosed in the hand-own's header). recvfrom: merge 872df69010 (9d31496d45:

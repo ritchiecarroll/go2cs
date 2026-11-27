@@ -298,7 +298,8 @@ internal static (nint n, error err) Write⁔(/*this*/ ref dumper h, slice<byte> 
             return (n, err);
         }
         n++;
-        h.rightChars[h.used] = toChar(data[i]);
+        var evalᴛ1 = toChar(data[i]);
+        h.rightChars[h.used] = evalᴛ1;
         h.used++;
         h.n++;
         if (h.used == 16) {

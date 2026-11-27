@@ -728,8 +728,13 @@ func assertScopedHandOwnFollowsItsRegistration(t *testing.T, coreDir string, pac
 			return
 		}
 
-		for _, goos := range scope {
-			scoped[goos] = true
+		// A GOOS entry is met by that GOOS's folder, an os/arch entry by its `<goos>-<arch>` folder.
+		for _, entry := range scope {
+			if strings.Contains(entry, "/") {
+				entry = platformTargetTag(entry)
+			}
+
+			scoped[entry] = true
 		}
 	}
 

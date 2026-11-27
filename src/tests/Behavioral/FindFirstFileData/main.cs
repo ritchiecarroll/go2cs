@@ -182,12 +182,14 @@ internal static (entry, bool) toEntry(ж<syscall.Win32finddata> Ꮡdata) {
     if (name == "."u8 || name == ".."u8) {
         return (new entry(), false);
     }
+    var evalᴛ1 = altName(ref (Ꮡdata).DerefOrNull());
+    var evalᴛ2 = data.LastWriteTime.Nanoseconds();
     return (new entry(
         name: name,
-        alt: altName(ref (Ꮡdata).DerefOrNull()),
+        alt: evalᴛ1,
         isDir: (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0,
         size: data.FileSizeLow,
-        mtime: data.LastWriteTime.Nanoseconds()
+        mtime: evalᴛ2
     ), true);
 }
 

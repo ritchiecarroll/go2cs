@@ -68,7 +68,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLuoqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
+[assembly: GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrQACAoACRaCgu6ipoKCgoKCgoKCppSCyoKmgoKU", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
 [assembly: GoPositionMap("os/signal/signal_unix.go", "signal_unix.cs", "AAsesqKiorSCgriCzoKUgoKUtLiCpoKmgqaC")]
 // </GoSourcePositionMaps>
 

@@ -251,7 +251,8 @@ internal static void interfaceType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Interfac
     // Subsequent uses of type sets will use this computed type
     // set and won't need to pass in a *Checker.
     check.later([GoFunc("(*Checker).interfaceType.func2")] () => {
-        computeInterfaceTypeSet(Ꮡcheck, Ꮡiface.Value.Pos(), Ꮡityp);
+        var evalᴛ1 = Ꮡiface.Value.Pos();
+        computeInterfaceTypeSet(Ꮡcheck, evalᴛ1, Ꮡityp);
     }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s", Ꮡityp.OrTypedNil());
 }
 

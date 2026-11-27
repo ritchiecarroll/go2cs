@@ -1537,11 +1537,11 @@ func cgoTargetBlocks(goos, goarch string) string {
 
 // cgoReferenceTarget is the target a cgo package's project references are built for. The converted standard library is
 // laid out for a declared set of targets (platformUniverse), and its own build refuses any other by name. A cgo
-// package's bindings are for the host's own target, which need not be in that set: darwin/arm64 is not, and the
-// library's darwin/amd64 flavour serves both of darwin's architectures. So the references take the package's own
-// target where the library is laid out for it, and otherwise the flavour the library has for that operating system.
-// Handing down the bindings' own pair refused every build of a cgo project on darwin/arm64 (first read on the hosted
-// leg 43335132134).
+// package's bindings are for the host's own target, which need not be in that set: windows/arm64 is not, and the
+// library's windows/amd64 flavour serves it. So the references take the package's own target where the library is
+// laid out for it, and otherwise the flavour the library has for that operating system. Handing down the bindings'
+// own pair refused every build of a cgo project on darwin/arm64 while darwin had one flavour (first read on the
+// hosted leg 43335132134); darwin/arm64 is a flavour of its own since the darwin/arm64 flip.
 func cgoReferenceTarget(goos, goarch string) (string, string) {
 	flavourArch := ""
 

@@ -198,7 +198,8 @@ internal static ж<singleflight.Group> getLookupGroup⁔(/*this*/ ж<Resolver> �
 // LookupHost uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupHost].
 public static (slice<@string> addrs, error err) LookupHost(@string host) {
-    return DefaultResolver.LookupHost(context.Background(), host);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupHost(evalᴛ1, host);
 }
 
 // LookupHost looks up the given host using the local resolver.
@@ -447,7 +448,8 @@ internal static slice<any> ipAddrsEface(slice<IPAddr> addrs) {
 // LookupPort uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupPort].
 public static (nint port, error err) LookupPort(@string network, @string service) {
-    return DefaultResolver.LookupPort(context.Background(), network, service);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupPort(evalᴛ1, network, service);
 }
 
 // LookupPort looks up the port for the given network and service.
@@ -498,7 +500,8 @@ internal static (nint port, error err) LookupPort⁔(/*this*/ ж<Resolver> Ꮡr,
 // LookupCNAME uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupCNAME].
 public static (@string cname, error err) LookupCNAME(@string host) {
-    return DefaultResolver.LookupCNAME(context.Background(), host);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupCNAME(evalᴛ1, host);
 }
 
 // LookupCNAME returns the canonical name for the given host.
@@ -540,7 +543,8 @@ internal static (@string, error) LookupCNAME⁔(/*this*/ ж<Resolver> Ꮡr, cont
 // invalid names, those records are filtered out and an error
 // will be returned alongside the remaining results, if any.
 public static (@string cname, slice<ж<SRV>> addrs, error err) LookupSRV(@string service, @string proto, @string name) {
-    return DefaultResolver.LookupSRV(context.Background(), service, proto, name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupSRV(evalᴛ1, service, proto, name);
 }
 
 // LookupSRV tries to resolve an [SRV] query of the given service,
@@ -591,7 +595,8 @@ internal static (@string, slice<ж<SRV>>, error) LookupSRV⁔(/*this*/ ж<Resolv
 // LookupMX uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupMX].
 public static (slice<ж<MX>>, error) LookupMX(@string name) {
-    return DefaultResolver.LookupMX(context.Background(), name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupMX(evalᴛ1, name);
 }
 
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
@@ -636,7 +641,8 @@ internal static (slice<ж<MX>>, error) LookupMX⁔(/*this*/ ж<Resolver> Ꮡr, c
 // LookupNS uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupNS].
 public static (slice<ж<NS>>, error) LookupNS(@string name) {
-    return DefaultResolver.LookupNS(context.Background(), name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupNS(evalᴛ1, name);
 }
 
 // LookupNS returns the DNS NS records for the given domain name.
@@ -674,7 +680,8 @@ internal static (slice<ж<NS>>, error) LookupNS⁔(/*this*/ ж<Resolver> Ꮡr, c
 // LookupTXT uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupTXT].
 public static (slice<@string>, error) LookupTXT(@string name) {
-    return DefaultResolver.lookupTXT(context.Background(), name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.lookupTXT(evalᴛ1, name);
 }
 
 // LookupTXT returns the DNS TXT records for the given domain name.
@@ -698,7 +705,8 @@ internal static (slice<@string>, error) LookupTXT⁔(/*this*/ ж<Resolver> Ꮡr,
 // LookupAddr uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupAddr].
 public static (slice<@string> names, error err) LookupAddr(@string addr) {
-    return DefaultResolver.LookupAddr(context.Background(), addr);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupAddr(evalᴛ1, addr);
 }
 
 // LookupAddr performs a reverse lookup for the given address, returning a list

@@ -1,6 +1,13 @@
 // Copyright 2014 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries above (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE:
+// - Value.Load, Value.Store, Value.Swap, Value.CompareAndSwap: INSPIRED BY src/sync/atomic/value.go, Go 1.26.11,
+//   methods Value.Load, Value.Store, Value.Swap, Value.CompareAndSwap. Go's doc comments and panics kept; the stored
+//   interface is one managed reference in place of the type and data words.
 using System.Threading;
 
 [module: go.GoManualConversion]

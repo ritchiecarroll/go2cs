@@ -103,10 +103,13 @@
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
-  <!-- Explicit compile items only (EnableDefaultCompileItems=false): the production sources are
-       recompiled into the test assembly alongside the converted test sources; nothing else in the
-       shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
-       can leak in because it is never listed. -->
+  <!-- Explicit compile items only (EnableDefaultCompileItems=false): the converted test sources,
+       the test package_info and the test host. The production sources are normally NOT listed:
+       the test assembly references the production project (the reference model, chosen for
+       black-box and internal suites alike). Only the recompile fall-back, taken when converted
+       records would have to change a closed production type, lists them here as well. Nothing
+       else in the shared directory (Generated/**, *.cs.auto review siblings, the production
+       package_info.cs) can leak in because it is never listed. -->
   <ItemGroup>
     <Compile Include="ecdsa_test.cs" />
     <Compile Include="go2cs_test_host.cs" />

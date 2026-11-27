@@ -15,8 +15,8 @@ internal static error fill(this ref oid o, @string text) {
 
 internal static (oid, error) parseOID(@string text) {
     oid o = default;
-    var ᴛ1 = o.fill(text);
-    return (o, ᴛ1);
+    var evalᴛ1 = o.fill(text);
+    return (o, evalᴛ1);
 }
 
 partial struct counter {
@@ -30,15 +30,15 @@ internal static nint bump(this ref counter c) {
 
 internal static (nint, nint) readThenBump() {
     counter c = default;
-    var ᴛ2 = c.bump();
-    return (c.n, ᴛ2);
+    var evalᴛ1 = c.bump();
+    return (c.n, evalᴛ1);
 }
 
 internal static (nint, @string, nint) orderedCalls(ref slice<@string> log) {
     counter c = default;
-    var ᴛ3 = note(ref log, "middle");
-    var ᴛ4 = c.bump();
-    return (c.n, ᴛ3, ᴛ4);
+    var evalᴛ1 = note(ref log, "middle");
+    var evalᴛ2 = c.bump();
+    return (c.n, evalᴛ1, evalᴛ2);
 }
 
 internal static @string note(ref slice<@string> log, @string what) {
@@ -48,8 +48,8 @@ internal static @string note(ref slice<@string> log, @string what) {
 
 internal static (nint, nint) addressArgument() {
     nint n = 0;
-    var ᴛ5 = raise(ref n);
-    return (n, ᴛ5);
+    var evalᴛ1 = raise(ref n);
+    return (n, evalᴛ1);
 }
 
 internal static nint raise(ref nint n) {
@@ -59,8 +59,8 @@ internal static nint raise(ref nint n) {
 
 internal static (nint, nint) throughPointer() {
     var c = Ꮡ(new counter());
-    var ᴛ6 = c.bump();
-    return (c.n, ᴛ6);
+    var evalᴛ1 = c.bump();
+    return (c.n, evalᴛ1);
 }
 
 internal static (ж<counter>, nint) pointerIdentity() {
@@ -165,12 +165,13 @@ partial struct node {
 }
 
 internal static (nint, nint) pointerFieldUnrelated(ref node nd) {
-    return (nd.handler, nd.pat.bump());
+    var evalᴛ1 = nd.pat.bump();
+    return (nd.handler, evalᴛ1);
 }
 
 internal static (nint, nint) pointerFieldSame(ref node nd) {
-    var ᴛ7 = nd.pat.bump();
-    return (nd.pat.n, ᴛ7);
+    var evalᴛ1 = nd.pat.bump();
+    return (nd.pat.n, evalᴛ1);
 }
 
 } // end main_package

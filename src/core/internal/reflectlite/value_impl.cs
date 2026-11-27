@@ -4,6 +4,20 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - ValueOf, valueInterface, unpackEface, Value.Len, Value.Elem, Value.IsNil, Value.Set, methodName: INSPIRED BY
+//   src/internal/reflectlite/value.go, Go 1.26.11, funcs ValueOf, valueInterface, unpackEface, methodName; methods
+//   Value.Len, Value.Elem, Value.IsNil, Value.Set. Same contract over the managed value, Go's guards and panics kept.
+// - ifaceE2I, typedmemmove, unsafe_New, chanlen, maplen: bodies for the bodyless Go declarations of the same names in
+//   src/internal/reflectlite/value.go. Original go2cs code.
+// - makeReflectValue, unwrapShell, makeTypedValue: original go2cs code. Helpers over GoReflect.
 
 namespace go.@internal;
 

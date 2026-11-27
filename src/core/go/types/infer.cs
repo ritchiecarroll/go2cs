@@ -122,13 +122,15 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
         //           the substitution (which always happens).
         if (Ꮡparams.Len() > 0) {
             var smap = makeSubstMap(tparams, targs);
-            Ꮡparams = Ꮡcheck.subst(nopos, new TupleжType(Ꮡparams), smap, nil, check.context())._<ж<Tuple>>(); @params = ref Ꮡparams.DerefOrNull();
+            var evalᴛ1 = check.context();
+            Ꮡparams = Ꮡcheck.subst(nopos, new TupleжType(Ꮡparams), smap, nil, evalᴛ1)._<ж<Tuple>>(); @params = ref Ꮡparams.DerefOrNull();
         }
 
         // Unify parameter and argument types for generic parameters with typed arguments
         // and collect the indices of generic parameters with untyped arguments.
         // Terminology: generic parameter = function parameter with a type-parameterized type
-        var u = newUnifier(tparams, targs, check.allowVersion(go1_21));
+        var evalᴛ2 = check.allowVersion(go1_21);
+        var u = newUnifier(tparams, targs, evalᴛ2);
 
         var tparamsʗ3 = tparams;
         var uʗ1 = u;
@@ -147,13 +149,16 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
                     }
                 }
                 if (allFailed) {
-                    Ꮡerr.Value.addf(new operandжpositioner(arg), "type %s of %s does not match %s (cannot infer %s)", targ, arg.expr, tpar, typeParamsString(tparamsʗ3));
+                    var evalᴛ3 = typeParamsString(tparamsʗ3);
+                    Ꮡerr.Value.addf(new operandжpositioner(arg), "type %s of %s does not match %s (cannot infer %s)", targ, arg.expr, tpar, evalᴛ3);
                     return;
                 }
             }
             var smap = makeSubstMap(tparamsʗ3, targsΔ1);
             // TODO(gri): pass a poser here, rather than arg.Pos().
-            var inferredΔ1 = Ꮡcheck.subst(arg.Pos(), tpar, smap, nil, Ꮡcheck.Value.context());
+            var evalᴛ4 = arg.Pos();
+            var evalᴛ5 = Ꮡcheck.Value.context();
+            var inferredΔ1 = Ꮡcheck.subst(evalᴛ4, tpar, smap, nil, evalᴛ5);
             // CannotInferTypeArgs indicates a failure of inference, though the actual
             // error may be better attributed to a user-provided type argument (hence
             // InvalidTypeArg). We can't differentiate these cases, so fall back on
@@ -279,7 +284,8 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
                             // TODO(gri) Type parameters that appear in the constraint and
                             //           for which we have type arguments inferred should
                             //           use those type arguments for a better error message.
-                            err.addf(posn, "%s (type %s) does not satisfy %s", tpar.OrTypedNil(), tx, tpar.Constraint());
+                            var evalᴛ6 = tpar.Constraint();
+                            err.addf(posn, "%s (type %s) does not satisfy %s", tpar.OrTypedNil(), tx, evalᴛ6);
                             inferred = default; goto ᒐdone;
                         }
                         break;
@@ -324,7 +330,8 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
                     var uʗ2 = u;
                     if (!Ꮡcheck.hasAllMethods(tx, new InterfaceжType(constraint), true, [GoFunc("(*Checker).infer.func4")] (Type x, Type y) => uʗ2.unify(x, y, exact), Ꮡcause)) {
                         // TODO(gri) better error message (see TODO above)
-                        err.addf(posn, "%s (type %s) does not satisfy %s %s", tpar.OrTypedNil(), tx, tpar.Constraint(), cause);
+                        var evalᴛ7 = tpar.Constraint();
+                        err.addf(posn, "%s (type %s) does not satisfy %s %s", tpar.OrTypedNil(), tx, evalᴛ7, cause);
                         inferred = default; goto ᒐdone;
                     }
                 }
@@ -443,7 +450,8 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
             nint nΔ1 = 0;
             foreach (var (_, index) in range(dirty)) {
                 var t0 = inferred[index];
-                var t1 = Ꮡcheck.subst(nopos, t0, smap, nil, check.context()); if (!AreEqual(t1, t0)) {
+                var evalᴛ8 = check.context();
+                var t1 = Ꮡcheck.subst(nopos, t0, smap, nil, evalᴛ8); if (!AreEqual(t1, t0)) {
                     // t0 was simplified to t1.
                     // If t0 was a generic function, but the simplified signature t1 does
                     // not contain any type parameters anymore, the function is not generic
@@ -534,7 +542,9 @@ internal static (slice<ж<TypeParam>>, Type) renameTParams⁔(/*this*/ ж<Checke
 
     var renameMap = makeRenameMap(tparams, tparams2);
     foreach (var (i, tparam) in range(tparams)) {
-        tparams2[i].bound = Ꮡcheck.subst(pos, tparam.bound, renameMap, nil, check.context());
+        var evalᴛ1 = check.context();
+        var evalᴛ2 = Ꮡcheck.subst(pos, tparam.bound, renameMap, nil, evalᴛ1);
+        tparams2[i].bound = evalᴛ2;
     }
 
     return (tparams2, Ꮡcheck.subst(pos, typ, renameMap, nil, check.context()));
@@ -610,7 +620,8 @@ internal static bool /*res*/ isParameterized⁔(/*this*/ ж<tpWalker> Ꮡw, Type
             break;
         }
         case ж<Alias> t: {
-            res = Ꮡw.isParameterized(Unalias(new AliasжType(t))); goto ᒐdone;
+            var evalᴛ1 = Unalias(new AliasжType(t));
+            res = Ꮡw.isParameterized(evalᴛ1); goto ᒐdone;
         }
         case ж<Array> t: {
             res = Ꮡw.isParameterized(t.elem); goto ᒐdone;

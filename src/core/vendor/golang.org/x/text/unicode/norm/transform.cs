@@ -50,7 +50,8 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     if (len(rb.@out) < rb.nrune * (nint)utf8.UTFMax) {
         return false;
     }
-    rb.@out = rb.@out.slice(rb.flushCopy(rb.@out));
+    var evalᴛ1 = rb.flushCopy(rb.@out);
+    rb.@out = rb.@out.slice(evalᴛ1);
     return true;
 }
 

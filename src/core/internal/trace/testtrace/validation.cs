@@ -232,7 +232,8 @@ internal static error Event⁔(/*this*/ ж<Validator> Ꮡv, trace.Event ev) {
                 var ctx = Ꮡv.getOrCreateThread(e, ev, ev.Thread());
                 if (ctx != nil) {
                     if (ctx.G != trace.NoGoroutine && ctx.G != id) {
-                        e.Errorf("tried to run goroutine %d when one was already executing (%d) on thread %d", id, ctx.G, ev.Thread());
+                        var evalᴛ1 = ev.Thread();
+                        e.Errorf("tried to run goroutine %d when one was already executing (%d) on thread %d", id, ctx.G, evalᴛ1);
                     }
                     ctx.G = id;
                     state.binding = ctx;
@@ -246,7 +247,8 @@ internal static error Event⁔(/*this*/ ж<Validator> Ꮡv, trace.Event ev) {
                 var ctx = state.binding;
                 if (ctx != nil) {
                     if (ctx.G != id) {
-                        e.Errorf("tried to stop goroutine %d when it wasn't currently executing (currently executing %d) on thread %d", id, ctx.G, ev.Thread());
+                        var evalᴛ2 = ev.Thread();
+                        e.Errorf("tried to stop goroutine %d when it wasn't currently executing (currently executing %d) on thread %d", id, ctx.G, evalᴛ2);
                     }
                     ctx.G = trace.NoGoroutine;
                     state.binding = default;
@@ -288,7 +290,8 @@ internal static error Event⁔(/*this*/ ж<Validator> Ꮡv, trace.Event ev) {
                 var ctx = Ꮡv.getOrCreateThread(e, ev, ev.Thread());
                 if (ctx != nil) {
                     if (ctx.P != trace.NoProc && ctx.P != id) {
-                        e.Errorf("tried to run proc %d when one was already executing (%d) on thread %d", id, ctx.P, ev.Thread());
+                        var evalᴛ3 = ev.Thread();
+                        e.Errorf("tried to run proc %d when one was already executing (%d) on thread %d", id, ctx.P, evalᴛ3);
                     }
                     ctx.P = id;
                     state.binding = ctx;
@@ -400,7 +403,8 @@ internal static void deleteRange⁔(/*this*/ ref Validator v, trace.ResourceID r
     if (i < 0) {
         return;
     }
-    v.ranges[r] = slices.Delete<slice<@string>, @string>(ranges, i, i + 1);
+    var evalᴛ1 = slices.Delete<slice<@string>, @string>(ranges, i, i + 1);
+    v.ranges[r] = evalᴛ1;
 }
 
 internal static ж<schedContext> getOrCreateThread⁔(/*this*/ ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, trace.Event ev, trace.ThreadID m) {
@@ -463,7 +467,8 @@ partial struct errAccumulator {
 internal static void Errorf⁔(/*this*/ ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
-    e.errs = append(e.errs, fmt.Errorf(f, args.ꓸꓸꓸ));
+    var evalᴛ1 = fmt.Errorf(f, args.ꓸꓸꓸ);
+    e.errs = append(e.errs, evalᴛ1);
 }
 
 internal static error Errors⁔(/*this*/ ref errAccumulator e) {

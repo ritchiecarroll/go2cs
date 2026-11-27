@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - semacquire1, semrelease1: INSPIRED BY src/runtime/sema.go, Go 1.26.11, funcs semacquire1, semrelease1. The
+//   waiting half over golib's RuntimeSemaphore, with Go's commit order and handoff; the sudog machinery is dropped.
+// - GoSemaWaiters, GoSemacquireReleaseProbe, GoSemaWaitersProbe: original go2cs code. Test seams.
 
 // The runtime's own semaphore, runtime.semacquire1 / runtime.semrelease1 (sema.go).
 //

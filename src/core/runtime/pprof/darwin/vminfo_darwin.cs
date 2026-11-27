@@ -39,10 +39,13 @@ internal static bool machVMInfo(Action<uint64, uint64, uint64, @string, @string>
             // NOTE: the meaning/value of Offset is unclear. However,
             // this likely doesn't matter as the text segment's file
             // offset is usually 0.
+            var evalᴛ1 = info.Offset[..];
+            var evalᴛ2 = byteorder.LEUint64(evalᴛ1);
+            var evalᴛ3 = regionFilename(addr);
             addMapping(addr,
                 addr + memRegionSize,
-                byteorder.LEUint64(info.Offset[..]),
-                regionFilename(addr),
+                evalᴛ2,
+                evalᴛ3,
                 ""u8);
             added = true;
         }

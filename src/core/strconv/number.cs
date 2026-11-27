@@ -285,7 +285,9 @@ partial struct NumError {
 }
 
 internal static @string Error⁔(/*this*/ ref NumError e) {
-    return "strconv."u8 + e.Func + ": "u8 + "parsing "u8 + Quote(e.Num) + ": "u8 + e.Err.Error();
+    var evalᴛ1 = Quote(e.Num);
+    var evalᴛ2 = e.Err.Error();
+    return "strconv."u8 + e.Func + ": "u8 + "parsing "u8 + evalᴛ1 + ": "u8 + evalᴛ2;
 }
 
 internal static error Unwrap⁔(/*this*/ ref NumError e) { return e.Err; }

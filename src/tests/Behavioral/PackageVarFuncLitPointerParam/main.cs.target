@@ -10,7 +10,10 @@ partial struct request {
     internal nint depth;
 }
 
-[GoLazy] partial class lazyᴛdescribe { internal static Func<ж<request>, @string, @string> describe = [GoFunc("init.func1")] (ж<request> r, @string tag) => fmt.Sprint(tag, ":", r.path, "/", r.closed, "/", r.depth, r.label()); }
+[GoLazy] partial class lazyᴛdescribe { internal static Func<ж<request>, @string, @string> describe = [GoFunc("init.func1")] (ж<request> r, @string tag) => {
+    var evalᴛ1 = r.label();
+    return fmt.Sprint(tag, ":", r.path, "/", r.closed, "/", r.depth, evalᴛ1);
+}; }
 
 [GoLazy] partial class lazyᴛdeepen { internal static Action<ж<request>> deepen = [GoFunc("init.func2")] (ж<request> r) => {
     r.depth = r.depth + 2;

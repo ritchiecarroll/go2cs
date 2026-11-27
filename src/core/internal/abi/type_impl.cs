@@ -1,6 +1,17 @@
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - TypeOf, TypeFor and the Type accessors: INSPIRED BY src/internal/abi/type.go, Go 1.26.11, funcs TypeOf, TypeFor;
+//   methods Type.InterfaceType, Type.StructType, Type.ArrayType, Type.FuncType, FuncType.InSlice, FuncType.OutSlice,
+//   Type.Elem, Type.ChanDir, Type.MapType, Type.Key, Type.Len, Type.Size. The same answers, read from a descriptor
+//   synthesized from the value's managed type; Go's doc comments are kept where the contract is Go's.
+// - synthType, synthesizeDescriptor and the other synthesize*, descriptorDimsKey and the chan-direction helpers:
+//   original go2cs code. The descriptor synthesis the accessors stand on.
 using go;
 
 // Hand-finished conversion (the reflection bridge — Phase 4).
@@ -508,6 +519,25 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
+// TypeFor with an ARRAY-DIMS companion: the length of an unnamed array type argument, which a type
+// alone cannot carry here. C# spells every Go [N]E as the one array<E>, so TypeFor<array<E>>() has no
+// length and refuses Size(), Len() and ArrayType() by name. The converter supplies a dims phantom
+// (`ᴀ2`, `ᴀ2_3`) only for an unnamed array type argument, and golib's ᴀnone otherwise, which answers
+// exactly what TypeFor<T>() answers. With dims the answer is the interned descriptor a live [N]E value
+// of the same type answers (synthType interns on the dims values, never on the phantom type, so two
+// assemblies' equal phantoms reach one box). Dims for a T that is not an array panic by name rather
+// than intern a descriptor for a type that does not exist. See arrayDimsCompanion.go in the converter
+// and docs/phase4/DESIGN-array-type-argument-length.md.
+public static ж<Type> TypeFor<T, Tᴀ>() where Tᴀ : IGoArrayDims {
+    if (Tᴀ.Dims.Length == 0) {
+        return TypeFor<T>();
+    }
+    if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(array<>)) {
+        throw panic($"abi.TypeFor: array dims [{string.Join(",", Tᴀ.Dims)}] for {typeof(T)}, which is not an array");
+    }
+    return synthType(typeof(T), Tᴀ.Dims);
+}
+
 internal static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<InterfaceType>> s_interfaceTypes = new();
 
 } partial class abiᴛType {
@@ -852,11 +882,11 @@ public static ChanDir ChanDir(this ж<Type> Ꮡt) {
 // answer. HASHER IS A FUNCTION OF THE SEED ALONE, which is the honest maximum here and not a
 // shortcut: Go's Hasher means "the key's bytes are AT this address", and the only caller of an
 // installed hook in this corpus invokes it with a NIL pointer and discards the key
-// (internal/sync/hashtriemap.cs:222, over noAddress at :542) because a managed address names no
-// value. That file's own taxonomy classes an address-IGNORING hook as the honorable kind (:120) and
-// states at :124-127 that every honorable hook here is a function of the seed alone -- so honoring
+// (internal/sync/hashtriemap.cs:234, over noAddress at :554) because a managed address names no
+// value. That file's own taxonomy classes an address-IGNORING hook as the honorable kind (:132) and
+// states at :136-139 that every honorable hook here is a function of the seed alone -- so honoring
 // one and forcing total collision are the same act, which is precisely the contract
-// TestHashTrieMapBadHash already proves the map satisfies (34/34 with `return 0`). What :122 refuses
+// TestHashTrieMapBadHash already proves the map satisfies (34/34 with `return 0`). What :134 refuses
 // is a hook that DEREFERENCES the address; this is not one.
 //
 // Group and GroupSize are Go's layout, DERIVED and not invented: the compiler lays a slot group out as

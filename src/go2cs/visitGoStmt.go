@@ -34,6 +34,14 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	// CS1003 ×4).
 	lambdaContext.deferredDecls = &strings.Builder{}
 
+	// Go evaluates the function value and the arguments at the statement, reading their operands after the calls
+	// in them (operandOrder.go); the prelude joins the statement's other hoisted declarations.
+	savedOperandHoist := v.hoistedDecls
+	v.hoistedDecls = lambdaContext.deferredDecls
+	endOperandOrder := v.beginOperandOrder(nil, false, append([]ast.Expr{goStmt.Call.Fun}, goStmt.Call.Args...)...)
+	v.hoistedDecls = savedOperandHoist
+	defer endOperandOrder()
+
 	var renderLambdaParams bool
 
 	// If we have a function literal, only prepare captures there, not on the GoStmt. A PARENTHESIZED
@@ -328,6 +336,18 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 			// ref extension (os/exec's `go c.watchCtx(resultc)`); bind the BOX overload.
 			if boxGroup := v.pointerReceiverBoxMethodGroup(goStmt.Call.Fun); boxGroup != "" {
 				callExpr = boxGroup
+			}
+
+			// The callee VALUE itself is handed to goǃ, whose overloads take the structural Action/Func
+			// delegates; a defined func type is a delegate of its own (context's `go f(cause)` through a
+			// CancelCauseFunc), so it converts to its underlying signature's -- exact mirror of the arm in
+			// visitDeferStmt. A nil value stays nil, as it does for a func value of an unnamed type.
+			if funType := v.getType(goStmt.Call.Fun, false); funType != nil {
+				if named, ok := types.Unalias(funType).(*types.Named); ok && named.TypeParams() == nil {
+					if sig, isSig := named.Underlying().(*types.Signature); isSig && !signatureMentionsTypeParams(sig) {
+						callExpr = fmt.Sprintf("builtin.NilSafeDelegateConversion<%s, %s>(%s)", v.getCSharpTypeName(sig), v.getCSharpTypeName(funType), callExpr)
+					}
+				}
 			}
 		}
 

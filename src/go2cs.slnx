@@ -582,6 +582,8 @@
     <Project Path="tests/Behavioral/EscapedLoopVarSiblingIndex/EscapedLoopVarSiblingIndex.csproj" />
     <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/ExportedAliasUnexportedTarget.csproj" />
     <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/aliaslib/ExportedAliasUnexportedTarget.aliaslib.csproj" />
+    <Project Path="tests/Behavioral/ExportedFuncOfUnexportedFuncType/ExportedFuncOfUnexportedFuncType.csproj" />
+    <Project Path="tests/Behavioral/ExportedFuncOfUnexportedFuncType/lib/ExportedFuncOfUnexportedFuncType.lib.csproj" />
     <Project Path="tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="tests/Behavioral/FieldAccessReinterpret/FieldAccessReinterpret.csproj" />
     <Project Path="tests/Behavioral/FieldAddressProperties/FieldAddressProperties.csproj" />
@@ -705,9 +707,11 @@
     <Project Path="tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="tests/Behavioral/GuardedNilPointerParamDeref/GuardedNilPointerParamDeref.csproj" />
     <Project Path="tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
+    <Project Path="tests/Behavioral/GoCallNamedFuncType/GoCallNamedFuncType.csproj" />
     <Project Path="tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="tests/Behavioral/GoDeferConstArgs/GoDeferConstArgs.csproj" />
     <Project Path="tests/Behavioral/GoImageCopyThroughView/GoImageCopyThroughView.csproj" />
+    <Project Path="tests/Behavioral/GoarchDefaultContext/GoarchDefaultContext.csproj" />
     <Project Path="tests/Behavioral/GoexitDefers/GoexitDefers.csproj" />
     <Project Path="tests/Behavioral/GoexitFromMain/GoexitFromMain.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/GoHostModuleShadow.csproj" />
@@ -878,6 +882,7 @@
     <Project Path="tests/Behavioral/MnForeignThread/MnForeignThread.csproj" />
     <Project Path="tests/Behavioral/MnGenericContended/MnGenericContended.csproj" />
     <Project Path="tests/Behavioral/MnGoMaxProcs/MnGoMaxProcs.csproj" />
+    <Project Path="tests/Behavioral/MnInvisible/MnInvisible.csproj" />
     <Project Path="tests/Behavioral/MnNoParkHang/MnNoParkHang.csproj" />
     <Project Path="tests/Behavioral/MnParkedCallers/MnParkedCallers.csproj" />
     <Project Path="tests/Behavioral/MnParkedMultiLine/MnParkedMultiLine.csproj" />
@@ -1053,6 +1058,19 @@
     <Project Path="tests/Behavioral/NonSelfConstraintSliceArg/NonSelfConstraintSliceArg.csproj" />
     <Project Path="tests/Behavioral/InitOrderNoInline/InitOrderNoInline.csproj" />
     <Project Path="tests/Behavioral/OpenGenericPointerImplement/OpenGenericPointerImplement.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderAddrMap/OperandOrderAddrMap.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderAssign/OperandOrderAssign.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderBinary/OperandOrderBinary.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderCallArgs/OperandOrderCallArgs.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderCompositeLit/OperandOrderCompositeLit.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderEarly/OperandOrderEarly.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderIf/OperandOrderIf.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderInPlace/OperandOrderInPlace.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderLabels/OperandOrderLabels.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderMultiAssign/OperandOrderMultiAssign.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderReturn/OperandOrderReturn.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderSend/OperandOrderSend.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderStmtForms/OperandOrderStmtForms.csproj" />
     <Project Path="tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
     <Project Path="tests/Behavioral/OsExecutablePath/OsExecutablePath.csproj" />
     <Project Path="tests/Behavioral/OsGetpagesize/OsGetpagesize.csproj" />
@@ -1418,6 +1436,8 @@
     <Project Path="tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/UntypedIntInterfaceBox/UntypedIntInterfaceBox.csproj" />
     <Project Path="tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
+    <Project Path="tests/Behavioral/UnnamedArrayTypeArgDescriptor/UnnamedArrayTypeArgDescriptor.csproj" />
+    <Project Path="tests/Behavioral/UnnamedArrayTypeArgDescriptor/wrap/UnnamedArrayTypeArgDescriptor.wrap.csproj" />
     <Project Path="tests/Behavioral/UnnamedMapNilConversion/UnnamedMapNilConversion.csproj" />
     <Project Path="tests/Behavioral/UnnamedParams/UnnamedParams.csproj" />
     <Project Path="tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
@@ -1525,8 +1545,8 @@
     <Project Path="tests/Performance/PerfStringView/PerfStringView.csproj" />
     <Project Path="tests/Performance/PerfTlsHandshake/PerfTlsHandshake.csproj" />
   </Folder>
-  <Folder Name="/utilities/">
+  <Folder Name="/tools/">
     <File Path="set-version.ps1" />
-    <Project Path="utilities/UpdateTestTargets/UpdateTestTargets.csproj" />
+    <Project Path="tools/UpdateTestTargets/UpdateTestTargets.csproj" />
   </Folder>
 </Solution>
