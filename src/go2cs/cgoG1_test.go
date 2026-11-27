@@ -75,9 +75,9 @@ func cgoG1Arms() []cgoG1Arm {
 		{name: "reinterpreted"},
 		{name: "reinterpretedwrite"},
 		{name: "copyback"},
-		// A ruled divergence of the converter, not of cgo: gc runs a call in an operand list before it reads a plain
-		// variable in the same list, and go2cs evaluates left to right (§11.22; BOARD, 2026-11-12).
-		{name: "ordered", goPrints: "ordered 200004\n", csPrints: "ordered 2004\n"},
+		// Was a ruled divergence (§11.22; BOARD, 2026-11-12): gc runs a call in an operand list before it reads a plain
+		// variable in the same list. P4's operand-order seat (train 17) emits that order, so both sides print the same.
+		{name: "ordered"},
 		// §11.16's divergences, each side asserted (§11.20's checklist).
 		{name: "packagelevel", goFails: cgoG1PointerPanic},
 		{name: "sibling", goFails: cgoG1PointerPanic},
