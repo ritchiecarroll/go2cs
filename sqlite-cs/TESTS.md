@@ -25,6 +25,9 @@ go2cs 1.26.11.1, and the release itself is not measured here. They are measured 
 | `modernc.org/sqlite/pcache` | 19 pass | 19 pass | **matches** |
 | `modernc.org/sqlite/vfs` | 9 pass | 9 pass | **matches** |
 
+The native column counts the tests both sides run. A plain native `go test` of the root package also reports the
+41 seed inputs of the fuzz target `FuzzSingleStatement` and the disclosed test.
+
 The same tests skip on both sides on linux/amd64.
 
 **`TestSEHTruncatedShm` is disclosed rather than run.** It needs a hardware memory fault to be recovered as a Go
@@ -35,4 +38,5 @@ and the reason is recorded with the conversion.
 seed-corpus inputs of the fuzz target `FuzzSingleStatement`, and the table leaves them out: go2cs does not run
 benchmarks or fuzz targets in converted tests yet.
 
-**Open walls:** none on linux/amd64 for these four packages at go2cs master. Windows and macOS have not been run.
+**Open walls:** none on linux/amd64 for these four packages at go2cs master, besides the disclosed test above.
+Windows and macOS have not been run.

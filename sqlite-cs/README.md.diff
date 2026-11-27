@@ -5,7 +5,7 @@
  | The demo, converted | output **byte-identical** to native Go, no stand-ins | output **byte-identical** to native Go, no stand-ins |
  | The file-backed demo, converted | output **byte-identical** to native Go in both journal modes, no stand-ins | output **byte-identical** to native Go in both journal modes, no stand-ins |
 -| SQLite's own tests, converted | **not yet run** | **in progress**: they need go2cs fixes newer than 1.26.11.1 |
-+| [SQLite's own tests, converted](TESTS.md) | **not yet run** | **match native** `go test` in all four test packages, at go2cs master (fixes newer than 1.26.11.1) |
++| [SQLite's own tests, converted](TESTS.md) | **not yet run** | **match native** `go test` in all four test packages, one test disclosed, on linux/amd64 at go2cs master (fixes newer than 1.26.11.1) |
  
  The demo runs were measured on 2026-11-20 with Go 1.26.11, the .NET 10 SDK and the go2cs 1.26.11.1 release,
  unmodified, comparing the converted program's output with the native program's using `cmp`. The Linux runs are on

@@ -13,7 +13,9 @@ Both sides are built with the tags `purego`, `math_big_pure_go`, `safe` and `noa
 
 The numbers below are measured on go2cs master at `4a56f17a3a`, not on a release: the fixes they need are newer than
 go2cs 1.26.11.1, and the release itself is not measured here. They are measured on linux/amd64 with Go 1.26.11, the
-.NET 10 SDK, at TypeScript commit `ba29a562991ceb942481e2a00810b4e5e4062e52`.
+.NET 10 SDK and a Release build (tiered JIT off), at TypeScript commit `ba29a562991ceb942481e2a00810b4e5e4062e52`.
+These four packages need no change to TypeScript's source: none of the tests compared here reads the repository's
+test data.
 <!-- Source: P5 20261127 refresh (COORD 20261127T134057Z). go2cs master 4a56f17a3a (train 18). Converted side:
      go2cs -tests -recurse over the trimmed module (the four test packages and the module packages they need), run in
      two phases on one output root, -test-action convert and then -test-action compare, so that the escape probe's
@@ -21,6 +23,9 @@ go2cs 1.26.11.1, and the release itself is not measured here. They are measured 
      go2cs_test_comparison.json reads status validated, matched true, errors 0. Native side: go test -json -count=1
      -tags purego,math_big_pure_go,safe,noasm -run '^Test' per package on the same box. Exclusions are benchmarks and
      the one fuzz target, not disclosures: ast 7, checker 1, parser 2 (BenchmarkParse, FuzzParser), scanner 0.
+     Harness patch check (COORD 20261127T193818Z item 1): the only callers of internal/repo in the four packages are
+     BenchmarkParse, FuzzParser and BenchmarkNewChecker, all excluded; the module copy's internal/repo/paths.go was
+     not patched for this run.
      Earlier reading, on a development tree before these fixes landed: P1 20261120T215925Z, relayed by COORD
      20261120T215954Z (same counts in all four packages); platform and counting level P1 20261121T081908Z. -->
 
@@ -35,7 +40,7 @@ go2cs 1.26.11.1, and the release itself is not measured here. They are measured 
 `parser` also runs the seed corpus of the fuzz target `FuzzParser`, and the table leaves it out: go2cs does not run
 benchmarks or fuzz targets in converted tests yet. No test is disclosed.
 
-**Open walls:** none for these four packages at go2cs master.
+**Open walls:** none on linux/amd64 for these four packages at go2cs master. Windows and macOS have not been run.
 
 ## Compiler conformance suite
 
@@ -43,12 +48,12 @@ TypeScript's compiler and conformance baseline test (`TestLocal`) is converted a
 host is published and run directly, and its verdicts are compared with native ones by a separate script, not by
 go2cs's test pipeline.
 
-This is measured on a go2cs development tree from 2026-11-21 that carried one fix not in any release, the `sync.Pool`
-cleanup fix, which is now on go2cs master. It is measured on linux/amd64 with 4 cores, Release build. It is not
-re-run at master `4a56f17a3a`.
-<!-- Source: P5 20261121T034525Z (not re-run in the 20261127 refresh: budget; the fix, 4e855b3716, is an ancestor of
-     master 4a56f17a3a); record DATA-ts-conformance-scout.md section 9 on claude/p5-ts-conformance-scout
-     943a751d38; relayed by COORD 20261121T034700Z. The queued fix is P5's sync.Pool cleanup seat. -->
+This is measured on a go2cs development tree from 2026-11-21, neither a release nor master, with the `sync.Pool`
+cleanup fix applied; that fix is on go2cs master. It is measured on linux/amd64 with 4 logical processors and a
+Release build. It is not re-run at master `4a56f17a3a`.
+<!-- Source: P5 20261121T034525Z; record docs/phase4/DATA-ts-conformance-scout.md (section 9) on go2cs master;
+     relayed by COORD 20261121T034700Z. The fix is P5's sync.Pool cleanup seat, 4e855b3716, an ancestor of master
+     4a56f17a3a. Not re-run in the 20261127 refresh. -->
 
 | | Native | Converted |
 |:--|:--|:--|
@@ -57,7 +62,13 @@ re-run at master `4a56f17a3a`.
 | Differences from native | | **0** |
 | Wall time | 85 s | 2,644 s |
 
-No configuration runs out of memory in the converted run.
+The wall times are test time and exclude the build: the native run takes 208 s with its compile. No configuration
+runs out of memory in the converted run.
 
-**One harness step.** The run sets `TSC_REPO_ROOT` to the TypeScript checkout. The test finds its baselines from its
-own source location, and in converted code `runtime.Caller` reports module paths rather than file-system paths.
+**One change to TypeScript's source, on both sides.** The test finds its baselines by walking up from its own source
+file, which `runtime.Caller` names. In converted code `runtime.Caller` reports a module path, the shape a Go
+`-trimpath` build reports, and the test panics on that shape. So the copy of TypeScript used for this run patches
+`internal/repo/paths.go`: before that panic, it returns `os.Getenv("TSC_REPO_ROOT")` when the variable is set. That
+package is converted again, and the converted run sets `TSC_REPO_ROOT` to the TypeScript checkout. The native run
+uses the same patched copy with the variable unset, so it takes its usual path.
+<!-- Source: docs/phase4/DATA-ts-conformance-scout.md section 3.3 on go2cs master. -->
