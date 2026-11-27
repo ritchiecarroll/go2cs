@@ -820,6 +820,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
+    public void CheckForeignEmbedPromotedPointer() => CheckTarget("ForeignEmbedPromotedPointer");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
