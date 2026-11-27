@@ -1529,6 +1529,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMultiValueReturnOrder() => CheckTarget("MultiValueReturnOrder");
 
     [TestMethod]
+    public void CheckMultiVarDeclTuple() => CheckTarget("MultiVarDeclTuple");
+
+    [TestMethod]
     public void CheckMulticastGroupJoin() => CheckTarget("MulticastGroupJoin");
 
     [TestMethod]

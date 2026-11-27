@@ -1573,6 +1573,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMultiValueReturnOrder() => CheckTarget("MultiValueReturnOrder");
 
     [TestMethod]
+    public void CheckMultiVarDeclTuple() => CheckTarget("MultiVarDeclTuple");
+
+    [TestMethod]
     public void CheckMulticastGroupJoin() => CheckTarget("MulticastGroupJoin");
 
     [TestMethod]

@@ -1576,6 +1576,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMultiValueReturnOrder() => CheckTarget("MultiValueReturnOrder");
 
     [TestMethod]
+    public void CheckMultiVarDeclTuple() => CheckTarget("MultiVarDeclTuple");
+
+    [TestMethod]
     public void CheckMulticastGroupJoin() => CheckTarget("MulticastGroupJoin");
 
     [TestMethod]

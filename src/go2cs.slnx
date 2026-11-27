@@ -899,6 +899,7 @@
     <Project Path="tests/Behavioral/MultiPointerEmbedPromotion/MultiPointerEmbedPromotion.csproj" />
     <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />
     <Project Path="tests/Behavioral/MultiValueReturnOrder/MultiValueReturnOrder.csproj" />
+    <Project Path="tests/Behavioral/MultiVarDeclTuple/MultiVarDeclTuple.csproj" />
     <Project Path="tests/Behavioral/NamedAnySliceType/NamedAnySliceType.csproj" />
     <Project Path="tests/Behavioral/NamedApproxStringByteConstraint/NamedApproxStringByteConstraint.csproj" />
     <Project Path="tests/Behavioral/NamedArrayAddressWrite/NamedArrayAddressWrite.csproj" />
