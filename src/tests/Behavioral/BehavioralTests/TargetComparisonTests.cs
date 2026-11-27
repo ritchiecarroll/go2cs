@@ -823,6 +823,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
+    public void CheckForeignEmbedPromotedPointer() => CheckTarget("ForeignEmbedPromotedPointer");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]

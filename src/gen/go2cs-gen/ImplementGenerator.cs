@@ -838,8 +838,7 @@ public class ImplementGenerator : ISourceGenerator
                             (string pointerEmbedName, INamedTypeSymbol pointerEmbedType, _) = declaringEmbeds[0];
                             string pointerEmbedNamespace = pointerEmbedType.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
 
-                            if (pointerEmbedNamespace != packageNamespace && pointerEmbedNamespace != Namespace &&
-                                !packageNamespace.StartsWith($"{pointerEmbedNamespace}.", StringComparison.Ordinal))
+                            if (!HostNamespaceVisible(pointerEmbedNamespace, packageNamespace))
                             {
                                 forwardStaticCalls[simpleName] = $"{GoMethodHosts.StaticClass(pointerEmbedType, simpleName)}.{simpleName}";
                             }
@@ -1021,6 +1020,19 @@ public class ImplementGenerator : ISourceGenerator
                             if (embedTypeSymbol is not null &&
                                 StructDeclarationSyntaxExtensions.GetForeignBoxReceiverMethodNames(embedTypeSymbol).Contains(methodName))
                             {
+                                // The embed's host classes live in ITS package's namespace, which the
+                                // generated file does not import when that namespace is neither this
+                                // one nor an ancestor of it (a user type embedding a struct from a
+                                // sibling module package: `go` cannot see `go.<module>`'s extensions,
+                                // CS1929). Forward through the host's STATIC call there, exactly as the
+                                // pointer-embed arm above does.
+                                string embedNamespace = embedTypeSymbol.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
+
+                                if (!HostNamespaceVisible(embedNamespace, packageNamespace))
+                                {
+                                    forwardStaticCalls[methodName] = $"{GoMethodHosts.StaticClass(embedTypeSymbol, methodName)}.{methodName}";
+                                }
+
                                 forwardReceivers[methodName] = receiver;
                                 break;
                             }
@@ -1598,6 +1610,15 @@ public class ImplementGenerator : ISourceGenerator
     // The registrations of a package class's pointer adapters (each adapter's own ᴛRegisterAdapter), called from ONE
     // method its module initializer defers to golib's first adapter lookup that misses (DeferredRegistration), where a
     // module initializer per adapter compiled each one at startup.
+    /// <summary>
+    /// Whether code emitted in <paramref name="emittingNamespace"/> sees the extension methods of a host class
+    /// in <paramref name="hostNamespace"/> without a using: the same namespace, the root <c>go</c> namespace, or
+    /// an ancestor of the emitting one. A forwarder to a host it cannot see takes the host's static call instead.
+    /// </summary>
+    private static bool HostNamespaceVisible(string hostNamespace, string emittingNamespace) =>
+        hostNamespace == emittingNamespace || hostNamespace == Namespace ||
+        emittingNamespace.StartsWith($"{hostNamespace}.", StringComparison.Ordinal);
+
     private static void EmitAdapterRegistrations(GeneratorExecutionContext context, HashSet<string> emittedHintNames, Dictionary<(string packageNamespace, string packageName), List<string>> adapterRegistrations)
     {
         foreach (KeyValuePair<(string packageNamespace, string packageName), List<string>> package in adapterRegistrations)
