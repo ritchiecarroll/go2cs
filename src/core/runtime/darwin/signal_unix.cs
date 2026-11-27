@@ -418,7 +418,8 @@ internal static void sigtrampgo(uint32 sig, ж<siginfo> info, @unsafe.Pointer ct
     ref var gsignalStack = ref heap(new gsignalStack(), out var ᏑgsignalStack);
     var setStack = adjustSignalStack(sig, (~gp).m, ᏑgsignalStack);
     if (setStack) {
-        gp.Value.m.Value.gsignal.Value.stktopsp = sys.GetCallerSP();
+        var evalᴛ1 = sys.GetCallerSP();
+        gp.Value.m.Value.gsignal.Value.stktopsp = evalᴛ1;
     }
 
     if ((~gp).stackguard0 == stackFork) {
@@ -803,7 +804,9 @@ internal static ж<g> fatalsignal(uint32 sig, ж<sigctxt> Ꮡc, ж<g> Ꮡgp, ref
         exit(2);
     }
 
-    print((@string)"PC=", (hex)(uint64)c.sigpc(), (@string)" m=", mp.id, (@string)" sigcode=", c.sigcode());
+    var evalᴛ1 = c.sigpc();
+    var evalᴛ2 = c.sigcode();
+    print((@string)"PC=", (hex)(uint64)evalᴛ1, (@string)" m=", mp.id, (@string)" sigcode=", evalᴛ2);
     if (sig == _SIGSEGV || sig == _SIGBUS) {
         print((@string)" addr=", (hex)(uint64)c.fault());
     }

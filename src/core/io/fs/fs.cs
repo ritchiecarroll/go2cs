@@ -268,7 +268,10 @@ partial struct PathError {
     public error Err;
 }
 
-internal static @string Error⁔(/*this*/ ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
+internal static @string Error⁔(/*this*/ ref PathError e) {
+    var evalᴛ1 = e.Err.Error();
+    return e.Op + " "u8 + e.Path + ": "u8 + evalᴛ1;
+}
 
 internal static error Unwrap⁔(/*this*/ ref PathError e) { return e.Err; }
 

@@ -121,7 +121,8 @@ internal static (slice<byte>, error) Next⁔(/*this*/ ref cramMD5Auth a, slice<b
         var d = hmac.New(md5.New, slice<byte>(a.secret));
         d.Write(fromServer);
         var s = new slice<byte>(0, d.Size());
-        return (fmt.Appendf(default, "%s %x"u8, a.username, d.Sum(s)), default);
+        var evalᴛ1 = d.Sum(s);
+        return (fmt.Appendf(default, "%s %x"u8, a.username, evalᴛ1), default);
     }
     return (default, default);
 }

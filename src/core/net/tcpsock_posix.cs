@@ -18,7 +18,9 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
         return new TCPAddrжAddr(Ꮡ(new TCPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port)));
     }
     case ж<syscall.SockaddrInet6> saΔ1: {
-        return new TCPAddrжAddr(Ꮡ(new TCPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port, Zone: zoneCache.name((nint)saΔ1.ZoneId))));
+        var evalᴛ1 = saΔ1.Addr[0..];
+        var evalᴛ2 = zoneCache.name((nint)saΔ1.ZoneId);
+        return new TCPAddrжAddr(Ꮡ(new TCPAddr(IP: evalᴛ1, Port: saΔ1.Port, Zone: evalᴛ2)));
     }}
     return default;
 }

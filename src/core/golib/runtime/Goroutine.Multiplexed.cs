@@ -105,6 +105,10 @@ public sealed partial class Goroutine
     // races the commit reads the right route; GoScheduler.Ready reads it first.
     internal volatile object? m_pin;
 
+    // M:N (N5 3b). Set while a native call entered with NativeCallHint.Blocks has handed this goroutine's P off;
+    // GoNativeCall.Exit takes a P back and clears it. Written and read only by the goroutine itself.
+    internal bool m_nativeHandedOff;
+
     // Set when the twin's root has ended (FinishTwin, and main's twin): a carrier then lets go of a pinned goroutine,
     // and ends its own thread when the goroutine ended locked (Go's rule, 3.4).
     internal volatile bool m_twinEnded;

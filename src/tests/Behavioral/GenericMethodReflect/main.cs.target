@@ -77,7 +77,8 @@ internal static void @try(@string label, Func<@string> f) {
                 fmt.Printf("%-36s PANIC %v\n"u8, label, r);
             }
         }, ref ᒐ);
-        fmt.Printf("%-36s %s\n"u8, label, f());
+        var evalᴛ1 = f();
+        fmt.Printf("%-36s %s\n"u8, label, evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -124,12 +125,19 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
     foreach (var (i, n) in range(goSets[name, () => new array<slice<@string>>(2)][0])) {
         var inʗ1 = @in;
         var vʗ2 = v;
-        @try(fmt.Sprintf("%s v.Method(%d)"u8, name, i), [GoFunc("probe.func3")] () => n + " "u8 + show(vʗ2.Method(i).Call(args(inʗ1[n].ꓸꓸꓸ))));
+        @try(fmt.Sprintf("%s v.Method(%d)"u8, name, i), [GoFunc("probe.func3")] () => {
+            var evalᴛ1 = vʗ2.Method(i);
+            var evalᴛ2 = args(inʗ1[n].ꓸꓸꓸ);
+            var evalᴛ3 = evalᴛ1.Call(evalᴛ2);
+            var evalᴛ4 = show(evalᴛ3);
+            return n + " "u8 + evalᴛ4;
+        });
         var inʗ2 = @in;
         var vʗ3 = v;
         @try(fmt.Sprintf("%s T.Method(%d).Func"u8, name, i), [GoFunc("probe.func4")] () => {
             var m = vʗ3.Type().Method(i);
-            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([vʗ3]), args(inʗ2[n].ꓸꓸꓸ))));
+            var evalᴛ5 = args(inʗ2[n].ꓸꓸꓸ);
+            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([vʗ3]), evalᴛ5)));
         });
         var inʗ3 = @in;
         var vʗ4 = v;
@@ -139,12 +147,19 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
     foreach (var (i, n) in range(goSets[name, () => new array<slice<@string>>(2)][1])) {
         var inʗ4 = @in;
         var pvʗ2 = pv;
-        @try(fmt.Sprintf("%s pv.Method(%d)"u8, name, i), [GoFunc("probe.func6")] () => n + " "u8 + show(pvʗ2.Method(i).Call(args(inʗ4[n].ꓸꓸꓸ))));
+        @try(fmt.Sprintf("%s pv.Method(%d)"u8, name, i), [GoFunc("probe.func6")] () => {
+            var evalᴛ6 = pvʗ2.Method(i);
+            var evalᴛ7 = args(inʗ4[n].ꓸꓸꓸ);
+            var evalᴛ8 = evalᴛ6.Call(evalᴛ7);
+            var evalᴛ9 = show(evalᴛ8);
+            return n + " "u8 + evalᴛ9;
+        });
         var inʗ5 = @in;
         var pvʗ3 = pv;
         @try(fmt.Sprintf("%s *T.Method(%d).Func"u8, name, i), [GoFunc("probe.func7")] () => {
             var m = pvʗ3.Type().Method(i);
-            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([pvʗ3]), args(inʗ5[n].ꓸꓸꓸ))));
+            var evalᴛ10 = args(inʗ5[n].ꓸꓸꓸ);
+            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([pvʗ3]), evalᴛ10)));
         });
     }
 

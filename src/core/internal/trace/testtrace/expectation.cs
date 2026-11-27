@@ -38,7 +38,8 @@ internal static error Check⁔(/*this*/ ref Expectation e, error err) {
         return fmt.Errorf("expected error while reading the trace: want something matching %q, got none"u8, e.errorMatcher.OrTypedNil());
     }
     if (e.failure && err != nil && !e.errorMatcher.MatchString(err.Error())) {
-        return fmt.Errorf("unexpected error while reading the trace: want something matching %q, got %s"u8, e.errorMatcher.OrTypedNil(), err.Error());
+        var evalᴛ1 = err.Error();
+        return fmt.Errorf("unexpected error while reading the trace: want something matching %q, got %s"u8, e.errorMatcher.OrTypedNil(), evalᴛ1);
     }
     return default;
 }

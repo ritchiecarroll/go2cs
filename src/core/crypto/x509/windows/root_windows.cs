@@ -178,7 +178,8 @@ internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = 
 
 [GoInit] internal static void initΔ1() {
     foreach (var (_, eku) in range(extKeyUsageOIDs)) {
-        windowsExtKeyUsageOIDs[eku.extKeyUsage] = slice<byte>(eku.oid.String() + "\x00");
+        var evalᴛ1 = eku.oid.String();
+        windowsExtKeyUsageOIDs[eku.extKeyUsage] = slice<byte>(evalᴛ1 + "\x00");
     }
 }
 

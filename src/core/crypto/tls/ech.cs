@@ -603,7 +603,9 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
 
     // NOTE: clone encap and payload so that mutating them does not mutate the
     // raw extension bytes.
-    return (echType, cs, configID, bytes.Clone(encap), bytes.Clone(payload), default);
+    var evalᴛ1 = bytes.Clone(encap);
+    var evalᴛ2 = bytes.Clone(payload);
+    return (echType, cs, configID, evalᴛ1, evalᴛ2, default);
 }
 
 internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello⁔(/*this*/ ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {

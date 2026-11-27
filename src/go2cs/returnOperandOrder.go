@@ -194,6 +194,14 @@ func (v *Visitor) exprEvaluatesCall(expr ast.Expr) bool {
 			return false
 		}
 
+		// A call or receive the statement already hoisted into its prelude (operandOrder.go) renders as its temp
+		// and runs no call here.
+		if node, isExpr := n.(ast.Expr); isExpr {
+			if _, hoisted := v.operandTemps[node]; hoisted {
+				return false
+			}
+		}
+
 		// A receive is ordered WITH the calls, so an operand carrying one must spill alongside
 		// them or the spill would reorder the two against each other. It reads no named storage,
 		// so it is never a hazard READ either — storagePathOf answers no path for it.

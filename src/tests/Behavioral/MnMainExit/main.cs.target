@@ -265,7 +265,8 @@ internal static partial void armI() {
 
 internal static void parent(@string name, bool header) {
     var cmd = exec.Command(Δos.Args[0]);
-    cmd.Env = append(Δos.Environ(), "MN_MAIN_EXIT_ARM=" + name[..1]);
+    var evalᴛ1 = Δos.Environ();
+    cmd.Env = append(evalᴛ1, "MN_MAIN_EXIT_ARM=" + name[..1]);
     ref var stdout = ref heap(new bytes.Buffer(), out var Ꮡstdout);
     ref var stderr = ref heap(new bytes.Buffer(), out var Ꮡstderr);
     cmd.Stdout = new bytes_BufferжWriter(Ꮡstdout);

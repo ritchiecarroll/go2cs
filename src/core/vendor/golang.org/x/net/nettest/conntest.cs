@@ -159,7 +159,8 @@ internal static partial void testBasicIO(ж<testing.T> t, net.Conn c1, net.Conn 
                 t.Errorf("unexpected c2.Close error: %v", err);
             }
         }
-        dataChʗ1.ᐸꟷ(wr.Bytes());
+        var evalᴛ1 = wr.Bytes();
+        dataChʗ1.ᐸꟷ(evalᴛ1);
     });
 
     var got = ᐸꟷ(dataCh); if (!bytes.Equal(got, want)) {
@@ -245,7 +246,9 @@ internal static partial void testRacyRead(ж<testing.T> t, net.Conn c1, net.Conn
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
 
-        c1.SetReadDeadline(time.Now().Add(time.Millisecond));
+        var evalᴛ1 = time.Now();
+        var evalᴛ2 = evalᴛ1.Add(time.Millisecond);
+        c1.SetReadDeadline(evalᴛ2);
         for (nint i = 0; i < 10; i++) {
             Ꮡwg.Add(1);
             goǃ([GoFunc("testRacyRead.func1")] () => {
@@ -260,7 +263,9 @@ internal static partial void testRacyRead(ж<testing.T> t, net.Conn c1, net.Conn
                         copy(b1, b2); // Mutate b1 to trigger potential race
                         if (err != nil) {
                             checkForTimeoutError(t, err);
-                            c1.SetReadDeadline(time.Now().Add(time.Millisecond));
+                            var evalᴛ3 = time.Now();
+                            var evalᴛ4 = evalᴛ3.Add(time.Millisecond);
+                            c1.SetReadDeadline(evalᴛ4);
                         }
                     }
                 }
@@ -283,7 +288,9 @@ internal static partial void testRacyWrite(ж<testing.T> t, net.Conn c1, net.Con
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
 
-        c1.SetWriteDeadline(time.Now().Add(time.Millisecond));
+        var evalᴛ1 = time.Now();
+        var evalᴛ2 = evalᴛ1.Add(time.Millisecond);
+        c1.SetWriteDeadline(evalᴛ2);
         for (nint i = 0; i < 10; i++) {
             Ꮡwg.Add(1);
             goǃ([GoFunc("testRacyWrite.func1")] () => {
@@ -298,7 +305,9 @@ internal static partial void testRacyWrite(ж<testing.T> t, net.Conn c1, net.Con
                         copy(b1, b2); // Mutate b1 to trigger potential race
                         if (err != nil) {
                             checkForTimeoutError(t, err);
-                            c1.SetWriteDeadline(time.Now().Add(time.Millisecond));
+                            var evalᴛ3 = time.Now();
+                            var evalᴛ4 = evalᴛ3.Add(time.Millisecond);
+                            c1.SetWriteDeadline(evalᴛ4);
                         }
                     }
                 }
@@ -429,7 +438,9 @@ internal static partial void testFutureTimeout(ж<testing.T> t, net.Conn c1, net
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(2);
 
-    c1.SetDeadline(time.Now().Add(100 * time.Millisecond));
+    var evalᴛ1 = time.Now();
+    var evalᴛ2 = evalᴛ1.Add(100 * time.Millisecond);
+    c1.SetDeadline(evalᴛ2);
     goǃ([GoFunc("testFutureTimeout.func1")] () => {
         GoFrame ᒐ = default;
         try {
@@ -552,7 +563,9 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                c1.SetDeadline(time.Now().Add(10 * time.Millisecond));
+                var evalᴛ1 = time.Now();
+                var evalᴛ2 = evalᴛ1.Add(10 * time.Millisecond);
+                c1.SetDeadline(evalᴛ2);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }

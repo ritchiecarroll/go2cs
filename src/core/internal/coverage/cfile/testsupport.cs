@@ -231,7 +231,8 @@ internal static error processPod⁔(/*this*/ ж<tstate> Ꮡts, pods.Pod p, map<@
             if (err != nil) {
                 return fmt.Errorf("reading pkg %d from meta-file %s: %s"u8, pkIdx, p.MetaFile, err);
             }
-            ts.cf.SetPackage(pd.PackagePath());
+            var evalᴛ1 = pd.PackagePath();
+            ts.cf.SetPackage(evalᴛ1);
             importpaths[pd.PackagePath()] = new EmptyStruct();
             ref var fd = ref heap(new coverage.FuncDesc(), out var Ꮡfd);
             var nf = pd.NumFuncs();

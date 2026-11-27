@@ -867,7 +867,8 @@ internal static void accumulate⁔(/*this*/ ref cpuStats s, int64 now, bool gcMa
 
     // Update total CPU.
     s.TotalTime = sched.totaltime + (now - sched.procresizetime) * (int64)gomaxprocs;
-    s.IdleTime += Ꮡsched.of(schedt.ᏑidleTime).Load();
+    var evalᴛ1 = Ꮡsched.of(schedt.ᏑidleTime).Load();
+    s.IdleTime += evalᴛ1;
 
     // Compute userTime. We compute this indirectly as everything that's not the above.
     //

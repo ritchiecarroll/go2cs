@@ -186,15 +186,17 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflect.Type typ, ref ref
             valid = false;
         }
         if (!valid) {
+            var evalᴛ1 = f.Tag.Get(xmlˢ);
             return (default, fmt.Errorf("xml: invalid tag in field %s of type %s: %q"u8,
-                f.Name, typ, f.Tag.Get(xmlˢ)));
+                f.Name, typ, evalᴛ1));
         }
     }
 
     // Use of xmlns without a name is not allowed.
     if (finfo.xmlns != ""u8 && tag == ""u8) {
+        var evalᴛ2 = f.Tag.Get(xmlˢ);
         return (default, fmt.Errorf("xml: namespace without name in field %s of type %s: %q"u8,
-            f.Name, typ, f.Tag.Get(xmlˢ)));
+            f.Name, typ, evalᴛ2));
     }
 
     if (f.Name == xmlName) {

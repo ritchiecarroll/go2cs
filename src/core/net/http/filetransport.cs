@@ -129,7 +129,9 @@ internal static void WriteHeader⁔(/*this*/ ref populateResponse pr, nint code)
     pr.wroteHeader = true;
 
     pr.res.StatusCode = code;
-    pr.res.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
+    var evalᴛ1 = StatusText(code);
+    var evalᴛ2 = fmt.Sprintf("%d %s"u8, code, evalᴛ1);
+    pr.res.Status = evalᴛ2;
 }
 
 internal static (nint n, error err) Write⁔(/*this*/ ref populateResponse pr, slice<byte> p) {

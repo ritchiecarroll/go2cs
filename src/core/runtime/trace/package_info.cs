@@ -70,7 +70,7 @@ using System.Runtime.CompilerServices;
 [assembly: GoPositionMap("runtime/trace/batch.go", "batch.cs", "ABQuooKUgqaAgoKUpICCpIKmgoKUgqaCgpSCpoKClIKmgoKUgpSCgoKUpg==")]
 [assembly: GoPositionMap("runtime/trace/encoding.go", "encoding.cs", "AAwegpiSgoKCgoKCgpSUgpSssoKCgoKUgg==")]
 [assembly: GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuIKmgqiSgpSCpoKsoAABEAAMAoKUppSmAAcQgoKmgoKUpoKUgoKCuAAbNMY=")]
-[assembly: GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABIq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACRSCqNySABcykg==", "24-31:1", "", "", "", "30:57,31:13")]
+[assembly: GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABIq8pSSlILKgoKUgoKUgpSCgpSmgpSCpIKU5oKmpgAHEIKCuIKUgpSCgqYACRSCqNySABcykg==", "24-31:1", "", "", "", "30:57,31:13")]
 [assembly: GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB060oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILW0oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILWopSUgqaCpqKClIKCgqa4gpS4ooIACBKCgoKUgoKClIKmgoKClIKUgpSCgriCgoKCgpSClILKgqg=", "157-198:1")]
 [assembly: GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHLsAbKqog==")]
 // </GoSourcePositionMaps>

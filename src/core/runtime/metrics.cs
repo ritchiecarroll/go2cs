@@ -69,7 +69,8 @@ internal static void initMetrics() {
         // boundaries.
         sizeClassBuckets[i] = (float64)((uint16)(gc.SizeClassToSize[i] + 1));
     }
-    sizeClassBuckets = append(sizeClassBuckets, float64Inf());
+    var evalᴛ1 = float64Inf();
+    sizeClassBuckets = append(sizeClassBuckets, evalᴛ1);
 
     timeHistBuckets = timeHistogramMetricsBuckets();
     metrics = new map<@string, metricData>{
@@ -710,19 +711,26 @@ partial struct sysStatsAggregate {
 internal static void compute⁔(/*this*/ ж<sysStatsAggregate> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    a.stacksSys = Ꮡmemstats.Ꮡstacks_sys.load();
-    a.buckHashSys = Ꮡmemstats.Ꮡbuckhash_sys.load();
-    a.gcMiscSys = Ꮡmemstats.ᏑgcMiscSys.load();
-    a.otherSys = Ꮡmemstats.Ꮡother_sys.load();
-    a.heapGoal = ᏑgcController.heapGoal();
+    var evalᴛ1 = Ꮡmemstats.Ꮡstacks_sys.load();
+    a.stacksSys = evalᴛ1;
+    var evalᴛ2 = Ꮡmemstats.Ꮡbuckhash_sys.load();
+    a.buckHashSys = evalᴛ2;
+    var evalᴛ3 = Ꮡmemstats.ᏑgcMiscSys.load();
+    a.gcMiscSys = evalᴛ3;
+    var evalᴛ4 = Ꮡmemstats.Ꮡother_sys.load();
+    a.otherSys = evalᴛ4;
+    var evalᴛ5 = ᏑgcController.heapGoal();
+    a.heapGoal = evalᴛ5;
     a.gcCyclesDone = (uint64)memstats.numgc;
     a.gcCyclesForced = (uint64)memstats.numforcedgc;
 
     systemstack([GoFunc("(*sysStatsAggregate).compute.func1")] () => {
         @lock(Ꮡmheap_.Ꮡlock);
-        Ꮡa.Value.mSpanSys = Ꮡmemstats.Ꮡmspan_sys.load();
+        var evalᴛ6 = Ꮡmemstats.Ꮡmspan_sys.load();
+        Ꮡa.Value.mSpanSys = evalᴛ6;
         Ꮡa.Value.mSpanInUse = (uint64)mheap_.spanalloc.inuse;
-        Ꮡa.Value.mCacheSys = Ꮡmemstats.Ꮡmcache_sys.load();
+        var evalᴛ7 = Ꮡmemstats.Ꮡmcache_sys.load();
+        Ꮡa.Value.mCacheSys = evalᴛ7;
         Ꮡa.Value.mCacheInUse = (uint64)mheap_.cachealloc.inuse;
         unlock(Ꮡmheap_.Ꮡlock);
     });

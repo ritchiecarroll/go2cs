@@ -146,7 +146,8 @@ internal static int64 pseudoUnix(nint year, ref syscall.Systemtime d) {
     // d.Hour, d.Minute and d.Second are absolute time
     nint day = 1;
     var t = Date(year, (Month)(nint)d.Month, day, (nint)d.Hour, (nint)d.Minute, (nint)d.Second, 0, UTC);
-    nint i = (nint)d.DayOfWeek - (nint)t.Weekday();
+    var evalᴛ1 = t.Weekday();
+    nint i = (nint)d.DayOfWeek - (nint)evalᴛ1;
     if (i < 0) {
         i += 7;
     }

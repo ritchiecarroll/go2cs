@@ -155,7 +155,9 @@ internal static void Start⁔(/*this*/ ж<Server> Ꮡs) {
         };
         s.client = Ꮡ(new http.Client(Transport: new http.TransportжRoundTripper(tr)));
     }
-    s.URL = "http://"u8 + s.Listener.Addr().String();
+    var evalᴛ1 = s.Listener.Addr();
+    var evalᴛ2 = evalᴛ1.String();
+    s.URL = "http://"u8 + evalᴛ2;
     Ꮡs.wrap();
     Ꮡs.goServe();
     if (serveFlag != ""u8) {
@@ -185,7 +187,8 @@ internal static void StartTLS⁔(/*this*/ ж<Server> Ꮡs) {
 
     var existingConfig = s.TLS;
     if (existingConfig != nil) {
-        s.TLS = existingConfig.Clone();
+        var evalᴛ1 = existingConfig.Clone();
+        s.TLS = evalᴛ1;
     } else {
         s.TLS = @new<tls.Config>();
     }
@@ -223,8 +226,11 @@ internal static void StartTLS⁔(/*this*/ ж<Server> Ꮡs) {
         return Ꮡdialer.DialContext(ctx, network, addr);
     };
     s.client.Transport = new http.TransportжRoundTripper(tr);
-    s.Listener = tls.NewListener(s.Listener, s.TLS);
-    s.URL = "https://"u8 + s.Listener.Addr().String();
+    var evalᴛ2 = tls.NewListener(s.Listener, s.TLS);
+    s.Listener = evalᴛ2;
+    var evalᴛ3 = s.Listener.Addr();
+    var evalᴛ4 = evalᴛ3.String();
+    s.URL = "https://"u8 + evalᴛ4;
     Ꮡs.wrap();
     Ꮡs.goServe();
 }

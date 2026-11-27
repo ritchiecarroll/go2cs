@@ -292,7 +292,8 @@ internal static nint minInputLen(ref syntax.Regexp re) {
         return minInputLen(ref (re.Sub[0]).DerefOrNull());
     }
     case var ᴛ when ᴛ == syntax.OpRepeat: {
-        return re.Min * minInputLen(ref (re.Sub[0]).DerefOrNull());
+        var evalᴛ1 = minInputLen(ref (re.Sub[0]).DerefOrNull());
+        return re.Min * evalᴛ1;
     }
     case var ᴛ when ᴛ == syntax.OpConcat: {
         nint l = 0;

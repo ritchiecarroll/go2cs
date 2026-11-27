@@ -715,6 +715,7 @@
     <Project Path="tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="tests/Behavioral/GoDeferConstArgs/GoDeferConstArgs.csproj" />
     <Project Path="tests/Behavioral/GoImageCopyThroughView/GoImageCopyThroughView.csproj" />
+    <Project Path="tests/Behavioral/GoarchDefaultContext/GoarchDefaultContext.csproj" />
     <Project Path="tests/Behavioral/GoexitDefers/GoexitDefers.csproj" />
     <Project Path="tests/Behavioral/GoexitFromMain/GoexitFromMain.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/GoHostModuleShadow.csproj" />
@@ -885,6 +886,7 @@
     <Project Path="tests/Behavioral/MnForeignThread/MnForeignThread.csproj" />
     <Project Path="tests/Behavioral/MnGenericContended/MnGenericContended.csproj" />
     <Project Path="tests/Behavioral/MnGoMaxProcs/MnGoMaxProcs.csproj" />
+    <Project Path="tests/Behavioral/MnInvisible/MnInvisible.csproj" />
     <Project Path="tests/Behavioral/MnNoParkHang/MnNoParkHang.csproj" />
     <Project Path="tests/Behavioral/MnParkedCallers/MnParkedCallers.csproj" />
     <Project Path="tests/Behavioral/MnParkedMultiLine/MnParkedMultiLine.csproj" />
@@ -1060,6 +1062,19 @@
     <Project Path="tests/Behavioral/NonSelfConstraintSliceArg/NonSelfConstraintSliceArg.csproj" />
     <Project Path="tests/Behavioral/InitOrderNoInline/InitOrderNoInline.csproj" />
     <Project Path="tests/Behavioral/OpenGenericPointerImplement/OpenGenericPointerImplement.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderAddrMap/OperandOrderAddrMap.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderAssign/OperandOrderAssign.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderBinary/OperandOrderBinary.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderCallArgs/OperandOrderCallArgs.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderCompositeLit/OperandOrderCompositeLit.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderEarly/OperandOrderEarly.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderIf/OperandOrderIf.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderInPlace/OperandOrderInPlace.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderLabels/OperandOrderLabels.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderMultiAssign/OperandOrderMultiAssign.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderReturn/OperandOrderReturn.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderSend/OperandOrderSend.csproj" />
+    <Project Path="tests/Behavioral/OperandOrderStmtForms/OperandOrderStmtForms.csproj" />
     <Project Path="tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
     <Project Path="tests/Behavioral/OsExecutablePath/OsExecutablePath.csproj" />
     <Project Path="tests/Behavioral/OsGetpagesize/OsGetpagesize.csproj" />

@@ -141,7 +141,8 @@ internal static void doubleCheckSmallScanNoHeader(uintptr size, ж<_type> Ꮡtyp
     if (mp.mallocing != 0) {
         @throw(mallocDeadlockˢ);
     }
-    if (mp.gsignal == getg()) {
+    var evalᴛ1 = getg();
+    if (mp.gsignal == evalᴛ1) {
         @throw(mallocDuringSignalˢ);
     }
     if (Ꮡtyp == nil || !typ.Pointers()) {
@@ -243,7 +244,8 @@ internal static void doubleCheckSmallNoScan(ж<_type> Ꮡtyp, ref m mp) {
     if (mp.mallocing != 0) {
         @throw(mallocDeadlockˢ);
     }
-    if (mp.gsignal == getg()) {
+    var evalᴛ1 = getg();
+    if (mp.gsignal == evalᴛ1) {
         @throw(mallocDuringSignalˢ);
     }
     if (Ꮡtyp != nil && typ.Pointers()) {
@@ -353,7 +355,8 @@ internal static void doubleCheckTiny(uintptr size, ж<_type> Ꮡtyp, ref m mp) {
     if (mp.mallocing != 0) {
         @throw(mallocDeadlockˢ);
     }
-    if (mp.gsignal == getg()) {
+    var evalᴛ1 = getg();
+    if (mp.gsignal == evalᴛ1) {
         @throw(mallocDuringSignalˢ);
     }
     if (Ꮡtyp != nil && typ.Pointers()) {

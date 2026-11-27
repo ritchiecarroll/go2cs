@@ -120,7 +120,10 @@ internal static error Write⁔(/*this*/ ж<CoverageMetaFileWriter> Ꮡm, /*[16]*
         if (m.debug) {
             var h = fnv.New128a();
             h.Write(blob);
-            fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= writing blob %d len %d at off=%d hash %s\n"u8, k, len(blob), off2, fmt.Sprintf("%x"u8, h.Sum(default)));
+            var evalᴛ1 = len(blob);
+            var evalᴛ2 = h.Sum(default);
+            var evalᴛ3 = fmt.Sprintf("%x"u8, evalᴛ2);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= writing blob %d len %d at off=%d hash %s\n"u8, k, evalᴛ1, off2, evalᴛ3);
         }
         (_, err) = m.w.Write(blob); if (err != nil) {
             return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);

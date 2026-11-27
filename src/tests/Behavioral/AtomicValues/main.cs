@@ -33,7 +33,8 @@ internal static void main() {
     fmt.Println("ptr cas ok:", Ꮡp.CompareAndSwap(Ꮡa, Ꮡb));
     fmt.Println("ptr final:", Ꮡp.Load().Value);
     var old = Ꮡp.Swap(Ꮡa);
-    fmt.Println("ptr swap:", old.Value, Ꮡp.Load().Value);
+    var evalᴛ1 = Ꮡp.Load();
+    fmt.Println("ptr swap:", old.Value, evalᴛ1.Value);
 
     ᏑgHolder.Ꮡcount.Store(42);
     ᏑgHolder.Ꮡcount.Add(8);

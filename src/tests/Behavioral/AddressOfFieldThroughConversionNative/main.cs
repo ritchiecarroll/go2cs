@@ -56,14 +56,20 @@ internal static void main() {
         @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡ(page, 0));
 
         atomic.StoreInt32(@unsafe.Pointer.To<rec>(p).Ꮡid, 7);
-        fmt.Println("atomic store:", (@unsafe.Pointer.To<rec>(p)).Value.id, binary.LittleEndian.Uint32(page[4..]));
+        var evalᴛ1 = page[4..];
+        var evalᴛ2 = binary.LittleEndian.Uint32(evalᴛ1);
+        fmt.Println("atomic store:", (@unsafe.Pointer.To<rec>(p)).Value.id, evalᴛ2);
 
         (@unsafe.Pointer.To<rec>(p).Ꮡcnt).Value = 11;
-        fmt.Println("union write:", (@unsafe.Pointer.To<rec>(p)).Value.cnt, binary.LittleEndian.Uint32(page[0..]));
+        var evalᴛ3 = page[0..];
+        var evalᴛ4 = binary.LittleEndian.Uint32(evalᴛ3);
+        fmt.Println("union write:", (@unsafe.Pointer.To<rec>(p)).Value.cnt, evalᴛ4);
 
         var q = @unsafe.Pointer.To<rec>(p).Ꮡid;
         q.Value = 9;
-        fmt.Println("kept address:", (@unsafe.Pointer.To<rec>(p)).Value.id, binary.LittleEndian.Uint32(page[4..]), (uintptr)q - (uintptr)p);
+        var evalᴛ5 = page[4..];
+        var evalᴛ6 = binary.LittleEndian.Uint32(evalᴛ5);
+        fmt.Println("kept address:", (@unsafe.Pointer.To<rec>(p)).Value.id, evalᴛ6, (uintptr)q - (uintptr)p);
 
         fmt.Println("parenthesized CAS:", atomic.CompareAndSwapInt32((@unsafe.Pointer.To<rec>(p)).Ꮡid, 9, 4), binary.LittleEndian.Uint32(page[4..]));
 

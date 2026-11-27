@@ -398,7 +398,8 @@ Loop:
                 // Flush current output block if any.
                 if (d.byteAvailable) {
                     // There is still one pending token that needs to be flushed
-                    d.tokens = append(d.tokens, literalToken((uint32)d.window[d.index - 1]));
+                    var evalᴛ1 = literalToken((uint32)d.window[d.index - 1]);
+                    d.tokens = append(d.tokens, evalᴛ1);
                     d.byteAvailable = false;
                 }
                 if (len(d.tokens) > 0) {
@@ -437,9 +438,11 @@ Loop:
             // There was a match at the previous step, and the current match is
             // not better. Output the previous match.
             if (d.fastSkipHashing != skipNever) {
-                d.tokens = append(d.tokens, matchToken((uint32)(d.length - (nint)baseMatchLength), (uint32)(d.offset - (nint)baseMatchOffset)));
+                var evalᴛ2 = matchToken((uint32)(d.length - (nint)baseMatchLength), (uint32)(d.offset - (nint)baseMatchOffset));
+                d.tokens = append(d.tokens, evalᴛ2);
             } else {
-                d.tokens = append(d.tokens, matchToken((uint32)(prevLength - (nint)baseMatchLength), (uint32)(prevOffset - (nint)baseMatchOffset)));
+                var evalᴛ3 = matchToken((uint32)(prevLength - (nint)baseMatchLength), (uint32)(prevOffset - (nint)baseMatchOffset));
+                d.tokens = append(d.tokens, evalᴛ3);
             }
             // Insert in the hash table all strings up to the end of the match.
             // index and index-1 are already inserted. If there is not enough
@@ -488,7 +491,8 @@ Loop:
                 if (d.fastSkipHashing != skipNever) {
                     i = d.index;
                 }
-                d.tokens = append(d.tokens, literalToken((uint32)d.window[i]));
+                var evalᴛ4 = literalToken((uint32)d.window[i]);
+                d.tokens = append(d.tokens, evalᴛ4);
                 if (len(d.tokens) == maxFlateBlockTokens) {
                     d.err = d.writeBlock(d.tokens, i + 1); if (d.err != nil) {
                         return;

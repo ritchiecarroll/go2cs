@@ -72,7 +72,8 @@ internal static error Write⁔(/*this*/ ж<Writer> Ꮡstw, io.Writer w) {
 
     [GoFunc("(*Writer).Write.func1")] error wr128(nuint v) {
         Ꮡstw.Value.tmp = Ꮡstw.Value.tmp[..0];
-        Ꮡstw.Value.tmp = uleb128.AppendUleb128(Ꮡstw.Value.tmp, v);
+        var evalᴛ1 = uleb128.AppendUleb128(Ꮡstw.Value.tmp, v);
+        Ꮡstw.Value.tmp = evalᴛ1;
         var (nw, err) = w.Write(Ꮡstw.Value.tmp); if (err != nil) {
             return fmt.Errorf("writing string table: %v"u8, err);
         } else if (nw != len(Ꮡstw.Value.tmp)) {
@@ -132,7 +133,8 @@ internal static void Read⁔(/*this*/ ref Reader str) {
     str.strs = new slice<@string>(0, numEntries);
     for (nint idx = 0; idx < numEntries; idx++) {
         var slen = str.r.ReadULEB128();
-        str.strs = append(str.strs, str.r.ReadString((int64)slen));
+        var evalᴛ1 = str.r.ReadString((int64)slen);
+        str.strs = append(str.strs, evalᴛ1);
     }
 }
 

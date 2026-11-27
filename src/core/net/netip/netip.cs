@@ -1363,7 +1363,10 @@ internal static error UnmarshalBinary⁔(/*this*/ ref AddrPort p, slice<byte> b)
     if (err != nil) {
         return err;
     }
-    p = AddrPortFrom(addr, byteorder.LEUint16(b.slice(len(b) - 2)));
+    var evalᴛ1 = len(b);
+    var evalᴛ2 = b.slice(evalᴛ1 - 2);
+    var evalᴛ3 = byteorder.LEUint16(evalᴛ2);
+    p = AddrPortFrom(addr, evalᴛ3);
     return default;
 }
 

@@ -74,7 +74,8 @@ internal static void rlock⁔(/*this*/ ж<rwmutex> Ꮡrw) {
     // deadlock (issue #20903). Alternatively, we could drop the P
     // while sleeping.
     acquireLockRankAndM(rw.readRank);
-    lockWithRankMayAcquire(Ꮡrw.ᏑrLock, getLockRank(Ꮡrw.ᏑrLock));
+    var evalᴛ1 = getLockRank(Ꮡrw.ᏑrLock);
+    lockWithRankMayAcquire(Ꮡrw.ᏑrLock, evalᴛ1);
 
     if (Ꮡrw.ᏑreaderCount.Add(1) < 0) {
         // A writer is pending. Park on the reader queue.

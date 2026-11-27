@@ -77,7 +77,8 @@ public static (ж<Prog>, error) Compile(ж<Regexp> re) {
     compiler c = default;
     c.init();
     var f = c.compile(re);
-    f.@out.patch(c.p, c.inst(InstMatch).i);
+    var evalᴛ1 = c.inst(InstMatch);
+    f.@out.patch(c.p, evalᴛ1.i);
     c.p.Start = (nint)f.i;
     return (c.p, default);
 }

@@ -176,7 +176,8 @@ internal static void end⁔(/*this*/ ж<activeSweep> Ꮡa, sweepLocker sl) {
             // We're the last sweeper, and there's nothing left to sweep.
             if (debug.gcpacertrace > 0) {
                 var live = ᏑgcController.ᏑheapLive.Load();
-                print((@string)"pacer: sweep done at heap size ", live >> 20, (@string)"MB; allocated ", (live - mheap_.sweepHeapLiveBasis) >> 20, (@string)"MB during sweep; swept ", Ꮡmheap_.ᏑpagesSwept.Load(), (@string)" pages at ", mheap_.sweepPagesPerByte, (@string)" pages/byte\n");
+                var evalᴛ1 = Ꮡmheap_.ᏑpagesSwept.Load();
+                print((@string)"pacer: sweep done at heap size ", live >> 20, (@string)"MB; allocated ", (live - mheap_.sweepHeapLiveBasis) >> 20, (@string)"MB during sweep; swept ", evalᴛ1, (@string)" pages at ", mheap_.sweepPagesPerByte, (@string)" pages/byte\n");
             }
             // Now that sweeping is completely done, flush remaining cleanups.
             ᏑgcCleanups.flush();
@@ -699,12 +700,16 @@ internal static bool sweep⁔(/*this*/ ref sweepLocked sl, bool preserve) {
         // Check the first bitmap byte, where we have to be
         // careful with freeindex.
         var obj = (uintptr)s.freeindex;
-        if ((uint8)((((uint8)(s.gcmarkBits.bytep(obj / 8).Value & ~s.allocBits.bytep(obj / 8).Value)) >> (int)(obj % 8))) != 0) {
+        var evalᴛ1 = s.gcmarkBits.bytep(obj / 8);
+        var evalᴛ2 = s.allocBits.bytep(obj / 8);
+        if ((uint8)((((uint8)(evalᴛ1.Value & ~evalᴛ2.Value)) >> (int)(obj % 8))) != 0) {
             s.reportZombies();
         }
         // Check remaining bytes.
         for (var i = obj / 8 + 1; i < divRoundUp((uintptr)s.nelems, 8); i++) {
-            if ((uint8)(s.gcmarkBits.bytep(i).Value & ~s.allocBits.bytep(i).Value) != 0) {
+            var evalᴛ3 = s.gcmarkBits.bytep(i);
+            var evalᴛ4 = s.allocBits.bytep(i);
+            if ((uint8)(evalᴛ3.Value & ~evalᴛ4.Value) != 0) {
                 s.reportZombies();
             }
         }
@@ -730,7 +735,8 @@ internal static bool sweep⁔(/*this*/ ref sweepLocked sl, bool preserve) {
     // gcmarkBits becomes the allocBits.
     // get a fresh cleared gcmarkBits in preparation for next GC
     s.allocBits = s.gcmarkBits;
-    s.gcmarkBits = newMarkBits((uintptr)s.nelems);
+    var evalᴛ5 = newMarkBits((uintptr)s.nelems);
+    s.gcmarkBits = evalᴛ5;
 
     // refresh pinnerBits if they exists
     if (s.pinnerBits != nil) {

@@ -23,7 +23,8 @@ internal static slice<@string> fmtFrames(params ꓸꓸꓸuintptr pcsʗp) {
         // Trim package from function name. It's just redundant noise.
         name = strings.TrimPrefix(name, cmdCompileInternalNoderˢ);
 
-        Ꮡres.ValueSlot = append(Ꮡres.ValueSlot, fmt.Sprintf("%s:%v: %s +0x%v"u8, @file, line, name, offset));
+        var evalᴛ1 = fmt.Sprintf("%s:%v: %s +0x%v"u8, @file, line, name, offset);
+        Ꮡres.ValueSlot = append(Ꮡres.ValueSlot, evalᴛ1);
     });
     return res;
 }

@@ -71,7 +71,7 @@ using System.Runtime.CompilerServices;
 [assembly: GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABIo0qaUooKUgpSClIKClKaCgpSmooKUgqaCgrgABxTSppSigpSClIKUgoKUpoKClKbYgoKmgpSClIKmpoKC")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/cbc_noasm.go", "cbc_noasm.cs", "AAgSgqaC")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/const.go", "const.cs", "ABImABMoABMoABQsACFEACFEACFEACRMACFEACFEACFE")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquIKUgoKmAAcQopSCgoK8woKCgoIABBLigpSCgpSUlISigoKCgoKmgoKCgriCgoKClIKCgoKUgoKCgqaEooKCAAMSwoKCgoKCpoKmgoKC", "", "", "36=BEUint64/1/2/2,BEUint64/2/2/3")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquIKUgoKmAAsQopSCgoK8woKCgoIABBLigpSCgpSUlISigoKCgoKmgoKCgriCgoKClIKCgoKUgoKCgqaEooKCAAMSwoKCgoKCpoKmgoKC", "", "", "36=BEUint64/1/2/2,BEUint64/2/2/3")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/ctr_noasm.go", "ctr_noasm.cs", "AAgSsqayprKmsg==")]
 // </GoSourcePositionMaps>
 

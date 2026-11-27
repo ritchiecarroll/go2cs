@@ -22,17 +22,20 @@ internal static partial void main() {
 
     var outʗ2 = @out;
     one f1 = [GoFunc("main.func2")] (nint nΔ1) => {
-        outʗ2.ᐸꟷ(fmt.Sprint("one ", nΔ1));
+        var evalᴛ1 = fmt.Sprint("one ", nΔ1);
+        outʗ2.ᐸꟷ(evalᴛ1);
     };
 
     var outʗ3 = @out;
     two f2 = [GoFunc("main.func3")] (nint nΔ2, @string s) => {
-        outʗ3.ᐸꟷ(fmt.Sprint("two ", nΔ2, " ", s));
+        var evalᴛ2 = fmt.Sprint("two ", nΔ2, " ", s);
+        outʗ3.ᐸꟷ(evalᴛ2);
     };
 
     var outʗ4 = @out;
     valued fv = [GoFunc("main.func4")] (nint nΔ3) => {
-        outʗ4.ᐸꟷ(fmt.Sprint("valued ", nΔ3));
+        var evalᴛ3 = fmt.Sprint("valued ", nΔ3);
+        outʗ4.ᐸꟷ(evalᴛ3);
         return nΔ3;
     };
 

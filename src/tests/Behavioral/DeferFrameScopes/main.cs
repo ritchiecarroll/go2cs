@@ -97,7 +97,8 @@ internal static nint mixedScopes() {
         [GoFunc("mixedScopes.func1")] nint add(nint n) => n * 2;
         var addʗ1 = add;
         [GoFunc("mixedScopes.func2")] void bump() {
-            total += addʗ1(3);
+            var evalᴛ1 = addʗ1(3);
+            total += evalᴛ1;
         }
 
         bump();

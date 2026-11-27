@@ -12,8 +12,11 @@ using errors = go.errors_package;
 namespace GolibTests;
 
 // darwin's hand-owned native calls enter a system call the way Go's do (docs/phase4/DESIGN-native-call-seam.md
-// §13.2, S-b2's darwin rows). Every libcCall caller is already inside the window: the converted darwin runtime's
-// syscall_syscalln calls entersyscall, which is S-b's hand-owned family. Three hand-owned sites call libc
+// §13.2, S-b2's darwin rows). The runtime's own libcCall callers are already inside the window: the converted
+// darwin runtime's syscall_syscalln calls entersyscall, which is S-b's hand-owned family. (The syscall package
+// never reached that function: it bodies its own syscalln and Syscall/6/9 in syscall_darwin_impl.cs, which were
+// unbracketed until 2026-11-26 and now bracket in place; DarwinSyscallBracketTests holds those rows, and
+// docs/phase4/DESIGN-darwin-syscall-bracket.md corrects this premise.) Three hand-owned sites call libc
 // directly instead, and Go makes each of them through syscall(), whose entersyscall moves the goroutine to
 // _Gsyscall for the length of the call:
 //   - syscall's posix_spawn, the parent's wait for the child's exec (Go's parent waits in readlen on the exec

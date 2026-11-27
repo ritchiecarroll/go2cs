@@ -223,7 +223,8 @@ internal static error readArgs⁔(/*this*/ ж<CounterDataReader> Ꮡcdr) {
         }
         cdr.osargs = new slice<@string>(0, argc);
         for (nint i = 0; i < argc; i++) {
-            @string arg = cdr.args[fmt.Sprintf("argv%d"u8, i)];
+            var evalᴛ1 = fmt.Sprintf("argv%d"u8, i);
+            @string arg = cdr.args[evalᴛ1];
             cdr.osargs = append(cdr.osargs, arg);
         }
     }

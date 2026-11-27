@@ -553,7 +553,8 @@ internal static (ж<indirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K
 internal static Action<Func<K, V, bool>> All⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht) {
     Ꮡht.init();
     return [GoFunc("(*HashTrieMap[...]).All.func1")] (Func<K, V, bool> yield) => {
-        Ꮡht.Value.iter(Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load(), yield);
+        var evalᴛ1 = Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load();
+        Ꮡht.Value.iter(evalᴛ1, yield);
     };
 }
 
@@ -749,7 +750,8 @@ internal static (V, ж<entry<K, V>>, bool) loadAndDelete⁔<K, V>(/*this*/ ж<en
 
     if (AreEqual(head.key, key)) {
         // Drop the head of the list.
-        return (head.value, Ꮡhead.of(entry<K, V>.Ꮡoverflow).Load(), true);
+        var evalᴛ1 = Ꮡhead.of(entry<K, V>.Ꮡoverflow).Load();
+        return (head.value, evalᴛ1, true);
     }
     var i = Ꮡhead.of(entry<K, V>.Ꮡoverflow);
     var e = i.Load();

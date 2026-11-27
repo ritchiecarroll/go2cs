@@ -246,7 +246,8 @@ internal static slice<byte> Bytes⁔(/*this*/ ref Index x) {
 }
 
 internal static slice<byte> at⁔(/*this*/ ref Index x, nint i) {
-    return x.data.slice((nint)(x.sa.get(i)));
+    var evalᴛ1 = x.sa.get(i);
+    return x.data.slice((nint)(evalᴛ1));
 }
 
 // lookupAll returns a slice into the matching region of the index.
@@ -259,8 +260,10 @@ internal static ints lookupAll⁔(/*this*/ ж<Index> Ꮡx, slice<byte> s) {
     var sʗ1 = s;
     nint i = sort.Search(x.sa.len(), [GoFunc("(*Index).lookupAll.func1")] (nint iΔ1) => bytes.Compare(Ꮡx.Value.at(iΔ1), sʗ1) >= 0);
     // starting at i, find the first index at which s is not a prefix
+    var evalᴛ1 = x.sa.len();
     var sʗ2 = s;
-    nint j = i + sort.Search(x.sa.len() - i, [GoFunc("(*Index).lookupAll.func2")] (nint jΔ1) => !bytes.HasPrefix(Ꮡx.Value.at(jΔ1 + i), sʗ2));
+    var evalᴛ2 = sort.Search(evalᴛ1 - i, [GoFunc("(*Index).lookupAll.func2")] (nint jΔ1) => !bytes.HasPrefix(Ꮡx.Value.at(jΔ1 + i), sʗ2));
+    nint j = i + evalᴛ2;
     return x.sa.Δslice(i, j);
 }
 

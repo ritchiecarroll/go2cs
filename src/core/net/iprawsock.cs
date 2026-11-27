@@ -190,7 +190,8 @@ internal static (nint, error) WriteToIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte>
     }
     var (n, err) = c.writeTo(b, addr);
     if (err != nil) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: addr.opAddr(), Err: err)));
+        var evalᴛ1 = addr.opAddr();
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: evalᴛ1, Err: err)));
     }
     return (n, err);
 }
@@ -208,7 +209,8 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b
     }
     var (n, err) = c.writeTo(b, a);
     if (err != nil) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: a.opAddr(), Err: err)));
+        var evalᴛ1 = a.opAddr();
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: evalᴛ1, Err: err)));
     }
     return (n, err);
 }
@@ -230,7 +232,8 @@ internal static (nint n, nint oobn, error err) WriteMsgIP⁔(/*this*/ ж<IPConn>
     }
     (n, oobn, err) = c.writeMsg(b, oob, addr);
     if (err != nil) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: addr.opAddr(), Err: err)));
+        var evalᴛ1 = addr.opAddr();
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: evalᴛ1, Err: err)));
     }
     return (n, oobn, err);
 }

@@ -321,7 +321,8 @@ partial struct nestedError {
 
 // nestedError implements error.Error.
 internal static @string Error⁔(/*this*/ ref nestedError e) {
-    return e.s + ": "u8 + e.err.Error();
+    var evalᴛ1 = e.err.Error();
+    return e.s + ": "u8 + evalᴛ1;
 }
 
 // Header is a representation of a DNS message header.
@@ -575,7 +576,8 @@ internal static error checkAdvance⁔(/*this*/ ref Parser p, section sec) {
         return ErrSectionDone;
     }
     p.resHeaderValid = false;
-    if (p.index == (nint)p.header.count(sec)) {
+    var evalᴛ1 = p.header.count(sec);
+    if (p.index == (nint)evalᴛ1) {
         p.index = 0;
         p.section++;
         return ErrSectionDone;

@@ -89,7 +89,9 @@ internal static void main() {
     da.B++;
     var db = new DB(new pair<nint>(A: 18));
     var das = slice<DA>([new(new pair<nint>(A: 19)), new(new pair<nint>(B: 20))]);
-    fmt.Println(da.A, da.B, db.A, db.B, das[0].A, das[1].B, ((pair<nint>)da).First(), ((A1)db).First(), ((DA)new A2(B: 21)).B, ((S)da).B, ((DB)s).A);
+    var evalᴛ1 = ((pair<nint>)da).First();
+    var evalᴛ2 = ((A1)db).First();
+    fmt.Println(da.A, da.B, db.A, db.B, das[0].A, das[1].B, evalᴛ1, evalᴛ2, ((DA)new A2(B: 21)).B, ((S)da).B, ((DB)s).A);
 
     var dx = new DX(new lib.Pair<@string>(A: "x", B: 22));
     var dy = new DY(new lib.Pair<@string>(A: "y"));
@@ -105,7 +107,9 @@ internal static void main() {
     pq.B++;
     var pda = Ꮡda.Reinterpret<DA, A1>();
     pda.B++;
-    fmt.Println(q.B, (pq.Reinterpret<pair<nint>, Q>()).Value.A, pq.First(), da.B, (pda.Reinterpret<A1, DA>()).Value.A, pda.First());
+    var evalᴛ3 = pq.First();
+    var evalᴛ4 = pda.First();
+    fmt.Println(q.B, (pq.Reinterpret<pair<nint>, Q>()).Value.A, evalᴛ3, da.B, (pda.Reinterpret<A1, DA>()).Value.A, evalᴛ4);
 }
 
 } // end main_package

@@ -9,13 +9,15 @@ partial class main_package {
 partial struct alias /*global::go.DefinedTypeOverForeignStruct.ptlike_package.Outer*/;
 
 internal static @string describe(this ref alias a) {
-    return fmt.Sprintf("%s/%d"u8, a.Name, a.In.Len());
+    var evalᴛ1 = a.In.Len();
+    return fmt.Sprintf("%s/%d"u8, a.Name, evalᴛ1);
 }
 
 internal static void main() {
     var a = (alias)ptlike.New("first", 1, 2, 3);
 
-    fmt.Println(a.Name, a.In.Len());
+    var evalᴛ1 = a.In.Len();
+    fmt.Println(a.Name, evalᴛ1);
     fmt.Println(a.describe());
 
     a.Name = "second";

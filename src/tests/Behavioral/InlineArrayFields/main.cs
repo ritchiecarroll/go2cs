@@ -94,7 +94,12 @@ internal static void main() {
         break;
     }}
     var m = new map<any, nint>{[box(g.Cells[0].ΔCopy())] = 1};
-    fmt.Println(m[array<int16>([1, 2, 3])], reflect.ValueOf(g.Off.ΔCopy()).Cap(), reflect.ValueOf(g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy())).Index(1).Len());
+    var evalᴛ1 = reflect.ValueOf(g.Off.ΔCopy());
+    var evalᴛ2 = evalᴛ1.Cap();
+    var evalᴛ3 = reflect.ValueOf(g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy()));
+    var evalᴛ4 = evalᴛ3.Index(1);
+    var evalᴛ5 = evalᴛ4.Len();
+    fmt.Println(m[array<int16>([1, 2, 3])], evalᴛ2, evalᴛ5);
     fmt.Printf("%T %v\n"u8, g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy()), g.Cells[1].ΔCopy());
     _ = (Func<@unsafe.Pointer, ж<Grid>>)(grid);
 

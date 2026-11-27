@@ -668,7 +668,8 @@ internal static (slice<slice<ж<Certificate>>>, error) Verify⁔(/*this*/ ж<Cer
         }
         var errΔ3 = checkChainConstraints(chain); if (errΔ3 != nil) {
             if (ᏑconstraintsHintErr.ValueSlot == nil) {
-                ᏑconstraintsHintErr.ValueSlot = new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, errΔ3.Error());
+                var evalᴛ1 = errΔ3.Error();
+                ᏑconstraintsHintErr.ValueSlot = new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, evalᴛ1);
             }
             return true;
         }
@@ -692,7 +693,8 @@ internal static (slice<slice<ж<Certificate>>>, error) Verify⁔(/*this*/ ж<Cer
         if (invalidPoliciesChains > 0) {
             details = append(details, fmt.Sprintf("%d candidate chains with invalid policies"u8, invalidPoliciesChains));
         }
-        err = new CertificateInvalidError(Ꮡc, NoValidChains, strings.Join(details, ", "));
+        var evalᴛ2 = strings.Join(details, ", ");
+        err = new CertificateInvalidError(Ꮡc, NoValidChains, evalᴛ2);
         return (default, err);
     }
 
@@ -824,7 +826,8 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains⁔
 
         switch (certType) {
         case var ᴛ when ᴛ == rootCertificate: {
-            chains = append(chains, appendToFreshChain(currentChainʗ1, candidate.cert));
+            var evalᴛ1 = appendToFreshChain(currentChainʗ1, candidate.cert);
+            chains = append(chains, evalᴛ1);
             break;
         }
         case var ᴛ when ᴛ == intermediateCertificate: {

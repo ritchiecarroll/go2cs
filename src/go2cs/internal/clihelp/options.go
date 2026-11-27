@@ -76,9 +76,10 @@ var options = []Option{
 		Details: "" +
 			"Target platform for build-tagged files (defaults to the host; a `-tests` run of a standard-library " +
 			"package defaults to the converted standard library's flavour for the host: the host's own platform when " +
-			"the library is converted for it (`windows/amd64`, `linux/amd64`, `linux/arm64`, `darwin/amd64`), " +
-			"otherwise the host's OS on `amd64`, so an Apple silicon host converts at `darwin/amd64`). A " +
-			"comma-separated **list** (`windows/amd64,linux/amd64,darwin/amd64,linux/arm64`) is accepted only with " +
+			"the library is converted for it (`windows/amd64`, `linux/amd64`, `linux/arm64`, `darwin/amd64`, " +
+			"`darwin/arm64`), otherwise the host's OS on `amd64`, so a Windows on Arm host converts at " +
+			"`windows/amd64`). A comma-separated **list** " +
+			"(`windows/amd64,linux/amd64,darwin/amd64,linux/arm64,darwin/arm64`) is accepted only with " +
 			"`-stdlib`, which then converts once per target and writes the multi-platform standard library, one " +
 			"flavour per target. Any other conversion emits for exactly one target, so a list there is rejected " +
 			"rather than silently converting the first.",
