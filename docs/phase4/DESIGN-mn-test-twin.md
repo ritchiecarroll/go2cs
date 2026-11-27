@@ -1,0 +1,76 @@
+# DESIGN — the test host enters a test's twin
+
+**Lane R, 2026-11-27.** COORD 20261127T051825Z (G's row 16f precondition; the owner, 11-27: test a few real
+concurrency-heavy modules before .5). Read at master `7d8af59808` (train 16). Nothing here is built or run yet.
+
+## 1. The finding
+
+Under `-tests`, a converted test binary runs every test through the hand-owned `testing` host. The host calls the
+test function PLAIN:
+
+- `TestExecution.Start` (src/core/testing/TestExecution.cs) starts a dedicated thread per test, enters a goroutine
+  scope (`Goroutine.Enter(s_tRunCreator, creator)`), and calls `Execute(action)`.
+- `Execute` calls `action(new StandardBox<testing_package.T>(t))`, the test's plain body.
+
+A plain body writes `goǃ` for a `go` statement, which is the thread path, and parks on threads. So with twins opted
+in and `GO2CS_MN=1`, a module's `go test` still runs every test goroutine on a thread. An M:N reading of a module's
+tests measures nothing. A program's `main` does not have this gap: its generated entry calls `builtin.RunMainꞏtwin`,
+which runs main's twin multiplexed as goroutine 1 (`Goroutine.RunMainTwin`).
+
+## 2. The cut
+
+**(a) golib: one public entry, `Goroutine.RunTwin(Action body, Func<GoTask> twin)`.** It is `RunMainTwin`'s body
+generalized from goroutine 1 to the calling goroutine.
+- When the scheduler is off, or the calling thread holds no goroutine, or that goroutine is locked to its thread, it
+  calls `body()` and nothing else. That is exactly today's path.
+- Otherwise the calling goroutine leaves its thread and runs `twin` multiplexed. The thread blocks until the twin
+  ends, takes the goroutine back, and rethrows whatever left the twin, from the same place (`ExceptionDispatchInfo`).
+- `RunMainTwin` keeps its `MainThread.Run` fallback and calls the shared core, so main's behaviour does not change.
+- Called by hand-owned `testing`, not by generated code, so it joins the ordinary public surface
+  (PublicSurface.golib.txt), not `[mn-frozen]`. That needs the decision this note asks for.
+
+**(b) testing: look up the test's twin only when the scheduler is on.** In `TestExecution.Start`'s thread, if
+multiplexing is enabled (a public read-only flag beside the entry) and the test's method has a sibling
+`<Name>ꞏtwin` in its declaring type, taking the same parameters and returning `GoTask`, the host calls
+`Goroutine.RunTwin(() => action(t), () => twin(t))` in place of `action(t)`.
+- With the scheduler off, no reflection runs and no line of the host's path changes. That is G's T0 dormancy bar:
+  default mode and `GO2CS_MN` unset stay byte-for-byte plain.
+
+**(c) testing: the owner check follows the goroutine when a twin ran.** `TryEnsureOwner` (FailNow, SkipNow) and
+`InOwnersBubble` compare `Environment.CurrentManagedThreadId` with `m_ownerThread`. A twin moves between carrier
+threads, so a `t.Fatal` in a twinned test would be refused as "called from a goroutine other than the test
+goroutine". On the twin path only, the check compares `Goroutine.Current` with `m_ownerGoroutine`, which is the same
+object on every carrier. The plain path keeps the thread check unchanged.
+
+**What leaves the twin.** `TestAbortException` (FailNow), `GoexitException` and `PanicException` are captured in the
+twin and rethrown on the test thread, inside `Execute`'s `try`. So `Execute`'s handlers see exactly what they see
+today. Defers run inside the twin, where the body's own defers are.
+
+## 3. Scope, and what is left out
+
+- **In:** top-level test functions (`TestX(t *testing.T)`) whose twin exists.
+- **Out, named:** a subtest literal passed to `t.Run`, an example, a benchmark, and `TestMain`. A subtest literal
+  arrives as a plain `Action<ж<T>>`. Whether the generator gives it a twin pair (`GoFuncPair`) reachable from the
+  host is the first question of a follow-up, not this cut.
+- `t.Parallel()` inside a twin parks on the host's gate, a managed wait on a carrier. N5's step 3a senses a managed
+  wait and retakes the P, so it does not starve the scheduler; it is stated, not engineered here.
+
+## 4. Red-first and the gates
+
+1. **The red row:** a twinned test whose body parks (on a channel, and in a select) reads parks > 0 under
+   `GO2CS_MN=1` after the cut, and 0 before. It is a converted test package built with twins, run by the `-tests`
+   host. The open question for G: whether that lives as a behavioral-style project with a `_test.go` (the host
+   built twinned, read through the scheduler's reading), or in GolibTests through a separate process, since
+   `GoScheduler.Enabled` is read once per process.
+2. **The near-miss:** with `GO2CS_MN` unset, the same package reads parks 0 and the host takes no twin path
+   (byte-for-byte: the default-mode subset and a CNR).
+3. **A FailNow row in a twinned test:** it ends the test as failed, not as an infrastructure error. That is the (c) guard.
+4. **Gates:** GolibTests; the behavioral `--mn` subset and the default subset; hosted mn-platform; repoguard (the
+   public-surface line).
+
+## 5. Questions for G and COORD
+
+- **The entry's shape and home:** `Goroutine.RunTwin` plus a public `Goroutine.MultiplexingEnabled`, or a
+  `builtin.RunTestꞏtwin` beside `RunMainꞏtwin`.
+- **The red row's home** (4.1).
+- **Order:** the train 18 aim stands if this note is ruled on today.
