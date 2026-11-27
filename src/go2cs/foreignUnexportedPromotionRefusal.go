@@ -26,7 +26,9 @@
 //
 // Promotion through an embedded INTERFACE field is not refused: the adapter forwards to the field's interface member,
 // which is public in C# and dispatches to the dynamic value's own method, the method Go calls
-// (crypto/internal/rand's reader embeds drbg.DefaultReader and is converted to it, which must keep converting).
+// (crypto/internal/rand's reader embeds drbg.DefaultReader and is converted to it, which must keep converting). The
+// exception is a path through a field the converting package cannot reach, an unexported field of another package
+// (`type T struct{ impl }` in lib, converted from main): the forward would not compile, so that is refused too.
 // Promotion from a type of the SAME package is not refused either: both sides are in one assembly, and Go's name
 // qualification agrees with the bare name there.
 //
@@ -509,13 +511,36 @@ func foreignUnexportedPromotionText(source, target types.Type, current *types.Pa
 		object, index, _ := types.LookupFieldOrMethod(source, false, method.Pkg(), method.Name())
 		promoted, ok := object.(*types.Func)
 
-		if !ok || len(index) < 2 || promoted.Pkg() == nil || promoted.Pkg() == ownPackage {
+		if !ok || len(index) < 2 || promoted.Pkg() == nil {
 			continue
 		}
 
 		receiver := promoted.Signature().Recv()
 
-		if receiver == nil || types.IsInterface(receiver.Type()) {
+		if receiver == nil {
+			continue
+		}
+
+		sourceName := types.TypeString(source, types.RelativeTo(current))
+		receiverName := types.TypeString(receiver.Type(), types.RelativeTo(current))
+
+		lead := fmt.Sprintf("%s %s %s, whose unexported method %s it satisfies only through %s's %s, promoted from package %s",
+			sourceName, how, types.TypeString(target, types.RelativeTo(current)), method.Name(), receiverName, method.Name(),
+			promoted.Pkg().Path())
+
+		if types.IsInterface(receiver.Type()) {
+			// Promoted through an embedded interface field: the adapter forwards through the field path, which is
+			// right only where it can reach every field on it.
+			if field := unreachableEmbeddedField(source, index[:len(index)-1], current); field != nil {
+				return fmt.Sprintf("%s. The adapter reaches that method through the embedded field %s, which is unexported in package %s and so cannot be reached from %s. go2cs refuses this conversion",
+					lead, field.Name(), field.Pkg().Path(), current.Path())
+			}
+
+			continue
+		}
+
+		if promoted.Pkg() == ownPackage {
+			// A concrete method from the source's own package: one assembly, where the bare name agrees with Go's.
 			continue
 		}
 
@@ -531,13 +556,6 @@ func foreignUnexportedPromotionText(source, target types.Type, current *types.Pa
 			continue
 		}
 
-		sourceName := types.TypeString(source, types.RelativeTo(current))
-		receiverName := types.TypeString(receiver.Type(), types.RelativeTo(current))
-
-		lead := fmt.Sprintf("%s %s %s, whose unexported method %s it satisfies only through %s's %s, promoted from package %s",
-			sourceName, how, types.TypeString(target, types.RelativeTo(current)), method.Name(), receiverName, method.Name(),
-			promoted.Pkg().Path())
-
 		if hasRival {
 			return fmt.Sprintf("%s. %s declares a method %s of its own, which Go keeps apart from %s's; go2cs maps an interface method by its bare name, so the converted call would reach %s's %s where Go calls %s's. go2cs refuses this conversion",
 				lead, sourceName, method.Name(), receiverName, sourceName, method.Name(), receiverName)
@@ -548,6 +566,34 @@ func foreignUnexportedPromotionText(source, target types.Type, current *types.Pa
 	}
 
 	return ""
+}
+
+// unreachableEmbeddedField is the first field on the embedding path index from source that is unexported and declared in
+// a package other than current, or nil when the converting package can reach every field on it.
+func unreachableEmbeddedField(source types.Type, index []int, current *types.Package) *types.Var {
+	t := source
+
+	for _, i := range index {
+		if pointer, ok := underlyingOf(t).(*types.Pointer); ok {
+			t = pointer.Elem()
+		}
+
+		structType, ok := underlyingOf(t).(*types.Struct)
+
+		if !ok || i >= structType.NumFields() {
+			return nil
+		}
+
+		field := structType.Field(i)
+
+		if !field.Exported() && field.Pkg() != current {
+			return field
+		}
+
+		t = field.Type()
+	}
+
+	return nil
 }
 
 // namedOrPointerNamed is t's named type, or the named type t points to, or nil.

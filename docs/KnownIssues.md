@@ -734,7 +734,8 @@ would call `U`'s own `m` (the program would print `main.m` where Go prints `lib.
 `lib.T`'s, which is internal to `lib`'s assembly, so it stands in a method that does nothing and returns a zero value.
 go2cs refuses the conversion where that would be wrong: a rival `m`, or an `m` that returns a value. It cannot be
 downgraded with `-warn`. Promotion through an embedded interface field (`type U struct{ lib.I }`) converts and calls
-the right method, and so does any interface whose methods are all exported.
+the right method, unless the path to that field crosses an unexported field of another package (`type T struct{ impl }`
+in `lib`), which is refused; any interface whose methods are all exported converts too.
 
 An unexported method that returns nothing, with no method of that name on `U`, is not refused, because the stand-in
 does what such a method usually does: nothing. That is the sealed-marker idiom of generated gRPC code

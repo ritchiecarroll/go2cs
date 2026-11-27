@@ -53,6 +53,16 @@ func (UnimplementedSealed) mustEmbedSealed() {}
 
 func Greet(s Sealed) string { return s.Hello() }
 
+// Wrap meets I only through its unexported interface field, which another package cannot reach.
+type hidden interface {
+	m() string
+	Name() string
+}
+
+type Wrap struct{ hidden }
+
+func NewWrap() Wrap { return Wrap{T{}} }
+
 // F binds its type argument's m through the constraint.
 func F[X I](x X) string { return x.m() }
 `
@@ -147,6 +157,8 @@ func TestForeignUnexportedPromotionSites(t *testing.T) {
 		{"type argument", `func main() { _ = lib.F(U{}) }`, 1},
 		{"explicit type argument", `func main() { _ = lib.F[U](U{}) }`, 1},
 		{"value result, no rival", `type W struct{ lib.T }; func main() { var i lib.I = W{}; _ = i }`, 1},
+		{"unexported interface field on the path", `type X struct{ lib.Wrap }; func main() { var i lib.I = X{lib.NewWrap()}; _ = i }`, 1},
+		{"unexported interface field, the foreign type itself", `func main() { var i lib.I = lib.NewWrap(); _ = i }`, 1},
 		{"void marker with a rival", `type V struct{ lib.UnimplementedSealed }; func (V) mustEmbedSealed() {}; func main() { _ = lib.Greet(V{}) }`, 1},
 
 		// Near misses: no conversion to an interface with lib's unexported method, an interface FIELD promotion,
