@@ -374,3 +374,44 @@ func TestHostFatalMintHonoursThePlatformScope(t *testing.T) {
 		t.Fatalf("with no readable page platform the refusal must stand; got %#v", v)
 	}
 }
+
+// A host-fatal test runs on NEITHER side, so it has no verdict row, and the totals line counts
+// disclosed-DIVERGENT tests (proofDisclosedNames; the roster banks that count by the 2026-10-26
+// ruling). The page must still NAME every withdrawn test with its reason, or the class's "never
+// hidden" charter fails on the one surface a reader sees. Measured 2026-11-27 (P5): the
+// modernc.org/sqlite page at master 4a56f17a3a read "399 matched · 0 disclosed" and never mentioned
+// TestSEHTruncatedShm. The totals line stays as it is: this guard pins both halves.
+func TestProofPageNamesHostFatalWithdrawals(t *testing.T) {
+	comparison, disclosures := loadProofFixture(t)
+	plain := renderValidationProofPage(fixtureProvenance(), comparison, disclosures, nil)
+
+	for name, d := range hostFatal("TestWithdrawnFault") {
+		disclosures[name] = d
+	}
+	page := renderValidationProofPage(fixtureProvenance(), comparison, disclosures, nil)
+
+	totals := func(p string) string {
+		for _, line := range strings.Split(p, "\n") {
+			if proofTotalsPattern.MatchString(line) {
+				return line
+			}
+		}
+		return ""
+	}
+	if totals(page) == "" || totals(page) != totals(plain) {
+		t.Fatalf("a host-fatal entry must not move the totals line (divergent-only, roster ruling 2026-10-26);\n got %q\nwant %q", totals(page), totals(plain))
+	}
+
+	if !strings.Contains(page, "\n## Withdrawn from both sides\n") {
+		t.Error("the page has no section for host-fatal withdrawals")
+	}
+	if !strings.Contains(page, "- `TestWithdrawnFault` (`host-fatal`) — because TestWithdrawnFault\n") {
+		t.Error("the page does not name the withdrawn test with its class and reason")
+	}
+	if !strings.Contains(page, "1 test is withdrawn from both sides") {
+		t.Error("the totals paragraph does not point to the withdrawal")
+	}
+	if strings.Contains(plain, "Withdrawn from both sides") || strings.Contains(plain, "withdrawn from both sides and") {
+		t.Error("a page with no host-fatal entry gained the withdrawal wording")
+	}
+}

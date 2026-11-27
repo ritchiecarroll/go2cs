@@ -291,6 +291,19 @@ func proofDisclosedNames(comparison testComparison, names []string, disclosures 
 	return disclosed
 }
 
+// proofHostFatalNames returns the sorted tests the manifest withdraws from both sides as host-fatal.
+// They are in neither side's results, so the verdict-derived sets above never see them.
+func proofHostFatalNames(disclosures map[string]testDisclosure) []string {
+	var names []string
+	for name, disclosure := range disclosures {
+		if disclosure.Class == hostFatalClass {
+			names = append(names, name)
+		}
+	}
+	sort.Strings(names)
+	return names
+}
+
 // isProofGoSideSkip reports whether a disclosed row is a Go-side host skip: an entry with a
 // GoSkipSignature, Go skipping and the converted side passing.
 func isProofGoSideSkip(comparison testComparison, name string, disclosure testDisclosure) bool {
@@ -427,6 +440,20 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 
 	if skipped > 0 {
 		fmt.Fprintf(&page, "\nBoth runtimes skip %d of the matched tests identically.\n", skipped)
+	}
+
+	// A host-fatal test runs on neither side, so it has no verdict row and the totals line above
+	// (disclosed-divergent, the count the roster banks by the 2026-10-26 ruling) does not count it.
+	// The page names it here and in its own section, so it is never hidden (hostFatalClass).
+	withdrawn := proofHostFatalNames(disclosures)
+	switch len(withdrawn) {
+	case 0:
+	case 1:
+		page.WriteString("\n1 test is withdrawn from both sides and not counted above; see\n" +
+			"[Withdrawn from both sides](#withdrawn-from-both-sides).\n")
+	default:
+		fmt.Fprintf(&page, "\n%d tests are withdrawn from both sides and not counted above; see\n"+
+			"[Withdrawn from both sides](#withdrawn-from-both-sides).\n", len(withdrawn))
 	}
 
 	// Package-level notes from the hand-owned disclosure manifest: caveats about the
@@ -693,6 +720,19 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			goos, rest, _ := strings.Cut(entry, ": ")
 			name, detail, _ := strings.Cut(rest, ": ")
 			fmt.Fprintf(&page, "- %s: %s — %s\n", goos, proofCodeSpan(name), detail)
+		}
+	}
+
+	if len(withdrawn) > 0 {
+		page.WriteString("\n## Withdrawn from both sides\n\n")
+		fmt.Fprintf(&page, "A %s test takes the converted test host's whole process down, by a crash or by a hang that\n", proofCodeSpan(hostFatalClass))
+		page.WriteString("consumes the deadline, so every test after it would lose its verdict too. It is withdrawn from\n")
+		page.WriteString("**both** sides by name, is not claimed by the matched count above, and is pinned with its reason\n")
+		page.WriteString("in the package's disclosure manifest:\n\n")
+
+		for _, name := range withdrawn {
+			fmt.Fprintf(&page, "- %s (%s) — %s\n", proofCodeSpan(name), proofCodeSpan(hostFatalClass),
+				strings.Join(strings.Fields(disclosures[name].Reason), " "))
 		}
 	}
 
