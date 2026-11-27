@@ -88,7 +88,7 @@
     <ItemGroup>
       <_GoPackageDirectory Include="@(GoPackageDirectory->'%(FullPath)')" />
       <_GoPackageDirectory Include="$(MSBuildProjectDirectory)" Condition="'@(GoPackageDirectory)' == ''" />
-      <_GoLayoutKey Include="windows;linux;darwin;amd64;arm64;windows-amd64;linux-amd64;darwin-amd64;linux-arm64" />
+      <_GoLayoutKey Include="windows;linux;darwin;amd64;arm64;windows-amd64;linux-amd64;darwin-amd64;linux-arm64;darwin-arm64" />
       <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/package_info.cs"
                       Condition="Exists('%(_GoPackageDirectory.FullPath)/package_info.cs')" />
       <_GoKeyFolder Include="@(_GoPackageDirectory)" GoLayoutKey="%(_GoLayoutKey.Identity)" />

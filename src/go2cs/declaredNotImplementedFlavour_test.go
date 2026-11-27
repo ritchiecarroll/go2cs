@@ -145,13 +145,13 @@ func TestFlavourOnlyStubCensus(t *testing.T) {
 	}
 
 	// ⚠ ANTI-VACUITY, arm 3: one positive and two negative controls, by name.
-	//   + runtime.load_g is declared in runtime/linux-arm64 alone ("called from assembly only") and
-	//     has no body anywhere: stubbed at linux/arm64 and at no other target.
+	//   + runtime.load_g is declared in runtime/arm64 alone ("called from assembly only") and has no
+	//     body anywhere: stubbed at the two arm64 targets and at no other.
 	//   - math.archExp2 and hash/crc32.castagnoliUpdate are declared in linux-arm64 and BODIED there by
 	//     hand-owned companions (site 9 and i9's triage): declared, and a stub at no target. They are
 	//     the two members whose arm64 stubs reached a sweep before anything per-flavour stood.
-	if entry := measured["runtime.load_g"]; entry == nil || strings.Join(entry.targets, ",") != atLinuxArm64 {
-		t.Errorf("POSITIVE CONTROL: runtime.load_g must read as stubbed at %s alone; read %v", atLinuxArm64, entry)
+	if entry := measured["runtime.load_g"]; entry == nil || strings.Join(entry.targets, ",") != atArm64 {
+		t.Errorf("POSITIVE CONTROL: runtime.load_g must read as stubbed at %s alone; read %v", atArm64, entry)
 	}
 
 	for _, member := range []string{"math.archExp2", "hash/crc32.castagnoliUpdate"} {
@@ -332,12 +332,13 @@ func sortedMembers[V any](set map[string]V) []string {
 // The target sets a row can name, spelled in platformUniverse order because that is the order the
 // measurement joins them in.
 const (
-	atLinuxArm64        = "linux/arm64"
+	atArm64             = "linux/arm64,darwin/arm64"
 	atLinux             = "linux/amd64,linux/arm64"
 	atAmd64             = "windows/amd64,linux/amd64,darwin/amd64"
 	atWindows           = "windows/amd64"
-	atDarwin            = "darwin/amd64"
-	atUnix              = "linux/amd64,darwin/amd64,linux/arm64"
+	atDarwin            = "darwin/amd64,darwin/arm64"
+	atDarwinArm64       = "darwin/arm64"
+	atUnix              = "linux/amd64,darwin/amd64,linux/arm64,darwin/arm64"
 	atWindowsLinuxAmd64 = "windows/amd64,linux/amd64"
 )
 
@@ -393,21 +394,35 @@ type flavourRow struct {
 // "not triaged" are the ones outside the floor set, the post-hop reading list. A disposition is a
 // reading: the guard measures the member and its targets, and checks no label but MASKED.
 //
-// No row is MASKED today. The two this guard found on its first day (internal/cpu.osInitArm64 and
+// 2026-11-25, the darwin/arm64 flip: arm64/ now serves linux/arm64 and darwin/arm64, and darwin/ serves both
+// darwin targets, so every row stubbed at linux/arm64 alone or darwin/amd64 alone gained the other target of its
+// folder; each was read at darwin/arm64 against the Go sources (go1.26.11) and none is reached there, so the
+// dispositions stand. Measured after: pooled 618; windows/amd64 212, linux/amd64 227, darwin/amd64 426,
+// linux/arm64 204, darwin/arm64 407.
+//
+// One row is MASKED: internal/cpu.getMIDR, declared in arm64/ and bodied in linux-arm64/ alone, at darwin/arm64.
+// The two this guard found on its first day (internal/cpu.osInitArm64 and
 // internal/poll.prepayPlatformDeadlinePath) were classic partials, stubbed only because
 // PartialStubGenerator excluded one classic partial by name where the rule is the shape. They are
 // rows of declaredErasedByDesign now.
 var declaredFlavourOnlyStubs = map[string]flavourRow{
-	// Stubbed at linux/arm64 alone: i9's triage rows 7 to 15.
-	"internal/cpu.getisar0":                {atLinuxArm64, flavourRefused},
-	"internal/cpu.getpfr0":                 {atLinuxArm64, flavourRefused},
-	"runtime.emptyfunc":                    {atLinuxArm64, flavourRefused},
-	"runtime.load_g":                       {atLinuxArm64, flavourGoSide},
-	"runtime.save_g":                       {atLinuxArm64, flavourGoSide},
-	"vendor/golang.org/x/sys/cpu.getisar0": {atLinuxArm64, flavourRefused},
-	"vendor/golang.org/x/sys/cpu.getisar1": {atLinuxArm64, flavourRefused},
-	"vendor/golang.org/x/sys/cpu.getpfr0":  {atLinuxArm64, flavourRefused},
-	"vendor/golang.org/x/sys/cpu.getzfr0":  {atLinuxArm64, flavourRefused},
+	// Stubbed at both arm64 targets: i9's triage rows 7 to 15, read at linux/arm64. At darwin/arm64 none is
+	// reached: internal/cpu's register readers are called only by cpu_arm64_freebsd.go, x/sys/cpu's archInit
+	// takes setMinimalFeatures on darwin (cpu_arm64.go:46-55), and load_g, save_g and emptyfunc are called
+	// from assembly only.
+	"internal/cpu.getisar0":                {atArm64, flavourRefused},
+	"internal/cpu.getpfr0":                 {atArm64, flavourRefused},
+	"runtime.emptyfunc":                    {atArm64, flavourRefused},
+	"runtime.load_g":                       {atArm64, flavourGoSide},
+	"runtime.save_g":                       {atArm64, flavourGoSide},
+	"vendor/golang.org/x/sys/cpu.getisar0": {atArm64, flavourRefused},
+	"vendor/golang.org/x/sys/cpu.getisar1": {atArm64, flavourRefused},
+	"vendor/golang.org/x/sys/cpu.getpfr0":  {atArm64, flavourRefused},
+	"vendor/golang.org/x/sys/cpu.getzfr0":  {atArm64, flavourRefused},
+
+	// Stubbed at darwin/arm64 alone, and MASKED: the body is linux-arm64/cpu_arm64_hwcap_impl.cs. Its one Go
+	// caller is cpu_arm64_hwcap.go (linux), and darwin/arm64's osInit (cpu_arm64_darwin.go) reads sysctl.
+	"internal/cpu.getMIDR": {atDarwinArm64, flavourMasked},
 
 	// Stubbed at both linux targets.
 	"runtime.access":               {atLinux, flavourRefused},
@@ -478,7 +493,8 @@ var declaredFlavourOnlyStubs = map[string]flavourRow{
 	"runtime.tstart_stdcall":                      {atWindows, flavourGoSide},
 	"runtime.wintls":                              {atWindows, flavourGoSide},
 
-	// Stubbed at darwin/amd64 alone (the trampolines are exempt by rule).
+	// Stubbed at both darwin targets, from darwin/ (the trampolines are exempt by rule). The same Go sources
+	// serve darwin/arm64, so the darwin/amd64 readings carry.
 	"os.readdir_r":         {atDarwin, flavourRefused},
 	"runtime.mstart_stub":  {atDarwin, flavourGoSide},
 	"runtime.syscall_x509": {atDarwin, flavourGoSide},
@@ -638,7 +654,8 @@ type erasedRow struct {
 // declaredFlavourOnlyStubs.
 var declaredErasedByDesign = map[string]erasedRow{
 	// Declared and called in amd64/cpu_arm64_process_impl.cs, from a module initializer and only
-	// when the process is arm64; bodied under darwin/ and linux-amd64/.
+	// when the process is arm64; bodied under darwin-amd64/ and linux-amd64/. darwin/arm64 does not compile
+	// amd64/ and runs osInit (darwin-arm64/cpu_arm64_darwin_impl.cs) instead.
 	"internal/cpu.osInitArm64": {atWindows, "an arm64 windows process skips OS feature detection " +
 		"silently and runs the generic paths: correct behaviour, only slower, and latent (no shipped " +
 		"RID runs an arm64 windows process)"},

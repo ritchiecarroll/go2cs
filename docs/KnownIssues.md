@@ -36,10 +36,16 @@ variable declared with a two-argument `//go:linkname`.
 workarounds.
 
 ## On Apple silicon, the standard library is the `amd64` build {#on-apple-silicon-runtimegoarch-reports-amd64}
+<!-- 2026-11-26 (P5, D2 of DESIGN-darwin-arm64-flavour.md; COORD 20261126T214931Z, G's pack NOTE): D2 adds darwin/arm64
+     to the corpus universe, and D7 (the pack flip: push-nuget's osx-arm64 map, pack-flavour-guard's osx-arm64 pair,
+     release-smoke and aot-smoke off the unbound list) is what makes the osx-arm64 package carry it. Until D7 this entry
+     describes the shipped packages unchanged; D7 rewrites it. -->
 
 The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library
-for macOS is built once, for `darwin/amd64`, and the same packages serve Intel and Apple-silicon Macs. On an
-Apple-silicon Mac a converted program runs as a native arm64 .NET process:
+in the macOS packages is the `darwin/amd64` build, and the same packages serve Intel and Apple-silicon Macs. The
+repository also converts a `darwin/arm64` flavour of the standard library, but until the packages carry it, the
+`osx-arm64` package ships the `darwin/amd64` build. On an Apple-silicon Mac a converted program runs as a native arm64
+.NET process:
 - `runtime.GOARCH` reads `arm64`, as Go's own program on the same Mac does. It is read from the process when the
   program starts, and the `GOARCH` setting that `debug.ReadBuildInfo` returns and `go/build`'s default context
   follow it;
@@ -70,7 +76,7 @@ architecture-specific path in the standard library.
      only. The heading was "On Apple silicon, `runtime.GOARCH` reports `amd64`"; its old id is kept explicitly, because
      NEWS.md (1.26.10.3) links it. runtime.GOARCH and internal/buildcfg's defaultGOARCH are displaced for darwin
      (src/go2cs/manualTypeOperations.go manualConversionConsts) and read the process architecture
-     (src/core/runtime/darwin/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin/zbootstrap_darwin_impl.cs).
+     (src/core/runtime/darwin-amd64/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin-amd64/zbootstrap_darwin_impl.cs).
      The census of record: docs/phase4/DESIGN-comparator-arms.md §5, layer 2, plus census E (consts folded from
      runtime.GOARCH: defaultGOARCH incoherent, 4 inert or equivalent). The linux and windows flavours still read amd64 on an
      arm64 host (BOARD 2026-11-09), and no package ships for those. -->

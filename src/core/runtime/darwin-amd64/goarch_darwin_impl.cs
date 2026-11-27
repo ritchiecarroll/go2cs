@@ -25,6 +25,12 @@
 // record (managed_impl.cs) writes it, as Go's writes the binary's own architecture.
 //
 // linux and windows keep the converted const until a census per flavour (BOARD, 2026-11-09).
+//
+// SCOPED TO THE darwin/amd64 TARGET since darwin/arm64 joined the universe (docs/phase4/DESIGN-darwin-arm64-flavour.md
+// section 4.2, ruling R3): the darwin/arm64 flavour is converted FOR arm64, so its converted constant already reads
+// Go's "arm64" and keeps it. This flavour keeps the member because it still runs in arm64 processes: a pack built
+// before D6, and a local build on Apple silicon with GoTargetArch empty. The file lives in darwin-amd64/ and its
+// name has no principal (no Go file is goarch_darwin.go), so no target's emission can move it.
 
 [module: go.GoManualConversion]
 
