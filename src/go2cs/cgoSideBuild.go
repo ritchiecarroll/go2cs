@@ -78,10 +78,14 @@ type cgoSideUnit struct {
 	names    []string
 }
 
-// cgoSideSourceExtensions are the source files of its own a package can have that cmd/go compiles or links as C, C++,
-// Objective-C, Fortran or assembly. The slice side-builds the preamble only (§2.7).
-var cgoSideSourceExtensions = map[string]bool{
-	".c": true, ".cc": true, ".cpp": true, ".cxx": true, ".c++": true, ".m": true, ".s": true, ".S": true, ".sx": true,
+// cgoSideBuiltExtensions are the source files of its own a package can have that the side build compiles as cmd/go
+// does (cgo Phase 4b, row 3): C, and assembly the C compiler assembles (cmd/go's SFiles).
+var cgoSideBuiltExtensions = map[string]bool{".c": true, ".s": true, ".S": true, ".sx": true}
+
+// cgoSideRefusedExtensions are the source files of its own that cmd/go compiles or links and the side build does not:
+// C++, Objective-C, Fortran and prebuilt objects (cgo Phase 4b, §3).
+var cgoSideRefusedExtensions = map[string]bool{
+	".cc": true, ".cpp": true, ".cxx": true, ".c++": true, ".m": true,
 	".f": true, ".F": true, ".for": true, ".f90": true, ".syso": true,
 }
 
@@ -518,16 +522,62 @@ func cgoSideCompile(toolchain cgoToolchain, goos string, flags []string, unit cg
 	return object, nil
 }
 
+// cgoSideCompileOwn compiles one of the package's own C or assembly files to object, as cmd/go does (work/exec.go,
+// ccompile): in the package directory, naming the file by its base name, with the package's C flags.
+func cgoSideCompileOwn(toolchain cgoToolchain, goos string, flags []string, source, object, packageDir string, prefixMaps []string) (string, error) {
+	args := append(append(append([]string{}, toolchain.cc[1:]...), toolchain.arch...), flags...)
+
+	if goos != "windows" {
+		args = append(args, "-fPIC")
+	}
+
+	args = append(append(args, cgoSideThreadFlag(goos)), prefixMaps...)
+
+	cmd := exec.Command(toolchain.cc[0], append(args, "-c", "-o", object, filepath.Base(source))...)
+	cmd.Dir = packageDir
+	cmd.Env = append(os.Environ(), toolchain.env...)
+
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return "", cgoSideFailure("compile", filepath.Base(source), string(out)+err.Error())
+	}
+
+	return object, nil
+}
+
 // cgoObjectDefines answers which of names an object file DEFINES, local symbols included: a name only declared is an
 // undefined symbol there (§2.1). The object is read with Go's own readers, as the capture reads its probe.
 func cgoObjectDefines(path, goos string, names []string) (map[string]bool, error) {
+	symbols, err := cgoObjectSymbols(path, goos, names)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defined := map[string]bool{}
+
+	for name, binding := range symbols {
+		if binding.defined {
+			defined[name] = true
+		}
+	}
+
+	return defined, nil
+}
+
+// cgoSymbolBinding is how an object binds a name: whether it defines it, and whether that definition is global (visible
+// to the link) rather than local (a static).
+type cgoSymbolBinding struct{ defined, global bool }
+
+// cgoObjectSymbols answers how an object file binds each of names (cgo Phase 4b, §2): a definition, local or global, or
+// nothing (an undefined reference, or absent). A common (tentative) definition is a global one.
+func cgoObjectSymbols(path, goos string, names []string) (map[string]cgoSymbolBinding, error) {
 	wanted := map[string]bool{}
 
 	for _, name := range names {
 		wanted[name] = true
 	}
 
-	defined := map[string]bool{}
+	defined := map[string]cgoSymbolBinding{}
 
 	switch goos {
 	case "windows":
@@ -541,8 +591,9 @@ func cgoObjectDefines(path, goos string, names []string) (map[string]bool, error
 
 		for _, symbol := range file.Symbols {
 			// A section number above 0 is a definition; 0 with a value is a common (tentative) definition.
+			// Storage class 2 is IMAGE_SYM_CLASS_EXTERNAL, a global; 3 is IMAGE_SYM_CLASS_STATIC.
 			if wanted[symbol.Name] && (symbol.SectionNumber > 0 || (symbol.SectionNumber == 0 && symbol.Value > 0)) {
-				defined[symbol.Name] = true
+				defined[symbol.Name] = cgoSymbolBinding{defined: true, global: symbol.StorageClass == 2}
 			}
 		}
 	case "darwin":
@@ -558,14 +609,14 @@ func cgoObjectDefines(path, goos string, names []string) (map[string]bool, error
 			return defined, nil
 		}
 
-		const stab, typeMask, section = 0xe0, 0x0e, 0x0e // N_STAB, N_TYPE, N_SECT
+		const stab, typeMask, section, external = 0xe0, 0x0e, 0x0e, 0x01 // N_STAB, N_TYPE, N_SECT, N_EXT
 
 		for _, symbol := range file.Symtab.Syms {
 			name := strings.TrimPrefix(symbol.Name, "_")
 
 			// N_SECT is a definition; N_UNDF with a value is a common one.
 			if symbol.Type&stab == 0 && wanted[name] && (symbol.Type&typeMask == section || (symbol.Type&typeMask == 0 && symbol.Value > 0)) {
-				defined[name] = true
+				defined[name] = cgoSymbolBinding{defined: true, global: symbol.Type&external != 0}
 			}
 		}
 	default:
@@ -585,7 +636,8 @@ func cgoObjectDefines(path, goos string, names []string) (map[string]bool, error
 
 		for _, symbol := range symbols {
 			if wanted[symbol.Name] && symbol.Section != elf.SHN_UNDEF {
-				defined[symbol.Name] = true
+				bind := elf.ST_BIND(symbol.Info)
+				defined[symbol.Name] = cgoSymbolBinding{defined: true, global: bind == elf.STB_GLOBAL || bind == elf.STB_WEAK}
 			}
 		}
 	}
@@ -638,89 +690,168 @@ func cgoSideLink(toolchain cgoToolchain, goos string, flags cgoLinkFlags, object
 // define. A unit is compiled once with every candidate, its object read for which it defines, and compiled again with
 // those alone, so a name only declared never reaches the link (where it would resolve to a library, or statically). It
 // returns the build (nil when no preamble defines any candidate) and the names no preamble defines.
-func cgoSideBuildUnits(toolchain cgoToolchain, goos, packageDir string, compileFlags []string, linkFlags cgoLinkFlags, candidates []cgoSideUnit, library string, trim cgoSideTrim) (*cgoSideBuild, []string, error) {
+func cgoSideBuildUnits(toolchain cgoToolchain, goos, packageDir string, compileFlags []string, linkFlags cgoLinkFlags, units []cgoSideUnit, ownSources []string, hosts map[string]int, library string, trim cgoSideTrim) (*cgoSideBuild, map[string]bool, map[string][]string, error) {
 	workDir, err := os.MkdirTemp("", "go2cs-cgo-side-")
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	defer os.RemoveAll(workDir)
 
 	prefixMaps := cgoSidePrefixMaps(toolchain, workDir, trim)
-	build := &cgoSideBuild{library: library}
-	var undefined, objects []string
+	names := make([]string, 0, len(hosts))
 
-	for _, candidate := range candidates {
-		classifyDir := filepath.Join(workDir, fmt.Sprintf("classify%d", candidate.table))
-		buildDir := filepath.Join(workDir, fmt.Sprintf("unit%d", candidate.table))
-
-		for _, dir := range []string{classifyDir, buildDir} {
-			if err := os.MkdirAll(dir, 0o755); err != nil {
-				return nil, nil, err
-			}
-		}
-
-		object, err := cgoSideCompile(toolchain, goos, compileFlags, candidate, classifyDir, packageDir, prefixMaps)
-
-		if err != nil {
-			return nil, nil, err
-		}
-
-		defines, err := cgoObjectDefines(object, goos, candidate.names)
-
-		if err != nil {
-			return nil, nil, fmt.Errorf("cgo: the side build of %s's preamble: its object cannot be read: %w", candidate.file, err)
-		}
-
-		unit := candidate
-		unit.names = nil
-
-		for _, name := range candidate.names {
-			if defines[name] {
-				unit.names = append(unit.names, name)
-			} else {
-				undefined = append(undefined, name)
-			}
-		}
-
-		if len(unit.names) == 0 {
-			continue
-		}
-
-		if object, err = cgoSideCompile(toolchain, goos, compileFlags, unit, buildDir, packageDir, prefixMaps); err != nil {
-			return nil, nil, err
-		}
-
-		build.units = append(build.units, unit)
-		objects = append(objects, object)
+	for name := range hosts {
+		names = append(names, name)
 	}
 
-	sort.Strings(undefined)
+	sort.Strings(names)
 
-	if len(build.units) == 0 {
-		return nil, undefined, nil
+	// Every unit is compiled with the names it hosts in its table, so a name it only declares is an undefined reference
+	// there; every own source is compiled as cmd/go compiles it. Each object is then read for every name Go uses.
+	var objects []cgoSideObject
+	var ownObjects []string
+
+	for _, unit := range units {
+		classifyDir := filepath.Join(workDir, fmt.Sprintf("classify%d", unit.table))
+
+		if err := os.MkdirAll(classifyDir, 0o755); err != nil {
+			return nil, nil, nil, err
+		}
+
+		object, err := cgoSideCompile(toolchain, goos, compileFlags, unit, classifyDir, packageDir, prefixMaps)
+
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		symbols, err := cgoObjectSymbols(object, goos, names)
+
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("cgo: the side build of %s's preamble: its object cannot be read: %w", unit.file, err)
+		}
+
+		objects = append(objects, cgoSideObject{name: unit.file, unit: unit.table, symbols: symbols})
+	}
+
+	for i, source := range ownSources {
+		object, err := cgoSideCompileOwn(toolchain, goos, compileFlags, source, filepath.Join(workDir, fmt.Sprintf("own%d.o", i)), packageDir, prefixMaps)
+
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		symbols, err := cgoObjectSymbols(object, goos, names)
+
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("cgo: the side build of %s: its object cannot be read: %w", filepath.Base(source), err)
+		}
+
+		objects = append(objects, cgoSideObject{name: filepath.Base(source), unit: -1, symbols: symbols})
+		ownObjects = append(ownObjects, object)
+	}
+
+	side, duplicates := cgoSideClassify(hosts, objects)
+
+	if len(side) == 0 {
+		return nil, side, duplicates, nil
+	}
+
+	// Each unit is compiled again with only its side-built names in its table, and every object is linked, as go's
+	// build links every cgo file's preamble and every C file of the package: one copy of each C global.
+	build := &cgoSideBuild{library: library}
+	var linked []string
+
+	for _, unit := range units {
+		buildDir := filepath.Join(workDir, fmt.Sprintf("unit%d", unit.table))
+
+		if err := os.MkdirAll(buildDir, 0o755); err != nil {
+			return nil, nil, nil, err
+		}
+
+		built := unit
+		built.names = nil
+
+		for _, name := range unit.names {
+			if side[name] {
+				built.names = append(built.names, name)
+			}
+		}
+
+		object, err := cgoSideCompile(toolchain, goos, compileFlags, built, buildDir, packageDir, prefixMaps)
+
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		build.units = append(build.units, built)
+		linked = append(linked, object)
 	}
 
 	output := filepath.Join(workDir, library)
 
-	if err := cgoSideLink(toolchain, goos, linkFlags, objects, output); err != nil {
-		return nil, nil, err
+	if err := cgoSideLink(toolchain, goos, linkFlags, append(linked, ownObjects...), output); err != nil {
+		return nil, nil, nil, err
 	}
 
 	// darwin: every library the side library depends on loads by an absolute install name, as every Phase 2 binding does
 	// (§11.12), since dyld searches a name that is not absolute (review of 500b0855c7, #3).
 	if goos == "darwin" {
 		if err := cgoSideDarwinDependencies(output); err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 	}
 
 	if build.binary, err = os.ReadFile(output); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return build, undefined, nil
+	return build, side, duplicates, nil
+}
+
+// cgoSideObject is one object of a package's side build, a preamble unit's or a C file of its own, and how it binds
+// each name Go uses.
+type cgoSideObject struct {
+	name    string // the source's base name
+	unit    int    // the unit's table, or -1 for a C file of the package's own
+	symbols map[string]cgoSymbolBinding
+}
+
+// cgoSideClassify answers which names are side-built and which are defined globally more than once (cgo Phase 4b, §2).
+// hosts maps each name to the table of the unit that hosts it. A name two objects define globally is a duplicate, as
+// at a C link. Else a name its hosting unit defines, locally or globally, is side-built. Else a name one other object
+// defines globally is. Anything else is left for the probe.
+func cgoSideClassify(hosts map[string]int, objects []cgoSideObject) (map[string]bool, map[string][]string) {
+	side := map[string]bool{}
+	duplicates := map[string][]string{}
+
+	for name, host := range hosts {
+		var global []string
+		hosted := false
+
+		for _, object := range objects {
+			binding := object.symbols[name]
+
+			if binding.global {
+				global = append(global, object.name)
+			}
+
+			if object.unit == host && binding.defined {
+				hosted = true
+			}
+		}
+
+		switch {
+		case len(global) > 1:
+			sort.Strings(global)
+			duplicates[name] = global
+		case hosted, len(global) == 1:
+			side[name] = true
+		}
+	}
+
+	return side, duplicates
 }
 
 // cgoSideDarwinDependencies refuses, by name, a side library one of whose dylib load commands names a library by
@@ -829,38 +960,57 @@ func cgoSidePkgConfigRefusal(symbol string, pkgConfig []string) string {
 	return fmt.Sprintf("C.%s: the package's preamble would be side-built, and it names #cgo pkg-config (%s), whose flags cmd/go adds at build time and go2cs does not read; a side build with other flags than cmd/cgo's could lay C out differently, so it is refused", symbol, strings.Join(pkgConfig, " "))
 }
 
-// cgoSideOwnSources names a package's source files of its own that cmd/go compiles as C or links (§2.7), or nil.
-func cgoSideOwnSources(pkg *packages.Package) []string {
-	var own []string
+// cgoSideOwnSources answers a package's source files of its own: the paths of those the side build compiles (C and
+// assembly), and the base names of those it refuses (cgoSideRefusedExtensions), each sorted.
+func cgoSideOwnSources(pkg *packages.Package) ([]string, []string) {
+	var built, refused []string
 
 	for _, file := range pkg.OtherFiles {
-		if cgoSideSourceExtensions[filepath.Ext(file)] {
-			own = append(own, filepath.Base(file))
+		switch extension := filepath.Ext(file); {
+		case cgoSideBuiltExtensions[extension]:
+			built = append(built, file)
+		case cgoSideRefusedExtensions[extension]:
+			refused = append(refused, filepath.Base(file))
 		}
 	}
 
-	sort.Strings(own)
+	sort.Strings(built)
+	sort.Strings(refused)
 
-	return own
+	return built, refused
 }
 
-// planCgoSideBuild side-builds the names no shared library exports (unbound), each in the unit of the import "C" source
-// that first uses it (§5, item 3). It returns the build, and a refusal for each name it cannot side-build.
-func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos, goarch string, flags cgoLinkFlags, unbound []string, symbolUses map[string]token.Position, sourcePaths map[string]string) (*cgoSideBuild, []cgoUseRefusal, error) {
-	var refusals []cgoUseRefusal
-
-	if own := cgoSideOwnSources(pkg); len(own) > 0 {
-		if len(own) > 3 {
-			own = append(own[:3], "…")
-		}
-
-		for _, symbol := range unbound {
-			refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: fmt.Sprintf("C.%s: no shared library the package links exports it, and the package has C source files of its own (%s): go2cs side-builds the preamble only (cgo Phase 4's preamble-only slice)", symbol, strings.Join(own, ", "))})
-		}
-
-		return nil, refusals, nil
+// cgoSideOwnRefusal is the refusal of a name no shared library exports, in a package with source files of its own the
+// side build does not compile, any of which could define it.
+func cgoSideOwnRefusal(symbol string, refused []string) string {
+	if len(refused) > 3 {
+		refused = append(refused[:3:3], "…")
 	}
 
+	return fmt.Sprintf("C.%s: no shared library the package links exports it, and the package has source files of its own go2cs does not build (%s): the side build compiles C and assembly only (cgo Phase 4b)", symbol, strings.Join(refused, ", "))
+}
+
+// cgoSideDuplicateRefusal is the refusal of a name two of the package's objects define as a global symbol (cgo Phase
+// 4b, OQ-1): C's link and go's both reject it, and a named refusal reads better than a linker error.
+func cgoSideDuplicateRefusal(symbol string, objects []string) string {
+	return fmt.Sprintf("C.%s: the package defines it as a global symbol more than once (%s); C's link and go's both reject a name defined twice, so it is refused", symbol, strings.Join(objects, ", "))
+}
+
+// cgoSidePlan is what the side build answers the route: the build, the names left for the probe (in the order the route
+// gave them), refusals, and a package's #cgo pkg-config arguments, under which no side build is made.
+type cgoSidePlan struct {
+	build     *cgoSideBuild
+	probe     []string
+	refusals  []cgoUseRefusal
+	pkgConfig []string
+}
+
+// planCgoSideBuild classifies every name Go uses before the probe is asked (cgo Phase 4b, §2): each is hosted by the unit of
+// the import "C" source that first uses it. A name the hosting unit defines, static or not, is side-built; else a name
+// one other object of the package (another file's preamble, or a C file of its own) defines globally is side-built;
+// a name two objects define globally is refused by name; and the rest are left for the probe. ownSources are the paths
+// of the package's own C files (cgoSideOwnSources).
+func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols []string, symbolUses map[string]token.Position, sourcePaths map[string]string, ownSources []string) (cgoSidePlan, error) {
 	// The tables are numbered by each source's place among the package's import "C" sources, by name, so a table's
 	// name does not move when another file's names change.
 	files := make([]string, 0, len(sourcePaths))
@@ -871,91 +1021,91 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 
 	sort.Strings(files)
 
-	units := map[string]*cgoSideUnit{}
+	units := make([]cgoSideUnit, len(files))
+	hosts := map[string]int{}
 
-	for _, symbol := range unbound {
+	for i, file := range files {
+		units[i] = cgoSideUnit{table: i, file: file}
+	}
+
+	for _, symbol := range symbols {
 		file := filepath.Base(symbolUses[symbol].Filename)
 
 		if _, found := sourcePaths[file]; !found {
-			refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: cgoUnboundRefusal(symbol)})
 			continue
 		}
 
-		if units[file] == nil {
-			units[file] = &cgoSideUnit{table: sort.SearchStrings(files, file), file: file}
-		}
-
-		units[file].names = append(units[file].names, symbol)
+		i := sort.SearchStrings(files, file)
+		hosts[symbol] = i
+		units[i].names = append(units[i].names, symbol)
 	}
 
-	if len(units) == 0 {
-		return nil, refusals, nil
+	if len(hosts) == 0 {
+		return cgoSidePlan{probe: symbols}, nil
 	}
 
-	var candidates []cgoSideUnit
-
-	for _, file := range files {
-		if unit := units[file]; unit != nil {
-			sort.Strings(unit.names)
-			candidates = append(candidates, *unit)
-		}
+	for i := range units {
+		sort.Strings(units[i].names)
 	}
 
 	toolchain, _, err := cgoResolveToolchain(load, goos, goarch)
 
 	if err != nil {
-		return nil, nil, err
+		return cgoSidePlan{}, err
 	}
 
 	listed, err := cgoSideList(load, options, pkg)
 
 	if err != nil {
-		return nil, nil, err
+		return cgoSidePlan{}, err
 	}
 
 	compileFlags, pkgConfig, err := cgoSideCompileFlags(load, listed, pkg)
 
 	if err != nil {
-		return nil, nil, err
+		return cgoSidePlan{}, err
 	}
 
+	// cmd/go adds pkg-config's flags at build time, so no compile here would be cmd/cgo's: nothing is side-built, and
+	// every name goes to the probe (review of 500b0855c7, #1).
 	if len(pkgConfig) > 0 {
-		for _, unit := range candidates {
-			for _, symbol := range unit.names {
-				refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: cgoSidePkgConfigRefusal(symbol, pkgConfig)})
-			}
-		}
-
-		return nil, refusals, nil
+		return cgoSidePlan{probe: symbols, pkgConfig: pkgConfig}, nil
 	}
 
 	trim, err := cgoSideTrimOf(load, listed, !options.noTrimPath, goos)
 
 	if err != nil {
-		return nil, nil, err
+		return cgoSidePlan{}, err
 	}
 
 	// Each preamble is read once the trim is known, under the #line name go's build would give it: the source's path in
 	// the package directory go list reports, as cmd/cgo's absolute path names it.
 	packageDir := listed.dir(pkg)
 
-	for i := range candidates {
-		path := sourcePaths[candidates[i].file]
+	for i := range units {
+		path := sourcePaths[units[i].file]
 
-		if candidates[i].preamble, err = cgoSidePreamble(path, trim.lineName(filepath.Join(packageDir, filepath.Base(path)))); err != nil {
-			return nil, nil, fmt.Errorf("cgo: the import \"C\" source %s cannot be read for its preamble: %w", candidates[i].file, err)
+		if units[i].preamble, err = cgoSidePreamble(path, trim.lineName(filepath.Join(packageDir, filepath.Base(path)))); err != nil {
+			return cgoSidePlan{}, fmt.Errorf("cgo: the import \"C\" source %s cannot be read for its preamble: %w", units[i].file, err)
 		}
 	}
 
-	build, undefined, err := cgoSideBuildUnits(toolchain, goos, packageDir, compileFlags, flags, candidates, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath), trim)
+	build, side, duplicates, err := cgoSideBuildUnits(toolchain, goos, packageDir, compileFlags, flags, units, ownSources, hosts, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath), trim)
 
 	if err != nil {
-		return nil, nil, err
+		return cgoSidePlan{}, err
 	}
 
-	for _, symbol := range undefined {
-		refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: cgoUnboundRefusal(symbol)})
+	plan := cgoSidePlan{build: build}
+
+	for _, symbol := range symbols {
+		switch {
+		case duplicates[symbol] != nil:
+			plan.refusals = append(plan.refusals, cgoUseRefusal{position: symbolUses[symbol], text: cgoSideDuplicateRefusal(symbol, duplicates[symbol])})
+		case !side[symbol]:
+			plan.probe = append(plan.probe, symbol)
+		}
 	}
 
-	return build, refusals, nil
+	return plan, nil
 }

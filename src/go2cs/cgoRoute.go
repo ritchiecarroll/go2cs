@@ -1196,9 +1196,14 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	} else {
 		var unbound []string
 		triple, _ = cgoCompilerTriple(load, options.targetPlatform)
-		captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
 
-		if err == nil && len(unbound) > 0 {
+		// cgo Phase 4b (docs/phase4/DESIGN-cgo-phase4b-own-sources.md §2): the side build classifies every name before the
+		// probe is asked, so a name the package defines is never bound to a library that also exports it. A package with
+		// source files of its own the side build does not compile is not classified: any of them could define a name.
+		builtOwn, refusedOwn := cgoSideOwnSources(pkg)
+		plan := cgoSidePlan{probe: symbols}
+
+		if len(refusedOwn) == 0 {
 			sourcePaths := map[string]string{}
 
 			for _, source := range sources {
@@ -1208,28 +1213,34 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 				}
 			}
 
-			var unbuilt []cgoUseRefusal
-
-			if side, unbuilt, err = planCgoSideBuild(pkg, options, load, goos, goarch, flags, unbound, symbolUses, sourcePaths); err == nil && len(unbuilt) > 0 {
-				return nil, refuseCgoRoute(pkg, unbuilt)
+			if plan, err = planCgoSideBuild(pkg, options, load, goos, goarch, flags, symbols, symbolUses, sourcePaths, builtOwn); err == nil && len(plan.refusals) > 0 {
+				return nil, refuseCgoRoute(pkg, plan.refusals)
 			}
+		}
 
-			if err == nil {
-				slots := side.slots()
-				symbols = slices.DeleteFunc(symbols, func(symbol string) bool { _, built := slots[symbol]; return built })
-				captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
+		if err == nil {
+			side = plan.build
+			symbols = plan.probe
+			captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
+		}
 
-				// The names left were bound by the first capture, so a second that binds fewer is not one go2cs reads.
-				if err == nil && len(unbound) > 0 {
-					var refusals []cgoUseRefusal
+		if err == nil && len(unbound) > 0 {
+			var refusals []cgoUseRefusal
 
-					for _, symbol := range unbound {
-						refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: cgoUnboundRefusal(symbol)})
-					}
+			for _, symbol := range unbound {
+				text := cgoUnboundRefusal(symbol)
 
-					return nil, refuseCgoRoute(pkg, refusals)
+				switch {
+				case len(refusedOwn) > 0:
+					text = cgoSideOwnRefusal(symbol, refusedOwn)
+				case len(plan.pkgConfig) > 0:
+					text = cgoSidePkgConfigRefusal(symbol, plan.pkgConfig)
 				}
+
+				refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: text})
 			}
+
+			return nil, refuseCgoRoute(pkg, refusals)
 		}
 	}
 

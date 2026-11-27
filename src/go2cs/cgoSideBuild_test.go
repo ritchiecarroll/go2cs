@@ -245,16 +245,63 @@ func TestCgoSideLibraryItemCopiesTheLibraryBesideTheAssembly(t *testing.T) {
 	}
 }
 
-// A package with C, C++, Objective-C or assembly files of its own is named (§2.7); headers are not sources.
-func TestCgoSideOwnSourcesNamesWhatCmdGoCompiles(t *testing.T) {
-	pkg := &packages.Package{OtherFiles: []string{filepath.Join("d", "z.h"), filepath.Join("d", "b.c"), filepath.Join("d", "a.S"), filepath.Join("d", "README.md")}}
+// A package's own C and assembly files are the side build's to compile, and its C++, Objective-C, Fortran and prebuilt
+// objects are named as refused (cgo Phase 4b, row 3 and §3); headers and other files are neither.
+func TestCgoSideOwnSourcesSplitsWhatTheSideBuildCompiles(t *testing.T) {
+	pkg := &packages.Package{OtherFiles: []string{
+		filepath.Join("d", "z.h"), filepath.Join("d", "b.c"), filepath.Join("d", "a.S"), filepath.Join("d", "README.md"),
+		filepath.Join("d", "c.cc"), filepath.Join("d", "m.m"), filepath.Join("d", "x.syso"),
+	}}
+	built, refused := cgoSideOwnSources(pkg)
 
-	if got, want := strings.Join(cgoSideOwnSources(pkg), ","), "a.S,b.c"; got != want {
-		t.Errorf("own sources %q, want %q", got, want)
+	if got, want := strings.Join(built, ","), strings.Join([]string{filepath.Join("d", "a.S"), filepath.Join("d", "b.c")}, ","); got != want {
+		t.Errorf("built %q, want %q", got, want)
 	}
 
-	if got := cgoSideOwnSources(&packages.Package{}); got != nil {
-		t.Errorf("a package with no other files has own sources %v", got)
+	if got, want := strings.Join(refused, ","), "c.cc,m.m,x.syso"; got != want {
+		t.Errorf("refused %q, want %q", got, want)
+	}
+
+	if built, refused := cgoSideOwnSources(&packages.Package{}); built != nil || refused != nil {
+		t.Errorf("a package with no other files has own sources %v, %v", built, refused)
+	}
+}
+
+// The classification order (cgo Phase 4b, §2), over synthesized symbol tables: a name its hosting unit defines, static or
+// not, is side-built; else one other object's global definition side-builds it; two global definitions are a
+// duplicate; and a name no object defines is left for the probe.
+func TestCgoSideClassifyFollowsTheDesignsOrder(t *testing.T) {
+	local := cgoSymbolBinding{defined: true}
+	global := cgoSymbolBinding{defined: true, global: true}
+
+	objects := []cgoSideObject{
+		{name: "a.go", unit: 0, symbols: map[string]cgoSymbolBinding{"own_static": local, "own_global": global, "dup": global, "static_beside_global": local}},
+		{name: "b.go", unit: 1, symbols: map[string]cgoSymbolBinding{"cross": global, "static_elsewhere": local}},
+		{name: "own.c", unit: -1, symbols: map[string]cgoSymbolBinding{"from_c": global, "dup": global, "static_beside_global": global}},
+	}
+
+	hosts := map[string]int{
+		"own_static": 0, "own_global": 0, "cross": 0, "from_c": 0, "dup": 0, "library": 0,
+		"static_elsewhere": 0, "static_beside_global": 0,
+	}
+
+	side, duplicates := cgoSideClassify(hosts, objects)
+
+	for name, want := range map[string]bool{
+		"own_static": true, "own_global": true, "cross": true, "from_c": true, "static_beside_global": true,
+		"dup": false, "library": false, "static_elsewhere": false,
+	} {
+		if side[name] != want {
+			t.Errorf("%s: side-built %v, want %v", name, side[name], want)
+		}
+	}
+
+	if got := strings.Join(duplicates["dup"], ","); got != "a.go,own.c" {
+		t.Errorf("dup: duplicates %q, want a.go,own.c", got)
+	}
+
+	if len(duplicates) != 1 {
+		t.Errorf("duplicates %v, want dup alone", duplicates)
 	}
 }
 

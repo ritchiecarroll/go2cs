@@ -39,7 +39,7 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
 
 * **Your code must build with the Go release go2cs tracks**, the one in
   [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you.
-* **cgo converts only through `-cgo`, and only calls of C functions a shared library defines** ([cgo](#cgo)).
+* **cgo converts only through `-cgo`, and only calls of C a shared library defines or the package's own C defines** ([cgo](#cgo)).
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag. A plain `-recurse` applies the common ones (`safe`, `purego`,
   `noasm`) for you; an explicit `-tags` replaces them, so restate them beside your own.
@@ -417,8 +417,10 @@ check runs at the package's first C call rather than when it loads.
   `unsafe.Pointer(&x)` is refused when the call runs, with a message that names the call. Inside a method
   with a pointer receiver, `unsafe.Pointer(p)` of a pointer of the receiver's own type is refused when the
   package is converted: move the call into a function that takes the pointer as a parameter;
-- a function the preamble itself defines, and a `#define` that is not a constant, both of which need
-  compiled C;
+- a `#define` that is not a constant. A function or variable the preamble defines, or a C or assembly file of the
+  package's own defines, is compiled into a side library beside the bindings (cgo Phase 4 and 4b), except in a package
+  that names `#cgo pkg-config`. C++, Objective-C, Fortran and `.syso` files of the package's own are refused by name,
+  and so is a name two of the package's files define as a global symbol, which C's link and Go's both reject;
 - `//export`;
 - a C variable whose type is not a C scalar or struct (an array, a pointer, a function pointer or a union);
   `C.x` of a scalar or struct type reads and writes the variable in place, as Go does, once a library the
