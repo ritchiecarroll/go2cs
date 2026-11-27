@@ -955,6 +955,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericHolderForeignConstraint() => CheckTarget("GenericHolderForeignConstraint");
 
     [TestMethod]
+    public void CheckGenericIfaceEmbedForwarder() => CheckTarget("GenericIfaceEmbedForwarder");
+
+    [TestMethod]
     public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
 
     [TestMethod]

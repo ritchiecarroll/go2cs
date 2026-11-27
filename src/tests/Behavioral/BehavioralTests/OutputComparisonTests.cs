@@ -923,6 +923,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericHolderForeignConstraint() => CheckTarget("GenericHolderForeignConstraint");
 
     [TestMethod]
+    public void CheckGenericIfaceEmbedForwarder() => CheckTarget("GenericIfaceEmbedForwarder");
+
+    [TestMethod]
     public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
 
     [TestMethod]

@@ -682,6 +682,8 @@
     <Project Path="tests/Behavioral/GenericHolderForeignConstraint/GenericHolderForeignConstraint.csproj" />
     <Project Path="tests/Behavioral/GenericHolderForeignConstraint/iterators/GenericHolderForeignConstraint.iterators.csproj" />
     <Project Path="tests/Behavioral/GenericHolderForeignConstraint/text/GenericHolderForeignConstraint.text.csproj" />
+    <Project Path="tests/Behavioral/GenericIfaceEmbedForwarder/GenericIfaceEmbedForwarder.csproj" />
+    <Project Path="tests/Behavioral/GenericIfaceEmbedForwarder/workerlib/GenericIfaceEmbedForwarder.workerlib.csproj" />
     <Project Path="tests/Behavioral/GenericInstClosedIface/GenericInstClosedIface.csproj" />
     <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/GenericInstClosedIfaceConsumer.csproj" />
     <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/boxlib/GenericInstClosedIfaceConsumer.boxlib.csproj" />
