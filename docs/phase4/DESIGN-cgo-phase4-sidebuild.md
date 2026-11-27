@@ -218,3 +218,41 @@ increment. Its library-on-host questions are RECON §6's.
   (`IncludeNativeLibrariesForSelfExtract`) and still load by the assembly-directory path? *Recommendation:* Phase 6's,
   as PLAN Phase 6 places it. This slice states it UNMEASURED.
 - **OQ-C: placement.** The owner's ruling (§ STATUS). COORD puts it to the owner with this note.
+
+## 5. Amendment, 2026-11-27: the owner's ruling, and what the cure settles
+
+**The ruling** (the owner, relayed by COORD on 2026-11-27): Phase 4 is GO now, on this branch.
+- **OQ-C:** the seat joins .5 if it is finished and fully gated before the M:N seat freeze (around 12-05). Otherwise it
+  rides .6.
+- **OQ-A is IN this slice.** A variable the preamble defines rides the same table (row below).
+- **OQ-B** stays recorded as UNMEASURED, for Phase 6.
+- Phase 5 (`//export`) still waits for its own ruling.
+
+**What writing the cure settled.** These refine §2. They do not change its mechanism.
+
+1. **Slot 0 of every table is the side library's own errno location.** It is a function the TU defines,
+   `static int *go2cs_cgo_errno_<n>(void) { return &errno; }`, after the preamble and an `#include <errno.h>`. That is
+   portable C: `errno` is `*_errno()` on windows, `*__errno_location()` on glibc and `*__error()` on darwin. It replaces
+   §2.5's "the errno location function its own C runtime exports (`_errno`)". Taking the address of a dllimport function
+   in a static initializer is not a constant on every windows compiler, and the helper reads the same slot. The slot is
+   written on every OS, so a table's layout does not depend on the target. Only the windows errno form reads it. Linux
+   and darwin keep §2.5's `SetLastSystemError` sequence.
+2. **The TU carries cmd/cgo's prolog include.** cmd/cgo compiles every preamble after its builtin prolog, which
+   includes `<stddef.h>`. The TU opens with `#include <stddef.h>` under `#line 1 "cgo-builtin-prolog"`, so a preamble
+   that uses `size_t` unincluded compiles as it does under cmd/cgo. The rest of the prolog (the `_GoString_` typedefs)
+   is not written, because no side-built signature may carry them (row below).
+3. **Each name is built in the TU of the first file that uses it.** cmd/cgo writes each C wrapper once, in the first
+   file that uses the name (`out.go`, `p.Written`). The route takes that file from the name's first recorded use.
+4. **The compile and link take `-I <package directory>`,** as cmd/cgo's compile does, so a preamble's
+   `#include "local.h"` resolves. On darwin the link sets the install name to the library's own file name, so no
+   conversion path is written into it.
+5. **The project copies the library to the build output flat** (`Link`), beside the assembly, which is where
+   `SideTable` loads it from.
+
+| Refusal row (§2.7), as cured | Text |
+|---|---|
+| unbound names in a package with C, C++, Objective-C or assembly files of its own | each name, at its use: "…and the package has C source files of its own (`x.c`): go2cs side-builds the preamble only (cgo Phase 4's preamble-only slice)" |
+| a VARIABLE the preamble defines (OQ-A, IN) | not refused: `GoCgoLibraries.SideVariable<T>` boxes its table slot, as `Variable<T>` boxes an export |
+| a Go string in a side-built signature | refused before any C runs, by the wrapper's existing scalar check ("is not a scalar"). No name reaches the side build with one |
+| a declared-only name (undefined in the object) | today's text, word for word |
+| the side compile or link fails | names the file, with the compiler's first diagnostic line through `cgoToolchainLine` |
