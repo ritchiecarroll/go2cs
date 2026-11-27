@@ -278,3 +278,11 @@ Phase 4 classifies a name by the object of the unit that hosts it (its first use
 declared. So the name is refused with today's text, by name: loud, never silently wrong. The cure is Phase 4b's
 classification by any of the package's objects defining the name as a global symbol. BOARD entry of 2026-11-27.
 
+**Known gap (COORD, 2026-11-27): a preamble definition colliding with a linked library's export.** Phase 4 asks the
+probe before it reads the unit's object, so a preamble function whose name a library the package links also exports
+(`gamma` in darwin/amd64's libSystem, measured at ef0f9a89e2; `isatty` on linux and darwin) is bound by the probe. The
+cmd/cgo-imports check then refuses it by name. Go compiles and calls the preamble's own. The refusal is loud, never a
+silent binding to the library's function, but it is not Go-faithful. The cure is Phase 4b's row 1: a name the file's
+own unit defines is side-built without asking the probe. TestCgoPhase4F then becomes a parity row. BOARD entry of
+2026-11-27.
+

@@ -43235,4 +43235,30 @@ table entry inside the library. The gap is recorded in DESIGN-cgo-phase4-sidebui
 
 — H (2026-11-27)
 
+## OPEN 2026-11-27 (H): cgo Phase 4, a preamble definition colliding with a linked library's export is refused; Go uses the preamble's
+
+**Finding.**
+- Measured at ef0f9a89e2, on hosted darwin/amd64 (converter-cgo 46041721404). A preamble defines `double gamma(double)`.
+  darwin/amd64's libSystem, which every link includes, carries libm and exports `gamma`.
+- Phase 4 asks the probe first. The probe binds `gamma` to libSystem, and the cmd/cgo-imports check then refuses it by
+  name, since cmd/cgo compiled the preamble's own and imports nothing ("C.gamma: cmd/cgo's own binary does not import
+  a symbol named gamma ...").
+- Go compiles the preamble's `gamma` and calls it. So the refusal is LOUD but not Go-faithful.
+- TestCgoPhase4F (isatty, `_isatty` on windows) holds the same refusal as a guard: the shape converts under Go and is
+  refused under go2cs.
+- libSystem, libm and libc export many common names, so preamble helpers that shadow them hit this.
+
+**Severity.** Loud and named; never a silent binding to the library's function. A package with such a helper does not
+convert.
+
+**Ruling.** COORD, 2026-11-27: the cure is Phase 4b's ROW 1, classification order.
+- When the file's own translation unit DEFINES the name, static or not, side-build it and never ask the probe.
+- Nothing binds silently to libc, and nothing Go accepts is refused.
+- TestCgoPhase4F becomes a parity row there: it matches go run with the preamble's own function on every OS.
+- The Phase 4 seat ships the loud refusal unless the reviewer objects on the re-read.
+
+**Owner.** H, in 4b.
+
+— H (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

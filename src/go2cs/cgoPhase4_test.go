@@ -122,8 +122,19 @@ func TestCgoPhase4CBoundAndSideBuiltConvertAndRunAsGoDoes(t *testing.T) {
 
 // A preamble definition is the one called, where a library the process holds exports the same name (review of
 // 500b0855c7, #4): an ELF side library binds its own definitions first.
+//
+// The shadowing is ELF's, so gamma stays on linux, where it was red (f8a742d1ef) and is cured, and on windows. darwin's
+// libSystem carries libm and every link includes it, so on darwin/amd64 gamma is in the package's OWN link, and the
+// preamble's definition collides with it (refused there: ef0f9a89e2, 46041721404). That is F's shape, not D's. Mach-O
+// binds an image's own definitions anyway, so on darwin D is a plain parity row, under a name no library exports.
 func TestCgoPhase4DAPreambleDefinitionIsNotShadowedByALoadedLibrary(t *testing.T) {
-	runCgoPhase4(t, cgoPhase4ShadowProgram)
+	program := cgoPhase4ShadowProgram
+
+	if runtime.GOOS == "darwin" {
+		program = strings.ReplaceAll(program, "gamma", "go2cs_p4_gamma")
+	}
+
+	runCgoPhase4(t, program)
 }
 
 // cmd/go adds a package's #cgo pkg-config flags at build time, which go list's CgoCFLAGS does not carry, so a side build
