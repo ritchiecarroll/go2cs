@@ -118,7 +118,55 @@ its numbers, and stop there.
 
 ## The rehearsal (C2's box)
 
-(filled in when the fmt-closure rehearsal lands)
+2026-11-27, C2. Setup:
+
+- tree `4a56f17a3a`;
+- Linux x64, 4 cores, SDK 10.0.404, a shared cloud container;
+- `-Solution src/core/fmt/fmt.csproj -GoTargetOS windows -TwinArm` (the switch on).
+
+It built `fmt`'s closure: 65 stdlib assemblies, not the 363-member solution. **It is not row 16b.**
+
+**What the mechanics did:**
+
+- The purge and the clean `--no-incremental` build ran in every arm.
+- The same 65 assemblies came out of every arm.
+- Twin names: plainA 17, plainB 17, twins 6,298. The assertion passed.
+- The two plain builds were byte-identical (byte band 0). The build is deterministic here.
+- golib was unchanged at 1,412,608 bytes in all three arms.
+- GO2CS0017/0018/0021 were 0/0/0 in every arm.
+- It exited 2, with REHEARSAL printed.
+
+| | plainA | plainB | A/A band | twins | twins / plain mean |
+|---|---:|---:|---:|---:|---:|
+| summed bytes, 65 assemblies | 30,507,520 | 30,507,520 | 0.00% | 33,414,144 | **1.0953 (+9.53%)** |
+| build wall, s | 291 | 260 | 10.92% | 418 | 1.516x (1.407x less the band) |
+
+The assemblies that grew most:
+
+| assembly | growth | bytes added |
+|---|---:|---:|
+| go.runtime | +38.3% | +1.53 MB |
+| go.os | +52.3% | +0.35 MB |
+| go.reflect | +19.7% | +0.18 MB |
+| go.internal.poll | +36.4% | +0.17 MB |
+| go.time | +25.4% | +0.15 MB |
+| go.fmt | +21.5% | +0.10 MB |
+
+**This is a signal for row 16b, not a reading of T1.** On this closure, twins add 9.53% to the summed bytes. That is
+above T1's +8% bar and above section 4's expected +6.6% (stage (c)'s +5.4-6.1% plus 7a's +0.5%).
+
+What I can say about it:
+
+- **The closure is runtime-heavy.** `go.runtime` alone is 4.0 MB of 30.5 MB and grew 38%. `fmt`'s closure is the part
+  of the library where goroutines park: os, poll, time, sync.
+- **The full solution adds about 300 packages this closure does not hold** (crypto, encoding, go/*, compress, text,
+  and others). Whether they dilute the ratio below +8% depends on how many of their functions can park. This
+  rehearsal does not measure that.
+- **Twin coverage may have grown since stage (c)** (N2's box twins, N3's pair calls, the func-value fix). Whether it
+  did is NOT MEASURED here.
+- The wall ratio, 1.52x (1.41x less a 10.9% band on a shared 4-core box), sits inside stage (c)'s 1.5-1.8x.
+
+The full-solution arms on the i7 are what T1 is scored on.
 
 ## Related
 
