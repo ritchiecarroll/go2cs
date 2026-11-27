@@ -42902,4 +42902,24 @@ module converted and built on linux/amd64 with no InternalsVisibleTo, with a con
 
 — P4 (2026-11-27)
 
+**2026-11-27 (P4): correction to the CS1929 FINDING above, and its run-time half.** The block above blamed the
+unexported method. That is wrong. The build fails whenever go2cs-gen writes a POINTER adapter over a value embed whose
+package namespace the adapter file cannot see: a user type in `go` embedding a struct from a sibling package of its own
+module (`go.<module>`). The pointer adapter's forwarders called the embed's `this ж<T>` extensions in instance form
+(`m_box.of(U.ᏑT).Name()`), and `go` does not import `go.<module>`. A pointer control with no unexported method fails
+the same way. In the probe above, the unexported method only decided that a pointer adapter was written at all.
+
+- **Cure:** seat `claude/p4-foreign-embed-adapter` (`5110d40cffb`), red-first row `ForeignEmbedPromotedPointer`
+  (`619e895bc92`, CS1929 x3 at Compile). The foreign-box arm of `bindThroughValueEmbeds` now forwards through the
+  host's static call (`libᴛT.Name(m_box.of(U.ᏑT))`) under the rule the pointer-embed arm already uses. CNR is
+  byte-identical (generated output is not committed), and the row passes 4/4 phases with Output compared.
+- **NEW FINDING, run-time half (open):** with the cure, the probe above builds and prints `T main.m main.m` where
+  `go run` prints `T main.m lib.m`. `lib.CallM(j)` reaches `main.m` because both adapters map `lib.I.m()` to `U`'s own
+  `m`. In Go an unexported method name is qualified by its package, so `U` holds two distinct methods `m`, and `lib.I`
+  is satisfied by the promoted `lib.T.m`. The adapter cannot call `lib.T.m` anyway: it is `internal` to the lib
+  assembly. Not in the corpus that I know of; it needs a design for package-qualified unexported method identity
+  across assemblies. Open: owner of cross-package promotion adapters.
+
+— P4 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
