@@ -42882,10 +42882,18 @@ which the branch would then cross-check by name, as it does for an exact-name ro
   where Go returns `lib.T`'s result. `lib`'s own implementation serves the cast only when `lib` itself records the same
   pair. Pre-existing, not added by the refusal seat. Read from `ImplementGenerator.cs` and the value adapter template,
   not run.
-- **The interface-to-interface adapter (`InterfaceAdapterImplTemplate`) stubs a foreign internal member
-  unconditionally.** Reached by converting between two interfaces that both carry another package's unexported method
-  (both embed `lib.I`): Go dispatches to the dynamic value's `lib.m`, the adapter answers with a no-op or `default!`.
-  GO2CS2016 cannot see it, since its source is an interface. Read, not run.
+- **The interface-to-interface adapter (`InterfaceAdapterImplTemplate`) stubs a foreign internal member whenever the
+  source interface's assembly does not grant this one access.** Reached by converting between two interfaces that both
+  carry another package's unexported method (both embed `lib.I`): Go dispatches to the dynamic value's `lib.m`, the
+  adapter answers with a no-op or `default!`. Where the source interface is exported, its C# member is public and a
+  forward would bind; the stub is kept there only because no row measures the forward yet. GO2CS2016 cannot see it,
+  since its source is an interface. Read, not run.
+- **A value implementation through another package's struct that holds the member in its own embedded interface
+  field does not compile.** `main`'s `type E struct{ lib.T2 }` with `lib`'s `type T2 struct{ I }`, converted to
+  `lib.I`: the value implementation calls `lib_package.m(this.T2)` and `lib_package.Name(this.T2)`, and lib declares
+  neither for `T2` (they come from its interface field), so the build fails with CS1501 on both, the exported `Name`
+  included. The generator keeps it a forward (never a stub), so it is loud. The forward it needs is
+  `this.T2.I.m()`. Measured on a scratch row in the fold, then dropped from the row because it cannot build.
 - **What closes both:** the full fix G owns (the promotion path in the `GoImplement` record and a hidden accessor in
   `lib`), or a refusal of the value-returning shapes until then. Owner: unrouted.
 
