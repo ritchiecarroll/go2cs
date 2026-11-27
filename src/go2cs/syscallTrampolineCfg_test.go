@@ -22,27 +22,26 @@ import (
 // made executable by VirtualProtect, and under Control Flow Guard only its entry, offset 0, may be an indirect-call
 // target. Windows marks every location of a page valid when VirtualProtect makes it executable, unless the protection
 // carries PAGE_TARGETS_NO_UPDATE; Microsoft documents that a PAGE_TARGETS_INVALID allocation starts with every location
-// invalid, and does not document what a PAGE_READWRITE allocation starts with. This row measures it, in a process built
-// with CFG, for three ways to map the page:
+// invalid. This row measures, in a process built with CFG, which mapping leaves exactly offset 0 callable:
 //
 //   - default:    VirtualAlloc(PAGE_READWRITE), write, VirtualProtect(PAGE_EXECUTE_READ). The control: page+16 is
-//     callable, so a termination in the other arms is the narrowing's doing, not the instrument's.
-//   - rw-narrow:  VirtualAlloc(PAGE_READWRITE), write, VirtualProtect(PAGE_EXECUTE_READ | PAGE_TARGETS_NO_UPDATE), then
-//     SetProcessValidCallTargets for offset 0 only.
+//     callable, so a termination in the invalid arm is the narrowing's doing, not the instrument's.
 //   - invalid:    VirtualAlloc(PAGE_EXECUTE_READ | PAGE_TARGETS_INVALID), VirtualProtect(PAGE_READWRITE), write,
 //     VirtualProtect(PAGE_EXECUTE_READ | PAGE_TARGETS_NO_UPDATE), then SetProcessValidCallTargets for offset 0 only.
-//   - both:       rw-narrow with offsets 0 and 16 marked. Recorded, not asserted: whether SetProcessValidCallTargets
-//     takes effect at all.
-//   - gpa:        rw-narrow with SetProcessValidCallTargets called through GetProcAddress's pointer, a CFG-checked
-//     indirect call, where every other arm calls the import directly. Recorded, not asserted. (Readings 2 and 3,
-//     46081898703 and 46082737587: a call through a pointer, from GetProcAddress or from the import, ended the
-//     process with a fast fail before it returned.)
-//   - plain:      default protection (no PAGE_TARGETS_NO_UPDATE), then SetProcessValidCallTargets for offset 0.
-//     Recorded, not asserted: whether the call itself survives on an ordinary page.
+//     The mapping the trampoline uses: page+0 callable, page+16 the CFG fast fail.
+//   - both:       invalid with offsets 0 and 16 marked. The instrument's check that SetProcessValidCallTargets takes
+//     effect: page+16 is callable once marked, so its termination in the invalid arm is the missing mark.
+//   - rw-narrow:  VirtualAlloc(PAGE_READWRITE), write, VirtualProtect(PAGE_EXECUTE_READ | PAGE_TARGETS_NO_UPDATE), then
+//     SetProcessValidCallTargets for offset 0. Recorded, not asserted (reading 4, 46083273402: the call fails with
+//     error 998, ERROR_NOACCESS).
+//   - plain:      default protection, then SetProcessValidCallTargets for offset 0. Recorded, not asserted (reading 4:
+//     the call succeeds and page+16 stays callable).
+//   - gpa:        invalid with SetProcessValidCallTargets called through GetProcAddress's pointer, a CFG-checked
+//     indirect call, where every other arm calls the import directly. Recorded, not asserted (readings 2 to 4: the
+//     process ends with a fast fail before the call returns).
 //
-// In every arm page+0 must be callable. In a narrowed arm a call to page+16 must end the process with the CFG fast
-// fail (STATUS_STACK_BUFFER_OVERRUN). The row reads NOT MEASURED where the C compiler cannot build with CFG
-// (-mguard=cf: clang, llvm-mingw's on the converter-cgo leg) or the process does not run with CFG on.
+// The row reads NOT MEASURED where the C compiler cannot build with CFG (-mguard=cf: clang, llvm-mingw's on the
+// converter-cgo leg) or the process does not run with CFG on.
 const cfgProbeSource = `#define SetProcessValidCallTargets go2cs_hidden_SetProcessValidCallTargets
 #include <windows.h>
 #include <stdio.h>
@@ -82,7 +81,7 @@ int main(int argc, char **argv) {
 
     GetSystemInfo(&si);
 
-    if (strcmp(arm, "invalid") == 0) {
+    if (strcmp(arm, "invalid") == 0 || strcmp(arm, "both") == 0 || strcmp(arm, "gpa") == 0) {
         page = VirtualAlloc(NULL, si.dwPageSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READ | GO2CS_TARGETS);
         if (page == NULL) fail("VirtualAlloc");
         if (!VirtualProtect(page, si.dwPageSize, PAGE_READWRITE, &old)) fail("VirtualProtect-rw");
@@ -174,11 +173,10 @@ func TestCgoSyscallTrampolinePageCallTargets(t *testing.T) {
 		}
 	}
 
-	// Recorded, not asserted: whether SetProcessValidCallTargets takes effect at all (offsets 0 and 16 marked), and
-	// whether calling it through GetProcAddress's pointer passes CFG.
-	run("both")
-	run("gpa")
+	// Recorded, not asserted: the two mappings that do not narrow, and the call through GetProcAddress's pointer.
+	run("rw-narrow")
 	run("plain")
+	run("gpa")
 
 	text, code := run("default")
 
@@ -190,17 +188,20 @@ func TestCgoSyscallTrampolinePageCallTargets(t *testing.T) {
 		t.Fatalf("control (default protection): page+0 and page+16 should both be callable; read exit %#x, %q", code, text)
 	}
 
-	for _, arm := range []string{"rw-narrow", "invalid"} {
-		text, code := run(arm)
+	text, code = run("both")
 
-		if !strings.Contains(text, "page+0: 7\n") {
-			t.Errorf("%s: page+0 should be callable; read exit %#x, %q", arm, code, text)
-			continue
-		}
+	if code != 0 || !strings.Contains(text, "page+0: 7\n") || !strings.Contains(text, "page+16: 16\n") {
+		t.Fatalf("both (offsets 0 and 16 marked): page+0 and page+16 should both be callable; read exit %#x, %q", code, text)
+	}
 
-		if strings.Contains(text, "page+16:") || code != statusStackBufferOverrun {
-			t.Errorf("%s: a call to page+16 should end the process with the CFG fast fail (%#x); read exit %#x, %q", arm,
-				statusStackBufferOverrun, code, text)
-		}
+	text, code = run("invalid")
+
+	if !strings.Contains(text, "page+0: 7\n") {
+		t.Fatalf("invalid: page+0 should be callable; read exit %#x, %q", code, text)
+	}
+
+	if strings.Contains(text, "page+16:") || code != statusStackBufferOverrun {
+		t.Errorf("invalid: a call to page+16 should end the process with the CFG fast fail (%#x); read exit %#x, %q",
+			statusStackBufferOverrun, code, text)
 	}
 }
