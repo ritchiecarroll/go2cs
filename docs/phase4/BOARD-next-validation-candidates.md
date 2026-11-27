@@ -43181,4 +43181,39 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — R (2026-11-27)
 
+
+## 2026-11-27 — P4 (GO2CS2016 fold, COORD 20261127T060428Z item 4): four shapes the refusal does not cover (OPEN)
+
+- **A value-returning unexported method met at depth 1, or through a promotion inside its own package, converted from
+  another package.** `lib.T` (declaring `m() string`) or `lib.W{T}` converted to `lib.I` from `main`: GO2CS2016 does not
+  fire (no foreign promotion from `main`'s side), and `main` records the pair, so `main`'s generator mints the adapter.
+  `T`'s methods are in `lib`'s assembly, so `IsInaccessibleMarker` holds and the adapter answers `m()` with `default!`
+  where Go returns `lib.T`'s result. `lib`'s own implementation serves the cast only when `lib` itself records the same
+  pair. Pre-existing, not added by the refusal seat. Read from `ImplementGenerator.cs` and the value adapter template,
+  not run.
+- **The interface-to-interface adapter (`InterfaceAdapterImplTemplate`) stubs a foreign internal member whenever the
+  source interface's assembly does not grant this one access.** Reached by converting between two interfaces that both
+  carry another package's unexported method (both embed `lib.I`): Go dispatches to the dynamic value's `lib.m`, the
+  adapter answers with a no-op or `default!`. Where the source interface is exported, its C# member is public and a
+  forward would bind; the stub is kept there only because no row measures the forward yet. GO2CS2016 cannot see it,
+  since its source is an interface. Read, not run.
+- **A value implementation through another package's struct that holds the member in its own embedded interface
+  field does not compile.** `main`'s `type E struct{ lib.T2 }` with `lib`'s `type T2 struct{ I }`, converted to
+  `lib.I`: the value implementation calls `lib_package.m(this.T2)` and `lib_package.Name(this.T2)`, and lib declares
+  neither for `T2` (they come from its interface field), so the build fails with CS1501 on both, the exported `Name`
+  included. The generator keeps it a forward (never a stub), so it is loud. The forward it needs is
+  `this.T2.I.m()`. Measured on a scratch row in the fold, then dropped from the row because it cannot build.
+- **A struct with two or more value embeds gets no provider answer, so its value implementation forwards and the
+  build fails loudly** (COORD 20261127T102713Z item 3). `ImplementGenerator`'s path walk asks which embed provides
+  the member only when one embed can; for `server{pb.UnimplementedFooServer; pb.UnimplementedBarServer}` registered by
+  value it answers null, and the value implementation keeps the forward. Where both embeds come from another
+  assembly and the member is internal there, the forward does not bind (CS1061 or CS0122). Not a regression: before
+  the fold the value implementation stubbed this member and answered a silent zero value; now the build says so. The fix is
+  to resolve the provider by Go's depth rule across the embeds. Read, not run.
+- **What closes them:** the full fix G owns (the promotion path in the `GoImplement` record and a hidden accessor in
+  `lib`) closes the first three; the fourth needs the provider lookup above. Until then, a refusal of the
+  value-returning shapes. Owner: unrouted.
+
+— P4 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

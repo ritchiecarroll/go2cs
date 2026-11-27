@@ -784,6 +784,52 @@ on the division; the converted program panics first, so `bump` never runs.
 **Workaround.** Make the call its own statement first, then read the variable: `b := bump()` and then
 `x := pick(g, b)` reads `g` after the call in both languages.
 
+## Another package's unexported interface method, met through an embedded struct, is refused {#another-packages-unexported-interface-method-met-through-an-embedded-struct-is-refused}
+
+**Symptom.** Converting a package stops with error `GO2CS2016` at a conversion such as `lib.CallM(u)` or
+`var j J = U{}`, where `U` embeds a struct from another package (`type U struct{ lib.T }`), the interface declares
+an unexported method of that package (`lib.I` with `m()`), and either `U` declares a method `m` of its own or `m`
+returns a value. A type argument checked against such an interface (`lib.F(u)` with `func F[X I](x X)`) is refused
+the same way.
+
+**Cause.** Go names an unexported method by its package, so `U` can hold two methods `m`: `lib.T`'s, promoted, and one
+`U` declares itself. `lib.I` is met by `lib.T`'s. A converted interface adapter maps a method by its name alone, so it
+would call `U`'s own `m` (the program would print `main.m` where Go prints `lib.m`). Without one it cannot call
+`lib.T`'s, which is internal to `lib`'s assembly, so it stands in a method that does nothing and returns a zero value.
+go2cs refuses the conversion where that would be wrong: a rival `m`, or an `m` that returns a value. It cannot be
+downgraded with `-warn`. Promotion through an embedded interface field (`type U struct{ lib.I }`) converts and calls
+the right method, unless the path to that field crosses an unexported field of another package (`type T struct{ impl }`
+in `lib`), which is refused; any interface whose methods are all exported converts too.
+
+An unexported method that returns nothing, with no method of that name on `U`, is not refused, because the stand-in
+does what such a method usually does: nothing. That is the sealed-marker idiom of generated gRPC code
+(`type server struct{ pb.UnimplementedGreeterServer }`, whose `mustEmbedUnimplementedGreeterServer()` is empty), and
+it converts and runs as in Go. If the marker's Go body does have an effect, the converted program skips it silently.
+
+**Workaround.** Pass the embedded value itself (`lib.CallM(u.T)`).
+
+The same mix-up reaches a type assertion, which the refusal cannot see because it is decided when the program runs:
+a value that meets another package's unexported method only through an embedded struct reads false where Go reads
+true. `net.Buffers.WriteTo`'s `w.(buffersWriter)` is one: for a type that embeds `*net.TCPConn`, Go uses the
+connection's vectored write and the converted program takes the plain write loop. The bytes written are the same.
+
+The refusal is new on the master branch. go2cs 1.26.11.1 converts the conversion and calls the wrong method, or fails
+to build with CS1929.
+<!-- 2026-11-27 (P4, fold of COORD 060053Z on P3's read 055910Z): the predicate narrowed to a rival or a returned value,
+     so the sealed-marker idiom converts as it did before the refusal (behavioral row ForeignEmbedSealedMarker, compared
+     with go run); the gate also reads multi-value sources, switch cases, map keys and delete, range assignment, and type
+     arguments (unit table in foreignUnexportedPromotionRefusal_test.go). The first workaround was dropped: a forwarding
+     method of U's own does not lift the refusal, since U still meets lib.I only through lib.T's m. -->
+<!-- 2026-11-27 (P4, .5 seat, COORD 041242Z, ruled 042410Z). Census before the cut (go/types, every named type whose
+     method set meets an interface's unexported method through a method of another package): std production + tests on
+     linux, windows and darwin, 4 pairs, of which the one RECORDED conversion is crypto/internal/rand's reader ->
+     drbg.DefaultReader through an INTERFACE field (correct, not refused); the behavioral corpus, 14 pairs, 0 recorded
+     through a struct embed. The refusal: src/go2cs/foreignUnexportedPromotionRefusal.go. The full fix (the promotion
+     path in the GoImplement record and a hidden accessor in lib) is post-.5 and G's. The bytes-written claim for
+     net.Buffers.WriteTo: its fallback loop writes each buffer in order (net.go). The false assertion is read from the
+     emission (no adapter for the pair implements buffersWriter; the test package records only testMockTCPConn -> net.Conn),
+     not from a run. -->
+
 ## Issues in older versions {#issues-in-older-versions}
 
 These issues affect only go2cs and `go.*` releases before 1.26.11.1. Each entry names the release that fixed it.

@@ -267,6 +267,18 @@ internal class InterfaceImplTemplate : TemplateBase
                     result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' implicit implementation mapped to promoted interface receiver method:\r\n        ");
                     result.Append($"[{NonUserCodeAttribute}] public {method.ReturnType} {method.GetSignature()} => {EmbedField}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
                 }
+                else if (!methodOverriden && method.IsInaccessibleMarker && method.ForwardTargetReachable == false)
+                {
+                    // A member internal to another assembly's interface, which the struct meets only by promotion
+                    // through a type this assembly cannot reach (a package-sealing marker such as a generated gRPC
+                    // server's mustEmbedUnimplemented...Server()), has nothing to forward to: the promoted method is
+                    // internal there. Stub it, as the pointer and value adapters do. Only then: where the path ends in
+                    // this assembly, at an interface field, or in an assembly granting this one access (an internal test
+                    // assembly), the forward below binds and a stub would answer a silent zero value. GO2CS2016 refuses
+                    // the shapes where the stub would be wrong (a rival method of the same name, or a returned value).
+                    result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' is internal to another assembly; a stub stands in for the promoted method:\r\n        ");
+                    result.Append($"[{NonUserCodeAttribute}] {method.ReturnType} {method.GetSignature()}{(method.ReturnType == "void" ? " { }" : " => default!;")}");
+                }
                 else
                 {
                     if (Promoted && methodOverriden)

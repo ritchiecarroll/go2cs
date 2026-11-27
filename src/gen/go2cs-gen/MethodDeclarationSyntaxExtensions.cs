@@ -114,6 +114,13 @@ public record MethodInfo
     // (public) interface member with a STUB body instead of forwarding to the inaccessible impl.
     public bool IsInaccessibleMarker { get; init; }
 
+    // With IsInaccessibleMarker: whether this assembly can reach the type that provides the member, the depth-1 embed
+    // the forward goes through (or the wrapped type itself for a foreign struct or interface). True where that type is
+    // in this assembly or in one that grants it internals access (an internal test assembly's InternalsVisibleTo),
+    // false where it is not, null where no single type is known. A stub stands in for the member only where the
+    // answer is false: a stub that compiles where a forward exists answers a silent zero value.
+    public bool? ForwardTargetReachable { get; init; }
+
     // True when this method can be forwarded through a REFLECTIVE invoker — every parameter and the
     // return type round-trip through `object`. False for a ref-struct (a Go variadic tail lowers to
     // `params variadic<T>`, a ref struct that cannot be boxed), a by-ref parameter or return, a pointer type, or a
