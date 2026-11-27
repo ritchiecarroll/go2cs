@@ -6,7 +6,7 @@ namespace go.net;
 using multipart = go.mime.multipart_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using go.mime;
 using go.net;
 

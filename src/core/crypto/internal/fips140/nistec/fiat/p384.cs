@@ -27,7 +27,7 @@ internal static UntypedInt p384ElementLen => 48;
 internal static ж<P384Element> One⁔(/*this*/ ж<P384Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    p384SetOne(ref nonnil(ref e).x);
+    p384SetOne(ref builtin.nonnil(ref e).x);
     return Ꮡe;
 }
 
@@ -67,7 +67,7 @@ internal static slice<byte> bytes⁔(/*this*/ ж<P384Element> Ꮡe, /*[48]*/ ж<
     ref var @out = ref Ꮡout.DerefOrNull();
 
     p384NonMontgomeryDomainFieldElement tmp = default;
-    p384FromMontgomery(ref tmp, ref nonnil(ref e).x);
+    p384FromMontgomery(ref tmp, ref builtin.nonnil(ref e).x);
     var ᴛ1 = tmp.Value;
     p384ToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ1);
     p384InvertEndianness(@out[..]);
@@ -102,7 +102,7 @@ internal static (ж<P384Element>, error) SetBytes⁔(/*this*/ ж<P384Element> �
     p384NonMontgomeryDomainFieldElement tmp = default;
     var ᴛ2 = tmp.Value;
     p384FromBytes(ref ᴛ2, ref @in);
-    p384ToMontgomery(ref nonnil(ref e).x, ref tmp);
+    p384ToMontgomery(ref builtin.nonnil(ref e).x, ref tmp);
     return (Ꮡe, default);
 }
 
@@ -112,7 +112,7 @@ internal static ж<P384Element> Add⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p384Add(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p384Add(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -122,7 +122,7 @@ internal static ж<P384Element> Sub⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p384Sub(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p384Sub(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -132,7 +132,7 @@ internal static ж<P384Element> Mul⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p384Mul(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p384Mul(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -141,7 +141,7 @@ internal static ж<P384Element> Square⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    p384Square(ref nonnil(ref e).x, ref nonnil(ref t).x);
+    p384Square(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t).x);
     return Ꮡe;
 }
 
@@ -151,11 +151,11 @@ internal static ж<P384Element> Select⁔(/*this*/ ж<P384Element> Ꮡv, ж<P384
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var ᴛ3 = nonnil(ref v).x.Value;
+    var ᴛ3 = builtin.nonnil(ref v).x.Value;
 
-    var ᴛ4 = nonnil(ref b).x.Value;
+    var ᴛ4 = builtin.nonnil(ref b).x.Value;
 
-    var ᴛ5 = nonnil(ref a).x.Value;
+    var ᴛ5 = builtin.nonnil(ref a).x.Value;
     p384Selectznz(ref ᴛ3, (p384Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;

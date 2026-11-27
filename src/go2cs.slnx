@@ -365,7 +365,9 @@
     <Project Path="tests/Behavioral/ForeignPairStructConversion/ForeignPairStructConversion.csproj" />
     <Project Path="tests/Behavioral/ForeignPairStructConversion/lib/ForeignPairStructConversion.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignPairStructConversion/other/ForeignPairStructConversion.other.csproj" />
+    <Project Path="tests/Behavioral/FuncLitTupleResultInfer/FuncLitTupleResultInfer.csproj" />
     <Project Path="tests/Behavioral/KeywordNamedTypeAlias/KeywordNamedTypeAlias.csproj" />
+    <Project Path="tests/Behavioral/NamedFuncTupleResult/NamedFuncTupleResult.csproj" />
     <Project Path="tests/Behavioral/OpenSliceUnnamedArray/OpenSliceUnnamedArray.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/PackageNameNotDirName.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/lib/PackageNameNotDirName.lib.csproj" />
@@ -610,6 +612,14 @@
     <Project Path="tests/Behavioral/ForeignConstraintProxy/lib/ForeignConstraintProxy.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignDefinedConversion/ForeignDefinedConversion.csproj" />
     <Project Path="tests/Behavioral/ForeignDefinedConversion/levellib/ForeignDefinedConversion.levellib.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/ForeignEmbedPromotedPointer.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/fam/left/ForeignEmbedPromotedPointer.fam.left.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/fam/right/ForeignEmbedPromotedPointer.fam.right.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/lib/ForeignEmbedPromotedPointer.lib.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedSealedMarker/ForeignEmbedSealedMarker.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedSealedMarker/pb/ForeignEmbedSealedMarker.pb.csproj" />
+    <Project Path="tests/Behavioral/ForeignInterfaceFieldPromotion/ForeignInterfaceFieldPromotion.csproj" />
+    <Project Path="tests/Behavioral/ForeignInterfaceFieldPromotion/lib/ForeignInterfaceFieldPromotion.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/ForeignIfaceFieldPointer.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/addrlib/ForeignIfaceFieldPointer.addrlib.csproj" />
     <Project Path="tests/Behavioral/ForInitMixedTypes/ForInitMixedTypes.csproj" />

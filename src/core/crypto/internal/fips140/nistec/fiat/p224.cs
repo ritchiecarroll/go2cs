@@ -27,7 +27,7 @@ internal static UntypedInt p224ElementLen => 28;
 internal static ж<P224Element> One⁔(/*this*/ ж<P224Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    p224SetOne(ref nonnil(ref e).x);
+    p224SetOne(ref builtin.nonnil(ref e).x);
     return Ꮡe;
 }
 
@@ -67,7 +67,7 @@ internal static slice<byte> bytes⁔(/*this*/ ж<P224Element> Ꮡe, /*[28]*/ ж<
     ref var @out = ref Ꮡout.DerefOrNull();
 
     p224NonMontgomeryDomainFieldElement tmp = default;
-    p224FromMontgomery(ref tmp, ref nonnil(ref e).x);
+    p224FromMontgomery(ref tmp, ref builtin.nonnil(ref e).x);
     var ᴛ1 = tmp.Value;
     p224ToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ1);
     p224InvertEndianness(@out[..]);
@@ -102,7 +102,7 @@ internal static (ж<P224Element>, error) SetBytes⁔(/*this*/ ж<P224Element> �
     p224NonMontgomeryDomainFieldElement tmp = default;
     var ᴛ2 = tmp.Value;
     p224FromBytes(ref ᴛ2, ref @in);
-    p224ToMontgomery(ref nonnil(ref e).x, ref tmp);
+    p224ToMontgomery(ref builtin.nonnil(ref e).x, ref tmp);
     return (Ꮡe, default);
 }
 
@@ -112,7 +112,7 @@ internal static ж<P224Element> Add⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p224Add(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p224Add(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -122,7 +122,7 @@ internal static ж<P224Element> Sub⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p224Sub(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p224Sub(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -132,7 +132,7 @@ internal static ж<P224Element> Mul⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p224Mul(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p224Mul(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -141,7 +141,7 @@ internal static ж<P224Element> Square⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    p224Square(ref nonnil(ref e).x, ref nonnil(ref t).x);
+    p224Square(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t).x);
     return Ꮡe;
 }
 
@@ -151,11 +151,11 @@ internal static ж<P224Element> Select⁔(/*this*/ ж<P224Element> Ꮡv, ж<P224
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var ᴛ3 = nonnil(ref v).x.Value;
+    var ᴛ3 = builtin.nonnil(ref v).x.Value;
 
-    var ᴛ4 = nonnil(ref b).x.Value;
+    var ᴛ4 = builtin.nonnil(ref b).x.Value;
 
-    var ᴛ5 = nonnil(ref a).x.Value;
+    var ᴛ5 = builtin.nonnil(ref a).x.Value;
     p224Selectznz(ref ᴛ3, (p224Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;

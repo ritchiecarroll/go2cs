@@ -7,7 +7,7 @@ using context = context_package;
 using bytealg = @internal.bytealg_package;
 using runtime = runtime_package;
 using Δsync = sync_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 
 partial class net_package {
@@ -151,7 +151,7 @@ internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slic
     if (len(addrs) == 0) {
         return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: originalAddr))));
     }
-    addrs = move2heap(addrsᴷ, addrs);
+    addrs = builtin.move2heap(addrsᴷ, addrs);
     return (addrs, default);
 }
 

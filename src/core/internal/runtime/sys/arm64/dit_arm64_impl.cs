@@ -28,8 +28,8 @@
 // and absent is what DITSupported reports here. They replace a throw that nothing should reach with the answer
 // "DIT is off", which is true of every thread the CLR starts.
 //
-// This file's principal is dit_arm64.cs, which only linux/arm64 emits in this universe, so the hand-own router keeps
-// it in linux-arm64/.
+// This file's principal is dit_arm64.cs, which linux/arm64 and darwin/arm64 both emit, so the hand-own router keeps
+// it in arm64/.
 //
 // Hand-owned (no dit_arm64_impl.go exists, so a reconvert never regenerates this file).
 [module: go.GoManualConversion]

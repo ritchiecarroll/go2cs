@@ -5635,7 +5635,7 @@ internal static void init⁔(/*this*/ ж<p> Ꮡpp, int32 id) {
             pp.raceprocctx = raceproccreate();
         }
     }
-    lockInit(ref nonnil(ref pp).timers.mu, lockRankTimers);
+    lockInit(ref builtin.nonnil(ref pp).timers.mu, lockRankTimers);
 
     // This P may get timers when it starts running. Set the mask here
     // since the P may not go through pidleget (notably P 0 on startup).

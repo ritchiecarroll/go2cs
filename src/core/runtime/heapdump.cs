@@ -635,7 +635,7 @@ internal static void dumpmemprof_callback(ж<bucket> b, uintptr nstk, ж<uintptr
             } else {
                 while (pc > 0) {
                     n--;
-                    buf[n] = LiteralByteAt("0123456789abcdef"u8, (uintptr)(pc & 15));
+                    buf[n] = builtin.LiteralByteAt("0123456789abcdef"u8, (uintptr)(pc & 15));
                     pc >>= 4;
                 }
             }

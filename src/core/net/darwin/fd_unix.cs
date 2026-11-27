@@ -70,7 +70,7 @@ internal static (syscall.Sockaddr rsa, error ret) connect⁔(/*this*/ ж<netFD> 
             }
             else if (AreEqual(err, default) || AreEqual(err, syscall.EISCONN)) { matchᴛ1 = true;
                 var selᴛ11 = ctx.Done();
-                switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+                switch (builtin.trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
                 case 0 when selᴛ11.ꟷᐳ(out _): {
                     (rsa, ret) = (default, mapErr(ctx.Err())); goto ᒐdone;
                 }
@@ -152,7 +152,7 @@ internal static (syscall.Sockaddr rsa, error ret) connect⁔(/*this*/ ж<netFD> 
             {
                 var errΔ1 = fd.pfd.WaitWrite(); if (errΔ1 != nil) {
                     var ctxDoneᴛ1 = ctxDone;
-                    switch (trySelect(ᐸꟷ(ctxDoneᴛ1, ꓸꓸꓸ))) {
+                    switch (builtin.trySelect(ᐸꟷ(ctxDoneᴛ1, ꓸꓸꓸ))) {
                     case 0 when ctxDoneᴛ1.ꟷᐳ(out _): {
                         (rsa, ret) = (default, mapErr(ctx.Err())); goto ᒐdone;
                     }

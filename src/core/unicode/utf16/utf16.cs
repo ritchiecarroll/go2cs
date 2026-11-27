@@ -152,7 +152,7 @@ internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
         }}
         buf = append(bufᴷ, buf, ar);
     }
-    buf = move2heap(bufᴷ, buf);
+    buf = builtin.move2heap(bufᴷ, buf);
     return buf;
 }
 

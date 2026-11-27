@@ -33,15 +33,16 @@ var warnAllowedCodes = map[string]string{
 
 // warnRefusedCodes are the KNOWN refusal codes -warn may not downgrade, each with the reason.
 var warnRefusedCodes = map[string]string{
-	diagnosticCgoRefused:                  "a whole-package refusal, so there is no per-site code to produce",
-	diagnosticManualTypeReceiverRefused:   "its downgraded site has no loud form: the conversion would take the receiver's value through a box-from-value record, which go2cs-gen refuses (GO2CS0008)",
-	diagnosticGenericInstantiationRefused: "retired, so it is never reported",
-	diagnosticNonSelfProxyRefused:         "its downgraded sites are not loud: most would not compile, and a zero value boxed to an interface would be silently wrong",
-	diagnosticSliceWideningRefused:        "its downgraded sites are silent: the callee's writes go to an element-wise copy and the program runs on with a wrong result",
-	diagnosticFileDropped:                 "a dropped file is not loud: an init function, a method or an interface record can vanish with no compile error",
-	diagnosticInlineArrayMixedPair:        "its downgraded site is silent: one side's inline bytes would be read as the other's array<T> references",
-	diagnosticAsmForwardSignatureRefused:  "a whole-package refusal, so there is no per-site code to produce",
-	diagnosticShapeWitnessRefused:         "its downgraded sites have no witness to name, so they would not compile",
+	diagnosticCgoRefused:                        "a whole-package refusal, so there is no per-site code to produce",
+	diagnosticManualTypeReceiverRefused:         "its downgraded site has no loud form: the conversion would take the receiver's value through a box-from-value record, which go2cs-gen refuses (GO2CS0008)",
+	diagnosticGenericInstantiationRefused:       "retired, so it is never reported",
+	diagnosticNonSelfProxyRefused:               "its downgraded sites are not loud: most would not compile, and a zero value boxed to an interface would be silently wrong",
+	diagnosticSliceWideningRefused:              "its downgraded sites are silent: the callee's writes go to an element-wise copy and the program runs on with a wrong result",
+	diagnosticFileDropped:                       "a dropped file is not loud: an init function, a method or an interface record can vanish with no compile error",
+	diagnosticInlineArrayMixedPair:              "its downgraded site is silent: one side's inline bytes would be read as the other's array<T> references",
+	diagnosticAsmForwardSignatureRefused:        "a whole-package refusal, so there is no per-site code to produce",
+	diagnosticShapeWitnessRefused:               "its downgraded sites have no witness to name, so they would not compile",
+	diagnosticForeignUnexportedPromotionRefused: "its downgraded site is silent: the adapter would call the type's own method of that name, or return a zero value for a method internal to another assembly",
 }
 
 // parseWarnCodes reads -warn's comma-separated list. An unknown code, or a known code that is not allowed, is an

@@ -265,8 +265,13 @@ var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|r
 var walkScaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap<.*>\(out var Ꮡ[\pL\pN_@]+\);|` + move2heapLine + `|` + operandHoistLine + `)$`)
 
 // move2heapLine is one line of the moves the converter writes ahead of a statement where buffered slices escape:
-// `x = move2heap(xᴷ, x);`, one per variable.
-const move2heapLine = `[\pL\pN_@]+ = move2heap\([\pL\pN_@]+ᴷ, [\pL\pN_@]+\);`
+// `x = builtin.move2heap(xᴷ, x);`, one per variable.
+const move2heapLine = `[\pL\pN_@]+ = ` + golibQualifier + `move2heap\([\pL\pN_@]+ᴷ, [\pL\pN_@]+\);`
+
+// golibQualifier is the `builtin.` the converter spells before a golib intrinsic it calls (`builtin.move2heap`,
+// `builtin.GoZero`, `builtin.nonnil`), so that no Go declaration of the same name can capture the call. Files
+// converted before that spelling carry the bare name, so a pattern for an intrinsic line takes both.
+const golibQualifier = `(builtin\.)?`
 
 // operandHoistLine is one line of the temps the converter writes ahead of a statement whose calls gc runs before its
 // plain operands (src/go2cs/operandOrder.go): `var evalᴛ1 = bump();`, one per moved call, in the calls' order.
@@ -993,7 +998,7 @@ func holdsAll(have, want map[string]bool) bool {
 
 // A variadic pack's prelude is a view (`.sslice()`), the heap slice (`var xs = xsʗp.slice();`) or, for a pack
 // only forwarded, the pack itself (`var xs = xsʗp;`, wall E): all three are the converter's prelude.
-var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= [\pL\pN_@]+ʗp(\.slice\(\))?;|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!?;)$`)
+var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= [\pL\pN_@]+ʗp(\.slice\(\))?;|= ` + golibQualifier + `GoZero<.*>\(\);|= ` + golibQualifier + `nonnil\(ref .*;|= default!?;)$`)
 
 var csDeclRe = regexp.MustCompile(`^(\[[^\]]*\]\s*)*(public|internal|private|protected|partial|static|readonly|unsafe|const|ref|file|new)\b`)
 

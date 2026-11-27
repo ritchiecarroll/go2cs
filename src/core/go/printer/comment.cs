@@ -101,7 +101,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             Slash: slash,
             Text: "//"
         )));
-        directives = move2heap(directivesᴷ, directives);
+        directives = builtin.move2heap(directivesᴷ, directives);
         foreach (var (_, c) in range(directives)) {
             @out = append(@out, Ꮡ(new ast.Comment(
                 Slash: slash,

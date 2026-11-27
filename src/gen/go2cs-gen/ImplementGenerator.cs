@@ -335,7 +335,9 @@ public class ImplementGenerator : ISourceGenerator
                         GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
                         TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray()),
                         IsInaccessibleMarker = GetStampedScope(info.method) == "internal" &&
-                            !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly)
+                            !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly),
+                        // The forward goes to the wrapped interface's own member.
+                        ForwardTargetReachable = AssemblyReachable(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly)
                     })
                     .Distinct()
                     .ToList();
@@ -533,6 +535,60 @@ public class ImplementGenerator : ISourceGenerator
                 ? GetMultiEmbedHopPaths(context, syntaxContext.SemanticModel.Compilation, structType, embedHops)
                 : [];
 
+            // Each member internal to another assembly's interface (IsInaccessibleMarker) is promoted to the struct along
+            // one embed path. Record whether this assembly can reach the end of that path (ForwardTargetReachable): a stub
+            // stands in only where it cannot. The path is followed through this assembly's own structs, one embed per
+            // level, and ends at an embedded INTERFACE field (whose member is public in C# and dispatches to the value Go
+            // calls), or at a type from another assembly, reachable only when that assembly grants this one internals access
+            // (an internal, white-box test assembly through InternalsVisibleTo). A FOREIGN struct is itself the end of the
+            // path. Where a level has several embeds and none is known to provide the member, the answer is null (unknown).
+            {
+                IAssemblySymbol currentAssembly = syntaxContext.SemanticModel.Compilation.Assembly;
+                bool foreignWrapped = structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, currentAssembly);
+
+                bool? pathReachable(ITypeSymbol type, StructDeclarationSyntax? decl, Compilation? declCompilation, string member, int depth)
+                {
+                    if (GetEmbeddedInterfaceFieldMembers(type).Any(field => field.Members.Contains(member)))
+                        return true;
+
+                    List<(string Name, INamedTypeSymbol Type)> pointerEmbeds = StructDeclarationSyntaxExtensions.GetPointerEmbeds(type);
+                    List<INamedTypeSymbol> embeds = [.. pointerEmbeds.Select(embed => embed.Type)];
+
+                    if (decl is not null)
+                    {
+                        embeds.AddRange(decl.GetEmbeddedValueHopNames(declCompilation!)
+                            .Select(hop => ResolveValueEmbedType(type, hop.Name))
+                            .OfType<INamedTypeSymbol>());
+                    }
+
+                    INamedTypeSymbol? embed = null;
+
+                    if (depth == 0 && multiEmbedHopPaths.TryGetValue(member, out string? hopPath))
+                        embed = pointerEmbeds.FirstOrDefault(pointerEmbed => pointerEmbed.Name == hopPath.Split('.')[0]).Type;
+                    else if (embeds.Count == 1)
+                        embed = embeds[0];
+
+                    if (embed is null)
+                        return null;
+
+                    // Another assembly's struct: its own embedded interface field (lib's `T2 struct{ I }`) is public and
+                    // dispatches to the dynamic value, so it stays a forward (loud if it does not bind, never a stub).
+                    if (!SymbolEqualityComparer.Default.Equals(embed.ContainingAssembly, currentAssembly) || depth >= 4)
+                        return AssemblyReachable(embed.ContainingAssembly, currentAssembly) || GetEmbeddedInterfaceFieldMembers(embed).Any(field => field.Members.Contains(member));
+
+                    (StructDeclarationSyntax? embedDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embed.ToDisplayString());
+
+                    return pathReachable(embed, embedDecl, embedCompilation, member, depth + 1);
+                }
+
+                methods = methods.Select(method => !method.IsInaccessibleMarker ? method : method with
+                {
+                    ForwardTargetReachable = foreignWrapped
+                        ? AssemblyReachable(structType.ContainingAssembly, currentAssembly)
+                        : pathReachable(structType, structDecl, compilation, GetSimpleName(method.Name), 0)
+                }).ToList();
+            }
+
             // Hop-target methods that are direct-ж primaries bind on the box FIELD itself
             // (`this.File.Read(p)`) — deref'ing first strands the extension receiver (CS1929).
             HashSet<string> embedHopBoxMethods = embedHops.Count == 1
@@ -635,6 +691,10 @@ public class ImplementGenerator : ISourceGenerator
                 // bind direct-ж receiver methods from a struct's `this` at all (CS1929).
                 Dictionary<string, string> forwardReceivers = new(StringComparer.Ordinal);
                 Dictionary<string, string> forwardStaticCalls = new(StringComparer.Ordinal);
+                // Members bound through an embedded INTERFACE field. An unexported member of another
+                // assembly's interface is callable on that field (a C# interface member is public), so
+                // the template forwards it there instead of writing the inaccessible-marker stub.
+                HashSet<string> interfaceFieldForwards = new(StringComparer.Ordinal);
 
                 foreach (MethodInfo structMethod in structMethods ?? [])
                 {
@@ -838,8 +898,7 @@ public class ImplementGenerator : ISourceGenerator
                             (string pointerEmbedName, INamedTypeSymbol pointerEmbedType, _) = declaringEmbeds[0];
                             string pointerEmbedNamespace = pointerEmbedType.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
 
-                            if (pointerEmbedNamespace != packageNamespace && pointerEmbedNamespace != Namespace &&
-                                !packageNamespace.StartsWith($"{pointerEmbedNamespace}.", StringComparison.Ordinal))
+                            if (!HostNamespaceVisible(pointerEmbedNamespace, packageNamespace))
                             {
                                 forwardStaticCalls[simpleName] = $"{GoMethodHosts.StaticClass(pointerEmbedType, simpleName)}.{simpleName}";
                             }
@@ -935,7 +994,10 @@ public class ImplementGenerator : ISourceGenerator
                             .ToList();
 
                         if (declaringFields.Count == 1)
+                        {
                             forwardReceivers[simpleName] = $"m_box.Value.{declaringFields[0].FieldName}";
+                            interfaceFieldForwards.Add(simpleName);
+                        }
                     }
                 }
 
@@ -1021,6 +1083,19 @@ public class ImplementGenerator : ISourceGenerator
                             if (embedTypeSymbol is not null &&
                                 StructDeclarationSyntaxExtensions.GetForeignBoxReceiverMethodNames(embedTypeSymbol).Contains(methodName))
                             {
+                                // The embed's host classes live in ITS package's namespace, which the
+                                // generated file does not import when that namespace is neither this
+                                // one nor an ancestor of it (a user type embedding a struct from a
+                                // sibling module package: `go` cannot see `go.<module>`'s extensions,
+                                // CS1929). Forward through the host's STATIC call there, exactly as the
+                                // pointer-embed arm above does.
+                                string embedNamespace = embedTypeSymbol.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
+
+                                if (!HostNamespaceVisible(embedNamespace, packageNamespace))
+                                {
+                                    forwardStaticCalls[methodName] = $"{GoMethodHosts.StaticClass(embedTypeSymbol, methodName)}.{methodName}";
+                                }
+
                                 forwardReceivers[methodName] = receiver;
                                 break;
                             }
@@ -1053,6 +1128,7 @@ public class ImplementGenerator : ISourceGenerator
                                 if (hopIfaceFields.Count == 1)
                                 {
                                     forwardReceivers[methodName] = $"{receiver}.Value.{hopIfaceFields[0].FieldName}";
+                                    interfaceFieldForwards.Add(methodName);
                                     break;
                                 }
                             }
@@ -1075,7 +1151,12 @@ public class ImplementGenerator : ISourceGenerator
                         string simpleName = GetSimpleName(method.Name);
 
                         if (!forwardReceivers.ContainsKey(simpleName))
+                        {
                             forwardReceivers[simpleName] = $"m_box.Value.{interfaceFieldName}";
+                            // Bound through an interface field: the field's member is public in C#, so the
+                            // inaccessible-marker stub must not pre-empt this forward (see the arms above).
+                            interfaceFieldForwards.Add(simpleName);
+                        }
                     }
                 }
 
@@ -1371,6 +1452,7 @@ public class ImplementGenerator : ISourceGenerator
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
                     ForwardStaticCalls = forwardStaticCalls,
+                    InterfaceFieldForwards = interfaceFieldForwards,
                     ForwardResultWraps = forwardResultWraps,
                     ImplementsFormattable = implementsFormattable,
                     UsingStatements = usingStatements
@@ -1598,6 +1680,15 @@ public class ImplementGenerator : ISourceGenerator
     // The registrations of a package class's pointer adapters (each adapter's own ᴛRegisterAdapter), called from ONE
     // method its module initializer defers to golib's first adapter lookup that misses (DeferredRegistration), where a
     // module initializer per adapter compiled each one at startup.
+    /// <summary>
+    /// Whether code emitted in <paramref name="emittingNamespace"/> sees the extension methods of a host class
+    /// in <paramref name="hostNamespace"/> without a using: the same namespace, the root <c>go</c> namespace, or
+    /// an ancestor of the emitting one. A forwarder to a host it cannot see takes the host's static call instead.
+    /// </summary>
+    private static bool HostNamespaceVisible(string hostNamespace, string emittingNamespace) =>
+        hostNamespace == emittingNamespace || hostNamespace == Namespace ||
+        emittingNamespace.StartsWith($"{hostNamespace}.", StringComparison.Ordinal);
+
     private static void EmitAdapterRegistrations(GeneratorExecutionContext context, HashSet<string> emittedHintNames, Dictionary<(string packageNamespace, string packageName), List<string>> adapterRegistrations)
     {
         foreach (KeyValuePair<(string packageNamespace, string packageName), List<string>> package in adapterRegistrations)
@@ -2319,6 +2410,10 @@ public class ImplementGenerator : ISourceGenerator
 
         return classes;
     }
+
+    // Whether code compiled into current can reach an internal member of assembly: its own, or one granting it access.
+    private static bool AssemblyReachable(IAssemblySymbol? assembly, IAssemblySymbol current) =>
+        assembly is not null && (SymbolEqualityComparer.Default.Equals(assembly, current) || assembly.GivesAccessTo(current));
 
     private static INamedTypeSymbol? ResolveValueEmbedType(ITypeSymbol structType, string embedName) =>
         structType.GetMembers(embedName)

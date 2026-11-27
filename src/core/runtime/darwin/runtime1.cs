@@ -745,8 +745,8 @@ internal static (slice<@unsafe.Pointer>, slice<slice<int32>>) reflect_typelinks(
         sections = append(sectionsᴷ, sections, (@unsafe.Pointer)md.types);
         ret = append(retᴷ, ret, md.typelinks);
     }
-    sections = move2heap(sectionsᴷ, sections);
-    ret = move2heap(retᴷ, ret);
+    sections = builtin.move2heap(sectionsᴷ, sections);
+    ret = builtin.move2heap(retᴷ, ret);
     return (sections, ret);
 }
 

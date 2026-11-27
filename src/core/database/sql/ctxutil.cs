@@ -17,7 +17,7 @@ internal static (driver.Stmt, error) ctxDriverPrepare(context.Context ctx, drive
     var (si, err) = ci.Prepare(query);
     if (err == nil) {
         var selᴛ1 = ctx.Done();
-        switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out _): {
             si.Close();
             return (default, ctx.Err());
@@ -39,7 +39,7 @@ internal static (driver.Result, error) ctxDriverExec(context.Context ctx, driver
     }
 
     var selᴛ2 = ctx.Done();
-    switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out _): {
         return (default, ctx.Err());
     }
@@ -59,7 +59,7 @@ internal static (driver.Rows, error) ctxDriverQuery(context.Context ctx, driver.
     }
 
     var selᴛ3 = ctx.Done();
-    switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0 when selᴛ3.ꟷᐳ(out _): {
         return (default, ctx.Err());
     }
@@ -79,7 +79,7 @@ internal static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, dr
     }
 
     var selᴛ4 = ctx.Done();
-    switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out _): {
         return (default, ctx.Err());
     }
@@ -99,7 +99,7 @@ internal static (driver.Rows, error) ctxDriverStmtQuery(context.Context ctx, dri
     }
 
     var selᴛ5 = ctx.Done();
-    switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
     case 0 when selᴛ5.ꟷᐳ(out _): {
         return (default, ctx.Err());
     }
@@ -148,7 +148,7 @@ internal static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ж<TxOpti
     var (txi, err) = ci.Begin();
     if (err == nil) {
         var selᴛ6 = ctx.Done();
-        switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
         case 0 when selᴛ6.ꟷᐳ(out _): {
             txi.Rollback();
             return (default, ctx.Err());

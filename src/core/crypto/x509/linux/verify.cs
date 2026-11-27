@@ -1159,14 +1159,14 @@ internal static slice<ж<policyGraphNode>> parentsWithExpected⁔(/*this*/ ref p
     if (pg.depth == 0) {
         return default;
     }
-    return pg.parentIndex[tmpstring(expected.der)];
+    return pg.parentIndex[builtin.tmpstring(expected.der)];
 }
 
 internal static ж<policyGraphNode> parentWithAnyPolicy⁔(/*this*/ ref policyGraph pg) {
     if (pg.depth == 0) {
         return default;
     }
-    return pg.strata[pg.depth - 1][tmpstring(anyPolicyOID.der)];
+    return pg.strata[pg.depth - 1][builtin.tmpstring(anyPolicyOID.der)];
 }
 
 internal static iter.Seq<ж<policyGraphNode>> parents⁔(/*this*/ ref policyGraph pg) {
@@ -1181,11 +1181,11 @@ internal static map<@string, ж<policyGraphNode>> leaves⁔(/*this*/ ref policyG
 }
 
 internal static ж<policyGraphNode> leafWithPolicy⁔(/*this*/ ref policyGraph pg, OID policy) {
-    return pg.strata[pg.depth][tmpstring(policy.der)];
+    return pg.strata[pg.depth][builtin.tmpstring(policy.der)];
 }
 
 internal static void deleteLeaf⁔(/*this*/ ref policyGraph pg, OID policy) {
-    var n = pg.strata[pg.depth][tmpstring(policy.der)];
+    var n = pg.strata[pg.depth][builtin.tmpstring(policy.der)];
     if (n == nil) {
         return;
     }
@@ -1217,7 +1217,7 @@ internal static slice<ж<policyGraphNode>> validPolicyNodes⁔(/*this*/ ref poli
             }
         }
     }
-    validNodes = move2heap(validNodesᴷ, validNodes);
+    validNodes = builtin.move2heap(validNodesᴷ, validNodes);
     return validNodes;
 }
 
@@ -1238,7 +1238,7 @@ internal static void incrDepth⁔(/*this*/ ref policyGraph pg) {
     pg.parentIndex = new map<@string, slice<ж<policyGraphNode>>>{};
     foreach (var (_, n) in pg.strata[pg.depth]) {
         foreach (var (_, e) in range(n.expectedPolicySet)) {
-            pg.parentIndex[((@string)e.der)] = append(pg.parentIndex[tmpstring(e.der)], n);
+            pg.parentIndex[((@string)e.der)] = append(pg.parentIndex[builtin.tmpstring(e.der)], n);
         }
     }
 
@@ -1336,13 +1336,13 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
             // In the specification chains go from the trust anchor to the leaf, whereas our
             // chains go from the leaf to the trust anchor, so our i's our inverted. Our
             // check here matches the check "i < n" in the specification.
-            if (policies[tmpstring(anyPolicyOID.der)] && (inhibitAnyPolicy > 0 || (n - i < n && isSelfSigned))) {
+            if (policies[builtin.tmpstring(anyPolicyOID.der)] && (inhibitAnyPolicy > 0 || (n - i < n && isSelfSigned))) {
                 var missing = new map<@string, slice<ж<policyGraphNode>>>{};
                 var leaves = pg.leaves();
                 foreach (var p in range<ж<policyGraphNode>>(pg.parents().Invoke)) {
                     foreach (var (_, expected) in range(p.expectedPolicySet)) {
-                        if (leaves[tmpstring(expected.der)] == nil) {
-                            missing[((@string)expected.der)] = append(missing[tmpstring(expected.der)], p);
+                        if (leaves[builtin.tmpstring(expected.der)] == nil) {
+                            missing[((@string)expected.der)] = append(missing[builtin.tmpstring(expected.der)], p);
                         }
                     }
                 }
@@ -1367,7 +1367,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
                                 // Invalid mapping
                                 return false;
                             }
-                            mappings[((@string)mapping.IssuerDomainPolicy.der)] = append(mappings[tmpstring(mapping.IssuerDomainPolicy.der)], mapping.SubjectDomainPolicy);
+                            mappings[((@string)mapping.IssuerDomainPolicy.der)] = append(mappings[builtin.tmpstring(mapping.IssuerDomainPolicy.der)], mapping.SubjectDomainPolicy);
                         } else {
                             // 6.1.4 (b) (3) (i) -- as updated by RFC 9618
                             pg.deleteLeaf(mapping.IssuerDomainPolicy);
@@ -1449,7 +1449,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
     // 6.1.5 (g) (5) -- as updated by RFC 9618
     var userConstrainedPolicySet = maps.Clone<map<@string, bool>, @string, bool>(authorityConstrainedPolicySet);
     // 6.1.5 (g) (6) -- as updated by RFC 9618
-    if (len(initialUserPolicySet) != 1 || !initialUserPolicySet[tmpstring(anyPolicyOID.der)]) {
+    if (len(initialUserPolicySet) != 1 || !initialUserPolicySet[builtin.tmpstring(anyPolicyOID.der)]) {
         // 6.1.5 (g) (6) (i) -- as updated by RFC 9618
         foreach (var (p, _) in userConstrainedPolicySet) {
             if (!initialUserPolicySet[p]) {
@@ -1457,7 +1457,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
             }
         }
         // 6.1.5 (g) (6) (ii) -- as updated by RFC 9618
-        if (authorityConstrainedPolicySet[tmpstring(anyPolicyOID.der)]) {
+        if (authorityConstrainedPolicySet[builtin.tmpstring(anyPolicyOID.der)]) {
             foreach (var (policy, _) in initialUserPolicySet) {
                 userConstrainedPolicySet[policy] = true;
             }

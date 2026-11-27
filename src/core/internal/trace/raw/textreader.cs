@@ -162,7 +162,7 @@ internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names)
             return (default, fmt.Errorf("encountered unexpected non-space at the end of an event: %q"u8, s));
         }
     }
-    args = move2heap(argsᴷ, args);
+    args = builtin.move2heap(argsᴷ, args);
     return (args, default);
 }
 

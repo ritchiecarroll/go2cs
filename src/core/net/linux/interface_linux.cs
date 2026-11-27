@@ -192,7 +192,7 @@ loop:
 continue_loop:;
     }
 break_loop:;
-    ifat = move2heap(ifatᴷ, ifat);
+    ifat = builtin.move2heap(ifatᴷ, ifat);
     return (ifat, default);
 }
 
@@ -279,7 +279,7 @@ internal static slice<Addr> parseProcNetIGMP(@string path, ж<Interface> Ꮡifi)
                 break;
             }}
         }
-        ifmat = move2heap(ifmatᴷ, ifmat);
+        ifmat = builtin.move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -313,7 +313,7 @@ internal static slice<Addr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡifi
                 ifmat = append(ifmatᴷ, ifmat, (Addr)(new IPAddrжAddr(ifma)));
             }
         }
-        ifmat = move2heap(ifmatᴷ, ifmat);
+        ifmat = builtin.move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

@@ -323,7 +323,7 @@ internal static slice<Type> /*res*/ operandTypes(slice<ж<operand>> list) {
     foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
     }
-    res = move2heap(resᴷ, res);
+    res = builtin.move2heap(resᴷ, res);
     return res;
 }
 
@@ -335,7 +335,7 @@ internal static slice<Type> /*res*/ varTypes(slice<ж<Var>> list) {
     foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
     }
-    res = move2heap(resᴷ, res);
+    res = builtin.move2heap(resᴷ, res);
     return res;
 }
 

@@ -5,7 +5,7 @@ namespace go.crypto.@internal.fips140;
 
 using bytes = bytes_package;
 using fips140 = go.crypto.@internal.fips140_package;
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using sha256 = go.crypto.@internal.fips140.sha256_package;
 using errors = errors_package;
 using go.crypto.@internal;
@@ -32,7 +32,7 @@ partial class tls12_package {
             0xe2, 0xb9, 0xd1, 0x03, 0x5e, 0xb2, 0x60, 0x5d,
             0x12, 0x68, 0x4f, 0x49, 0xdf, 0xa9, 0x9d, 0xcc
         ]);
-        var got = MasterSecret<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), input, transcript); if (!bytes.Equal(got, want)) {
+        var got = MasterSecret<hash.Hash>(builtin.widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), input, transcript); if (!bytes.Equal(got, want)) {
             return errors.New("unexpected result");
         }
         return default;

@@ -951,7 +951,7 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
             // variable type underfoot.)
             if (lhs != nil) {
                 bool used = default;
-                lhsVars = move2heap(lhsVarsᴷ, lhsVars);
+                lhsVars = builtin.move2heap(lhsVarsᴷ, lhsVars);
                 foreach (var (_, v) in range(lhsVars)) {
                     if (check.usedVars[v]) {
                         used = true;

@@ -8,7 +8,7 @@
 // (keys k where k != k), such as floating-point NaNs.
 namespace go;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 
 partial class maps_package {
 
@@ -50,7 +50,7 @@ public static bool EqualFunc<M1, M2, K, V1, V2>(M1 m1, M2 m2, Func<V1, V2, bool>
 //
 //go:linkname clone maps.clone
 /*linkname*/ internal static partial any clone(any m) {
-    return mapclone(m);
+    return builtin.mapclone(m);
 }
 
 // Clone returns a copy of m.  This is a shallow clone:

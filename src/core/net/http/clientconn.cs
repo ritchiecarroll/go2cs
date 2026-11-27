@@ -471,7 +471,7 @@ internal static error Close⁔(/*this*/ http1ClientConn cc) {
 
 internal static error Err⁔(/*this*/ http1ClientConn cc) {
     var selᴛ4 = cc.pconn.closech;
-    switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out _): {
         return cc.pconn.closed;
     }
@@ -524,7 +524,7 @@ internal static error Reserve⁔(/*this*/ http1ClientConn cc) {
             return cc.pconn.closed;
         }
         var selᴛ5 = cc.pconn.availch;
-        switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
         case 0 when selᴛ5.ꟷᐳ(out _): {
             break;
         }
@@ -546,7 +546,7 @@ internal static void Release⁔(/*this*/ http1ClientConn cc) {
         defer(ccʗ1.pconn.Ꮡmu.Unlock, ref ᒐ);
         if (cc.pconn.reserved) {
             var selᴛ6 = cc.pconn.availch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-            switch (trySelect(selᴛ6)) {
+            switch (builtin.trySelect(selᴛ6)) {
             case 0: {
                 break;
             }

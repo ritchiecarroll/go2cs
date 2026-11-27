@@ -366,7 +366,7 @@ public static (slice<RoutingMessage> msgs, error err) ParseRoutingMessage(slice<
     if (nmsgs != len(msgs) + nskips) {
         return (default, EINVAL);
     }
-    msgs = move2heap(msgsᴷ, msgs);
+    msgs = builtin.move2heap(msgsᴷ, msgs);
     return (msgs, default);
 }
 

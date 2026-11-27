@@ -110,7 +110,7 @@ internal static slice<stack> secret_appendSignalStacks(slice<stack> sigstacks) {
     releasem(ref ((~getg()).m).DerefOrNull());
     ᏑallocmLock.unlock();
     startTheWorld(stw);
-    sigstacks = move2heap(sigstacksᴷ, sigstacks);
+    sigstacks = builtin.move2heap(sigstacksᴷ, sigstacks);
     return sigstacks;
 }
 

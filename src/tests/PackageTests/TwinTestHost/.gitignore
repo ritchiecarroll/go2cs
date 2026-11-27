@@ -1,0 +1,10 @@
+# This directory is an input fixture. The end-to-end command regenerates all C# artifacts in place.
+*.cs
+*.csproj
+go2cs.ico
+go2cs.png
+go2cs_test_*.json
+go2cs_test_*.xml
+bin/
+obj/
+Generated/

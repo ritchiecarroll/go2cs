@@ -202,7 +202,7 @@ internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
     for (; n > 0; n--) {
         buf = append(bufᴷ, buf, (byte)'0');
     }
-    buf = move2heap(bufᴷ, buf);
+    buf = builtin.move2heap(bufᴷ, buf);
     return buf;
 }
 

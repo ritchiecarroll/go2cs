@@ -10,10 +10,12 @@ package main
 
 import (
 	"go/ast"
+	"go/build"
 	"go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"sort"
 	"strings"
@@ -214,5 +216,137 @@ func f(options Options, scope goosScope) {
 
 	if want := []string{"planted.go:3:2: collectHandOwnedDecls", "planted.go:4:6: includes"}; !slices.Equal(planted, want) {
 		t.Errorf("the planted calls read %v, want %v", planted, want)
+	}
+}
+
+// TestTargetScopedRegistrationConvertsEndToEnd converts a module whose package holds a function, a pointer-receiver
+// method and a package var, each registered for darwin/arm64 alone, through the whole package conversion, at
+// windows/amd64, darwin/amd64 and darwin/arm64, with hoistLiterals on to mirror the stdlib's mode. Each run must
+// finish with no dropped file (GO2CS2008) and no panic, and each registered declaration is displaced at darwin/arm64
+// and emitted at the other two. The fixture reaches the registry lookups in the array-dims facts, the emission, the
+// hoisted-literal pass (hoistedLiteralOperations.go, which runs in both modes and reads the registry before its
+// hoist gate) and both hand-owned-member passes (fieldAccess.go, methods and vars). manualTypeReceiverRefusal.go's
+// lookup runs only in a package with a manual type, and is a follow-up on the BOARD. TestRegistryLookupsReceiveTheFullTarget reads converter source for a registry callee
+// handed goosOfTarget(...) directly, so it cannot see a GOOS stored first and passed later: the array-dims facts
+// did exactly that (arrayDimsInputs held the GOOS in a field), goosScope.includes panicked on the os/arch entry,
+// and every target dropped internal/cpu's cpu.go until a five-target emission found it. This test reads every pass
+// the driver runs, however the target is spelled on its way to the registry. The fixture's generic is instantiated
+// with an array, so the array-dims facts run over the package. P3's SHOULD 1 on the darwin/arm64 seats (D2, D3).
+func TestTargetScopedRegistrationConvertsEndToEnd(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	const pkgPath = "example.com/scoped/lib"
+
+	previousFuncs, hadFuncs := manualConversionFuncs[pkgPath]
+	previousVars, hadVars := manualConversionVars[pkgPath]
+	previousGoRoot := build.Default.GOROOT
+	manualConversionFuncs[pkgPath] = map[string]goosScope{"Scoped": {"darwin/arm64"}, "Box.Get": {"darwin/arm64"}}
+	manualConversionVars[pkgPath] = map[string]goosScope{"Shared": {"darwin/arm64"}}
+
+	takeDroppedFiles()
+
+	t.Cleanup(func() {
+		takeDroppedFiles()
+		build.Default.GOROOT = previousGoRoot
+
+		if hadFuncs {
+			manualConversionFuncs[pkgPath] = previousFuncs
+		} else {
+			delete(manualConversionFuncs, pkgPath)
+		}
+
+		if hadVars {
+			manualConversionVars[pkgPath] = previousVars
+		} else {
+			delete(manualConversionVars, pkgPath)
+		}
+	})
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/scoped\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "lib", "lib.go"), `package lib
+
+func zero[T any]() T { var x T; return x }
+
+// Scoped, Box.Get and Shared are registered for darwin/arm64 alone.
+func Scoped() int { return len(zero[[4]byte]()) }
+
+type Box struct{ n int }
+
+func (b *Box) Get() int { return b.n }
+
+var Shared = []int{1, 2, 3}
+
+func Kept() int { var b Box; return Scoped() + b.Get() + Shared[0] }
+`)
+
+	for _, target := range []string{"windows/amd64", "darwin/amd64", "darwin/arm64"} {
+		// One output root per target: two conversions never share a root.
+		out := filepath.Join(root, "out-"+strings.ReplaceAll(target, "/", "-"))
+		options := Options{
+			goRoot:              build.Default.GOROOT,
+			goPath:              build.Default.GOPATH,
+			go2csPath:           out,
+			recurse:             true,
+			targetPlatform:      target,
+			indentSpaces:        4,
+			preferVarDecl:       true,
+			useChannelOperators: true,
+			hoistLiterals:       true,
+		}
+
+		if options.goRoot == "" {
+			options.goRoot = runtime.GOROOT()
+		}
+
+		build.Default.GOROOT = options.goRoot
+
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("%s: the conversion panicked over a target-scoped registration: %v", target, r)
+				}
+			}()
+
+			if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+				t.Errorf("%s: ConvertModule: %v", target, err)
+			}
+		}()
+
+		if err := droppedFileError(); err != nil {
+			t.Errorf("%s: the conversion dropped a file over a target-scoped registration:\n%v", target, err)
+			continue
+		}
+
+		data, err := os.ReadFile(filepath.Join(out, "src", "example.com", "scoped", "lib", "lib.cs"))
+
+		if err != nil {
+			t.Errorf("%s: lib.cs was not written: %v", target, err)
+			continue
+		}
+
+		emission := string(data)
+
+		if !strings.Contains(emission, "class ᴀ4 ") {
+			t.Errorf("%s: no ᴀ4 dims type, so the array-dims facts did not run over the fixture:\n%s", target, emission)
+		}
+
+		for _, member := range []struct{ name, placeholder, body string }{
+			{"Scoped", "func Scoped is hand-converted", "public static nint Scoped()"},
+			{"Box.Get", "func Get is hand-converted", "static nint Get⁔("},
+			{"Shared", "var Shared is hand-converted", "ᏑShared = new"},
+		} {
+			placeholder := strings.Contains(emission, member.placeholder)
+			body := strings.Contains(emission, member.body)
+
+			if displaced := target == "darwin/arm64"; placeholder != displaced || body == displaced {
+				t.Errorf("%s: %s displaced=%v (placeholder %v, body %v), want displaced=%v:\n%s",
+					target, member.name, placeholder && !body, placeholder, body, displaced, emission)
+			}
+		}
 	}
 }

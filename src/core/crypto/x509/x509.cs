@@ -42,9 +42,9 @@ using url = go.net.url_package;
 using strconv = strconv_package;
 using time = time_package;
 using unicode = unicode_package;
-// blank import: go.crypto.sha1_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: go.crypto.sha256_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: go.crypto.sha512_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/sha1" (init forced in ImportInitializers)
+// import _ "crypto/sha256" (init forced in ImportInitializers)
+// import _ "crypto/sha512" (init forced in ImportInitializers)
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
 using cryptobyte_asn1 = vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 using encoding;
@@ -2351,7 +2351,7 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
 
     error err = default;
     if (@out.PublicKeyAlgorithm != UnknownPublicKeyAlgorithm) {
-        (@out.PublicKey, err) = parsePublicKey(ref nonnil(ref @in).TBSCSR.PublicKey);
+        (@out.PublicKey, err) = parsePublicKey(ref builtin.nonnil(ref @in).TBSCSR.PublicKey);
         if (err != nil) {
             return (default, err);
         }

@@ -5,7 +5,7 @@
 // Package field implements fast arithmetic modulo 2^255-19.
 namespace go.crypto.@internal.fips140.edwards25519;
 
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;

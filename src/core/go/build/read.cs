@@ -16,7 +16,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using global::go.go;
 using global::go.unicode;
 

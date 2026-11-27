@@ -730,7 +730,7 @@ internal static partial error Start⁔(/*this*/ ж<Cmd> Ꮡc) {
         }
         if (c.ctx != nil) {
             var selᴛ1 = c.ctx.Done();
-            switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
                 return c.ctx.Err();
             }
@@ -888,7 +888,7 @@ internal static void watchCtx⁔(/*this*/ ref Cmd c, channel/*<-*/<ctxResult> re
 
     if (c.goroutineErr != nil) {
         var selᴛ6 = c.goroutineErr;
-        switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
         case 0 when selᴛ6.ꟷᐳ(out var goroutineErr): {
             // Forward goroutineErr only if we don't have reason to believe it was
             // caused by a call to Cancel or Kill above.
@@ -1038,7 +1038,7 @@ internal static error awaitGoroutines⁔(/*this*/ ж<Cmd> Ꮡc, ж<time.Timer> �
             }
 
             var selᴛ7 = c.goroutineErr;
-            switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
             case 0 when selᴛ7.ꟷᐳ(out var err): {
                 // Avoid the overhead of starting a timer.
                 return err;
