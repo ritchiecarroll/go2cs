@@ -480,6 +480,9 @@ func TestCommittedProofPagesNameTheirHostFatalTests(t *testing.T) {
 		heading := proofPageHeadingPattern.FindStringSubmatch(page)
 		platform := proofPagePlatformPattern.FindStringSubmatch(page)
 		if heading == nil || platform == nil {
+			// A page the guard cannot read is a failure, never a skip: a reworded renderer would otherwise shrink the
+			// guard to the pages it still recognises and leave it green.
+			t.Errorf("%s: no proof-page heading (%v) or totals line (%v) matches; the renderer and this guard change together", entry.Name(), heading != nil, platform != nil)
 			continue
 		}
 		read++
