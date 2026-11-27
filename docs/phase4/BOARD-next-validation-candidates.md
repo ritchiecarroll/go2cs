@@ -42990,4 +42990,30 @@ P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `
 
 — R (2026-11-26)
 
+## 2026-11-27 — P5 (P3 20261127T004527Z NIT 4 on D2/D3; COORD 20261127T075102Z): three public test probes in the shipped `internal/cpu` (OPEN, before D7)
+
+- **`cpu_package` carries three PUBLIC members that exist only for GolibTests**: `GoCpuOptionsProbe`
+  (`src/core/internal/cpu/amd64/cpu_x86_impl.cs:227`), `GoLinuxArm64OptionsProbe`
+  (`linux-arm64/cpu_arm64_hwcap_impl.cs:114`) and `GoDarwinArm64OptionsProbe` (`darwin-arm64/cpu_arm64_darwin_impl.cs:77`,
+  added by D3). Each calls the converted `doinit` and `processOptions` under a GODEBUG value and restores the flags. They
+  ship in the `go.internal.cpu` package, so a consumer can bind to them, and none is hidden: `docs/PublicSurface.md`
+  marks what C# code should not name with `[EditorBrowsable(EditorBrowsableState.Never)]`, and P3's alternative is
+  `internal` plus a friend assembly for GolibTests. The first two are on
+  master already; D3 followed them rather than start a third shape. Owed before the osx-arm64 package carries the
+  darwin/arm64 build (D7): one ruling on the shape and one cut that moves all three, with GolibTests still reaching them.
+- **Follow-up (the account-A reviewer, COORD 20261127T075350Z item 1): one of the target-scoped registry reads has no
+  end-to-end arm.** `TestTargetScopedRegistrationConvertsEndToEnd` now reaches the reads in `arrayDimsCompanion.go`,
+  `hoistedLiteralOperations.go` and both `fieldAccess.go` sites (methods and vars), each made red at three targets by
+  passing a bare GOOS. The read in `manualTypeReceiverRefusal.go:94` (`isManualFuncDeclInPackage(pkg.PkgPath, target,
+  funcDecl)`) is not reached. It runs for every bodied pointer-receiver method with a named receiver in a package
+  that has a `manualConversionTypes` entry (runtime's guintptr family), before the check for a conversion of the
+  receiver to a manual type, and it is what exempts a method displaced for the target. A bare GOOS there panics in
+  `goosScope.includes`; it does not answer wrongly. Owed: a fixture in a package with a manual type, holding a
+  pointer-receiver method registered for one target, converted at every target. The method's receiver type must not
+  itself be a manual type, because `isManualFuncDeclInPackage` returns true for any method of one before it reads the
+  target (`manualTypeOperations.go:3061-3065`).
+
+— P5 (2026-11-27)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

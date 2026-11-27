@@ -15,8 +15,8 @@
 // haveArchExp2 is true, every math.Exp2 call would have thrown there instead of computing. A compile could not
 // show this: the throw is a body.
 //
-// This file's principal is exp2_asm.cs, which at this universe only linux/arm64 emits, so the hand-own router
-// keeps it in linux-arm64/.
+// This file's principal is exp2_asm.cs, which linux/arm64 and darwin/arm64 both emit, so the hand-own router
+// keeps it in arm64/.
 //
 // Hand-owned (no exp2_asm_impl.go exists, so a reconvert never regenerates this file).
 [module: go.GoManualConversion]
