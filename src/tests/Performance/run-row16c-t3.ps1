@@ -100,12 +100,23 @@ if ([IO.Path]::GetFileNameWithoutExtension($pwshExe) -ieq 'dotnet')
 function Get-FreeGB([string] $path)
 {
     $full = [IO.Path]::GetFullPath($path)
+
+    # On Windows ask only the drive that holds the path. Enumerating every drive and calling IsReady blocks on a mapped
+    # network drive that is "Reconnecting": C2's sibling kit hung 90 minutes there on the i7 before its first arm. A
+    # failure reads -1, which the floor then refuses by name. (Fix as C2 cut it, claude/c2-mn-row16b-kit 27660ed68f.)
+    if ($IsWindowsHost)
+    {
+        try { return [int][math]::Floor([IO.DriveInfo]::new([IO.Path]::GetPathRoot($full)).AvailableFreeSpace / 1GB) }
+        catch { return -1 }
+    }
+
+    # Elsewhere every path's root is '/', so the longest mount point that holds the path is the one to read.
     $best = $null
     foreach ($d in [IO.DriveInfo]::GetDrives())
     {
         if (-not $d.IsReady) { continue }
         $rootPath = $d.RootDirectory.FullName
-        if ($full.StartsWith($rootPath, [StringComparison]::OrdinalIgnoreCase) -and ($null -eq $best -or $rootPath.Length -gt $best.RootDirectory.FullName.Length)) { $best = $d }
+        if ($full.StartsWith($rootPath, [StringComparison]::Ordinal) -and ($null -eq $best -or $rootPath.Length -gt $best.RootDirectory.FullName.Length)) { $best = $d }
     }
     if ($null -eq $best) { return -1 }
     return [int][math]::Floor($best.AvailableFreeSpace / 1GB)
