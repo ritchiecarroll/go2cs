@@ -113,6 +113,7 @@
     <None Include="$(MSBuildThisFileDirectory)tempNamedAfterIdentifier_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallTrampolineCfg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)syscallTrampolineCfgDotnet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)loadScopedCaches_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoCheckClosureForms_test.go" />
