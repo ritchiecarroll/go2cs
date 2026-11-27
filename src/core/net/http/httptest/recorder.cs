@@ -230,7 +230,8 @@ internal static ж<http.Response> Result⁔(/*this*/ ref ResponseRecorder rw) {
     if (res.StatusCode == 0) {
         res.StatusCode = 200;
     }
-    res.Status = fmt.Sprintf("%03d %s"u8, res.StatusCode, http.StatusText(res.StatusCode));
+    var evalᴛ1 = http.StatusText(res.StatusCode);
+    res.Status = fmt.Sprintf("%03d %s"u8, res.StatusCode, evalᴛ1);
     if (rw.Body != nil) {
         res.Body = io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(rw.Body.Bytes())));
     } else {
@@ -268,7 +269,8 @@ internal static ж<http.Response> Result⁔(/*this*/ ref ResponseRecorder rw) {
             res.Trailer = new http.Header(0);
         }
         foreach (var (_, v) in range(vv)) {
-            res.Trailer.Add(strings.TrimPrefix(k, http.TrailerPrefix), v);
+            var evalᴛ2 = strings.TrimPrefix(k, http.TrailerPrefix);
+            res.Trailer.Add(evalᴛ2, v);
         }
     }
     return res;

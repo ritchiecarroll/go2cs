@@ -96,7 +96,8 @@ internal static slice<byte> Append⁔(/*this*/ ж<Float> Ꮡx, slice<byte> buf, 
     ref var d = ref heap(new @decimal(), out var Ꮡd); // == 0.0
     if (x.form == finite) {
         // x != 0
-        Ꮡd.init(x.mant, (nint)x.exp - x.mant.bitLen());
+        var evalᴛ1 = x.mant.bitLen();
+        Ꮡd.init(x.mant, (nint)x.exp - evalᴛ1);
     }
 
     // 2) round to desired precision
@@ -201,7 +202,8 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
     // that the lsb of mant corresponds to 1/2 ulp for the precision of
     // x (i.e., for mant we want x.prec + 1 bits).
     var mant = ((nat)default).set(x.mant);
-    nint exp = (nint)x.exp - mant.bitLen();
+    var evalᴛ1 = mant.bitLen();
+    nint exp = (nint)x.exp - evalᴛ1;
     nint s = mant.bitLen() - (nint)(x.prec + 1);
     switch (ᐧ) {
     case {} when s is < 0: {

@@ -127,10 +127,14 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 		v.hoistedDecls = hoistBuf
 
 		if sendStmt, ok := comClause.Comm.(*ast.SendStmt); ok {
+			// Go reads the case's channel and value after the calls in them (operandOrder.go).
+			endOperandOrder := v.beginOperandOrder(nil, false, sendStmt.Chan, sendStmt.Value)
+
 			chanOperand := v.convExpr(sendStmt.Chan, nil)
 			flushHoist(hoistBuf)
 
 			sendValue := v.convSendValueExpr(sendStmt)
+			endOperandOrder()
 
 			if hoistBuf.Len() > 0 {
 				chanTemp := getGlobalTempVarName("sel")

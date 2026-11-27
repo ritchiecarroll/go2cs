@@ -58,7 +58,9 @@ internal static void main() {
     var s = new Snapshot(watched: Ꮡf.ᏑImports, named: Ꮡf.ᏑName);
     ж<Expected<map<@string, @string>>> local = s.watched;
     local.Value.Value["c"] = "d";
-    fmt.Println(len(f.Imports.Value), (~s.named).Value, local.IsPresent());
+    var evalᴛ1 = len(f.Imports.Value);
+    var evalᴛ2 = local.IsPresent();
+    fmt.Println(evalᴛ1, (~s.named).Value, evalᴛ2);
 }
 
 } // end main_package

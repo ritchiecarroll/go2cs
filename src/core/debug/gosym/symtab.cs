@@ -812,7 +812,8 @@ partial struct UnknownLineError {
 }
 
 internal static @string Error⁔(/*this*/ ref UnknownLineError e) {
-    return "no code at "u8 + e.File + ":"u8 + strconv.Itoa(e.Line);
+    var evalᴛ1 = strconv.Itoa(e.Line);
+    return "no code at "u8 + e.File + ":"u8 + evalᴛ1;
 }
 
 // DecodingError represents an error during the decoding of

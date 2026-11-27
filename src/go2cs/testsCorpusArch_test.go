@@ -227,9 +227,9 @@ func TestPathsCorpusFlavorArchMatchesTheConverter(t *testing.T) {
 	}
 
 	// Get-HostFlavorArch is the arch a host's instruments build: the same answer, except for a host _paths.ps1 pins
-	// ($HostFlavorArchInterimPins). darwin/arm64 builds darwin/amd64 until D5 binds the hosted job's GoTargetArch and
-	// removes the pin (COORD ruling 2026-11-25); that cut changes this table too.
-	hostPins := map[string]string{"darwin/arm64": "amd64"}
+	// ($HostFlavorArchInterimPins). The table is empty since D5, which bound the osx-arm64 job's GoTargetArch and removed
+	// the darwin/arm64 entry (amd64 from D2 to D5, COORD ruling 2026-11-25); a new pin adds its row here, or this fails.
+	hostPins := map[string]string{}
 
 	for _, pair := range pairs {
 		key := fmt.Sprintf("host|%s|%s", pair[0], pair[1])

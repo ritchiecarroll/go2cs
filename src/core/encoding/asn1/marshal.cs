@@ -133,7 +133,8 @@ internal static nint Len⁔(/*this*/ ref taggedEncoder t) {
 
 internal static void Encode⁔(/*this*/ ref taggedEncoder t, slice<byte> dst) {
     t.tag.Encode(dst);
-    t.body.Encode(dst.slice(t.tag.Len()));
+    var evalᴛ1 = t.tag.Len();
+    t.body.Encode(dst.slice(evalᴛ1));
 }
 
 partial struct int64Encoder /*num:int64*/;
@@ -750,10 +751,12 @@ internal static (encoder e, error err) makeField(reflect.Value v, fieldParameter
 
             tt.body = new taggedEncoderжencoder(t);
 
-            tt.tag = ((bytesEncoder)appendTagAndLength(tt.scratch[..0], new tagAndLength(
+            var evalᴛ1 = tt.scratch[..0];
+            var evalᴛ2 = t.tag.Len();
+            tt.tag = ((bytesEncoder)appendTagAndLength(evalᴛ1, new tagAndLength(
                 @class: @class,
                 tag: @params.tag.Value,
-                length: bodyLen + t.tag.Len(),
+                length: bodyLen + evalᴛ2,
                 isCompound: true
             )));
 

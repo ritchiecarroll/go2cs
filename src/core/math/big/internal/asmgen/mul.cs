@@ -248,7 +248,8 @@ internal static void addMul(ж<Func> Ꮡf, @string addsrc, @string mulsrc, nint 
             @out[0][i] = x;
             prev = hi;
         }
-        aʗ1.Add(aʗ1.Imm(0), prev, cʗ1, (Carry)(UseCarry | SmashCarry));
+        var evalᴛ1 = aʗ1.Imm(0);
+        aʗ1.Add(evalᴛ1, prev, cʗ1, (Carry)(UseCarry | SmashCarry));
         if (addsrc != ""u8) {
             aʗ1.Comment(addˢ);
             Carry flagΔ1 = SetCarry;
@@ -256,7 +257,8 @@ internal static void addMul(ж<Func> Ꮡf, @string addsrc, @string mulsrc, nint 
                 aʗ1.Add(x, @out[0][i], @out[0][i], flagΔ1);
                 flagΔ1 = (Carry)(UseCarry | SetCarry);
             }
-            aʗ1.Add(aʗ1.Imm(0), cʗ1, cʗ1, (Carry)(UseCarry | SmashCarry));
+            var evalᴛ2 = aʗ1.Imm(0);
+            aʗ1.Add(evalᴛ2, cʗ1, cʗ1, (Carry)(UseCarry | SmashCarry));
         }
         pʗ1.StoreN(@out);
     });
@@ -283,7 +285,8 @@ internal static void addMulAlt(ж<Func> Ꮡf) {
     ref var r0 = ref heap<Reg>(a.ZR(), out var Ꮡr0);
     if (!r0.Valid()) {
         r0 = a.Reg();
-        a.Mov(a.Imm(0), r0);
+        var evalᴛ1 = a.Imm(0);
+        a.Mov(evalᴛ1, r0);
     }
 
     var p = Ꮡf.Pipe();
@@ -364,10 +367,12 @@ internal static void addMulVirtualCarry(ж<Func> Ꮡf, nint mulIndex) {
             aʗ1.MulWide(mʗ1, x, lo, hi);
             if (mulIndex == 1) {
                 aʗ1.Add(@in[0][i], lo, lo, SetCarry);
-                aʗ1.Add(aʗ1.Imm(0), hi, hi, (Carry)(UseCarry | SmashCarry));
+                var evalᴛ1 = aʗ1.Imm(0);
+                aʗ1.Add(evalᴛ1, hi, hi, (Carry)(UseCarry | SmashCarry));
             }
             aʗ1.Add(cʗ1, lo, x, SetCarry);
-            aʗ1.Add(aʗ1.Imm(0), hi, cʗ1, (Carry)(UseCarry | SmashCarry));
+            var evalᴛ2 = aʗ1.Imm(0);
+            aʗ1.Add(evalᴛ2, hi, cʗ1, (Carry)(UseCarry | SmashCarry));
             @out[0][i] = x;
         }
         pʗ1.StoreN(@out);

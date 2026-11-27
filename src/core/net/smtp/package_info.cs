@@ -68,7 +68,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoIACgb8gpSClILmgpSUAAYWwuaCpoKCgoKClA==")]
+[assembly: GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoIACgb8gpSClILmgpSUAAYWwuaCpoKCgoKCpA==")]
 [assembly: GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADtqooKClIKqooKCgoKUgoKokqiygoKCgqYABhDygpSClIKo4oKClIKCggAJCsKCggAICsKCgpSCgoKCgoKmgpSC6sKClIKClIKCgqzigoKU7sKClIKUgqzSgpSCgoKClIKCooKClMa0pIKUlIKClIKUgoKUAAgQ8oKUgpSCgoKUgqaC7LKClIIACxCCgoLu4oKClAAIMgAWAoKUgoKmgoKUkoKUgIKCgpSCtoKClIKmgpSCgqaCgpSCgpSCgpTe4oKUgpSCguqigpSC6qKClILosoKCgpTokoKU", "", "", "", "424:21")]
 // </GoSourcePositionMaps>
 

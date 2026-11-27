@@ -63,7 +63,8 @@ internal static void resolveFile(ref ast.File @file, ж<token.File> handle, Acti
             i++;
         } else if (debugResolve) {
             token.Pos pos = ident.Obj.Decl._<resolveFile_type>().Pos();
-            r.trace(resolvedSVToPackageˢ, ident.Name, ident.Pos(), pos);
+            var evalᴛ1 = ident.Pos();
+            r.trace(resolvedSVToPackageˢ, ident.Name, evalᴛ1, pos);
         }
     }
     @file.Scope = r.pkgScope;
@@ -176,7 +177,8 @@ internal static void declare⁔(/*this*/ ref resolver r, any decl, any data, ж<
         }
         if (ident.Name != "_"u8) {
             if (debugResolve) {
-                r.trace(declaringSVˢ, ident.Name, ident.Pos());
+                var evalᴛ1 = ident.Pos();
+                r.trace(declaringSVˢ, ident.Name, evalᴛ1);
             }
             var alt = scope.Insert(obj); if (alt != nil && r.declErr != nil) {
                 @string prevDecl = ""u8;
@@ -211,7 +213,8 @@ internal static void shortVarDecl⁔(/*this*/ ref resolver r, ж<ast.AssignStmt>
             ident.Obj = obj;
             if (ident.Name != "_"u8) {
                 if (debugResolve) {
-                    r.trace(declaringSVˢ, ident.Name, ident.Pos());
+                    var evalᴛ1 = ident.Pos();
+                    r.trace(declaringSVˢ, ident.Name, evalᴛ1);
                 }
                 var alt = r.topScope.Insert(obj); if (alt != nil) {
                     ident.Obj = alt; // redeclaration

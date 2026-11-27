@@ -35,7 +35,9 @@ internal static float64 ExpFloat64⁔(/*this*/ ref Rand r) {
         if (i == 0) {
             return (float64)re - math.Log(r.Float64());
         }
-        if (fe[i] + (float32)r.Float64() * (fe[(uint8)(i - 1)] - fe[i]) < (float32)math.Exp(-x)) {
+        var evalᴛ1 = r.Float64();
+        var evalᴛ2 = math.Exp(-x);
+        if (fe[i] + (float32)evalᴛ1 * (fe[(uint8)(i - 1)] - fe[i]) < (float32)evalᴛ2) {
             return x;
         }
     }

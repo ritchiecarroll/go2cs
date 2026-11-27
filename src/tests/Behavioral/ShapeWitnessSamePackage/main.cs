@@ -156,7 +156,10 @@ internal static void main() {
 
     var files = slice<ж<SourceFile>>([a, Ꮡ(new SourceFile("b.ts", "yz"))]);
     var masked = FromLSPRangeForSourceFile(files, 0);
-    fmt.Println("masked site:", len(masked), masked[1].Start, masked[1].Script == files[1], fmt.Sprintf("%T"u8, masked));
+    var evalᴛ1 = len(masked);
+    var evalᴛ2 = masked[1].Script == files[1];
+    var evalᴛ3 = fmt.Sprintf("%T"u8, masked);
+    fmt.Println("masked site:", evalᴛ1, masked[1].Start, evalᴛ2, evalᴛ3);
 
     var (_, ok) = dump<ж<SourceFile>, SourceFileжScriptΔshape>(a)._<slice<MappedSpan<ж<SourceFile>>>>(ᐧ);
     fmt.Println("dump through any:", ok);
@@ -182,7 +185,9 @@ internal static void main() {
     fmt.Println("range over the result:", sb.String());
 
     var mems = FromLSPRange<memFile, ScriptΔshapeOf<memFile>>(new memFile("m.ts"), 2);
-    fmt.Println("value implementer:", len(mems), mems[0].Start, mems[0].Script.Text());
+    var evalᴛ4 = len(mems);
+    var evalᴛ5 = mems[0].Script.Text();
+    fmt.Println("value implementer:", evalᴛ4, mems[0].Start, evalᴛ5);
 
     Script iface = new SourceFileжScript(a);
     var viaIface = FromLSPRange<Script, ScriptΔshapeOf<Script>>(iface, 0);
@@ -225,7 +230,8 @@ internal static stdio.Reader Open(this ref memSrc m) { return new strings_Reader
 internal static @string Join(this ref memSrc m, @string sep, params ꓸꓸꓸstring partsʗp) {
     var parts = partsʗp.slice();
 
-    return m.data + ":"u8 + strings.Join(parts, sep);
+    var evalᴛ1 = strings.Join(parts, sep);
+    return m.data + ":"u8 + evalᴛ1;
 }
 
 internal static void Stamp(this ref memSrc m, params ꓸꓸꓸstring partsʗp) {

@@ -71,11 +71,12 @@ internal static error parseTypes⁔(/*this*/ ж<Data> Ꮡd, @string name, slice<
         }
 
         var boff = b.off;
+        var evalᴛ1 = b.bytes((nint)(n - (b.off - hdroff)));
         d.typeSigs[sig] = Ꮡ(new typeUnit(
             unit: new unit(
                 @base: @base,
                 off: boff,
-                data: b.bytes((nint)(n - (b.off - hdroff))),
+                data: evalᴛ1,
                 atable: atable,
                 asize: (nint)asize,
                 vers: vers,
@@ -158,10 +159,11 @@ internal static (ж<Entry>, error) Next⁔(/*this*/ ж<typeUnitReader> Ꮡtur) {
 
 // clone returns a new reader for the type unit.
 internal static typeReader clone⁔(/*this*/ ref typeUnitReader tur) {
+    var evalᴛ1 = makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), tur.tu.name, tur.tu.off, tur.tu.data);
     return new typeUnitReaderжtypeReader(Ꮡ(new typeUnitReader(
         d: tur.d,
         tu: tur.tu,
-        b: makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), tur.tu.name, tur.tu.off, tur.tu.data)
+        b: evalᴛ1
     )));
 }
 

@@ -234,7 +234,8 @@ internal static slice<byte> bytesCompressed⁔(/*this*/ ref P224Point p, /*[29]*
     // Encode the sign of the y coordinate (indicated by the least significant
     // bit) as the encoding type (2 or 3).
     var buf = append(@out[..0], (byte)2);
-    buf[0] |= (byte)((byte)(y.Bytes()[p224ElementLength - 1] & 1));
+    var evalᴛ1 = y.Bytes();
+    buf[0] |= (byte)((byte)(evalᴛ1[p224ElementLength - 1] & 1));
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     return buf;
 }
@@ -434,9 +435,13 @@ internal static ж<array<p224Table>> generatorTable⁔(/*this*/ ref P224Point p)
         p224GeneratorTable = Ꮡ(new array<p224Table>(56));
         var @base = NewP224Point().SetGenerator();
         for (nint i = 0; i < (nint)(p224ElementLength * 2); i++) {
-            p224GeneratorTable.Value[i][0] = NewP224Point().Set(@base);
+            var evalᴛ1 = NewP224Point();
+            var evalᴛ2 = evalᴛ1.Set(@base);
+            p224GeneratorTable.Value[i][0] = evalᴛ2;
             for (nint j = 1; j < 15; j++) {
-                p224GeneratorTable.Value[i][j] = NewP224Point().Add(p224GeneratorTable.Value[i][j - 1], @base);
+                var evalᴛ3 = NewP224Point();
+                var evalᴛ4 = evalᴛ3.Add(p224GeneratorTable.Value[i][j - 1], @base);
+                p224GeneratorTable.Value[i][j] = evalᴛ4;
             }
             @base.Double(@base);
             @base.Double(@base);

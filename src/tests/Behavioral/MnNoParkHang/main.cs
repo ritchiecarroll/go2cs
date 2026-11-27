@@ -27,7 +27,9 @@ internal static partial @string hookBlocks() {
     var gateʗ1 = gate;
     goǃ([GoFunc("hookBlocks.func1")] () => {
         ᐸꟷ(gateʗ1);
-        doneʗ1.ᐸꟷ(fmt.Sprint(new slow(chʗ1)));
+        var evalᴛ1 = new slow(chʗ1);
+        var evalᴛ2 = fmt.Sprint(evalᴛ1);
+        doneʗ1.ᐸꟷ(evalᴛ2);
     });
 
     var chʗ2 = ch;
@@ -106,7 +108,8 @@ internal static partial (nint, nint) weakLockBlocks() {
     var lockerʗ1 = locker;
     goǃ([GoFunc("weakLockBlocks.func2")] () => {
         ᐸꟷ(heldʗ2);
-        lockerʗ1.ᐸꟷ(plainLock(Ꮡmu, ref (Ꮡn).DerefOrNull()));
+        var evalᴛ1 = plainLock(Ꮡmu, ref (Ꮡn).DerefOrNull());
+        lockerʗ1.ᐸꟷ(evalᴛ1);
     });
 
     var heldʗ3 = held;

@@ -1071,7 +1071,8 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 // password. For instance, when used with OAuth2, both arguments must
 // be URL encoded first with [url.QueryEscape].
 internal static void SetBasicAuth⁔(/*this*/ ref Request r, @string username, @string password) {
-    r.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
+    var evalᴛ1 = basicAuth(username, password);
+    r.Header.Set(authorizationˢ, "Basic "u8 + evalᴛ1);
 }
 
 // parseRequestLine parses "GET /foo HTTP/1.1" into its three parts.

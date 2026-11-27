@@ -220,7 +220,8 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
     foreach (var i in range(len(tHat))) {
         tHat[i].Assign(s2[i]);
         foreach (var j in range(len(s1))) {
-            tHat[i].Assign(polyAdd(tHat[i], nttMul(A[i * l + j], s1[j])));
+            var evalᴛ1 = nttMul(A[i * l + j], s1[j]);
+            tHat[i].Assign(polyAdd(tHat[i], evalᴛ1));
         }
     }
     // t = NTT⁻¹(ˆt)

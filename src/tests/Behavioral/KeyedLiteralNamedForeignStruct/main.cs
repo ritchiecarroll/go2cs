@@ -15,21 +15,25 @@ partial class main_package {
 )); }
 
 internal static void main() {
-    fmt.Println(id.Data1, id.Data2, id.Data3, id.Data4[1], id.First());
+    var evalᴛ1 = id.First();
+    fmt.Println(id.Data1, id.Data2, id.Data3, id.Data4[1], evalᴛ1);
 
     var partial = new guid.GUID(new win.GUID(Data2: 9));
     fmt.Println(partial.Data1, partial.Data2, partial.Data4[7]);
 
     var p = Ꮡ(new guid.GUID(new win.GUID(Data1: 5)));
     p.Data2 = 6;
-    fmt.Println(p.Data1, p.Data2, p.First());
+    var evalᴛ2 = p.First();
+    fmt.Println(p.Data1, p.Data2, evalᴛ2);
 
     var list = slice<guid.GUID>([new(new win.GUID(Data1: 10)), new(new win.GUID(Data3: 11))]);
     fmt.Println(len(list), list[0].Data1, list[1].Data3);
 
     var ptrs = slice<ж<guid.GUID>>([Ꮡ(new guid.GUID(new win.GUID(Data1: 12)))]);
     ptrs[0].Data2 = 13;
-    fmt.Println(len(ptrs), ptrs[0].Data1, ptrs[0].Data2, ptrs[0].First());
+    var evalᴛ3 = len(ptrs);
+    var evalᴛ4 = ptrs[0].First();
+    fmt.Println(evalᴛ3, ptrs[0].Data1, ptrs[0].Data2, evalᴛ4);
 
     var copied = id.ΔClone();
     copied.Data1 = 1;
@@ -39,7 +43,9 @@ internal static void main() {
     fmt.Println(o.A, o.B[1], o.Sum());
 
     var (vals, refs) = guid.Pair();
-    fmt.Println(len(vals), vals[0].A, vals[1].B[0], vals[1].Sum(), refs[0].A);
+    var evalᴛ5 = len(vals);
+    var evalᴛ6 = vals[1].Sum();
+    fmt.Println(evalᴛ5, vals[0].A, vals[1].B[0], evalᴛ6, refs[0].A);
 
     var empty = new guid.GUID();
     var emptyPtr = Ꮡ(new guid.GUID());

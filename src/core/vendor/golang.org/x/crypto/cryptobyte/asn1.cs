@@ -130,7 +130,8 @@ internal static void AddASN1UTCTime⁔(/*this*/ ж<Builder> Ꮡb, time.Time t) {
         // As utilized by the X.509 profile, UTCTime can only
         // represent the years 1950 through 2049.
         if (tʗ1.Year() < 1950 || tʗ1.Year() >= 2050) {
-            Ꮡb.Value.err = fmt.Errorf("cryptobyte: cannot represent %v as a UTCTime"u8, tʗ1);
+            var evalᴛ1 = fmt.Errorf("cryptobyte: cannot represent %v as a UTCTime"u8, tʗ1);
+            Ꮡb.Value.err = evalᴛ1;
             return;
         }
         c.AddBytes(slice<byte>(tʗ1.Format(defaultUTCTimeFormatStr)));

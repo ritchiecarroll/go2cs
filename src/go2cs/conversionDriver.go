@@ -39,7 +39,7 @@ import (
 var goModCache string
 
 // goModCacheDir returns the Go module cache root (GOMODCACHE), resolved once: the environment
-// override first, then `go env`, falling back to the documented default <GOPATH>/pkg/mod
+// override first, then `go env`, falling back to Go's default (defaultGoModCache)
 // (main() has normalized the GOPATH environment variable by the time any conversion runs).
 func goModCacheDir() string {
 	if goModCache != "" {
@@ -55,7 +55,7 @@ func goModCacheDir() string {
 		return goModCache
 	}
 
-	goModCache = filepath.Join(os.Getenv("GOPATH"), "pkg", "mod")
+	goModCache = defaultGoModCache(os.Getenv("GOPATH"), userHomeDirOrEmpty())
 
 	return goModCache
 }
@@ -296,6 +296,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// embed.FS variables name was missing from the assembly.
 		resetEmbedTargets()
 		resetPackageState(pkg)
+
+		// The load-scoped caches empty once, here, before the route pre-pass (prepareShapeWitness) and every
+		// analysis below can fill them, so the whole root shares their first answers (resetLoadScopedCaches).
+		resetLoadScopedCaches()
 
 		files := []FileEntry{}
 		unmarkedFileCount := 0

@@ -241,7 +241,8 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
             // apparently not due to an explicit test deadline that we added.
             // Log that information in case it is useful for diagnosing a failure,
             // but don't actually fail the test because of it.
-            t.Logf("%v: terminating command: %v", ctx.Err(), cmdʗ1.OrTypedNil());
+            var evalᴛ1 = ctx.Err();
+            t.Logf("%v: terminating command: %v", evalᴛ1, cmdʗ1.OrTypedNil());
         }
         return cmdʗ1.Process.Signal(Sigquit);
     };

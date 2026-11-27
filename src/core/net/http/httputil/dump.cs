@@ -153,7 +153,8 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
                 io.Copy(io.Discard, reqΔ1.Body);
                 reqΔ1.Body.Close();
             }
-            var selᴛ1 = drʗ2.c.ᐸꟷ(new strings_ReaderжReader(strings.NewReader(http11204NoContentˢ)), ꓸꓸꓸ);
+            var evalᴛ1 = strings.NewReader(http11204NoContentˢ);
+            var selᴛ1 = drʗ2.c.ᐸꟷ(new strings_ReaderжReader(evalᴛ1), ꓸꓸꓸ);
             var quitReadChᴛ1 = quitReadChʗ1;
             switch (select(selᴛ1, ᐸꟷ(quitReadChᴛ1, ꓸꓸꓸ))) {
             case 0: {

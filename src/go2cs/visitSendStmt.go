@@ -45,6 +45,10 @@ func (v *Visitor) visitSendStmt(sendStmt *ast.SendStmt, format FormattingContext
 		channelOperation = "Send"
 	}
 
+	// Go reads the channel and the value after the calls in them (operandOrder.go).
+	endOperandOrder := v.beginOperandOrder(nil, false, sendStmt.Chan, sendStmt.Value)
+	defer endOperandOrder()
+
 	chanOperand := v.convExpr(sendStmt.Chan, nil)
 	chanHoistLen := 0
 

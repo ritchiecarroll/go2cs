@@ -11,7 +11,8 @@ partial class main_package {
 internal static void main() {
     var p = lib.ᏑN;
     p.Value = 5;
-    fmt.Println("&lib.N write:", lib.N, lib.ReadN());
+    var evalᴛ1 = lib.ReadN();
+    fmt.Println("&lib.N write:", lib.N, evalᴛ1);
 
     fmt.Println("&lib.N identity:", lib.ᏑN == lib.ᏑN, p == lib.ᏑN);
 
@@ -35,7 +36,8 @@ internal static void main() {
 
     var q = lib.ᏑS.ᏑN;
     q.Value = 3;
-    fmt.Println("field pointer:", lib.S.N, lib.ReadS());
+    var evalᴛ2 = lib.ReadS();
+    fmt.Println("field pointer:", lib.S.N, evalᴛ2);
 
     lib.ᏑS.ᏑWG.Add(1);
     lib.ᏑS.ᏑWG.Done();

@@ -1537,6 +1537,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
 
     [TestMethod]
+    public void CheckMnInvisible() => CheckTarget("MnInvisible");
+
+    [TestMethod]
     public void CheckMnMainExit() => CheckTarget("MnMainExit");
 
     [TestMethod]
@@ -1994,6 +1997,45 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
+
+    [TestMethod]
+    public void CheckOperandOrderAddrMap() => CheckTarget("OperandOrderAddrMap");
+
+    [TestMethod]
+    public void CheckOperandOrderAssign() => CheckTarget("OperandOrderAssign");
+
+    [TestMethod]
+    public void CheckOperandOrderBinary() => CheckTarget("OperandOrderBinary");
+
+    [TestMethod]
+    public void CheckOperandOrderCallArgs() => CheckTarget("OperandOrderCallArgs");
+
+    [TestMethod]
+    public void CheckOperandOrderCompositeLit() => CheckTarget("OperandOrderCompositeLit");
+
+    [TestMethod]
+    public void CheckOperandOrderEarly() => CheckTarget("OperandOrderEarly");
+
+    [TestMethod]
+    public void CheckOperandOrderIf() => CheckTarget("OperandOrderIf");
+
+    [TestMethod]
+    public void CheckOperandOrderInPlace() => CheckTarget("OperandOrderInPlace");
+
+    [TestMethod]
+    public void CheckOperandOrderLabels() => CheckTarget("OperandOrderLabels");
+
+    [TestMethod]
+    public void CheckOperandOrderMultiAssign() => CheckTarget("OperandOrderMultiAssign");
+
+    [TestMethod]
+    public void CheckOperandOrderReturn() => CheckTarget("OperandOrderReturn");
+
+    [TestMethod]
+    public void CheckOperandOrderSend() => CheckTarget("OperandOrderSend");
+
+    [TestMethod]
+    public void CheckOperandOrderStmtForms() => CheckTarget("OperandOrderStmtForms");
 
     [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");

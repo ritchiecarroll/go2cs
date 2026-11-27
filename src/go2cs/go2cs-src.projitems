@@ -111,6 +111,7 @@
     <None Include="$(MSBuildThisFileDirectory)tempNamedAfterIdentifier_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)loadScopedCaches_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoCheckClosureForms_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoConfigurationClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations.go" />
@@ -481,6 +482,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSamplesHoldTheirLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\consumerLegRids_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinArchBinding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\converterGofmt_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />
@@ -637,6 +639,8 @@
     <None Include="$(MSBuildThisFileDirectory)nugetMapResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapRun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapSourceWording_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)operandOrder.go" />
+    <None Include="$(MSBuildThisFileDirectory)operandOrderCovers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleBuildFailure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleLinknamePull_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleTagFileSets_test.go" />

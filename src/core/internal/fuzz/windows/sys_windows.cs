@@ -104,7 +104,10 @@ internal static void setWorkerComm(ref exec.Cmd cmd, workerComm comm) {
     Δsyscall.SetHandleInformation((Δsyscall.Handle)comm.fuzzIn.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
     Δsyscall.SetHandleInformation((Δsyscall.Handle)comm.fuzzOut.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
     Δsyscall.SetHandleInformation((Δsyscall.Handle)memFD, Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    cmd.Env = append(cmd.Env, fmt.Sprintf("GO_TEST_FUZZ_WORKER_HANDLES=%x,%x,%x"u8, comm.fuzzIn.Fd(), comm.fuzzOut.Fd(), memFD));
+    var evalᴛ1 = comm.fuzzIn.Fd();
+    var evalᴛ2 = comm.fuzzOut.Fd();
+    var evalᴛ3 = fmt.Sprintf("GO_TEST_FUZZ_WORKER_HANDLES=%x,%x,%x"u8, evalᴛ1, evalᴛ2, memFD);
+    cmd.Env = append(cmd.Env, evalᴛ3);
     cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: slice<Δsyscall.Handle>([(Δsyscall.Handle)comm.fuzzIn.Fd(), (Δsyscall.Handle)comm.fuzzOut.Fd(), (Δsyscall.Handle)memFD])));
 }
 

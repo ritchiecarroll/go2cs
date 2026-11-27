@@ -15,7 +15,9 @@ internal static void expectPanic(@string label, @string want, Action f) {
         defer([GoFunc("expectPanic.func1")] () => {
             var r = recover();
             @string msg = fmt.Sprint(r);
-            fmt.Printf("%-16s panicked: %v  mentions %q: %v  text: %s\n"u8, label, r != nil, want, strings.Contains(msg, want), msg);
+            var evalᴛ1 = r != nil;
+            var evalᴛ2 = strings.Contains(msg, want);
+            fmt.Printf("%-16s panicked: %v  mentions %q: %v  text: %s\n"u8, label, evalᴛ1, want, evalᴛ2, msg);
         }, ref ᒐ);
         f();
     }
@@ -45,7 +47,13 @@ internal static void convRow(@string label, any x, any want) {
             }
         }, ref ᒐ);
         var v = reflect.ValueOf(x).Convert(reflect.TypeOf(want));
-        fmt.Printf("%-34s type==%v deepEqual=%v nil=%v\n"u8, label, AreEqual(v.Type(), reflect.TypeOf(want)), reflect.DeepEqual(v.Interface(), want), v.Kind() == reflect.Ptr && v.IsNil());
+        var evalᴛ1 = v.Type();
+        var evalᴛ2 = reflect.TypeOf(want);
+        var evalᴛ3 = AreEqual(evalᴛ1, evalᴛ2);
+        var evalᴛ4 = v.Interface();
+        var evalᴛ5 = reflect.DeepEqual(evalᴛ4, want);
+        var evalᴛ6 = v.Kind() == reflect.Ptr && v.IsNil();
+        fmt.Printf("%-34s type==%v deepEqual=%v nil=%v\n"u8, label, evalᴛ3, evalᴛ5, evalᴛ6);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -227,7 +235,8 @@ internal static void main() {
     ref var sh = ref heap<reflect.Value>(reflect.ValueOf(slice<byte>([1, 2, 3, 4])), out var Ꮡsh);
     var shʗ1 = sh;
     expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", [GoFunc("main.func16")] () => {
-        shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));
+        var evalᴛ1 = reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L));
+        shʗ1.Convert(evalᴛ1);
     });
 
     convRow("IntChan(nil) -> chan<- int", (IntChan)default, channel/*<-*/<nint>.SendOnly);
@@ -254,7 +263,11 @@ internal static void main() {
             }, ref ᒐ);
             var v = reflect.New(slotΔ1).Elem();
             v.Set(xΔ1);
-            fmt.Printf("%-38s slot=%v value=%v nil=%v\n"u8, label, v.Type(), reflect.TypeOf(v.Interface()), v.IsNil());
+            var evalᴛ2 = v.Type();
+            var evalᴛ3 = v.Interface();
+            var evalᴛ4 = reflect.TypeOf(evalᴛ3);
+            var evalᴛ5 = v.IsNil();
+            fmt.Printf("%-38s slot=%v value=%v nil=%v\n"u8, label, evalᴛ2, evalᴛ4, evalᴛ5);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }

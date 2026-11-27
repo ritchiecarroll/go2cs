@@ -46,7 +46,8 @@ internal static void @try(@string name, Func<@string> f) {
                 fmt.Printf("%s: panic: %v\n"u8, name, r);
             }
         }, ref ᒐ);
-        fmt.Printf("%s: %s\n"u8, name, f());
+        var evalᴛ1 = f();
+        fmt.Printf("%s: %s\n"u8, name, evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

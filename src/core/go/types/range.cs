@@ -67,11 +67,12 @@ internal static void rangeStmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext inn
                 // Override type of rangeVar to be a constant
                 // (and thus side-effects will not be computed
                 // by the backend).
+                var evalᴛ1 = constant.MakeInt64(t.len);
                 check.record(Ꮡ(new operand(
                     mode: constant_,
                     expr: rangeVar,
                     typ: new BasicжType(Typ[Int]),
-                    val: constant.MakeInt64(t.len),
+                    val: evalᴛ1,
                     id: x.id
                 )));
             }

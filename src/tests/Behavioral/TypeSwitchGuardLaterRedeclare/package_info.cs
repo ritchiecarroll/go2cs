@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("TypeSwitchGuardLaterRedeclare.go", "TypeSwitchGuardLaterRedeclare.cs", "AAgcgpSkpKaCzIKClKSmgrqCgrS0toKmlLTYgqaCgoKCgpSSgpSCgoKC", "32-42:1;73-73:1;78-78:2")]
+[assembly: GoPositionMap("TypeSwitchGuardLaterRedeclare.go", "TypeSwitchGuardLaterRedeclare.cs", "AAgcgpSkpKaCzIKClKSmgrqCgrS0toKmlLTYgqaCgoKSgpSSkpSCgoKC", "32-42:1;73-73:1;78-78:2")]
 // </GoSourcePositionMaps>
 
 namespace go;

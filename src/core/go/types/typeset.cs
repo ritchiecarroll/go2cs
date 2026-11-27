@@ -202,7 +202,8 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
             check.indent++;
             defer([GoFunc("computeInterfaceTypeSet.func1")] () => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(pos, "=> %s ", Ꮡityp.typeSet().OrTypedNil());
+                var evalᴛ1 = Ꮡityp.typeSet();
+                Ꮡcheck.trace(pos, "=> %s ", evalᴛ1.OrTypedNil());
             }, ref ᒐ);
         }
 

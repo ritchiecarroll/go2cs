@@ -237,7 +237,8 @@ internal static slice<byte> bytesCompressed⁔(/*this*/ ж<P256Point> Ꮡp, /*[3
     // Encode the sign of the y coordinate (indicated by the least significant
     // bit) as the encoding type (2 or 3).
     var buf = append(@out[..0], (byte)2);
-    buf[0] |= (byte)((byte)(y.Bytes()[p256ElementLength - 1] & 1));
+    var evalᴛ1 = y.Bytes();
+    buf[0] |= (byte)((byte)(evalᴛ1[p256ElementLength - 1] & 1));
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     return buf;
 }

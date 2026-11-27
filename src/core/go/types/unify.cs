@@ -393,7 +393,9 @@ internal static bool /*result*/ nify⁔(/*this*/ ж<unifier> Ꮡu, Type xʗp, Ty
                 result = true; goto ᒐdone;
             }
             // both x and y have an inferred type - they must match
-            result = Ꮡu.nify(u.at(px), u.at(py), mode, Ꮡp); goto ᒐdone;
+            var evalᴛ1 = u.at(px);
+            var evalᴛ2 = u.at(py);
+            result = Ꮡu.nify(evalᴛ1, evalᴛ2, mode, Ꮡp); goto ᒐdone;
         }
         case {} when px != nil: {
             // x is a type parameter, y is not
@@ -607,10 +609,12 @@ internal static bool /*result*/ nify⁔(/*this*/ ж<unifier> Ꮡu, Type xʗp, Ty
         }
 
         // Continue with unaliased types but don't lose original alias names, if any (go.dev/issue/67628).
+        var evalᴛ3 = Unalias(x);
         var xorig = x;
-        x = Unalias(x);
+        x = evalᴛ3;
+        var evalᴛ4 = Unalias(y);
         var yorig = y;
-        y = Unalias(y);
+        y = evalᴛ4;
 
         switch (x.type()) {
         case ж<Basic> xΔ3: {

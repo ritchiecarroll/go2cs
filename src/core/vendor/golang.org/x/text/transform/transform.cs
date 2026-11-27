@@ -485,7 +485,8 @@ internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ ref chai
                     break;
                 }
                 // in.b is an internal buffer and we can make progress.
-                (@in.p, @in.n) = (0, copy(@in.b, @in.src()));
+                var evalᴛ1 = @in.src();
+                (@in.p, @in.n) = (0, copy(@in.b, evalᴛ1));
                 fallthrough = true;
             } while (false);
         }

@@ -120,7 +120,9 @@ internal static partial void main() {
     goǃ([GoFunc("main.func7")] (rune rΔ2) => {
         doneʗ1.ᐸꟷ(rΔ2);
     }, (rune)'g');
-    fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));
+    var evalᴛ1 = ᐸꟷ(sel);
+    var evalᴛ2 = ᐸꟷ(done);
+    fmt.Println(tm["a"], tm["b"], tw, evalᴛ1, evalᴛ2);
 
     foreach (var (_, c) in range(slice<byte>("a_7."u8))) {
         int8 i8Δ1 = (int8)c;

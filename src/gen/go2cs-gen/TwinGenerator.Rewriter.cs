@@ -39,6 +39,16 @@ public sealed partial class TwinGenerator
         // A call inside one of its arguments is judged against that moved statement, not the original one.
         private readonly HashSet<SyntaxNode> m_moving = [];
 
+        // M:N row 19, M1 (DESIGN-mn-row19-movability.md): the earlier calls the plan pass (PlanEarlierSpills) found
+        // blocking a parking call that could otherwise move, each spilled ahead in text order when it is visited; and,
+        // while the plan pass runs RefLikeBefore, the list Earlier adds such calls to instead of blocking on them.
+        private readonly HashSet<SyntaxNode> m_spillEarlier = [];
+        private List<InvocationExpressionSyntax>? m_plan;
+
+        // M:N row 19, M9: the right operand of a logical operator being lowered to an if. A call's walk stops there, as at
+        // the store statement `ᴛ = <right operand>;` the lowering writes for it.
+        private SyntaxNode? m_lowerRoot;
+
         public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
         // The ref-blocked census (row 7, DATA-mn-row7-refblock.md): one row per call left plain because it could not
@@ -242,6 +252,12 @@ public sealed partial class TwinGenerator
         private readonly bool m_blockBody;
         private int m_pairAwaits;
 
+        // Row 19 ruling 2: awaits of a weak target (a member that never parks, such as crypto's Hash.New) do not make a
+        // literal park, so PairLiteral leaves a literal whose only awaits are weak target calls plain.
+        // The two counts are disjoint: m_pairAwaits counts func-value pair tests, m_weakAwaits the two site awaits of a
+        // direct call, so no await is subtracted twice.
+        private int m_weakAwaits;
+
         // N2: the box twin's receiver (`this ref T t` becomes `this ж<T> Ꮡt`), whose ref the prologue declares; Rule R
         // derives it again after each await from the box (or, under GoTwinsBoxCopy, the probe's control, from a copy).
         public string? BoxReceiver { get; init; }
@@ -281,7 +297,7 @@ public sealed partial class TwinGenerator
         public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             if (m_passive > 0 || !m_run.Sites.TryGetValue(node, out Site? site))
-                return base.VisitInvocationExpression(node);
+                return m_passive == 0 && m_spillEarlier.Contains(node) ? SpillEarlier(node) : base.VisitInvocationExpression(node);
 
             if (site.Go == GoKind.Literal)
                 return m_run.LiteralLaunches(site) ? GoLiteral(node) : base.VisitInvocationExpression(node);
@@ -324,13 +340,18 @@ public sealed partial class TwinGenerator
                 if (site.Active && !site.PairBody && m_run.IsBoxTwinTarget(site.Target) && !m_run.BoxCallable(site))
                     m_run.NoteBoxPlain(node, site.Target!, text: site.ArgPlain);
 
-                return base.VisitInvocationExpression(node);
+                return m_spillEarlier.Contains(node) ? SpillEarlier(node) : base.VisitInvocationExpression(node);
             }
 
             // A ref struct value evaluated before the await (a u8 literal passed as a format, say) cannot live
             // across it. Where everything evaluated earlier is inert, the awaited call moves ahead of its
             // statement; anywhere else the call stays a blocking one, which hands its P off as a thread park does.
             bool spill = RefLikeBefore(node, out bool movable);
+
+            // M:N row 19, M1: a parking call the plan pass spills ahead of a later one moves even when nothing ref-like
+            // pins it, so it keeps its place in Go's call order before the later call.
+            if (m_spillEarlier.Contains(node) && movable)
+                spill = true;
 
             // Row 7, inline re-derivation (DATA-mn-row7-refblock.md): a call that cannot move only because a ref local is read
             // after it in the same evaluation (an if, else-if or while header, a case guard) is awaited in place, and each
@@ -415,6 +436,8 @@ public sealed partial class TwinGenerator
                 m_spilled.Add(node);
                 m_spills.Add(ParseStatement("var " + temp + " = " + awaited.ToFullString() + ";"));
                 m_awaits++;
+                if (m_run.WeakTarget(site))
+                    m_weakAwaits++;
                 Awaits++;
                 Spills++;
 
@@ -429,6 +452,8 @@ public sealed partial class TwinGenerator
                 awaited = ParenthesizedExpression(awaited);
 
             m_awaits++;
+            if (m_run.WeakTarget(site))
+                m_weakAwaits++;
             Awaits++;
 
             return awaited.WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
@@ -490,20 +515,39 @@ public sealed partial class TwinGenerator
                 while (core is ParenthesizedExpressionSyntax or CastExpressionSyntax)
                     core = core is ParenthesizedExpressionSyntax inner ? inner.Expression : ((CastExpressionSyntax)core).Expression;
 
-                if (!m_spilled.Contains(bare) && !m_spilled.Contains(core) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue &&
-                    !IsPureRead(bare))
-                    Block("earlier:" + bare.Kind());
+                if (m_spilled.Contains(bare) || m_spilled.Contains(core) || bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) || m_model.GetConstantValue(bare).HasValue ||
+                    IsConvertedConstant(bare) || IsPureRead(bare))
+                    return;
+
+                // M:N row 19, M1: while the plan pass runs, an earlier call that can spill by value is planned, not a blocker.
+                if (m_plan is not null && core is InvocationExpressionSyntax call && SpillableEarlier(call))
+                {
+                    m_plan.Add(call);
+                    return;
+                }
+
+                Block("earlier:" + bare.Kind());
             }
 
             SyntaxNode? moved = null;
 
             for (SyntaxNode? parent = node.Parent; parent is not null && moved is null; child = parent, parent = parent.Parent)
             {
+                if (ReferenceEquals(child, m_lowerRoot))
+                    break;
+
                 if (parent is StatementSyntax statement)
                 {
+                    // M:N row 19 (DESIGN-mn-row19-movability.md): a call moves only out of a statement that is a direct
+                    // member of a statement list (m_current), so an else-if's condition, which runs only when the first is
+                    // false, and a brace-less body stay blocked by name. M5: a throw evaluates its operand and then throws,
+                    // as a return does. M6: an if condition runs once, before either branch, so a ref-like value before a
+                    // call in it moves the call ahead of the if; a call blocked only by a ref read after it keeps row 7's
+                    // inline re-derivation.
                     if (!ReferenceEquals(statement, m_current))
                         Block("nested:" + statement.Kind());
-                    else if (statement is not (ExpressionStatementSyntax or LocalDeclarationStatementSyntax or ReturnStatementSyntax))
+                    else if (statement is not (ExpressionStatementSyntax or LocalDeclarationStatementSyntax or ReturnStatementSyntax or ThrowStatementSyntax) &&
+                             !(statement is IfStatementSyntax && refLike))
                         Block("stmt:" + statement.Kind());
 
                     break;
@@ -542,6 +586,19 @@ public sealed partial class TwinGenerator
                     case VariableDeclarationSyntax declaration:
                         if (declaration.Variables.Count != 1)
                             Block("multi-declarator");
+
+                        break;
+                    // M:N row 19, M3: a tuple literal's elements evaluate left to right, as a Go multi-value return's
+                    // operands do, so the elements before the call are earlier exactly as arguments are. A deconstruction
+                    // TARGET is not a literal and stays under the store rules.
+                    case TupleExpressionSyntax tuple when child is ArgumentSyntax && !(tuple.Parent is AssignmentExpressionSyntax target && target.Left == tuple):
+                        foreach (ArgumentSyntax element in tuple.Arguments)
+                        {
+                            if (element == child)
+                                break;
+
+                            Earlier(element.Expression);
+                        }
 
                         break;
                     case BaseArgumentListSyntax list:
@@ -598,11 +655,24 @@ public sealed partial class TwinGenerator
                         // again (Rule S), and the store runs after: every store still lands in the box the Go variable
                         // names. Go's two-phase assignment leaves the order between reading a plain variable on the
                         // left and the call on the right unspecified, so reading the left after the call is Go-legal.
+                        // M:N row 19, M8: a deconstruction into new locals (`var (r, errΔ1) = d.CharsetReader(…)`) stores into
+                        // fresh locals, as a local declaration does, so it moves as one. A deconstruction that mixes a new
+                        // local with an existing target is a tuple on the left and stays blocked by name.
+                        if (assignment.Left is DeclarationExpressionSyntax { Designation: ParenthesizedVariableDesignationSyntax })
+                            break;
+
                         if (WritesThroughRef(assignment.Left))
                             refTarget = true;
                         else if (m_model.GetSymbolInfo(assignment.Left).Symbol is not (ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None }))
                             Block("store-left:" + assignment.Left.Kind());
 
+                        break;
+                    // M:N row 19, M4: a COMPOUND store into a plain local or parameter (`s += " "u8 + t.String()`) is
+                    // `s = s op f()`, and the read of s is unordered against the call: gc reads it after (go1.26.11, every
+                    // form, with and without -l). The call moves ahead and the store reads s after it. A field, element
+                    // or any other target stays blocked by name.
+                    case AssignmentExpressionSyntax compound when child == compound.Right && !compound.IsKind(SyntaxKind.CoalesceAssignmentExpression) &&
+                                                                  m_model.GetSymbolInfo(compound.Left).Symbol is ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None }:
                         break;
                     default:
                         foreach (SyntaxNode sibling in parent.ChildNodes())
@@ -649,9 +719,9 @@ public sealed partial class TwinGenerator
                 case ParenthesizedExpressionSyntax parenthesized:
                     return IsPureRead(parenthesized.Expression);
                 case IdentifierNameSyntax identifier:
-                    return m_model.GetSymbolInfo(identifier).Symbol is ILocalSymbol or IParameterSymbol or IFieldSymbol or IPropertySymbol { ReturnsByRef: true };
+                    return m_model.GetSymbolInfo(identifier).Symbol is ILocalSymbol or IParameterSymbol or IFieldSymbol or IPropertySymbol { ReturnsByRef: true } or IPropertySymbol { ReturnsByRefReadonly: true };
                 case MemberAccessExpressionSyntax member when member.IsKind(SyntaxKind.SimpleMemberAccessExpression):
-                    return m_model.GetSymbolInfo(member).Symbol is IFieldSymbol or IPropertySymbol { ReturnsByRef: true } &&
+                    return m_model.GetSymbolInfo(member).Symbol is IFieldSymbol or IPropertySymbol { ReturnsByRef: true } or IPropertySymbol { ReturnsByRefReadonly: true } &&
                            (IsPureRead(member.Expression) || member.Expression is ThisExpressionSyntax ||
                             m_model.GetSymbolInfo(member.Expression).Symbol is INamedTypeSymbol or INamespaceSymbol);
                 case CastExpressionSyntax cast:
@@ -659,6 +729,8 @@ public sealed partial class TwinGenerator
                 case PrefixUnaryExpressionSyntax unary when unary.IsKind(SyntaxKind.UnaryMinusExpression) || unary.IsKind(SyntaxKind.UnaryPlusExpression) ||
                                                             unary.IsKind(SyntaxKind.LogicalNotExpression) || unary.IsKind(SyntaxKind.BitwiseNotExpression):
                     return IsPureRead(unary.Operand);
+                case ObjectCreationExpressionSyntax creation:
+                    return IsAdapterOverPureRead(creation);
                 default:
                     return false;
             }
@@ -666,6 +738,290 @@ public sealed partial class TwinGenerator
             static bool IsNumeric(ITypeSymbol? type) =>
                 type is { SpecialType: >= SpecialType.System_Char and <= SpecialType.System_Double or SpecialType.System_IntPtr or SpecialType.System_UIntPtr } ||
                 type is { TypeKind: TypeKind.Enum };
+        }
+
+        // M:N row 19, M1 (DESIGN-mn-row19-movability.md): an earlier call spills in Go order. Before a statement is
+        // visited, each parking call in it that would spill is judged with the earlier calls that block it planned
+        // instead (m_plan); where nothing else blocks, those calls are spilled ahead in text order, which is C#'s
+        // evaluation order and Go's call order, and the parking call then moves after them. A pure read between them
+        // stays in place and reads after both, as in gc. The walk only reaches positions evaluated unconditionally, and
+        // what is evaluated before each planned call is judged by the same walk, so the rule is recursive.
+        private void PlanEarlierSpills(SyntaxNode scope)
+        {
+            foreach (InvocationExpressionSyntax call in scope.DescendantNodesAndSelf(node => node == scope || node is not (StatementSyntax or AnonymousFunctionExpressionSyntax))
+                         .OfType<InvocationExpressionSyntax>())
+            {
+                if (!m_run.Sites.TryGetValue(call, out Site? site) || site.Go != GoKind.None || !m_run.ShouldAwait(site))
+                    continue;
+
+                List<InvocationExpressionSyntax> plan = [];
+                bool spill, movable;
+
+                m_plan = plan;
+
+                try
+                {
+                    spill = RefLikeBefore(call, out movable);
+                }
+                finally
+                {
+                    m_plan = null;
+                }
+
+                if (spill && movable && plan.Count > 0)
+                    m_spillEarlier.UnionWith(plan);
+            }
+        }
+
+        // M:N row 19, M9 (DESIGN-mn-row19-movability.md, owner ruling 3): a logical operator whose right operand holds a
+        // parking call that cannot move only because the operator may skip it is lowered to the branch Go means, through a
+        // fresh temporary of the operator's own type: `&&` as `T ᴛ = a; if (ᴛ) { ᴛ = f(); }`, `||` with `if (!ᴛ)`, then
+        // the statement with ᴛ in place of the operator. The left operand runs once, first; the right operand runs only
+        // when Go runs it; a store target is written once, after the right operand, so a right operand reading the target
+        // sees its old value (P3, MUST 2). The shapes: `return op;`, a single-variable local declaration, and a store into
+        // a plain local or parameter, each a direct member of a statement list (the caller is Statements). A chain lowers
+        // from the outside in. A user-defined operator, or a left operand declaring a variable, is not lowered.
+        private List<StatementSyntax>? LowerLogical(StatementSyntax statement)
+        {
+            ExpressionSyntax? expression = statement switch
+            {
+                ReturnStatementSyntax { Expression: { } value } => value,
+                LocalDeclarationStatementSyntax { IsConst: false, Declaration: { Type: not RefTypeSyntax, Variables: [{ Initializer.Value: { } value }] } } => value,
+                ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax store } when store.IsKind(SyntaxKind.SimpleAssignmentExpression) &&
+                    m_model.GetSymbolInfo(store.Left).Symbol is ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None } => store.Right,
+                _ => null
+            };
+
+            if (expression is null || Unparenthesized(expression) is not BinaryExpressionSyntax op || !Lowerable(op) ||
+                m_model.GetTypeInfo(op).Type is not { TypeKind: not TypeKind.Error } type)
+                return null;
+
+            string temp = "ᴛtwin" + ++m_temps;
+            List<StatementSyntax> lowered = [];
+
+            Lower(op, temp, type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), lowered);
+
+            for (int i = 0; i < lowered.Count; i++)
+                lowered[i] = lowered[i].WithLeadingTrivia(i == 0 ? statement.GetLeadingTrivia() : TriviaList(Space));
+
+            lowered.Add(statement.ReplaceNode(expression, IdentifierName(temp).WithTriviaFrom(expression)).WithLeadingTrivia(Space));
+            return lowered;
+        }
+
+        private static ExpressionSyntax Unparenthesized(ExpressionSyntax expression)
+        {
+            while (expression is ParenthesizedExpressionSyntax parenthesized)
+                expression = parenthesized.Expression;
+
+            return expression;
+        }
+
+        // Whether the operator is lowered: the built-in logical operator, a left operand that declares no variable, and a
+        // parking call in the right operand that is blocked here and would move (or await in place) in the store the
+        // lowering writes for it, its earlier calls spilled by M1, or under an inner operator that is itself lowered.
+        private bool Lowerable(BinaryExpressionSyntax op)
+        {
+            if (!(op.IsKind(SyntaxKind.LogicalAndExpression) || op.IsKind(SyntaxKind.LogicalOrExpression)) ||
+                m_model.GetSymbolInfo(op).Symbol is IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } ||
+                op.Left.DescendantNodesAndSelf().Any(node => node is DeclarationExpressionSyntax or DeclarationPatternSyntax or RecursivePatternSyntax or VarPatternSyntax))
+                return false;
+
+            foreach (InvocationExpressionSyntax call in op.Right.DescendantNodesAndSelf(node => node is not AnonymousFunctionExpressionSyntax).OfType<InvocationExpressionSyntax>())
+            {
+                if (!m_run.Sites.TryGetValue(call, out Site? site) || site.Go != GoKind.None || !m_run.ShouldAwait(site) ||
+                    !RefLikeBefore(call, out bool movableHere) || movableHere)
+                    continue;
+
+                SyntaxNode? outerRoot = m_lowerRoot;
+                List<InvocationExpressionSyntax>? outerPlan = m_plan;
+
+                m_lowerRoot = op.Right;
+                m_plan = [];
+
+                try
+                {
+                    if (!RefLikeBefore(call, out bool movableLowered) || movableLowered)
+                        return true;
+
+                    m_plan = outerPlan;
+
+                    if (Unparenthesized(op.Right) is BinaryExpressionSyntax inner && Lowerable(inner))
+                        return true;
+                }
+                finally
+                {
+                    m_lowerRoot = outerRoot;
+                    m_plan = outerPlan;
+                }
+            }
+
+            return false;
+        }
+
+        // Writes the lowered operator into the temporary: its declaration (or, for an inner operator of a chain, a store)
+        // from the left operand, then the if that stores the right operand, as Statements writes a statement: each moved
+        // call on its own line followed by the live refs derived again, and the live refs again after an await in place.
+        private void Lower(BinaryExpressionSyntax op, string temp, string? type, List<StatementSyntax> output)
+        {
+            List<StatementSyntax> outerSpills = m_spills;
+
+            m_spills = [];
+            ExpressionSyntax left = (ExpressionSyntax)Visit(op.Left)!;
+            Flush(output);
+            m_spills = outerSpills;
+
+            output.Add(ParseStatement((type is null ? "" : type + " ") + temp + " = " + left.WithoutTrivia().ToFullString() + ";"));
+
+            SyntaxNode? outerRoot = m_lowerRoot;
+            List<StatementSyntax> body = [];
+
+            m_lowerRoot = op.Right;
+
+            if (Unparenthesized(op.Right) is BinaryExpressionSyntax inner && Lowerable(inner))
+            {
+                Lower(inner, temp, null, body);
+            }
+            else
+            {
+                PlanEarlierSpills(op.Right);
+
+                int before = m_awaits;
+
+                m_spills = [];
+                ExpressionSyntax right = (ExpressionSyntax)Visit(op.Right)!;
+                Flush(body);
+                m_spills = outerSpills;
+
+                body.Add(ParseStatement(temp + " = " + right.WithoutTrivia().ToFullString() + ";"));
+
+                if (m_awaits != before)
+                    body.AddRange(Live(TriviaList(Space)));
+            }
+
+            m_lowerRoot = outerRoot;
+
+            output.Add(ParseStatement("if (" + (op.IsKind(SyntaxKind.LogicalOrExpression) ? "!" : "") + temp + ") { " +
+                                      string.Join(" ", body.Select(statement => statement.WithoutTrivia().ToFullString())) + " }"));
+
+            void Flush(List<StatementSyntax> into)
+            {
+                foreach (StatementSyntax spill in m_spills)
+                {
+                    into.Add(spill);
+                    into.AddRange(Live(TriviaList(Space)));
+                }
+            }
+        }
+
+        // M1's by-value test (P3, MUST 1 and SHOULD 4a): a spill copies the call's result into a temporary, so the call
+        // must not return by ref (`ref` or `ref readonly`) nor be passed by ref (a `ref`, `in` or `out` argument); its
+        // result must not be ref-like (a ref struct cannot live across the await, CS4007); and it must declare no variable
+        // (an `out var` or a pattern designation would move to the spill's scope). A by-value struct result that is the
+        // receiver of a member is a fresh value either way: C# copies such a receiver into a hidden temporary, and a
+        // `this ref` extension cannot take it at all (net's `netip.AddrFrom16(sa.Addr).WithZone(zoneCache.name(…))`).
+        private bool SpillableEarlier(InvocationExpressionSyntax call)
+        {
+            if (m_model.GetSymbolInfo(call).Symbol is not IMethodSymbol { ReturnsVoid: false, ReturnsByRef: false, ReturnsByRefReadonly: false } method ||
+                method.ReturnType.IsRefLikeType)
+                return false;
+
+            SyntaxNode? parent = call.Parent;
+
+            while (parent is ParenthesizedExpressionSyntax or CastExpressionSyntax)
+                parent = parent.Parent;
+
+            if (parent is ArgumentSyntax argument && !argument.RefKindKeyword.IsKind(SyntaxKind.None))
+                return false;
+
+            return !call.DescendantNodes().Any(node => node is DeclarationExpressionSyntax or DeclarationPatternSyntax or RecursivePatternSyntax or VarPatternSyntax or StackAllocArrayCreationExpressionSyntax);
+        }
+
+        // M1: a planned call that does not park, spilled ahead into its own temporary.
+        private SyntaxNode SpillEarlier(InvocationExpressionSyntax node)
+        {
+            ExpressionSyntax visited = (ExpressionSyntax)base.VisitInvocationExpression(node)!;
+            string temp = "ᴛtwin" + ++m_temps;
+
+            m_spilled.Add(node);
+            m_spills.Add(ParseStatement("var " + temp + " = " + visited.WithoutTrivia().ToFullString() + ";"));
+            Spills++;
+
+            return IdentifierName(temp).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
+        }
+
+        // M:N row 19, M2 (DESIGN-mn-row19-movability.md): the converter's form of a Go interface conversion of a variable,
+        // `io.Writer(&buf)`, is a generated adapter over it (`new bytes_BufferжWriter(Ꮡbuf)`, `new fmt_StateᴠWriter(s)`),
+        // whose constructor only stores its operand. gc converts after a later call in the same statement (go1.26.11: a
+        // pointer, an interface variable and a value read the call's write when the call is not inlined, and a parking
+        // call never is), so an adapter over a pure read is a pure read. An adapter is recognized against go2cs-gen's own
+        // output: one emitted in another assembly implements golib's IGoAdapter; one emitted beside this code is not yet
+        // in the compilation the rewriter reads, so it is named by a GoImplement record of this assembly whose source type
+        // is the operand's (through ж<T> for a pointer record) and whose interface ends the adapter's name.
+        private bool IsAdapterOverPureRead(ObjectCreationExpressionSyntax creation)
+        {
+            if (creation.ArgumentList is not { Arguments: [{ RefKindKeyword.RawKind: (int)SyntaxKind.None } argument] } || creation.Initializer is not null ||
+                !IsPureRead(argument.Expression))
+                return false;
+
+            ITypeSymbol? created = m_model.GetTypeInfo(creation).Type;
+
+            if (created is null)
+                return false;
+
+            if (created.TypeKind != TypeKind.Error)
+                return created.AllInterfaces.Any(contract => contract is { Name: "IGoAdapter", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } });
+
+            if (m_model.GetTypeInfo(argument.Expression).Type is not { } operand)
+                return false;
+
+            foreach (AttributeData record in m_model.Compilation.Assembly.GetAttributes())
+            {
+                if (record.AttributeClass is not { Name: "GoImplementAttribute", TypeArguments: [{ } source, { } contract] })
+                    continue;
+
+                bool pointer = record.NamedArguments.Any(named => named is { Key: "Pointer", Value.Value: true });
+
+                ITypeSymbol? wrapped = pointer
+                    ? operand is INamedTypeSymbol { Name: "ж", TypeArguments: [{ } element] } ? element : null
+                    : operand;
+
+                if (wrapped is not null && SymbolEqualityComparer.Default.Equals(wrapped, source) && created.Name.EndsWith(contract.Name, System.StringComparison.Ordinal))
+                    return true;
+            }
+
+            return false;
+        }
+
+        // M:N row 19, M7 (DESIGN-mn-row19-movability.md): a converted Go constant is a constant. The converter emits a typed
+        // Go constant as a static expression-bodied property over a literal (go/types' `VarKind LocalVar => 2`), for which
+        // Roslyn reports no constant value; reading it runs no code a call could observe. A `default` literal is the
+        // zero value and runs no code either. A Go string constant is a ref readonly property over a static readonly field
+        // (`nodeTVˢ => ref nodeTVˢᵇ`, and time's `RFC3339` across assemblies): IsPureRead admits that as a read.
+        private bool IsConvertedConstant(ExpressionSyntax expression)
+        {
+            if (expression.IsKind(SyntaxKind.DefaultLiteralExpression) || expression is DefaultExpressionSyntax)
+                return true;
+
+            if (expression is not (IdentifierNameSyntax or MemberAccessExpressionSyntax) ||
+                m_model.GetSymbolInfo(expression).Symbol is not IPropertySymbol { IsStatic: true, SetMethod: null, ReturnsByRef: false, ReturnsByRefReadonly: false } property)
+                return false;
+
+            foreach (SyntaxReference reference in property.DeclaringSyntaxReferences)
+            {
+                if (reference.GetSyntax() is PropertyDeclarationSyntax { ExpressionBody.Expression: { } body } && IsLiteral(body))
+                    return true;
+            }
+
+            return false;
+
+            static bool IsLiteral(ExpressionSyntax body) => body switch
+            {
+                LiteralExpressionSyntax => true,
+                ParenthesizedExpressionSyntax parenthesized => IsLiteral(parenthesized.Expression),
+                CastExpressionSyntax cast => IsLiteral(cast.Expression),
+                PrefixUnaryExpressionSyntax unary => IsLiteral(unary.Operand),
+                _ => false
+            };
         }
 
         // Stage (c): whether a ref local is read LATER in the call's statement than the call (math/big's
@@ -1106,29 +1462,36 @@ public sealed partial class TwinGenerator
             }
 
             List<List<string>> scopes = m_scopes;
-            int awaits = m_awaits, pairAwaits = m_pairAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
+            int awaits = m_awaits, pairAwaits = m_pairAwaits, weakAwaits = m_weakAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
             List<string> hoisted = [.. HoistedPairs];
             List<int> sites = m_sites, calls = m_calls;
+            int refBlocked = RefBlocked, refBlockedRows = RefBlockedRows.Count;
             m_scopes = [];
             m_awaits = 0;
             m_pairAwaits = 0;
+            m_weakAwaits = 0;
             m_sites = [];
             m_calls = [];
 
             CSharpSyntaxNode body = (CSharpSyntaxNode)Visit(node.Body)!;
-            bool parks = m_awaits - m_pairAwaits > 0;
+            bool parks = m_awaits - m_pairAwaits - m_weakAwaits > 0;
             List<int> literalSites = m_sites, literalCalls = m_calls;
 
             m_scopes = scopes;
             m_awaits = awaits;
             m_pairAwaits = pairAwaits;
+            m_weakAwaits = weakAwaits;
             m_sites = sites;
             m_calls = calls;
 
             if (!parks)
             {
-                // Not can-park: undo what the twin visit counted, and leave the literal plain.
+                // Not can-park: undo what the twin visit counted, and leave the literal plain. The ref-blocked rows go
+                // back too: a call the discarded visit found ref-blocked is a plain call in a plain literal, not a block
+                // (row 19: crypto/tls's five `() => recv.New()` literals read as ref-blocked after ruling 2 left them plain).
                 Awaits = totalAwaits;
+                RefBlocked = refBlocked;
+                RefBlockedRows.RemoveRange(refBlockedRows, RefBlockedRows.Count - refBlockedRows);
                 m_temps = temps;
                 m_run.PairTests = tests;
                 HoistedPairs.Clear();
@@ -1368,7 +1731,10 @@ public sealed partial class TwinGenerator
                 m_current = statement;
                 m_spills = [];
 
-                StatementSyntax visited = (StatementSyntax)Visit(statement)!;
+                PlanEarlierSpills(statement);
+
+                List<StatementSyntax>? lowered = LowerLogical(statement);
+                StatementSyntax visited = lowered is null ? (StatementSyntax)Visit(statement)! : lowered[^1];
                 List<StatementSyntax> spills = m_spills;
 
                 m_current = outer;
@@ -1410,6 +1776,10 @@ public sealed partial class TwinGenerator
 
                     visited = visited.WithLeadingTrivia(Space);
                 }
+
+                // M9: the lowered operator's temporary and its if stand before the statement that reads the temporary.
+                if (lowered is not null)
+                    result.AddRange(lowered.Take(lowered.Count - 1));
 
                 Register(statement);
 

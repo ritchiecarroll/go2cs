@@ -418,7 +418,8 @@ internal static error Close⁔(/*this*/ ref openDir d) { return default; }
 internal static (fs.FileInfo, error) Stat⁔(/*this*/ ref openDir d) { return (new fileжFileInfo(d.f), default); }
 
 internal static (nint, error) Read⁔(/*this*/ ref openDir d, slice<byte> _) {
-    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: errors.New(isADirectoryˢ)))));
+    var evalᴛ1 = errors.New(isADirectoryˢ);
+    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: evalᴛ1))));
 }
 
 internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ref openDir d, nint count) {

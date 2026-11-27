@@ -26,7 +26,15 @@ partial struct cell {
 partial struct cells /*[]cell*/;
 
 internal static ж<cell> at(this ref cells c, nint i) { return Ꮡ((c), i); }
-internal static void swapAt(this ref cells c, nint i, nint j) { (c.at(i).Value, c.at(j).Value) = (c.at(j).Value, c.at(i).Value); }
+
+internal static void swapAt(this ref cells c, nint i, nint j) {
+    var evalᴛ1 = c.at(i);
+    var evalᴛ2 = c.at(j);
+    var evalᴛ3 = c.at(j);
+    var evalᴛ4 = c.at(i);
+    (evalᴛ1.Value, evalᴛ2.Value) = (evalᴛ3.Value, evalᴛ4.Value);
+}
+
 internal static void setAt(this ref cells c, nint i, nint v) { c.at(i).Value = new cell(v); }
 
 internal static void showCells(ref cells c) {
@@ -68,7 +76,9 @@ internal static void main() {
     for (nint i = 0; i < len(e.ValueSlot); i++) {
         nint min = i;
         for (nint j = i + 1; j < len(e.ValueSlot); j++) {
-            if (e.at(j).v < e.at(min).v) {
+            var evalᴛ1 = e.at(j);
+            var evalᴛ2 = e.at(min);
+            if (evalᴛ1.v < evalᴛ2.v) {
                 min = j;
             }
         }

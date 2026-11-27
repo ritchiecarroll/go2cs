@@ -13,7 +13,8 @@ internal static void main() {
     fmt.Println("3 defer f(&err):", deferNamedWithPointer(), "| gob shape:", deferGobShape());
 
     var g = deferMethodValue();
-    fmt.Println("4 method value:", g.got, "| with args:", deferMethodValueWithArgs());
+    var evalᴛ1 = deferMethodValueWithArgs();
+    fmt.Println("4 method value:", g.got, "| with args:", evalᴛ1);
 
     fmt.Println("5 defer recover():", deferRecoverItself());
 

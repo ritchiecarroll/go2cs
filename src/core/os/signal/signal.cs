@@ -331,7 +331,8 @@ public static partial (context.Context ctx, context.CancelFunc stop) NotifyConte
             var selᴛ4 = (~cʗ1).Context.Done();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
             case 0 when selᴛ3.ꟷᐳ(out var s): {
-                cʗ1.cancel((signalError)(s.String() + " signal received"u8));
+                var evalᴛ1 = s.String();
+                cʗ1.cancel((signalError)(evalᴛ1 + " signal received"u8));
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {

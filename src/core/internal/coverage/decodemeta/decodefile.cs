@@ -178,8 +178,11 @@ internal static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDeco
     if (r.debug) {
         var h = fnv.New128a();
         h.Write(pp);
+        var evalᴛ1 = len(pp);
+        var evalᴛ2 = h.Sum(default);
+        var evalᴛ3 = fmt.Sprintf("%x"u8, evalᴛ2);
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= pkidx=%d payload length is %d hash=%s\n"u8,
-            pkIdx, len(pp), fmt.Sprintf("%x"u8, h.Sum(default)));
+            pkIdx, evalᴛ1, evalᴛ3);
     }
     if (err != nil) {
         return (default, default, err);

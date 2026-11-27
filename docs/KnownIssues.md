@@ -276,6 +276,10 @@ the value `a` had before the call. Built with twins and run with `GO2CS_MN=1`, a
 evaluated ahead of the plain reads in its expression, as gc evaluates it, and then the program prints the value after
 the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
 unspecified behavior.
+With twins this also happens when the statement calls another function before the call that can wait, in a compound
+assignment (`s += f()` reads `s` after `f`), and when the value is converted to an interface for the call.
+<!-- 2026-11-25 (P4, row 19 movability, P3's NIT 6): rules M1, M2 and M4 move more twin sites to gc's order while
+     the plain body keeps C#'s left-to-right order; docs/phase4/DESIGN-mn-row19-movability.md section 4. -->
 
 **After a carrier stack could not be reserved, goroutines recurse to two depths.** Under the M:N scheduler each carrier
 thread reserves 1 GiB, or what a set `GO2CS_GOROUTINE_STACK` says ([Tuning](Tuning.md#goroutine-stacks)). A carrier
@@ -285,6 +289,31 @@ take that size. Carriers started before it keep theirs, so a goroutine, `main` i
 on one carrier and run out of stack at half of it on another, depending on which carrier resumes it.
 <!-- Source: src/core/golib/runtime/GoScheduler.cs, CarrierThread (a halved size is published for later carriers only);
      P3's row 4 read, 2026-11-24, NIT 4. -->
+
+**A wait the scheduler cannot see holds its thread, and the scheduler adds threads around it, up to a ceiling.** A
+goroutine built with twins can still block somewhere golib does not see: a .NET wait in hand-written C# (`lock`, an
+event, `Task.Wait`, `Thread.Sleep`), or a native call. The scheduler notices a .NET wait that lasts two of its ticks and
+gives the goroutine's processor to other work. For anything else it starts more threads while work waits. In all it
+starts at most 10,000 threads (Go's default; set it with `debug.SetMaxThreads` or `GO2CS_MN_MAXTHREADS`). A program
+that needs more ends as Go's does: `runtime: program exceeds 10000-thread limit`, then `fatal error: thread exhaustion`
+and exit status 2.
+<!-- Source: src/core/golib/runtime/GoScheduler.cs, the monitor's sensed retake (N5 3a), re-armed injection and
+     ThreadExhaustion (3c, COORD's Q1 ruling 2026-11-23); docs/phase4/DESIGN-mn-n5-invisible-blocking.md section 9.
+     Behavioral MnInvisible V1, V2 and V7. -->
+
+**C# that blocks in its own native call says so with `GoNativeCall`.** Code you write in C# that calls a native
+function which can block (a P/Invoke that waits on a device, a socket or a lock) brackets the call, so the scheduler
+can give the goroutine's processor away while it waits:
+`GoNativeCall.Enter(NativeCallHint.Blocks); try { Call(); } finally { GoNativeCall.Exit(); }`. `Blocks` gives the
+processor away at once, as Go's `entersyscallblock` does; `MayBlock`, the default, keeps it and lets the scheduler take
+it back if the call lasts. Call `Exit` exactly once for each `Enter`, on the same goroutine, and read the call's error
+(`Marshal.GetLastPInvokeError`) before `Exit`. `GoNativeCall` is an advanced member of `go.golib`: hidden from
+completion, and frozen, so a program that uses it keeps working across releases. Without twins or without
+`GO2CS_MN=1` it does nothing.
+<!-- Source: src/core/golib/runtime/GoNativeCall.cs (3b: Enter(Blocks) hands the P off, Exit takes one back); COORD's
+     Q2 ruling 2026-11-23 (DESIGN-mn-n5-invisible-blocking.md section 9): a documented consumer contract, in
+     PublicSurface.golib.txt's [mn-frozen] section. Behavioral MnInvisible V5 (Blocks) and V6 (MayBlock), from the
+     fixture's hand_impl.cs. -->
 
 ## A nugetgo package built on 1.26.10.3 beside the go.* 1.26.11.1 packages fails at restore {#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore}
 
@@ -725,6 +754,32 @@ To get Go's lines in a program, use one of these, at a large cost in speed:
 Under Native AOT, `runtime.Caller` reports line 0 instead of the call's line, measured on `linux-x64`; the function
 name it reports matches Go. Neither route above applies to a Native AOT program, so for Go's lines run the program
 under the JIT with one of them.
+
+## In a few statement forms, a variable read beside a call can see its value from before the call {#operand-order-limits}
+
+**Symptom.** A statement reads a variable and also calls a function that changes that variable, and the converted
+program prints the value from before the call where Go prints the value from after it. For example, with a
+package variable `g` and a function `bump` that adds one to `g`, a package-level `var x = pick(g, bump())` passes
+`pick` the old `g` in the converted program and the new one under Go.
+
+**Cause.** Go's specification fixes the order of the calls in a statement but not when the statement's other
+operands are read against them. Go's compiler runs every call of the statement first and reads the other operands
+after, and C# reads every operand left to right. go2cs moves a statement's calls ahead of it where a call can change
+something an earlier operand reads, so most statements match Go
+([Multi-Assignment and Evaluation Order](ConversionStrategies-Reference/multi-assignment.md#a-call-runs-before-the-plain-operands-of-its-statement)).
+These forms keep C#'s left-to-right order:
+- a `case` expression of a `switch` (the switch's own tag is covered);
+- a package-level variable's initializer;
+- a statement in which a call whose several results pass straight into another call, such as `sum(two())`, would
+  have to move, as in `x := g + sum(two())`.
+- any other statement whose calls the converter cannot fully order: such a statement keeps C#'s left-to-right order
+  as a whole, and none of its calls moves.
+
+A division that panics is a related case. In `fmt.Println(x/y, bump())` with `y` zero, Go runs `bump` and then panics
+on the division; the converted program panics first, so `bump` never runs.
+
+**Workaround.** Make the call its own statement first, then read the variable: `b := bump()` and then
+`x := pick(g, b)` reads `g` after the call in both languages.
 
 ## Issues in older versions {#issues-in-older-versions}
 

@@ -18,7 +18,9 @@ internal static bool reading = os.Getenv("MN_GEN_READING") == "1"u8;
 
 internal static void report(@string phase, time.Time began) {
     if (reading) {
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: %s elapsed_ms=%.1f\n"u8, phase, (float64)time.Since(began).Microseconds() / 1000D);
+        var evalᴛ1 = time.Since(began);
+        var evalᴛ2 = evalᴛ1.Microseconds();
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: %s elapsed_ms=%.1f\n"u8, phase, (float64)evalᴛ2 / 1000D);
     }
 }
 
@@ -85,7 +87,8 @@ internal static partial bool pipelines<T>(nint n, Func<nint, T> mk) {
         var got = ᐸꟷ(done);
         ok = ok && len(got) == items;
         for (nint i = 0; ok && i < items; i++) {
-            ok = AreEqual(got[i], mk(i));
+            var evalᴛ1 = mk(i);
+            ok = AreEqual(got[i], evalᴛ1);
         }
     }
     return ok;

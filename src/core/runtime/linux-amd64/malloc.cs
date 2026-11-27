@@ -925,7 +925,8 @@ mapped:
 
     // Create arena metadata.
     for (arenaIdx ri = arenaIndex((uintptr)v); ri <= arenaIndex((uintptr)v + size - 1); ri++) {
-        var l2 = h.arenas[ri.l1()];
+        var evalᴛ1 = ri.l1();
+        var l2 = h.arenas[evalᴛ1];
         if (l2 == nil) {
             // Allocate an L2 arena map.
             //
@@ -1056,7 +1057,8 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
             s.allocCache.RshAssign((nuint)(theBit + 1));
             s.freeindex = freeidx;
             s.allocCount++;
-            return (gclinkptr)((uintptr)result * s.elemsize + s.@base());
+            var evalᴛ1 = s.@base();
+            return (gclinkptr)((uintptr)result * s.elemsize + evalᴛ1);
         }
     }
     return 0;
@@ -1104,7 +1106,8 @@ internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree⁔(/*th
         @throw(freeIndexIsNotValidˢ);
     }
 
-    v = (gclinkptr)((uintptr)freeIndex * s.elemsize + s.@base());
+    var evalᴛ1 = s.@base();
+    v = (gclinkptr)((uintptr)freeIndex * s.elemsize + evalᴛ1);
     s.allocCount++;
     if (s.allocCount > s.nelems) {
         println((@string)"s.allocCount=", s.allocCount, (@string)"s.nelems=", s.nelems);
@@ -1310,7 +1313,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
         if ((~mp).mallocing != 0) {
             @throw(mallocDeadlockˢ);
         }
-        if ((~mp).gsignal == getg()) {
+        var evalᴛ1 = getg();
+        if ((~mp).gsignal == evalᴛ1) {
             @throw(mallocDuringSignalˢ);
         }
         if (Ꮡtyp != nil && typ.Pointers()) {
@@ -1472,7 +1476,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
         if ((~mp).mallocing != 0) {
             @throw(mallocDeadlockˢ);
         }
-        if ((~mp).gsignal == getg()) {
+        var evalᴛ1 = getg();
+        if ((~mp).gsignal == evalᴛ1) {
             @throw(mallocDuringSignalˢ);
         }
         if (Ꮡtyp != nil && typ.Pointers()) {
@@ -1485,9 +1490,11 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
     var c = getMCache(ref (mp).DerefOrNull());
     uint8 sizeclass = default;
     if (size <= (uintptr)(gc.SmallSizeMax - 8)) {
-        sizeclass = gc.SizeToSizeClass8[divRoundUp(size, gc.SmallSizeDiv)];
+        var evalᴛ2 = divRoundUp(size, gc.SmallSizeDiv);
+        sizeclass = gc.SizeToSizeClass8[evalᴛ2];
     } else {
-        sizeclass = gc.SizeToSizeClass128[divRoundUp(size - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv)];
+        var evalᴛ3 = divRoundUp(size - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv);
+        sizeclass = gc.SizeToSizeClass128[evalᴛ3];
     }
     size = (uintptr)gc.SizeClassToSize[sizeclass];
     var spc = makeSpanClass(sizeclass, true);
@@ -1628,7 +1635,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
         if ((~mp).mallocing != 0) {
             @throw(mallocDeadlockˢ);
         }
-        if ((~mp).gsignal == getg()) {
+        var evalᴛ1 = getg();
+        if ((~mp).gsignal == evalᴛ1) {
             @throw(mallocDuringSignalˢ);
         }
         if (Ꮡtyp == nil || !typ.Pointers()) {
@@ -1642,7 +1650,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
 
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
-    var sizeclass = gc.SizeToSizeClass8[divRoundUp(size, gc.SmallSizeDiv)];
+    var evalᴛ2 = divRoundUp(size, gc.SmallSizeDiv);
+    var sizeclass = gc.SizeToSizeClass8[evalᴛ2];
     var spc = makeSpanClass(sizeclass, false);
     var span = c.alloc[spc];
     var v = nextFreeFast(span);
@@ -1658,7 +1667,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
         // on 64-bit platforms.
         c.scanAlloc += 8;
     } else {
-        c.scanAlloc += heapSetTypeNoHeader((uintptr)x, size, Ꮡtyp, span);
+        var evalᴛ3 = heapSetTypeNoHeader((uintptr)x, size, Ꮡtyp, span);
+        c.scanAlloc += evalᴛ3;
     }
     size = (uintptr)gc.SizeClassToSize[sizeclass];
 
@@ -1725,7 +1735,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
         if ((~mp).mallocing != 0) {
             @throw(mallocDeadlockˢ);
         }
-        if ((~mp).gsignal == getg()) {
+        var evalᴛ1 = getg();
+        if ((~mp).gsignal == evalᴛ1) {
             @throw(mallocDuringSignalˢ);
         }
         if (Ꮡtyp == nil || !typ.Pointers()) {
@@ -1742,9 +1753,11 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     size += gc.MallocHeaderSize;
     uint8 sizeclass = default;
     if (size <= (uintptr)(gc.SmallSizeMax - 8)) {
-        sizeclass = gc.SizeToSizeClass8[divRoundUp(size, gc.SmallSizeDiv)];
+        var evalᴛ2 = divRoundUp(size, gc.SmallSizeDiv);
+        sizeclass = gc.SizeToSizeClass8[evalᴛ2];
     } else {
-        sizeclass = gc.SizeToSizeClass128[divRoundUp(size - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv)];
+        var evalᴛ3 = divRoundUp(size - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv);
+        sizeclass = gc.SizeToSizeClass128[evalᴛ3];
     }
     size = (uintptr)gc.SizeClassToSize[sizeclass];
     var spc = makeSpanClass(sizeclass, false);
@@ -1759,7 +1772,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     }
     var header = @unsafe.Pointer.To<ж<_type>>(x);
     x = add(x, gc.MallocHeaderSize);
-    c.scanAlloc += heapSetTypeSmallHeader((uintptr)x, size - (uintptr)gc.MallocHeaderSize, Ꮡtyp, header, span);
+    var evalᴛ4 = heapSetTypeSmallHeader((uintptr)x, size - (uintptr)gc.MallocHeaderSize, Ꮡtyp, header, span);
+    c.scanAlloc += evalᴛ4;
 
     // Ensure that the stores above that initialize x to
     // type-safe memory and set the heap bits occur before
@@ -1820,7 +1834,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
         if ((~mp).mallocing != 0) {
             @throw(mallocDeadlockˢ);
         }
-        if ((~mp).gsignal == getg()) {
+        var evalᴛ1 = getg();
+        if ((~mp).gsignal == evalᴛ1) {
             @throw(mallocDuringSignalˢ);
         }
     }
@@ -1903,7 +1918,9 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
     mp = acquirem();
     if (Ꮡtyp != nil && typ.Pointers()) {
         // Finish storing the type information, now that we're certain the memory is zeroed.
-        getMCache(ref (mp).DerefOrNull()).scanAlloc += heapSetTypeLarge((uintptr)x, size, Ꮡtyp, span);
+        var evalᴛ2 = getMCache(ref (mp).DerefOrNull());
+        var evalᴛ3 = heapSetTypeLarge((uintptr)x, size, Ꮡtyp, span);
+        evalᴛ2.scanAlloc += evalᴛ3;
     }
     // Publish the object again, now with zeroed memory and initialized type information.
     //
@@ -2089,7 +2106,8 @@ internal static bool freegc(@unsafe.Pointer ptr, uintptr size, bool noscan) {
     if ((~mp).mallocing != 0) {
         @throw(freegcDeadlockˢ);
     }
-    if ((~mp).gsignal == getg()) {
+    var evalᴛ1 = getg();
+    if ((~mp).gsignal == evalᴛ1) {
         @throw(freegcDuringSignalˢ);
     }
     mp.Value.mallocing = 1;
@@ -2150,9 +2168,11 @@ internal static bool freegc(@unsafe.Pointer ptr, uintptr size, bool noscan) {
     // sizeclass here matches what's in span found via spanOf(ptr) or findObject(ptr).
     uint8 sizeclass = default;
     if (size <= (uintptr)(gc.SmallSizeMax - 8)) {
-        sizeclass = gc.SizeToSizeClass8[divRoundUp(size, gc.SmallSizeDiv)];
+        var evalᴛ2 = divRoundUp(size, gc.SmallSizeDiv);
+        sizeclass = gc.SizeToSizeClass8[evalᴛ2];
     } else {
-        sizeclass = gc.SizeToSizeClass128[divRoundUp(size - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv)];
+        var evalᴛ3 = divRoundUp(size - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv);
+        sizeclass = gc.SizeToSizeClass128[evalᴛ3];
     }
 
     var spc = makeSpanClass(sizeclass, noscan);

@@ -66,7 +66,8 @@ internal static ж<T> LoadOrStore⁔<T>(/*this*/ ж<canonMap<T>> Ꮡm, T keyʗp)
         ref var m = ref Ꮡm.DerefOrNull();
         ref var key = ref heap(keyʗp, out var Ꮡkey);
 
-        var hash = m.hash(abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), m.seed);
+        var evalᴛ1 = abi.NoEscape(@unsafe.Pointer.FromPinnedBox(Ꮡkey));
+        var hash = m.hash(evalᴛ1, m.seed);
         System.GC.KeepAlive(Ꮡkey);
 
         ж<indirect<T>> i = default;

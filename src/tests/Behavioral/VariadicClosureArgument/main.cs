@@ -24,7 +24,8 @@ internal static void main() {
     @string @out = "";
     Actionꓸꓸꓸ<@string, any> writeFormat = [GoFunc("main.func1")] (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp;
-        @out += fmt.Sprintf(format, args.ꓸꓸꓸ) + ";"u8;
+        var evalᴛ1 = fmt.Sprintf(format, args.ꓸꓸꓸ);
+        @out += evalᴛ1 + ";"u8;
     };
     header(writeFormat, 2);
     headerNamed(builtin.NilSafeDelegateConversion<logFunc, Actionꓸꓸꓸ<@string, any>>(writeFormat), 3);

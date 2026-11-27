@@ -123,14 +123,16 @@ internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
         }
         var (bs, ok) = byteSlice(v.any); if (ok) {
             // As of Go 1.19, this only allocates for strings longer than 32 bytes.
-            s.buf.WriteString(strconv.Quote((@string)bs));
+            var evalᴛ1 = strconv.Quote((@string)bs);
+            s.buf.WriteString(evalᴛ1);
             return default;
         }
         s.appendString(fmt.Sprintf("%+v"u8, v.Any()));
         break;
     }
     default: {
-        s.buf.ValueSlot = v.append(s.buf.ValueSlot);
+        var evalᴛ2 = v.append(s.buf.ValueSlot);
+        s.buf.ValueSlot = evalᴛ2;
         break;
     }}
     return default;
