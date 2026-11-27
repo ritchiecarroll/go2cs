@@ -40,11 +40,6 @@ workarounds.
      to the corpus universe, and D7 (the pack flip: push-nuget's osx-arm64 map, pack-flavour-guard's osx-arm64 pair,
      release-smoke and aot-smoke off the unbound list) is what makes the osx-arm64 package carry it. Until D7 this entry
      describes the shipped packages unchanged; D7 rewrites it. -->
-<!-- Amended 2026-11-27 (P5): the pack flip is D6 of that design (section 9), not D7, and it is seated on
-     claude/p5-darwin-arm64-d6. The entry still describes the published packages, which carry the darwin/amd64 build on
-     osx-arm64 until the release that ships D6; it is rewritten on that release day, beside the entry in
-     docs/DRAFT-news-next.md ("On Apple silicon the packages carry the arm64 standard library"). The packed stages stay
-     off the flavour probe: they consume packed bytes and build nothing from src/core. -->
 
 The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library
 in the macOS packages is the `darwin/amd64` build, and the same packages serve Intel and Apple-silicon Macs. The
@@ -99,6 +94,12 @@ architecture-specific path in the standard library.
      2026-11-08: the apply lays a linux/arm64 flavour out beside the three (src/core/runtime/linux-arm64/extern.cs,
      src/core/internal/goarch/linux-arm64/zgoarch_arm64.cs). It compiles there and does not run yet, and no package
      ships for it. The darwin and windows flavours are as this entry describes them. -->
+<!-- Amended 2026-11-27 (P5): the pack flip the 2026-11-26 note under the heading calls D7 is D6 of
+     DESIGN-darwin-arm64-flavour.md (section 9), seated on
+     claude/p5-darwin-arm64-d6. The entry still describes the published packages, which carry the darwin/amd64 build on
+     osx-arm64 until the release that ships D6; it is rewritten on that release day, beside the entry in
+     docs/DRAFT-news-next.md ("On Apple silicon the packages carry the arm64 standard library"). The packed stages stay
+     off the flavour probe: they consume packed bytes and build nothing from src/core. -->
 
 
 <a id="the-packages-do-not-ship-linux-arm64"></a>
