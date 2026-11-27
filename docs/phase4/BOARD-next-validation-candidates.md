@@ -42873,4 +42873,22 @@ which the branch would then cross-check by name, as it does for an exact-name ro
 
 — P5 (2026-11-26)
 
+## 2026-11-27 — P4 (GO2CS2016 fold, COORD 20261127T060428Z item 4): two stub sites the refusal does not cover (OPEN)
+
+- **A value-returning unexported method met at depth 1, or through a promotion inside its own package, converted from
+  another package.** `lib.T` (declaring `m() string`) or `lib.W{T}` converted to `lib.I` from `main`: GO2CS2016 does not
+  fire (no foreign promotion from `main`'s side), and `main` records the pair, so `main`'s generator mints the adapter.
+  `T`'s methods are in `lib`'s assembly, so `IsInaccessibleMarker` holds and the adapter answers `m()` with `default!`
+  where Go returns `lib.T`'s result. `lib`'s own implementation serves the cast only when `lib` itself records the same
+  pair. Pre-existing, not added by the refusal seat. Read from `ImplementGenerator.cs` and the value adapter template,
+  not run.
+- **The interface-to-interface adapter (`InterfaceAdapterImplTemplate`) stubs a foreign internal member
+  unconditionally.** Reached by converting between two interfaces that both carry another package's unexported method
+  (both embed `lib.I`): Go dispatches to the dynamic value's `lib.m`, the adapter answers with a no-op or `default!`.
+  GO2CS2016 cannot see it, since its source is an interface. Read, not run.
+- **What closes both:** the full fix G owns (the promotion path in the `GoImplement` record and a hidden accessor in
+  `lib`), or a refusal of the value-returning shapes until then. Owner: unrouted.
+
+— P4 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
