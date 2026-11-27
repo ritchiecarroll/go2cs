@@ -281,3 +281,12 @@ row 7 pieces 2+3, docs/phase4/DESIGN-mn-stdlib-twins.md section 6): go.sync's `L
 go.time's `Sleepꞏtwin` is public. Both are frozen surface of go.sync and go.time, guarded by GolibTests'
 StdlibTwinSurfaceTests. The L-min cost stated above no longer applies to these two calls; it still applies to every other
 plain stdlib call. Still owed with piece 5: a twin-built sync must skip the generator's box forwarder beside this twin.
+
+### Amendment (dated block, 2026-11-27, P4): sync's Wait twin ships public from .5
+
+The owner's ruling, relayed by COORD (docs/phase4/inbox/P4/20261127T194634Z-COORD.md): "Yes, build in .5". go.sync's
+`public static GoTask Waitꞏtwin(this ж<WaitGroup> Ꮡwg)` is frozen surface of go.sync, as `Lockꞏtwin` is, guarded by
+GolibTests' StdlibTwinSurfaceTests (`SyncsWaitTwinTakesTheWaitGroupBox`, and the public-twin list in
+`NoOtherPublicTwinShipsInSyncOrTime`). A Wait with a non-zero count parks instead of holding its carrier. Unlike
+`Lockꞏtwin` it is NOT weak: a call to `wg.Wait()` makes its caller a twin. Design and readings:
+docs/phase4/DESIGN-mn-waitgroup-twin.md. The L-min cost stated above no longer applies to `WaitGroup.Wait` either.
