@@ -29,7 +29,7 @@ using strings = strings_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using httpproxy = vendor.golang.org.x.net.http.httpproxy_package;
 using compress;
@@ -681,7 +681,7 @@ internal static partial (ж<Response>, error err) roundTrip⁔(/*this*/ ж<Trans
 
         for (;;) {
             var selᴛ98 = ctx.Done();
-            switch (trySelect(ᐸꟷ(selᴛ98, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ98, ꓸꓸꓸ))) {
             case 0 when selᴛ98.ꟷᐳ(out _): {
                 req.closeBody();
                 (_ᴛ1, err) = (default, context.Cause(ctx)); goto ᒐdone;
@@ -985,9 +985,9 @@ internal static context.CancelCauseFunc prepareTransportCancel⁔(/*this*/ ж<Tr
     if (t.reqCanceler == nil) {
         t.reqCanceler = new map<ж<Request>, context.CancelCauseFunc>();
     }
-    t.reqCanceler[req] = NilSafeDelegateConversion<context.CancelCauseFunc, Action<error>>(cancel);
+    t.reqCanceler[req] = builtin.NilSafeDelegateConversion<context.CancelCauseFunc, Action<error>>(cancel);
     t.reqMu.Unlock();
-    return NilSafeDelegateConversion<context.CancelCauseFunc, Action<error>>(cancel);
+    return builtin.NilSafeDelegateConversion<context.CancelCauseFunc, Action<error>>(cancel);
 }
 
 // CancelRequest cancels an in-flight request by closing its connection.
@@ -1132,7 +1132,7 @@ internal static error tryPutIdleConn⁔(/*this*/ ж<Transport> Ꮡt, ж<persistC
             }
             pconn.inFlight = false;
             var selᴛ101 = pconn.availch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-            switch (trySelect(selᴛ101)) {
+            switch (builtin.trySelect(selᴛ101)) {
             case 0: {
                 break;
             }
@@ -1711,7 +1711,7 @@ internal static (ж<persistConn>, error err) getConn⁔(/*this*/ ж<Transport> �
                 // what caused r.err; if so, prefer to return the
                 // cancellation error (see golang.org/issue/16049).
                 var selᴛ104 = treq.ctx.Done();
-                switch (trySelect(ᐸꟷ(selᴛ104, ꓸꓸꓸ))) {
+                switch (builtin.trySelect(ᐸꟷ(selᴛ104, ꓸꓸꓸ))) {
                 case 0 when selᴛ104.ꟷᐳ(out _): {
                     var errΔ1 = context.Cause(treq.ctx);
                     if (AreEqual(errΔ1, errRequestCanceled)) {
@@ -3053,7 +3053,7 @@ internal static bool wroteRequest⁔(/*this*/ ж<persistConn> Ꮡpc) {
         ref var pc = ref Ꮡpc.DerefOrNull();
 
         var selᴛ121 = pc.writeErrCh;
-        switch (trySelect(ᐸꟷ(selᴛ121, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ121, ꓸꓸꓸ))) {
         case 0 when selᴛ121.ꟷᐳ(out var err): {
             // Common case: the write happened well before the response, so
             // avoid creating a timer.
@@ -3315,7 +3315,7 @@ internal static (ж<Response> resp, error err) roundTrip⁔(/*this*/ ж<persistC
             }
             case 1 when pcClosedᴛ1.ꟷᐳ(out _): {
                 var rescᴛ2 = resc;
-                switch (trySelect(ᐸꟷ(rescᴛ2, ꓸꓸꓸ))) {
+                switch (builtin.trySelect(ᐸꟷ(rescᴛ2, ꓸꓸꓸ))) {
                 case 0 when rescᴛ2.ꟷᐳ(out var re): {
                     // The pconn closing raced with the response to the request,
                     // probably after the server wrote a response and immediately
@@ -3342,7 +3342,7 @@ internal static (ж<Response> resp, error err) roundTrip⁔(/*this*/ ж<persistC
             }
             case 4 when ctxDoneChanᴛ1.ꟷᐳ(out _): {
                 var rescᴛ3 = resc;
-                switch (trySelect(ᐸꟷ(rescᴛ3, ꓸꓸꓸ))) {
+                switch (builtin.trySelect(ᐸꟷ(rescᴛ3, ꓸꓸꓸ))) {
                 case 0 when rescᴛ3.ꟷᐳ(out var reΔ1): {
                     // readLoop is responsible for canceling req.ctx after
                     // it reads the response body. Check for a response racing

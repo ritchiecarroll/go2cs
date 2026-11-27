@@ -503,7 +503,7 @@ continue_Spans:;
     }
 break_Spans:;
 
-    spans = move2heap(spansᴷ, spans);
+    spans = builtin.move2heap(spansᴷ, spans);
     return spans;
 }
 
@@ -668,7 +668,7 @@ internal static Block paragraph⁔(/*this*/ ref parseDoc d, slice<@string> lines
         }
         defs = append(defsᴷ, defs, def);
     }
-    defs = move2heap(defsᴷ, defs);
+    defs = builtin.move2heap(defsᴷ, defs);
     foreach (var (_, def) in range(defs)) {
         d.Links = append(d.Links, def);
         if (d.links[def.Text] == nil) {
@@ -832,7 +832,7 @@ internal static slice<Text> parseLinkedText⁔(/*this*/ ж<parseDoc> Ꮡd, @stri
         }
         case (byte)']': {
             if (start >= 0) {
-                var (def, ok) = d.links[tmpstring(buf), ꟷ]; if (ok) {
+                var (def, ok) = d.links[builtin.tmpstring(buf), ꟷ]; if (ok) {
                     def.Used = true;
                     flush(start);
                     var evalᴛ1 = text.slice(start + 1, i);

@@ -729,8 +729,8 @@ internal static ж<heapArena> heapArenaOf(uintptr p) {
 internal static void init⁔(/*this*/ ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    lockInit(ref nonnil(ref h).@lock, lockRankMheap);
-    lockInit(ref nonnil(ref h).speciallock, lockRankMheapSpecial);
+    lockInit(ref builtin.nonnil(ref h).@lock, lockRankMheap);
+    lockInit(ref builtin.nonnil(ref h).speciallock, lockRankMheapSpecial);
 
     h.spanalloc.init(/* unsafe.Sizeof(mspan{}) */ (uintptr)160, recordspan, (uintptr)@unsafe.Pointer.FromRef(ref h), Ꮡmemstats.Ꮡmspan_sys);
     h.spanSPMCAlloc.init(/* unsafe.Sizeof(spanSPMC{}) */ (uintptr)56, default, nil, Ꮡmemstats.ᏑgcMiscSys);
@@ -1848,7 +1848,7 @@ internal static void init⁔(/*this*/ ж<mspan> Ꮡspan, uintptr @base, uintptr 
     span.gcmarkBits = default;
     span.pinnerBits = default;
     Ꮡspan.Ꮡstate.set(mSpanDead);
-    lockInit(ref nonnil(ref span).speciallock, lockRankMspanSpecial);
+    lockInit(ref builtin.nonnil(ref span).speciallock, lockRankMspanSpecial);
 }
 
 internal static bool inList⁔(/*this*/ ref mspan span) {

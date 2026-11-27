@@ -708,7 +708,7 @@ internal static ж<Signature> /*rsig*/ arguments⁔(/*this*/ ж<Checker> Ꮡchec
 
         // compute argument signatures: instantiate if needed
         nint j = n;
-        genericArgs = move2heap(genericArgsᴷ, genericArgs);
+        genericArgs = builtin.move2heap(genericArgsᴷ, genericArgs);
         foreach (var (_, i) in range(genericArgs)) {
             var arg = args[i];
             var asig = arg.typ._<ж<Signature>>();

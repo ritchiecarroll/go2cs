@@ -2003,7 +2003,7 @@ keep the emission unchanged where it is already right — a NAMED array element 
 its backing lazily from its own known size, the same exclusion `arrayElemFactory` documents), and an
 assignment TARGET, which carries a value and needs no zero. In the converted standard library the one
 such read is the `entity2` read in `html/escape.cs`.<!-- measured at the
-landing: one line, the read now at html/escape.cs:151 (`entity2[tmpstring(entityName), () => new array<rune>(2)]`) -->
+landing: one line, the read now at html/escape.cs:151 (`entity2[builtin.tmpstring(entityName), () => new array<rune>(2)]`) -->
 
 (Guarded by the `MapArrayValueZero` behavioral test: plain and comma-ok reads, hit and miss, a
 nested element, a named map type read both nil and empty, an unnamed map read both nil and empty,

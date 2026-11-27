@@ -118,7 +118,7 @@ internal static EI append⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, E data)
     if (d.sparse == nil) {
         d.sparse = new map<EI, E>();
     }
-    var id = ConvertToType<EI>(len(d.sparse)) + ConvertToType<EI>(1);
+    var id = builtin.ConvertToType<EI>(len(d.sparse)) + builtin.ConvertToType<EI>(1);
     d.sparse[id] = data;
     return id;
 }
@@ -134,8 +134,8 @@ internal static void compactify⁔<EI, E>(/*this*/ ref dataTable<EI, E> d)
         return;
     }
     // Find the range of IDs.
-    var maxID = ConvertToType<EI>(0);
-    var minID = ~ConvertToType<EI>(0);
+    var maxID = builtin.ConvertToType<EI>(0);
+    var minID = ~builtin.ConvertToType<EI>(0);
     foreach (var (id, _) in d.sparse) {
         if (id > maxID) {
             maxID = id;
@@ -144,23 +144,23 @@ internal static void compactify⁔<EI, E>(/*this*/ ref dataTable<EI, E> d)
             minID = id;
         }
     }
-    if (maxID >= ConvertToType<EI>(math.MaxInt)) {
+    if (maxID >= builtin.ConvertToType<EI>(math.MaxInt)) {
         // We can't create a slice big enough to hold maxID elements
         return;
     }
     // We're willing to waste at most 2x memory.
-    if ((nint)ConvertToUInt64<EI>(maxID - minID) > max(len(d.sparse), 2 * len(d.sparse))) {
+    if ((nint)builtin.ConvertToUInt64<EI>(maxID - minID) > max(len(d.sparse), 2 * len(d.sparse))) {
         return;
     }
-    if ((nint)ConvertToUInt64<EI>(minID) > len(d.sparse)) {
+    if ((nint)builtin.ConvertToUInt64<EI>(minID) > len(d.sparse)) {
         return;
     }
-    nint size = (nint)ConvertToUInt64<EI>(maxID) + 1;
+    nint size = (nint)builtin.ConvertToUInt64<EI>(maxID) + 1;
     d.present = new slice<uint8>((size + 7) / 8);
     d.dense = new slice<E>(size);
     foreach (var (id, data) in d.sparse) {
-        d.dense[(nint)(ConvertToUInt64<EI>(id))] = data;
-        d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] |= (uint8)((uint8)((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))));
+        d.dense[(nint)(builtin.ConvertToUInt64<EI>(id))] = data;
+        d.present[(nint)(builtin.ConvertToUInt64<EI>(id / builtin.ConvertToType<EI>(8)))] |= (uint8)((uint8)((uint8)1 << (int)(builtin.ConvertToUInt64<EI>((id % builtin.ConvertToType<EI>(8))))));
     }
     d.sparse = default;
 }
@@ -170,12 +170,12 @@ internal static void compactify⁔<EI, E>(/*this*/ ref dataTable<EI, E> d)
 internal static (E, bool) get⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, EI id)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
-    if (AreEqual(id, ConvertToType<EI>(0))) {
+    if (AreEqual(id, builtin.ConvertToType<EI>(0))) {
         return (@new<E>().ValueSlot, true);
     }
-    if (ConvertToUInt64<EI>(id) < (uint64)len(d.dense)) {
-        if ((uint8)(d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] & ((uint8)((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))))) != 0) {
-            return (d.dense[(nint)(ConvertToUInt64<EI>(id))], true);
+    if (builtin.ConvertToUInt64<EI>(id) < (uint64)len(d.dense)) {
+        if ((uint8)(d.present[(nint)(builtin.ConvertToUInt64<EI>(id / builtin.ConvertToType<EI>(8)))] & ((uint8)((uint8)1 << (int)(builtin.ConvertToUInt64<EI>((id % builtin.ConvertToType<EI>(8))))))) != 0) {
+            return (d.dense[(nint)(builtin.ConvertToUInt64<EI>(id))], true);
         }
     } else if (d.sparse != nil) {
         var (data, ok) = d.sparse[id, ꟷ]; if (ok) {
@@ -193,7 +193,7 @@ internal static bool forEach⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, Func<EI,
         if ((uint8)(d.present[id / 8] & (((uint8)1).Lsh((int64)(id % 8)))) == 0) {
             continue;
         }
-        if (!yield(ConvertToType<EI>(id), value)) {
+        if (!yield(builtin.ConvertToType<EI>(id), value)) {
             return false;
         }
     }

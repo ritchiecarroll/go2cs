@@ -6,7 +6,7 @@ namespace go.runtime;
 using fmt = fmt_package;
 using slices = slices_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // added for go linkname usage
+/* import _ "unsafe" (nothing to initialize) */ // added for go linkname usage
 
 partial class trace_package {
 

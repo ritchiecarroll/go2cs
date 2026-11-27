@@ -59,7 +59,7 @@ internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).
 internal static ж<kind> kind⁔<T>(/*this*/ Ptr<T> _Δp0)
     where T : Value
 {
-    T x = GoZero<T>();
+    T x = builtin.GoZero<T>();
     var xk = x.kind();
     var (pk, ok) = ᏑptrKinds.Load(xk.OrTypedNil());
     if (!ok) {
@@ -102,7 +102,7 @@ public static T Deref<W, T>(Ptr<W> ptr)
         @base = @base.args[0];
     }
 
-    W y = GoZero<W>();
+    W y = builtin.GoZero<W>();
     return y.wrap(Ꮡ(new op(Δop: "deref", kind: y.kind(), args: [@base], c: off)));
 }
 
@@ -127,7 +127,7 @@ internal static ж<kind> kind⁔<T>(/*this*/ Array<T> _)
     where T : Value
 {
     // TODO: Cache this like Ptr.kind.
-    T x = GoZero<T>();
+    T x = builtin.GoZero<T>();
     return Ꮡ(new kind(typ: "Array["u8 + x.kind().typ + "]"u8, reg: regClassNone));
 }
 

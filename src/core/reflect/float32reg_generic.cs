@@ -14,11 +14,11 @@ partial class reflect_package {
 // zero argument registers, but is not used.
 internal static float32 archFloat32FromReg(uint64 reg) {
     var i = (uint32)reg;
-    return bitcast<uint32, float32>(i);
+    return builtin.bitcast<uint32, float32>(i);
 }
 
 internal static uint64 archFloat32ToReg(float32 val) {
-    return (uint64)(bitcast<float32, uint32>(val));
+    return (uint64)(builtin.bitcast<float32, uint32>(val));
 }
 
 } // end reflect_package

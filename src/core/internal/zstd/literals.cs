@@ -93,7 +93,7 @@ internal static (nint, slice<byte>, error) readRawRLELiterals⁔(/*this*/ ref Re
         }
     }
 
-    outbuf = move2heap(outbufᴷ, outbuf);
+    outbuf = builtin.move2heap(outbufᴷ, outbuf);
     return (off, outbuf, default);
 }
 
@@ -236,7 +236,7 @@ internal static (slice<byte>, error) readLiteralsOneStream⁔(/*this*/ ж<Reader
         rbr.cnt -= (uint32)((uint16)(t & 0xff));
     }
 
-    outbuf = move2heap(outbufᴷ, outbuf);
+    outbuf = builtin.move2heap(outbufᴷ, outbuf);
     return (outbuf, default);
 }
 

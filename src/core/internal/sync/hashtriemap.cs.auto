@@ -60,8 +60,8 @@ internal static partial void initSlow⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> �
         map<K, V> m = default;
         var mapType = abi.TypeOf(m).MapType();
         Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Store(newIndirectNode<K, V>(nil));
-        ht.keyHash = NilSafeDelegateConversion<hashFunc, Func<@unsafe.Pointer, uintptr, uintptr>>(mapType.Hasher);
-        ht.valEqual = NilSafeDelegateConversion<equalFunc, Func<@unsafe.Pointer, @unsafe.Pointer, bool>>(mapType.Value.Elem.Equal);
+        ht.keyHash = builtin.NilSafeDelegateConversion<hashFunc, Func<@unsafe.Pointer, uintptr, uintptr>>(mapType.Hasher);
+        ht.valEqual = builtin.NilSafeDelegateConversion<equalFunc, Func<@unsafe.Pointer, @unsafe.Pointer, bool>>(mapType.Value.Elem.Equal);
         ht.seed = (uintptr)runtime_rand();
 
         Ꮡht.of(HashTrieMap<K, V>.Ꮡinited).Store(1);
@@ -105,7 +105,7 @@ internal static (V value, bool ok) Load⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> 
 // Otherwise, it stores and returns the given value.
 // The loaded result is true if the value was loaded, false if stored.
 internal static (V result, bool loaded) LoadOrStore⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V value) {
-    V result = GoZero<V>();
+    V result = builtin.GoZero<V>();
     bool loaded = default;
     GoFrame ᒐ = default;
     try {
@@ -235,7 +235,7 @@ internal static void Store⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K key,
 // Swap swaps the value for a key and returns the previous value if any.
 // The loaded result reports whether the key was present.
 internal static (V previous, bool loaded) Swap⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V @new) {
-    V previous = GoZero<V>();
+    V previous = builtin.GoZero<V>();
     bool loaded = default;
     GoFrame ᒐ = default;
     try {
@@ -289,7 +289,7 @@ internal static (V previous, bool loaded) Swap⁔<K, V>(/*this*/ ж<HashTrieMap<
         var iʗ1 = i;
         defer(iʗ1.of(indirect<K, V>.Ꮡmu).Unlock, ref ᒐ);
 
-        V zero = GoZero<V>();
+        V zero = builtin.GoZero<V>();
         ж<entry<K, V>> oldEntry = default;
         if (n != nil) {
             // Swap if the keys compare.
@@ -704,7 +704,7 @@ internal static (ж<entry<K, V>>, V, bool) swap⁔<K, V>(/*this*/ ж<entry<K, V>
         i = e.of(entry<K, V>.Ꮡoverflow);
         e = e.of(entry<K, V>.Ꮡoverflow).Load();
     }
-    V zero = GoZero<V>();
+    V zero = builtin.GoZero<V>();
     return (Ꮡhead, zero, false);
 }
 

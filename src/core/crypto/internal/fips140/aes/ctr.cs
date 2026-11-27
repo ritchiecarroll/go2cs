@@ -94,7 +94,7 @@ internal static void XORKeyStreamAt⁔(/*this*/ ж<CTR> Ꮡc, slice<byte> dst, s
         ref var @in = ref heap(new array<byte>(16), out var Ꮡin);
         ref var @out = ref heap(new array<byte>(16), out var Ꮡout);
         copy(@in.slice((nint)(blockOffset)), src);
-        ctrBlocks1(ref nonnil(ref c).b, Ꮡout, Ꮡin, ivlo, ivhi);
+        ctrBlocks1(ref builtin.nonnil(ref c).b, Ꮡout, Ꮡin, ivlo, ivhi);
         nint n = copy(dst, @out.slice((nint)(blockOffset)));
         src = src.slice(n);
         dst = dst.slice(n);
@@ -102,7 +102,7 @@ internal static void XORKeyStreamAt⁔(/*this*/ ж<CTR> Ꮡc, slice<byte> dst, s
     }
 
     while (len(src) >= (nint)(8 * BlockSize)) {
-        ctrBlocks8(ref nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 128)), Ꮡ(array<byte>.Alias(src, 128)), ivlo, ivhi);
+        ctrBlocks8(ref builtin.nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 128)), Ꮡ(array<byte>.Alias(src, 128)), ivlo, ivhi);
         src = src[(int)(8 * BlockSize)..];
         dst = dst[(int)(8 * BlockSize)..];
         (ivlo, ivhi) = add128(ivlo, ivhi, 8);
@@ -110,19 +110,19 @@ internal static void XORKeyStreamAt⁔(/*this*/ ж<CTR> Ꮡc, slice<byte> dst, s
 
     // The tail can have at most 7 = 4 + 2 + 1 blocks.
     if (len(src) >= (nint)(4 * BlockSize)) {
-        ctrBlocks4(ref nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 64)), Ꮡ(array<byte>.Alias(src, 64)), ivlo, ivhi);
+        ctrBlocks4(ref builtin.nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 64)), Ꮡ(array<byte>.Alias(src, 64)), ivlo, ivhi);
         src = src[(int)(4 * BlockSize)..];
         dst = dst[(int)(4 * BlockSize)..];
         (ivlo, ivhi) = add128(ivlo, ivhi, 4);
     }
     if (len(src) >= (nint)(2 * BlockSize)) {
-        ctrBlocks2(ref nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 32)), Ꮡ(array<byte>.Alias(src, 32)), ivlo, ivhi);
+        ctrBlocks2(ref builtin.nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 32)), Ꮡ(array<byte>.Alias(src, 32)), ivlo, ivhi);
         src = src[(int)(2 * BlockSize)..];
         dst = dst[(int)(2 * BlockSize)..];
         (ivlo, ivhi) = add128(ivlo, ivhi, 2);
     }
     if (len(src) >= (nint)(1 * BlockSize)) {
-        ctrBlocks1(ref nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 16)), Ꮡ(array<byte>.Alias(src, 16)), ivlo, ivhi);
+        ctrBlocks1(ref builtin.nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 16)), Ꮡ(array<byte>.Alias(src, 16)), ivlo, ivhi);
         src = src[(int)(1 * BlockSize)..];
         dst = dst[(int)(1 * BlockSize)..];
         (ivlo, ivhi) = add128(ivlo, ivhi, 1);
@@ -133,7 +133,7 @@ internal static void XORKeyStreamAt⁔(/*this*/ ж<CTR> Ꮡc, slice<byte> dst, s
         ref var @in = ref heap(new array<byte>(16), out var Ꮡin);
         ref var @out = ref heap(new array<byte>(16), out var Ꮡout);
         copy(@in[..], src);
-        ctrBlocks1(ref nonnil(ref c).b, Ꮡout, Ꮡin, ivlo, ivhi);
+        ctrBlocks1(ref builtin.nonnil(ref c).b, Ꮡout, Ꮡin, ivlo, ivhi);
         copy(dst, @out[..]);
     }
 }

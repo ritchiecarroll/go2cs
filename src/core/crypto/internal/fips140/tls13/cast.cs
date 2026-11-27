@@ -5,7 +5,7 @@ namespace go.crypto.@internal.fips140;
 
 using bytes = bytes_package;
 using fips140 = go.crypto.@internal.fips140_package;
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using sha256 = go.crypto.@internal.fips140.sha256_package;
 using errors = errors_package;
 using go.crypto.@internal;
@@ -26,7 +26,7 @@ partial class tls13_package {
             0xf7, 0xe3, 0x08, 0x6a, 0x2a, 0xcb, 0x96, 0xc7,
             0xa3, 0x1f, 0xe3, 0x23, 0x56, 0x6e, 0x14, 0x5b
         ]);
-        var es = NewEarlySecret<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), default);
+        var es = NewEarlySecret<hash.Hash>(builtin.widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), default);
         var hs = es.HandshakeSecret(default);
         var ms = hs.MasterSecret();
         var transcript = sha256.New();

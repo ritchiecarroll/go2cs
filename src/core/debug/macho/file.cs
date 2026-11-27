@@ -795,7 +795,7 @@ internal static (slice<@string>, error) ImportedLibraries⁔(/*this*/ ref File f
             all = append(allᴷ, all, lib.Name);
         }
     }
-    all = move2heap(allᴷ, all);
+    all = builtin.move2heap(allᴷ, all);
     return (all, default);
 }
 

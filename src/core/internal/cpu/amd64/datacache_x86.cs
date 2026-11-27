@@ -84,7 +84,7 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
             throw panic("expected levels to be in order and for there to be one data/unified cache per level");
         }
     }
-    caches = move2heap(cachesᴷ, caches);
+    caches = builtin.move2heap(cachesᴷ, caches);
     return caches;
 }
 

@@ -341,7 +341,7 @@ internal static (slice<byte> K, slice<byte> c) kemEncaps1024(/*[1568]*/ ж<array
     var G = g.Sum(default);
     K = G[..(int)(SharedKeySize)];
     var r = G[(int)(SharedKeySize)..];
-    c = pkeEncrypt1024(cc, ref nonnil(ref ek).encryptionKey1024, Ꮡm, r);
+    c = pkeEncrypt1024(cc, ref builtin.nonnil(ref ek).encryptionKey1024, Ꮡm, r);
     return (K, c);
 }
 
@@ -469,7 +469,7 @@ internal static slice<byte> /*K*/ kemDecaps1024(ref DecapsulationKey1024 dk, /*[
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();
-    var m = pkeDecrypt1024(ref nonnil(ref dk).decryptionKey1024, Ꮡc);
+    var m = pkeDecrypt1024(ref builtin.nonnil(ref dk).decryptionKey1024, Ꮡc);
     var g = sha3.New512();
     g.Write(m[..]);
     g.Write(dk.h[..]);
@@ -481,7 +481,7 @@ internal static slice<byte> /*K*/ kemDecaps1024(ref DecapsulationKey1024 dk, /*[
     var Kout = new slice<byte>(SharedKeySize);
     J.Read(Kout);
     ref var cc = ref heap(new array<byte>(1568), out var Ꮡcc);
-    var c1 = pkeEncrypt1024(Ꮡcc, ref nonnil(ref dk).encryptionKey1024, Ꮡ(array<byte>.Alias(m, 32)), r);
+    var c1 = pkeEncrypt1024(Ꮡcc, ref builtin.nonnil(ref dk).encryptionKey1024, Ꮡ(array<byte>.Alias(m, 32)), r);
 
     subtle.ConstantTimeCopy(subtle.ConstantTimeCompare(c[..], c1), Kout, Kprime);
     return Kout;

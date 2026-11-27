@@ -546,7 +546,7 @@ public static slice<byte> AppendMarker(slice<byte> dst, uint64 id) {
     array<byte> buf = new(33); /* len(prefix) + 16 + 1 */
     copy(buf[..], prefix);
     for (nint i = 0; i < 16; i++) {
-        buf[len(prefix) + i] = LiteralByteAt("0123456789abcdef"u8, (id >> 60));
+        buf[len(prefix) + i] = builtin.LiteralByteAt("0123456789abcdef"u8, (id >> 60));
         id <<= 4;
     }
     buf[len(prefix) + 16] = (byte)']';

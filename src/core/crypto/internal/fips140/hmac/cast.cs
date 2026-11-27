@@ -25,7 +25,7 @@ partial class hmac_package {
             0x4f, 0x12, 0x73, 0x23, 0x73, 0x77, 0x66, 0x05,
             0x10, 0xee, 0x57, 0x6b, 0x3a, 0xc7, 0x14, 0x41
         ]);
-        var h = New<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), input);
+        var h = New<hash.Hash>(builtin.widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), input);
         h.Write(input);
         h.Write(input);
         var got = h.Sum(default); if (!bytes.Equal(got, want)) {

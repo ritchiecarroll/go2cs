@@ -5,7 +5,7 @@ namespace go.crypto.@internal.fips140;
 
 using bytes = bytes_package;
 using fips140 = go.crypto.@internal.fips140_package;
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using sha512 = go.crypto.@internal.fips140.sha512_package;
 using errors = errors_package;
 using sync = sync_package;
@@ -65,7 +65,7 @@ internal static void fipsPCT<P>(ж<Curve<P>> c, ж<PrivateKey> k)
         var hash = testHash();
         var evalᴛ1 = P256();
         var evalᴛ2 = bits2octets<P256PointжPoint>(ref (evalᴛ1).DerefOrNull(), hash);
-        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.Value.d, evalᴛ2, default);
+        var drbg = newDRBG<hash.Hash>(builtin.widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.Value.d, evalᴛ2, default);
         var (sig, err) = sign(ref (c).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
         if (err != nil) {
             return err;
@@ -100,7 +100,7 @@ internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc([GoFun
             0x8a, 0x60, 0xae, 0x52, 0x31, 0xe4, 0x2e, 0x4e
         ]
         ));
-        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), Z, default, (plainPersonalizationString)persStr);
+        var drbg = newDRBG<hash.Hash>(builtin.widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), Z, default, (plainPersonalizationString)persStr);
         var (got, err) = sign<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
         if (err != nil) {
             return err;
@@ -135,7 +135,7 @@ internal static void initᴛfipsSelfTestDeterministic() { fipsSelfTestDeterminis
         ));
         var evalᴛ3 = P256();
         var evalᴛ4 = bits2octets<P256PointжPoint>(ref (evalᴛ3).DerefOrNull(), hash);
-        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.d, evalᴛ4, default);
+        var drbg = newDRBG<hash.Hash>(builtin.widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.d, evalᴛ4, default);
         var (got, err) = sign<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
         if (err != nil) {
             return err;

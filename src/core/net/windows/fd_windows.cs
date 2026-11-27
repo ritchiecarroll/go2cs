@@ -215,7 +215,7 @@ internal static (syscall.Sockaddr, error) connect⁔(/*this*/ ж<netFD> Ꮡfd, c
         {
             var err = Ꮡfd.Ꮡpfd.ConnectEx(ra); if (err != nil) {
                 var selᴛ9 = ctx.Done();
-                switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
+                switch (builtin.trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
                 case 0 when selᴛ9.ꟷᐳ(out _): {
                     return (default, mapErr(ctx.Err()));
                 }

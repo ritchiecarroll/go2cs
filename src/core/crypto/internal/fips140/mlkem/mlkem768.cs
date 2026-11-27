@@ -374,7 +374,7 @@ internal static (slice<byte> K, slice<byte> c) kemEncaps(/*[1088]*/ ж<array<byt
     var G = g.Sum(default);
     K = G[..(int)(SharedKeySize)];
     var r = G[(int)(SharedKeySize)..];
-    c = pkeEncrypt(cc, ref nonnil(ref ek).encryptionKey, Ꮡm, r);
+    c = pkeEncrypt(cc, ref builtin.nonnil(ref ek).encryptionKey, Ꮡm, r);
     return (K, c);
 }
 
@@ -496,7 +496,7 @@ internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, /*[1088]
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();
-    var m = pkeDecrypt(ref nonnil(ref dk).decryptionKey, Ꮡc);
+    var m = pkeDecrypt(ref builtin.nonnil(ref dk).decryptionKey, Ꮡc);
     var g = sha3.New512();
     g.Write(m[..]);
     g.Write(dk.h[..]);
@@ -508,7 +508,7 @@ internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, /*[1088]
     var Kout = new slice<byte>(SharedKeySize);
     J.Read(Kout);
     ref var cc = ref heap(new array<byte>(1088), out var Ꮡcc);
-    var c1 = pkeEncrypt(Ꮡcc, ref nonnil(ref dk).encryptionKey, Ꮡ(array<byte>.Alias(m, 32)), r);
+    var c1 = pkeEncrypt(Ꮡcc, ref builtin.nonnil(ref dk).encryptionKey, Ꮡ(array<byte>.Alias(m, 32)), r);
 
     if (testingOnlyRejectionOutcome != nil) {
         testingOnlyRejectionOutcome(subtle.ConstantTimeCompare(c[..], c1));

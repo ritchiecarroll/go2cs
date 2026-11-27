@@ -9,7 +9,7 @@
 namespace go.math;
 
 using bits = go.math.bits_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using go.math;
 
 partial class big_package {

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140.nistec;
 
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 
 partial class fiat_package {
 

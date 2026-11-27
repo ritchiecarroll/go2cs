@@ -100,7 +100,7 @@ internal static termlist norm⁔(/*this*/ termlist xl) {
         }
         rl = append(rlᴷ, rl, xi);
     }
-    rl = move2heap(rlᴷ, rl);
+    rl = builtin.move2heap(rlᴷ, rl);
     return rl;
 }
 

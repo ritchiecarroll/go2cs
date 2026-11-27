@@ -437,14 +437,14 @@ partial struct Float64 {
 //go:nosplit
 internal static float64 Load⁔(/*this*/ ж<Float64> Ꮡf) {
     var r = Ꮡf.Ꮡu.Load();
-    return bitcast<uint64, float64>(r);
+    return builtin.bitcast<uint64, float64>(r);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
 internal static void Store⁔(/*this*/ ж<Float64> Ꮡf, float64 value) {
-    Ꮡf.Ꮡu.Store(bitcast<float64, uint64>(value));
+    Ꮡf.Ꮡu.Store(builtin.bitcast<float64, uint64>(value));
 }
 
 // UnsafePointer is an atomically accessed unsafe.Pointer value.

@@ -27,7 +27,7 @@ using strings = strings_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using System.Runtime.CompilerServices;
 using crypto;
@@ -3096,7 +3096,7 @@ internal static partial void HandleFunc⁔(/*this*/ ж<ServeMux> Ꮡmux, @string
     if (use121) {
         Ꮡmux.Ꮡmux121.handleFunc(pattern, handler);
     } else {
-        Ꮡmux.register(pattern, new HandlerFuncᴠHandler(NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
+        Ꮡmux.register(pattern, new HandlerFuncᴠHandler(builtin.NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
     }
 }
 
@@ -3116,7 +3116,7 @@ public static partial void HandleFunc(@string pattern, Action<ResponseWriter, ж
     if (use121) {
         DefaultServeMux.Ꮡmux121.handleFunc(pattern, handler);
     } else {
-        DefaultServeMux.register(pattern, new HandlerFuncᴠHandler(NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
+        DefaultServeMux.register(pattern, new HandlerFuncᴠHandler(builtin.NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
     }
 }
 

@@ -1245,7 +1245,7 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges⁔(/*this*/ ж<Data> 
         }
     }
 
-    ret = move2heap(retᴷ, ret);
+    ret = builtin.move2heap(retᴷ, ret);
     return (ret, default);
 }
 

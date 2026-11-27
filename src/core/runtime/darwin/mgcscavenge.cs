@@ -346,7 +346,7 @@ internal static void init⁔(/*this*/ ж<scavengerState> Ꮡs) {
     if (s.g != nil) {
         @throw(scavengerStateIsAlreadyˢ);
     }
-    lockInit(ref nonnil(ref s).@lock, lockRankScavenge);
+    lockInit(ref builtin.nonnil(ref s).@lock, lockRankScavenge);
     s.g = getg();
 
     s.timer = @new<timer>();

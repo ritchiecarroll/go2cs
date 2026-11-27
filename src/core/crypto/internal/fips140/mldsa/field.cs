@@ -123,7 +123,7 @@ partial struct ringElement /*[256]fieldElement*/;
 internal static T /*s*/ polyAdd<T>(T a, T b)
     where T : /* ~[256]crypto/internal/fips140/mldsa.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = GoZero<T>();
+    T s = builtin.GoZero<T>();
 
     foreach (var i in range(len(s))) {
         s[i] = fieldAdd(a[i], b[i]);
@@ -135,7 +135,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 internal static T /*s*/ polySub<T>(T a, T b)
     where T : /* ~[256]crypto/internal/fips140/mldsa.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = GoZero<T>();
+    T s = builtin.GoZero<T>();
 
     foreach (var i in range(len(s))) {
         s[i] = fieldSub(a[i], b[i]);
@@ -295,7 +295,7 @@ internal static ringElement inverseNTT(nttElement f) {
         }
     }
 
-    foreach (var i in range(len(f))) {
+    foreach (var i in range(builtin.len(f))) {
         f[i] = fieldMontgomeryMul(f[i], 16382); // 16382 = 256⁻¹ * R mod q
     }
     return ((ringElement)(array<fieldElement>)f).Clone();

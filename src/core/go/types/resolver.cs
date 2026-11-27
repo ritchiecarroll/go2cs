@@ -641,7 +641,7 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
         break;
     }}
 
-    tparams = move2heap(tparamsᴷ, tparams);
+    tparams = builtin.move2heap(tparamsᴷ, tparams);
     return (ptr, @base, tparams);
 }
 
@@ -775,12 +775,12 @@ internal static void packageObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
             }
         }
         // phase 2: alias type declarations
-        aliasList = move2heap(aliasListᴷ, aliasList);
+        aliasList = builtin.move2heap(aliasListᴷ, aliasList);
         foreach (var (_, obj) in range(aliasList)) {
             Ꮡcheck.objDecl(new TypeNameжObject(obj));
         }
         // phase 3: all other declarations
-        othersList = move2heap(othersListᴷ, othersList);
+        othersList = builtin.move2heap(othersListᴷ, othersList);
         foreach (var (_, obj) in range(othersList)) {
             Ꮡcheck.objDecl(obj);
         }

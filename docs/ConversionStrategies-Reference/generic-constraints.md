@@ -341,8 +341,8 @@ The companion **shift-*count*** case —
 `1 << (id % 8)` where the count is a numeric type parameter, coerced to `int` by `intCastOperand`
 (the same coercion the shift-width machinery uses) — routes through the same bridge, with the constant
 operand materialized as the type parameter:
-`(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))` (a bare `(int)(EI)` is CS0030).
-<!-- src/core/internal/trace/base.cs:163 `(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))`.
+`(uint8)1 << (int)(builtin.ConvertToUInt64<EI>((id % builtin.ConvertToType<EI>(8))))` (a bare `(int)(EI)` is CS0030).
+<!-- src/core/internal/trace/base.cs:163 `(uint8)1 << (int)(builtin.ConvertToUInt64<EI>((id % builtin.ConvertToType<EI>(8))))`.
 at the fix: cleared ~11 of internal/trace's index CS1503/CS0030 (17 -> 6) and its last two shift-count CS0030
 (6 -> 4). --> Guarded by `NamedNumericSliceIndex` (a generic `lookup[K ~uint64]`
 indexing by the type parameter and an arithmetic result, a `pick` indexing by a named `int64`, a

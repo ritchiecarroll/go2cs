@@ -71,11 +71,11 @@ internal static (nint, error) Write⁔(/*this*/ ж<macGeneric> Ꮡh, slice<byte>
         }
         p = p.slice(n);
         h.offset = 0;
-        updateGeneric(ref nonnil(ref h).macState, h.buffer[..]);
+        updateGeneric(ref builtin.nonnil(ref h).macState, h.buffer[..]);
     }
     {
         nint n = len(p) - (len(p) % (nint)TagSize); if (n > 0) {
-            updateGeneric(ref nonnil(ref h).macState, p.slice(0, n));
+            updateGeneric(ref builtin.nonnil(ref h).macState, p.slice(0, n));
             p = p.slice(n);
         }
     }

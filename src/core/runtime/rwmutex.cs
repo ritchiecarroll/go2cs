@@ -59,8 +59,8 @@ internal static void init⁔(/*this*/ ж<rwmutex> Ꮡrw, lockRank readRank, lock
 
     rw.readRank = readRank;
 
-    lockInit(ref nonnil(ref rw).rLock, readRankInternal);
-    lockInit(ref nonnil(ref rw).wLock, writeRank);
+    lockInit(ref builtin.nonnil(ref rw).rLock, readRankInternal);
+    lockInit(ref builtin.nonnil(ref rw).wLock, writeRank);
 }
 
 internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;

@@ -18,7 +18,7 @@ using fmt = fmt_package;
 using hash = hash_package;
 using cpu = go.@internal.cpu_package;
 using runtime = runtime_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using chacha20poly1305 = vendor.golang.org.x.crypto.chacha20poly1305_package;
 using go.@internal;
 using go.crypto;

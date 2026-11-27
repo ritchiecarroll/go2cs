@@ -64,7 +64,7 @@ internal static (nint n, error err) read⁔(/*this*/ ж<pipe> Ꮡp, slice<byte> 
     ref var p = ref Ꮡp.DerefOrNull();
 
     var selᴛ1 = p.done;
-    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out _): {
         return (0, Ꮡp.readCloseError());
     }
@@ -105,7 +105,7 @@ internal static (nint n, error err) write⁔(/*this*/ ж<pipe> Ꮡp, slice<byte>
         ref var p = ref Ꮡp.DerefOrNull();
 
         var selᴛ4 = p.done;
-        switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
         case 0 when selᴛ4.ꟷᐳ(out _): {
             (n, err) = (0, Ꮡp.writeCloseError()); goto ᒐdone;
         }

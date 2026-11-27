@@ -46,10 +46,10 @@ partial struct mcentral {
 // Initialize a single central free list.
 internal static void init⁔(/*this*/ ref mcentral c, spanClass spc) {
     c.spanclass = spc;
-    lockInit(ref nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
-    lockInit(ref nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
-    lockInit(ref nonnil(ref c).full[0].spineLock, lockRankSpanSetSpine);
-    lockInit(ref nonnil(ref c).full[1].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).full[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).full[1].spineLock, lockRankSpanSetSpine);
 }
 
 // partialUnswept returns the spanSet which holds partially-filled
