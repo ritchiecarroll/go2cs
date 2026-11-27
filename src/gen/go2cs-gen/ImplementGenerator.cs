@@ -1095,7 +1095,12 @@ public class ImplementGenerator : ISourceGenerator
                         string simpleName = GetSimpleName(method.Name);
 
                         if (!forwardReceivers.ContainsKey(simpleName))
+                        {
                             forwardReceivers[simpleName] = $"m_box.Value.{interfaceFieldName}";
+                            // Bound through an interface field: the field's member is public in C#, so the
+                            // inaccessible-marker stub must not pre-empt this forward (see the arms above).
+                            interfaceFieldForwards.Add(simpleName);
+                        }
                     }
                 }
 
