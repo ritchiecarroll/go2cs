@@ -38,7 +38,7 @@ namespace go.golib;
 /// The resolver a converted cgo package registers for its own assembly (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §6.2).
 /// The converter emits only the data: the package's libraries, and a module initializer that registers them.
 /// </summary>
-[EditorBrowsable(EditorBrowsableState.Never)] public static class GoCgoLibraries
+[EditorBrowsable(EditorBrowsableState.Never)] public static partial class GoCgoLibraries
 {
     /// <summary>Registers the resolver for <paramref name="assembly"/>'s own <c>[LibraryImport]</c> bindings.</summary>
     public static void Register(Assembly assembly, params GoCgoLibrary[] libraries) => Register(assembly, "", libraries);
@@ -208,13 +208,9 @@ namespace go.golib;
             if (OperatingSystem.IsMacOS() && !name.StartsWith('/'))
                 throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which is not an absolute install name: darwin loads a captured library only by its absolute path, since dyld's search for a bare name reaches the current directory; the current directory is never searched (docs/Limitations.md#cgo)");
 
-            nint handle;
+            nint handle = OperatingSystem.IsWindows() ? LoadOnWindows(name, assembly) : NativeLibrary.TryLoad(name, out nint loaded) ? loaded : 0;
 
-            bool loaded = OperatingSystem.IsWindows() ?
-                NativeLibrary.TryLoad(name, assembly, DllImportSearchPath.SafeDirectories | DllImportSearchPath.AssemblyDirectory, out handle) :
-                NativeLibrary.TryLoad(name, out handle);
-
-            if (loaded)
+            if (handle != 0)
                 return handle;
 
             throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}; the current directory is never searched (docs/Limitations.md#cgo)");
@@ -222,4 +218,28 @@ namespace go.golib;
 
         return 0;
     }
+
+    // On windows a bound library loads from the assembly's directory, then the application directory, System32 and the
+    // AddDllDirectory directories, and its DEPENDENTS are held to the same places: LoadLibraryExW's LOAD_LIBRARY_SEARCH
+    // flags apply to the library and every dependency it loads. NativeLibrary.TryLoad with DllImportSearchPath flags did
+    // not hold the dependents: a dependent only in the current directory loaded
+    // (TestCgoResolveHoldsABoundLibrarysDependentsOutOfTheCurrentDirectory, b927d8e4fb, cgo-e2e 46064580544 and
+    // 46064584096), the shape Phase 4's side library measured first (TestCgoPhase4H, 46054089826).
+    private static nint LoadOnWindows(string name, Assembly assembly)
+    {
+        string directory = assembly.Location.Length > 0 ? Path.GetDirectoryName(assembly.Location)! : AppContext.BaseDirectory;
+        string beside = Path.GetFullPath(Path.Combine(directory, name));
+
+        nint handle = File.Exists(beside) ? LoadLibraryExW(beside, 0, LoadLibrarySearchDllLoadDir | LoadLibrarySearchDefaultDirs) : 0;
+
+        return handle != 0 ? handle : LoadLibraryExW(name, 0, LoadLibrarySearchDefaultDirs);
+    }
+
+    // LoadLibraryExW's search flags (libloaderapi.h): the loaded library's own directory, and the application directory,
+    // System32 and the AddDllDirectory directories, for the library and every dependency it loads.
+    private const uint LoadLibrarySearchDllLoadDir = 0x00000100;
+    private const uint LoadLibrarySearchDefaultDirs = 0x00001000;
+
+    [LibraryImport("kernel32.dll", EntryPoint = "LoadLibraryExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
+    private static partial nint LoadLibraryExW(string fileName, nint file, uint flags);
 }
