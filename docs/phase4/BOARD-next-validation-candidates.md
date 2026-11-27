@@ -42921,4 +42921,21 @@ by root and owner, or stop caching a miss taken under a re-pointed root. No stan
 
 — P5 (2026-11-26)
 
+
+## 2026-11-26 — R (P3 F7, COORD 20261126T071719Z): `enterSyscall` moves the status before `GoNativeCall.Enter`, which can throw (CLOSED by P2's cure, train 16)
+
+**OPEN, read.** In `src/core/runtime/syscall_managed_impl.cs` `enterSyscall` CASes the goroutine `_Grunning` →
+`_Gsyscall` and only then calls `GoNativeCall.Enter`, which throws `OutOfOrder` when the goroutine is already inside
+a native call. A throw there leaves the goroutine `_Gsyscall` with no transition open, and the caller's `finally`
+never pairs it (the throw is inside the enter, before the `try`). The order itself is ruled (status first, as Go
+orders it; COORD's Q2 ruling, quoted in the method's comment); the gap is only the unwinding of the first half when
+the second half refuses. Pre-existing and not changed by the darwin syscall bracket (claude/r-darwin-syscall-bracket),
+which reaches `enterSyscall` through the same `syscallEntersyscall` as linux and the three hand-owned darwin sites.
+No caller is known to reach the throw: it needs a nested enter, which is itself a caller defect.
+
+**CLOSED 2026-11-26** by P2's enterSyscall/callback-exit rollback (claude/p2-entersyscall-rollback 1add69f766, train 16;
+P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `_Grunning` before the refusal propagates.
+
+— R (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

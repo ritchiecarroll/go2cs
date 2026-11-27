@@ -169,6 +169,9 @@
        classes above are linux-only ones. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
     <Compile Remove="DarwinNativeTransitionTests.cs" />
+    <!-- The darwin syscall bracket's rows (docs/phase4/DESIGN-darwin-syscall-bracket.md) drive syscall's
+         GoSyscallnCall/GoRawSyscallnCall seams and the darwin keystones, which the darwin flavour alone declares. -->
+    <Compile Remove="DarwinSyscallBracketTests.cs" />
   </ItemGroup>
 
   <!-- S3's arm64 Stat_t mirror and its GoNativeStatLayoutProbe live in syscall/linux-arm64/, which only the
