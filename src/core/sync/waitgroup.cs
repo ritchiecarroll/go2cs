@@ -37,7 +37,7 @@ using WaitReason = go.golib.WaitReason;
 // hand-owned file. One table entry per statement, each followed by a zero entry, so every other
 // line of the file still reports its own C# position. repoguard's TestHandOwnedGoStatementsMapToGo
 // checks it.
-[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIYC3AMAANsD")]
+[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIwC3AMAANsD")]
 
 namespace go;
 
@@ -293,9 +293,8 @@ public static void Go(this ж<WaitGroup> Ꮡwg, Action f) {
 // The front is not async, so the zero-count return allocates nothing; the await runs outside Gate.
 //
 // NOT WEAK: a Wait with a non-zero count always parks, and its caller is exactly the goroutine that must give its carrier
-// back, so a call to Wait makes its caller a twin. Wait is hand-written, so its twin is too, after Go so the go statement
-// keeps the line its position record names. (In a twin build the generator runs over sync as well, sees this twin, and
-// emits none of its own, as for Lockꞏtwin.)
+// back, so a call to Wait makes its caller a twin. Wait is hand-written, so its twin is too. (In a twin build the generator
+// runs over sync as well, sees this twin, and emits none of its own, as for Lockꞏtwin.)
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public static GoTask Waitꞏtwin(this ж<WaitGroup> Ꮡwg) {
     if (!GoScheduler.OnCarrier) {

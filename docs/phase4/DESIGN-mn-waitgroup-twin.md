@@ -29,8 +29,11 @@ cost more than it saves (N1). A `Wait` with a non-zero count always parks, and i
 that must give their carrier back, so a caller that parks only through `wg.Wait()` becomes a twin. That is the selection
 change this seat makes, and the census in section 6 counts it.
 
-Placed AFTER `Go` in the file, so the `go` statement in `Go` keeps its line and the hand-kept `GoPositionMap` record
-(repoguard `TestHandOwnedGoStatementsMapToGo`) does not move.
+Placed after `Go` in the file. The lines the seat adds ABOVE `Go` (three aliases, the waker's slot wake and two
+comment lines) move its `go` statement from line 263 to 269, so the hand-kept `GoPositionMap` record is re-encoded for
+the new line (the same Go line, 238) and the two conversion-strategy notes that cite it are re-cited (repoguard
+`TestHandOwnedGoStatementsMapToGo` and `TestDocsProvenanceNotesResolve`, both red until then). The first draft of this
+note said the record would not move; that was wrong.
 
 ## 3. The body
 
