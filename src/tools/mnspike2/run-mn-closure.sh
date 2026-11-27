@@ -15,6 +15,8 @@
 # switches); build Release; run Q1_CLOSURE_RUNS times (default 3) under GO2CS_MN=1 GO2CS_MN_READING=1 with GOMAXPROCS as
 # the caller set it; compare each run's stdout, READING lines removed, with `go run` of the program on this machine
 # (go-output.txt, committed, is the fallback when go run fails). Prints one READING line per run and a summary line.
+# Each run's READING line carries wall=<ms>, the run's wall clock including the deadline's 1 s poll, so read it as
+# coarse (about +-1 s): row 14's A/A pair (run-row14-arms.sh) is what bounds it.
 #
 # With the standard library twinned, the build twins every converted package IN PLACE under src/core: a later plain
 # build of the same tree rebuilds them. Run it after the Q1 kit, not before.
@@ -42,6 +44,8 @@ summary="$out/summary.txt"
 : > "$summary"
 note() { echo "$*" | tee -a "$summary"; }
 fail() { note "READING closure FAILURE $*"; exit 1; }
+# Milliseconds since the epoch; date's %N where it exists (GNU), whole seconds otherwise (the bash 3.2 macOS ships).
+now_ms() { local n; n=$(date +%s%N 2>/dev/null); case "$n" in *N|"") echo $(( $(date +%s) * 1000 )) ;; *) echo $(( n / 1000000 )) ;; esac; }
 
 goos_arg=()
 [ -n "${Q1_GOOS:-}" ] && goos_arg=("-p:GoTargetOS=$Q1_GOOS")
@@ -91,18 +95,20 @@ fi
 
 bad=0
 for r in $(seq 1 "$runs"); do
+    r0=$(now_ms)
     run_deadline "$timeout_s" "$out/run$r.stack" sh -c 'cd "$1" && exec env GO2CS_MN=1 GO2CS_MN_READING=1 dotnet "$2"' sh "$(dirname "$dll")" "$dll" \
         > "$out/run$r.stdout" 2> "$out/run$r.stderr"
     c=$?
+    wall=$(( $(now_ms) - r0 ))
     if [ $c -eq 124 ]; then
         bad=$((bad + 1))
-        note "READING closure run$r HUNG at ${timeout_s}s, killed | stacks: run$r.stack ($(wc -l < "$out/run$r.stack" | tr -d ' ') lines) | stdout $(wc -c < "$out/run$r.stdout" | tr -d ' ') bytes"
+        note "READING closure run$r HUNG at ${timeout_s}s, killed wall=${wall}ms | stacks: run$r.stack ($(wc -l < "$out/run$r.stack" | tr -d ' ') lines) | stdout $(wc -c < "$out/run$r.stdout" | tr -d ' ') bytes"
         continue
     fi
     grep -v 'READING' "$out/run$r.stdout" | tr -d '\r' > "$out/run$r.cmp"
     if cmp -s "$out/run$r.cmp" "$ref"; then eq=EQUAL; else eq=DIFFER; diff "$ref" "$out/run$r.cmp" > "$out/run$r.diff"; fi
     [ $c -eq 0 ] && [ $eq = EQUAL ] || bad=$((bad + 1))
-    note "READING closure run$r exit=$c $eq | $(grep -h 'READING go-scheduler' "$out/run$r.stdout" "$out/run$r.stderr" | head -1 | tr -d '\r')"
+    note "READING closure run$r exit=$c $eq wall=${wall}ms | $(grep -h 'READING go-scheduler' "$out/run$r.stdout" "$out/run$r.stderr" | head -1 | tr -d '\r')"
 done
 
 [ $bad -eq 0 ] && note "READING closure PASS runs=$runs equal=$runs" || fail "runs=$runs bad=$bad"
