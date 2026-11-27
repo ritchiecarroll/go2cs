@@ -774,13 +774,11 @@ func colorInto(dst unsafe.Pointer) _Ctype_int {
 var __cgofn__cgo_55dd9c1e1280_Cfunc_memset byte
 var _cgo_55dd9c1e1280_Cfunc_memset = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_memset)
 
-type _Ctype_uint uint32
-
 type _Ctype___uint64_t = _Ctype_ulong
 
 type _Ctype_uint64_t = _Ctype___uint64_t
 
-type _Ctype_go2cs_probe_color = _Ctype_uint
+type _Ctype_go2cs_probe_color uint32
 
 //go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into
 //go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into _cgo_55dd9c1e1280_Cfunc_go2cs_probe_wide_into
@@ -833,9 +831,11 @@ func _Cfunc_memset(p0 unsafe.Pointer, p1 _Ctype_int, p2 _Ctype_size_t) (r1 unsaf
 		t.Errorf("the call does not read %q", want)
 	}
 
-	// The near misses name their own typedef, never what it aliases: the typedef of a typedef stops at the name the
-	// parameter was declared at, and the enum's typedef is not its uint.
-	for _, want := range []string{"(Cꓸuint64_t)(0x123456789UL)", "(Cꓸgo2cs_probe_color)(4)"} {
+	// The near misses. The typedef of a typedef stops at the name the parameter was declared at (Cꓸuint64_t); the hosted
+	// probe 45908623601 read the pre-cure `(_Ctype_uint64_t)` and CS0246 on linux, darwin and windows. cmd/cgo declares
+	// a typedef'd enum as a DEFINED type (`type _Ctype_go2cs_probe_color uint32`), never an alias, so it already read
+	// `(C.go2cs_probe_color)` before the cure; its line guards that the cure leaves a defined C type's spelling alone.
+	for _, want := range []string{"(Cꓸuint64_t)(0x123456789UL)", "(C.go2cs_probe_color)(4)"} {
 		if !strings.Contains(converted, want) {
 			t.Errorf("the near miss does not read %q; the calls read:\n%s", want, cgoLinesContaining(converted, "_into("))
 		}
