@@ -198,6 +198,37 @@ net's `var ctx, cancel = context.WithCancel(context.Background())` is the corpus
 `GlobalTupleVarDecl` extension — a local `var si, fi = ifaceAndFunc()` returning an interface and a
 func, both read back.)
 
+## A typed var spec with one multi-result call deconstructs, then converts each result
+A function-local `var a, b T = pair()` declares both names with the type `T` and assigns each one result of the call, converted to `T` as an assignment does. It is emitted as a deconstruction into temporaries followed by one typed declaration per name. Each temporary is named after its variable with a `ᴛ` suffix, and a blank name becomes the C# discard `_`.
+
+```go
+type I interface{ Name() string }
+
+func ab() (A, *B) { return A{"a"}, &B{2} }
+
+var x, y I = ab()
+```
+
+<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:45-47 -->
+```csharp
+var (xᴛ1, yᴛ1) = ab();
+I x = xᴛ1;
+I y = new BжI(yᴛ1);
+```
+
+Each result goes through the conversion its own type needs. A pointer to an interface goes through its adapter (`BжI` above). A value of `any` takes the empty-interface boxing. A func value of another func type takes the nil-safe delegate conversion, so a nil func value stays nil:
+
+<!-- source: src/tests/Behavioral/MultiVarDeclTuple/main.cs.target:55-57 -->
+```csharp
+var (fᴛ1, gᴛ1) = funcs();
+Action<error> f = builtin.NilSafeDelegateConversion<Action<error>, cancelFunc>(fᴛ1);
+Action<error> g = builtin.NilSafeDelegateConversion<Action<error>, cancelFunc>(gᴛ1);
+```
+
+Without this form, the declaration assigned the whole result tuple to the first name and the zero value to the rest. C# accepts that without complaint wherever the tuple converts to `T`, as it does for `any` and other interfaces, so `var a, b any = pair()` printed `{1 x} <nil>` where Go prints `1 x`. A func-typed `T` failed to compile (CS0029). Like the untyped branch above, it is gated to names with no heap box. <!-- 2026-11-27, P6 F6: found from the F2/F3 seat's review probe (`var a, b func(error) = pair()`), confirmed silent for `any` by COORD at 317b273e58; typedTupleElementConversion in visitValueSpec.go. -->
+
+Guarded by `MultiVarDeclTuple`, compared with Go. It covers `any`, an interface whose two results both need a conversion, an interface where one result already has the declared type, func-typed targets including a nil value, and blank names.
+
 ---
 
 [← Short Variable Redeclaration (Shadowing)](shadowing.md) · [Index](README.md) · [Slices and Arrays →](slices-and-arrays.md)

@@ -157,6 +157,47 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 			}
 		}
 
+		// A FUNCTION-LOCAL `var a, b T = pair()` — a TYPED spec fed by ONE multi-value call — takes each
+		// result in turn, converted to T, as an assignment does. The per-name loop below has no such
+		// form: it assigned the WHOLE tuple to the first name and defaulted the rest, which C# accepts
+		// silently wherever the tuple converts to T (`any`, an interface: `{1 x} <nil>` where Go prints
+		// `1 x`) and refuses elsewhere (a func type, CS0029). Deconstruct into temps, then declare each
+		// name from its temp through typedTupleElementConversion. Gated, like the untyped branch below,
+		// to names with no heap box.
+		if v.inFunction && valueSpec.Type != nil && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
+			if _, isCall := ast.Unparen(valueSpec.Values[0]).(*ast.CallExpr); isCall {
+				tuple, isTuple := v.info.TypeOf(valueSpec.Values[0]).(*types.Tuple)
+
+				if isTuple && tuple.Len() == len(valueSpec.Names) && !v.anyNameHasHeapBox(valueSpec.Names) {
+					declared := v.info.TypeOf(valueSpec.Type)
+					declaredName := v.getCSharpTypeName(declared)
+					temps := make([]string, len(valueSpec.Names))
+
+					for i, ident := range valueSpec.Names {
+						if ident.Name == "_" {
+							temps[i] = "_"
+						} else {
+							temps[i] = v.getTempVarName(getSanitizedIdentifier(v.getIdentName(ident)))
+						}
+					}
+
+					v.outputBuilder.WriteString(v.newline)
+					v.writeOutput("var (%s) = %s;", strings.Join(temps, ", "), v.convExpr(valueSpec.Values[0], nil))
+
+					for i, ident := range valueSpec.Names {
+						if ident.Name == "_" {
+							continue
+						}
+
+						v.outputBuilder.WriteString(v.newline)
+						v.writeOutput("%s %s = %s;", declaredName, getSanitizedIdentifier(v.getIdentName(ident)), v.typedTupleElementConversion(declared, tuple.At(i).Type(), temps[i]))
+					}
+
+					return
+				}
+			}
+		}
+
 		// A FUNCTION-LOCAL `var name, offset, abs = t.locabs()` (a grouped var spec is not a
 		// `:=`, so visitAssignStmt never sees it) deconstructs the same way — the per-name
 		// loop below assigned the WHOLE tuple to the first name and silently DEFAULTED the
@@ -1756,4 +1797,45 @@ func claimHoistedConstFieldName(csIDName string) string {
 	}
 
 	return fmt.Sprintf("%s%s%d", csIDName, HoistedConstMarker, ordinal)
+}
+
+// anyNameHasHeapBox reports whether any of a spec's names gets a `Ꮡname` box (identHasHeapBox), which the
+// tuple-deconstruction branches of visitValueSpec do not declare.
+func (v *Visitor) anyNameHasHeapBox(names []*ast.Ident) bool {
+	for _, ident := range names {
+		if obj := v.info.Defs[ident]; obj != nil && v.identHasHeapBox(obj, obj.Type()) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// typedTupleElementConversion converts name, a temp holding one result (Go type actual) of a multi-value call,
+// to a slot of Go type declared: an interface takes the usual interface conversion (the empty interface its
+// pointer-boundary treatment), a func type of another delegate the nil-safe delegate conversion, and anything
+// else passes as it is. It is the per-element conversion visitReturnStmt applies to a forwarded multi-value
+// return.
+func (v *Visitor) typedTupleElementConversion(declared, actual types.Type, name string) string {
+	if types.Identical(declared, actual) {
+		return name
+	}
+
+	if declaredIsIface, declaredIfaceEmpty := isInterface(declared); declaredIsIface {
+		if !declaredIfaceEmpty {
+			return v.convertToInterfaceType(declared, actual, name)
+		}
+
+		if typeParam, ok := actual.(*types.TypeParam); ok && isEmptyInterfaceTarget(declared) {
+			return applyTypedNilTypeParamBox(typeParam, name)
+		}
+
+		return v.applyTypedNilPointerBoxToType(actual, name)
+	}
+
+	if targetName, sourceName, ok := v.funcConversion(nil, declared, nil, actual); ok {
+		return fmt.Sprintf("builtin.NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, name)
+	}
+
+	return name
 }
