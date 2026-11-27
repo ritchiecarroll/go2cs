@@ -120,7 +120,7 @@ func cgoSideFixtureUnit(t *testing.T) cgoSideUnit {
 		t.Fatal(err)
 	}
 
-	preamble, err := cgoSidePreamble(path)
+	preamble, err := cgoSidePreamble(path, filepath.Base(path))
 
 	if err != nil {
 		t.Fatal(err)
@@ -177,7 +177,7 @@ func TestCgoSidePreambleIsReadAsCmdCgoReadsIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := cgoSidePreamble(path)
+	got, err := cgoSidePreamble(path, filepath.Base(path))
 
 	if err != nil {
 		t.Fatal(err)
@@ -520,4 +520,38 @@ func cgoSideTrimForTest(t *testing.T, load cgoLoad, pattern, goos string) cgoSid
 	}
 
 	return trim
+}
+
+// A side unit's #line names the Go source as go's build bakes it (review of 823978ff1a, #2): the absolute path with
+// the trim's from replaced by its to, textually, as the prefix map cmd/go hands CC does; the base name where the trim
+// maps nothing; and never a sibling directory that only shares the module directory's prefix.
+func TestCgoSideTrimLineNameIsTheMappedSource(t *testing.T) {
+	root := t.TempDir()
+	module := filepath.Join(root, "mod")
+	goRoot := filepath.Join(root, "goroot")
+	listed := &cgoListedModule{Path: "example.com/cgoreal", Dir: module}
+
+	for _, goos := range []string{"linux", "windows"} {
+		prefix := "/_"
+
+		if goos == "windows" {
+			prefix = `\\_\_`
+		}
+
+		for _, row := range []struct {
+			name, path, want string
+			trim             cgoSideTrim
+		}{
+			{"trimmed module", filepath.Join(module, "main.go"), filepath.Join(prefix, "example.com/cgoreal", "main.go"), cgoSideTrim{trimmed: true, root: module, module: listed}},
+			{"untrimmed module", filepath.Join(module, "main.go"), "main.go", cgoSideTrim{root: module, module: listed}},
+			{"GOROOT, untrimmed", filepath.Join(goRoot, "src", "net", "cgo_unix.go"), filepath.Join(prefix, "GOROOT", "src", "net", "cgo_unix.go"), cgoSideTrim{goroot: true, root: goRoot}},
+			{"a sibling sharing the prefix", filepath.Join(root, "mod2", "main.go"), "main.go", cgoSideTrim{trimmed: true, root: module, module: listed}},
+		} {
+			row.trim.goos = goos
+
+			if got := row.trim.lineName(row.path); got != row.want {
+				t.Errorf("%s/%s: names %q, want %q", goos, row.name, got, row.want)
+			}
+		}
+	}
 }

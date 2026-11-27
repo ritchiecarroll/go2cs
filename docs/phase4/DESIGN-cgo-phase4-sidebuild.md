@@ -70,6 +70,14 @@ address (§2.5).
 
 The TU is deterministic text: the preamble's bytes, in the order cmd/cgo reads them, plus the table.
 
+> **Amended 2026-11-27 (review of 823978ff1a, #2): the preamble's `#line` name.** cmd/cgo names the preamble by the
+> source's absolute path (cmd/cgo/ast.go, ParseGo), and the prefix map cmd/go hands CC trims it to
+> `/_/<module path>/<file>` under -trimpath, and for a GOROOT package always. The TU writes that trimmed name wherever
+> the trim maps the source (`cgoSideTrim.lineName`), so the preamble's own `__FILE__` is go's. Untrimmed, go bakes the
+> absolute path, and the TU keeps the base name instead. The TU is written beside the bindings, and a machine path does
+> not go into an emitted file. That one difference from go is deliberate. Row I's untrimmed arm reads the header's
+> `__FILE__` only, and its trimmed arm reads both.
+
 ### 2.3 The build
 
 The side build uses the compiler and flags cmd/cgo used:

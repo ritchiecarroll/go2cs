@@ -23,7 +23,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"path/filepath"
 	"strings"
 	"unicode"
 )
@@ -33,9 +32,10 @@ import (
 
 // cgoSidePreamble reads a Go source's import "C" preamble as cmd/cgo reads it (src/cmd/cgo/ast.go, ParseGo and
 // commentText; src/cmd/cgo/gcc.go, ProcessCgoDirectives; Go 1.26.11): each import "C" spec's doc comment, or its
-// declaration's when the declaration holds that one spec, under a #line naming the file by its base name (where cmd/cgo
-// names its absolute path) and the comment's line, with every #cgo line blanked.
-func cgoSidePreamble(path string) (string, error) {
+// declaration's when the declaration holds that one spec, under a #line naming the file lineName and the comment's line,
+// with every #cgo line blanked. cmd/cgo names the file by its absolute path, which cmd/go's -trimpath map then trims;
+// the caller passes that trimmed name, or the base name where nothing maps it (cgoSideTrim.lineName).
+func cgoSidePreamble(path, lineName string) (string, error) {
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, path, nil, parser.ImportsOnly|parser.ParseComments)
 
@@ -69,7 +69,7 @@ func cgoSidePreamble(path string) (string, error) {
 				continue
 			}
 
-			fmt.Fprintf(&preamble, "#line %d %q\n", fset.Position(group.Pos()).Line, filepath.Base(path))
+			fmt.Fprintf(&preamble, "#line %d %q\n", fset.Position(group.Pos()).Line, lineName)
 
 			for _, comment := range group.List {
 				text := comment.Text

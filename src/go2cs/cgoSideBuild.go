@@ -329,6 +329,19 @@ func cgoSideTrimOf(load cgoLoad, listed cgoSideListing, trimmed bool, goos strin
 	return trim, nil
 }
 
+// lineName is the name a side unit's #line gives the Go source at path, so the preamble's own __FILE__ is the one go's
+// build bakes (review of 823978ff1a, #2). cmd/cgo writes the absolute path (cmd/cgo/ast.go, ParseGo), and the prefix
+// map cmd/go hands CC replaces the trim's from with its to, textually; so where the trim maps path, the name is that
+// replacement. Where it maps nothing (untrimmed, outside GOROOT), the name is the base name, not the absolute path go
+// would print, so a side unit written beside the bindings never carries a machine path (design, §2.2).
+func (trim cgoSideTrim) lineName(path string) string {
+	if from, to := trim.mapping(); from != "" && strings.HasPrefix(path, from) && len(path) > len(from) && os.IsPathSeparator(path[len(from)]) {
+		return to + path[len(from):]
+	}
+
+	return filepath.Base(path)
+}
+
 // mapping is the trim's from and to, or "" "" when it maps nothing.
 func (trim cgoSideTrim) mapping() (string, string) {
 	if !trim.trimmed && !trim.goroot {
@@ -840,13 +853,7 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 		}
 
 		if units[file] == nil {
-			preamble, err := cgoSidePreamble(sourcePaths[file])
-
-			if err != nil {
-				return nil, nil, fmt.Errorf("cgo: the import \"C\" source %s cannot be read for its preamble: %w", file, err)
-			}
-
-			units[file] = &cgoSideUnit{table: sort.SearchStrings(files, file), file: file, preamble: preamble}
+			units[file] = &cgoSideUnit{table: sort.SearchStrings(files, file), file: file}
 		}
 
 		units[file].names = append(units[file].names, symbol)
@@ -897,6 +904,15 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Each preamble is read once the trim is known, under the #line name go's build would give it.
+	for i := range candidates {
+		path := sourcePaths[candidates[i].file]
+
+		if candidates[i].preamble, err = cgoSidePreamble(path, trim.lineName(path)); err != nil {
+			return nil, nil, fmt.Errorf("cgo: the import \"C\" source %s cannot be read for its preamble: %w", candidates[i].file, err)
+		}
 	}
 
 	build, undefined, err := cgoSideBuildUnits(toolchain, goos, pkg.Dir, compileFlags, flags, candidates, cgoSideLibraryFile(goos, pkg.Name, pkg.PkgPath), trim)
