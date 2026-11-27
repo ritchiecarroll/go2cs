@@ -707,13 +707,16 @@ func TestTheCgoCompilerProbeRunsOncePerCompilerAndTarget(t *testing.T) {
 }
 
 // A route refusal under -recurse -cgo skips its package and names it; the rest of the module converts (COORD's ruling on
-// C2's 193007Z: the plan says skip, and a module with one Phase 4 package must still convert the rest). bad defines its C
-// function in the preamble, which is Phase 4's (compiled C), so the route refuses it. Single-package -cgo keeps the fatal
-// refusal.
+// C2's 193007Z: the plan says skip, and a module with one Phase 4 package must still convert the rest). bad's C function
+// is defined in a C source file of its own (bad.c), which cgo Phase 4's preamble-only slice refuses by name (its §2.7),
+// and both tests hold that text. A function the preamble defines is side-built since Phase 4, so the fixture no longer
+// uses one. MOVE THIS FIXTURE AGAIN when a later slice compiles a package's own C files (the plan's static-link gap,
+// go-sqlite3's sqlite3.c): it must keep reaching a refusal that slice does not retire. Single-package -cgo keeps the
+// fatal refusal.
 const cgoRecurseBad = `package bad
 
 /*
-static int two(void) { return 2; }
+int two(void);
 */
 import "C"
 
@@ -721,13 +724,19 @@ import "C"
 func Two() int { return int(C.two()) }
 `
 
+// cgoRecurseBadC is bad's C source file of its own.
+const cgoRecurseBadC = "int two(void) { return 2; }\n"
+
+// cgoRecurseBadRefusal is the refusal both tests hold bad to, by its text: not merely refused, refused for this reason.
+const cgoRecurseBadRefusal = "C.two: no shared library the package links exports it, and the package has C source files of its own (bad.c): go2cs side-builds the preamble only"
+
 func TestARecurseCgoConversionSkipsARouteRefusedPackageAndConvertsTheRest(t *testing.T) {
 	requireHostCC(t)
 
-	combined, output, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "bad/bad.go": cgoRecurseBad, "main.go": cgoRecurseMain},
+	combined, output, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "bad/bad.go": cgoRecurseBad, "bad/bad.c": cgoRecurseBadC, "main.go": cgoRecurseMain},
 		"-recurse=nuget", "-cgo=true")
 
-	for _, want := range []string{"GO2CS2001", "Refused 1 package", "example.com/cgorecurse/bad"} {
+	for _, want := range []string{"GO2CS2001", "Refused 1 package", "example.com/cgorecurse/bad", cgoRecurseBadRefusal} {
 		if !strings.Contains(combined, want) {
 			t.Errorf("the run does not name %q:\n%s", want, combined)
 		}
@@ -752,12 +761,13 @@ func TestASinglePackageCgoConversionKeepsTheFatalRouteRefusal(t *testing.T) {
 	dir := t.TempDir()
 	writeCgoFixture(t, dir, "go.mod", "module example.com/bad\n\ngo 1.26\n")
 	writeCgoFixture(t, dir, "bad.go", cgoRecurseBad)
+	writeCgoFixture(t, dir, "bad.c", cgoRecurseBadC)
 	output := t.TempDir()
 	cmd := exec.Command(driverBinary(t), "-cgo=true", "-go2cspath", treeSrc, dir, output)
 	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=")
 	combined, err := cmd.CombinedOutput()
 
-	if err == nil || !strings.Contains(string(combined), "Refusing to convert") || !strings.Contains(string(combined), "GO2CS2001") {
+	if err == nil || !strings.Contains(string(combined), "Refusing to convert") || !strings.Contains(string(combined), "GO2CS2001") || !strings.Contains(string(combined), cgoRecurseBadRefusal) {
 		t.Errorf("a single-package -cgo conversion of a refused package did not stop with the fatal refusal (%v):\n%s", err, combined)
 	}
 }
