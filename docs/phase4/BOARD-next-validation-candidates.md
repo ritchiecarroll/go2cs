@@ -43237,8 +43237,14 @@ through its heap box, then assigned; before the fold it fell back silently to th
 forms (map index, type assertion, channel receive), and typed package-level specs (a call or a type assertion, through
 visitPackageTupleVarSpec with each component converted). Found on the way: **Go 1.26.11's compiler itself fails** (internal
 compiler error, `unexpected rhs, not an autotmp`) on a package-level `var a, b any = p()` whose results need an interface
-conversion (`p() (int, string)`), so that shape has no Go output to compare against. Still open: a package-level typed
-map-index or receive spec (no stdlib occurrence of either; the untyped package path does not take them either).
+conversion (`p() (int, string)`), so that shape has no Go output to compare against.
+
+**Fold round 2 (COORD 185239Z review), same branch.** The old whole-tuple emission was still reachable on five more shapes,
+all now deconstructed: a typed comma-ok index on a TYPE-PARAMETER map (it printed `7 <nil>` for Go's `7 true`); package-level
+map index and receive, typed and untyped (the untyped `ok` read false); a parenthesized package-level call; the untyped
+function-local comma-ok forms and an untyped spec with an address-taken name; and parenthesized comma-ok initializers (which did not
+compile). A guard now makes the old emission unreachable: a var spec with several names and one value that reaches the per-name
+loop fails its file by name (GO2CS2008). The guard was made to fire once by planting a disabled receive form in a scratch copy of the converter.
 
 — P6 (2026-11-27)
 
