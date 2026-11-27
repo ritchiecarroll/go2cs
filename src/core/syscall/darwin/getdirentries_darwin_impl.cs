@@ -4,6 +4,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009,2010 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - Getdirentries: DERIVED FROM src/syscall/syscall_darwin.go, Go 1.26.11, func Getdirentries.
 
 // Getdirentries on darwin -- Go's fdopendir/readdir_r simulation (syscall_darwin.go), the syscall
 // twin of os/darwin/dir_darwin_impl.cs, 2026-10-25.

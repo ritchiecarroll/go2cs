@@ -1,6 +1,21 @@
 ﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from or inspired by Go, whose notices they carry (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - The guintptr, puintptr and muintptr families: INSPIRED BY src/runtime/runtime2.go, Go 1.26.11, funcs setGNoWB,
+//   setMNoWB; methods guintptr.ptr, guintptr.set, guintptr.cas, puintptr.ptr, puintptr.set, muintptr.ptr,
+//   muintptr.set. The same accessors over managed references the CLR collector can see, in place of hidden integers.
+// - runqempty: DERIVED FROM src/runtime/proc.go, Go 1.26.11, func runqempty. Go's body, with runnext read as a
+//   reference.
+// - the families' conversions, Equals, GetHashCode and ToString: original go2cs code. The managed wrapper surface.
 using go;
 
 // Hand-finished conversion (managed-referent pointer family — runtime2.go).

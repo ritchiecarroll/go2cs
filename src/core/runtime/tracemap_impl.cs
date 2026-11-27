@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is inspired by Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - traceMap.newTraceMapNode: INSPIRED BY src/runtime/tracemap.go, Go 1.26.11, method traceMap.newTraceMapNode. The
+//   same node, allocated as a managed object in place of Go-layout region memory.
 
 // go2cs code converter hand-conversion of tracemap.go's newTraceMapNode.
 //

@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from or inspired by Go, whose notice it carries (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2017 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Add64, Sub64: DERIVED FROM src/math/bits/bits.go, Go 1.26.11, funcs Add64, Sub64. Go's bodies and doc comments.
+// - Mul, Add, Sub, Mul64: INSPIRED BY src/math/bits/bits.go, Go 1.26.11, funcs Mul, Add, Sub, Mul64. The same results
+//   as one BCL call each; Go's doc comments verbatim.
 
 // THE THREE WORD-SIZE LEAVES, AS ONE BCL CALL EACH.
 //

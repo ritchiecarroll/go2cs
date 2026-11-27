@@ -1,6 +1,17 @@
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - TypeOf, TypeFor and the Type accessors: INSPIRED BY src/internal/abi/type.go, Go 1.26.11, funcs TypeOf, TypeFor;
+//   methods Type.InterfaceType, Type.StructType, Type.ArrayType, Type.FuncType, FuncType.InSlice, FuncType.OutSlice,
+//   Type.Elem, Type.ChanDir, Type.MapType, Type.Key, Type.Len, Type.Size. The same answers, read from a descriptor
+//   synthesized from the value's managed type; Go's doc comments are kept where the contract is Go's.
+// - synthType, synthesizeDescriptor and the other synthesize*, descriptorDimsKey and the chan-direction helpers:
+//   original go2cs code. The descriptor synthesis the accessors stand on.
 using go;
 
 // Hand-finished conversion (the reflection bridge — Phase 4).
@@ -871,11 +882,11 @@ public static ChanDir ChanDir(this ж<Type> Ꮡt) {
 // answer. HASHER IS A FUNCTION OF THE SEED ALONE, which is the honest maximum here and not a
 // shortcut: Go's Hasher means "the key's bytes are AT this address", and the only caller of an
 // installed hook in this corpus invokes it with a NIL pointer and discards the key
-// (internal/sync/hashtriemap.cs:222, over noAddress at :542) because a managed address names no
-// value. That file's own taxonomy classes an address-IGNORING hook as the honorable kind (:120) and
-// states at :124-127 that every honorable hook here is a function of the seed alone -- so honoring
+// (internal/sync/hashtriemap.cs:234, over noAddress at :554) because a managed address names no
+// value. That file's own taxonomy classes an address-IGNORING hook as the honorable kind (:132) and
+// states at :136-139 that every honorable hook here is a function of the seed alone -- so honoring
 // one and forcing total collision are the same act, which is precisely the contract
-// TestHashTrieMapBadHash already proves the map satisfies (34/34 with `return 0`). What :122 refuses
+// TestHashTrieMapBadHash already proves the map satisfies (34/34 with `return 0`). What :134 refuses
 // is a hook that DEREFERENCES the address; this is not one.
 //
 // Group and GroupSize are Go's layout, DERIVED and not invented: the compiler lays a slot group out as

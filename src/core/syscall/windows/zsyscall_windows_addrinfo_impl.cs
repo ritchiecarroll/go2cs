@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - GetAddrInfoW, FreeAddrInfoW: INSPIRED BY src/syscall/zsyscall_windows.go (generated from the declarations in
+//   src/syscall/syscall_windows.go, whose notice this file carries), Go 1.26.11, funcs GetAddrInfoW, FreeAddrInfoW.
+//   The native addrinfo chain is copied into managed records and freed by the native call.
+// - the copy and release helpers: original go2cs code.
 
 // Hand-written implementation of the NAME-RESOLUTION pair -- GetAddrInfoW and FreeAddrInfoW -- the
 // members of the syscall struct-passing class that `net`'s DNS path forces. Reached the first time

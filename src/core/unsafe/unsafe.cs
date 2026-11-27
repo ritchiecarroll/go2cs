@@ -1,6 +1,16 @@
 ﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry above (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// PROVENANCE, part by part:
+// - the package and declaration doc comments: DERIVED FROM src/unsafe/unsafe.go, Go 1.26.11, funcs Sizeof, Offsetof,
+//   Alignof, Add, Slice, SliceData, String, StringData. Go's doc comments verbatim.
+// - Sizeof, Offsetof, Alignof, Add, Slice, SliceData, String, StringData: bodies for the bodyless Go declarations of
+//   the same names in src/unsafe/unsafe.go. Original go2cs code.
+// - the Pointer type and the rest of go2cs's unsafe surface: original go2cs code.
 
 /*
 Package unsafe contains operations that step around the type safety of Go programs.

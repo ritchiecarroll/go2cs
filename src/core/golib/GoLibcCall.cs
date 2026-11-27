@@ -3,6 +3,17 @@
 //
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Call, ReadErrno and GoLibcErrnoRule: INSPIRED BY src/runtime/sys_darwin.go, Go 1.26.11, func syscall_rawsyscalln.
+//   Errno is read after every call and Go's failure test decides whether it is returned.
+// - the native dispatch, marshalling and register conversion: original go2cs code.
 
 using System;
 using System.Reflection;

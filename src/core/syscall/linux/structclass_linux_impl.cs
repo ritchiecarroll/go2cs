@@ -4,6 +4,33 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notices they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// Copyright 2014 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - Select, Statfs, Fstatfs: DERIVED FROM src/syscall/zsyscall_linux_amd64.go (generated from the declarations in
+//   src/syscall/syscall_linux_amd64.go, whose notice this file carries), Go 1.26.11, funcs Select, Statfs, Fstatfs.
+//   The generated wrappers, with the struct passed through a native mirror and copied back.
+// - Sysinfo, Adjtimex, wait4, Uname: DERIVED FROM src/syscall/zsyscall_linux_amd64.go (generated from the
+//   declarations in src/syscall/syscall_linux.go, whose notice this file carries), Go 1.26.11, funcs Sysinfo,
+//   Adjtimex, wait4, Uname. The generated wrappers, with the struct passed through a native mirror and copied back.
+// - FcntlFlock: DERIVED FROM src/syscall/flock_linux.go, Go 1.26.11, func FcntlFlock. The Flock_t is passed through a
+//   native mirror.
+// - SetsockoptIPMreq, SetsockoptIPv6Mreq, SetsockoptICMPv6Filter: DERIVED FROM src/syscall/syscall_unix.go, Go
+//   1.26.11, funcs SetsockoptIPMreq, SetsockoptIPv6Mreq, SetsockoptICMPv6Filter. The option value is passed in a
+//   native buffer.
+// - SetsockoptIPMreqn, GetsockoptIPMreq, GetsockoptIPMreqn, GetsockoptIPv6Mreq, GetsockoptICMPv6Filter: DERIVED FROM
+//   src/syscall/syscall_linux.go, Go 1.26.11, funcs SetsockoptIPMreqn, GetsockoptIPMreq, GetsockoptIPMreqn,
+//   GetsockoptIPv6Mreq, GetsockoptICMPv6Filter. The option value is passed in a native buffer.
+// - the native mirrors and their copy helpers: original go2cs code.
 
 // The syscall STRUCT-PASSING class, closed PROACTIVELY for the five remaining Linux members whose
 // converted struct carries `array<>` fields. zsyscall_linux_amd64_impl.cs carries the class's full

@@ -4,6 +4,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are inspired by Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - usleep: INSPIRED BY src/runtime/os_windows.go, Go 1.26.11, func usleep. The same microsecond sleep, through a
+//   high-resolution timer or a timed yield loop.
+// - GoUsleep: original go2cs code. Test seam.
 
 // runtime.usleep on Windows, hand-owned (COORD ruling 2026-09-22; manualConversionFuncs["runtime"],
 // goosWindows).

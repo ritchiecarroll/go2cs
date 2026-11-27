@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - init: DERIVED FROM src/internal/routebsd/sys.go, Go 1.26.11, func init. Go's byte-order probe, reading the native
+//   word through a span in place of an unsafe re-view.
 
 // routebsd.init's byte-order probe, hand-owned (2026-10-15, the Go 1.26 hop's H6). This is the successor of
 // vendor/golang.org/x/net/route/darwin/sys_impl.cs, the darwin run layer's increment 3b (2026-09-03), which H5c

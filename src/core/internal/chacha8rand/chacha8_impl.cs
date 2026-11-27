@@ -4,6 +4,20 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// This file is derived from or inspired by Go, whose notice it carries (license of record:
+// LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - setup, block_generic: DERIVED FROM src/internal/chacha8rand/chacha8_generic.go, Go 1.26.11, funcs setup,
+//   block_generic. Go's statements, writing through spans in place of Go's array re-views.
+// - block, Setup, QuarterRound: INSPIRED BY src/internal/chacha8rand/chacha8_generic.go, Go 1.26.11, funcs
+//   block_generic, qr. The body for the assembly-only block: the same ChaCha8 rounds over four lanes, in go2cs's own
+//   shape.
 
 using System;
 using System.Runtime.InteropServices;

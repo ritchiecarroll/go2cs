@@ -4,6 +4,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// Parts of this file are derived from Go, whose notice they carry (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2019 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - dlogImpl, dloggerImpl.s, printDebugLogImpl, printDebugLogPC, debugLogReader.printVal: DERIVED FROM
+//   src/runtime/debuglog.go, Go 1.26.11, funcs dlogImpl, printDebugLogImpl, printDebugLogPC; methods dloggerImpl.s,
+//   debugLogReader.printVal. Go's bodies and comments; what changed is listed in the note below.
+// - dlogWrite, dlogInt: original go2cs code. Helpers of those changes.
 
 // Hand-finished conversion of debuglog.go's dlogImpl, printDebugLogImpl and printDebugLogPC: the
 // three regions the runtime row's six TestDebugLog* rows reach (the stop-the-world seat, owner
