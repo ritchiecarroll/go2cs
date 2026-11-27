@@ -12,7 +12,7 @@
 // can't be represented.
 namespace go.crypto.@internal.fips140;
 
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 
 partial class nistec_package {
 

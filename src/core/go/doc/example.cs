@@ -103,11 +103,13 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             ref var output = ref heap<@string>(out var Ꮡoutput);
             ref var unordered = ref heap<bool>(out var Ꮡunordered);
             (output, unordered, var hasOutput) = exampleOutput(f.Body, @file.Comments);
+            var evalᴛ1 = name[(int)(len("Example"))..];
+            var evalᴛ2 = playExample(ref (@file).DerefOrNull(), ref (f).DerefOrNull());
             flist = append(flistᴷ, flist, Ꮡ(new Example(
-                Name: name[(int)(len("Example"))..],
+                Name: evalᴛ1,
                 Doc: doc,
                 Code: new ast.BlockStmtжNode(f.Body),
-                Play: playExample(ref (@file).DerefOrNull(), ref (f).DerefOrNull()),
+                Play: evalᴛ2,
                 Comments: @file.Comments,
                 Output: output,
                 Unordered: unordered,
@@ -120,7 +122,8 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             // other top-level declarations, and no tests or
             // benchmarks, use the whole file as the example.
             flist[0].Code = new ast.FileжNode(@file);
-            flist[0].Play = playExampleFile(ref (@file).DerefOrNull());
+            var evalᴛ3 = playExampleFile(ref (@file).DerefOrNull());
+            flist[0].Play = evalᴛ3;
         }
         list = appendꓸꓸꓸ(list, flist);
     }
@@ -275,7 +278,8 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             ref var spec = ref heap<ast.ImportSpec>(s.Value, out var Ꮡspec);
             ref var path = ref heap<ast.BasicLit>(s.Path.Value, out var Ꮡpath);
             spec.Path = Ꮡpath;
-            updateBasicLitPos(spec.Path, groupStart(Ꮡspec));
+            var evalᴛ1 = groupStart(Ꮡspec);
+            updateBasicLitPos(spec.Path, evalᴛ1);
             namedImports = append(namedImports, (ast.Spec)(new ast.ImportSpecжSpec(Ꮡspec)));
             delete(unresolved, n);
         }
@@ -588,7 +592,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
             prevEnd = imp.Comment.End();
         }
     }
-    groupStarts = move2heap(groupStartsᴷ, groupStarts);
+    groupStarts = builtin.move2heap(groupStartsᴷ, groupStarts);
     return groupStarts;
 }
 
@@ -625,7 +629,7 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
     // Copy the File, as it may be used elsewhere.
     ref var f = ref heap<ast.File>(@file, out var Ꮡf);
     f.Name = ast.NewIdent(mainˢ);
-    decls = move2heap(declsᴷ, decls);
+    decls = builtin.move2heap(declsᴷ, decls);
     f.Decls = decls;
     f.Comments = comments;
     return Ꮡf;
@@ -643,10 +647,11 @@ internal static (ж<ast.BlockStmt>, slice<ж<ast.CommentGroup>>) stripOutputComm
     }
 
     // Copy body and comments, as the originals may be used elsewhere.
+    var evalᴛ1 = last.Pos();
     var newBody = Ꮡ(new ast.BlockStmt(
         Lbrace: body.Lbrace,
         List: body.List,
-        Rbrace: last.Pos()
+        Rbrace: evalᴛ1
     ));
     var newComments = new slice<ж<ast.CommentGroup>>(len(comments) - 1);
     copy(newComments, comments.slice(0, i));

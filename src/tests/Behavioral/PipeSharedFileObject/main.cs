@@ -66,7 +66,8 @@ internal static partial void step(@string name, Func<@string> body) {
     var done = new channel<@string>(1);
     var doneʗ1 = done;
     goǃ([GoFunc("step.func1")] () => {
-        doneʗ1.ᐸꟷ(body());
+        var evalᴛ1 = body();
+        doneʗ1.ᐸꟷ(evalᴛ1);
     });
 
     var doneᴛ1 = done;
@@ -116,8 +117,12 @@ internal static void main() {
     var stderrʗ2 = stderr;
     var stdoutʗ2 = stdout;
     step("2 deadlines", [GoFunc("main.func2")] () => {
-        var refused = stderrʗ2.SetDeadline(time.Now().Add(time.Hour));
-        var bound = stdoutʗ2.SetDeadline(time.Now().Add(time.Hour));
+        var evalᴛ1 = time.Now();
+        var evalᴛ2 = evalᴛ1.Add(time.Hour);
+        var refused = stderrʗ2.SetDeadline(evalᴛ2);
+        var evalᴛ3 = time.Now();
+        var evalᴛ4 = evalᴛ3.Add(time.Hour);
+        var bound = stdoutʗ2.SetDeadline(evalᴛ4);
         stdoutʗ2.SetDeadline(new time.Time());
         return fmt.Sprintf("stderr ErrNoDeadline=%v stdout err=%v"u8, errors.Is(refused, os.ErrNoDeadline), bound);
     });
@@ -255,11 +260,13 @@ internal static partial @string consecutiveWrites(bool skipOnSuccess) {
             var (k, err) = server7ʗ1.Read(buf);
             total += k;
             if (err != nil) {
-                drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes <%v>"u8, total, err));
+                var evalᴛ1 = fmt.Sprintf("%d bytes <%v>"u8, total, err);
+                drainedʗ1.ᐸꟷ(evalᴛ1);
                 return;
             }
         }
-        drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes"u8, total));
+        var evalᴛ2 = fmt.Sprintf("%d bytes"u8, total);
+        drainedʗ1.ᐸꟷ(evalᴛ2);
     });
 
     for (nint i = 1; i <= large; i++) {

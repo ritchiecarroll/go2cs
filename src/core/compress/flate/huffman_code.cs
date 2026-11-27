@@ -263,7 +263,8 @@ internal static void assignEncodingAndSize⁔(/*this*/ ж<huffmanEncoder> Ꮡh, 
 
         Ꮡh.Ꮡlns.sort(chunk);
         foreach (var (_, node) in range(chunk)) {
-            h.codes[node.literal] = new hcode(code: reverseBits(code, (uint8)n), len: (uint16)n);
+            var evalᴛ1 = reverseBits(code, (uint8)n);
+            h.codes[node.literal] = new hcode(code: evalᴛ1, len: (uint16)n);
             code++;
         }
         list = list.slice(0, len(list) - (nint)bits);

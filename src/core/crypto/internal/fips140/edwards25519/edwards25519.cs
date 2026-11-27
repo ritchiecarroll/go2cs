@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140;
 
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using field = go.crypto.@internal.fips140.edwards25519.field_package;
 using errors = errors_package;
 using go.crypto.@internal.fips140.edwards25519;
@@ -138,7 +138,8 @@ internal static slice<byte> bytes⁔(/*this*/ ж<Point> Ꮡv, /*[32]*/ ж<array<
     Ꮡy.Multiply(Ꮡv.Ꮡy, ᏑzInv); // y = Y / Z
 
     var @out = copyFieldElement(buf, Ꮡy);
-    @out[31] |= (byte)((byte)(x.IsNegative() << 7));
+    var evalᴛ1 = x.IsNegative();
+    @out[31] |= (byte)((byte)(evalᴛ1 << 7));
     return @out;
 }
 

@@ -20,9 +20,9 @@ The **method-group** go statement needs the receiver box too. A void, non-variad
 
 A conversion to a **named func type** — `metricReader(read)` where `type metricReader func() uint64` — targets a C# **delegate declaration** (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast conversion (a `(metricReader)read` from `Func<ulong>` is CS0030); C# converts via **delegate creation**: `new metricReader(read)`, which accepts a compatible delegate or method group. The general conversion branch special-cases a named target whose underlying is a `*types.Signature`. Delegate creation is used where the operand cannot be nil — a function literal or a package-level function; any other operand (a func-typed parameter or variable, which can be nil at run time) routes through golib's `NilSafeDelegateConversion<TTarget, TSource>`, so a nil source converts to nil as in Go instead of throwing in the delegate constructor, and `T(nil)` emits `default(T)!`. Composed with the bound-value lambda this renders the full runtime `metrics.go` registration, where `read` is a parameter (guarded by the `MethodExpression` extension — a named-func-type conversion with a bound method invoked through a func field, values vs Go):
 
-<!-- source: src/core/runtime/metrics.cs:565-566 -->
+<!-- source: src/core/runtime/metrics.cs:566-567 -->
 ```csharp
-    var recvʗ1 = NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
+    var recvʗ1 = builtin.NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
     d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => recvʗ1.compute(p1, p2);
 ```
 

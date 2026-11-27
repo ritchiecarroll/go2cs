@@ -649,7 +649,7 @@ $BuildOutputDirs = @('bin', 'obj', 'Generated')
 # this spelling. Layout L3 lays a package's files into a KEY FOLDER per target set -- a GOOS (linux\), a
 # GOARCH (amd64\) or the pair (linux-arm64\) -- and $layoutKeys, every name such a folder can carry, is
 # derived from it rather than listed a second time.
-$layoutUniverse = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64')
+$layoutUniverse = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64', 'darwin/arm64')
 
 $layoutKeys = @($layoutUniverse | ForEach-Object { $g, $a = $_ -split '/'; $g; $a; "$g-$a" } | Sort-Object -Unique)
 

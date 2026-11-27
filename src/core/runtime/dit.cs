@@ -4,7 +4,7 @@
 namespace go;
 
 using sys = @internal.runtime.sys_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using @internal.runtime;
 
 partial class runtime_package {

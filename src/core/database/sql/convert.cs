@@ -13,7 +13,7 @@ using strconv = strconv_package;
 using time = time_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using go.database.sql;
 using go.unicode;
 
@@ -279,7 +279,8 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             if (d == nil) {
                 return errNilPtr;
             }
-            d.ValueSlot = Ꮡrows.setrawbuf(append(Ꮡrows.rawbuf(), s.ꓸꓸꓸ));
+            var evalᴛ1 = Ꮡrows.rawbuf();
+            d.ValueSlot = Ꮡrows.setrawbuf(append(evalᴛ1, s.ꓸꓸꓸ));
             return default;
         }}
         break;
@@ -337,7 +338,9 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             if (d == nil) {
                 return errNilPtr;
             }
-            d.ValueSlot = Ꮡrows.setrawbuf(s.AppendFormat(Ꮡrows.rawbuf(), time.RFC3339Nano));
+            var evalᴛ2 = Ꮡrows.rawbuf();
+            var evalᴛ3 = s.AppendFormat(evalᴛ2, time.RFC3339Nano);
+            d.ValueSlot = Ꮡrows.setrawbuf(evalᴛ3);
             return default;
         }}
         break;

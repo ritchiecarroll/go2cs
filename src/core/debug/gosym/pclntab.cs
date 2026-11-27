@@ -281,47 +281,72 @@ internal static void parsePclnTab⁔(/*this*/ ж<LineTable> Ꮡt) {
 
         [GoFunc("(*LineTable).parsePclnTab.func2")] uint64 offset(uint32 word) => Ꮡt.Value.uintptr(Ꮡt.Value.Data.slice((nint)(8 + word * Ꮡt.Value.ptrsize)));
         var offsetʗ1 = offset;
-        [GoFunc("(*LineTable).parsePclnTab.func3")] slice<byte> data(uint32 word) => Ꮡt.Value.Data.slice((nint)(offsetʗ1(word)));
+        [GoFunc("(*LineTable).parsePclnTab.func3")] slice<byte> data(uint32 word) {
+            var evalᴛ1 = offsetʗ1(word);
+            return Ꮡt.Value.Data.slice((nint)(evalᴛ1));
+        }
 
         switch (possibleVersion) {
         case var ᴛ when ᴛ == ver118 || ᴛ == ver120: {
-            t.nfunctab = (uint32)offset(0);
-            t.nfiletab = (uint32)offset(1);
+            var evalᴛ2 = offset(0);
+            t.nfunctab = (uint32)evalᴛ2;
+            var evalᴛ3 = offset(1);
+            t.nfiletab = (uint32)evalᴛ3;
             t.textStart = t.PC; // use the start PC instead of reading from the table, which may be unrelocated
-            t.funcnametab = data(3);
-            t.cutab = data(4);
-            t.filetab = data(5);
-            t.pctab = data(6);
-            t.funcdata = data(7);
-            t.functab = data(7);
-            nint functabsize = ((nint)t.nfunctab * 2 + 1) * t.functabFieldSize();
+            var evalᴛ4 = data(3);
+            t.funcnametab = evalᴛ4;
+            var evalᴛ5 = data(4);
+            t.cutab = evalᴛ5;
+            var evalᴛ6 = data(5);
+            t.filetab = evalᴛ6;
+            var evalᴛ7 = data(6);
+            t.pctab = evalᴛ7;
+            var evalᴛ8 = data(7);
+            t.funcdata = evalᴛ8;
+            var evalᴛ9 = data(7);
+            t.functab = evalᴛ9;
+            var evalᴛ10 = t.functabFieldSize();
+            nint functabsize = ((nint)t.nfunctab * 2 + 1) * evalᴛ10;
             t.functab = t.functab.slice(0, functabsize);
             break;
         }
         case var ᴛ when ᴛ == ver116: {
-            t.nfunctab = (uint32)offset(0);
-            t.nfiletab = (uint32)offset(1);
-            t.funcnametab = data(2);
-            t.cutab = data(3);
-            t.filetab = data(4);
-            t.pctab = data(5);
-            t.funcdata = data(6);
-            t.functab = data(6);
-            nint functabsize = ((nint)t.nfunctab * 2 + 1) * t.functabFieldSize();
+            var evalᴛ11 = offset(0);
+            t.nfunctab = (uint32)evalᴛ11;
+            var evalᴛ12 = offset(1);
+            t.nfiletab = (uint32)evalᴛ12;
+            var evalᴛ13 = data(2);
+            t.funcnametab = evalᴛ13;
+            var evalᴛ14 = data(3);
+            t.cutab = evalᴛ14;
+            var evalᴛ15 = data(4);
+            t.filetab = evalᴛ15;
+            var evalᴛ16 = data(5);
+            t.pctab = evalᴛ16;
+            var evalᴛ17 = data(6);
+            t.funcdata = evalᴛ17;
+            var evalᴛ18 = data(6);
+            t.functab = evalᴛ18;
+            var evalᴛ19 = t.functabFieldSize();
+            nint functabsize = ((nint)t.nfunctab * 2 + 1) * evalᴛ19;
             t.functab = t.functab.slice(0, functabsize);
             break;
         }
         case var ᴛ when ᴛ == ver12: {
-            t.nfunctab = (uint32)t.uintptr(t.Data[8..]);
+            var evalᴛ20 = t.Data[8..];
+            var evalᴛ21 = t.uintptr(evalᴛ20);
+            t.nfunctab = (uint32)evalᴛ21;
             t.funcdata = t.Data;
             t.funcnametab = t.Data;
             t.functab = t.Data.slice((nint)(8 + t.ptrsize));
             t.pctab = t.Data;
-            nint functabsize = ((nint)t.nfunctab * 2 + 1) * t.functabFieldSize();
+            var evalᴛ22 = t.functabFieldSize();
+            nint functabsize = ((nint)t.nfunctab * 2 + 1) * evalᴛ22;
             var fileoff = t.binary.Uint32(t.functab.slice(functabsize));
             t.functab = t.functab.slice(0, functabsize);
             t.filetab = t.Data.slice((nint)(fileoff));
-            t.nfiletab = t.binary.Uint32(t.filetab);
+            var evalᴛ23 = t.binary.Uint32(t.filetab);
+            t.nfiletab = evalᴛ23;
             t.filetab = t.filetab.slice(0, (nint)(t.nfiletab * 4));
             break;
         }
@@ -357,10 +382,12 @@ internal static slice<Func> go12Funcs⁔(/*this*/ ж<LineTable> Ꮡt) {
             var info = Ꮡt.funcData((uint32)i);
             f.LineTable = Ꮡt;
             f.FrameSize = (nint)info.deferreturn();
+            var evalᴛ1 = info.nameOff();
+            var evalᴛ2 = t.funcName(evalᴛ1);
             syms[i] = new Sym(
                 Value: f.Entry,
                 Type: (byte)'T',
-                Name: t.funcName(info.nameOff()),
+                Name: evalᴛ2,
                 ΔGoType: 0,
                 Func: f,
                 goVersion: t.version
@@ -492,7 +519,9 @@ partial struct funcData {
 internal static funcData funcData⁔(/*this*/ ж<LineTable> Ꮡt, uint32 i) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var data = t.funcdata.slice((nint)(Ꮡt.funcTab().funcOff((nint)i)));
+    var evalᴛ1 = Ꮡt.funcTab();
+    var evalᴛ2 = evalᴛ1.funcOff((nint)i);
+    var data = t.funcdata.slice((nint)(evalᴛ2));
     return new funcData(t: Ꮡt, data: data);
 }
 
@@ -721,7 +750,8 @@ internal static uint64 /*pc*/ go12LineToPC⁔(/*this*/ ж<LineTable> Ꮡt, @stri
                     // skip functions without compilation unit (not real function, or linker generated)
                     continue;
                 }
-                cutab = t.cutab.slice((nint)(f.cuOffset() * 4));
+                var evalᴛ1 = f.cuOffset();
+                cutab = t.cutab.slice((nint)(evalᴛ1 * 4));
             }
             var pcΔ1 = t.findFileLine(entry, filetab, linetab, (int32)filenum, (int32)line, cutab);
             if (pcΔ1 != 0) {

@@ -17,7 +17,7 @@ using unix = @internal.syscall.unix_package;
 using runtime = runtime_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal.syscall;
 
 partial class os_package {
@@ -120,9 +120,10 @@ internal static (ж<ProcessState>, error) pidfdWait⁔(/*this*/ ж<Process> Ꮡp
         // This also releases a reference to the handle.
         Ꮡp.doRelease(statusDone);
 
+        var evalᴛ1 = info.WaitStatus();
         return (Ꮡ(new ProcessState(
             pid: (nint)info.Pid,
-            status: info.WaitStatus(),
+            status: evalᴛ1,
             rusage: Ꮡrusage
         )), default);
     }

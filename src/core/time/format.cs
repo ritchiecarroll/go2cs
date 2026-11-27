@@ -5,7 +5,7 @@ namespace go;
 
 using errors = errors_package;
 using stringslite = @internal.stringslite_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 
 partial class time_package {
@@ -1747,7 +1747,7 @@ internal static (uint64 x, bytes rem, error err) leadingInt<bytes>(bytes s)
     where bytes : /* []byte | string */ IByteSeq<bytes, byte>, new()
 {
     uint64 x = default;
-    bytes rem = GoZero<bytes>();
+    bytes rem = builtin.GoZero<bytes>();
 
     nint i = 0;
     for (; i < len(s); i++) {
@@ -1809,7 +1809,8 @@ partial struct parseDurationError {
 }
 
 internal static @string Error⁔(/*this*/ ref parseDurationError e) {
-    return "time: "u8 + e.message + " "u8 + quote(e.value);
+    var evalᴛ1 = quote(e.value);
+    return "time: "u8 + e.message + " "u8 + evalᴛ1;
 }
 
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{

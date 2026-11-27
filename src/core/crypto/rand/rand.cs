@@ -10,8 +10,8 @@ using boring = go.crypto.@internal.boring_package;
 using drbg = go.crypto.@internal.fips140.drbg_package;
 using rand = go.crypto.@internal.rand_package;
 using io = io_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: go.crypto.@internal.rand_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
+// import _ "crypto/internal/rand" (init forced in ImportInitializers)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 

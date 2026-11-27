@@ -16,11 +16,11 @@ internal static ж<Block> newBlock(ж<Block> c, slice<byte> key) {
 }
 
 internal static void encryptBlock(ref Block c, slice<byte> dst, slice<byte> src) {
-    encryptBlockGeneric(ref nonnil(ref c).blockExpanded, dst, src);
+    encryptBlockGeneric(ref builtin.nonnil(ref c).blockExpanded, dst, src);
 }
 
 internal static void decryptBlock(ref Block c, slice<byte> dst, slice<byte> src) {
-    decryptBlockGeneric(ref nonnil(ref c).blockExpanded, dst, src);
+    decryptBlockGeneric(ref builtin.nonnil(ref c).blockExpanded, dst, src);
 }
 
 internal static void checkGenericIsExpected() { }

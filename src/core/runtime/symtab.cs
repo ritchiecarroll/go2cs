@@ -521,9 +521,11 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
             if (i + 1 < nftab) {
                 f2name = funcname(f2);
             }
-            println((@string)"function symbol table not sorted by PC offset:", (hex)(uint64)datap.ftab[i].entryoff, funcname(f1), (@string)">", (hex)(uint64)datap.ftab[i + 1].entryoff, f2name, (@string)", plugin:", datap.pluginpath);
+            var evalᴛ1 = funcname(f1);
+            println((@string)"function symbol table not sorted by PC offset:", (hex)(uint64)datap.ftab[i].entryoff, evalᴛ1, (@string)">", (hex)(uint64)datap.ftab[i + 1].entryoff, f2name, (@string)", plugin:", datap.pluginpath);
             for (nint j = 0; j <= i; j++) {
-                println((@string)"\t", (hex)(uint64)datap.ftab[j].entryoff, funcname(new funcInfo(Ꮡ(datap.pclntable, datap.ftab[j].funcoff).Reinterpret<byte, _func>(), Ꮡdatap)));
+                var evalᴛ2 = funcname(new funcInfo(Ꮡ(datap.pclntable, datap.ftab[j].funcoff).Reinterpret<byte, _func>(), Ꮡdatap));
+                println((@string)"\t", (hex)(uint64)datap.ftab[j].entryoff, evalᴛ2);
             }
             if (GOOS == "aix"u8 && isarchive) {
                 println((@string)"-Wl,-bnoobjreorder is mandatory on aix/ppc64 with c-archive");
@@ -1180,7 +1182,8 @@ internal static bitvector stackmapdata(ж<stackmap> Ꮡstkmap, int32 n) {
     if (stackDebug > 0 && (n < 0 || n >= stkmap.n)) {
         @throw(stackmapdataIndexOutOfˢ);
     }
-    return new bitvector(stkmap.nbit, addb(Ꮡstkmap.at(stackmap.Ꮡbytedata, 0), (uintptr)(n * ((stkmap.nbit + 7) >> 3))));
+    var evalᴛ1 = addb(Ꮡstkmap.at(stackmap.Ꮡbytedata, 0), (uintptr)(n * ((stkmap.nbit + 7) >> 3)));
+    return new bitvector(stkmap.nbit, evalᴛ1);
 }
 
 } // end runtime_package

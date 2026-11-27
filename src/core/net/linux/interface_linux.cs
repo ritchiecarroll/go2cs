@@ -69,7 +69,8 @@ internal static UntypedInt sysARPHardwareGREIPv4 => 778;  // any over GRE over I
 internal static UntypedInt sysARPHardwareGREIPv6 => 823;  // any over GRE over IPv6 tunneling
 
 internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.NetlinkRouteAttr> attrs) {
-    var ifi = Ꮡ(new Interface(Index: (nint)ifim.Index, Flags: linkFlags(ifim.Flags)));
+    var evalᴛ1 = linkFlags(ifim.Flags);
+    var ifi = Ꮡ(new Interface(Index: (nint)ifim.Index, Flags: evalᴛ1));
     foreach (var (_, a) in range(attrs)) {
         switch (a.Attr.Type) {
         case var ᴛ when ᴛ == syscall.IFLA_ADDRESS: {
@@ -191,7 +192,7 @@ loop:
 continue_loop:;
     }
 break_loop:;
-    ifat = move2heap(ifatᴷ, ifat);
+    ifat = builtin.move2heap(ifatᴷ, ifat);
     return (ifat, default);
 }
 
@@ -278,7 +279,7 @@ internal static slice<Addr> parseProcNetIGMP(@string path, ж<Interface> Ꮡifi)
                 break;
             }}
         }
-        ifmat = move2heap(ifmatᴷ, ifmat);
+        ifmat = builtin.move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -312,7 +313,7 @@ internal static slice<Addr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡifi
                 ifmat = append(ifmatᴷ, ifmat, (Addr)(new IPAddrжAddr(ifma)));
             }
         }
-        ifmat = move2heap(ifmatᴷ, ifmat);
+        ifmat = builtin.move2heap(ifmatᴷ, ifmat);
         return ifmat;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

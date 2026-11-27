@@ -30,7 +30,7 @@ using io = io_package;
 using fs = go.io.fs_package;
 using os = os_package;
 using debug = runtime.debug_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 using encoding;
 using go.debug;
@@ -536,7 +536,8 @@ internal static (uint64, uint64) DataStart⁔(/*this*/ ref peExe x) {
     const uint32 IMAGE_SCN_ALIGN_32BYTES = 0x600000;
     foreach (var (_, sect) in range(x.f.Sections)) {
         if (sect.VirtualAddress != 0 && sect.Size != 0 && (uint32)(sect.Characteristics & ~IMAGE_SCN_ALIGN_32BYTES) == (uint32)((UntypedInt)(IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ) | (uint32)IMAGE_SCN_MEM_WRITE)) {
-            return ((uint64)sect.VirtualAddress + x.imageBase(), (uint64)sect.VirtualSize);
+            var evalᴛ1 = x.imageBase();
+            return ((uint64)sect.VirtualAddress + evalᴛ1, (uint64)sect.VirtualSize);
         }
     }
     return (0, 0);

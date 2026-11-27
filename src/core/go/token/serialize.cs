@@ -60,12 +60,14 @@ internal static error Write⁔(/*this*/ ж<FileSet> Ꮡs, Func<any, error> encod
     slice<serializedFile> files = default;
     foreach (var f in range<ж<File>>(Ꮡs.Ꮡtree.all().Invoke)) {
         f.Ꮡmutex.Lock();
+        var evalᴛ1 = slices.Clone<slice<nint>, nint>(f.lines);
+        var evalᴛ2 = slices.Clone<slice<lineInfo>, lineInfo>(f.infos);
         files = append(files, new serializedFile(
             Name: f.name,
             Base: f.@base,
             Size: f.size,
-            Lines: slices.Clone<slice<nint>, nint>(f.lines),
-            Infos: slices.Clone<slice<lineInfo>, lineInfo>(f.infos)
+            Lines: evalᴛ1,
+            Infos: evalᴛ2
         ));
         f.Ꮡmutex.Unlock();
     }

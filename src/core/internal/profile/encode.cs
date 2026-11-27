@@ -38,10 +38,12 @@ internal static void preEncode⁔(/*this*/ ref Profile p) {
         foreach (var (_, k) in range(keys)) {
             var vs = s.Label[k];
             foreach (var (_, v) in range(vs)) {
+                var evalᴛ1 = addString(strings, k);
+                var evalᴛ2 = addString(strings, v);
                 s.labelX = append(s.labelX,
                     new Label(
-                        keyX: addString(strings, k),
-                        strX: addString(strings, v)
+                        keyX: evalᴛ1,
+                        strX: evalᴛ2
                     ));
             }
         }
@@ -53,9 +55,10 @@ internal static void preEncode⁔(/*this*/ ref Profile p) {
         foreach (var (_, k) in range(numKeys)) {
             var vs = s.NumLabel[k];
             foreach (var (_, v) in range(vs)) {
+                var evalᴛ3 = addString(strings, k);
                 s.labelX = append(s.labelX,
                     new Label(
-                        keyX: addString(strings, k),
+                        keyX: evalᴛ3,
                         numX: v
                     ));
             }
@@ -276,8 +279,8 @@ internal static error postDecode⁔(/*this*/ ж<Profile> Ꮡp) {
         s.locationIDX = default;
     }
 
-    (p.DropFrames, err) = getString(p.stringTable, ref nonnil(ref p).dropFramesX, err);
-    (p.KeepFrames, err) = getString(p.stringTable, ref nonnil(ref p).keepFramesX, err);
+    (p.DropFrames, err) = getString(p.stringTable, ref builtin.nonnil(ref p).dropFramesX, err);
+    (p.KeepFrames, err) = getString(p.stringTable, ref builtin.nonnil(ref p).keepFramesX, err);
 
     {
         var pt = p.PeriodType; if (pt == nil) {
@@ -300,7 +303,7 @@ internal static error postDecode⁔(/*this*/ ж<Profile> Ꮡp) {
     }
 
     p.commentX = default;
-    (p.DefaultSampleType, err) = getString(p.stringTable, ref nonnil(ref p).defaultSampleTypeX, err);
+    (p.DefaultSampleType, err) = getString(p.stringTable, ref builtin.nonnil(ref p).defaultSampleTypeX, err);
     p.stringTable = default;
     return err;
 }

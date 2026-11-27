@@ -321,7 +321,8 @@ partial struct nestedError {
 
 // nestedError implements error.Error.
 internal static @string Error⁔(/*this*/ ref nestedError e) {
-    return e.s + ": "u8 + e.err.Error();
+    var evalᴛ1 = e.err.Error();
+    return e.s + ": "u8 + evalᴛ1;
 }
 
 // Header is a representation of a DNS message header.
@@ -575,7 +576,8 @@ internal static error checkAdvance⁔(/*this*/ ref Parser p, section sec) {
         return ErrSectionDone;
     }
     p.resHeaderValid = false;
-    if (p.index == (nint)p.header.count(sec)) {
+    var evalᴛ1 = p.header.count(sec);
+    if (p.index == (nint)evalᴛ1) {
         p.index = 0;
         p.section++;
         return ErrSectionDone;
@@ -2058,7 +2060,7 @@ internal static (slice<byte>, error) pack⁔(/*this*/ ref Name n, slice<byte> ms
         // segment. A pointer is two bytes with the two most significant
         // bits set to 1 to indicate that it is a pointer.
         if ((i == 0 || n.Data[i - 1] == '.') && compression != nil) {
-            var (ptr, ok) = compression[tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
+            var (ptr, ok) = compression[builtin.tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
                 // Hit. Emit a pointer instead of the rest of
                 // the domain.
                 return (append(msg, (byte)((uint16)(ptr >> 8 | 0xC0)), (byte)ptr), default);

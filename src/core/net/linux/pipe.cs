@@ -56,9 +56,10 @@ internal static void set⁔(/*this*/ ж<pipeDeadline> Ꮡd, time.Time t) {
                 if (closed) {
                     d.cancel = new channel<EmptyStruct>(0);
                 }
-                d.timer = time.AfterFunc(dur, [GoFunc("(*pipeDeadline).set.func1")] () => {
+                var evalᴛ1 = time.AfterFunc(dur, [GoFunc("(*pipeDeadline).set.func1")] () => {
                     close(Ꮡd.Value.cancel);
                 });
+                d.timer = evalᴛ1;
                 return;
             }
         }
@@ -89,7 +90,7 @@ internal static channel<EmptyStruct> wait⁔(/*this*/ ж<pipeDeadline> Ꮡd) {
 
 internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
     var cᴛ1 = c;
-    switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
     case 0 when cᴛ1.ꟷᐳ(out _): {
         return true;
     }

@@ -110,7 +110,9 @@ internal static void writeChunk⁔(/*this*/ ref encoder e, slice<byte> b, @strin
     var crc = crc32.NewIEEE();
     crc.Write(e.header[4..8]);
     crc.Write(b);
-    binary.BigEndian.PutUint32(e.footer[..4], crc.Sum32());
+    var evalᴛ1 = e.footer[..4];
+    var evalᴛ2 = crc.Sum32();
+    binary.BigEndian.PutUint32(evalᴛ1, evalᴛ2);
 
     (_, e.err) = e.w.Write(e.header[..8]);
     if (e.err != nil) {
@@ -129,8 +131,12 @@ private static readonly @string ihdrˢᵇ = "IHDR"u8;
 
 internal static void writeIHDR⁔(/*this*/ ref encoder e) {
     var b = e.m.Bounds();
-    binary.BigEndian.PutUint32(e.tmp[0..4], (uint32)b.Dx());
-    binary.BigEndian.PutUint32(e.tmp[4..8], (uint32)b.Dy());
+    var evalᴛ1 = e.tmp[0..4];
+    var evalᴛ2 = b.Dx();
+    binary.BigEndian.PutUint32(evalᴛ1, (uint32)evalᴛ2);
+    var evalᴛ3 = e.tmp[4..8];
+    var evalᴛ4 = b.Dy();
+    binary.BigEndian.PutUint32(evalᴛ3, (uint32)evalᴛ4);
     // Set bit depth and color type.
     switch (e.cb) {
     case var ᴛ when ᴛ == cbG8: {
@@ -266,7 +272,8 @@ internal static nint filter(ref array<slice<byte>> cr, slice<byte> pr, nint bpp)
         sum += abs8(cdat4[i]);
     }
     for (nint i = bpp; i < n; i++) {
-        cdat4[i] = (byte)(cdat0[i] - paeth(cdat0[i - bpp], pdat[i], pdat[i - bpp]));
+        var evalᴛ1 = paeth(cdat0[i - bpp], pdat[i], pdat[i - bpp]);
+        cdat4[i] = (byte)(cdat0[i] - evalᴛ1);
         sum += abs8(cdat4[i]);
         if (sum >= best) {
             break;
@@ -426,10 +433,13 @@ internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, imag
             case var ᴛ when ᴛ == cbG8: {
                 if (gray != nil) {
                     nint offset = (y - b.Min.Y) * gray.Stride;
-                    copy(cr[0][1..], gray.Pix.slice(offset, offset + b.Dx()));
+                    var evalᴛ1 = cr[0][1..];
+                    var evalᴛ2 = b.Dx();
+                    copy(evalᴛ1, gray.Pix.slice(offset, offset + evalᴛ2));
                 } else {
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
-                        var c = color.GrayModel.Convert(m.At(x, y))._<color.Gray>();
+                        var evalᴛ3 = m.At(x, y);
+                        var c = color.GrayModel.Convert(evalᴛ3)._<color.Gray>();
                         cr[0][i] = c.Y;
                         i++;
                     }
@@ -469,11 +479,14 @@ internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, imag
             case var ᴛ when ᴛ == cbP8: {
                 if (paletted != nil) {
                     nint offset = (y - b.Min.Y) * paletted.Stride;
-                    copy(cr[0][1..], paletted.Pix.slice(offset, offset + b.Dx()));
+                    var evalᴛ4 = cr[0][1..];
+                    var evalᴛ5 = b.Dx();
+                    copy(evalᴛ4, paletted.Pix.slice(offset, offset + evalᴛ5));
                 } else {
                     var pi = m._<image.PalettedImage>();
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
-                        cr[0][i] = pi.ColorIndexAt(x, y);
+                        var evalᴛ6 = pi.ColorIndexAt(x, y);
+                        cr[0][i] = evalᴛ6;
                         i += 1;
                     }
                 }
@@ -507,10 +520,14 @@ internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, imag
             case var ᴛ when ᴛ == cbTCA8: {
                 if (nrgba != nil) {
                     nint offset = (y - b.Min.Y) * nrgba.Stride;
-                    copy(cr[0][1..], nrgba.Pix.slice(offset, offset + b.Dx() * 4));
+                    var evalᴛ7 = cr[0][1..];
+                    var evalᴛ8 = b.Dx();
+                    copy(evalᴛ7, nrgba.Pix.slice(offset, offset + evalᴛ8 * 4));
                 } else if (rgba != nil) {
                     var dst = cr[0][1..];
-                    var src = rgba.Pix.slice(rgba.PixOffset(b.Min.X, y), rgba.PixOffset(b.Max.X, y));
+                    var evalᴛ9 = rgba.PixOffset(b.Min.X, y);
+                    var evalᴛ10 = rgba.PixOffset(b.Max.X, y);
+                    var src = rgba.Pix.slice(evalᴛ9, evalᴛ10);
                     for (; len(src) >= 4; (dst, src) = (dst[4..], src[4..])) {
                         var d = Ꮡ(array<byte>.Alias(dst, 4));
                         var s = Ꮡ(array<byte>.Alias(src, 4));
@@ -541,7 +558,8 @@ internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, imag
                 } else {
                     // Convert from image.Image (which is alpha-premultiplied) to PNG's non-alpha-premultiplied.
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
-                        var c = color.NRGBAModel.Convert(m.At(x, y))._<color.NRGBA>();
+                        var evalᴛ11 = m.At(x, y);
+                        var c = color.NRGBAModel.Convert(evalᴛ11)._<color.NRGBA>();
                         cr[0][i + 0] = c.R;
                         cr[0][i + 1] = c.G;
                         cr[0][i + 2] = c.B;
@@ -553,7 +571,8 @@ internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, imag
             }
             case var ᴛ when ᴛ == cbG16: {
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
-                    var c = color.Gray16Model.Convert(m.At(x, y))._<color.Gray16>();
+                    var evalᴛ12 = m.At(x, y);
+                    var c = color.Gray16Model.Convert(evalᴛ12)._<color.Gray16>();
                     cr[0][i + 0] = (uint8)(c.Y >> 8);
                     cr[0][i + 1] = (uint8)c.Y;
                     i += 2;
@@ -577,7 +596,8 @@ internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, imag
             case var ᴛ when ᴛ == cbTCA16: {
                 // Convert from image.Image (which is alpha-premultiplied) to PNG's non-alpha-premultiplied.
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
-                    var c = color.NRGBA64Model.Convert(m.At(x, y))._<color.NRGBA64>();
+                    var evalᴛ13 = m.At(x, y);
+                    var c = color.NRGBA64Model.Convert(evalᴛ13)._<color.NRGBA64>();
                     cr[0][i + 0] = (uint8)(c.R >> 8);
                     cr[0][i + 1] = (uint8)c.R;
                     cr[0][i + 2] = (uint8)(c.G >> 8);
@@ -629,7 +649,8 @@ internal static void writeIDATs⁔(/*this*/ ж<encoder> Ꮡe) {
     } else {
         e.bw.Reset(new encoderжWriter(Ꮡe));
     }
-    e.err = Ꮡe.writeImage(new bufio_WriterжWriter(e.bw), e.m, e.cb, levelToZlib(e.enc.CompressionLevel));
+    var evalᴛ1 = levelToZlib(e.enc.CompressionLevel);
+    e.err = Ꮡe.writeImage(new bufio_WriterжWriter(e.bw), e.m, e.cb, evalᴛ1);
     if (e.err != nil) {
         return;
     }

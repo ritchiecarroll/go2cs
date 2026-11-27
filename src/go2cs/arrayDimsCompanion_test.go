@@ -403,3 +403,66 @@ func TestArrayDimsOverloadForwarderLine(t *testing.T) {
 		t.Errorf("ref forwarder\n got %s\nwant %s", got, want)
 	}
 }
+
+// TestArrayDimsFactsMeasureATargetScope pins the target the facts hand the hand-own registry. A function
+// registered for one os/arch target (internal/cpu's osInit is registered for darwin/arm64 alone) is read by
+// the facts' displaced test, and goosScope.includes refuses a bare GOOS against such an entry by panicking.
+// The facts passed goosOfTarget(...) until the darwin/arm64 merge, so every target's conversion of
+// internal/cpu failed on cpu.go (GO2CS2008) and dropped its records from package_info.cs.
+func TestArrayDimsFactsMeasureATargetScope(t *testing.T) {
+	visitor, production := loadArrayDimsFixture(t)
+
+	previous, had := manualConversionFuncs["example/dims"]
+	manualConversionFuncs["example/dims"] = map[string]goosScope{"noSink": {"darwin/arm64"}}
+
+	t.Cleanup(func() {
+		if had {
+			manualConversionFuncs["example/dims"] = previous
+		} else {
+			delete(manualConversionFuncs, "example/dims")
+		}
+	})
+
+	var noSink *ast.FuncDecl
+
+	for _, file := range production.Syntax {
+		for _, decl := range file.Decls {
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok && funcDecl.Name.Name == "noSink" {
+				noSink = funcDecl
+			}
+		}
+	}
+
+	if noSink == nil {
+		t.Fatal("fixture has no noSink declaration")
+	}
+
+	for _, target := range []string{"windows/amd64", "darwin/amd64", "darwin/arm64"} {
+		visitor.options.targetPlatform = target
+		inputs := visitor.arrayDimsInputs()
+
+		if inputs.target != target {
+			t.Errorf("%s: the facts read target %q, want the full os/arch target", target, inputs.target)
+		}
+
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("%s: the facts panicked over a target-scoped registration: %v", target, r)
+				}
+			}()
+
+			computeArrayDimsFacts(production, inputs)
+
+			// The answer, not only the absence of a panic: the facts' displaced test asks the registry with
+			// inputs.target, and noSink is displaced at darwin/arm64 and at no other target. The facts' own
+			// outputs cannot show it for this fixture, since an unexported displaced generic keeps its companion
+			// analysis, so the registry call is read directly; TestTargetScopedRegistrationConvertsEndToEnd reads
+			// the displacement in a whole conversion's emission. It sits inside the recover, so a regressed
+			// target fails this test and not the whole test binary.
+			if got, want := isManualFuncDeclInPackage(production.Types.Path(), inputs.target, noSink), target == "darwin/arm64"; got != want {
+				t.Errorf("%s: noSink displaced = %v, want %v", target, got, want)
+			}
+		}()
+	}
+}

@@ -65,7 +65,8 @@ internal static void tryUpdate⁔(/*this*/ ж<nsswitchConfig> Ꮡconf) {
         ᒐd1 = true;
 
         var now = time.Now();
-        if (conf.lastChecked.After(now.Add((time.Duration)(-5000000000L)))) {
+        var evalᴛ1 = now.Add((time.Duration)(-5000000000L));
+        if (conf.lastChecked.After(evalᴛ1)) {
             return;
         }
         conf.lastChecked = now;
@@ -93,7 +94,7 @@ internal static void acquireSema⁔(/*this*/ ref nsswitchConfig conf) {
 
 internal static bool tryAcquireSema⁔(/*this*/ ref nsswitchConfig conf) {
     var selᴛ19 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    switch (trySelect(selᴛ19)) {
+    switch (builtin.trySelect(selᴛ19)) {
     case 0: {
         return true;
     }

@@ -6,7 +6,7 @@
 // used by the Go standard library.
 namespace go.@internal;
 
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 
 partial class cpu_package {
 

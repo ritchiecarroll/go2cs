@@ -23,7 +23,7 @@ using urlpkg = go.net.url_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using idna = vendor.golang.org.x.net.idna_package;
 using crypto;
@@ -1071,7 +1071,8 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 // password. For instance, when used with OAuth2, both arguments must
 // be URL encoded first with [url.QueryEscape].
 internal static void SetBasicAuth⁔(/*this*/ ref Request r, @string username, @string password) {
-    r.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
+    var evalᴛ1 = basicAuth(username, password);
+    r.Header.Set(authorizationˢ, "Basic "u8 + evalᴛ1);
 }
 
 // parseRequestLine parses "GET /foo HTTP/1.1" into its three parts.

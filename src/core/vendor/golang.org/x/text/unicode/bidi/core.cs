@@ -225,7 +225,8 @@ internal static void determineMatchingIsolates⁔(/*this*/ ref paragraph p) {
                 }
             }
             if (p.matchingPDI[i] == -1) {
-                p.matchingPDI[i] = p.Len();
+                var evalᴛ1 = p.Len();
+                p.matchingPDI[i] = evalᴛ1;
             }
         }
     }
@@ -324,9 +325,11 @@ internal static void determineExplicitEmbeddingLevels⁔(/*this*/ ref paragraph 
                 isRTL = (p.determineParagraphEmbeddingLevel(i + 1, p.matchingPDI[i]) == 1);
             }
             if (isIsolate) {
-                p.resultLevels[i] = stack.lastEmbeddingLevel();
+                var evalᴛ1 = stack.lastEmbeddingLevel();
+                p.resultLevels[i] = evalᴛ1;
                 if (stack.lastDirectionalOverrideStatus() != ON) {
-                    p.resultTypes[i] = stack.lastDirectionalOverrideStatus();
+                    var evalᴛ2 = stack.lastDirectionalOverrideStatus();
+                    p.resultTypes[i] = evalᴛ2;
                 }
             }
 
@@ -391,13 +394,15 @@ internal static void determineExplicitEmbeddingLevels⁔(/*this*/ ref paragraph 
                 stack.pop();
                 validIsolateCount--;
             }
-            p.resultLevels[i] = stack.lastEmbeddingLevel();
+            var evalᴛ3 = stack.lastEmbeddingLevel();
+            p.resultLevels[i] = evalᴛ3;
             break;
         }
         // Rule X7
         case var ᴛ when ᴛ == PDF: {
             // Not really part of the spec
-            p.resultLevels[i] = stack.lastEmbeddingLevel();
+            var evalᴛ4 = stack.lastEmbeddingLevel();
+            p.resultLevels[i] = evalᴛ4;
 
             if (overflowIsolateCount > 0) {
                 // do nothing
@@ -421,9 +426,11 @@ internal static void determineExplicitEmbeddingLevels⁔(/*this*/ ref paragraph 
             break;
         }
         default: {
-            p.resultLevels[i] = stack.lastEmbeddingLevel();
+            var evalᴛ5 = stack.lastEmbeddingLevel();
+            p.resultLevels[i] = evalᴛ5;
             if (stack.lastDirectionalOverrideStatus() != ON) {
-                p.resultTypes[i] = stack.lastDirectionalOverrideStatus();
+                var evalᴛ6 = stack.lastDirectionalOverrideStatus();
+                p.resultTypes[i] = evalᴛ6;
             }
             break;
         }}
@@ -834,7 +841,7 @@ internal static slice<ж<isolatingRunSequence>> determineIsolatingRunSequences�
             sequences = append(sequencesᴷ, sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
         }
     }
-    sequences = move2heap(sequencesᴷ, sequences);
+    sequences = builtin.move2heap(sequencesᴷ, sequences);
     return sequences;
 }
 

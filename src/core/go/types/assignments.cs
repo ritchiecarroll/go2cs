@@ -323,7 +323,7 @@ internal static slice<Type> /*res*/ operandTypes(slice<ж<operand>> list) {
     foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
     }
-    res = move2heap(resᴷ, res);
+    res = builtin.move2heap(resᴷ, res);
     return res;
 }
 
@@ -335,7 +335,7 @@ internal static slice<Type> /*res*/ varTypes(slice<ж<Var>> list) {
     foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
     }
-    res = move2heap(resᴷ, res);
+    res = builtin.move2heap(resᴷ, res);
     return res;
 }
 
@@ -450,8 +450,12 @@ internal static void returnError⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at
     }
     var err = Ꮡcheck.newError(WrongResultCount);
     err.addf(at, "%s return values", qualifier);
-    err.addf(noposn, "have %s", Ꮡcheck.typesSummary(operandTypes(rhs), false, false));
-    err.addf(noposn, "want %s", Ꮡcheck.typesSummary(varTypes(lhs), false, false));
+    var evalᴛ1 = operandTypes(rhs);
+    var evalᴛ2 = Ꮡcheck.typesSummary(evalᴛ1, false, false);
+    err.addf(noposn, "have %s", evalᴛ2);
+    var evalᴛ3 = varTypes(lhs);
+    var evalᴛ4 = Ꮡcheck.typesSummary(evalᴛ3, false, false);
+    err.addf(noposn, "want %s", evalᴛ4);
     err.report();
 }
 

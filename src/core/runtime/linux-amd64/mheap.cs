@@ -663,7 +663,9 @@ internal static bool inHeapOrStack(uintptr b) {
 //go:nosplit
 internal static ж<mspan> spanOfUnchecked(uintptr p) {
     arenaIdx ai = arenaIndex(p);
-    return mheap_.arenas[ai.l1()].Value[ai.l2()].spans[(p / (uintptr)pageSize) % (uintptr)pagesPerArena];
+    var evalᴛ1 = ai.l1();
+    var evalᴛ2 = ai.l2();
+    return mheap_.arenas[evalᴛ1].Value[evalᴛ2].spans[(p / (uintptr)pageSize) % (uintptr)pagesPerArena];
 }
 
 // spanOfHeap is like spanOf, but returns nil if p does not point to a
@@ -693,7 +695,9 @@ internal static (ж<heapArena> arena, uintptr pageIdx, uint8 pageMask) pageIndex
     uint8 pageMask = default;
 
     arenaIdx ai = arenaIndex(p);
-    arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
+    var evalᴛ1 = ai.l1();
+    var evalᴛ2 = ai.l2();
+    arena = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
     pageIdx = ((p / (uintptr)pageSize) / 8) % (uintptr)len(arena.pageInUse);
     pageMask = (byte)((byte)(1 << (int)((p / (uintptr)pageSize) % 8)));
     return (arena, pageIdx, pageMask);
@@ -713,7 +717,8 @@ internal static ж<heapArena> heapArenaOf(uintptr p) {
             return default;
         }
     }
-    var l2 = mheap_.arenas[ri.l1()];
+    var evalᴛ1 = ri.l1();
+    var l2 = mheap_.arenas[evalᴛ1];
     if (arenaL1Bits != 0 && l2 == nil) { // Should never happen if there's no L1.
         return default;
     }
@@ -724,8 +729,8 @@ internal static ж<heapArena> heapArenaOf(uintptr p) {
 internal static void init⁔(/*this*/ ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    lockInit(ref nonnil(ref h).@lock, lockRankMheap);
-    lockInit(ref nonnil(ref h).speciallock, lockRankMheapSpecial);
+    lockInit(ref builtin.nonnil(ref h).@lock, lockRankMheap);
+    lockInit(ref builtin.nonnil(ref h).speciallock, lockRankMheapSpecial);
 
     h.spanalloc.init(/* unsafe.Sizeof(mspan{}) */ (uintptr)160, recordspan, (uintptr)@unsafe.Pointer.FromRef(ref h), Ꮡmemstats.Ꮡmspan_sys);
     h.spanSPMCAlloc.init(/* unsafe.Sizeof(spanSPMC{}) */ (uintptr)56, default, nil, Ꮡmemstats.ᏑgcMiscSys);
@@ -868,7 +873,9 @@ internal static uintptr reclaimChunk⁔(/*this*/ ж<mheap> Ꮡh, slice<arenaIdx>
     }
     while (n > 0) {
         arenaIdx ai = arenas[pageIdx / (uintptr)pagesPerArena];
-        var ha = h.arenas[ai.l1()].Value[ai.l2()];
+        var evalᴛ1 = ai.l1();
+        var evalᴛ2 = ai.l2();
+        var ha = h.arenas[evalᴛ1].Value[evalᴛ2];
 
         // Get a chunk of the bitmap to work on.
         nuint arenaPage = (nuint)(pageIdx % (uintptr)pagesPerArena);
@@ -993,12 +1000,16 @@ internal static ж<mspan> allocManual⁔(/*this*/ ж<mheap> Ꮡh, uintptr npages
 internal static void setSpans⁔(/*this*/ ref mheap h, uintptr @base, uintptr npage, ж<mspan> s) {
     var p = @base / (uintptr)pageSize;
     arenaIdx ai = arenaIndex(@base);
-    var ha = h.arenas[ai.l1()].Value[ai.l2()];
+    var evalᴛ1 = ai.l1();
+    var evalᴛ2 = ai.l2();
+    var ha = h.arenas[evalᴛ1].Value[evalᴛ2];
     for (var n = (uintptr)0; n < npage; n++) {
         var i = (p + n) % (uintptr)pagesPerArena;
         if (i == 0) {
             ai = arenaIndex(@base + n * (uintptr)pageSize);
-            ha = h.arenas[ai.l1()].Value[ai.l2()];
+            var evalᴛ3 = ai.l1();
+            var evalᴛ4 = ai.l2();
+            ha = h.arenas[evalᴛ3].Value[evalᴛ4];
         }
         ha.spans[i] = s;
     }
@@ -1023,7 +1034,9 @@ internal static bool /*needZero*/ allocNeedsZero⁔(/*this*/ ref mheap h, uintpt
 
     while (npage > 0) {
         arenaIdx ai = arenaIndex(@base);
-        var ha = h.arenas[ai.l1()].Value[ai.l2()];
+        var evalᴛ1 = ai.l1();
+        var evalᴛ2 = ai.l2();
+        var ha = h.arenas[evalᴛ1].Value[evalᴛ2];
 
         var zeroedBase = atomic.Loaduintptr(ha.ᏑzeroedBase);
         var arenaBase = @base % (uintptr)heapArenaBytes;
@@ -1835,7 +1848,7 @@ internal static void init⁔(/*this*/ ж<mspan> Ꮡspan, uintptr @base, uintptr 
     span.gcmarkBits = default;
     span.pinnerBits = default;
     Ꮡspan.Ꮡstate.set(mSpanDead);
-    lockInit(ref nonnil(ref span).speciallock, lockRankMspanSpecial);
+    lockInit(ref builtin.nonnil(ref span).speciallock, lockRankMspanSpecial);
 }
 
 internal static bool inList⁔(/*this*/ ref mspan span) {
@@ -2005,7 +2018,9 @@ internal static void spanHasSpecials(ж<mspan> Ꮡs) {
 
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
-    var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
+    var evalᴛ1 = ai.l1();
+    var evalᴛ2 = ai.l2();
+    var ha = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
     atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)1 << (int)(arenaPage % 8)));
 }
 
@@ -2015,7 +2030,9 @@ internal static void spanHasNoSpecials(ж<mspan> Ꮡs) {
 
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
-    var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
+    var evalᴛ1 = ai.l1();
+    var evalᴛ2 = ai.l2();
+    var ha = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
     atomic.And8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)(~((uint8)((uint8)1 << (int)(arenaPage % 8))))));
 }
 

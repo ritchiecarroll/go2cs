@@ -46,14 +46,14 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<CommentGroup> n: {
-        walkList(v, widen<ж<Comment>, Node>(n.List, elemᴛ1 => new CommentжNode(elemᴛ1)));
+        walkList(v, builtin.widen<ж<Comment>, Node>(n.List, elemᴛ1 => new CommentжNode(elemᴛ1)));
         break;
     }
     case ж<Field> n: {
         if (n.Doc != nil) {
             Walk(v, new CommentGroupжNode(n.Doc));
         }
-        walkList(v, widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
+        walkList(v, builtin.widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
         if (n.Type != nil) {
             Walk(v, n.Type);
         }
@@ -66,7 +66,7 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<FieldList> n: {
-        walkList(v, widen<ж<Field>, Node>(n.List, elemᴛ1 => new FieldжNode(elemᴛ1)));
+        walkList(v, builtin.widen<ж<Field>, Node>(n.List, elemᴛ1 => new FieldжNode(elemᴛ1)));
         break;
     }
     // Expressions
@@ -339,7 +339,7 @@ public static void Walk(Visitor v, Node node) {
         if (n.Doc != nil) {
             Walk(v, new CommentGroupжNode(n.Doc));
         }
-        walkList(v, widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
+        walkList(v, builtin.widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
         if (n.Type != nil) {
             Walk(v, n.Type);
         }
@@ -434,7 +434,7 @@ internal static Visitor Visit⁔(/*this*/ inspector f, Node node) {
 // which (like [Inspect]) provides control over descent into subtrees,
 // but additionally reports the stack of enclosing nodes.
 public static void Inspect(Node node, Func<Node, bool> f) {
-    Walk(new inspectorᴠVisitor(NilSafeDelegateConversion<inspector, Func<Node, bool>>(f)), node);
+    Walk(new inspectorᴠVisitor(builtin.NilSafeDelegateConversion<inspector, Func<Node, bool>>(f)), node);
 }
 
 // Preorder returns an iterator over all the nodes of the syntax tree

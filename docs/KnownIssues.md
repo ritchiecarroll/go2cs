@@ -36,10 +36,19 @@ variable declared with a two-argument `//go:linkname`.
 workarounds.
 
 ## On Apple silicon, the standard library is the `amd64` build {#on-apple-silicon-runtimegoarch-reports-amd64}
+<!-- 2026-11-26 (P5, D2 of DESIGN-darwin-arm64-flavour.md; COORD 20261126T214931Z, G's pack NOTE): D2 adds darwin/arm64
+     to the corpus universe, and D7 (the pack flip: push-nuget's osx-arm64 map, pack-flavour-guard's osx-arm64 pair,
+     release-smoke and aot-smoke off the unbound list) is what makes the osx-arm64 package carry it. Until D7 this entry
+     describes the shipped packages unchanged; D7 rewrites it. -->
 
 The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library
-for macOS is built once, for `darwin/amd64`, and the same packages serve Intel and Apple-silicon Macs. On an
-Apple-silicon Mac a converted program runs as a native arm64 .NET process:
+in the macOS packages is the `darwin/amd64` build, and the same packages serve Intel and Apple-silicon Macs. The
+repository also converts a `darwin/arm64` flavour of the standard library, but until the packages carry it, the
+`osx-arm64` package ships the `darwin/amd64` build. A `go2cs -tests` run made by hand on an Apple-silicon Mac with an
+arm64-native `go2cs` converts and builds that `darwin/arm64` flavour, which no published test result covers yet: the
+validated macOS results are read on the `darwin/amd64` build. A `go2cs` running under Rosetta defaults to
+`darwin/amd64`. On an Apple-silicon Mac a converted program runs as a native arm64
+.NET process:
 - `runtime.GOARCH` reads `arm64`, as Go's own program on the same Mac does. It is read from the process when the
   program starts, and the `GOARCH` setting that `debug.ReadBuildInfo` returns and `go/build`'s default context
   follow it;
@@ -70,7 +79,7 @@ architecture-specific path in the standard library.
      only. The heading was "On Apple silicon, `runtime.GOARCH` reports `amd64`"; its old id is kept explicitly, because
      NEWS.md (1.26.10.3) links it. runtime.GOARCH and internal/buildcfg's defaultGOARCH are displaced for darwin
      (src/go2cs/manualTypeOperations.go manualConversionConsts) and read the process architecture
-     (src/core/runtime/darwin/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin/zbootstrap_darwin_impl.cs).
+     (src/core/runtime/darwin-amd64/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin-amd64/zbootstrap_darwin_impl.cs).
      The census of record: docs/phase4/DESIGN-comparator-arms.md §5, layer 2, plus census E (consts folded from
      runtime.GOARCH: defaultGOARCH incoherent, 4 inert or equivalent). The linux and windows flavours still read amd64 on an
      arm64 host (BOARD 2026-11-09), and no package ships for those. -->
@@ -270,6 +279,10 @@ the value `a` had before the call. Built with twins and run with `GO2CS_MN=1`, a
 evaluated ahead of the plain reads in its expression, as gc evaluates it, and then the program prints the value after
 the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
 unspecified behavior.
+With twins this also happens when the statement calls another function before the call that can wait, in a compound
+assignment (`s += f()` reads `s` after `f`), and when the value is converted to an interface for the call.
+<!-- 2026-11-25 (P4, row 19 movability, P3's NIT 6): rules M1, M2 and M4 move more twin sites to gc's order while
+     the plain body keeps C#'s left-to-right order; docs/phase4/DESIGN-mn-row19-movability.md section 4. -->
 
 **After a carrier stack could not be reserved, goroutines recurse to two depths.** Under the M:N scheduler each carrier
 thread reserves 1 GiB, or what a set `GO2CS_GOROUTINE_STACK` says ([Tuning](Tuning.md#goroutine-stacks)). A carrier
@@ -279,6 +292,31 @@ take that size. Carriers started before it keep theirs, so a goroutine, `main` i
 on one carrier and run out of stack at half of it on another, depending on which carrier resumes it.
 <!-- Source: src/core/golib/runtime/GoScheduler.cs, CarrierThread (a halved size is published for later carriers only);
      P3's row 4 read, 2026-11-24, NIT 4. -->
+
+**A wait the scheduler cannot see holds its thread, and the scheduler adds threads around it, up to a ceiling.** A
+goroutine built with twins can still block somewhere golib does not see: a .NET wait in hand-written C# (`lock`, an
+event, `Task.Wait`, `Thread.Sleep`), or a native call. The scheduler notices a .NET wait that lasts two of its ticks and
+gives the goroutine's processor to other work. For anything else it starts more threads while work waits. In all it
+starts at most 10,000 threads (Go's default; set it with `debug.SetMaxThreads` or `GO2CS_MN_MAXTHREADS`). A program
+that needs more ends as Go's does: `runtime: program exceeds 10000-thread limit`, then `fatal error: thread exhaustion`
+and exit status 2.
+<!-- Source: src/core/golib/runtime/GoScheduler.cs, the monitor's sensed retake (N5 3a), re-armed injection and
+     ThreadExhaustion (3c, COORD's Q1 ruling 2026-11-23); docs/phase4/DESIGN-mn-n5-invisible-blocking.md section 9.
+     Behavioral MnInvisible V1, V2 and V7. -->
+
+**C# that blocks in its own native call says so with `GoNativeCall`.** Code you write in C# that calls a native
+function which can block (a P/Invoke that waits on a device, a socket or a lock) brackets the call, so the scheduler
+can give the goroutine's processor away while it waits:
+`GoNativeCall.Enter(NativeCallHint.Blocks); try { Call(); } finally { GoNativeCall.Exit(); }`. `Blocks` gives the
+processor away at once, as Go's `entersyscallblock` does; `MayBlock`, the default, keeps it and lets the scheduler take
+it back if the call lasts. Call `Exit` exactly once for each `Enter`, on the same goroutine, and read the call's error
+(`Marshal.GetLastPInvokeError`) before `Exit`. `GoNativeCall` is an advanced member of `go.golib`: hidden from
+completion, and frozen, so a program that uses it keeps working across releases. Without twins or without
+`GO2CS_MN=1` it does nothing.
+<!-- Source: src/core/golib/runtime/GoNativeCall.cs (3b: Enter(Blocks) hands the P off, Exit takes one back); COORD's
+     Q2 ruling 2026-11-23 (DESIGN-mn-n5-invisible-blocking.md section 9): a documented consumer contract, in
+     PublicSurface.golib.txt's [mn-frozen] section. Behavioral MnInvisible V5 (Blocks) and V6 (MayBlock), from the
+     fixture's hand_impl.cs. -->
 
 ## A nugetgo package built on 1.26.10.3 beside the go.* 1.26.11.1 packages fails at restore {#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore}
 
@@ -719,6 +757,78 @@ To get Go's lines in a program, use one of these, at a large cost in speed:
 Under Native AOT, `runtime.Caller` reports line 0 instead of the call's line, measured on `linux-x64`; the function
 name it reports matches Go. Neither route above applies to a Native AOT program, so for Go's lines run the program
 under the JIT with one of them.
+
+## In a few statement forms, a variable read beside a call can see its value from before the call {#operand-order-limits}
+
+**Symptom.** A statement reads a variable and also calls a function that changes that variable, and the converted
+program prints the value from before the call where Go prints the value from after it. For example, with a
+package variable `g` and a function `bump` that adds one to `g`, a package-level `var x = pick(g, bump())` passes
+`pick` the old `g` in the converted program and the new one under Go.
+
+**Cause.** Go's specification fixes the order of the calls in a statement but not when the statement's other
+operands are read against them. Go's compiler runs every call of the statement first and reads the other operands
+after, and C# reads every operand left to right. go2cs moves a statement's calls ahead of it where a call can change
+something an earlier operand reads, so most statements match Go
+([Multi-Assignment and Evaluation Order](ConversionStrategies-Reference/multi-assignment.md#a-call-runs-before-the-plain-operands-of-its-statement)).
+These forms keep C#'s left-to-right order:
+- a `case` expression of a `switch` (the switch's own tag is covered);
+- a package-level variable's initializer;
+- a statement in which a call whose several results pass straight into another call, such as `sum(two())`, would
+  have to move, as in `x := g + sum(two())`.
+- any other statement whose calls the converter cannot fully order: such a statement keeps C#'s left-to-right order
+  as a whole, and none of its calls moves.
+
+A division that panics is a related case. In `fmt.Println(x/y, bump())` with `y` zero, Go runs `bump` and then panics
+on the division; the converted program panics first, so `bump` never runs.
+
+**Workaround.** Make the call its own statement first, then read the variable: `b := bump()` and then
+`x := pick(g, b)` reads `g` after the call in both languages.
+
+## Another package's unexported interface method, met through an embedded struct, is refused {#another-packages-unexported-interface-method-met-through-an-embedded-struct-is-refused}
+
+**Symptom.** Converting a package stops with error `GO2CS2016` at a conversion such as `lib.CallM(u)` or
+`var j J = U{}`, where `U` embeds a struct from another package (`type U struct{ lib.T }`), the interface declares
+an unexported method of that package (`lib.I` with `m()`), and either `U` declares a method `m` of its own or `m`
+returns a value. A type argument checked against such an interface (`lib.F(u)` with `func F[X I](x X)`) is refused
+the same way.
+
+**Cause.** Go names an unexported method by its package, so `U` can hold two methods `m`: `lib.T`'s, promoted, and one
+`U` declares itself. `lib.I` is met by `lib.T`'s. A converted interface adapter maps a method by its name alone, so it
+would call `U`'s own `m` (the program would print `main.m` where Go prints `lib.m`). Without one it cannot call
+`lib.T`'s, which is internal to `lib`'s assembly, so it stands in a method that does nothing and returns a zero value.
+go2cs refuses the conversion where that would be wrong: a rival `m`, or an `m` that returns a value. It cannot be
+downgraded with `-warn`. Promotion through an embedded interface field (`type U struct{ lib.I }`) converts and calls
+the right method, unless the path to that field crosses an unexported field of another package (`type T struct{ impl }`
+in `lib`), which is refused; any interface whose methods are all exported converts too.
+
+An unexported method that returns nothing, with no method of that name on `U`, is not refused, because the stand-in
+does what such a method usually does: nothing. That is the sealed-marker idiom of generated gRPC code
+(`type server struct{ pb.UnimplementedGreeterServer }`, whose `mustEmbedUnimplementedGreeterServer()` is empty), and
+it converts and runs as in Go. If the marker's Go body does have an effect, the converted program skips it silently.
+
+**Workaround.** Pass the embedded value itself (`lib.CallM(u.T)`).
+
+The same mix-up reaches a type assertion, which the refusal cannot see because it is decided when the program runs:
+a value that meets another package's unexported method only through an embedded struct reads false where Go reads
+true. `net.Buffers.WriteTo`'s `w.(buffersWriter)` is one: for a type that embeds `*net.TCPConn`, Go uses the
+connection's vectored write and the converted program takes the plain write loop. The bytes written are the same.
+
+The refusal is new on the master branch. go2cs 1.26.11.1 converts the conversion and calls the wrong method, or fails
+to build with CS1929.
+<!-- 2026-11-27 (P4, fold of COORD 060053Z on P3's read 055910Z): the predicate narrowed to a rival or a returned value,
+     so the sealed-marker idiom converts as it did before the refusal (behavioral row ForeignEmbedSealedMarker, compared
+     with go run); the gate also reads multi-value sources, switch cases, map keys and delete, range assignment, and type
+     arguments (unit table in foreignUnexportedPromotionRefusal_test.go). The first workaround was dropped: a forwarding
+     method of U's own does not lift the refusal, since U still meets lib.I only through lib.T's m. -->
+<!-- 2026-11-27 (P4, .5 seat, COORD 041242Z, ruled 042410Z). Census before the cut (go/types, every named type whose
+     method set meets an interface's unexported method through a method of another package): std production + tests on
+     linux, windows and darwin, 4 pairs, of which the one RECORDED conversion is crypto/internal/rand's reader ->
+     drbg.DefaultReader through an INTERFACE field (correct, not refused); the behavioral corpus, 14 pairs, 0 recorded
+     through a struct embed. The refusal: src/go2cs/foreignUnexportedPromotionRefusal.go. The full fix (the promotion
+     path in the GoImplement record and a hidden accessor in lib) is post-.5 and G's. The bytes-written claim for
+     net.Buffers.WriteTo: its fallback loop writes each buffer in order (net.go). The false assertion is read from the
+     emission (no adapter for the pair implements buffersWriter; the test package records only testMockTCPConn -> net.Conn),
+     not from a run. -->
 
 ## Issues in older versions {#issues-in-older-versions}
 

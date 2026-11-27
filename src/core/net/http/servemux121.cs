@@ -103,7 +103,7 @@ internal static void handleFunc⁔(/*this*/ ж<serveMux121> Ꮡmux, @string patt
     if (handler == nil) {
         throw panic("http: nil handler");
     }
-    Ꮡmux.handle(pattern, new HandlerFuncᴠHandler(NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
+    Ꮡmux.handle(pattern, new HandlerFuncᴠHandler(builtin.NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
 }
 
 // Formerly ServeMux.Handler.

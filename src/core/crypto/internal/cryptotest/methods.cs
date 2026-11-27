@@ -62,7 +62,7 @@ internal static (slice<@string>, error) extraMethods(any ip) {
         }
     }
 
-    extraMethods = move2heap(extraMethodsᴷ, extraMethods);
+    extraMethods = builtin.move2heap(extraMethodsᴷ, extraMethods);
     return (extraMethods, default);
 }
 

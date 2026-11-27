@@ -121,7 +121,7 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
             ret = append(retᴷ, ret, e);
         }
     }
-    ret = move2heap(retᴷ, ret);
+    ret = builtin.move2heap(retᴷ, ret);
     return ret;
 }
 
@@ -156,6 +156,7 @@ internal static void ServeHTTP⁔(/*this*/ ж<Handler> Ꮡh, http.ResponseWriter
             port = matches[1];
         }
 
+        var evalᴛ1 = req.URL.RequestURI();
         var env = slice<@string>([
             "SERVER_SOFTWARE=go",
             "SERVER_PROTOCOL=HTTP/1.1",
@@ -163,7 +164,7 @@ internal static void ServeHTTP⁔(/*this*/ ж<Handler> Ꮡh, http.ResponseWriter
             "GATEWAY_INTERFACE=CGI/1.1",
             "REQUEST_METHOD="u8 + req.Method,
             "QUERY_STRING="u8 + req.URL.RawQuery,
-            "REQUEST_URI="u8 + req.URL.RequestURI(),
+            "REQUEST_URI="u8 + evalᴛ1,
             "PATH_INFO="u8 + pathInfo,
             "SCRIPT_NAME="u8 + root,
             "SCRIPT_FILENAME="u8 + h.Path,

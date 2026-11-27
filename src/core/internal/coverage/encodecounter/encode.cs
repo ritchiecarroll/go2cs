@@ -137,13 +137,15 @@ internal static error writeSegmentPreamble⁔(/*this*/ ж<CoverageDataWriter> �
             return err;
         }
     }
-    cfw.csh.StrTabLen = (uint32)len(ws.BytesWritten()) - hdrsz;
+    var evalᴛ1 = ws.BytesWritten();
+    cfw.csh.StrTabLen = (uint32)len(evalᴛ1) - hdrsz;
 
     var akeys = slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(args));
 
     [GoFunc("(*CoverageDataWriter).writeSegmentPreamble.func1")] error wrULEB128(nuint v) {
         Ꮡcfw.Value.tmp = Ꮡcfw.Value.tmp[..0];
-        Ꮡcfw.Value.tmp = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, v);
+        var evalᴛ2 = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, v);
+        Ꮡcfw.Value.tmp = evalᴛ2;
         var (_, err) = Ꮡws.Value.Write(Ꮡcfw.Value.tmp); if (err != nil) {
             return err;
         }
@@ -177,7 +179,8 @@ internal static error writeSegmentPreamble⁔(/*this*/ ж<CoverageDataWriter> �
             return err;
         }
     }
-    cfw.csh.ArgsLen = (uint32)len(ws.BytesWritten()) - (cfw.csh.StrTabLen + hdrsz);
+    var evalᴛ3 = ws.BytesWritten();
+    cfw.csh.ArgsLen = (uint32)len(evalᴛ3) - (cfw.csh.StrTabLen + hdrsz);
 
     return default;
 }
@@ -269,7 +272,8 @@ internal static error writeCounters⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, C
             towr = 4;
         } else if (Ꮡcfw.Value.cflavor == coverage.CtrULeb128) {
             Ꮡcfw.Value.tmp = Ꮡcfw.Value.tmp[..0];
-            Ꮡcfw.Value.tmp = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, (nuint)val);
+            var evalᴛ1 = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, (nuint)val);
+            Ꮡcfw.Value.tmp = evalᴛ1;
             buf = Ꮡcfw.Value.tmp;
             towr = len(buf);
         } else {
@@ -312,7 +316,7 @@ internal static error writeCounters⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, C
         return default;
     };
     {
-        var err = visitor.VisitFuncs(NilSafeDelegateConversion<CounterVisitorFn, Func<uint32, uint32, slice<uint32>, error>>(emitter)); if (err != nil) {
+        var err = visitor.VisitFuncs(builtin.NilSafeDelegateConversion<CounterVisitorFn, Func<uint32, uint32, slice<uint32>, error>>(emitter)); if (err != nil) {
             return err;
         }
     }

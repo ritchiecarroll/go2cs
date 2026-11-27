@@ -161,7 +161,8 @@ internal static (ж<Form>, error err) readForm⁔(/*this*/ ж<Reader> Ꮡr, int6
                 if (maxMemoryBytes < 0) {
                     (_ᴛ1, err) = (default, ErrMessageTooLarge); goto ᒐdone;
                 }
-                form.Value.Value[name] = append((~form).Value[name], Ꮡb.String());
+                var evalᴛ1 = Ꮡb.String();
+                form.Value.Value[name] = append((~form).Value[name], evalᴛ1);
                 continue;
             }
 

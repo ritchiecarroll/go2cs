@@ -121,7 +121,8 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
             entryʗ1.err = err;
         } else {
             entryʗ1.util = util;
-            entryʗ1.mmuCurve = trace.NewMMUCurve(util);
+            var evalᴛ1 = trace.NewMMUCurve(util);
+            entryʗ1.mmuCurve = evalᴛ1;
         }
     });
     return (entry.util, entry.mmuCurve, entry.err);
@@ -174,7 +175,8 @@ internal static void HandlePlot⁔(/*this*/ ж<mmu> Ꮡm, http.ResponseWriter w,
         var window = (time.Duration)(int64)math.Exp((float64)i / /* (samples - 1) */ 99D * (logMax - logMin) + logMin);
         if (quantiles == nil) {
             plot[i] = new slice<float64>(2);
-            plot[i][1] = mmuCurve.MMU(window);
+            var evalᴛ1 = mmuCurve.MMU(window);
+            plot[i][1] = evalᴛ1;
         } else {
             plot[i] = new slice<float64>(1 + len(quantiles));
             copy(plot[i][1..], mmuCurve.MUD(window, quantiles));

@@ -52,8 +52,15 @@
     <CompilerVisibleProperty Include="GoTwinsCut" />
   </ItemGroup>
 
+  <!-- A converted test host (go2cs -tests): the converter names its project <package>.tests and gives it the entry
+       go.Go2CsTestHost.Main in go2cs_test_host.cs. It has no Go main, so go2cs-gen emits no GoTwinEntry for it, and it
+       keeps its own Main; the host enters each test's twin itself (Goroutine.RunTwin, DESIGN-mn-test-twin.md). -->
+  <PropertyGroup>
+    <GoTwinsTestHost Condition="'$(GoTwinsTestHost)' == '' and $(MSBuildProjectName.EndsWith('.tests')) and Exists('$(MSBuildProjectDirectory)\go2cs_test_host.cs')">true</GoTwinsTestHost>
+  </PropertyGroup>
+
   <!-- A twinned executable starts through go2cs-gen's GoTwinEntry, which runs main's twin. -->
-  <PropertyGroup Condition="'$(GoTwins)' == 'true' and '$(OutputType)' == 'Exe'">
+  <PropertyGroup Condition="'$(GoTwins)' == 'true' and '$(OutputType)' == 'Exe' and '$(GoTwinsTestHost)' != 'true'">
     <StartupObject>go.GoTwinEntry</StartupObject>
   </PropertyGroup>
 </Project>

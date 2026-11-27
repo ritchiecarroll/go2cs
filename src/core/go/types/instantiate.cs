@@ -113,7 +113,8 @@ internal static Type /*res*/ instance⁔(/*this*/ ж<Checker> Ꮡcheck, token.Po
     // unique IDs for Named types within the hasher.
     var hashes = new slice<@string>(len(ctxts));
     foreach (var (i, ctxtΔ1) in range(ctxts)) {
-        hashes[i] = ctxtΔ1.instanceHash(orig, targs);
+        var evalᴛ1 = ctxtΔ1.instanceHash(orig, targs);
+        hashes[i] = evalᴛ1;
     }
 
     // Record the result in all contexts.
@@ -279,7 +280,8 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
             } else {
                 detail = Ꮡcheck.sprintf("%s is not an interface", T);
             }
-            cause = Ꮡcheck.sprintf("%s does not %s %s (%s)", V, verb, T, detail);
+            var evalᴛ1 = Ꮡcheck.sprintf("%s does not %s %s (%s)", V, verb, T, detail);
+            cause = evalᴛ1;
         }
         return false;
     }
@@ -301,7 +303,8 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
     // No type with non-empty type set satisfies the empty type set.
     if (Ti.typeSet().IsEmpty()) {
         if (Ꮡcause != nil) {
-            cause = Ꮡcheck.sprintf("cannot %s %s (empty type set)", verb, T);
+            var evalᴛ2 = Ꮡcheck.sprintf("cannot %s %s (empty type set)", verb, T);
+            cause = evalᴛ2;
         }
         return false;
     }
@@ -310,7 +313,8 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
     if (!Ꮡcheck.hasAllMethods(V, T, true, Identical, Ꮡcause)) {
         /* !Implements(V, T) */
         if (Ꮡcause != nil) {
-            cause = Ꮡcheck.sprintf("%s does not %s %s %s", V, verb, T, cause);
+            var evalᴛ3 = Ꮡcheck.sprintf("%s does not %s %s %s", V, verb, T, cause);
+            cause = evalᴛ3;
         }
         return false;
     }
@@ -334,12 +338,14 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
                 return true;
             }
             if (Ꮡcause != nil) {
-                Ꮡcause.Value = Ꮡcheck.sprintf("%s to %s comparable requires go1.20 or later", V, verb);
+                var evalᴛ4 = Ꮡcheck.sprintf("%s to %s comparable requires go1.20 or later", V, verb);
+                Ꮡcause.Value = evalᴛ4;
             }
             return false;
         }
         if (Ꮡcause != nil) {
-            Ꮡcause.Value = Ꮡcheck.sprintf("%s does not %s comparable", V, verb);
+            var evalᴛ5 = Ꮡcheck.sprintf("%s does not %s comparable", V, verb);
+            Ꮡcause.Value = evalᴛ5;
         }
         return false;
     }
@@ -357,7 +363,8 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
         if (!Vi.typeSet().subsetOf(Ti.typeSet())) {
             // TODO(gri) report which type is missing
             if (Ꮡcause != nil) {
-                cause = Ꮡcheck.sprintf("%s does not %s %s", V, verb, T);
+                var evalᴛ6 = Ꮡcheck.sprintf("%s does not %s %s", V, verb, T);
+                cause = evalᴛ6;
             }
             return false;
         }
@@ -394,10 +401,12 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
                 break;
             }
             default: {
-                detail = Ꮡcheck.sprintf("%s missing in %s", V, Ti.typeSet().terms);
+                var evalᴛ7 = Ti.typeSet();
+                detail = Ꮡcheck.sprintf("%s missing in %s", V, evalᴛ7.terms);
                 break;
             }}
-            cause = Ꮡcheck.sprintf("%s does not %s %s (%s)", V, verb, T, detail);
+            var evalᴛ8 = Ꮡcheck.sprintf("%s does not %s %s (%s)", V, verb, T, detail);
+            cause = evalᴛ8;
         }
         return false;
     }

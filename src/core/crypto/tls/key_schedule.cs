@@ -162,7 +162,9 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares⁔(/
     if (err != nil) {
         return (default, default, err);
     }
-    return (Ꮡ(new keySharePrivateKeys(ecdhe: priv)), slice<keyShare>([new(ke.id, priv.PublicKey().Bytes())]), default);
+    var evalᴛ1 = priv.PublicKey();
+    var evalᴛ2 = evalᴛ1.Bytes();
+    return (Ꮡ(new keySharePrivateKeys(ecdhe: priv)), slice<keyShare>([new(ke.id, evalᴛ2)]), default);
 }
 
 internal static (slice<byte>, keyShare, error) serverSharedSecret⁔(/*this*/ ref ecdhKeyExchange ke, io.Reader rand, slice<byte> clientKeyShare) {
@@ -178,7 +180,9 @@ internal static (slice<byte>, keyShare, error) serverSharedSecret⁔(/*this*/ re
     if (err != nil) {
         return (default, new keyShare(), err);
     }
-    return (sharedKey, new keyShare(ke.id, key.PublicKey().Bytes()), default);
+    var evalᴛ1 = key.PublicKey();
+    var evalᴛ2 = evalᴛ1.Bytes();
+    return (sharedKey, new keyShare(ke.id, evalᴛ2), default);
 }
 
 internal static (slice<byte>, error) clientSharedSecret⁔(/*this*/ ref ecdhKeyExchange ke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) {
@@ -232,7 +236,9 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares⁔(/
     if (ke.id == X25519MLKEM768) {
         shareData = appendꓸꓸꓸ(priv.mlkem.Encapsulator().Bytes(), ecdhShares[0].data);
     } else {
-        shareData = appendꓸꓸꓸ(ecdhShares[0].data, priv.mlkem.Encapsulator().Bytes());
+        var evalᴛ1 = priv.mlkem.Encapsulator();
+        var evalᴛ2 = evalᴛ1.Bytes();
+        shareData = appendꓸꓸꓸ(ecdhShares[0].data, evalᴛ2);
     }
     return (priv, slice<keyShare>([new(ke.id, shareData), ecdhShares[0]]), default);
 }

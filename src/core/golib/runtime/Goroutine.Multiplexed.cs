@@ -105,6 +105,10 @@ public sealed partial class Goroutine
     // races the commit reads the right route; GoScheduler.Ready reads it first.
     internal volatile object? m_pin;
 
+    // M:N (N5 3b). Set while a native call entered with NativeCallHint.Blocks has handed this goroutine's P off;
+    // GoNativeCall.Exit takes a P back and clears it. Written and read only by the goroutine itself.
+    internal bool m_nativeHandedOff;
+
     // Set when the twin's root has ended (FinishTwin, and main's twin): a carrier then lets go of a pinned goroutine,
     // and ends its own thread when the goroutine ended locked (Go's rule, 3.4).
     internal volatile bool m_twinEnded;
@@ -134,31 +138,72 @@ public sealed partial class Goroutine
         // Goroutine 1 leaves the startup thread. Its logical state starts from the defaults on its first carrier,
         // as it does on the thread MainThread.Run starts.
         s_mainTwinRan = true;
-        main.m_multiplexed = true;
+        RunOnScheduler(main, twin, carryState: false);
+    }
+
+    /// <summary>
+    /// Runs the calling goroutine's work as its hidden async twin, multiplexed, and returns on the calling thread
+    /// when the twin ends. This is the converted test host's entry (src/core/testing's TestExecution, a test function
+    /// and its twin), not generated code's, and it is M:N machinery a consumer has no use for.
+    /// </summary>
+    /// <remarks>
+    /// It is exactly <c>body()</c> when the scheduler is off, when the calling thread holds no goroutine, when that
+    /// goroutine is locked to its thread, or when it is already multiplexed (there is no thread to leave). Otherwise
+    /// the goroutine leaves its thread, carrying its logical state, runs <paramref name="twin"/> on the scheduler,
+    /// and the calling thread takes it back when the twin ends: a return, an unrecovered panic and a
+    /// <c>runtime.Goexit</c> each leave from here, as they would have left <c>body()</c>.
+    /// </remarks>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static void RunTwin(Action body, Func<GoTask> twin)
+    {
+        Goroutine? goroutine = t_current;
+
+        if (!GoScheduler.Enabled || goroutine is null || goroutine.LockedToThread || goroutine.m_multiplexed)
+        {
+            body();
+            return;
+        }
+
+        RunOnScheduler(goroutine, twin, carryState: true);
+    }
+
+    // The shared core: the goroutine leaves the calling thread, its twin runs multiplexed, and the thread takes the
+    // goroutine back when the twin ends. carryState moves the goroutine's logical state (its panic and defer state,
+    // GoThreadState) with it, as Unmount does; main starts from the defaults instead (RunMainTwin).
+    private static void RunOnScheduler(Goroutine goroutine, Func<GoTask> twin, bool carryState)
+    {
+        if (carryState)
+            goroutine.SwapLogicalState();
+
+        goroutine.m_multiplexed = true;
         t_current = null;
-        Interlocked.CompareExchange(ref main.m_threadId, 0, Environment.CurrentManagedThreadId);
+        Interlocked.CompareExchange(ref goroutine.m_threadId, 0, Environment.CurrentManagedThreadId);
 
-        main.m_context = ExecutionContext.Capture();
-        MainTwin run = new(twin, main);
+        goroutine.m_context = ExecutionContext.Capture();
+        ThreadTwin run = new(twin, goroutine);
 
-        GoScheduler.Ready(main, (Action)run.Run);
+        GoScheduler.Ready(goroutine, (Action)run.Run);
 
         run.Done.Wait();
 
         // The twin's last step is still mounted until its carrier lets go.
         SpinWait spin = default;
 
-        while (Volatile.Read(ref main.m_threadId) != 0)
+        while (Volatile.Read(ref goroutine.m_threadId) != 0)
             spin.SpinOnce();
 
-        main.m_multiplexed = false;
-        main.Mount();
+        goroutine.m_multiplexed = false;
+        goroutine.Mount();
 
-        // Goroutine 1 comes back with the ExecutionContext its twin ended under.
-        if (GoScheduler.ContextFollowsGoroutine && main.m_context is { } context)
+        // A goroutine that goes on running on this thread may run a twin again: the pin's end mark is for this one.
+        if (carryState)
+            goroutine.m_twinEnded = false;
+
+        // The goroutine comes back with the ExecutionContext its twin ended under.
+        if (GoScheduler.ContextFollowsGoroutine && goroutine.m_context is { } context)
             ExecutionContext.Restore(context);
 
-        // What left main leaves it here, on goroutine 1, bound to this thread again.
+        // What left the twin leaves it here, on the goroutine, bound to this thread again.
         run.Outcome?.Throw();
     }
 
@@ -168,7 +213,7 @@ public sealed partial class Goroutine
     internal static string MainReading() =>
         s_mainTwinRan ? " main=multiplexed" : " main=thread";
 
-    private sealed class MainTwin(Func<GoTask> twin, Goroutine main)
+    private sealed class ThreadTwin(Func<GoTask> twin, Goroutine goroutine)
     {
         internal readonly ManualResetEventSlim Done = new(false);
         internal ExceptionDispatchInfo? Outcome;
@@ -176,8 +221,8 @@ public sealed partial class Goroutine
         internal void Run() =>
             _ = Drive();
 
-        // Nothing is handled here: main has no goroutine root, so whatever leaves it is carried to the startup
-        // thread as it is.
+        // Nothing is handled here: the twin's root is the thread that waits for it (main's, or the test host's), so
+        // whatever leaves it is carried to that thread as it is.
         private async GoTask Drive()
         {
             try
@@ -189,8 +234,8 @@ public sealed partial class Goroutine
                 Outcome = ExceptionDispatchInfo.Capture(ex);
             }
 
-            // The pin: main's twin has ended, so a carrier pinned to it lets go (DESIGN-mn-pin.md 3.4, L2).
-            main.m_twinEnded = true;
+            // The pin: the twin has ended, so a carrier pinned to it lets go (DESIGN-mn-pin.md 3.4, L2).
+            goroutine.m_twinEnded = true;
             Done.Set();
         }
     }

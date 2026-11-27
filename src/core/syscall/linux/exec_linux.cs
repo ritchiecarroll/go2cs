@@ -560,8 +560,12 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
 
             // Add the c capability to the permitted and inheritable capability mask,
             // otherwise we will not be able to add it to the ambient capability mask.
-            caps.data[capToIndex(c)].permitted |= (uint32)(capToMask(c));
-            caps.data[capToIndex(c)].inheritable |= (uint32)(capToMask(c));
+            var evalᴛ1 = capToIndex(c);
+            var evalᴛ2 = capToMask(c);
+            caps.data[evalᴛ1].permitted |= (uint32)(evalᴛ2);
+            var evalᴛ3 = capToIndex(c);
+            var evalᴛ4 = capToMask(c);
+            caps.data[evalᴛ3].inheritable |= (uint32)(evalᴛ4);
         }
 
         var ᴋ14 = Ꮡcaps.Ꮡhdr;

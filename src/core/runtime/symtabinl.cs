@@ -4,7 +4,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 using @unsafe = unsafe_package;
 
@@ -71,8 +71,8 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(funcInfo f, uint
     }
     var inlTree = @unsafe.Pointer.To<array<inlinedCall>>(inldata);
     var u = new inlineUnwinder(f: f, inlTree: inlTree);
-    var ᴛ1 = u.resolveInternal(pc);
-    return (u, ᴛ1);
+    var evalᴛ1 = u.resolveInternal(pc);
+    return (u, evalᴛ1);
 }
 
 internal static inlineFrame resolveInternal⁔(/*this*/ ref inlineUnwinder u, uintptr pc) {

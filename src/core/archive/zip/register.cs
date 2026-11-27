@@ -156,7 +156,7 @@ internal static ref sync.Map decompressors => ref ((StaticBox<sync.Map>)Ꮡdecom
     Ꮡcompressors.Store(Store, new Compressor([GoFunc("init.0.func1")] (io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default)));
     Ꮡcompressors.Store(Deflate, new Compressor([GoFunc("init.0.func2")] (io.Writer w) => (newFlateWriter(w), default)));
 
-    Ꮡdecompressors.Store(Store, NilSafeDelegateConversion<Decompressor, Func<io.Reader, io.ReadCloser>>(io.NopCloser));
+    Ꮡdecompressors.Store(Store, builtin.NilSafeDelegateConversion<Decompressor, Func<io.Reader, io.ReadCloser>>(io.NopCloser));
     Ꮡdecompressors.Store(Deflate, new Decompressor(newFlateReader));
 }
 

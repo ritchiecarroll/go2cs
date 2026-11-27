@@ -199,7 +199,9 @@ internal static Decoder NewDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionK
     r.Relocs = new slice<RefTableEntry>(Ꮡr.Len());
     foreach (var i in range(len(r.Relocs))) {
         Ꮡr.Sync(SyncReloc);
-        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
+        var evalᴛ1 = Ꮡr.Len();
+        var evalᴛ2 = Ꮡr.Len();
+        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)evalᴛ1, (RelElemIdx)(int32)evalᴛ2);
     }
 
     return r;
@@ -225,7 +227,9 @@ internal static Decoder TempDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, Section
     }
     foreach (var i in range(len(r.Relocs))) {
         Ꮡr.Sync(SyncReloc);
-        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
+        var evalᴛ1 = Ꮡr.Len();
+        var evalᴛ2 = Ꮡr.Len();
+        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)evalᴛ1, (RelElemIdx)(int32)evalᴛ2);
     }
 
     return r;
@@ -347,7 +351,8 @@ internal static partial void Sync⁔(/*this*/ ж<Decoder> Ꮡr, SyncMarker mWant
         fmt.Printf("\t[stack trace unavailable; recompile package %q with -d=syncframes]\n"u8, r.common.pkgPath);
     }
     foreach (var (_, pc) in range(writerPCs)) {
-        fmt.Printf("\t%s\n"u8, r.common.StringIdx(r.rawReloc(SectionString, pc)));
+        var evalᴛ1 = r.rawReloc(SectionString, pc);
+        fmt.Printf("\t%s\n"u8, r.common.StringIdx(evalᴛ1));
     }
 
     fmt.Printf("\nexpected %v, reading at:\n"u8, mWant);
@@ -437,7 +442,8 @@ internal static @string String⁔(/*this*/ ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncString);
-    return r.common.StringIdx(Ꮡr.Reloc(SectionString));
+    var evalᴛ1 = Ꮡr.Reloc(SectionString);
+    return r.common.StringIdx(evalᴛ1);
 }
 
 // Strings decodes and returns a variable-length slice of strings from

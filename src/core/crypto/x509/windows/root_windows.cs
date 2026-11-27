@@ -101,7 +101,7 @@ internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<
         chain = append(chainᴷ, chain, parsedCert);
     }
 
-    chain = move2heap(chainᴷ, chain);
+    chain = builtin.move2heap(chainᴷ, chain);
     return (chain, default);
 }
 
@@ -178,7 +178,8 @@ internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = 
 
 [GoInit] internal static void initΔ1() {
     foreach (var (_, eku) in range(extKeyUsageOIDs)) {
-        windowsExtKeyUsageOIDs[eku.extKeyUsage] = slice<byte>(eku.oid.String() + "\x00");
+        var evalᴛ1 = eku.oid.String();
+        windowsExtKeyUsageOIDs[eku.extKeyUsage] = slice<byte>(evalᴛ1 + "\x00");
     }
 }
 

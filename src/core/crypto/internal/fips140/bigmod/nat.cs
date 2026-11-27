@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140;
 
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
 using bits = math.bits_package;
@@ -243,7 +243,9 @@ internal static error setBytes⁔(/*this*/ ref Nat x, slice<byte> b) {
     nint i = len(b);
     nint k = 0;
     while (k < len(x.limbs) && i >= _S) {
-        x.limbs[k] = bigEndianUint(b.slice(i - (nint)_S, i));
+        var evalᴛ1 = b.slice(i - (nint)_S, i);
+        var evalᴛ2 = bigEndianUint(evalᴛ1);
+        x.limbs[k] = evalᴛ2;
         i -= _S;
         k++;
     }
@@ -611,7 +613,11 @@ public static (ж<Modulus>, error) NewModulusProduct(slice<byte> a, slice<byte> 
     var y = NewNat().resetToBytes(b);
     var n = NewNat().reset(len(x.limbs) + len(y.limbs));
     foreach (var i in range(len(y.limbs))) {
-        n.limbs[i + len(x.limbs)] = addMulVVW(n.limbs.slice(i, i + len(x.limbs)), x.limbs, y.limbs[i]);
+        var evalᴛ1 = len(x.limbs);
+        var evalᴛ2 = len(x.limbs);
+        var evalᴛ3 = n.limbs.slice(i, i + evalᴛ2);
+        var evalᴛ4 = addMulVVW(evalᴛ3, x.limbs, y.limbs[i]);
+        n.limbs[i + evalᴛ1] = evalᴛ4;
     }
     return newModulus(n.trim());
 }

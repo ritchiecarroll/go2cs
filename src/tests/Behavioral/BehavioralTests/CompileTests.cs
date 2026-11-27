@@ -820,7 +820,16 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
+    public void CheckForeignEmbedPromotedPointer() => CheckTarget("ForeignEmbedPromotedPointer");
+
+    [TestMethod]
+    public void CheckForeignEmbedSealedMarker() => CheckTarget("ForeignEmbedSealedMarker");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
+
+    [TestMethod]
+    public void CheckForeignInterfaceFieldPromotion() => CheckTarget("ForeignInterfaceFieldPromotion");
 
     [TestMethod]
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
@@ -875,6 +884,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
+
+    [TestMethod]
+    public void CheckFuncLitTupleResultInfer() => CheckTarget("FuncLitTupleResultInfer");
 
     [TestMethod]
     public void CheckFuncLitUntypedConstReturn() => CheckTarget("FuncLitUntypedConstReturn");
@@ -1094,6 +1106,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGoUntypedConstArg() => CheckTarget("GoUntypedConstArg");
+
+    [TestMethod]
+    public void CheckGoarchDefaultContext() => CheckTarget("GoarchDefaultContext");
 
     [TestMethod]
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
@@ -1534,6 +1549,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
 
     [TestMethod]
+    public void CheckMnInvisible() => CheckTarget("MnInvisible");
+
+    [TestMethod]
     public void CheckMnMainExit() => CheckTarget("MnMainExit");
 
     [TestMethod]
@@ -1640,6 +1658,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
+
+    [TestMethod]
+    public void CheckNamedFuncTupleResult() => CheckTarget("NamedFuncTupleResult");
 
     [TestMethod]
     public void CheckNamedFuncTypeMapParam() => CheckTarget("NamedFuncTypeMapParam");
@@ -1991,6 +2012,45 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckOpenSliceUnnamedArray() => CheckTarget("OpenSliceUnnamedArray");
+
+    [TestMethod]
+    public void CheckOperandOrderAddrMap() => CheckTarget("OperandOrderAddrMap");
+
+    [TestMethod]
+    public void CheckOperandOrderAssign() => CheckTarget("OperandOrderAssign");
+
+    [TestMethod]
+    public void CheckOperandOrderBinary() => CheckTarget("OperandOrderBinary");
+
+    [TestMethod]
+    public void CheckOperandOrderCallArgs() => CheckTarget("OperandOrderCallArgs");
+
+    [TestMethod]
+    public void CheckOperandOrderCompositeLit() => CheckTarget("OperandOrderCompositeLit");
+
+    [TestMethod]
+    public void CheckOperandOrderEarly() => CheckTarget("OperandOrderEarly");
+
+    [TestMethod]
+    public void CheckOperandOrderIf() => CheckTarget("OperandOrderIf");
+
+    [TestMethod]
+    public void CheckOperandOrderInPlace() => CheckTarget("OperandOrderInPlace");
+
+    [TestMethod]
+    public void CheckOperandOrderLabels() => CheckTarget("OperandOrderLabels");
+
+    [TestMethod]
+    public void CheckOperandOrderMultiAssign() => CheckTarget("OperandOrderMultiAssign");
+
+    [TestMethod]
+    public void CheckOperandOrderReturn() => CheckTarget("OperandOrderReturn");
+
+    [TestMethod]
+    public void CheckOperandOrderSend() => CheckTarget("OperandOrderSend");
+
+    [TestMethod]
+    public void CheckOperandOrderStmtForms() => CheckTarget("OperandOrderStmtForms");
 
     [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");

@@ -245,6 +245,58 @@ func TestMove2heapLinesAreTheStatementsLowering(t *testing.T) {
 	}
 }
 
+// The converter spells a golib intrinsic it calls with its class, `builtin.move2heap(xᴷ, x)`, `= builtin.GoZero<T>()`
+// and `= builtin.nonnil(ref x)`, so that no Go declaration can capture the call; files converted before that carry the
+// bare name. Both spellings are the converter's own lines. The move2heap renderings, re-spelled with the class, must
+// read exactly as the bare ones do, and the prelude pattern takes both spellings of its two intrinsic lines. Red
+// before golibQualifier: the re-spelled `good` read an unexplained blank, a missing blank and a misplaced comment, and
+// the drift regen of master 317b273e58 moved four corpus classes (-8, +10, +2, +3) in 8 files where no comment or
+// blank line had moved (docs/phase4/DATA-master-drift-317b273e58.md).
+func TestIntrinsicLinesReadWithTheBuiltinQualifier(t *testing.T) {
+	for _, rendering := range []string{"good", "bad"} {
+		src, err := os.ReadFile(filepath.Join("testdata", "move2heap", rendering, "m2h", "m2h.cs"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		qualified := strings.ReplaceAll(string(src), "= move2heap(", "= builtin.move2heap(")
+
+		if qualified == string(src) {
+			t.Fatalf("%s: the rendering holds no move2heap line to re-spell", rendering)
+		}
+
+		dir := t.TempDir()
+		csFile := filepath.Join(dir, "m2h.cs")
+
+		if err := os.WriteFile(csFile, []byte(qualified), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		bare, spelled := NewResults(), NewResults()
+
+		if err := bare.AnalyzeFiles(filepath.Join("testdata", "move2heap", "goroot", "src", "m2h", "m2h.go"), filepath.Join("testdata", "move2heap", rendering, "m2h", "m2h.cs"), "m2h"); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := spelled.AnalyzeFiles(filepath.Join("testdata", "move2heap", "goroot", "src", "m2h", "m2h.go"), csFile, "m2h"); err != nil {
+			t.Fatal(err)
+		}
+
+		if !maps.Equal(bare.Counts(), spelled.Counts()) {
+			t.Errorf("%s: with builtin. the census reads %v, want what the bare spelling reads, %v", rendering, spelled.Counts(), bare.Counts())
+		}
+	}
+
+	for _, line := range []string{
+		"    var x = GoZero<nint>();", "    var x = builtin.GoZero<nint>();",
+		"    var x = nonnil(ref q);", "    var x = builtin.nonnil(ref q);",
+	} {
+		if !preludeRe.MatchString(line) {
+			t.Errorf("preludeRe does not read %q as a prelude line", line)
+		}
+	}
+}
+
 // preludeBlanks reads testdata/prelude's rendering: its body blank-line classes, and the separators read.
 func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 	t.Helper()

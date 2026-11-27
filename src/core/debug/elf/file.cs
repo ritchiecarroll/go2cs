@@ -157,7 +157,9 @@ internal static io.ReadSeeker Open⁔(/*this*/ ж<Section> Ꮡs) {
 
         s.compressionOffset = 12;
         s.compressionType = COMPRESS_ZLIB;
-        s.Size = binary.BigEndian.Uint64(b[4..12]);
+        var evalᴛ1 = b[4..12];
+        var evalᴛ2 = binary.BigEndian.Uint64(evalᴛ1);
+        s.Size = evalᴛ2;
         zrd = zlib.NewReader;
     } else if ((SectionFlag)(s.Flags & SHF_ALLOC) != 0) {
         return new errorReader(new FormatErrorжerror(Ꮡ(new FormatError((int64)s.Offset,
@@ -1925,7 +1927,7 @@ internal static (slice<@string>, error) DynString⁔(/*this*/ ref File f, DynTag
             }
         }
     }
-    all = move2heap(allᴷ, all);
+    all = builtin.move2heap(allᴷ, all);
     return (all, default);
 }
 
@@ -1973,7 +1975,7 @@ internal static (slice<uint64>, error) DynValue⁔(/*this*/ ref File f, DynTag t
             vals = append(valsᴷ, vals, v);
         }
     }
-    vals = move2heap(valsᴷ, vals);
+    vals = builtin.move2heap(valsᴷ, vals);
     return (vals, default);
 }
 

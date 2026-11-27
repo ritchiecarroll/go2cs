@@ -70,7 +70,7 @@ internal static (nint, error) lookupProtocolMap(@string name) {
     array<byte> lowerProtocol = new(25); /* maxProtoLength */
     nint n = copy(lowerProtocol[..], name);
     lowerASCIIBytes(lowerProtocol.slice(0, n));
-    var (proto, found) = protocols[tmpstring(lowerProtocol.slice(0, n)), ꟷ];
+    var (proto, found) = protocols[builtin.tmpstring(lowerProtocol.slice(0, n)), ꟷ];
     if (!found || n != len(name)) {
         return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "unknown IP protocol specified", Addr: name))));
     }
@@ -110,7 +110,7 @@ internal static (nint port, error error) lookupPortMapWithNetwork(@string networ
         array<byte> lowerService = new(25); /* maxPortBufSize */
         nint n = copy(lowerService[..], service);
         lowerASCIIBytes(lowerService.slice(0, n));
-        var (portΔ1, okΔ1) = m[tmpstring(lowerService.slice(0, n)), ꟷ]; if (okΔ1 && n == len(service)) {
+        var (portΔ1, okΔ1) = m[builtin.tmpstring(lowerService.slice(0, n)), ꟷ]; if (okΔ1 && n == len(service)) {
             return (portΔ1, default);
         }
         return (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), errNetwork + "/"u8 + service, ""u8)));
@@ -198,7 +198,8 @@ internal static ж<singleflight.Group> getLookupGroup⁔(/*this*/ ж<Resolver> �
 // LookupHost uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupHost].
 public static (slice<@string> addrs, error err) LookupHost(@string host) {
-    return DefaultResolver.LookupHost(context.Background(), host);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupHost(evalᴛ1, host);
 }
 
 // LookupHost looks up the given host using the local resolver.
@@ -312,7 +313,7 @@ internal static context.Context _ᴛ1ʗ = new onlyValuesCtxжContext(((ж<onlyVa
 // Value performs a lookup if the original context hasn't expired.
 internal static any Value⁔(/*this*/ ref onlyValuesCtx ovc, any key) {
     var selᴛ13 = ovc.lookupValues.Done();
-    switch (trySelect(ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
     case 0 when selᴛ13.ꟷᐳ(out _): {
         return default;
     }
@@ -447,7 +448,8 @@ internal static slice<any> ipAddrsEface(slice<IPAddr> addrs) {
 // LookupPort uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupPort].
 public static (nint port, error err) LookupPort(@string network, @string service) {
-    return DefaultResolver.LookupPort(context.Background(), network, service);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupPort(evalᴛ1, network, service);
 }
 
 // LookupPort looks up the port for the given network and service.
@@ -498,7 +500,8 @@ internal static (nint port, error err) LookupPort⁔(/*this*/ ж<Resolver> Ꮡr,
 // LookupCNAME uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupCNAME].
 public static (@string cname, error err) LookupCNAME(@string host) {
-    return DefaultResolver.LookupCNAME(context.Background(), host);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupCNAME(evalᴛ1, host);
 }
 
 // LookupCNAME returns the canonical name for the given host.
@@ -540,7 +543,8 @@ internal static (@string, error) LookupCNAME⁔(/*this*/ ж<Resolver> Ꮡr, cont
 // invalid names, those records are filtered out and an error
 // will be returned alongside the remaining results, if any.
 public static (@string cname, slice<ж<SRV>> addrs, error err) LookupSRV(@string service, @string proto, @string name) {
-    return DefaultResolver.LookupSRV(context.Background(), service, proto, name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupSRV(evalᴛ1, service, proto, name);
 }
 
 // LookupSRV tries to resolve an [SRV] query of the given service,
@@ -591,7 +595,8 @@ internal static (@string, slice<ж<SRV>>, error) LookupSRV⁔(/*this*/ ж<Resolv
 // LookupMX uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupMX].
 public static (slice<ж<MX>>, error) LookupMX(@string name) {
-    return DefaultResolver.LookupMX(context.Background(), name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupMX(evalᴛ1, name);
 }
 
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
@@ -636,7 +641,8 @@ internal static (slice<ж<MX>>, error) LookupMX⁔(/*this*/ ж<Resolver> Ꮡr, c
 // LookupNS uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupNS].
 public static (slice<ж<NS>>, error) LookupNS(@string name) {
-    return DefaultResolver.LookupNS(context.Background(), name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupNS(evalᴛ1, name);
 }
 
 // LookupNS returns the DNS NS records for the given domain name.
@@ -674,7 +680,8 @@ internal static (slice<ж<NS>>, error) LookupNS⁔(/*this*/ ж<Resolver> Ꮡr, c
 // LookupTXT uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupTXT].
 public static (slice<@string>, error) LookupTXT(@string name) {
-    return DefaultResolver.lookupTXT(context.Background(), name);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.lookupTXT(evalᴛ1, name);
 }
 
 // LookupTXT returns the DNS TXT records for the given domain name.
@@ -698,7 +705,8 @@ internal static (slice<@string>, error) LookupTXT⁔(/*this*/ ж<Resolver> Ꮡr,
 // LookupAddr uses [context.Background] internally; to specify the context, use
 // [Resolver.LookupAddr].
 public static (slice<@string> names, error err) LookupAddr(@string addr) {
-    return DefaultResolver.LookupAddr(context.Background(), addr);
+    var evalᴛ1 = context.Background();
+    return DefaultResolver.LookupAddr(evalᴛ1, addr);
 }
 
 // LookupAddr performs a reverse lookup for the given address, returning a list
@@ -904,7 +912,7 @@ internal static (slice<ж<NS>>, error) goLookupNS⁔(/*this*/ ж<Resolver> Ꮡr,
         }
         nss = append(nssᴷ, nss, Ꮡ(new NS(Host: ns.NS.String())));
     }
-    nss = move2heap(nssᴷ, nss);
+    nss = builtin.move2heap(nssᴷ, nss);
     return (nss, default);
 }
 

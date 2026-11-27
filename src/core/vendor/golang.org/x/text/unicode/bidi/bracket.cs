@@ -71,9 +71,10 @@ internal static bool Less⁔(/*this*/ bracketPairs b, nint i, nint j) { return b
 // The identifiers for bracket types are the rune of the canonicalized opening
 // bracket for brackets (open or close) or 0 for runes that are not brackets.
 internal static void resolvePairedBrackets(ref isolatingRunSequence s) {
+    var evalᴛ1 = list.New();
     var p = new bracketPairer(
         sos: s.sos,
-        openers: list.New(),
+        openers: evalᴛ1,
         codesIsolatedRun: s.types,
         indexes: s.indexes
     );
@@ -155,7 +156,8 @@ internal static void locateBrackets⁔(/*this*/ ref bracketPairer p, slice<brack
                     p.pairPositions = append(p.pairPositions, new bracketPair(opener, i));
                     // remove up to and including matched opener
                     for (; count > 0; count--) {
-                        p.openers.Remove(p.openers.Front());
+                        var evalᴛ1 = p.openers.Front();
+                        p.openers.Remove(evalᴛ1);
                     }
                     break;
                 }

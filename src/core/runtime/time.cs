@@ -121,7 +121,7 @@ partial struct timer {
 internal static void init⁔(/*this*/ ж<timer> Ꮡt, Action<any, uintptr, int64> f, any arg) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    lockInit(ref nonnil(ref t).mu, lockRankTimer);
+    lockInit(ref builtin.nonnil(ref t).mu, lockRankTimer);
     t.f = f;
     t.arg = arg;
 }
@@ -300,7 +300,7 @@ private static readonly @string updateHeapˢᵇ = "updateHeap"u8;
 internal static bool /*updated*/ updateHeap⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    assertWorldStoppedOrLockHeld(ref nonnil(ref t).mu);
+    assertWorldStoppedOrLockHeld(ref builtin.nonnil(ref t).mu);
     Ꮡt.trace(updateHeapˢ);
     var ts = t.ts;
     if (ts == nil || Ꮡt != ts.heap[0].timer) {
@@ -491,7 +491,7 @@ internal static void addHeap⁔(/*this*/ ж<timers> Ꮡts, ж<timer> Ꮡt) {
     ref var ts = ref Ꮡts.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    assertWorldStoppedOrLockHeld(ref nonnil(ref ts).mu);
+    assertWorldStoppedOrLockHeld(ref builtin.nonnil(ref ts).mu);
     // Timers rely on the network poller, so make sure the poller
     // has started.
     if (ᏑnetpollInited.Load() == 0) {
@@ -1446,7 +1446,7 @@ internal static void verify⁔(/*this*/ ж<timers> Ꮡts) {
 internal static void updateMinWhenHeap⁔(/*this*/ ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
-    assertWorldStoppedOrLockHeld(ref nonnil(ref ts).mu);
+    assertWorldStoppedOrLockHeld(ref builtin.nonnil(ref ts).mu);
     if (len(ts.heap) == 0) {
         Ꮡts.ᏑminWhenHeap.Store(0);
     } else {

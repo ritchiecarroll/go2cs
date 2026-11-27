@@ -546,12 +546,14 @@ internal static ж<Entry> entry⁔(/*this*/ ж<buf> Ꮡb, ж<Entry> cu, ж<unit>
         var fmt = a.field[i].fmt;
         if (fmt == formIndirect) {
             fmt = (format)(uint32)b.@uint();
-            e.Field[i].Class = formToClass(fmt, a.field[i].attr, vers, Ꮡb);
+            var evalᴛ1 = formToClass(fmt, a.field[i].attr, vers, Ꮡb);
+            e.Field[i].Class = evalᴛ1;
         }
         any val = default;
         switch (fmt) {
         default: {
-            b.error("unknown entry attr format 0x"u8 + strconv.FormatInt((int64)fmt, 16));
+            var evalᴛ2 = strconv.FormatInt((int64)fmt, 16);
+            b.error("unknown entry attr format 0x"u8 + evalᴛ2);
             break;
         }
         // address
@@ -602,19 +604,23 @@ internal static ж<Entry> entry⁔(/*this*/ ж<buf> Ꮡb, ж<Entry> cu, ж<unit>
         }
         // block
         case var ᴛ when ᴛ == formDwarfBlock1: {
-            val = b.bytes((nint)b.uint8());
+            var evalᴛ3 = b.uint8();
+            val = b.bytes((nint)evalᴛ3);
             break;
         }
         case var ᴛ when ᴛ == formDwarfBlock2: {
-            val = b.bytes((nint)b.uint16());
+            var evalᴛ4 = b.uint16();
+            val = b.bytes((nint)evalᴛ4);
             break;
         }
         case var ᴛ when ᴛ == formDwarfBlock4: {
-            val = b.bytes((nint)b.uint32());
+            var evalᴛ5 = b.uint32();
+            val = b.bytes((nint)evalᴛ5);
             break;
         }
         case var ᴛ when ᴛ == formDwarfBlock: {
-            val = b.bytes((nint)b.@uint());
+            var evalᴛ6 = b.@uint();
+            val = b.bytes((nint)evalᴛ6);
             break;
         }
         // constant
@@ -800,7 +806,8 @@ internal static ж<Entry> entry⁔(/*this*/ ж<buf> Ꮡb, ж<Entry> cu, ж<unit>
         case var ᴛ when ᴛ == formSecOffset || ᴛ == formGnuRefAlt || ᴛ == formGnuStrpAlt: {
             var (is64, known) = b.format.dwarf64();
             if (!known) {
-                b.error("unknown size for form 0x"u8 + strconv.FormatInt((int64)fmt, 16));
+                var evalᴛ7 = strconv.FormatInt((int64)fmt, 16);
+                b.error("unknown size for form 0x"u8 + evalᴛ7);
             } else if (is64) {
                 val = (int64)b.uint64();
             } else {
@@ -811,7 +818,8 @@ internal static ж<Entry> entry⁔(/*this*/ ж<buf> Ꮡb, ж<Entry> cu, ж<unit>
         // exprloc
         // New in DWARF 4.
         case var ᴛ when ᴛ == formExprloc: {
-            val = b.bytes((nint)b.@uint());
+            var evalᴛ8 = b.@uint();
+            val = b.bytes((nint)evalᴛ8);
             break;
         }
         // reference
@@ -1237,7 +1245,7 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges⁔(/*this*/ ж<Data> 
         }
     }
 
-    ret = move2heap(retᴷ, ret);
+    ret = builtin.move2heap(retᴷ, ret);
     return (ret, default);
 }
 

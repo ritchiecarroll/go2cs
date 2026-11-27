@@ -6,7 +6,7 @@ namespace go.runtime;
 using fmt = fmt_package;
 using slices = slices_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // added for go linkname usage
+/* import _ "unsafe" (nothing to initialize) */ // added for go linkname usage
 
 partial class trace_package {
 
@@ -58,7 +58,8 @@ internal static (nint n, error err) Write⁔(/*this*/ ж<recorder> Ꮡw, slice<b
             r.active.gen = ba.gen;
         }
         if (ba.time != 0 && (r.active.minTime == 0 || r.active.minTime > r.freq.mul(ba.time))) {
-            r.active.minTime = r.freq.mul(ba.time);
+            var evalᴛ1 = r.freq.mul(ba.time);
+            r.active.minTime = evalᴛ1;
         }
         r.active.size += len(ba.data);
         r.active.batches = append(r.active.batches, ba.data);

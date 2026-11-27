@@ -146,6 +146,12 @@ param(
     # read Rosetta's behaviour as the package's (COORD's osx-arm64 oracle seat, ruling (A)). Empty, the default, adds
     # nothing to any row's arguments.
     [string] $TestOracleGoarch = '',
+    # Threads the converter's -platforms to every row: the ONE os/arch target each row converts at and its test host
+    # builds at. It must be a target of the corpus universe on this host's GOOS (Resolve-SweepPlatforms, _roster.ps1).
+    # Empty, the default, takes the interim pin where one applies to this host ($SweepInterimPlatformPins: an
+    # Apple-silicon host runs darwin/amd64 until D7 of docs/phase4/DESIGN-darwin-arm64-flavour.md re-banks the osx-arm64
+    # cells), and otherwise adds nothing to any row's arguments.
+    [string] $Platforms = '',
     # DIAGNOSTIC ONLY: a regex handed to the converter's -test-filter, which filters BOTH sides of the compare (go test
     # -run and the converted host --run). The os-matrix stack-probe stage runs one test of one row this way, so a hang
     # can be dumped (COORD's ruling, 2026-11-08). A filtered row's counts are not its banked counts, so such a sweep
@@ -201,6 +207,18 @@ if ($freeGB -lt 25) {
 # _paths.ps1, which is what pins $env:GoTargetOS on a Linux host -- the variable Get-SweepTargetGoos
 # reads to decide which OS's expectation this run is measuring against.
 . (Join-Path $PSScriptRoot '_roster.ps1')
+
+# ---- the row target (-Platforms, and the darwin/arm64 interim pin) --------------------------------
+# Resolved once, after _paths.ps1 has pinned GoTargetOS/GoTargetArch to the host's flavour: a resolved target
+# re-pins both to ITSELF, so the roster expectation (Get-SweepTargetGoos/-Goarch below) and every child dotnet
+# build read the flavour the rows are converted at, never the host's. Empty leaves both as _paths.ps1 set them.
+$Platforms = Resolve-SweepPlatforms -Explicit $Platforms -HostGoos $HostGoos -HostGoarch $HostGoarch
+if ($Platforms) {
+    $env:GoTargetOS = $Platforms.Split('/')[0]
+    $env:GoTargetArch = $Platforms.Split('/')[1]
+    $pinNote = if ($Platforms -ceq $SweepInterimPlatformPins["$HostGoos/$HostGoarch"]) { ' (the interim pin for this host; D7 removes it)' } else { '' }
+    Write-Host "platforms: every row converts and builds at $Platforms$pinNote"
+}
 
 # ---- cgo pin, WHOLE RUN, every platform (coordinator ruling 2026-09-03, mailbox a29200e47) -------
 # Both comparison sides share ONE cgo state and the converted side can only be the corpus's, which
@@ -1458,6 +1476,11 @@ foreach ($row in $rows) {
     if ($TestOracleGoarch) {
         $execArgs += @('-test-oracle-goarch', $TestOracleGoarch)
         $execSuffix += " [oracle-goarch=$TestOracleGoarch]"
+    }
+
+    if ($Platforms) {
+        $execArgs += @('-platforms', $Platforms)
+        $execSuffix += " [platforms=$Platforms]"
     }
 
     if ($TestFilter) {

@@ -52,11 +52,23 @@ type cgoScalar struct {
 	basic     string
 	isBool    bool
 	isVoid    bool
+
+	// word is a parameter that can carry an address and so goes through GoCgoArgs.Word: every 64-bit integer (design
+	// 20.10, P3's SHOULD 2: `ioctl(fd, req, unsigned long arg)` takes an address as a plain unsigned long), and the
+	// address-carrying typedefs (cgoWordTypes) whatever their width, read off the OUTERMOST name, since cmd/cgo declares a
+	// typedef as an alias (`type _Ctype_uintptr_t = _Ctype_ulong`).
+	word bool
 }
 
 // cgoScalarOf reads one parameter or result type, or refuses it by name.
 func cgoScalarOf(function, role string, t types.Type) (cgoScalar, error) {
 	goSide := ""
+	word := false
+
+	if alias, ok := t.(*types.Alias); ok {
+		cName, _ := strings.CutPrefix(alias.Obj().Name(), "_Ctype_")
+		word = cgoWordTypes[cName]
+	}
 
 	if named, ok := types.Unalias(t).(*types.Named); ok {
 		cName, found := strings.CutPrefix(named.Obj().Name(), "_Ctype_")
@@ -88,7 +100,9 @@ func cgoScalarOf(function, role string, t types.Type) (cgoScalar, error) {
 		goSide = basic.Name()
 	}
 
-	return cgoScalar{goSide: goSide, primitive: primitive, basic: basic.Name(), isBool: basic.Kind() == types.Bool}, nil
+	word = word || cgoWordTypes[goSide] || basic.Kind() == types.Int64 || basic.Kind() == types.Uint64
+
+	return cgoScalar{goSide: goSide, primitive: primitive, basic: basic.Name(), isBool: basic.Kind() == types.Bool, word: word}, nil
 }
 
 // toPrimitive is the expression that hands value to the extern.
@@ -98,6 +112,22 @@ func (scalar cgoScalar) toPrimitive(value string) string {
 	}
 
 	return fmt.Sprintf("(%s)%s", scalar.basic, value)
+}
+
+// cgoWordTypes are the C integer types that carry an address: what Go code hands them is often a uintptr made from a Go
+// pointer (`C.uintptr_t(uintptr(unsafe.Pointer(&x)))`).
+var cgoWordTypes = map[string]bool{"uintptr_t": true, "intptr_t": true}
+
+// argument is the expression that hands parameter value of function to the extern. A word parameter (every 64-bit
+// integer, and uintptr_t/intptr_t) goes through GoCgoArgs.Word (design 20.4 S4 and 20.10): a token go2cs minted for a Go
+// value with no address is refused by name there, since C would receive a number naming no memory where Go hands it an
+// address; any other integer crosses unchanged. Every other parameter is toPrimitive's.
+func (scalar cgoScalar) argument(function, value string) string {
+	if scalar.word {
+		return fmt.Sprintf("(%s)global::go.golib.GoCgoArgs.Word((ulong)(%s)%s, %q)", scalar.basic, scalar.basic, value, function)
+	}
+
+	return scalar.toPrimitive(value)
 }
 
 // fromPrimitive is the expression that hands the extern's result back as the Go-side type.
@@ -186,7 +216,7 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 	for i, param := range params {
 		externParams = append(externParams, fmt.Sprintf("%s p%d", param.primitive, i))
 		wrapperParams = append(wrapperParams, fmt.Sprintf("%s p%d", param.goSide, i))
-		arguments = append(arguments, param.toPrimitive(fmt.Sprintf("p%d", i)))
+		arguments = append(arguments, param.argument(function, fmt.Sprintf("p%d", i)))
 	}
 
 	wrapperResult := result.goSide

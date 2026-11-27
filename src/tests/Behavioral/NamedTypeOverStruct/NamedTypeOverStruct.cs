@@ -71,7 +71,8 @@ internal static void main() {
 
     var c = Ꮡb.Ꮡw;
     bump(ref (c.of(wrapper.Ꮡa)).DerefOrNull());
-    fmt.Println(b.w.a, readBack(Ꮡb));
+    var evalᴛ1 = readBack(Ꮡb);
+    fmt.Println(b.w.a, evalᴛ1);
 
     var s = new shadowed();
     s.fn = 5;
@@ -87,7 +88,8 @@ internal static void main() {
     ref var e = ref heap<derived>(new derived(@base: new @base(id: 21), tag: 2), out var Ꮡe);
     var p = Ꮡe;
     bump(ref (p.of(derived.Ꮡid)).DerefOrNull());
-    fmt.Println(e.id, e.tag, e.twice());
+    var evalᴛ2 = e.twice();
+    fmt.Println(e.id, e.tag, evalᴛ2);
 
     shadowed z = new(nil);
     z.ctxt.fn = 7;

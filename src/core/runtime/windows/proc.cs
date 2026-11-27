@@ -1011,8 +1011,10 @@ internal static void dumpgstatus(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var thisg = getg();
-    print((@string)"runtime:   gp: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", readgstatus(Ꮡgp), (@string)"\n");
-    print((@string)"runtime: getg:  g=", thisg.OrTypedNil(), (@string)", goid=", (~thisg).goid, (@string)",  g->atomicstatus=", readgstatus(thisg), (@string)"\n");
+    var evalᴛ1 = readgstatus(Ꮡgp);
+    print((@string)"runtime:   gp: gp=", Ꮡgp.OrTypedNil(), (@string)", goid=", gp.goid, (@string)", gp->atomicstatus=", evalᴛ1, (@string)"\n");
+    var evalᴛ2 = readgstatus(thisg);
+    print((@string)"runtime: getg:  g=", thisg.OrTypedNil(), (@string)", goid=", (~thisg).goid, (@string)",  g->atomicstatus=", evalᴛ2, (@string)"\n");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -3993,7 +3995,8 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
                 // GC work may be available.
                 return (default, false, now, pollUntil, true);
             }
-            var p2 = allp[@enum.position()];
+            var evalᴛ1 = @enum.position();
+            var p2 = allp[evalᴛ1];
             if (pp == p2) {
                 continue;
             }
@@ -4034,7 +4037,8 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
             }
 
             // Don't bother to attempt to steal if p2 is idle.
-            if (!idlepMask.read(@enum.position())) {
+            var evalᴛ2 = @enum.position();
+            if (!idlepMask.read(evalᴛ2)) {
                 var gpΔ2 = runqsteal(pp, p2, stealTimersOrRunNextG); if (gpΔ2 != nil) {
                     return (gpΔ2, false, now, pollUntil, ranTimer);
                 }
@@ -5008,9 +5012,11 @@ internal static ж<g> malg(int32 stacksize) {
         stacksize = round2((int32)stackSystem + stacksize);
         var newgʗ1 = newg;
         systemstack([GoFunc("malg.func1")] () => {
-            newgʗ1.Value.stack = @stackalloc((uint32)stacksize);
+            var evalᴛ1 = @stackalloc((uint32)stacksize);
+            newgʗ1.Value.stack = evalᴛ1;
             if (valgrindenabled) {
-                newgʗ1.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~newgʗ1).stack.lo, (@unsafe.Pointer)(~newgʗ1).stack.hi);
+                var evalᴛ2 = valgrindRegisterStack((@unsafe.Pointer)(~newgʗ1).stack.lo, (@unsafe.Pointer)(~newgʗ1).stack.hi);
+                newgʗ1.Value.valgrindStackID = evalᴛ2;
             }
         });
         newg.Value.stackguard0 = (~newg).stack.lo + (uintptr)stackGuard;
@@ -5301,9 +5307,11 @@ retry:
         // Stack was deallocated in gfput or just above. Allocate a new one.
         var gpʗ2 = gp;
         systemstack([GoFunc("gfget.func2")] () => {
-            gpʗ2.Value.stack = @stackalloc(startingStackSize);
+            var evalᴛ1 = @stackalloc(startingStackSize);
+            gpʗ2.Value.stack = evalᴛ1;
             if (valgrindenabled) {
-                gpʗ2.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~gpʗ2).stack.lo, (@unsafe.Pointer)(~gpʗ2).stack.hi);
+                var evalᴛ2 = valgrindRegisterStack((@unsafe.Pointer)(~gpʗ2).stack.lo, (@unsafe.Pointer)(~gpʗ2).stack.hi);
+                gpʗ2.Value.valgrindStackID = evalᴛ2;
             }
         });
         gp.Value.stackguard0 = (~gp).stack.lo + (uintptr)stackGuard;
@@ -5500,7 +5508,8 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
     } else if (usesLibcall() && mp.libcallg != 0 && mp.libcallpc != 0 && mp.libcallsp != 0) {
         // Libcall, i.e. runtime syscall on windows.
         // Collect Go stack that leads to the call.
-        Ꮡu.initAt(mp.libcallpc, mp.libcallsp, 0, mp.libcallg.ptr(), unwindSilentErrors);
+        var evalᴛ1 = mp.libcallg.ptr();
+        Ꮡu.initAt(mp.libcallpc, mp.libcallsp, 0, evalᴛ1, unwindSilentErrors);
     } else if (Ꮡmp != nil && mp.vdsoSP != 0) {
         // VDSO call, e.g. nanotime1 on Linux.
         // Collect Go stack that leads to the call.
@@ -5626,7 +5635,7 @@ internal static void init⁔(/*this*/ ж<p> Ꮡpp, int32 id) {
             pp.raceprocctx = raceproccreate();
         }
     }
-    lockInit(ref nonnil(ref pp).timers.mu, lockRankTimers);
+    lockInit(ref builtin.nonnil(ref pp).timers.mu, lockRankTimers);
 
     // This P may get timers when it starts running. Set the mask here
     // since the P may not go through pidleget (notably P 0 on startup).
@@ -6061,7 +6070,8 @@ internal static ж<p> releasepNoTrace() {
     }
     var pp = (~(~gp).m).p.ptr();
     if ((~pp).m.ptr() != (~gp).m || (~pp).status != _Prunning) {
-        print((@string)"releasep: m=", (~gp).m.OrTypedNil(), (@string)" m->p=", (~(~gp).m).p.ptr().OrTypedNil(), (@string)" p->m=", (hex)(uint64)(~pp).m, (@string)" p->status=", (~pp).status, (@string)"\n");
+        var evalᴛ1 = (~(~gp).m).p.ptr();
+        print((@string)"releasep: m=", (~gp).m.OrTypedNil(), (@string)" m->p=", evalᴛ1.OrTypedNil(), (@string)" p->m=", (hex)(uint64)(~pp).m, (@string)" p->status=", (~pp).status, (@string)"\n");
         @throw(releasepInvalidPStateˢ);
     }
 
@@ -6134,7 +6144,8 @@ internal static void checkdead() {
         return;
     }
     if (run < 0) {
-        print((@string)"runtime: checkdead: nmidle=", sched.nmidle, (@string)" nmidlelocked=", sched.nmidlelocked, (@string)" mcount=", mcount(), (@string)" nmsys=", sched.nmsys, (@string)"\n");
+        var evalᴛ1 = mcount();
+        print((@string)"runtime: checkdead: nmidle=", sched.nmidle, (@string)" nmidlelocked=", sched.nmidlelocked, (@string)" mcount=", evalᴛ1, (@string)" nmsys=", sched.nmsys, (@string)"\n");
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         @throw(checkdeadInconsistentˢ);
     }
@@ -6647,9 +6658,15 @@ internal static void schedtrace(bool detailed) {
     }
 
     @lock(Ꮡsched.of(schedt.Ꮡlock));
-    print((@string)"SCHED ", (now - starttime) / 1000000, (@string)"ms: gomaxprocs=", gomaxprocs, (@string)" idleprocs=", Ꮡsched.of(schedt.Ꮡnpidle).Load(), (@string)" threads=", mcount(), (@string)" spinningthreads=", Ꮡsched.of(schedt.Ꮡnmspinning).Load(), (@string)" needspinning=", Ꮡsched.of(schedt.Ꮡneedspinning).Load(), (@string)" idlethreads=", sched.nmidle, (@string)" runqueue=", sched.runq.size);
+    var evalᴛ1 = Ꮡsched.of(schedt.Ꮡnpidle).Load();
+    var evalᴛ2 = mcount();
+    var evalᴛ3 = Ꮡsched.of(schedt.Ꮡnmspinning).Load();
+    var evalᴛ4 = Ꮡsched.of(schedt.Ꮡneedspinning).Load();
+    print((@string)"SCHED ", (now - starttime) / 1000000, (@string)"ms: gomaxprocs=", gomaxprocs, (@string)" idleprocs=", evalᴛ1, (@string)" threads=", evalᴛ2, (@string)" spinningthreads=", evalᴛ3, (@string)" needspinning=", evalᴛ4, (@string)" idlethreads=", sched.nmidle, (@string)" runqueue=", sched.runq.size);
     if (detailed) {
-        print((@string)" gcwaiting=", Ꮡsched.of(schedt.Ꮡgcwaiting).Load(), (@string)" nmidlelocked=", sched.nmidlelocked, (@string)" stopwait=", sched.stopwait, (@string)" sysmonwait=", Ꮡsched.of(schedt.Ꮡsysmonwait).Load(), (@string)"\n");
+        var evalᴛ5 = Ꮡsched.of(schedt.Ꮡgcwaiting).Load();
+        var evalᴛ6 = Ꮡsched.of(schedt.Ꮡsysmonwait).Load();
+        print((@string)" gcwaiting=", evalᴛ5, (@string)" nmidlelocked=", sched.nmidlelocked, (@string)" stopwait=", sched.stopwait, (@string)" sysmonwait=", evalᴛ6, (@string)"\n");
     }
     // We must be careful while reading data from P's, M's and G's.
     // Even if we hold schedlock, most data can be changed concurrently.
@@ -6719,7 +6736,9 @@ internal static void schedtrace(bool detailed) {
     }
 
     forEachG([GoFunc("schedtrace.func1")] (ж<g> gp) => {
-        print((@string)"  G", (~gp).goid, (@string)": status=", readgstatus(gp), (@string)"(", (~gp).waitreason.String(), (@string)") m=");
+        var evalᴛ7 = readgstatus(gp);
+        var evalᴛ8 = (~gp).waitreason.String();
+        print((@string)"  G", (~gp).goid, (@string)": status=", evalᴛ7, (@string)"(", evalᴛ8, (@string)") m=");
         if ((~gp).m != nil) {
             print((~(~gp).m).id);
         } else {
@@ -7337,7 +7356,11 @@ internal static void runqputbatch(ж<p> Ꮡpp, ж<gQueue> Ꮡq) {
         [GoFunc("runqputbatch.func1")] uint32 off(uint32 o) => (Ꮡpp.Value.runqtail + o) % (uint32)len(Ꮡpp.Value.runq);
         for (var i = (uint32)1; i < n; i++) {
             var j = cheaprandn(i + 1);
-            (pp.runq[off(i)], pp.runq[off(j)]) = (pp.runq[off(j)], pp.runq[off(i)]);
+            var evalᴛ1 = off(i);
+            var evalᴛ2 = off(j);
+            var evalᴛ3 = off(j);
+            var evalᴛ4 = off(i);
+            (pp.runq[evalᴛ1], pp.runq[evalᴛ2]) = (pp.runq[evalᴛ3], pp.runq[evalᴛ4]);
         }
     }
 

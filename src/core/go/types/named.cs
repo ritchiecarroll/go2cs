@@ -246,7 +246,8 @@ internal static ж<Named> unpack⁔(/*this*/ ж<Named> Ꮡn) {
             var orig = n.inst.orig;
             orig.unpack();
 
-            n.fromRHS = Ꮡn.expandRHS();
+            var evalᴛ1 = Ꮡn.expandRHS();
+            n.fromRHS = evalᴛ1;
             n.tparams = orig.tparams;
 
             if (len(orig.methods) == 0) {
@@ -272,7 +273,8 @@ internal static ж<Named> unpack⁔(/*this*/ ж<Named> Ꮡn) {
             var (tparams, underlying, methods, delayed) = n.loader(Ꮡn);
             n.loader = default;
 
-            n.tparams = bindTParams(tparams);
+            var evalᴛ2 = bindTParams(tparams);
+            n.tparams = evalᴛ2;
             n.fromRHS = underlying; // for cycle detection
             n.methods = methods;
 
@@ -463,7 +465,8 @@ internal static ж<Func> Method⁔(/*this*/ ж<Named> Ꮡt, nint i) {
 
         if (t.methods[i] == nil) {
             assert(t.inst.ctxt != nil); // we should still have a context remaining from the resolution phase
-            t.methods[i] = Ꮡt.expandMethod(i);
+            var evalᴛ1 = Ꮡt.expandMethod(i);
+            t.methods[i] = evalᴛ1;
             t.inst.expandedMethods++;
 
             // Check if we've created all methods at this point. If we have, mark the
@@ -719,7 +722,7 @@ internal static void resolveUnderlying⁔(/*this*/ ж<Named> Ꮡn) {
         }}
     }
 
-    path = move2heap(pathᴷ, path);
+    path = builtin.move2heap(pathᴷ, path);
     foreach (var (_, t) in range(path)) {
         var tʗ1 = t;
         var uʗ1 = u;
@@ -826,7 +829,8 @@ internal static Type /*rhs*/ expandRHS⁔(/*this*/ ж<Named> Ꮡn) {
         assert(n.inst.orig.stateHas((stateMask)(lazyLoaded | unpacked)));
 
         if (n.inst.ctxt == nil) {
-            n.inst.ctxt = NewContext();
+            var evalᴛ1 = NewContext();
+            n.inst.ctxt = evalᴛ1;
         }
 
         var ctxt = n.inst.ctxt;
@@ -848,7 +852,8 @@ internal static Type /*rhs*/ expandRHS⁔(/*this*/ ж<Named> Ꮡn) {
             ctxt = check.context();
         }
 
-        rhs = check.subst(n.obj.pos, orig.rhs(), m, Ꮡn, ctxt);
+        var evalᴛ2 = orig.rhs();
+        rhs = check.subst(n.obj.pos, evalᴛ2, m, Ꮡn, ctxt);
 
         // TODO(markfreeman): Can we handle this in substitution?
         // If the RHS is an interface, we must set the receiver of interface methods

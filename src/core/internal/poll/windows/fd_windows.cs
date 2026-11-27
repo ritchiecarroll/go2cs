@@ -166,7 +166,8 @@ internal static ж<windows.WSAMsg> newWSAMsg(slice<byte> p, slice<byte> oob, nin
     // Use a pool to reuse allocations.
     var msg = ᏑwsaMsgPool.Get()._<ж<windows.WSAMsg>>();
     msg.Buffers.Len = (uint32)len(p);
-    msg.Buffers.Buf = @unsafe.SliceData(p);
+    var evalᴛ1 = @unsafe.SliceData(p);
+    msg.Buffers.Buf = evalᴛ1;
     if (len(oob) > 0) {
         msg.Control = new Δsyscall.WSABuf(
             Len: (uint32)len(oob),
@@ -267,18 +268,7 @@ internal static void cancelIO⁔(/*this*/ ж<FD> Ꮡfd, ж<operation> Ꮡo) {
     fd.pd.waitCanceled((nint)o.mode);
 }
 
-// pin pins ptr for the duration of the IO operation.
-// If fd is in blocking mode, pin does nothing.
-internal static void pin⁔(/*this*/ ref FD fd, nint mode, any ptr) {
-    if (fd.isBlocking) {
-        return;
-    }
-    if (mode == 'r') {
-        fd.readPinner.Pin(ptr);
-    } else {
-        fd.writePinner.Pin(ptr);
-    }
-}
+// go2cs generated this placeholder — func pin is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // execIO executes a single IO operation o.
 // It supports both synchronous and asynchronous IO.
@@ -321,7 +311,7 @@ internal static (nint, error) execIO⁔(/*this*/ ж<FD> Ꮡfd, nint mode, Func<�
             o.o.HEvent = (Δsyscall.Handle)(h | 1);
             defer(Δsyscall.CloseHandle, h, ref ᒐ);
         }
-        fd.pin(mode, o.OrTypedNil());
+        Ꮡfd.pin(mode, o.OrTypedNil());
         ref var qty = ref heap<uint32>(out var Ꮡqty);
         (qty, err) = submit(o);
         error waitErr = default;
@@ -604,7 +594,7 @@ internal static (nint, error) Read⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
         }
 
         if (len(buf) > 0) {
-            fd.pin('r', Ꮡ(buf, 0));
+            Ꮡfd.pin('r', Ꮡ(buf, 0));
         }
 
         if (len(buf) > maxRW) {
@@ -623,7 +613,8 @@ internal static (nint, error) Read⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
             (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).Read.func1")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ5 = default;
-                errΔ5 = Δsyscall.ReadFile(Ꮡfd.Value.Sysfd, bufʗ1, Ꮡqty, Ꮡfd.Value.overlapped(o));
+                var evalᴛ1 = Ꮡfd.Value.overlapped(o);
+                errΔ5 = Δsyscall.ReadFile(Ꮡfd.Value.Sysfd, bufʗ1, Ꮡqty, evalᴛ1);
                 return (Ꮡqty.Value, errΔ5);
             });
             fd.addOffset(n);
@@ -647,7 +638,8 @@ internal static (nint, error) Read⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ6 = default;
                 ref var flags = ref heap(new uint32(), out var Ꮡflags);
-                errΔ6 = Δsyscall.WSARecv(Ꮡfd.Value.Sysfd, newWsaBuf(bufʗ2), 1, Ꮡqty, Ꮡflags, o.Ꮡo, nil);
+                var evalᴛ2 = newWsaBuf(bufʗ2);
+                errΔ6 = Δsyscall.WSARecv(Ꮡfd.Value.Sysfd, evalᴛ2, 1, Ꮡqty, Ꮡflags, o.Ꮡo, nil);
                 return (Ꮡqty.Value, errΔ6);
             });
             if (race.Enabled) {
@@ -756,7 +748,7 @@ internal static (nint, error) Pread⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf, i
         defer(Ꮡfd.readWriteUnlock, ref ᒐ);
 
         if (len(buf) > 0) {
-            fd.pin('r', Ꮡ(buf, 0));
+            Ꮡfd.pin('r', Ꮡ(buf, 0));
         }
 
         if (len(buf) > maxRW) {
@@ -816,7 +808,7 @@ internal static (nint, Δsyscall.Sockaddr, error) ReadFrom⁔(/*this*/ ж<FD> �
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
-        fd.pin('r', Ꮡ(buf, 0));
+        Ꮡfd.pin('r', Ꮡ(buf, 0));
 
         var rsa = newWSARsa();
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
@@ -826,7 +818,8 @@ internal static (nint, Δsyscall.Sockaddr, error) ReadFrom⁔(/*this*/ ж<FD> �
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             ref var flags = ref heap(new uint32(), out var Ꮡflags);
-            errΔ2 = Δsyscall.WSARecvFrom(Ꮡfd.Value.Sysfd, newWsaBuf(bufʗ1), 1, Ꮡqty, Ꮡflags, rsaʗ1.Ꮡname, rsaʗ1.Ꮡnamelen, o.Ꮡo, nil);
+            var evalᴛ1 = newWsaBuf(bufʗ1);
+            errΔ2 = Δsyscall.WSARecvFrom(Ꮡfd.Value.Sysfd, evalᴛ1, 1, Ꮡqty, Ꮡflags, rsaʗ1.Ꮡname, rsaʗ1.Ꮡnamelen, o.Ꮡo, nil);
             return (Ꮡqty.Value, errΔ2);
         });
         err = fd.eofError(n, err);
@@ -857,7 +850,7 @@ internal static (nint, error) ReadFromInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
-        fd.pin('r', Ꮡ(buf, 0));
+        Ꮡfd.pin('r', Ꮡ(buf, 0));
 
         var rsa = newWSARsa();
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
@@ -867,7 +860,8 @@ internal static (nint, error) ReadFromInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             ref var flags = ref heap(new uint32(), out var Ꮡflags);
-            errΔ2 = Δsyscall.WSARecvFrom(Ꮡfd.Value.Sysfd, newWsaBuf(bufʗ1), 1, Ꮡqty, Ꮡflags, rsaʗ1.Ꮡname, rsaʗ1.Ꮡnamelen, o.Ꮡo, nil);
+            var evalᴛ1 = newWsaBuf(bufʗ1);
+            errΔ2 = Δsyscall.WSARecvFrom(Ꮡfd.Value.Sysfd, evalᴛ1, 1, Ꮡqty, Ꮡflags, rsaʗ1.Ꮡname, rsaʗ1.Ꮡnamelen, o.Ꮡo, nil);
             return (Ꮡqty.Value, errΔ2);
         });
         err = fd.eofError(n, err);
@@ -898,7 +892,7 @@ internal static (nint, error) ReadFromInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
-        fd.pin('r', Ꮡ(buf, 0));
+        Ꮡfd.pin('r', Ꮡ(buf, 0));
 
         var rsa = newWSARsa();
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
@@ -908,7 +902,8 @@ internal static (nint, error) ReadFromInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             ref var flags = ref heap(new uint32(), out var Ꮡflags);
-            errΔ2 = Δsyscall.WSARecvFrom(Ꮡfd.Value.Sysfd, newWsaBuf(bufʗ1), 1, Ꮡqty, Ꮡflags, rsaʗ1.Ꮡname, rsaʗ1.Ꮡnamelen, o.Ꮡo, nil);
+            var evalᴛ1 = newWsaBuf(bufʗ1);
+            errΔ2 = Δsyscall.WSARecvFrom(Ꮡfd.Value.Sysfd, evalᴛ1, 1, Ꮡqty, Ꮡflags, rsaʗ1.Ꮡname, rsaʗ1.Ꮡnamelen, o.Ꮡo, nil);
             return (Ꮡqty.Value, errΔ2);
         });
         err = fd.eofError(n, err);
@@ -943,7 +938,7 @@ internal static (nint, error) Write⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
         }
 
         if (len(buf) > 0) {
-            fd.pin('w', Ꮡ(buf, 0));
+            Ꮡfd.pin('w', Ꮡ(buf, 0));
         }
         nint ntotal = default;
         for (;;) {
@@ -964,7 +959,8 @@ internal static (nint, error) Write⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
                 (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).Write.func1")] (ж<operation> o) => {
                     ref var qty = ref heap(new uint32(), out var Ꮡqty);
                     error errΔ3 = default;
-                    errΔ3 = Δsyscall.WriteFile(Ꮡfd.Value.Sysfd, bʗ1, Ꮡqty, Ꮡfd.Value.overlapped(o));
+                    var evalᴛ1 = Ꮡfd.Value.overlapped(o);
+                    errΔ3 = Δsyscall.WriteFile(Ꮡfd.Value.Sysfd, bʗ1, Ꮡqty, evalᴛ1);
                     return (Ꮡqty.Value, errΔ3);
                 });
                 fd.addOffset(n);
@@ -978,7 +974,8 @@ internal static (nint, error) Write⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
                 (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).Write.func2")] (ж<operation> o) => {
                     ref var qty = ref heap(new uint32(), out var Ꮡqty);
                     error errΔ4 = default;
-                    errΔ4 = Δsyscall.WSASend(Ꮡfd.Value.Sysfd, newWsaBuf(bʗ2), 1, Ꮡqty, 0, o.Ꮡo, nil);
+                    var evalᴛ2 = newWsaBuf(bʗ2);
+                    errΔ4 = Δsyscall.WSASend(Ꮡfd.Value.Sysfd, evalᴛ2, 1, Ꮡqty, 0, o.Ꮡo, nil);
                     return (Ꮡqty.Value, errΔ4);
                 });
                 break;
@@ -1059,7 +1056,7 @@ internal static (nint, error) Pwrite⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf, 
         defer(Ꮡfd.readWriteUnlock, ref ᒐ);
 
         if (len(buf) > 0) {
-            fd.pin('w', Ꮡ(buf, 0));
+            Ꮡfd.pin('w', Ꮡ(buf, 0));
         }
 
         if (fd.isBlocking) {
@@ -1146,8 +1143,6 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf,
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
         {
             var err = Ꮡfd.writeLock(); if (err != nil) {
                 return (0, err);
@@ -1166,7 +1161,7 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf,
             return (n, err);
         }
 
-        fd.pin('w', Ꮡ(buf, 0));
+        Ꮡfd.pin('w', Ꮡ(buf, 0));
 
         nint ntotal = 0;
         while (len(buf) > 0) {
@@ -1177,7 +1172,8 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf,
             var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteTo.func2")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
-                errΔ1 = Δsyscall.WSASendto(Ꮡfd.Value.Sysfd, newWsaBuf(Ꮡb.ValueSlot), 1, Ꮡqty, 0, sa, o.Ꮡo, nil);
+                var evalᴛ1 = newWsaBuf(Ꮡb.ValueSlot);
+                errΔ1 = Δsyscall.WSASendto(Ꮡfd.Value.Sysfd, evalᴛ1, 1, Ꮡqty, 0, sa, o.Ꮡo, nil);
                 return (Ꮡqty.Value, errΔ1);
             });
             ntotal += (nint)n;
@@ -1197,8 +1193,6 @@ internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
         {
             var err = Ꮡfd.writeLock(); if (err != nil) {
                 return (0, err);
@@ -1217,7 +1211,7 @@ internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             return (n, err);
         }
 
-        fd.pin('w', Ꮡ(buf, 0));
+        Ꮡfd.pin('w', Ꮡ(buf, 0));
 
         nint ntotal = 0;
         while (len(buf) > 0) {
@@ -1228,7 +1222,8 @@ internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteToInet4.func2")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
-                errΔ1 = windows.WSASendtoInet4(Ꮡfd.Value.Sysfd, newWsaBuf(Ꮡb.ValueSlot), 1, Ꮡqty, 0, sa4, o.Ꮡo, nil);
+                var evalᴛ1 = newWsaBuf(Ꮡb.ValueSlot);
+                errΔ1 = windows.WSASendtoInet4(Ꮡfd.Value.Sysfd, evalᴛ1, 1, Ꮡqty, 0, sa4, o.Ꮡo, nil);
                 return (Ꮡqty.Value, errΔ1);
             });
             ntotal += (nint)n;
@@ -1248,8 +1243,6 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
         {
             var err = Ꮡfd.writeLock(); if (err != nil) {
                 return (0, err);
@@ -1268,7 +1261,7 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             return (n, err);
         }
 
-        fd.pin('w', Ꮡ(buf, 0));
+        Ꮡfd.pin('w', Ꮡ(buf, 0));
 
         nint ntotal = 0;
         while (len(buf) > 0) {
@@ -1279,7 +1272,8 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteToInet6.func2")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
-                errΔ1 = windows.WSASendtoInet6(Ꮡfd.Value.Sysfd, newWsaBuf(Ꮡb.ValueSlot), 1, Ꮡqty, 0, sa6, o.Ꮡo, nil);
+                var evalᴛ1 = newWsaBuf(Ꮡb.ValueSlot);
+                errΔ1 = windows.WSASendtoInet6(Ꮡfd.Value.Sysfd, evalᴛ1, 1, Ꮡqty, 0, sa6, o.Ꮡo, nil);
                 return (Ꮡqty.Value, errΔ1);
             });
             ntotal += (nint)n;

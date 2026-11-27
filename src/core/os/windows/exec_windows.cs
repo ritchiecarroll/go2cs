@@ -209,7 +209,7 @@ internal static slice<@string> commandLineToArgv(@string cmd) {
         (arg, cmd) = readNextArg(cmd);
         args = append(argsᴷ, args, (@string)arg);
     }
-    args = move2heap(argsᴷ, args);
+    args = builtin.move2heap(argsᴷ, args);
     return args;
 }
 

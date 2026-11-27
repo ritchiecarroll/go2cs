@@ -64,7 +64,7 @@ using atomic = go.sync.atomic_package;
 
 using @unsafe = unsafe_package;
 
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // go:linkname
 using go;
 using go.@internal;
 using go.sync;
@@ -176,7 +176,9 @@ internal static ref value empty => ref ((StaticBox<value>)Ꮡempty).ValueSlot;
 // caching of Value's result.
 internal static @string Value⁔(/*this*/ ж<Setting> Ꮡs) {
     Ꮡs.of(Setting.Ꮡonce).Do([GoFunc("(*Setting).Value.func1")] () => {
-        Ꮡs.Value.setting = lookup(Ꮡs.Value.Name());
+        var evalᴛ1 = Ꮡs.Value.Name();
+        var evalᴛ2 = lookup(evalᴛ1);
+        Ꮡs.Value.setting = evalᴛ2;
         if (Ꮡs.Value.info == nil && !Ꮡs.Value.Undocumented()) {
             throw panic("godebug: Value of name not listed in godebugs.All: " + Ꮡs.Value.name);
         }

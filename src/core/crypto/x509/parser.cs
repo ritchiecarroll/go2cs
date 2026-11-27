@@ -218,7 +218,8 @@ private static readonly @string x509MalformedParametersˢᵇ = "x509: malformed 
 internal static (pkix.AlgorithmIdentifier, error) parseAI(cryptobyte.String der) {
     ref var ai = ref heap<pkix.AlgorithmIdentifier>(new pkix.AlgorithmIdentifier(), out var Ꮡai);
     if (!der.ReadASN1ObjectIdentifier(Ꮡai.ᏑAlgorithm)) {
-        return (ai, errors.New(x509MalformedOidˢ));
+        var evalᴛ1 = errors.New(x509MalformedOidˢ);
+        return (ai, evalᴛ1);
     }
     if (der.Empty()) {
         return (ai, default);
@@ -226,7 +227,8 @@ internal static (pkix.AlgorithmIdentifier, error) parseAI(cryptobyte.String der)
     ref var @params = ref heap<cryptobyte.String>(out var Ꮡparams);
     ref var tag = ref heap(new cryptobyte_asn1.Tag(), out var Ꮡtag);
     if (!der.ReadAnyASN1Element(Ꮡparams, Ꮡtag)) {
-        return (ai, errors.New(x509MalformedParametersˢ));
+        var evalᴛ2 = errors.New(x509MalformedParametersˢ);
+        return (ai, evalᴛ2);
     }
     ai.Parameters.Tag = (nint)tag;
     ai.Parameters.FullBytes = @params;
@@ -248,18 +250,21 @@ internal static (time.Time, error) parseTime(ж<cryptobyte.String> Ꮡder) {
     switch (ᐧ) {
     case {} when Ꮡder.PeekASN1Tag(cryptobyte_asn1.UTCTime): {
         if (!der.ReadASN1UTCTime(Ꮡt)) {
-            return (t, errors.New(x509MalformedUTCTimeˢ));
+            var evalᴛ1 = errors.New(x509MalformedUTCTimeˢ);
+            return (t, evalᴛ1);
         }
         break;
     }
     case {} when Ꮡder.PeekASN1Tag(cryptobyte_asn1.GeneralizedTime): {
         if (!der.ReadASN1GeneralizedTime(Ꮡt)) {
-            return (t, errors.New(x509Malformedˢ));
+            var evalᴛ2 = errors.New(x509Malformedˢ);
+            return (t, evalᴛ2);
         }
         break;
     }
     default: {
-        return (t, errors.New(x509UnsupportedTimeˢ));
+        var evalᴛ3 = errors.New(x509UnsupportedTimeˢ);
+        return (t, evalᴛ3);
     }}
     return (t, default);
 }
@@ -290,16 +295,19 @@ private static readonly @string x509MalformedExtensionˢ3ᵇ = "x509: malformed 
 internal static (pkix.Extension, error) parseExtension(cryptobyte.String der) {
     ref var ext = ref heap(new pkix.Extension(), out var Ꮡext);
     if (!der.ReadASN1ObjectIdentifier(Ꮡext.ᏑId)) {
-        return (ext, errors.New(x509MalformedExtensionˢ));
+        var evalᴛ1 = errors.New(x509MalformedExtensionˢ);
+        return (ext, evalᴛ1);
     }
     if (der.PeekASN1Tag(cryptobyte_asn1.BOOLEAN)) {
         if (!der.ReadASN1Boolean(Ꮡext.ᏑCritical)) {
-            return (ext, errors.New(x509MalformedExtensionˢ2));
+            var evalᴛ2 = errors.New(x509MalformedExtensionˢ2);
+            return (ext, evalᴛ2);
         }
     }
     ref var val = ref heap<cryptobyte.String>(out var Ꮡval);
     if (!der.ReadASN1(Ꮡval, cryptobyte_asn1.OCTET_STRING)) {
-        return (ext, errors.New(x509MalformedExtensionˢ3));
+        var evalᴛ3 = errors.New(x509MalformedExtensionˢ3);
+        return (ext, evalᴛ3);
     }
     ext.Value = val;
     return (ext, default);
@@ -592,7 +600,8 @@ internal static (slice<byte>, error) parseAuthorityKeyIdentifier(pkix.Extension 
     if (!val.ReadASN1(Ꮡakid, cryptobyte_asn1.SEQUENCE)) {
         return (default, errors.New(x509InvalidAuthorityKeyˢ));
     }
-    if (akid.PeekASN1Tag(((cryptobyte_asn1.Tag)0).ContextSpecific())) {
+    var evalᴛ1 = ((cryptobyte_asn1.Tag)0).ContextSpecific();
+    if (akid.PeekASN1Tag(evalᴛ1)) {
         if (!akid.ReadASN1(Ꮡakid, ((cryptobyte_asn1.Tag)0).ContextSpecific())) {
             return (default, errors.New(x509InvalidAuthorityKeyˢ));
         }
@@ -626,8 +635,8 @@ internal static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseE
             unknownUsages = append(unknownUsagesᴷ, unknownUsages, eku);
         }
     }
-    extKeyUsages = move2heap(extKeyUsagesᴷ, extKeyUsages);
-    unknownUsages = move2heap(unknownUsagesᴷ, unknownUsages);
+    extKeyUsages = builtin.move2heap(extKeyUsagesᴷ, extKeyUsages);
+    unknownUsages = builtin.move2heap(unknownUsagesᴷ, unknownUsages);
     return (extKeyUsages, unknownUsages, default);
 }
 
@@ -660,7 +669,7 @@ internal static (slice<OID>, error) parseCertificatePoliciesExtension(cryptobyte
         }
         oids = append(oidsᴷ, oids, oid);
     }
-    oids = move2heap(oidsᴷ, oids);
+    oids = builtin.move2heap(oidsᴷ, oids);
     return (oids, default);
 }
 
@@ -840,10 +849,10 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
             }}
         }
 
-        dnsNames = move2heap(dnsNamesᴷ, dnsNames);
-        ips = move2heap(ipsᴷ, ips);
-        emails = move2heap(emailsᴷ, emails);
-        uriDomains = move2heap(uriDomainsᴷ, uriDomains);
+        dnsNames = builtin.move2heap(dnsNamesᴷ, dnsNames);
+        ips = builtin.move2heap(ipsᴷ, ips);
+        emails = builtin.move2heap(emailsᴷ, emails);
+        uriDomains = builtin.move2heap(uriDomainsᴷ, uriDomains);
         return (dnsNames, ips, emails, uriDomains, default);
     }
 
@@ -960,7 +969,8 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                         return errors.New(x509InvalidCrlˢ2);
                     }
                     while (!dpNameDER.Empty()) {
-                        if (!dpNameDER.PeekASN1Tag(((cryptobyte_asn1.Tag)6).ContextSpecific())) {
+                        var evalᴛ1 = ((cryptobyte_asn1.Tag)6).ContextSpecific();
+                        if (!dpNameDER.PeekASN1Tag(evalᴛ1)) {
                             break;
                         }
                         ref var uri = ref heap<cryptobyte.String>(out var Ꮡuri);
@@ -984,7 +994,8 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                 if (!val.ReadASN1(Ꮡval, cryptobyte_asn1.SEQUENCE)) {
                     return errors.New(x509InvalidPolicyˢ);
                 }
-                if (val.PeekASN1Tag(((cryptobyte_asn1.Tag)0).ContextSpecific())) {
+                var evalᴛ2 = ((cryptobyte_asn1.Tag)0).ContextSpecific();
+                if (val.PeekASN1Tag(evalᴛ2)) {
                     ref var v = ref heap(new int64(), out var Ꮡv);
                     if (!val.ReadASN1Int64WithTag(Ꮡv, ((cryptobyte_asn1.Tag)0).ContextSpecific())) {
                         return errors.New(x509InvalidPolicyˢ);
@@ -996,7 +1007,8 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                     }
                     @out.RequireExplicitPolicyZero = @out.RequireExplicitPolicy == 0;
                 }
-                if (val.PeekASN1Tag(((cryptobyte_asn1.Tag)1).ContextSpecific())) {
+                var evalᴛ3 = ((cryptobyte_asn1.Tag)1).ContextSpecific();
+                if (val.PeekASN1Tag(evalᴛ3)) {
                     ref var v = ref heap(new int64(), out var Ꮡv);
                     if (!val.ReadASN1Int64WithTag(Ꮡv, ((cryptobyte_asn1.Tag)1).ContextSpecific())) {
                         return errors.New(x509InvalidPolicyˢ);
@@ -1091,7 +1103,8 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                 if (!aiaDER.ReadASN1ObjectIdentifier(Ꮡmethod)) {
                     return errors.New(x509InvalidAuthorityInfoˢ);
                 }
-                if (!aiaDER.PeekASN1Tag(((cryptobyte_asn1.Tag)6).ContextSpecific())) {
+                var evalᴛ4 = ((cryptobyte_asn1.Tag)6).ContextSpecific();
+                if (!aiaDER.PeekASN1Tag(evalᴛ4)) {
                     continue;
                 }
                 if (!aiaDER.ReadASN1(ᏑaiaDER, ((cryptobyte_asn1.Tag)6).ContextSpecific())) {
@@ -1383,7 +1396,7 @@ public static (slice<ж<Certificate>>, error) ParseCertificates(slice<byte> der)
         certs = append(certsᴷ, certs, cert);
         der = der.slice(len(cert.Raw));
     }
-    certs = move2heap(certsᴷ, certs);
+    certs = builtin.move2heap(certsᴷ, certs);
     return (certs, default);
 }
 

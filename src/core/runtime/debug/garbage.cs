@@ -59,7 +59,8 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     }
     stats.PauseEnd = stats.PauseEnd[..0];
     foreach (var (_, ns) in range(stats.Pause.slice(n, n + n))) {
-        stats.PauseEnd = append(stats.PauseEnd, time.Unix(0, (int64)ns));
+        var evalᴛ1 = time.Unix(0, (int64)ns);
+        stats.PauseEnd = append(stats.PauseEnd, evalᴛ1);
     }
 
     if (len(stats.PauseQuantiles) > 0) {

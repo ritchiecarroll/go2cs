@@ -357,7 +357,8 @@ internal static (dnsmessage.Parser, @string, error) tryOneName⁔(/*this*/ ж<Re
                 if (AreEqual(errΔ2, errNoSuchHost)) {
                     // The name does not exist, so trying
                     // another server won't help.
-                    return (p, server, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server)));
+                    var evalᴛ1 = newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server);
+                    return (p, server, new DNSErrorжerror(evalᴛ1));
                 }
                 lastErr = new DNSErrorжerror(newDNSError(errΔ2, name, server));
                 continue;
@@ -367,7 +368,8 @@ internal static (dnsmessage.Parser, @string, error) tryOneName⁔(/*this*/ ж<Re
                 if (AreEqual(errΔ3, errNoSuchHost)) {
                     // The name does not exist, so trying
                     // another server won't help.
-                    return (p, server, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server)));
+                    var evalᴛ2 = newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server);
+                    return (p, server, new DNSErrorжerror(evalᴛ2));
                 }
                 lastErr = new DNSErrorжerror(newDNSError(errΔ3, name, server));
                 continue;
@@ -437,7 +439,8 @@ internal static void tryUpdate⁔(/*this*/ ж<resolverConfig> Ꮡconf, @string n
         ᒐd1 = true;
 
         var now = time.Now();
-        if (conf.lastChecked.After(now.Add((time.Duration)(-5000000000L)))) {
+        var evalᴛ1 = now.Add((time.Duration)(-5000000000L));
+        if (conf.lastChecked.After(evalᴛ1)) {
             return;
         }
         conf.lastChecked = now;
@@ -472,7 +475,7 @@ internal static void tryUpdate⁔(/*this*/ ж<resolverConfig> Ꮡconf, @string n
 
 internal static bool tryAcquireSema⁔(/*this*/ ref resolverConfig conf) {
     var selᴛ10 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    switch (trySelect(selᴛ10)) {
+    switch (builtin.trySelect(selᴛ10)) {
     case 0: {
         return true;
     }
@@ -980,7 +983,7 @@ internal static (slice<@string>, error) goLookupPTR⁔(/*this*/ ж<Resolver> Ꮡ
         ptrs = append(ptrsᴷ, ptrs, ptr.PTR.String());
     }
 
-    ptrs = move2heap(ptrsᴷ, ptrs);
+    ptrs = builtin.move2heap(ptrsᴷ, ptrs);
     return (ptrs, default);
 }
 

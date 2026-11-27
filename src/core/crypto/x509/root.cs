@@ -5,7 +5,7 @@ namespace go.crypto;
 
 using godebug = go.@internal.godebug_package;
 using sync = sync_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using go.@internal;
 
 partial class x509_package {

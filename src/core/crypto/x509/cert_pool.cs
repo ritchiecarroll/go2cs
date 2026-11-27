@@ -150,7 +150,7 @@ internal static slice<potentialParent> findPotentialParents⁔(/*this*/ ж<CertP
     slice<potentialParent> matchingKeyID = default;
     slice<potentialParent> oneKeyID = default;
     slice<potentialParent> mismatchKeyID = default;
-    foreach (var (_, c) in range(s.byName[tmpstring(cert.RawIssuer)])) {
+    foreach (var (_, c) in range(s.byName[builtin.tmpstring(cert.RawIssuer)])) {
         var (candidate, constraint, err) = s.cert(c);
         if (err != nil) {
             continue;
@@ -189,7 +189,8 @@ internal static bool contains⁔(/*this*/ ж<CertPool> Ꮡs, ж<Certificate> Ꮡ
     if (Ꮡs == nil) {
         return false;
     }
-    return s.haveSum[sha256.Sum224(cert.Raw)];
+    var evalᴛ1 = sha256.Sum224(cert.Raw);
+    return s.haveSum[evalᴛ1];
 }
 
 // AddCert adds a certificate to a pool.

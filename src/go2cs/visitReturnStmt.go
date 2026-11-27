@@ -218,6 +218,10 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 	defer func() { v.hoistedDecls = savedHoist }()
 
+	// Go reads the results after the calls among them (operandOrder.go).
+	endOperandOrder := v.beginOperandOrder(nil, false, returnStmt.Results...)
+	defer endOperandOrder()
+
 	// In namedReturnDeferMode a `return e1, e2` assigns the named result params and then returns
 	// (via the void func() wrapper); the wrapper's caller side emits the actual `return <named>`
 	// after the defers run. So here we emit `(named1, named2) = (e1, e2); return;` for an explicit
@@ -451,6 +455,8 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 						} else {
 							result.WriteString(v.convertToInterfaceType(declared, actual, tempNames[i]))
 						}
+					} else if targetName, sourceName, ok := v.funcConversion(nil, declared, nil, actual); ok {
+						result.WriteString(fmt.Sprintf("builtin.NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, tempNames[i]))
 					} else {
 						result.WriteString(tempNames[i])
 					}
@@ -832,8 +838,9 @@ func (v *Visitor) crossBaseConstCastFor(targetType types.Type, expr ast.Expr) st
 
 // forwardedReturnNeedsConversion reports whether `result`, the ONE expression of a return statement, is a
 // multi-value call forwarded as the whole result list whose elements must be converted to the declared
-// results: a declared interface result the call returns as a concrete, non-interface type. Such a return
-// is deconstructed into temps and each element converted (see visitReturnStmt), and a function literal
+// results: a declared interface result the call returns as a concrete, non-interface type, or a func
+// result the call returns as a func type that renders as a different delegate. Such a return is
+// deconstructed into temps and each element converted (see visitReturnStmt), and a function literal
 // with such an arm cannot take its delegate type from its body (see convFuncLit). The call's tuple is
 // returned with the answer.
 func (v *Visitor) forwardedReturnNeedsConversion(result ast.Expr, resultParams *types.Tuple) (*types.Tuple, bool) {
@@ -855,6 +862,14 @@ func (v *Visitor) forwardedReturnNeedsConversion(result ast.Expr, resultParams *
 			if _, actualIsIface := actual.Underlying().(*types.Interface); !actualIsIface {
 				return tuple, true
 			}
+		}
+
+		// Two func types that render as different delegates (a defined func type and its unnamed signature, either
+		// way round): C# converts a tuple element-wise only through implicit conversions, and two delegate types
+		// have none, CS0029. x/sync v0.11.0's errgroup returns context.WithCancelCause's (Context, CancelCauseFunc)
+		// as (context.Context, func(error)).
+		if _, _, ok := v.funcConversion(nil, declared, nil, actual); ok {
+			return tuple, true
 		}
 	}
 

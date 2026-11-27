@@ -1170,7 +1170,7 @@ static unsafe partial class cgotestꓸC_package
 
         try
         {
-            r = labsᴍnative((int64)p0);
+            r = labsᴍnative((int64)global::go.golib.GoCgoArgs.Word((ulong)(int64)p0, "labs"));
         }
         finally
         {

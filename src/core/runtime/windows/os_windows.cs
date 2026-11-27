@@ -500,7 +500,8 @@ internal static void goenvs() {
     envs = new slice<@string>(n);
 
     foreach (var i in range(len(envs))) {
-        envs[i] = gostringw(Ꮡ(p, 0));
+        var evalᴛ1 = gostringw(Ꮡ(p, 0));
+        envs[i] = evalᴛ1;
         while (p[0] != 0) {
             p = p[1..];
         }
@@ -657,7 +658,8 @@ internal static int32 semasleep(int64 ns) {
 
     uintptr result = default;
     if (ns < 0) {
-        result = stdcall(_WaitForSingleObject, (~(~getg()).m).waitsema, (uintptr)windows.INFINITE);
+        var evalᴛ1 = getg();
+        result = stdcall(_WaitForSingleObject, (~(~evalᴛ1).m).waitsema, (uintptr)windows.INFINITE);
     } else {
         var start = nanotime();
         var elapsed = (int64)0;
@@ -666,8 +668,10 @@ internal static int32 semasleep(int64 ns) {
             if (ms == 0) {
                 ms = 1;
             }
+            var evalᴛ2 = getg();
+            var evalᴛ3 = getg();
             result = stdcall(_WaitForMultipleObjects, 2,
-                (uintptr)Ꮡ(array<uintptr>([(~(~getg()).m).waitsema, (~(~getg()).m).resumesema])),
+                (uintptr)Ꮡ(array<uintptr>([(~(~evalᴛ2).m).waitsema, (~(~evalᴛ3).m).resumesema])),
                 0, (uintptr)ms);
             if (result != (uintptr)(_WAIT_OBJECT_0 + 1)) {
                 // Not a suspend/resume event
@@ -765,8 +769,9 @@ private static readonly @string runtimeNewosprocˢᵇ = "runtime.newosproc"u8;
 //go:nosplit
 internal static void newosproc(ж<m> mp) {
     // We pass 0 for the stack size to use the default for this binary.
+    var evalᴛ1 = abi.FuncPCABI0(tstart_stdcall);
     var thandle = stdcall(_CreateThread, 0, 0,
-        abi.FuncPCABI0(tstart_stdcall), (uintptr)mp,
+        evalᴛ1, (uintptr)mp,
         0, 0);
 
     if (thandle == 0) {

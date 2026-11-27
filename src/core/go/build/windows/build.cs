@@ -28,7 +28,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using global::go.@internal;
 using global::go.go;
 using global::go.go.build;
@@ -268,7 +268,7 @@ internal static slice<@string> gopath⁔(/*this*/ ref Context ctxt) {
         }
         all = append(allᴷ, all, p);
     }
-    all = move2heap(allᴷ, all);
+    all = builtin.move2heap(allᴷ, all);
     return all;
 }
 
@@ -642,7 +642,8 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
         ImportPath: path
     ));
     if (path == ""u8) {
-        return (p, fmt.Errorf("import %q: invalid import path"u8, path));
+        var evalᴛ1 = fmt.Errorf("import %q: invalid import path"u8, path);
+        return (p, evalᴛ1);
     }
 
     @string pkgtargetroot = default;
@@ -687,10 +688,12 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
     if (IsLocalImport(path)) {
         pkga = ""u8; // local imports have no installed path
         if (srcDir == ""u8) {
-            return (p, fmt.Errorf("import %q: import relative to unknown directory"u8, path));
+            var evalᴛ2 = fmt.Errorf("import %q: import relative to unknown directory"u8, path);
+            return (p, evalᴛ2);
         }
         if (!ctxt.isAbsPath(path)) {
-            p.Dir = ctxt.joinPath(srcDir, path);
+            var evalᴛ3 = ctxt.joinPath(srcDir, path);
+            p.Dir = evalᴛ3;
         }
         // p.Dir directory may or may not exist. Gather partial information first, check if it exists later.
         // Determine canonical import path, if any.
@@ -738,7 +741,8 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
         // Keep going with the information we have.
     } else {
         if (strings.HasPrefix(path, "/")) {
-            return (p, fmt.Errorf("import %q: cannot import absolute path"u8, path));
+            var evalᴛ4 = fmt.Errorf("import %q: cannot import absolute path"u8, path);
+            return (p, evalᴛ4);
         }
 
         var errΔ1 = ctxt.importGo(p, path, srcDir, mode); if (errΔ1 == nil) {
@@ -767,7 +771,9 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
                         @string dir = Ꮡctxt.Value.joinPath(vendor, path);
                         if (Ꮡctxt.Value.isDir(dir) && hasGoFiles(Ꮡctxt, dir)) {
                             pʗ2.Dir = dir;
-                            pʗ2.ImportPath = strings.TrimPrefix(pathpkg.Join(sub, vendorˢ, path), srcˢ2);
+                            var evalᴛ5 = pathpkg.Join(sub, vendorˢ, path);
+                            var evalᴛ6 = strings.TrimPrefix(evalᴛ5, srcˢ2);
+                            pʗ2.ImportPath = evalᴛ6;
                             pʗ2.Goroot = isGoroot;
                             pʗ2.Root = root;
                             setPkgaʗ1(); // p.ImportPath changed
@@ -821,7 +827,8 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
                 // TODO(bcmills): Setting p.Dir here is misleading, because gccgo
                 // doesn't actually load its standard-library packages from this
                 // directory. See if we can leave it unset.
-                p.Dir = ctxt.joinPath(ctxt.GOROOT, srcˢ, path);
+                var evalᴛ7 = ctxt.joinPath(ctxt.GOROOT, srcˢ, path);
+                p.Dir = evalᴛ7;
                 p.Goroot = true;
                 p.Root = ctxt.GOROOT;
                 goto Found;
@@ -877,25 +884,32 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
         if (len(tried.gopath) == 0) {
             paths = append(paths, (@string)"\t($GOPATH not set. For more details see: 'go help gopath')");
         }
-        return (p, fmt.Errorf("cannot find package %q in any of:\n%s"u8, path, strings.Join(paths, "\n")));
+        var evalᴛ8 = strings.Join(paths, "\n");
+        var evalᴛ9 = fmt.Errorf("cannot find package %q in any of:\n%s"u8, path, evalᴛ8);
+        return (p, evalᴛ9);
     }
 
 Found:
     if (p.Root != ""u8) {
-        p.SrcRoot = ctxt.joinPath(p.Root, srcˢ);
-        p.PkgRoot = ctxt.joinPath(p.Root, pkgˢ);
-        p.BinDir = ctxt.joinPath(p.Root, binˢ);
+        var evalᴛ10 = ctxt.joinPath(p.Root, srcˢ);
+        p.SrcRoot = evalᴛ10;
+        var evalᴛ11 = ctxt.joinPath(p.Root, pkgˢ);
+        p.PkgRoot = evalᴛ11;
+        var evalᴛ12 = ctxt.joinPath(p.Root, binˢ);
+        p.BinDir = evalᴛ12;
         if (pkga != ""u8) {
             // Always set PkgTargetRoot. It might be used when building in shared
             // mode.
-            p.PkgTargetRoot = ctxt.joinPath(p.Root, pkgtargetroot);
+            var evalᴛ13 = ctxt.joinPath(p.Root, pkgtargetroot);
+            p.PkgTargetRoot = evalᴛ13;
 
             // Set the install target if applicable.
             if (!p.Goroot || (installgoroot.Value() == "all"u8 && p.ImportPath != "unsafe"u8 && p.ImportPath != "builtin"u8)) {
                 if (p.Goroot) {
                     installgoroot.IncNonDefault();
                 }
-                p.PkgObj = ctxt.joinPath(p.Root, pkga);
+                var evalᴛ14 = ctxt.joinPath(p.Root, pkga);
+                p.PkgObj = evalᴛ14;
             }
         }
     }
@@ -912,7 +926,8 @@ Found:
         }
 
         // package was not found
-        return (p, fmt.Errorf("cannot find package %q in:\n\t%s"u8, p.ImportPath, p.Dir));
+        var evalᴛ15 = fmt.Errorf("cannot find package %q in:\n\t%s"u8, p.ImportPath, p.Dir);
+        return (p, evalᴛ15);
     }
 
     if ((ImportMode)(mode & FindOnly) != 0) {
@@ -962,7 +977,9 @@ Found:
             continue;
         }
         if (d.Type() == fs.ModeSymlink) {
-            if (ctxt.isDir(ctxt.joinPath(p.Dir, d.Name()))) {
+            var evalᴛ16 = d.Name();
+            var evalᴛ17 = ctxt.joinPath(p.Dir, evalᴛ16);
+            if (ctxt.isDir(evalᴛ17)) {
                 // Symlinks to directories are not source files.
                 continue;
             }
@@ -1047,7 +1064,9 @@ Found:
         }
         // Grab the first package comment as docs, provided it is not from a test file.
         if (info.parsed != nil && info.parsed.Doc != nil && p.Doc == ""u8 && !isTest && !isXTest) {
-            p.Doc = Δdoc.Synopsis(info.parsed.Doc.Text());
+            var evalᴛ18 = info.parsed.Doc.Text();
+            var evalᴛ19 = Δdoc.Synopsis(evalᴛ18);
+            p.Doc = evalᴛ19;
         }
 
         if ((ImportMode)(mode & ImportComment) != 0) {
@@ -1124,7 +1143,8 @@ Found:
         fileList.ValueSlot = append(fileList.ValueSlot, name);
         if (importMap != nil) {
             foreach (var (_, imp) in range(info.imports)) {
-                importMap[imp.path] = append(importMap[imp.path], fset.Position(imp.pos));
+                var evalᴛ20 = fset.Position(imp.pos);
+                importMap[imp.path] = append(importMap[imp.path], evalᴛ20);
             }
         }
         if (embedMap != nil) {
@@ -1338,7 +1358,8 @@ internal static error importGo⁔(/*this*/ ref Context ctxt, ж<Package> Ꮡp, @
     }
 
     @string goCmd = filepath.Join(ctxt.GOROOT, binˢ, "go");
-    var cmd = exec.Command(goCmd, listˢ, "-e", "-compiler=" + ctxt.Compiler, "-tags=" + strings.Join(ctxt.BuildTags, ","), "-installsuffix=" + ctxt.InstallSuffix, fDirImportPathRootGorootˢ, "--", path);
+    var evalᴛ1 = strings.Join(ctxt.BuildTags, ",");
+    var cmd = exec.Command(goCmd, listˢ, "-e", "-compiler=" + ctxt.Compiler, "-tags=" + evalᴛ1, "-installsuffix=" + ctxt.InstallSuffix, fDirImportPathRootGorootˢ, "--", path);
 
     if (ctxt.Dir != ""u8) {
         cmd.Dir = ctxt.Dir;

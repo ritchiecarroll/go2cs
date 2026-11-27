@@ -72,7 +72,11 @@ internal static (bool, bool) zeroAgrees<T, Tᴀ>()
 {
     var p = GoArrayZero.New<T, Tᴀ>();
     var v = reflect.New(reflect.TypeOf(p.OrTypedNil()).Elem());
-    return (reflect.DeepEqual(p.OrTypedNil(), v.Interface()), reflect.DeepEqual((p.ValueSlot).OrTypedNilOf(), v.Elem().Interface()));
+    var evalᴛ1 = v.Interface();
+    var evalᴛ2 = reflect.DeepEqual(p.OrTypedNil(), evalᴛ1);
+    var evalᴛ3 = v.Elem();
+    var evalᴛ4 = evalᴛ3.Interface();
+    return (evalᴛ2, reflect.DeepEqual((p.ValueSlot).OrTypedNilOf(), evalᴛ4));
 }
 
 private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
@@ -118,7 +122,9 @@ internal static void main() {
     hv.FieldByName("X").SetInt(7);
     var (promoted, promotedOK) = reflect.TypeOf(h).FieldByName("X");
     var (_, ambiguous) = reflect.TypeOf(new clash()).FieldByName("Y");
-    fmt.Println("promoted through an unexported embed:", h.inner.X, hv.FieldByName("X").CanSet(), promotedOK, len(promoted.Index), promoted.Name, ambiguous);
+    var evalᴛ1 = hv.FieldByName("X");
+    var evalᴛ2 = evalᴛ1.CanSet();
+    fmt.Println("promoted through an unexported embed:", h.inner.X, evalᴛ2, promotedOK, len(promoted.Index), promoted.Name, ambiguous);
     fmt.Println("embed and plain unexported are read-only:", hv.FieldByName("inner").CanSet(), reflect.ValueOf(Ꮡ(new nested())).Elem().Field(0).CanSet());
 
     var lit = slice<ж<inner>>([default]);

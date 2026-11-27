@@ -326,7 +326,8 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv⁔(/*this*/ ж<Checker>
                     // baseTPar.bound is possibly parameterized by other type parameters
                     // defined by the generic base type. Substitute those parameters with
                     // the receiver type parameters declared by the current method.
-                    recvTPar.bound = Ꮡcheck.subst(recvTPar.obj.pos, baseTPar.bound, smap, nil, check.context());
+                    var evalᴛ1 = check.context();
+                    recvTPar.bound = Ꮡcheck.subst(recvTPar.obj.pos, baseTPar.bound, smap, nil, evalᴛ1);
                 }
             } else {
                 @string got = measure(len(recvTParams), typeParameterˢ);
@@ -340,7 +341,9 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv⁔(/*this*/ ж<Checker>
             foreach (var (i, targ) in range(recvTParams)) {
                 targs[i] = new TypeParamжType(targ);
             }
-            recvType = Ꮡcheck.instance(rparam.Type.Pos(), new NamedжgenericType(baseType), targs, nil, check.context());
+            var evalᴛ2 = rparam.Type.Pos();
+            var evalᴛ3 = check.context();
+            recvType = Ꮡcheck.instance(evalᴛ2, new NamedжgenericType(baseType), targs, nil, evalᴛ3);
             check.recordInstance(rbase, targs, recvType);
 
             // Reestablish pointerness if needed (but avoid a pointer to an invalid type).

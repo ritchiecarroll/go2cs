@@ -9,14 +9,15 @@ namespace go.runtime;
 using poll = @internal.poll_package;
 using os = os_package;
 using runtime = runtime_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 
 partial class debug_package {
 
 // PrintStack prints to standard error the stack trace returned by runtime.Stack.
 public static partial void PrintStack() {
-    os.Stderr.Write(Stack());
+    var evalᴛ1 = Stack();
+    os.Stderr.Write(evalᴛ1);
 }
 
 // Stack returns a formatted stack trace of the goroutine that calls it.

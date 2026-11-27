@@ -100,6 +100,9 @@
   <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
     <Compile Remove="GoCgoWrappers.windows.golden.cs" />
     <Compile Remove="GoCgoWrapperTypes.windows.cs" />
+    <!-- cgo S6's poll guard: it drives internal/poll's Windows displacement through a real overlapped read, so it is a
+         Windows-only file (DESIGN-cgo-phase3-marshaling 21.8), not a skip on every other flavour. -->
+    <Compile Remove="PollPinDisplacementTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
     <Compile Remove="GoCgoWrapperTypes.posix.cs" />
@@ -176,6 +179,9 @@
        classes above are linux-only ones. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
     <Compile Remove="DarwinNativeTransitionTests.cs" />
+    <!-- The darwin syscall bracket's rows (docs/phase4/DESIGN-darwin-syscall-bracket.md) drive syscall's
+         GoSyscallnCall/GoRawSyscallnCall seams and the darwin keystones, which the darwin flavour alone declares. -->
+    <Compile Remove="DarwinSyscallBracketTests.cs" />
   </ItemGroup>
 
   <!-- S3's arm64 Stat_t mirror and its GoNativeStatLayoutProbe live in syscall/linux-arm64/, which only the
@@ -190,13 +196,23 @@
     <Compile Remove="LinuxArm64RuntimeSyscallFlavourTests.cs" />
   </ItemGroup>
 
+  <!-- internal/cpu's darwin/arm64 start-up (darwin-arm64/cpu_arm64_darwin_impl.cs) and its options probe, which only
+       the darwin/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoTargetArch)' != 'arm64'">
+    <Compile Remove="DarwinArm64CpuStartupTests.cs" />
+  </ItemGroup>
+
   <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).
        - InternalCpuGodebugTests drives internal/cpu's amd64/ hand-owns (cpu_x86_impl.cs, cpu_arm64_process_impl.cs)
-         through their probes. The linux/arm64 flavour starts internal/cpu in linux-arm64/cpu_arm64_hwcap_impl.cs,
-         which has no probe yet.
+         through their probes. The arm64 flavours start internal/cpu elsewhere, each read by its own test file:
+         linux/arm64 in linux-arm64/cpu_arm64_hwcap_impl.cs (LinuxArm64CpuStartupTests), darwin/arm64 in
+         darwin-arm64/cpu_arm64_darwin_impl.cs (DarwinArm64CpuStartupTests).
        - LinuxAmd64NetpollFlavourTests names SYS_EPOLL_WAIT, which only amd64's table has; it is also linux-only. -->
   <ItemGroup Condition="'$(GoTargetArch)' == 'arm64'">
     <Compile Remove="InternalCpuGodebugTests.cs" />
+    <!-- internal/runtime/gc/scan's AVX-512 kernels (scan/amd64/scan_amd64_impl.cs, R's finding 5) exist only in the
+         amd64 flavours; an arm64 build has no ExpandAVX512, FilterNilAVX512, ScanSpanPackedAVX512 or CanAVX512. -->
+    <Compile Remove="ScanAvx512KernelTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' == 'arm64'">
     <Compile Remove="LinuxAmd64NetpollFlavourTests.cs" />
@@ -432,6 +448,10 @@
     <!-- TestenvCPUProfilingBrokenTests: the hand-owned answer runtime/pprof's CPU tests consult. -->
     <ProjectReference Include="..\..\core\internal\testenv\internal.testenv.csproj" />
     <ProjectReference Include="..\..\core\os\exec\os.exec.csproj" />
+
+    <!-- PollPinDisplacementTests (cgo S6, DESIGN-cgo-phase3-marshaling 21.8): a real overlapped read through net's poller on
+         Windows, so the poll pin displacement is guarded by a run rather than a reading. -->
+    <ProjectReference Include="..\..\core\net\net.csproj" />
 
     <!-- MulUnbalancedDiscriminatorTests: the §5.4 discriminator drives math/big's nat.mul through
          Int.SetBits/Int.Mul. Same precedent as sha3 above — an MSTest tier binding a converted

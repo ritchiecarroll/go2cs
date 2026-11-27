@@ -298,7 +298,8 @@ internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, /*[32]*/ ж<array<
     foreach (var i in range(t, 3)) { // t = A ◦ s + e
         t.Value[i].Assign(e[i]);
         foreach (var j in range(s, 3)) {
-            t.Value[i].Assign(polyAdd<nttElement>(t.Value[i], nttMul(A.Value[i * (nint)k + j], s.Value[j])));
+            var evalᴛ1 = nttMul(A.Value[i * (nint)k + j], s.Value[j]);
+            t.Value[i].Assign(polyAdd<nttElement>(t.Value[i], evalᴛ1));
         }
     }
 
@@ -373,7 +374,7 @@ internal static (slice<byte> K, slice<byte> c) kemEncaps(/*[1088]*/ ж<array<byt
     var G = g.Sum(default);
     K = G[..(int)(SharedKeySize)];
     var r = G[(int)(SharedKeySize)..];
-    c = pkeEncrypt(cc, ref nonnil(ref ek).encryptionKey, Ꮡm, r);
+    c = pkeEncrypt(cc, ref builtin.nonnil(ref ek).encryptionKey, Ꮡm, r);
     return (K, c);
 }
 
@@ -447,7 +448,8 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
             // Note that i and j are inverted, as we need the transposed of A.
             uHat.Assign(polyAdd<nttElement>(uHat, nttMul(ex.a[j * (nint)k + i], r[j])));
         }
-        u[i].Assign(polyAdd(e1[i], inverseNTT(uHat)));
+        var evalᴛ1 = inverseNTT(uHat);
+        u[i].Assign(polyAdd(e1[i], evalᴛ1));
     }
 
     var μ = ringDecodeAndDecompress1(ref (m).DerefOrNull());
@@ -494,7 +496,7 @@ internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, /*[1088]
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();
-    var m = pkeDecrypt(ref nonnil(ref dk).decryptionKey, Ꮡc);
+    var m = pkeDecrypt(ref builtin.nonnil(ref dk).decryptionKey, Ꮡc);
     var g = sha3.New512();
     g.Write(m[..]);
     g.Write(dk.h[..]);
@@ -506,7 +508,7 @@ internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, /*[1088]
     var Kout = new slice<byte>(SharedKeySize);
     J.Read(Kout);
     ref var cc = ref heap(new array<byte>(1088), out var Ꮡcc);
-    var c1 = pkeEncrypt(Ꮡcc, ref nonnil(ref dk).encryptionKey, Ꮡ(array<byte>.Alias(m, 32)), r);
+    var c1 = pkeEncrypt(Ꮡcc, ref builtin.nonnil(ref dk).encryptionKey, Ꮡ(array<byte>.Alias(m, 32)), r);
 
     if (testingOnlyRejectionOutcome != nil) {
         testingOnlyRejectionOutcome(subtle.ConstantTimeCompare(c[..], c1));
@@ -534,7 +536,8 @@ internal static slice<byte> pkeDecrypt(ref decryptionKey dx, /*[1088]*/ ж<array
 
     nttElement mask = default; // s⊺ ◦ NTT(u)
     foreach (var i in range(len(dx.s))) {
-        mask.Assign(polyAdd(mask, nttMul(dx.s[i], ntt(u[i]))));
+        var evalᴛ1 = ntt(u[i]);
+        mask.Assign(polyAdd(mask, nttMul(dx.s[i], evalᴛ1)));
     }
     var w = polySub(v, inverseNTT(mask));
 

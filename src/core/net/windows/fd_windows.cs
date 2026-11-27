@@ -215,7 +215,7 @@ internal static (syscall.Sockaddr, error) connect⁔(/*this*/ ж<netFD> Ꮡfd, c
         {
             var err = Ꮡfd.Ꮡpfd.ConnectEx(ra); if (err != nil) {
                 var selᴛ9 = ctx.Done();
-                switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
+                switch (builtin.trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
                 case 0 when selᴛ9.ꟷᐳ(out _): {
                     return (default, mapErr(ctx.Err()));
                 }
@@ -322,7 +322,8 @@ internal static (ж<os.File>, error) dup⁔(/*this*/ ж<netFD> Ꮡfd) {
     // All WSASocket calls must be match with a syscall.Closesocket call,
     // but os.NewFile calls syscall.CloseHandle instead. We need to use
     // a hidden function so that the returned file is aware of this fact.
-    return (newWindowsFile(h, fd.name()), default);
+    var evalᴛ1 = fd.name();
+    return (newWindowsFile(h, evalᴛ1), default);
 }
 
 } // end net_package

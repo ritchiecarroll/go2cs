@@ -503,7 +503,7 @@ continue_Spans:;
     }
 break_Spans:;
 
-    spans = move2heap(spansᴷ, spans);
+    spans = builtin.move2heap(spansᴷ, spans);
     return spans;
 }
 
@@ -668,7 +668,7 @@ internal static Block paragraph⁔(/*this*/ ref parseDoc d, slice<@string> lines
         }
         defs = append(defsᴷ, defs, def);
     }
-    defs = move2heap(defsᴷ, defs);
+    defs = builtin.move2heap(defsᴷ, defs);
     foreach (var (_, def) in range(defs)) {
         d.Links = append(d.Links, def);
         if (d.links[def.Text] == nil) {
@@ -744,7 +744,8 @@ internal static ж<List> list⁔(/*this*/ ж<parseDoc> Ꮡd, slice<@string> line
             flush();
             continue;
         }
-        text = append(textᴷ, text, strings.TrimSpace(line));
+        var evalᴛ1 = strings.TrimSpace(line);
+        text = append(textᴷ, text, evalᴛ1);
     }
     flush();
     return list;
@@ -831,11 +832,13 @@ internal static slice<Text> parseLinkedText⁔(/*this*/ ж<parseDoc> Ꮡd, @stri
         }
         case (byte)']': {
             if (start >= 0) {
-                var (def, ok) = d.links[tmpstring(buf), ꟷ]; if (ok) {
+                var (def, ok) = d.links[builtin.tmpstring(buf), ꟷ]; if (ok) {
                     def.Used = true;
                     flush(start);
+                    var evalᴛ1 = text.slice(start + 1, i);
+                    var evalᴛ2 = d.parseText(default, evalᴛ1, false);
                     @out = append(@out, (Text)(new LinkжText(Ꮡ(new Link(
-                        Text: d.parseText(default, text.slice(start + 1, i), false),
+                        Text: evalᴛ2,
                         URL: def.URL
                     )))));
                     wrote = i + 1;
@@ -941,7 +944,8 @@ internal static slice<Text> parseText⁔(/*this*/ ref parseDoc d, slice<Text> @o
     [GoFunc("(*parseDoc).parseText.func2")] void flush(nint i) {
         writeUntilʗ1(i);
         if (Ꮡw.Value.Len() > 0) {
-            @out = append(@out, (Text)((Plain)Ꮡw.Value.String()));
+            var evalᴛ1 = Ꮡw.Value.String();
+            @out = append(@out, (Text)((Plain)evalᴛ1));
             Ꮡw.Value.Reset();
         }
     }

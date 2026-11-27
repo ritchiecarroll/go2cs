@@ -266,7 +266,7 @@ internal static void process(os.Signal sig) {
             if (h.want(n)) {
                 // send but do not block for it
                 var cᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
-                switch (trySelect(cᴛ1)) {
+                switch (builtin.trySelect(cᴛ1)) {
                 case 0: {
                     break;
                 }
@@ -280,7 +280,7 @@ internal static void process(os.Signal sig) {
         foreach (var (_, d) in range(handlers.stopping)) {
             if (d.h.want(n)) {
                 var selᴛ2 = d.c.ᐸꟷ(sig, ꓸꓸꓸ);
-                switch (trySelect(selᴛ2)) {
+                switch (builtin.trySelect(selᴛ2)) {
                 case 0: {
                     break;
                 }
@@ -331,7 +331,8 @@ public static partial (context.Context ctx, context.CancelFunc stop) NotifyConte
             var selᴛ4 = (~cʗ1).Context.Done();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
             case 0 when selᴛ3.ꟷᐳ(out var s): {
-                cʗ1.cancel((signalError)(s.String() + " signal received"u8));
+                var evalᴛ1 = s.String();
+                cʗ1.cancel((signalError)(evalᴛ1 + " signal received"u8));
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {

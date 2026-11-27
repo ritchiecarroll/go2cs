@@ -8,7 +8,7 @@ using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using Δmath = @internal.runtime.math_package;
 using strconv = @internal.strconv_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using @internal;
 using @internal.runtime;
 using @unsafe = unsafe_package;
@@ -482,7 +482,9 @@ internal static void revise⁔(/*this*/ ж<gcControllerState> Ꮡc) {
 
     // The expected scan work is computed as the amount of bytes scanned last
     // GC cycle (both heap and stack), plus our estimate of globals work for this cycle.
-    var scanWorkExpected = (int64)(c.lastHeapScan + Ꮡc.ᏑlastStackScan.Load() + Ꮡc.ᏑglobalsScan.Load());
+    var evalᴛ1 = Ꮡc.ᏑlastStackScan.Load();
+    var evalᴛ2 = Ꮡc.ᏑglobalsScan.Load();
+    var scanWorkExpected = (int64)(c.lastHeapScan + evalᴛ1 + evalᴛ2);
 
     // maxScanWork is a worst-case estimate of the amount of scan work that
     // needs to be performed in this GC cycle. Specifically, it represents
@@ -654,7 +656,12 @@ internal static void endCycle⁔(/*this*/ ж<gcControllerState> Ꮡc, int64 now,
         printlock();
         var goal = gcGoalUtilization * 100D;
         print((@string)"pacer: ", (nint)(utilization * 100D), (@string)"% CPU (", (nint)goal, (@string)" exp.) for ");
-        print(Ꮡc.ᏑheapScanWork.Load(), (@string)"+", Ꮡc.ᏑstackScanWork.Load(), (@string)"+", Ꮡc.ᏑglobalsScanWork.Load(), (@string)" B work (", c.lastHeapScan + Ꮡc.ᏑlastStackScan.Load() + Ꮡc.ᏑglobalsScan.Load(), (@string)" B exp.) ");
+        var evalᴛ1 = Ꮡc.ᏑheapScanWork.Load();
+        var evalᴛ2 = Ꮡc.ᏑstackScanWork.Load();
+        var evalᴛ3 = Ꮡc.ᏑglobalsScanWork.Load();
+        var evalᴛ4 = Ꮡc.ᏑlastStackScan.Load();
+        var evalᴛ5 = Ꮡc.ᏑglobalsScan.Load();
+        print(evalᴛ1, (@string)"+", evalᴛ2, (@string)"+", evalᴛ3, (@string)" B work (", c.lastHeapScan + evalᴛ4 + evalᴛ5, (@string)" B exp.) ");
         var live = Ꮡc.ᏑheapLive.Load();
         print((@string)"in ", c.triggered, (@string)" B -> ", live, (@string)" B (∆goal ", (int64)live - (int64)c.lastHeapGoal, (@string)", cons/mark ", oldConsMark, (@string)")");
         println();
@@ -1311,7 +1318,9 @@ internal static void commit⁔(/*this*/ ж<gcControllerState> Ꮡc, bool isSweep
     // plus additional runway for non-heap sources of GC work.
     var gcPercentHeapGoal = ~(uint64)0;
     var gcPercent = Ꮡc.ᏑgcPercent.Load(); if (gcPercent >= 0) {
-        gcPercentHeapGoal = c.heapMarked + (c.heapMarked + Ꮡc.ᏑlastStackScan.Load() + Ꮡc.ᏑglobalsScan.Load()) * (uint64)gcPercent / 100;
+        var evalᴛ1 = Ꮡc.ᏑlastStackScan.Load();
+        var evalᴛ2 = Ꮡc.ᏑglobalsScan.Load();
+        gcPercentHeapGoal = c.heapMarked + (c.heapMarked + evalᴛ1 + evalᴛ2) * (uint64)gcPercent / 100;
     }
     // Apply the minimum heap size here. It's defined in terms of gcPercent
     // and is only updated by functions that call commit.
@@ -1343,7 +1352,9 @@ internal static void commit⁔(/*this*/ ж<gcControllerState> Ꮡc, bool isSweep
     // Furthermore, by setting the runway so that CPU resources are divided
     // this way, assuming that the cons/mark ratio is correct, we make that
     // division a reality.
-    Ꮡc.Ꮡrunway.Store((uint64)((c.consMark * /* (1 - gcGoalUtilization) */ 0.75D / /* (gcGoalUtilization) */ 0.25D) * (float64)(c.lastHeapScan + Ꮡc.ᏑlastStackScan.Load() + Ꮡc.ᏑglobalsScan.Load())));
+    var evalᴛ3 = Ꮡc.ᏑlastStackScan.Load();
+    var evalᴛ4 = Ꮡc.ᏑglobalsScan.Load();
+    Ꮡc.Ꮡrunway.Store((uint64)((c.consMark * /* (1 - gcGoalUtilization) */ 0.75D / /* (gcGoalUtilization) */ 0.25D) * (float64)(c.lastHeapScan + evalᴛ3 + evalᴛ4)));
 }
 
 // setGCPercent updates gcPercent. commit must be called after.

@@ -70,7 +70,8 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         // to be used as input into the wide shift.
         // After the loop finishes, prev holds the final output word to be written.
         var c = Ꮡa.Reg();
-        shiftWide(s, prev, a.Imm(0), c);
+        var evalᴛ1 = a.Imm(0);
+        shiftWide(s, prev, evalᴛ1, c);
         f.StoreArg(c, "c");
         Ꮡa.Free(c);
         Ꮡa.Comment(shiftRemainingWordsˢ);
@@ -101,7 +102,8 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         // once we find the low bits after reading the next input word.
         // After the loop finishes, prev holds the final output word to be written.
         ref var sNeg = ref heap<Reg>(Ꮡa.Reg(), out var ᏑsNeg);
-        Ꮡa.Mov(a.Imm(a.Arch.WordBits), sNeg);
+        var evalᴛ2 = a.Imm(a.Arch.WordBits);
+        Ꮡa.Mov(evalᴛ2, sNeg);
         Ꮡa.Sub(s, sNeg, sNeg, SmashCarry);
         var c = Ꮡa.Reg();
         negShift(sNeg, prev, c);
@@ -126,7 +128,8 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
                 // stores on ARM, that doesn't hurt us.
                 @out[0] = @out[0][..1];
                 foreach (var (_, x) in range(@in[0])) {
-                    Ꮡa.Or(negShiftRegʗ1(sNegʗ1, x), prevʗ2, prevʗ2);
+                    var evalᴛ3 = negShiftRegʗ1(sNegʗ1, x);
+                    Ꮡa.Or(evalᴛ3, prevʗ2, prevʗ2);
                     @out[0][0] = prevʗ2;
                     pʗ2.StoreN(@out);
                     shiftʗ1(sʗ2, x, prevʗ2);

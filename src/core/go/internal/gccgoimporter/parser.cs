@@ -1064,7 +1064,15 @@ internal static ref readonly @string runeˢ => ref runeˢᵇ;
 private static readonly @string runeˢᵇ = "rune"u8;
 
 internal static types.Type lookupBuiltinType(nint typ) {
-    return new golib.SparseArray<types.Type>{[gccgoBuiltinINT8] = new types.BasicжType(types.Typ[types.Int8]), [gccgoBuiltinINT16] = new types.BasicжType(types.Typ[types.Int16]), [gccgoBuiltinINT32] = new types.BasicжType(types.Typ[types.Int32]), [gccgoBuiltinINT64] = new types.BasicжType(types.Typ[types.Int64]), [gccgoBuiltinUINT8] = new types.BasicжType(types.Typ[types.Uint8]), [gccgoBuiltinUINT16] = new types.BasicжType(types.Typ[types.Uint16]), [gccgoBuiltinUINT32] = new types.BasicжType(types.Typ[types.Uint32]), [gccgoBuiltinUINT64] = new types.BasicжType(types.Typ[types.Uint64]), [gccgoBuiltinFLOAT32] = new types.BasicжType(types.Typ[types.Float32]), [gccgoBuiltinFLOAT64] = new types.BasicжType(types.Typ[types.Float64]), [gccgoBuiltinINT] = new types.BasicжType(types.Typ[types.Int]), [gccgoBuiltinUINT] = new types.BasicжType(types.Typ[types.Uint]), [gccgoBuiltinUINTPTR] = new types.BasicжType(types.Typ[types.Uintptr]), [gccgoBuiltinBOOL] = new types.BasicжType(types.Typ[types.Bool]), [gccgoBuiltinSTRING] = new types.BasicжType(types.Typ[types.String]), [gccgoBuiltinCOMPLEX64] = new types.BasicжType(types.Typ[types.Complex64]), [gccgoBuiltinCOMPLEX128] = new types.BasicжType(types.Typ[types.Complex128]), [gccgoBuiltinERROR] = types.Universe.Lookup(errorˢ).Type(), [gccgoBuiltinBYTE] = types.Universe.Lookup(byteˢ).Type(), [gccgoBuiltinRUNE] = types.Universe.Lookup(runeˢ).Type(), [gccgoBuiltinANY] = types.Universe.Lookup(anyˢ).Type()
+    var evalᴛ1 = types.Universe.Lookup(errorˢ);
+    var evalᴛ2 = evalᴛ1.Type();
+    var evalᴛ3 = types.Universe.Lookup(byteˢ);
+    var evalᴛ4 = evalᴛ3.Type();
+    var evalᴛ5 = types.Universe.Lookup(runeˢ);
+    var evalᴛ6 = evalᴛ5.Type();
+    var evalᴛ7 = types.Universe.Lookup(anyˢ);
+    var evalᴛ8 = evalᴛ7.Type();
+    return new golib.SparseArray<types.Type>{[gccgoBuiltinINT8] = new types.BasicжType(types.Typ[types.Int8]), [gccgoBuiltinINT16] = new types.BasicжType(types.Typ[types.Int16]), [gccgoBuiltinINT32] = new types.BasicжType(types.Typ[types.Int32]), [gccgoBuiltinINT64] = new types.BasicжType(types.Typ[types.Int64]), [gccgoBuiltinUINT8] = new types.BasicжType(types.Typ[types.Uint8]), [gccgoBuiltinUINT16] = new types.BasicжType(types.Typ[types.Uint16]), [gccgoBuiltinUINT32] = new types.BasicжType(types.Typ[types.Uint32]), [gccgoBuiltinUINT64] = new types.BasicжType(types.Typ[types.Uint64]), [gccgoBuiltinFLOAT32] = new types.BasicжType(types.Typ[types.Float32]), [gccgoBuiltinFLOAT64] = new types.BasicжType(types.Typ[types.Float64]), [gccgoBuiltinINT] = new types.BasicжType(types.Typ[types.Int]), [gccgoBuiltinUINT] = new types.BasicжType(types.Typ[types.Uint]), [gccgoBuiltinUINTPTR] = new types.BasicжType(types.Typ[types.Uintptr]), [gccgoBuiltinBOOL] = new types.BasicжType(types.Typ[types.Bool]), [gccgoBuiltinSTRING] = new types.BasicжType(types.Typ[types.String]), [gccgoBuiltinCOMPLEX64] = new types.BasicжType(types.Typ[types.Complex64]), [gccgoBuiltinCOMPLEX128] = new types.BasicжType(types.Typ[types.Complex128]), [gccgoBuiltinERROR] = evalᴛ2, [gccgoBuiltinBYTE] = evalᴛ4, [gccgoBuiltinRUNE] = evalᴛ6, [gccgoBuiltinANY] = evalᴛ8
     }.array(23)[typ];
 }
 
@@ -1233,7 +1241,7 @@ internal static void parseTypes⁔(/*this*/ ж<parser> Ꮡp, ж<types.Package> p
         @string allTypeData = sb.String();
 
         p.typeData = [""]; // type 0, unused
-        typeOffsets = move2heap(typeOffsetsᴷ, typeOffsets);
+        typeOffsets = builtin.move2heap(typeOffsetsᴷ, typeOffsets);
         foreach (var (_, to) in range(typeOffsets)) {
             p.typeData = append(p.typeData, allTypeData.slice(to.offset, to.offset + to.length));
         }
@@ -1259,7 +1267,8 @@ internal static void parseSavedType⁔(/*this*/ ж<parser> Ꮡp, ж<types.Packag
         }, Ꮡp.Value.scanner, Ꮡp.Value.tok, Ꮡp.Value.lit, ref ᒐ);
 
         p.scanner = @new<scanner.Scanner>();
-        Ꮡp.initScanner(p.scanner.Filename, new strings_ReaderжReader(strings.NewReader(p.typeData[i])));
+        var evalᴛ1 = strings.NewReader(p.typeData[i]);
+        Ꮡp.initScanner(p.scanner.Filename, new strings_ReaderжReader(evalᴛ1));
         p.expectKeyword(typeˢ);
         nint id = p.parseInt();
         if (id != i) {
@@ -1324,14 +1333,16 @@ internal static void parseInitDataDirective⁔(/*this*/ ж<parser> Ꮡp) {
         }
         case {} when exprᴛ1 == "priority"u8: {
             p.next();
-            p.initdata.Priority = p.parseInt();
+            var evalᴛ1 = p.parseInt();
+            p.initdata.Priority = evalᴛ1;
             p.expectEOL();
             break;
         }
         case {} when exprᴛ1 == "init"u8: {
             p.next();
             while (p.tok != '\n' && p.tok != ';' && p.tok != scanner.EOF) {
-                p.initdata.Inits = append(p.initdata.Inits, p.parsePackageInit());
+                var evalᴛ2 = p.parsePackageInit();
+                p.initdata.Inits = append(p.initdata.Inits, evalᴛ2);
             }
             p.expectEOL();
             break;

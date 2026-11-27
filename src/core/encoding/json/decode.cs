@@ -15,7 +15,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using go.encoding;
 using go.unicode;
 
@@ -133,9 +133,11 @@ partial struct UnmarshalTypeError {
 
 internal static @string Error⁔(/*this*/ ref UnmarshalTypeError e) {
     if (e.Struct != ""u8 || e.Field != ""u8) {
-        return "json: cannot unmarshal "u8 + e.Value + " into Go struct field "u8 + e.Struct + "."u8 + e.Field + " of type "u8 + e.Type.String();
+        var evalᴛ1 = e.Type.String();
+        return "json: cannot unmarshal "u8 + e.Value + " into Go struct field "u8 + e.Struct + "."u8 + e.Field + " of type "u8 + evalᴛ1;
     }
-    return "json: cannot unmarshal "u8 + e.Value + " into Go value of type "u8 + e.Type.String();
+    var evalᴛ2 = e.Type.String();
+    return "json: cannot unmarshal "u8 + e.Value + " into Go value of type "u8 + evalᴛ2;
 }
 
 // An UnmarshalFieldError describes a JSON object key that
@@ -149,7 +151,9 @@ partial struct UnmarshalFieldError {
 }
 
 internal static @string Error⁔(/*this*/ ref UnmarshalFieldError e) {
-    return "json: cannot unmarshal object key "u8 + strconv.Quote(e.Key) + " into unexported field "u8 + e.Field.Name + " of type "u8 + e.Type.String();
+    var evalᴛ1 = strconv.Quote(e.Key);
+    var evalᴛ2 = e.Type.String();
+    return "json: cannot unmarshal object key "u8 + evalᴛ1 + " into unexported field "u8 + e.Field.Name + " of type "u8 + evalᴛ2;
 }
 
 // An InvalidUnmarshalError describes an invalid argument passed to [Unmarshal].
@@ -435,7 +439,8 @@ internal static error value⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) {
         Ꮡd.rescanLiteral();
 
         if (v.IsValid()) {
-            var err = d.literalStore(d.data.slice(start, d.readIndex()), v, false); if (err != nil) {
+            var evalᴛ1 = d.readIndex();
+            var err = d.literalStore(d.data.slice(start, evalᴛ1), v, false); if (err != nil) {
                 return err;
             }
         }
@@ -745,7 +750,8 @@ internal static error object⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) 
         // Read key.
         nint start = d.readIndex();
         Ꮡd.rescanLiteral();
-        var item = d.data.slice(start, d.readIndex());
+        var evalᴛ1 = d.readIndex();
+        var item = d.data.slice(start, evalᴛ1);
         var (key, ok) = unquoteBytes(item);
         if (!ok) {
             throw panic(phasePanicMsg);
@@ -764,9 +770,9 @@ internal static error object⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) 
             }
             subv = mapElem;
         } else {
-            var f = fields.byExactName[tmpstring(key)];
+            var f = fields.byExactName[builtin.tmpstring(key)];
             if (f == nil) {
-                f = fields.byFoldedName[tmpstring(foldName(key))];
+                f = fields.byFoldedName[builtin.tmpstring(foldName(key))];
             }
             if (f != nil) {
                 subv = v;
@@ -795,9 +801,11 @@ internal static error object⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) 
                         subv = subv.Elem();
                     }
                     if (i < len(f.index) - 1) {
+                        var evalᴛ2 = subv.Type();
+                        var evalᴛ3 = evalᴛ2.Field(ind);
                         d.errorContext.FieldStack = append(
                             d.errorContext.FieldStack,
-                            subv.Type().Field(ind).Name);
+                            evalᴛ3.Name);
                     }
                     subv = subv.Field(ind);
                 }
@@ -1226,7 +1234,8 @@ internal static map<@string, any> objectInterface⁔(/*this*/ ж<decodeState> �
         // Read string key.
         nint start = d.readIndex();
         Ꮡd.rescanLiteral();
-        var item = d.data.slice(start, d.readIndex());
+        var evalᴛ1 = d.readIndex();
+        var item = d.data.slice(start, evalᴛ1);
         var (key, ok) = unquote(item);
         if (!ok) {
             throw panic(phasePanicMsg);
@@ -1268,7 +1277,8 @@ internal static any literalInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     nint start = d.readIndex();
     Ꮡd.rescanLiteral();
 
-    var item = d.data.slice(start, d.readIndex());
+    var evalᴛ1 = d.readIndex();
+    var item = d.data.slice(start, evalᴛ1);
 
     var c = item[0];
     switch (c) {

@@ -37,7 +37,8 @@ internal static bool /*isFuncInst*/ indexExpr⁔(/*this*/ ж<Checker> Ꮡcheck, 
         // type instantiation
         x.mode = invalid;
         // TODO(gri) here we re-evaluate e.X - try to avoid this
-        x.typ = Ꮡcheck.varType(e.orig);
+        var evalᴛ1 = Ꮡcheck.varType(e.orig);
+        x.typ = evalᴛ1;
         if (isValid(x.typ)) {
             x.mode = typexpr;
         }
@@ -355,7 +356,8 @@ internal static void sliceExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡ
 
     // spec: "Only the first index may be omitted; it defaults to 0."
     if (e.Slice3 && (e.High == nil || e.Max == nil)) {
-        Ꮡcheck.error(inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, and3rdIndexRequiredIn3ˢ);
+        var evalᴛ1 = inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack);
+        Ꮡcheck.error(evalᴛ1, InvalidSyntaxTree, and3rdIndexRequiredIn3ˢ);
         x.mode = invalid;
         return;
     }

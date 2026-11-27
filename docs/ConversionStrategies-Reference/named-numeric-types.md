@@ -522,7 +522,7 @@ section count against, seven times in one file:
 ```go
 if len(m.Questions) > int(^uint16(0)) {     // vendor/golang.org/x/net/dns/dnsmessage
 ```
-<!-- source: src/core/vendor/golang.org/x/net/dns/dnsmessage/message.cs:1113 -->
+<!-- source: src/core/vendor/golang.org/x/net/dns/dnsmessage/message.cs:1115 -->
 ```csharp
 if (len(m.Questions) > (nint)(unchecked((uint16)(~(uint16)0)))) {
 ```

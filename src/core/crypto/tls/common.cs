@@ -25,7 +25,7 @@ using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using container;
 using go.@internal;
 using go.crypto;
@@ -1397,7 +1397,8 @@ internal static error SupportsCertificate⁔(/*this*/ ж<ClientHelloInfo> Ꮡchi
         }
         // Finally, there needs to be a mutual cipher suite that uses the static
         // RSA key exchange instead of ECDHE.
-        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), [GoFunc("(*ClientHelloInfo).SupportsCertificate.func1.1")] (ж<cipherSuite> cΔ1) => {
+        var evalᴛ1 = configʗ1.supportedCipherSuites();
+        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, evalᴛ1, [GoFunc("(*ClientHelloInfo).SupportsCertificate.func1.1")] (ж<cipherSuite> cΔ1) => {
             if ((cΔ1.flags & (nint)suiteECDHE) != 0) {
                 return false;
             }
@@ -1494,7 +1495,8 @@ internal static error SupportsCertificate⁔(/*this*/ ж<ClientHelloInfo> Ꮡchi
     // Make sure that there is a mutually supported cipher suite that works with
     // this certificate. Cipher suite selection will then apply the logic in
     // reverse to pick it. See also serverHandshakeState.cipherSuiteOk.
-    var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), [GoFunc("(*ClientHelloInfo).SupportsCertificate.func2")] (ж<cipherSuite> cΔ3) => {
+    var evalᴛ2 = config.supportedCipherSuites();
+    var cipherSuite = selectCipherSuite(chi.CipherSuites, evalᴛ2, [GoFunc("(*ClientHelloInfo).SupportsCertificate.func2")] (ж<cipherSuite> cΔ3) => {
         if ((cΔ3.flags & (nint)suiteECDHE) == 0) {
             return false;
         }
@@ -1721,7 +1723,8 @@ internal static void Put⁔(/*this*/ ж<lruSessionCache> Ꮡc, @string sessionKe
 
         if (c.q.Len() < c.capacity) {
             var entryΔ2 = Ꮡ(new lruSessionCacheEntry(sessionKey, cs));
-            c.m[sessionKey] = c.q.PushFront(entryΔ2.OrTypedNil());
+            var evalᴛ1 = c.q.PushFront(entryΔ2.OrTypedNil());
+            c.m[sessionKey] = evalᴛ1;
             return;
         }
 

@@ -68,7 +68,7 @@ var (
 
 // lineKeyedUniverse is the (GOOS, GOARCH) pairs the corpus is laid out for, the converter's platformUniverse
 // (src/go2cs/platformLattice.go); TestLineKeyedRecordsLandOnTheirCode holds the two equal.
-var lineKeyedUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
+var lineKeyedUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64", "darwin/arm64"}
 
 // lineKeyedFolderTargets are the targets a layout L3 key folder compiles at, by its name: a `<goos>`, an `<arch>` or
 // a `<goos>-<arch>` folder. No target means the name is not a key folder's.

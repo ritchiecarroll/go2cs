@@ -528,10 +528,12 @@ internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Con
     }
 
     var doneᴛ1 = done;
-    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
     case 0 when doneᴛ1.ꟷᐳ(out _): {
         // parent is already canceled
-        child.cancel(false, parent.Err(), Cause(parent));
+        var evalᴛ1 = parent.Err();
+        var evalᴛ2 = Cause(parent);
+        child.cancel(false, evalᴛ1, evalᴛ2);
         return;
     }
     default: {
@@ -561,7 +563,9 @@ internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Con
             // parent implements an AfterFunc method.
             c.mu.Lock();
             var stop = a.AfterFunc([GoFunc("(*cancelCtx).propagateCancel.func1")] () => {
-                child.cancel(false, parent.Err(), Cause(parent));
+                var evalᴛ3 = parent.Err();
+                var evalᴛ4 = Cause(parent);
+                child.cancel(false, evalᴛ3, evalᴛ4);
             });
             c.Context = new stopCtx(
                 Context: parent,
@@ -578,7 +582,9 @@ internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Con
         var selᴛ3 = child.Done();
         switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
         case 0 when selᴛ2.ꟷᐳ(out _): {
-            child.cancel(false, parent.Err(), Cause(parent));
+            var evalᴛ5 = parent.Err();
+            var evalᴛ6 = Cause(parent);
+            child.cancel(false, evalᴛ5, evalᴛ6);
             break;
         }
         case 1 when selᴛ3.ꟷᐳ(out _): {
@@ -720,9 +726,10 @@ public static (Context, CancelFunc) WithDeadlineCause(Context parent, time.Time 
         defer(cʗ2.of(timerCtx.Ꮡmu).Unlock, ref ᒐ);
         if (c.of(timerCtx.Ꮡerr).Load() == nil) {
             var cʗ3 = c;
-            c.timer = time.AfterFunc(dur, [GoFunc("WithDeadlineCause.func2")] () => {
+            var evalᴛ1 = time.AfterFunc(dur, [GoFunc("WithDeadlineCause.func2")] () => {
                 cʗ3.cancel(true, DeadlineExceeded, cause);
             });
+            c.timer = evalᴛ1;
         }
         var cʗ4 = c;
         return (new timerCtxжContext(c), [GoFunc("WithDeadlineCause.func3")] () => {

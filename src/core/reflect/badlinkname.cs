@@ -5,7 +5,7 @@ namespace go;
 
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using @internal;
 
 partial class reflect_package {

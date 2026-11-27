@@ -193,7 +193,7 @@ internal static reflectlite.Type errorType = reflectlite.TypeOf((ж<error>)nil).
 // method is responsible for setting target.
 public static (E, bool) AsType<E>(error err) {
     if (err == nil) {
-        E zero = GoZero<E>();
+        E zero = builtin.GoZero<E>();
         return (zero, false);
     }
     ref var pe = ref heap<ж<E>>(out var Ꮡpe); // lazily initialized

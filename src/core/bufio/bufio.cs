@@ -486,7 +486,7 @@ internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint
     }
 
     totalLen += len(frag);
-    fullBuffers = move2heap(fullBuffersᴷ, fullBuffers);
+    fullBuffers = builtin.move2heap(fullBuffersᴷ, fullBuffers);
     return (fullBuffers, frag, totalLen, err);
 }
 

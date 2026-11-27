@@ -65,7 +65,8 @@ internal static partial (nint, error) lookupProtocol(context.Context ctx, @strin
         GoFrame ᒐ = default;
         try {
             var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
-                chʗ1.ᐸꟷ(new lookupProtocol_result(err: mapErr(errΔ1)));
+                var evalᴛ1 = mapErr(errΔ1);
+                chʗ1.ᐸꟷ(new lookupProtocol_result(err: evalᴛ1));
                 return;
             }
             defer(releaseThread, ref ᒐ);
@@ -77,10 +78,10 @@ internal static partial (nint, error) lookupProtocol(context.Context ctx, @strin
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    var selᴛ13 = ch;
+    var chᴛ1 = ch;
     var selᴛ14 = ctx.Done();
-    switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
-    case 0 when selᴛ13.ꟷᐳ(out var r): {
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out var r): {
         if (r.err != nil) {
             var (proto, err) = lookupProtocolMap(name); if (err == nil) {
                 return (proto, default);
@@ -201,10 +202,10 @@ internal static partial (slice<IPAddr>, error) lookupIP⁔(/*this*/ ж<Resolver>
         });
     }
 
-    var selᴛ15 = ch;
+    var chᴛ1 = ch;
     var selᴛ16 = ctx.Done();
-    switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
-    case 0 when selᴛ15.ꟷᐳ(out var rΔ1): {
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out var rΔ1): {
         return (rΔ1.addrs, rΔ1.err);
     }
     case 1 when selᴛ16.ꟷᐳ(out _): {
@@ -236,17 +237,16 @@ internal static (nint, error) lookupPort⁔(/*this*/ ж<Resolver> Ꮡr, context.
 
         ref var hints = ref heap(new syscall.AddrinfoW(), out var Ꮡhints);
 
-        var exprᴛ1 = network;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "ip"u8: { // no hints
+        case {} when network == "ip"u8: { // no hints
             break;
         }
-        case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+        case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
             hints.Socktype = syscall.SOCK_STREAM;
             hints.Protocol = syscall.IPPROTO_TCP;
             break;
         }
-        case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+        case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
             hints.Socktype = syscall.SOCK_DGRAM;
             hints.Protocol = syscall.IPPROTO_UDP;
             break;
@@ -460,7 +460,7 @@ internal static (slice<@string>, error) lookupTXT⁔(/*this*/ ж<Resolver> Ꮡr,
         foreach (var (_, p) in range(validRecs(rec, syscall.DNS_TYPE_TEXT, name))) {
             var d = p.at(syscall.DNSRecord.ᏑData, 0).Reinterpret<byte, syscall.DNSTXTData>();
             @string s = ""u8;
-            foreach (var (_, v) in range(array<ж<uint16>>.AliasPointer(Ꮡ((d.of(syscall.DNSTXTData.ᏑStringArray).ElementRef(0))), 1024).slice(0, d.StringCount, d.StringCount))) {
+            foreach (var (_, v) in range(array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1024).slice(0, d.StringCount, d.StringCount))) {
                 s += windows.UTF16PtrToString(v);
             }
             txts = append(txts, s);

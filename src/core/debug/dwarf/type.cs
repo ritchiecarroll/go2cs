@@ -108,7 +108,10 @@ partial struct QualType {
     public Type Type;
 }
 
-internal static @string String⁔(/*this*/ ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
+internal static @string String⁔(/*this*/ ref QualType t) {
+    var evalᴛ1 = t.Type.String();
+    return t.Qual + " "u8 + evalᴛ1;
+}
 
 internal static int64 Size⁔(/*this*/ ref QualType t) { return t.Type.Size(); }
 
@@ -128,7 +131,8 @@ internal static int64 Size⁔(/*this*/ ref ArrayType t) {
     if (t.Count == -1) {
         return 0;
     }
-    return t.Count * t.Type.Size();
+    var evalᴛ1 = t.Type.Size();
+    return t.Count * evalᴛ1;
 }
 
 // A VoidType represents the C void type.
@@ -270,7 +274,8 @@ internal static @string Defn⁔(/*this*/ ref StructType t) {
         if (i > 0) {
             s += "; "u8;
         }
-        s += f.Name + " "u8 + f.Type.String();
+        var evalᴛ1 = f.Type.String();
+        s += f.Name + " "u8 + evalᴛ1;
         s += "@"u8 + strconv.FormatInt(f.ByteOffset, 10);
         if (f.BitSize > 0) {
             s += " : "u8 + strconv.FormatInt(f.BitSize, 10);
@@ -310,7 +315,8 @@ internal static @string String⁔(/*this*/ ref EnumType t) {
         if (i > 0) {
             s += "; "u8;
         }
-        s += v.Name + "="u8 + strconv.FormatInt(v.Val, 10);
+        var evalᴛ1 = strconv.FormatInt(v.Val, 10);
+        s += v.Name + "="u8 + evalᴛ1;
     }
     s += "}"u8;
     return s;
@@ -370,7 +376,8 @@ internal static @string String⁔(/*this*/ ref UnsupportedType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
-    return t.Name + "(unsupported type "u8 + t.Tag.String() + ")"u8;
+    var evalᴛ1 = t.Tag.String();
+    return t.Name + "(unsupported type "u8 + evalᴛ1 + ")"u8;
 }
 
 // typeReader is used to read from either the info section or the
@@ -506,7 +513,8 @@ internal static (Type, error) readType⁔(/*this*/ ж<Data> Ꮡd, @string name, 
                     return default;
                 }
                 if (kid == nil) {
-                    Ꮡerr.ValueSlot = new DecodeError(name, r.offset(), "unexpected end of DWARF entries");
+                    var evalᴛ1 = r.offset();
+                    Ꮡerr.ValueSlot = new DecodeError(name, evalᴛ1, "unexpected end of DWARF entries");
                     return default;
                 }
                 if (kid.Tag == 0) {

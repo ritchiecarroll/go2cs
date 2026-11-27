@@ -168,16 +168,21 @@ partial class windows_package
         byte* block = (byte*)golib.GoAsyncIO.StageOperationBuffer(overlapped, checked(bufBytes + syscall.GoNativeSockaddrLen));
         staged = (NativeWSABuf*)block;
 
-        stageWSABufs(bufs, bufcnt, staged);
+        stageWSABufs(bufs, bufcnt, staged, overlapped);
 
         addr = block + bufBytes;
         return native;
     }
 
-    // Transcribes a Go WSABuf array into its native form. Shared by the two submits in this package
-    // (WSASendTo above, WSASendMsg in syscall_windows_impl.cs) so the one thing they genuinely have
+    // Transcribes a Go WSABuf array into its native form. Shared by the submits in this package
+    // (WSASendTo above, WSASendMsg and WSARecvMsg in syscall_windows_impl.cs) so the one thing they genuinely have
     // in common is written once; everything else about their staging differs.
-    private static unsafe void stageWSABufs(ж<syscall.WSABuf> bufs, uint32 bufcnt, NativeWSABuf* staged) {
+    //
+    // Each buffer's box is RETAINED through the operation for the flight (cgo S6, design 21.10, COORD's hardening
+    // ruling), as syscall's writeWSABufs does: the box's own pin is what holds the bytes the kernel reads or fills after
+    // this call returns. Before this the box was held only by being reachable from the FD's operation (o.buf.Buf), the
+    // one (F)-only holder 21.10 named.
+    private static unsafe void stageWSABufs(ж<syscall.WSABuf> bufs, uint32 bufcnt, NativeWSABuf* staged, object overlapped) {
         for (uint32 i = 0; i < bufcnt; i++) {
             // Index 0 is the common case and the only one a struct-FIELD reference can answer; a
             // multi-buffer submit names a slice element, which unsafe.Add steps through.
@@ -186,6 +191,9 @@ partial class windows_package
 
             staged[i].Len = buf.Len;
             staged[i].Buf = buf.Buf == nil ? null : (byte*)(void*)buf.Buf;
+
+            if (buf.Buf != nil)
+                golib.GoAsyncIO.RetainForFlight(overlapped, buf.Buf);
         }
     }
 

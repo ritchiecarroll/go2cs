@@ -42,6 +42,10 @@ func (v *Visitor) visitExprStmt(exprStmt *ast.ExprStmt, format FormattingContext
 
 	defer func() { v.resultDiscardedExpr = savedDiscard }()
 
+	// Go reads the statement's operands after its calls (operandOrder.go).
+	endOperandOrder := v.beginOperandOrder(nil, false, exprStmt.X)
+	defer endOperandOrder()
+
 	expr := v.convExpr(exprStmt.X, nil)
 
 	if hoistBuf != nil && hoistBuf.Len() > 0 {

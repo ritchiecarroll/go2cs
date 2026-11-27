@@ -24,7 +24,7 @@ internal static slice<rtcov.CovCounterBlob> coverage_getCovCounterList() {
             Len: (uint64)((datap.ecovctrs - datap.covctrs) / u32sz)
         ));
     }
-    res = move2heap(resᴷ, res);
+    res = builtin.move2heap(resᴷ, res);
     return res;
 }
 

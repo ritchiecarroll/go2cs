@@ -42,9 +42,9 @@ using url = go.net.url_package;
 using strconv = strconv_package;
 using time = time_package;
 using unicode = unicode_package;
-// blank import: go.crypto.sha1_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: go.crypto.sha256_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: go.crypto.sha512_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/sha1" (init forced in ImportInitializers)
+// import _ "crypto/sha256" (init forced in ImportInitializers)
+// import _ "crypto/sha512" (init forced in ImportInitializers)
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
 using cryptobyte_asn1 = vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 using encoding;
@@ -1078,7 +1078,8 @@ internal static error CheckCRLSignature⁔(/*this*/ ref Certificate c, ж<pkix.C
     ref var crl = ref Ꮡcrl.DerefOrNull();
 
     SignatureAlgorithm algo = getSignatureAlgorithmFromAI(crl.SignatureAlgorithm);
-    return c.CheckSignature(algo, crl.TBSCertList.Raw, crl.SignatureValue.RightAlign());
+    var evalᴛ1 = crl.SignatureValue.RightAlign();
+    return c.CheckSignature(algo, crl.TBSCertList.Raw, evalᴛ1);
 }
 
 partial struct UnhandledCriticalExtension {
@@ -2329,24 +2330,28 @@ internal static ref readonly @string x509TrailingDataAfterXˢ => ref x509Trailin
 private static readonly @string x509TrailingDataAfterXˢᵇ = "x509: trailing data after X.509 Subject"u8;
 
 internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref certificateRequest @in) {
+    var evalᴛ1 = @in.SignatureValue.RightAlign();
+    var evalᴛ2 = getSignatureAlgorithmFromAI(@in.SignatureAlgorithm);
+    var evalᴛ3 = getPublicKeyAlgorithmFromOID(@in.TBSCSR.PublicKey.Algorithm.Algorithm);
+    var evalᴛ4 = parseRawAttributes(@in.TBSCSR.RawAttributes);
     var @out = Ꮡ(new CertificateRequest(
         Raw: @in.Raw,
         RawTBSCertificateRequest: @in.TBSCSR.Raw,
         RawSubjectPublicKeyInfo: @in.TBSCSR.PublicKey.Raw,
         RawSubject: @in.TBSCSR.Subject.FullBytes,
 
-        Signature: @in.SignatureValue.RightAlign(),
-        SignatureAlgorithm: getSignatureAlgorithmFromAI(@in.SignatureAlgorithm),
+        Signature: evalᴛ1,
+        SignatureAlgorithm: evalᴛ2,
 
-        PublicKeyAlgorithm: getPublicKeyAlgorithmFromOID(@in.TBSCSR.PublicKey.Algorithm.Algorithm),
+        PublicKeyAlgorithm: evalᴛ3,
 
         Version: @in.TBSCSR.Version,
-        Attributes: parseRawAttributes(@in.TBSCSR.RawAttributes)
+        Attributes: evalᴛ4
     ));
 
     error err = default;
     if (@out.PublicKeyAlgorithm != UnknownPublicKeyAlgorithm) {
-        (@out.PublicKey, err) = parsePublicKey(ref nonnil(ref @in).TBSCSR.PublicKey);
+        (@out.PublicKey, err) = parsePublicKey(ref builtin.nonnil(ref @in).TBSCSR.PublicKey);
         if (err != nil) {
             return (default, err);
         }

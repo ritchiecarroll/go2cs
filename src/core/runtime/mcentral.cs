@@ -46,10 +46,10 @@ partial struct mcentral {
 // Initialize a single central free list.
 internal static void init⁔(/*this*/ ref mcentral c, spanClass spc) {
     c.spanclass = spc;
-    lockInit(ref nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
-    lockInit(ref nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
-    lockInit(ref nonnil(ref c).full[0].spineLock, lockRankSpanSetSpine);
-    lockInit(ref nonnil(ref c).full[1].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).full[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref builtin.nonnil(ref c).full[1].spineLock, lockRankSpanSetSpine);
 }
 
 // partialUnswept returns the spanSet which holds partially-filled
@@ -83,7 +83,8 @@ private static readonly @string spanHasNoFreeObjectsˢᵇ = "span has no free ob
 // Allocate a span to use in an mcache.
 internal static ж<mspan> cacheSpan⁔(/*this*/ ref mcentral c) {
     // Deduct credit for this span allocation and sweep if necessary.
-    var spanBytes = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()] * (uintptr)pageSize;
+    var evalᴛ1 = c.spanclass.sizeclass();
+    var spanBytes = (uintptr)gc.SizeClassToNPages[evalᴛ1] * (uintptr)pageSize;
     deductSweepCredit(spanBytes, 0);
 
     var traceDone = false;
@@ -257,7 +258,8 @@ internal static void uncacheSpan⁔(/*this*/ ref mcentral c, ж<mspan> Ꮡs) {
 
 // grow allocates a new empty span from the heap and initializes it for c's size class.
 internal static ж<mspan> grow⁔(/*this*/ ref mcentral c) {
-    var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
+    var evalᴛ1 = c.spanclass.sizeclass();
+    var npages = (uintptr)gc.SizeClassToNPages[evalᴛ1];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
         return default;

@@ -133,7 +133,7 @@ partial struct ringElement /*[256]fieldElement*/;
 internal static T /*s*/ polyAdd<T>(T a, T b)
     where T : /* ~[256]crypto/internal/fips140/mlkem.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = GoZero<T>();
+    T s = builtin.GoZero<T>();
 
     foreach (var i in range(len(s))) {
         s[i] = fieldAdd(a[i], b[i]);
@@ -145,7 +145,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 internal static T /*s*/ polySub<T>(T a, T b)
     where T : /* ~[256]crypto/internal/fips140/mlkem.fieldElement */ IArray<fieldElement>, new()
 {
-    T s = GoZero<T>();
+    T s = builtin.GoZero<T>();
 
     foreach (var i in range(len(s))) {
         s[i] = fieldSub(a[i], b[i]);
@@ -187,7 +187,7 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
     if (len(b) != encodingSize12) {
         return (new T{}, errors.New(mlkemInvalidEncodingˢ));
     }
-    T f = GoZero<T>();
+    T f = builtin.GoZero<T>();
     for (nint i = 0; i < n; i += 2) {
         var d = (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16;
         const uint32 mask12 = 0b1111_1111_1111;
@@ -232,7 +232,8 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
     (s, var b) = sliceForAppend(s, encodingSize1);
     clear(b);
     foreach (var i in range(len(f))) {
-        b[i / 8] |= (uint8)((uint8)(compress(f[i], 1).Lsh((int64)(i % 8))));
+        var evalᴛ1 = compress(f[i], 1);
+        b[i / 8] |= (uint8)((uint8)(evalᴛ1.Lsh((int64)(i % 8))));
     }
     return s;
 }
@@ -356,7 +357,7 @@ internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, 
     if (bIdx != 0) {
         throw panic("mlkem: internal error: bitsFilled != 0");
     }
-    s = move2heap(sᴷ, s);
+    s = builtin.move2heap(sᴷ, s);
     return s;
 }
 
@@ -532,7 +533,7 @@ internal static ringElement inverseNTT(nttElement f) {
             }
         }
     }
-    foreach (var i in range(len(f))) {
+    foreach (var i in range(builtin.len(f))) {
         f[i] = fieldMul(f[i], 3303); // 3303 = 128⁻¹ mod q
     }
     return ((ringElement)(array<fieldElement>)f).Clone();

@@ -157,6 +157,60 @@ internal static class PackageAncestry
         string.Equals(moduleRoot?.Trim(), ModuleRootNone, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
+    /// The runtimeconfig key (<c>AppContext</c> data) holding the module root a conversion RECORDED for a by-hand run:
+    /// the converter writes it into the Directory.Build.props beside a test host converted outside a go2cs root, and
+    /// the SDK carries it into the host's runtimeconfig. Read only when <see cref="ModuleRootEnvironmentVariable"/> is
+    /// unset (<see cref="ResolveModuleRoot"/>), so the pipeline, which always sets the variable, never reads it.
+    /// </summary>
+    public const string RecordedModuleRootKey = "go2cs.ModuleRoot";
+
+    /// <summary>
+    /// The runtimeconfig key holding the recorded go.mod of a module that ships none, the recorded twin of
+    /// <see cref="ModuleGoModEnvironmentVariable"/>. Read only with a RECORDED root (<see cref="ResolveModuleGoMod"/>),
+    /// so a root set by hand never pairs with another module's go.mod.
+    /// </summary>
+    public const string RecordedModuleGoModKey = "go2cs.ModuleGoMod";
+
+    /// <summary>
+    /// The module root a host stages from: <see cref="ModuleRootEnvironmentVariable"/> when it is set (any value,
+    /// <see cref="ModuleRootNone"/> included), else the root the conversion recorded (<see cref="RecordedModuleRootKey"/>),
+    /// else the unset variable's value. <paramref name="recorded"/> says the answer came from the record, so a refusal
+    /// can name where a stale value came from.
+    /// </summary>
+    public static string? ResolveModuleRoot(out bool recorded)
+    {
+        string? moduleRoot = Environment.GetEnvironmentVariable(ModuleRootEnvironmentVariable);
+        recorded = false;
+
+        if (!string.IsNullOrWhiteSpace(moduleRoot))
+            return moduleRoot;
+
+        if (AppContext.GetData(RecordedModuleRootKey) is string recordedRoot && !string.IsNullOrWhiteSpace(recordedRoot))
+        {
+            recorded = true;
+            return recordedRoot;
+        }
+
+        return moduleRoot;
+    }
+
+    /// <summary>
+    /// The go.mod handed over for a module that ships none: <see cref="ModuleGoModEnvironmentVariable"/> when it is set,
+    /// else, with a root that came from the record, the recorded go.mod (<see cref="RecordedModuleGoModKey"/>). The
+    /// narrowing runs one way: a recorded go.mod never pairs with a root set by hand, while a go.mod set by hand still
+    /// pairs with a recorded root, as the variable wins everywhere it is set (the pipeline sets both or neither).
+    /// </summary>
+    public static string? ResolveModuleGoMod(bool rootRecorded)
+    {
+        string? goMod = Environment.GetEnvironmentVariable(ModuleGoModEnvironmentVariable);
+
+        if (!string.IsNullOrWhiteSpace(goMod) || !rootRecorded)
+            return goMod;
+
+        return AppContext.GetData(RecordedModuleGoModKey) as string;
+    }
+
+    /// <summary>
     /// Why a module host with a module root SET cannot stage its module, naming the precondition that failed, or
     /// null when it can: the package must be a package of the module, and the root must be a module (its own
     /// go.mod, or the one go reads for a module that ships none). These are <see cref="TryStageModule"/>'s

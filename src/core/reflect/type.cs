@@ -1487,7 +1487,7 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
             ret = append(retᴷ, ret, typ);
         }
     }
-    ret = move2heap(retᴷ, ret);
+    ret = builtin.move2heap(retᴷ, ret);
     return ret;
 }
 
@@ -1537,16 +1537,22 @@ internal static Type initFuncTypes(nint n) {
             return funcTypes[n];
         }
 
-        funcTypes[n] = StructOf(slice<StructField>([
+        var evalᴛ1 = new funcType();
+        var evalᴛ2 = TypeOf(evalᴛ1);
+        var evalᴛ3 = Ꮡ(new rtype());
+        var evalᴛ4 = TypeOf(evalᴛ3);
+        var evalᴛ5 = ArrayOf(n, evalᴛ4);
+        var evalᴛ6 = StructOf(slice<StructField>([
             new(
                 Name: "FuncType",
-                Type: TypeOf(new funcType())
+                Type: evalᴛ2
             ),
             new(
                 Name: "Args",
-                Type: ArrayOf(n, TypeOf(Ꮡ(new rtype())))
+                Type: evalᴛ5
             )
         ]));
+        funcTypes[n] = evalᴛ6;
         return funcTypes[n];
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -1928,7 +1934,9 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
     } else {
         s = "funcargs("u8 + stringFor(Ꮡt.ᏑType) + ")"u8;
     }
-    x.Str = resolveReflectName(newName(s, ""u8, false, false));
+    var evalᴛ1 = newName(s, ""u8, false, false);
+    var evalᴛ2 = resolveReflectName(evalᴛ1);
+    x.Str = evalᴛ2;
 
     // cache result for future callers
     var xʗ1 = x;

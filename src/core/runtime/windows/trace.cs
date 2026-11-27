@@ -930,7 +930,8 @@ internal static partial void start⁔(/*this*/ ж<traceAdvancerState> Ꮡs) {
 
     // Start a goroutine to periodically advance the trace generation.
     s.done = new channel<EmptyStruct>(0);
-    s.timer = newWakeableSleep();
+    var evalᴛ1 = newWakeableSleep();
+    s.timer = evalᴛ1;
     goǃ([GoFunc("(*traceAdvancerState).start.func1")] () => {
         while (traceEnabled()) {
             // Set a timer to wake us up
@@ -988,7 +989,8 @@ internal static ж<wakeableSleep> newWakeableSleep() {
 internal static void sleep⁔(/*this*/ ж<wakeableSleep> Ꮡs, int64 ns) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s.timer.reset(nanotime() + ns, 0);
+    var evalᴛ1 = nanotime();
+    s.timer.reset(evalᴛ1 + ns, 0);
     @lock(Ꮡs.Ꮡlock);
     if (raceenabled) {
         raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
@@ -1021,7 +1023,7 @@ internal static void wake⁔(/*this*/ ж<wakeableSleep> Ꮡs) {
         // want to block on the receiver waking up. This also
         // effectively batches together wakeup notifications.
         var selᴛ1 = s.wakeup.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-        switch (trySelect(selᴛ1)) {
+        switch (builtin.trySelect(selᴛ1)) {
         case 0: {
             break;
         }

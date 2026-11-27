@@ -10,7 +10,7 @@
 // Go fixes GOARCH per build (extern.go: `const GOARCH string = goarch.GOARCH`). The windows flavour of the
 // corpus is converted ONCE, for windows/amd64, and the same managed program runs as a native arm64 .NET process
 // on Windows on Arm, where Go's own binary reads "arm64". The converter displaces the const for windows
-// (manualConversionConsts, as for darwin; runtime/darwin/goarch_darwin_impl.cs) and this member replaces it.
+// (manualConversionConsts, as for darwin; runtime/darwin-amd64/goarch_darwin_impl.cs) and this member replaces it.
 //
 // THE ONE VISIBLE ASYMMETRY, and it is deliberate. Only runtime.GOARCH moves. internal/goarch (GOARCH,
 // IsAmd64, IsArm64, ArchFamily), the files Go selected for windows/amd64, and every constant folded at

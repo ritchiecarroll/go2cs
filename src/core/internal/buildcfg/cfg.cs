@@ -77,7 +77,8 @@ public static error Error;
 // Check exits the program with a fatal error if Error is non-nil.
 public static void Check() {
     if (Error != nil) {
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %v\n"u8, filepath.Base(os.Args[0]), Error);
+        var evalᴛ1 = filepath.Base(os.Args[0]);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %v\n"u8, evalᴛ1, Error);
         os.Exit(2);
     }
 }
@@ -499,7 +500,7 @@ internal static slice<@string> experimentTags() {
     foreach (var (_, exp) in range(ᏑExperiment.Enabled())) {
         list = append(listᴷ, list, "goexperiment."u8 + exp);
     }
-    list = move2heap(listᴷ, list);
+    list = builtin.move2heap(listᴷ, list);
     return list;
 }
 
@@ -557,7 +558,7 @@ internal static slice<@string> gogoarchTags() {
         for (nint i = 1; i <= GOAMD64; i++) {
             list = append(listᴷ, list, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
         }
-        list = move2heap(listᴷ, list);
+        list = builtin.move2heap(listᴷ, list);
         return list;
     }
     case {} when GOARCHᴛ1 == "arm"u8: {
@@ -565,7 +566,7 @@ internal static slice<@string> gogoarchTags() {
         for (nint i = 5; i <= GOARM.Version; i++) {
             list = append(listᴷΔ1, list, fmt.Sprintf("%s.%d"u8, GOARCH, i));
         }
-        list = move2heap(listᴷΔ1, list);
+        list = builtin.move2heap(listᴷΔ1, list);
         return list;
     }
     case {} when GOARCHᴛ1 == "arm64"u8: {
@@ -594,7 +595,7 @@ internal static slice<@string> gogoarchTags() {
         for (nint i = 8; i <= GOPPC64; i++) {
             list = append(listᴷΔ2, list, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
         }
-        list = move2heap(listᴷΔ2, list);
+        list = builtin.move2heap(listᴷΔ2, list);
         return list;
     }
     case {} when GOARCHᴛ1 == "riscv64"u8: {

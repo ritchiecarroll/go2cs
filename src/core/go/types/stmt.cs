@@ -31,7 +31,8 @@ internal static void funcBody⁔(/*this*/ ж<Checker> Ꮡcheck, ж<declInfo> dec
         }
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(body.Pos(), "-- %s: %s", name, Ꮡsig.OrTypedNil());
+            var evalᴛ1 = body.Pos();
+            Ꮡcheck.trace(evalᴛ1, "-- %s: %s", name, Ꮡsig.OrTypedNil());
         }
 
         // save/restore current environment and set up function environment
@@ -169,7 +170,8 @@ internal static void multipleDefaults⁔(/*this*/ ж<Checker> Ꮡcheck, slice<as
         }}
         if (d != nil) {
             if (first != nil) {
-                Ꮡcheck.errorf(new ast_Stmtᴠpositioner(d), DuplicateDefault, "multiple defaults (first at %s)", check.fset.Position(first.Pos()));
+                var evalᴛ1 = first.Pos();
+                Ꮡcheck.errorf(new ast_Stmtᴠpositioner(d), DuplicateDefault, "multiple defaults (first at %s)", check.fset.Position(evalᴛ1));
             } else {
                 first = d;
             }
@@ -178,7 +180,9 @@ internal static void multipleDefaults⁔(/*this*/ ж<Checker> Ꮡcheck, slice<as
 }
 
 internal static void openScope⁔(/*this*/ ref Checker check, ast.Node node, @string comment) {
-    var scope = NewScope(check.scope, node.Pos(), node.End(), comment);
+    var evalᴛ1 = node.Pos();
+    var evalᴛ2 = node.End();
+    var scope = NewScope(check.scope, evalᴛ1, evalᴛ2, comment);
     check.recordScope(node, scope);
     check.scope = scope;
 }
@@ -316,7 +320,8 @@ L:
                     goto continue_L;
                 }
             }
-            seen[val] = append(seen[val], new valueType(v.Pos(), v.typ));
+            var evalᴛ1 = v.Pos();
+            seen[val] = append(seen[val], new valueType(evalᴛ1, v.typ));
         }
 continue_L:;
     }
@@ -599,7 +604,8 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
             if (ch.mode == invalid || val.mode == invalid) {
                 return;
             }
-            var elem = Ꮡcheck.chanElem(inNode(new ast.SendStmtжNode(sΔ1), sΔ1.Arrow), Ꮡch, false); if (elem != nil) {
+            var evalᴛ1 = inNode(new ast.SendStmtжNode(sΔ1), sΔ1.Arrow);
+            var elem = Ꮡcheck.chanElem(evalᴛ1, Ꮡch, false); if (elem != nil) {
                 Ꮡcheck.assignment(Ꮡval, elem, sendˢ);
             }
             break;
@@ -616,7 +622,8 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
                 break;
             }
             default: {
-                Ꮡcheck.errorf(inNode(new ast.IncDecStmtжNode(sΔ1), sΔ1.TokPos), InvalidSyntaxTree, "unknown inc/dec operation %s", sΔ1.Tok);
+                var evalᴛ2 = inNode(new ast.IncDecStmtжNode(sΔ1), sΔ1.TokPos);
+                Ꮡcheck.errorf(evalᴛ2, InvalidSyntaxTree, "unknown inc/dec operation %s", sΔ1.Tok);
                 return;
             }}
 
@@ -646,7 +653,8 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
                     return;
                 }
                 if (sΔ1.Tok == token.DEFINE) {
-                    Ꮡcheck.shortVarDecl(inNode(new ast.AssignStmtжNode(sΔ1), sΔ1.TokPos), sΔ1.Lhs, sΔ1.Rhs);
+                    var evalᴛ3 = inNode(new ast.AssignStmtжNode(sΔ1), sΔ1.TokPos);
+                    Ꮡcheck.shortVarDecl(evalᴛ3, sΔ1.Lhs, sΔ1.Rhs);
                 } else {
                     // regular assignment
                     Ꮡcheck.assignVars(sΔ1.Lhs, sΔ1.Rhs);
@@ -656,7 +664,8 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
             default: {
                 // assignment operations
                 if (len(sΔ1.Lhs) != 1 || len(sΔ1.Rhs) != 1) {
-                    Ꮡcheck.errorf(inNode(new ast.AssignStmtжNode(sΔ1), sΔ1.TokPos), MultiValAssignOp, "assignment operation %s requires single-valued expressions", sΔ1.Tok);
+                    var evalᴛ4 = inNode(new ast.AssignStmtжNode(sΔ1), sΔ1.TokPos);
+                    Ꮡcheck.errorf(evalᴛ4, MultiValAssignOp, "assignment operation %s requires single-valued expressions", sΔ1.Tok);
                     return;
                 }
                 token.Token op = assignOp(sΔ1.Tok);
@@ -942,7 +951,7 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
             // variable type underfoot.)
             if (lhs != nil) {
                 bool used = default;
-                lhsVars = move2heap(lhsVarsᴷ, lhsVars);
+                lhsVars = builtin.move2heap(lhsVarsᴷ, lhsVars);
                 foreach (var (_, v) in range(lhsVars)) {
                     if (check.usedVars[v]) {
                         used = true;
@@ -1036,7 +1045,8 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
         }
         case ж<ast.RangeStmt> sΔ1: {
             inner |= (stmtContext)((stmtContext)(breakOk | continueOk));
-            Ꮡcheck.rangeStmt(inner, sΔ1, inNode(new ast.RangeStmtжNode(sΔ1), sΔ1.TokPos), sΔ1.Key, (~sΔ1).Value, default, sΔ1.X, sΔ1.Tok == token.DEFINE);
+            var evalᴛ5 = inNode(new ast.RangeStmtжNode(sΔ1), sΔ1.TokPos);
+            Ꮡcheck.rangeStmt(inner, sΔ1, evalᴛ5, sΔ1.Key, (~sΔ1).Value, default, sΔ1.X, sΔ1.Tok == token.DEFINE);
             break;
         }
         default: {

@@ -274,8 +274,10 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
         @string username = u.Username();
         var (password, _) = u.Password();
         forkReq();
-        req.Header = cloneOrMakeHeader(ireq.Header);
-        req.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
+        var evalᴛ1 = cloneOrMakeHeader(ireq.Header);
+        req.Header = evalᴛ1;
+        var evalᴛ2 = basicAuth(username, password);
+        req.Header.Set(authorizationˢ, "Basic "u8 + evalᴛ2);
     }
 
     if (!deadline.IsZero()) {
@@ -403,7 +405,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
 
         Action cancelCtxΔ1 = default;
         (req.ctx, var cancelCtxᴛ1) = context.WithDeadline(oldCtx, deadline);
-        cancelCtxΔ1 = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtxᴛ1);
+        cancelCtxΔ1 = builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtxᴛ1);
         var deadlineʗ1 = deadline;
         return (cancelCtxΔ1, [GoFunc("setRequestCancel.func1")] () => time.Now().After(deadlineʗ1));
     }
@@ -412,7 +414,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     Action cancelCtx = default;
     if (timeBeforeContextDeadline(deadline, oldCtx)) {
         (req.ctx, var cancelCtxᴛ2) = context.WithDeadline(oldCtx, deadline);
-        cancelCtx = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtxᴛ2);
+        cancelCtx = builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtxᴛ2);
     }
 
     var cancel = new channel<EmptyStruct>(0);
@@ -773,7 +775,9 @@ internal static (ж<Response> retres, error reterr) do⁔(/*this*/ ж<Client> �
                 copyHeaders(Ꮡreq, stripSensitiveHeaders, !includeBody);
                 // Add the Referer header from the most recent
                 // request URL to the new one, if it's not https->http:
-                @string @ref = refererForURL(reqs[len(reqs) - 1].URL, ref (req.URL).DerefOrNull(), req.Header.Get(refererˢ)); if (@ref != ""u8) {
+                var evalᴛ1 = len(reqs);
+                var evalᴛ2 = req.Header.Get(refererˢ);
+                @string @ref = refererForURL(reqs[evalᴛ1 - 1].URL, ref (req.URL).DerefOrNull(), evalᴛ2); if (@ref != ""u8) {
                     req.Header.Set(refererˢ, @ref);
                 }
                 errΔ1 = c.checkRedirect(Ꮡreq, reqs);
@@ -894,7 +898,8 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier⁔(/*this*/ ж
                     }
                 }
                 slices.Sort<slice<@string>, @string>(ss); // Ensure deterministic headers
-                ireqhdrʗ1.Set(cookieˢ, strings.Join(ss, "; "));
+                var evalᴛ1 = strings.Join(ss, "; ");
+                ireqhdrʗ1.Set(cookieˢ, evalᴛ1);
             }
         }
 

@@ -366,3 +366,24 @@ func enterModuleCacheReleaseCopy(dir, goModSource string) (copyDir string, leave
 
 	return copyDir, leave, nil
 }
+
+// defaultGoModCache is Go's own default module cache, for when neither GOMODCACHE nor `go env` answers: the first
+// GOPATH entry's pkg/mod, and with no GOPATH, <home>/go/pkg/mod, as `go` defaults GOPATH. Empty when neither is known,
+// rather than the relative pkg/mod an empty GOPATH would join into, which no absolute path is ever under.
+func defaultGoModCache(gopath, home string) string {
+	if entries := filepath.SplitList(gopath); len(entries) > 0 && entries[0] != "" {
+		return filepath.Join(entries[0], "pkg", "mod")
+	}
+
+	if home != "" {
+		return filepath.Join(home, "go", "pkg", "mod")
+	}
+
+	return ""
+}
+
+// userHomeDirOrEmpty is the user's home directory, or empty when the OS cannot say.
+func userHomeDirOrEmpty() string {
+	home, _ := os.UserHomeDir()
+	return home
+}

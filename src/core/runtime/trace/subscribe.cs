@@ -9,7 +9,7 @@ using io = io_package;
 using runtime = runtime_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using @internal.trace;
 using go.sync;
 

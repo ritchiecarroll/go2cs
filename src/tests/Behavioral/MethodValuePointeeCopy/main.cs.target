@@ -79,7 +79,8 @@ internal static void main() {
     _ = callV();
     _ = callV();
 
-    fmt.Println("callOnce", ptrCalls, callV());
+    var evalᴛ1 = callV();
+    fmt.Println("callOnce", ptrCalls, evalᴛ1);
 
     var h6 = new holder(p: Ꮡ(new frame(Name: "e")));
     var recvʗ7 = ~h6.p;

@@ -10,7 +10,7 @@ using fs = go.io.fs_package;
 using runtime = runtime_package;
 using atomic = go.sync.atomic_package;
 using syscall = syscall_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using @internal;
 using @internal.syscall;
 using go.io;
@@ -284,7 +284,8 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
         syscall.CloseOnExec(r);
     }
 
-    var f = newFile(r, name, kindOpenFile, unix.HasNonblockFlag(flag));
+    var evalᴛ1 = unix.HasNonblockFlag(flag);
+    var f = newFile(r, name, kindOpenFile, evalᴛ1);
     f.pfd.SysFile = s;
     return (f, default);
 }

@@ -4,7 +4,7 @@
 namespace go.@internal.syscall;
 
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 
 partial class windows_package {
 
