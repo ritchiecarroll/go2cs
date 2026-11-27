@@ -63,6 +63,11 @@ internal class AdapterImplTemplate : TemplateBase
     // ForwardReceivers becomes the first ARGUMENT (m_box / m_box.Value / ref m_box.Value).
     public Dictionary<string, string>? ForwardStaticCalls;
 
+    // Members bound through an embedded INTERFACE field (ForwardReceivers' `m_box.Value.<Field>`). An
+    // unexported member of another assembly's interface reached that way forwards to the field: the
+    // interface member is public in C#, and the field's dynamic value holds the method Go calls.
+    public HashSet<string>? InterfaceFieldForwards;
+
     // ⚠ Per-method RESULT ADAPTER for a member whose DECLARED result is an interface the forwarded
     // Go method does not return. The adapter implements the interface AS DECLARED, so the forwarded
     // receiver box has to be wrapped in the RESULT interface's own adapter before it is handed back:
@@ -157,7 +162,9 @@ internal class AdapterImplTemplate : TemplateBase
                 // A cross-assembly unexported interface marker (Go's package-sealing exprNode()/tree()
                 // etc.) has no accessible implementation to forward to (CS1061) and is never callable
                 // from outside its package — satisfy the required member with a no-op / default stub.
-                if (method.IsInaccessibleMarker)
+                // Not when the member is bound through an embedded interface FIELD: the field's own
+                // value implements it, and the stub would answer a zero value where Go calls that method.
+                if (method.IsInaccessibleMarker && InterfaceFieldForwards?.Contains(forwardName) != true)
                 {
                     result.Append($"{method.ReturnType} {method.GetSignature()}{(method.ReturnType == "void" ? " { }" : " => default!;")}");
                     continue;

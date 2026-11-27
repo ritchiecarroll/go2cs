@@ -635,6 +635,10 @@ public class ImplementGenerator : ISourceGenerator
                 // bind direct-ж receiver methods from a struct's `this` at all (CS1929).
                 Dictionary<string, string> forwardReceivers = new(StringComparer.Ordinal);
                 Dictionary<string, string> forwardStaticCalls = new(StringComparer.Ordinal);
+                // Members bound through an embedded INTERFACE field. An unexported member of another
+                // assembly's interface is callable on that field (a C# interface member is public), so
+                // the template forwards it there instead of writing the inaccessible-marker stub.
+                HashSet<string> interfaceFieldForwards = new(StringComparer.Ordinal);
 
                 foreach (MethodInfo structMethod in structMethods ?? [])
                 {
@@ -934,7 +938,10 @@ public class ImplementGenerator : ISourceGenerator
                             .ToList();
 
                         if (declaringFields.Count == 1)
+                        {
                             forwardReceivers[simpleName] = $"m_box.Value.{declaringFields[0].FieldName}";
+                            interfaceFieldForwards.Add(simpleName);
+                        }
                     }
                 }
 
@@ -1065,6 +1072,7 @@ public class ImplementGenerator : ISourceGenerator
                                 if (hopIfaceFields.Count == 1)
                                 {
                                     forwardReceivers[methodName] = $"{receiver}.Value.{hopIfaceFields[0].FieldName}";
+                                    interfaceFieldForwards.Add(methodName);
                                     break;
                                 }
                             }
@@ -1383,6 +1391,7 @@ public class ImplementGenerator : ISourceGenerator
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
                     ForwardStaticCalls = forwardStaticCalls,
+                    InterfaceFieldForwards = interfaceFieldForwards,
                     ForwardResultWraps = forwardResultWraps,
                     ImplementsFormattable = implementsFormattable,
                     UsingStatements = usingStatements
