@@ -44,10 +44,49 @@ internal static (nint, bool) tupleᴛ2ʗ = gi._<nint>(ᐧ);
 internal static any gy = tupleᴛ2ʗ.Item1;
 internal static any gok = tupleᴛ2ʗ.Item2;
 
+internal static map<@string, nint> pm = new map<@string, nint>{["k"] = 7};
+
+internal static (nint, bool) tupleᴛ3ʗ = pm["k", ꟷ];
+internal static any gmv = tupleᴛ3ʗ.Item1;
+internal static any gmok = tupleᴛ3ʗ.Item2;
+
+internal static (nint, bool) tupleᴛ4ʗ = pm["k", ꟷ];
+internal static nint guv = tupleᴛ4ʗ.Item1;
+internal static bool guok = tupleᴛ4ʗ.Item2;
+
+internal static channel<nint> pch = func([GoFunc("init.func1")] channel<nint> () => {
+    var c = new channel<nint>(1);
+    c.ᐸꟷ(5);
+    return c;
+})();
+
+internal static (nint, bool) tupleᴛ5ʗ = ᐸꟷ(pch, ꟷ);
+internal static nint grv = tupleᴛ5ʗ.Item1;
+internal static bool grok = tupleᴛ5ʗ.Item2;
+
+internal static (any, any) tupleᴛ6ʗ = anys();
+internal static any qa = tupleᴛ6ʗ.Item1;
+internal static any qb = tupleᴛ6ʗ.Item2;
+
+internal static void tpm<M>(M m)
+    where M : /* ~map[string]int */ IMap<@string, nint>, ISupportMake<M>, new()
+{
+
+    var (vᴛ1, okᴛ1) = m["k"u8, ꟷ];
+    any v = vᴛ1;
+    any ok = okᴛ1;
+
+    var (w, wok) = m["z"u8, ꟷ];
+    fmt.Println(v, ok, w, wok);
+}
+
 internal static (cancelFunc, cancelFunc) funcs() {
     var (_, cancel) = context.WithCancelCause(context.Background());
     return (builtin.NilSafeDelegateConversion<cancelFunc, context.CancelCauseFunc>(cancel), default);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object ba2ˢ = (@string)"ba2"u8;
 
 internal static void main() {
 
@@ -128,6 +167,42 @@ internal static void main() {
     any cz = czᴛ1;
     any czok = czokᴛ1;
     fmt.Println(cv, cok, cz, czok);
+
+    fmt.Println(gmv, gmok, guv, guok, grv, grok, qa, qb);
+
+    tpm(new map<@string, nint>{["k"] = 7});
+
+    var (uv, uok) = m["k", ꟷ];
+    var ch2 = new channel<nint>(1);
+    ch2.ᐸꟷ(8);
+
+    var (rv, rok) = ᐸꟷ(ch2, ꟷ);
+
+    var (baᴛ1, bbᴛ1) = anys();
+    ref var ba = ref heap<any>(out var Ꮡba);
+    ba = baᴛ1;
+    any bb = bbᴛ1;
+    var bp = Ꮡba;
+    bp.ValueSlot = ba2ˢ;
+    fmt.Println(uv, uok, rv, rok, ba, bb);
+
+    var ch3 = new channel<nint>(1);
+    ch3.ᐸꟷ(6);
+
+    var (qvᴛ1, qokᴛ1) = m["k", ꟷ];
+    any qv = qvᴛ1;
+    any qok = qokᴛ1;
+
+    var (qrᴛ1, qrokᴛ1) = ᐸꟷ(ch3, ꟷ);
+    any qr = qrᴛ1;
+    any qrok = qrokᴛ1;
+
+    var (qtᴛ1, qtokᴛ1) = tx._<nint>(ᐧ);
+    any qt = qtᴛ1;
+    any qtok = qtokᴛ1;
+
+    var (qc, qd) = pair();
+    fmt.Println(qv, qok, qr, qrok, qt, qtok, qc, qd);
 }
 
 } // end main_package

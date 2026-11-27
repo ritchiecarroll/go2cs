@@ -37,6 +37,30 @@ var gi any = 5
 
 var gy, gok any = gi.(int)
 
+// Package-level comma-ok specs, typed and untyped: map index and channel receive. And a parenthesized call.
+var pm = map[string]int{"k": 7}
+
+var gmv, gmok any = pm["k"]
+
+var guv, guok = pm["k"]
+
+var pch = func() chan int {
+	c := make(chan int, 1)
+	c <- 5
+	return c
+}()
+
+var grv, grok = <-pch
+
+var qa, qb any = (anys())
+
+// A typed comma-ok index on a type-parameter map.
+func tpm[M ~map[string]int](m M) {
+	var v, ok any = m["k"]
+	var w, wok = m["z"]
+	fmt.Println(v, ok, w, wok)
+}
+
 func funcs() (cancelFunc, cancelFunc) {
 	_, cancel := context.WithCancelCause(context.Background())
 	return cancelFunc(cancel), nil
@@ -97,4 +121,28 @@ func main() {
 	close(ch)
 	var cz, czok any = <-ch
 	fmt.Println(cv, cok, cz, czok)
+
+	// Package-level comma-ok and parenthesized specs.
+	fmt.Println(gmv, gmok, guv, guok, grv, grok, qa, qb)
+
+	tpm(map[string]int{"k": 7})
+
+	// Untyped comma-ok forms, and an untyped spec with an address-taken name.
+	var uv, uok = m["k"]
+	ch2 := make(chan int, 1)
+	ch2 <- 8
+	var rv, rok = <-ch2
+	var ba, bb = anys()
+	bp := &ba
+	*bp = "ba2"
+	fmt.Println(uv, uok, rv, rok, ba, bb)
+
+	// Parenthesized comma-ok forms.
+	ch3 := make(chan int, 1)
+	ch3 <- 6
+	var qv, qok any = (m["k"])
+	var qr, qrok any = (<-ch3)
+	var qt, qtok any = (tx.(int))
+	var qc, qd = (pair())
+	fmt.Println(qv, qok, qr, qrok, qt, qtok, qc, qd)
 }
