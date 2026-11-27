@@ -42990,7 +42990,7 @@ P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `
 
 — R (2026-11-26)
 
-## 2026-11-27 — P4 (GO2CS2016 fold, COORD 20261127T060428Z item 4): two stub sites the refusal does not cover (OPEN)
+## 2026-11-27 — P4 (GO2CS2016 fold, COORD 20261127T060428Z item 4): four shapes the refusal does not cover (OPEN)
 
 - **A value-returning unexported method met at depth 1, or through a promotion inside its own package, converted from
   another package.** `lib.T` (declaring `m() string`) or `lib.W{T}` converted to `lib.I` from `main`: GO2CS2016 does not
@@ -43011,8 +43011,16 @@ P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `
   neither for `T2` (they come from its interface field), so the build fails with CS1501 on both, the exported `Name`
   included. The generator keeps it a forward (never a stub), so it is loud. The forward it needs is
   `this.T2.I.m()`. Measured on a scratch row in the fold, then dropped from the row because it cannot build.
-- **What closes both:** the full fix G owns (the promotion path in the `GoImplement` record and a hidden accessor in
-  `lib`), or a refusal of the value-returning shapes until then. Owner: unrouted.
+- **A struct with two or more value embeds gets no provider answer, so its value implementation forwards and the
+  build fails loudly** (COORD 20261127T102713Z item 3). `ImplementGenerator`'s path walk asks which embed provides
+  the member only when one embed can; for `server{pb.UnimplementedFooServer; pb.UnimplementedBarServer}` registered by
+  value it answers null, and the value implementation keeps the forward. Where both embeds come from another
+  assembly and the member is internal there, the forward does not bind (CS1061 or CS0122). Not a regression: before
+  the fold the value implementation stubbed this member and answered a silent zero value; now the build says so. The fix is
+  to resolve the provider by Go's depth rule across the embeds. Read, not run.
+- **What closes them:** the full fix G owns (the promotion path in the `GoImplement` record and a hidden accessor in
+  `lib`) closes the first three; the fourth needs the provider lookup above. Until then, a refusal of the
+  value-returning shapes. Owner: unrouted.
 
 — P4 (2026-11-27)
 
