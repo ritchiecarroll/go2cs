@@ -34,8 +34,11 @@ import (
 //   - both:       rw-narrow with offsets 0 and 16 marked. Recorded, not asserted: whether SetProcessValidCallTargets
 //     takes effect at all.
 //   - gpa:        rw-narrow with SetProcessValidCallTargets called through GetProcAddress's pointer, a CFG-checked
-//     indirect call, where every other arm imports it directly. Recorded, not asserted. (Reading 2, 46081898703: an
-//     indirect call to it ended the process with the CFG fast fail before it returned.)
+//     indirect call, where every other arm calls the import directly. Recorded, not asserted. (Readings 2 and 3,
+//     46081898703 and 46082737587: a call through a pointer, from GetProcAddress or from the import, ended the
+//     process with a fast fail before it returned.)
+//   - plain:      default protection (no PAGE_TARGETS_NO_UPDATE), then SetProcessValidCallTargets for offset 0.
+//     Recorded, not asserted: whether the call itself survives on an ordinary page.
 //
 // In every arm page+0 must be callable. In a narrowed arm a call to page+16 must end the process with the CFG fast
 // fail (STATUS_STACK_BUFFER_OVERRUN). The row reads NOT MEASURED where the C compiler cannot build with CFG
@@ -62,15 +65,15 @@ static void fail(const char *step) { printf("step-failed: %s %lu\n", step, GetLa
 int main(int argc, char **argv) {
     const char *arm = argc > 1 ? argv[1] : "";
     HMODULE kernelbase = LoadLibraryW(L"kernelbase.dll");
-    go2cs_set_targets set_targets = strcmp(arm, "gpa") == 0
-        ? (go2cs_set_targets)GetProcAddress(kernelbase, "SetProcessValidCallTargets")
-        : SetProcessValidCallTargets;
+    go2cs_set_targets gpa_targets = (go2cs_set_targets)GetProcAddress(kernelbase, "SetProcessValidCallTargets");
     go2cs_get_policy get_policy = (go2cs_get_policy)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetProcessMitigationPolicy");
     DWORD policy = 0, old;
     SYSTEM_INFO si;
     unsigned char *page;
     volatile go2cs_entry entry;
-    BOOL narrow = strcmp(arm, "default") != 0;
+    BOOL narrow = strcmp(arm, "default") != 0 && strcmp(arm, "plain") != 0;
+    BOOL mark = strcmp(arm, "default") != 0;
+    BOOL ok;
 
     if (get_policy == NULL || !get_policy(GetCurrentProcess(), 7 /* ProcessControlFlowGuardPolicy */, &policy, sizeof policy)) fail("GetProcessMitigationPolicy");
     printf("cfg: %lu\n", policy & 1);
@@ -97,13 +100,19 @@ int main(int argc, char **argv) {
     printf("protected: %p\n", (void *)page);
     fflush(stdout);
 
-    if (narrow) {
+    if (mark) {
         /* "both" marks offset 16 too: the instrument's check that SetProcessValidCallTargets takes effect */
         go2cs_cfg_target targets[2] = { { 0, 1 /* CFG_CALL_TARGET_VALID */ }, { 16, 1 } };
         ULONG count = strcmp(arm, "both") == 0 ? 2 : 1;
         printf("calling SetProcessValidCallTargets\n");
         fflush(stdout);
-        if (set_targets == NULL || !set_targets(GetCurrentProcess(), page, si.dwPageSize, count, targets)) fail("SetProcessValidCallTargets");
+        /* A direct call through the import (not CFG-checked) in every arm but "gpa", whose call through
+           GetProcAddress's pointer is a CFG-checked indirect call. */
+        if (strcmp(arm, "gpa") == 0)
+            ok = gpa_targets != NULL && gpa_targets(GetCurrentProcess(), page, si.dwPageSize, count, targets);
+        else
+            ok = SetProcessValidCallTargets(GetCurrentProcess(), page, si.dwPageSize, count, targets);
+        if (!ok) fail("SetProcessValidCallTargets");
         printf("targets: %lu, flags %llu\n", count, (unsigned long long)targets[0].Flags);
         fflush(stdout);
     }
@@ -169,6 +178,7 @@ func TestCgoSyscallTrampolinePageCallTargets(t *testing.T) {
 	// whether calling it through GetProcAddress's pointer passes CFG.
 	run("both")
 	run("gpa")
+	run("plain")
 
 	text, code := run("default")
 
