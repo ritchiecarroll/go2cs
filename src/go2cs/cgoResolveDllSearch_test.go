@@ -213,17 +213,44 @@ func TestCgoResolveHoldsABoundLibrarysDependentsOutOfTheCurrentDirectory(t *test
 	plantedY := t.TempDir()
 	copyCgoG1File(t, filepath.Join(depDir, "go2csdlly.dll"), filepath.Join(plantedY, "go2csdlly.dll"))
 	probe := []string{cgoDllSearchProbeEnv + "=1"}
+	onPathY := append([]string{"PATH=" + plantedY + string(os.PathListSeparator) + os.Getenv("PATH")}, probe...)
 
-	handOwned := runCgoG1(t, csProgram, run, plantedY, probe)
-	t.Logf("READING %s hand-owned arm: go2cs, the import's dependent only in the current directory: exit %d %q", target, handOwned.exit, strings.TrimSpace(handOwned.stdout))
-	cgoDllSearchRefused(t, cgoG1Run{stdout: handOwned.stdout, stderr: handOwned.stdout, exit: cgoDllSearchProbeExit(handOwned)}, "x 42", "go2csdllx", "the current directory")
+	for _, place := range []struct {
+		name string
+		dir  string
+		env  []string
+	}{
+		{"the current directory", plantedY, probe},
+		{"PATH", t.TempDir(), onPathY},
+	} {
+		handOwned := runCgoG1(t, csProgram, run, place.dir, place.env)
+		t.Logf("READING %s hand-owned arm: go2cs, the import's dependent only in %s: exit %d %q", target, place.name, handOwned.exit, strings.TrimSpace(handOwned.stdout))
+		cgoDllSearchRefused(t, cgoG1Run{stdout: handOwned.stdout, stderr: handOwned.stdout, exit: cgoDllSearchProbeExit(handOwned, "x")}, "x 42", "go2csdllx", place.name)
+	}
+
+	// The same import spelled the usual .NET way, a name with a dot and no .dll: [DllImport("go2cs.dllz")] loads
+	// go2cs.dllz.dll, as the runtime adds .dll to any name that does not end in .dll or .exe.
+	copyCgoG1File(t, filepath.Join(libDir, "go2csdllx.dll"), filepath.Join(beside, "go2cs.dllz.dll"))
+	dotted := []string{cgoDllSearchProbeEnv + "=dotted"}
+
+	handOwnedDotted := runCgoG1(t, csProgram, run, plantedY, dotted)
+	t.Logf("READING %s hand-owned dotted arm: go2cs, the import's dependent only in the current directory: exit %d %q", target, handOwnedDotted.exit, strings.TrimSpace(handOwnedDotted.stdout))
+	cgoDllSearchRefused(t, cgoG1Run{stdout: handOwnedDotted.stdout, stderr: handOwnedDotted.stdout, exit: cgoDllSearchProbeExit(handOwnedDotted, "z")}, "z 42", "go2cs.dllz", "the current directory")
 
 	copyCgoG1File(t, filepath.Join(depDir, "go2csdlly.dll"), filepath.Join(beside, "go2csdlly.dll"))
-	handOwnedControl := runCgoG1(t, csProgram, run, t.TempDir(), probe)
-	t.Logf("READING %s hand-owned control: go2cs, the import's dependent beside it: exit %d %q", target, handOwnedControl.exit, strings.TrimSpace(handOwnedControl.stdout))
 
-	if handOwnedControl.exit != 0 || !strings.Contains(handOwnedControl.stdout, "x 42") {
-		t.Errorf("go2cs did not load the hand-owned import with its dependent beside it (exit %d %q):\n%s", handOwnedControl.exit, handOwnedControl.stdout, lastLines(handOwnedControl.stderr, 12))
+	for _, control := range []struct {
+		name, env, loaded string
+	}{
+		{"hand-owned control", "1", "x 42"},
+		{"hand-owned dotted control", "dotted", "z 42"},
+	} {
+		handOwnedControl := runCgoG1(t, csProgram, run, t.TempDir(), []string{cgoDllSearchProbeEnv + "=" + control.env})
+		t.Logf("READING %s %s: go2cs, the import's dependent beside it: exit %d %q", target, control.name, handOwnedControl.exit, strings.TrimSpace(handOwnedControl.stdout))
+
+		if handOwnedControl.exit != 0 || !strings.Contains(handOwnedControl.stdout, control.loaded) {
+			t.Errorf("go2cs did not load the %s's import with its dependent beside it (exit %d %q):\n%s", control.name, handOwnedControl.exit, handOwnedControl.stdout, lastLines(handOwnedControl.stderr, 12))
+		}
 	}
 
 	// MAX_PATH: the same program in a directory 260 characters deep or more. The control loads with every dependent
@@ -231,11 +258,12 @@ func TestCgoResolveHoldsABoundLibrarysDependentsOutOfTheCurrentDirectory(t *test
 	cgoDllSearchDeep(t, target, csProgram, beside, planted, run)
 }
 
-// cgoDllSearchProbeEnv asks the hand-owned import to be called after main.
+// cgoDllSearchProbeEnv asks the hand-owned import to be called after main: 1 for go2csdllx.dll, dotted for go2cs.dllz.
 const cgoDllSearchProbeEnv = "GO2CS_DLLSEARCH_HANDOWNED"
 
 // cgoDllSearchHandOwned is a hand-owned [DllImport] compiled into the converted assembly. After main it calls
-// go2csdllx_value and prints "x <value>", or "x refused: <message>" when the load is refused.
+// go2csdllx_value and prints "x <value>", or "x refused: <message>" when the load is refused; asked for the dotted
+// spelling, it calls the same export through go2cs.dllz and prints "z <value>" or "z refused: <message>".
 const cgoDllSearchHandOwned = `using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -245,31 +273,41 @@ internal static class Go2csDllSearchHandOwned
     [DllImport("go2csdllx.dll")]
     private static extern int go2csdllx_value();
 
+    [DllImport("go2cs.dllz", EntryPoint = "go2csdllx_value")]
+    private static extern int go2csdllz_value();
+
     [ModuleInitializer]
     internal static void Arm()
     {
-        if (Environment.GetEnvironmentVariable("` + cgoDllSearchProbeEnv + `") != "1")
+        (string label, Func<int> call) = Environment.GetEnvironmentVariable("` + cgoDllSearchProbeEnv + `") switch
+        {
+            "1" => ("x", (Func<int>)go2csdllx_value),
+            "dotted" => ("z", (Func<int>)go2csdllz_value),
+            _ => ((string)null, (Func<int>)null)
+        };
+
+        if (call is null)
             return;
 
-        AppDomain.CurrentDomain.ProcessExit += static (_, _) =>
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
         {
             try
             {
-                Console.WriteLine($"x {go2csdllx_value()}");
+                Console.WriteLine($"{label} {call()}");
             }
             catch (DllNotFoundException ex)
             {
-                Console.WriteLine($"x refused: {ex.Message}");
+                Console.WriteLine($"{label} refused: {ex.Message}");
             }
         };
     }
 }
 `
 
-// cgoDllSearchProbeExit is the hand-owned arm's outcome as an exit code: 1 when the probe printed a refusal, since the
-// program itself exits 0 once main returns.
-func cgoDllSearchProbeExit(run cgoG1Run) int {
-	if run.exit != 0 || strings.Contains(run.stdout, "x refused: ") {
+// cgoDllSearchProbeExit is the hand-owned arm's outcome as an exit code: 1 when the probe printed a refusal under
+// label, since the program itself exits 0 once main returns.
+func cgoDllSearchProbeExit(run cgoG1Run, label string) int {
+	if run.exit != 0 || strings.Contains(run.stdout, label+" refused: ") {
 		return 1
 	}
 
