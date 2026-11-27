@@ -139,10 +139,21 @@ func TestCgoPhase4EASideBuildUnderPkgConfigIsRefusedByName(t *testing.T) {
 	writeCgoFixture(t, pcDir, "go2cspc.pc", "Name: go2cspc\nDescription: go2cs pkg-config fixture\nVersion: 1\nCflags: -DGO2CS_PC=7\nLibs:\n")
 	t.Setenv("PKG_CONFIG_PATH", pcDir)
 
-	program := "package main\n\n/*\n#cgo pkg-config: go2cspc\nstatic int pc(void) { return GO2CS_PC; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"pc\", C.pc()) }\n"
-	combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{"main.go": program})
-	requireNothingWritten(t, output, err, combined)
-	requireCgoUseRefused(t, cgoRefusalLines(combined), "main.go(", "C.pc", "pkg-config")
+	// The silent shape is the finding's: the define selects code that compiles either way, so a side build without it
+	// succeeds and answers differently from go's (COORD, 2026-11-27). The loud shape uses the define's value, so a side
+	// build without it cannot compile; it is kept as a second row.
+	for _, row := range []struct{ name, preamble string }{
+		{"silent", "#ifdef GO2CS_PC\nstatic int pc(void) { return 7; }\n#else\nstatic int pc(void) { return 1; }\n#endif\n"},
+		{"loud", "static int pc(void) { return GO2CS_PC; }\n"},
+	} {
+		t.Run(row.name, func(t *testing.T) {
+			program := "package main\n\n/*\n#cgo pkg-config: go2cspc\n" + row.preamble + "*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"pc\", C.pc()) }\n"
+			combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{"main.go": program})
+			t.Logf("READING %s/%s %s: exit %v; the conversion's output ends:\n%s", runtime.GOOS, runtime.GOARCH, row.name, err, lastLines(combined, 12))
+			requireNothingWritten(t, output, err, combined)
+			requireCgoUseRefused(t, cgoRefusalLinesIn(combined, "main.go"), "main.go(", "C.pc", "pkg-config")
+		})
+	}
 }
 
 // A name the preamble defines and a library the package links also exports is refused by name, never bound to the
@@ -152,7 +163,8 @@ func TestCgoPhase4FAPreambleDefinitionALibraryAlsoExportsIsRefusedByName(t *test
 	program := "package main\n\n/*\nstatic int isatty(int fd) { return 42; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"isatty\", C.isatty(0)) }\n"
 	combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{"main.go": program})
 	requireNothingWritten(t, output, err, combined)
-	requireCgoUseRefused(t, cgoRefusalLines(combined), "main.go(", "C.isatty")
+	t.Logf("READING %s/%s: the conversion's output ends:\n%s", runtime.GOOS, runtime.GOARCH, lastLines(combined, 12))
+	requireCgoUseRefused(t, cgoRefusalLinesIn(combined, "main.go"), "main.go(", "C.isatty")
 }
 
 // cgoPhase4PathNeedles are the path spellings a side library must not carry: the side build's work-directory stem, and
