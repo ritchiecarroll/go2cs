@@ -9,7 +9,7 @@
 // - WaitGroup.Add, WaitGroup.Done, WaitGroup.Wait, WaitGroup.Go: INSPIRED BY src/sync/waitgroup.go, Go 1.26.11,
 //   methods WaitGroup.Add, WaitGroup.Done, WaitGroup.Wait, WaitGroup.Go. The same counter contract and panics over a
 //   managed wait.
-// - the counter helpers: original go2cs code.
+// - the counter helpers, and WaitGroup.Waitꞏtwin (the M:N twin of Wait): original go2cs code.
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted waitgroup.go output). Go's WaitGroup
 // packs a counter and a waiter count into one atomic uint64 and parks waiters on the runtime sleeping
@@ -18,9 +18,12 @@
 // zero. Wait blocks on the latch; the Add that drives the counter to zero releases every waiter.
 using System.Collections.Generic;
 using System.Threading;
-// Aliased rather than imported wholesale: this file needs exactly three golib types, and a blanket
+// Aliased rather than imported wholesale: this file needs a handful of golib types, and a blanket
 // `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
 // beside converted code.
+using GoParkSlot = go.golib.GoParkSlot;
+using GoScheduler = go.golib.GoScheduler;
+using GoTask = go.golib.GoTask;
 using Goroutine = go.golib.Goroutine;
 using SyncTestBubble = go.golib.SyncTestBubble;
 using WaitReason = go.golib.WaitReason;
@@ -56,7 +59,8 @@ partial class sync_package {
 // queue for wg.sema, reduced to what the event cannot say: WHOM the Add that reaches zero wakes. The
 // event releases every waiter at once and cannot name them, so without this the zero-reaching Add
 // could not ready them (golib's Goroutine.Ready, on the waker's side), and a waiter would read parked
-// until its own thread resumed. Guarded by Gate.
+// until its own thread resumed. Each entry pairs the goroutine with the GoParkSlot a twin waiter awaits
+// (Waitꞏtwin), or null for a plain waiter, which the event releases. Guarded by Gate.
 //
 // Bubble and Bubbled are Go 1.26's synctest association (waitgroup.go:86-105): Bubble is the
 // _KindSpecialBubble record runtime/synctest.go keeps on the WaitGroup's heap object, and Bubbled is
@@ -73,7 +77,7 @@ internal sealed class WaitGroupState {
     internal int Counter;
     internal readonly ManualResetEventSlim Idle = new(true);
     internal readonly object Gate = new();
-    internal readonly List<Goroutine?> Parked = new();
+    internal readonly List<(Goroutine? Goroutine, GoParkSlot? Slot)> Parked = new();
     internal SyncTestBubble? Bubble;
     internal bool Bubbled;
 }
@@ -133,9 +137,11 @@ public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
                 }
 
                 // Go's Add at zero: semrelease for every waiter, each readied (goready) before it is
-                // signalled -- here, readied, then the one event that releases them all.
-                foreach (Goroutine? parked in s.Parked) {
+                // signalled -- here, readied, a twin waiter's slot woken (the channel waiter's order), then
+                // the one event that releases every plain waiter.
+                foreach ((Goroutine? parked, GoParkSlot? slot) in s.Parked) {
                     Goroutine.Ready(parked);
+                    slot?.Wake();
                 }
 
                 s.Parked.Clear();
@@ -233,7 +239,7 @@ public static void Wait(this ж<WaitGroup> Ꮡwg) {
         }
 
         bool synctestDurable = s.Bubbled && associated;
-        s.Parked.Add(Goroutine.Current);
+        s.Parked.Add((Goroutine.Current, null));
 
         using (Goroutine.Park(synctestDurable ? WaitReason.SynctestWaitGroupWait : WaitReason.SyncWaitGroupWait)) {
             Monitor.Exit(s.Gate);
@@ -271,6 +277,64 @@ public static void Go(this ж<WaitGroup> Ꮡwg, Action f) {
 
         Ꮡwg.Done();
     });
+}
+
+// The M:N twin of Wait, which a twinned program's twin awaits (M:N scheduler, opt-in: GoTwins=true and GO2CS_MN=1;
+// inert otherwise). FROZEN SURFACE from .5 (the owner's ruling of 2026-11-27, docs/phase4/FREEZE-mn-surface.md;
+// docs/phase4/DESIGN-mn-waitgroup-twin.md): generated code in user assemblies names it, so its signature holds.
+//
+// A Wait with a non-zero count PARKS here instead of blocking its carrier on Idle. The protocol is Wait's, under the same
+// Gate: the zero-count return with Go 1.25's disassociation, then the goroutine registers itself, now with a GoParkSlot,
+// and parks with Wait's reason (the synctest-durable one included, so a bubble counts a twin waiter as it counts a plain
+// one). The Add that reaches zero readies it and wakes the slot; a wake that lands before the await commits is kept by
+// the slot. Off a carrier (the scheduler off, or a thread it did not make) it takes plain Wait. Plain Wait charges no
+// block profile, so no profiling branch is needed (unlike Lockꞏtwin).
+//
+// The front is not async, so the zero-count return allocates nothing; the await runs outside Gate.
+//
+// NOT WEAK: a Wait with a non-zero count always parks, and its caller is exactly the goroutine that must give its carrier
+// back, so a call to Wait makes its caller a twin. sync is hand-owned and no generator runs over it, so the twin is
+// written here by hand, after Go so the go statement keeps the line its position record names.
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public static GoTask Waitꞏtwin(this ж<WaitGroup> Ꮡwg) {
+    if (!GoScheduler.OnCarrier) {
+        Ꮡwg.Wait();
+        return default;
+    }
+
+    WaitGroupState s = wgStateOf(Ꮡwg);
+    GoParkSlot slot;
+    Goroutine.ParkScope scope;
+
+    lock (s.Gate) {
+        SyncTestBubble? caller = wgBubbleOf(Ꮡwg);
+        bool associated = caller is not null && ReferenceEquals(s.Bubble, caller);
+
+        if (s.Counter == 0) {
+            if (s.Parked.Count == 0 && s.Bubbled && associated) {
+                s.Bubbled = false;
+                s.Bubble = null;
+            }
+
+            return default;
+        }
+
+        bool synctestDurable = s.Bubbled && associated;
+        scope = Goroutine.ParkTwin(synctestDurable ? WaitReason.SynctestWaitGroupWait : WaitReason.SyncWaitGroupWait);
+        slot = new GoParkSlot();
+        s.Parked.Add((Goroutine.Current, slot));
+    }
+
+    return waitParkedAsync(slot, scope);
+}
+
+private static async GoTask waitParkedAsync(GoParkSlot slot, Goroutine.ParkScope scope) {
+    try {
+        await slot;
+    }
+    finally {
+        scope.Dispose();
+    }
 }
 
 } partial class sync_package {
