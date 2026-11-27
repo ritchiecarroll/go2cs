@@ -21,22 +21,22 @@ import (
 // TestCgoSyscallTrampolinePageCallTargets (syscallTrampolineCfg_test.go) measured the trampoline page's CFG narrowing
 // from C, and found that a call to SetProcessValidCallTargets through a pointer from GetProcAddress ends a CFG process
 // with a fast fail, while a direct call through the import table succeeds. syscall's C# side reaches the export with
-// [LibraryImport], which calls through a resolved pointer. This row measures what that call does in each .NET caller,
-// with the same declarations syscall uses (src/core/syscall/windows/dll_windows.cs) and the same page sequence:
+// [LibraryImport], which calls through a resolved pointer. This row runs a probe with the same declarations syscall uses
+// (src/core/syscall/windows/dll_windows.cs), the same page sequence and the same choice: the page is narrowed when the
+// process runs with CFG and the JIT, and mapped as without CFG (every location valid) under Native AOT with CFG, where
+// the marking call ends the process (COORD 235045Z). Asserted, in each caller, that the shipped choice returns 7 from
+// page+0 and exits 0:
 //
-//   - jit-apphost: the program's own apphost (probe.exe), the JIT.
-//   - jit-dotnet:  dotnet.exe probe.dll, the JIT.
-//   - aot:         Native AOT, default settings (the control: CFG off, so the program takes the default arm).
-//   - aot-cfg:     Native AOT with <ControlFlowGuard>Guard</ControlFlowGuard>.
-//   - aot-cfg-nomark:  aot-cfg's binary, the PAGE_TARGETS_INVALID mapping without the marking call: whether page+0 is
-//     callable at all when the mark is skipped.
-//   - aot-cfg-default: aot-cfg's binary, the page mapped as without CFG (read-write, then executable, every location
-//     valid).
+//   - jit-apphost: the program's own apphost (probe.exe), the JIT; CFG on, narrowed, the marking call returns.
+//   - jit-dotnet:  dotnet.exe probe.dll, the JIT; the same.
+//   - aot:         Native AOT, default settings; CFG off, not narrowed.
+//   - aot-cfg:     Native AOT with <ControlFlowGuard>Guard</ControlFlowGuard>; CFG on, so GetProcessMitigationPolicy
+//     returned in that process, and not narrowed.
 //
-// Each reading names its runtime and whether the process runs with CFG, then, where CFG is on, whether the marking
-// call returns, and whether page+0 and page+16 are callable. Recorded, not asserted: the design takes its CFG arm from
-// these readings (COORD 233938Z). The row reads NOT MEASURED where no dotnet SDK is on PATH, or a Native AOT publish
-// cannot run (no MSVC linker or no package source).
+// Recorded, not asserted, on aot-cfg's binary: "mark" narrows anyway (reading 1, 46084158304: the marking call ends
+// the process with a fast fail), and "nomark" maps PAGE_TARGETS_INVALID without the call (reading 2, 46084609091:
+// page+0 ends the process, so skipping the call alone is not a choice). The row reads NOT MEASURED where no dotnet SDK
+// is on PATH; an arm whose Native AOT publish cannot run (no MSVC linker or no package source) reads NOT MEASURED.
 const cfgDotnetProgram = `using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -63,27 +63,28 @@ internal static unsafe partial class Probe
         bool cfg = (policy & 1) != 0;
         Console.WriteLine("cfg: " + (cfg ? 1 : 0));
 
-        // "default" maps the page as a process without CFG would, whatever the process runs with
-        if (mode == "default") { cfg = false; Console.WriteLine("mode: default"); }
+        // syscall's choice: narrow under CFG with the JIT; "mark" and "nomark" narrow under CFG whatever the runtime
+        bool narrow = mode == "mark" || mode == "nomark" ? cfg : cfg && RuntimeFeature.IsDynamicCodeSupported;
+        Console.WriteLine("narrow: " + (narrow ? 1 : 0));
 
-        nint page = cfg
+        nint page = narrow
             ? win32VirtualAlloc(0, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READ | PAGE_TARGETS)
             : win32VirtualAlloc(0, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
         if (page == 0) { Console.WriteLine("step-failed: VirtualAlloc " + Marshal.GetLastPInvokeError()); return 3; }
 
         uint old;
-        if (cfg && !win32VirtualProtect(page, 4096, PAGE_READWRITE, out old)) { Console.WriteLine("step-failed: VirtualProtect-rw " + Marshal.GetLastPInvokeError()); return 3; }
+        if (narrow && !win32VirtualProtect(page, 4096, PAGE_READWRITE, out old)) { Console.WriteLine("step-failed: VirtualProtect-rw " + Marshal.GetLastPInvokeError()); return 3; }
 
         // mov eax, 7; ret at offset 0, and mov eax, 16; ret at offset 16
         byte* p = (byte*)page;
         p[0] = 0xB8; p[1] = 7; p[2] = 0; p[3] = 0; p[4] = 0; p[5] = 0xC3;
         p[16] = 0xB8; p[17] = 16; p[18] = 0; p[19] = 0; p[20] = 0; p[21] = 0xC3;
 
-        if (!win32VirtualProtect(page, 4096, PAGE_EXECUTE_READ | (cfg ? PAGE_TARGETS : 0), out old)) { Console.WriteLine("step-failed: VirtualProtect-rx " + Marshal.GetLastPInvokeError()); return 3; }
+        if (!win32VirtualProtect(page, 4096, PAGE_EXECUTE_READ | (narrow ? PAGE_TARGETS : 0), out old)) { Console.WriteLine("step-failed: VirtualProtect-rx " + Marshal.GetLastPInvokeError()); return 3; }
 
-        if (cfg && mode == "nomark")
+        if (narrow && mode == "nomark")
             Console.WriteLine("mode: nomark");
-        else if (cfg)
+        else if (narrow)
         {
             nuint* target = stackalloc nuint[2];
             target[0] = 0; // offset 0
@@ -169,7 +170,7 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 		return true
 	}
 
-	run := func(arm string, name string, args ...string) {
+	run := func(arm string, name string, args ...string) (string, uint32) {
 		cmd := exec.Command(name, args...)
 		cmd.Dir = dir
 		cmd.Env = env
@@ -181,10 +182,26 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 		switch {
 		case err == nil:
 			t.Logf("READING %s: %q (exit 0)", arm, text)
+			return text, 0
 		case errors.As(err, &exit):
 			t.Logf("READING %s: %q (exit %#x)", arm, text, uint32(exit.ExitCode()))
+			return text, uint32(exit.ExitCode())
 		default:
-			t.Errorf("%s: the probe did not run: %v", arm, err)
+			t.Fatalf("%s: the probe did not run: %v", arm, err)
+			return "", 0
+		}
+	}
+
+	// expect asserts the shipped choice in one caller: its runtime, CFG and narrowing, page+0 returning 7, exit 0.
+	expect := func(arm string, text string, code uint32, lines ...string) {
+		for _, line := range append(lines, "page+0: 7") {
+			if !strings.Contains(text, line+"\n") {
+				t.Errorf("%s: expected the line %q; read exit %#x, %q", arm, line, code, text)
+			}
+		}
+
+		if code != 0 {
+			t.Errorf("%s: expected exit 0; read exit %#x, %q", arm, code, text)
 		}
 	}
 
@@ -192,19 +209,23 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 		t.Fatal("the JIT build of the probe failed; see the reading above")
 	}
 
-	run("jit-apphost", filepath.Join(dir, "jit", "probe.exe"), "16")
-	run("jit-dotnet", dotnet, filepath.Join(dir, "jit", "probe.dll"), "16")
+	text, code := run("jit-apphost", filepath.Join(dir, "jit", "probe.exe"), "16")
+	expect("jit-apphost", text, code, "runtime: jit", "cfg: 1", "narrow: 1", "targets: 1, flags 3")
+	text, code = run("jit-dotnet", dotnet, filepath.Join(dir, "jit", "probe.dll"), "16")
+	expect("jit-dotnet", text, code, "runtime: jit", "cfg: 1", "narrow: 1", "targets: 1, flags 3")
 
 	if sdk("aot publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
 		"-o", filepath.Join(dir, "aot")) {
-		run("aot", filepath.Join(dir, "aot", "probe.exe"), "16")
+		text, code = run("aot", filepath.Join(dir, "aot", "probe.exe"), "16")
+		expect("aot", text, code, "runtime: aot", "cfg: 0", "narrow: 0")
 	}
 
 	if sdk("aot-cfg publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
 		"-p:ControlFlowGuard=Guard", "-p:IntermediateOutputPath="+filepath.Join(dir, "objcfg")+string(filepath.Separator),
 		"-o", filepath.Join(dir, "aotcfg")) {
-		run("aot-cfg", filepath.Join(dir, "aotcfg", "probe.exe"), "16")
+		text, code = run("aot-cfg", filepath.Join(dir, "aotcfg", "probe.exe"), "16")
+		expect("aot-cfg", text, code, "runtime: aot", "cfg: 1", "narrow: 0")
+		run("aot-cfg-mark", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "mark")
 		run("aot-cfg-nomark", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "nomark")
-		run("aot-cfg-default", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "default")
 	}
 }
