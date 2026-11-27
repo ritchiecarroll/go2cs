@@ -200,6 +200,9 @@
        - LinuxAmd64NetpollFlavourTests names SYS_EPOLL_WAIT, which only amd64's table has; it is also linux-only. -->
   <ItemGroup Condition="'$(GoTargetArch)' == 'arm64'">
     <Compile Remove="InternalCpuGodebugTests.cs" />
+    <!-- internal/runtime/gc/scan's AVX-512 kernels (scan/amd64/scan_amd64_impl.cs, R's finding 5) exist only in the
+         amd64 flavours; an arm64 build has no ExpandAVX512, FilterNilAVX512, ScanSpanPackedAVX512 or CanAVX512. -->
+    <Compile Remove="ScanAvx512KernelTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' == 'arm64'">
     <Compile Remove="LinuxAmd64NetpollFlavourTests.cs" />
