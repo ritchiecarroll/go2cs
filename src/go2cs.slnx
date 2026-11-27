@@ -614,6 +614,8 @@
     <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/fam/left/ForeignEmbedPromotedPointer.fam.left.csproj" />
     <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/fam/right/ForeignEmbedPromotedPointer.fam.right.csproj" />
     <Project Path="tests/Behavioral/ForeignEmbedPromotedPointer/lib/ForeignEmbedPromotedPointer.lib.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedSealedMarker/ForeignEmbedSealedMarker.csproj" />
+    <Project Path="tests/Behavioral/ForeignEmbedSealedMarker/pb/ForeignEmbedSealedMarker.pb.csproj" />
     <Project Path="tests/Behavioral/ForeignInterfaceFieldPromotion/ForeignInterfaceFieldPromotion.csproj" />
     <Project Path="tests/Behavioral/ForeignInterfaceFieldPromotion/lib/ForeignInterfaceFieldPromotion.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/ForeignIfaceFieldPointer.csproj" />

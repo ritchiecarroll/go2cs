@@ -794,6 +794,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForeignEmbedPromotedPointer() => CheckTarget("ForeignEmbedPromotedPointer");
 
     [TestMethod]
+    public void CheckForeignEmbedSealedMarker() => CheckTarget("ForeignEmbedSealedMarker");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
