@@ -474,7 +474,14 @@ func cgoSideTrimFixture(t *testing.T, root string) {
 // and a vendored module's vendor directory to "vendor"), never from a module re-derived from the package directory's
 // name and go.mod (review of 823978ff1a, #1). Each expected mapping is written from exec.go's rule, not computed.
 func TestCgoSideTrimTakesTheModuleGoListReports(t *testing.T) {
-	root := t.TempDir()
+	// The expected directories are go list's, which resolves symlinks: on darwin the temporary directory is under
+	// /var, a symlink to /private/var, and go list reports /private/var (converter-cgo darwin, 46071733990).
+	root, err := filepath.EvalSymlinks(t.TempDir())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	cgoSideTrimFixture(t, root)
 
 	slash := func(goos, path string) string {
