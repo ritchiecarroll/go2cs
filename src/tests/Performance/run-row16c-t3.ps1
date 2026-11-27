@@ -86,7 +86,16 @@ foreach ($name in @('GO2CS_MN', 'GoTwinsFor', 'GOMAXPROCS', $twinName))
 if ($OutDir -eq '') { $OutDir = Join-Path ([IO.Path]::GetTempPath()) ("row16c-" + (Get-Date -Format 'yyyyMMdd-HHmmss')) }
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 $OutDir = (Resolve-Path $OutDir).Path
+# The PowerShell that runs each arm: this process's own executable, unless that is the dotnet host. PowerShell installed
+# as a .NET global tool runs inside dotnet, so (Get-Process -Id $PID).Path names dotnet.exe, and every arm then ran
+# `dotnet -NoProfile -File ...` and exited 1 in 0 s (G's first run of this kit). Then the pwsh application on PATH is used.
 $pwshExe = (Get-Process -Id $PID).Path
+if ([IO.Path]::GetFileNameWithoutExtension($pwshExe) -ieq 'dotnet')
+{
+    $pwshCommand = @(Get-Command pwsh -CommandType Application -ErrorAction SilentlyContinue)
+    if ($pwshCommand.Count -eq 0) { Fail "this PowerShell runs inside dotnet (a .NET global tool) and no pwsh application is on PATH to start the arms with" }
+    $pwshExe = $pwshCommand[0].Source
+}
 
 function Get-FreeGB([string] $path)
 {
