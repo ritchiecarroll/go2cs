@@ -423,6 +423,20 @@ func TestArrayDimsFactsMeasureATargetScope(t *testing.T) {
 		}
 	})
 
+	var noSink *ast.FuncDecl
+
+	for _, file := range production.Syntax {
+		for _, decl := range file.Decls {
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok && funcDecl.Name.Name == "noSink" {
+				noSink = funcDecl
+			}
+		}
+	}
+
+	if noSink == nil {
+		t.Fatal("fixture has no noSink declaration")
+	}
+
 	for _, target := range []string{"windows/amd64", "darwin/amd64", "darwin/arm64"} {
 		visitor.options.targetPlatform = target
 		inputs := visitor.arrayDimsInputs()
@@ -440,5 +454,14 @@ func TestArrayDimsFactsMeasureATargetScope(t *testing.T) {
 
 			computeArrayDimsFacts(production, inputs)
 		}()
+
+		// The answer, not only the absence of a panic: the facts' displaced test asks the registry with
+		// inputs.target, and noSink is displaced at darwin/arm64 and at no other target. The facts' own outputs
+		// cannot show it for this fixture, since an unexported displaced generic keeps its companion analysis,
+		// so the registry call is read directly; TestTargetScopedRegistrationConvertsEndToEnd reads the
+		// displacement in a whole conversion's emission.
+		if got, want := isManualFuncDeclInPackage(production.Types.Path(), inputs.target, noSink), target == "darwin/arm64"; got != want {
+			t.Errorf("%s: noSink displaced = %v, want %v", target, got, want)
+		}
 	}
 }

@@ -21,8 +21,8 @@
 // which Go's own routing already rules out (it calls these only when HasCRC32), and it keeps the body total
 // rather than a throw.
 //
-// This file's principal is crc32_arm64.cs, which only linux/arm64 emits in this universe, so the hand-own router
-// keeps it in linux-arm64/.
+// This file's principal is crc32_arm64.cs, which linux/arm64 and darwin/arm64 both emit, so the hand-own router
+// keeps it in arm64/.
 //
 // Hand-owned (no crc32_arm64_impl.go exists, so a reconvert never regenerates this file).
 [module: go.GoManualConversion]
