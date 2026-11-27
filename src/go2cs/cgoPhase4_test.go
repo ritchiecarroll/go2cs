@@ -200,15 +200,18 @@ func TestCgoPhase4GARelativeIncludeDirectoryIsThePackages(t *testing.T) {
 	})
 }
 
-// cgoPhase4PathNeedles are the path spellings a side library must not carry: the side build's work-directory stem, and
-// the temporary root and the package directory, each with either separator.
+// cgoPhase4PathNeedles are the path spellings a side library must not carry: the side build's work-directory stem and,
+// trimmed, the temporary root and the package directory, each with either separator. Untrimmed, go itself bakes the
+// package's absolute path wherever a header spells __FILE__, and the test's package lies under the temporary root, so
+// only the work-directory stem is held (3748d05f94, 46054074306: the root's needle matched the package path go bakes).
 func cgoPhase4PathNeedles(module string, trimmed bool) []string {
 	needles := []string{"go2cs-cgo-side"}
-	paths := []string{os.TempDir()}
 
-	if trimmed {
-		paths = append(paths, module)
+	if !trimmed {
+		return needles
 	}
+
+	paths := []string{os.TempDir(), module}
 
 	for _, path := range paths {
 		path = strings.TrimRight(path, `/\`)
