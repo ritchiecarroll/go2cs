@@ -43216,4 +43216,18 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — P4 (2026-11-27)
 
+## 2026-11-27 — P6 (F4, routed by COORD 2026-11-27): a generic struct embedding an interface named itself without its type parameters (CURED, claude/p6-generic-iface-embed)
+
+**CURED, read.** ants v2.12.1's `goWorkerWithFuncGeneric[T]` embeds the `worker` interface and satisfies it only through its pointer,
+partly through promotion from the field. The converter's pointer-only satisfaction arm (visitStructType.go) recorded the pair as
+`GoImplement<goWorkerWithFuncGeneric, worker>(Pointer = true)` and wrote each promoted forwarder over the bare
+`goWorkerWithFuncGeneric`, which names no type: CS0305 x5 in the ants build, and CS0246 x2 on `T` in go2cs-gen's pointer-receiver
+overloads of those forwarders. The record now names the open definition (`GoImplement(typeof(gw<>), typeof(worker), Pointer = true)`,
+the interface-conversion path's form), and the forwarders are generic over the struct's type parameters, in both the holder
+and the package-class form. ants then builds plain. Guarded by the `GenericIfaceEmbedForwarder` behavioral test (with a `workerlib`
+library arm for the holder form). Not covered: an embedded interface over the struct's own type parameters, as on the
+conversion path.
+
+— P6 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

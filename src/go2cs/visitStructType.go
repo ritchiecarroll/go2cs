@@ -950,6 +950,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					// the two-seeded diff this cut banks with.
 					pointerRecordName := PointerPrefix + "<" + structTypeName + ">"
 
+					// A GENERIC struct (ants' `goWorkerWithFuncGeneric[T]{ worker; … }`) is recorded by its open
+					// definition, `GoImplement(typeof(gw<>), typeof(worker), Pointer = true)`, the form the
+					// interface-conversion path records an open generic target in (openGenericImplementRecordName).
+					// The bare name `GoImplement<gw, worker>` named no type at all (CS0305).
+					if recordName, ok := openGenericImplementRecordName(declaredStructType, structTypeName+"<>"); ok {
+						pointerRecordName = PointerPrefix + "<" + recordName + ">"
+					}
+
 					packageLock.Lock()
 
 					if implementations, exists := interfaceImplementations[csFullTypeName]; exists {
@@ -1353,6 +1361,14 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 		holder = v.suffixHolderOf(receiver)
 	}
 
+	// A GENERIC struct's forwarders are generic methods over the struct's own type parameters, taking the
+	// instantiated struct (`inputArg⁔<T>(goWorkerWithFuncGeneric<T> recvᴛ, …)`), as its declared methods are.
+	var typeParams, constraints string
+
+	if receiver != nil && receiver.TypeParams().Len() > 0 {
+		typeParams, constraints = v.getGenericDefinition(receiver)
+	}
+
 	for _, fwd := range v.promotedInterfaceForwarders[mark:] {
 		signature := fwd.method.Type().(*types.Signature)
 
@@ -1437,17 +1453,17 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 		// The method survives in Go's VALUE method set (nothing shadows it), so the forwarder is a value method — the
 		// generator's own Promoted-path extension form. Otherwise `this ref` is the pointer-receiver shape: golib reads
 		// an unmarked by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1).
-		receiverParameter := fwd.structName + " recvᴛ"
+		receiverParameter := fwd.structName + typeParams + " recvᴛ"
 
 		if !fwd.valueReceiver {
 			receiverParameter = "ref " + receiverParameter
 		}
 
 		if holder != "" {
-			v.writeStringLn(target, "internal static %s %s(/*this*/ %s%s) => recvᴛ.%s.%s(%s);", resultType, suffixBodyName(methodName), receiverParameter, params.String(), fwd.embedName, methodName, args.String())
-			v.recordForwarder(receiver.Obj().Pos(), holder, access, false, resultType, methodName, fwd.method.Name(), "", "this "+receiverParameter+params.String(), "", fwd.method.Type().(*types.Signature))
+			v.writeStringLn(target, "internal static %s %s%s(/*this*/ %s%s)%s => recvᴛ.%s.%s(%s);", resultType, suffixBodyName(methodName), typeParams, receiverParameter, params.String(), constraints, fwd.embedName, methodName, args.String())
+			v.recordForwarder(receiver.Obj().Pos(), holder, access, false, resultType, methodName, fwd.method.Name(), typeParams, "this "+receiverParameter+params.String(), constraints, fwd.method.Type().(*types.Signature))
 		} else {
-			v.writeStringLn(target, "%s%s static %s %s(this %s%s) => recvᴛ.%s.%s(%s);", goNameAttr(fwd.method.Name(), methodName), access, resultType, methodName, receiverParameter, params.String(), fwd.embedName, methodName, args.String())
+			v.writeStringLn(target, "%s%s static %s %s%s(this %s%s)%s => recvᴛ.%s.%s(%s);", goNameAttr(fwd.method.Name(), methodName), access, resultType, methodName, typeParams, receiverParameter, params.String(), constraints, fwd.embedName, methodName, args.String())
 		}
 	}
 
