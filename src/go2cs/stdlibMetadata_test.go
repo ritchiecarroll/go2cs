@@ -474,7 +474,9 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 		}
 	}
 
-	for _, goos := range []string{"linux/amd64", "linux/arm64", "darwin/amd64", "darwin"} {
+	// darwin's syscall is laid out per target since the darwin/arm64 flip (darwin-amd64/, darwin-arm64/), so a bare
+	// "darwin" names no flavour of it; each darwin target is asked by name.
+	for _, goos := range []string{"linux/amd64", "linux/arm64", "darwin/amd64", "darwin/arm64"} {
 		values, pointers := implementsOf(goos)
 
 		if containsPair(pointers, "DLLError", "error") {
@@ -502,7 +504,8 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 		t.Error("fmt has a flat package_info.cs, yet its linux record differs from its windows one")
 	}
 
-	// A package split by ARCH alone. math's copies sit in `amd64/` and `linux-arm64/`: the amd64 one is
+	// A package split by ARCH alone. math's copies sit in `amd64/` and `arm64/` (linux-arm64/ until the darwin/arm64
+	// flip gave arm64 a second target): the amd64 one is
 	// what the reference flavor compiles, so it is the unqualified section, and every amd64 target
 	// reads it whatever its GOOS. This is the arm that had NO record while the unqualified section was
 	// taken from a `windows/` folder only. Its two copies export the same lines (they differ in position
@@ -513,15 +516,15 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 		t.Error("math has no unqualified section: its `amd64/` copy was not read as the reference flavor's")
 	}
 
-	if _, ok := sections["math"+stdlibmeta.FlavorSeparator+"linux-arm64"]; !ok {
-		t.Error("math has no `@linux-arm64` section, though it carries a linux-arm64/ copy")
+	if _, ok := sections["math"+stdlibmeta.FlavorSeparator+"arm64"]; !ok {
+		t.Error("math has no `@arm64` section, though it carries an arm64/ copy")
 	}
 
 	if _, ok := sections["math"+stdlibmeta.FlavorSeparator+stdlibmeta.ReferenceGOARCH]; ok {
 		t.Error("math's `amd64/` copy was recorded as a flavor section; it is the reference flavor's")
 	}
 
-	for _, target := range []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"} {
+	for _, target := range platformUniverse {
 		if _, ok := stdLibExportedMetadata("math", target); !ok {
 			t.Errorf("math has no record at %s", target)
 		}

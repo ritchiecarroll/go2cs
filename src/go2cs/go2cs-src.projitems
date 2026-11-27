@@ -107,6 +107,7 @@
     <None Include="$(MSBuildThisFileDirectory)solutionProjectPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallKeepAliveAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)tailCalledFuncValue_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)targetScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)tempNamedAfterIdentifier_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
@@ -147,6 +148,8 @@
     <None Include="$(MSBuildThisFileDirectory)chanDirComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chanDirectionCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)childEnvGo2CSPath_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)classicPartialFlavours_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cpuStartupFlavours_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cliPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)closedCarrier.go" />
     <None Include="$(MSBuildThisFileDirectory)closedCarrier_test.go" />

@@ -1,12 +1,29 @@
-// cpu_arm64_darwin_impl.cs - Gbtc
+// cpu_arm64_process_darwin_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // SPDX-License-Identifier: BSD-3-Clause
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+//
+// osInitArm64 below is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2020 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE, part by part:
+// - osInitArm64: DERIVED FROM src/internal/cpu/cpu_arm64_darwin.go, Go 1.26.11, func osInit. A port: Go's statements
+//   in Go's order, Go's comments verbatim, with the one ruled departure below (HasDIT).
 
 // darwin's osInit for an arm64 process: cpu_arm64_darwin.go, which the darwin/amd64 conversion does not
 // build. cpu_arm64_impl.cs calls it, and only on an arm64 process; it explains why the corpus needs it.
+//
+// THE NAME HAS NO PRINCIPAL, ON PURPOSE (docs/phase4/DESIGN-darwin-arm64-flavour.md section 5, ruling R6):
+// this file was darwin/cpu_arm64_darwin_impl.cs, whose principal is the converted cpu_arm64_darwin.cs. Once
+// darwin/arm64 emits that principal, the merge would home the file beside it in darwin-arm64/, away from the
+// darwin/amd64 build whose amd64/cpu_arm64_process_impl.cs declares osInitArm64, and C# would erase that call
+// with no diagnostic. No Go file has this name, so no target's emission can move it. darwin/arm64's own
+// osInit is darwin-arm64/cpu_arm64_darwin_impl.cs, with the same ruled departure.
 //
 // The sysctl reads go through the converted sysctlEnabled (cpu_darwin.cs) and cpu_darwin_impl.cs's
 // sysctlbynameInt32, the same libSystem call Go's runtime push makes. AES, PMULL, SHA1 and SHA2 are set

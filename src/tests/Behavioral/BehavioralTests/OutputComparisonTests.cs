@@ -1058,6 +1058,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoUntypedConstArg() => CheckTarget("GoUntypedConstArg");
 
     [TestMethod]
+    public void CheckGoarchDefaultContext() => CheckTarget("GoarchDefaultContext");
+
+    [TestMethod]
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]

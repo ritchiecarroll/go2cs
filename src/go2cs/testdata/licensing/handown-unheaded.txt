@@ -20,13 +20,12 @@ own crypto/internal/fips140/nistec/fiat/p256_impl.cs
 own crypto/rand/rand_impl.cs
 own crypto/x509/internal/macos/darwin/corefoundation_impl.cs
 own embed/embed_impl.cs
-own hash/crc32/linux-arm64/crc32_arm64_impl.cs
+own hash/crc32/arm64/crc32_arm64_impl.cs
 own internal/abi/funcpc_impl.cs
-own internal/buildcfg/darwin/zbootstrap_darwin_impl.cs
+own internal/buildcfg/darwin-amd64/zbootstrap_darwin_impl.cs
 own internal/buildcfg/windows/zbootstrap_windows_impl.cs
 own internal/bytealg/bytealg_impl.cs
 own internal/coverage/cfile/emit_impl.cs
-pending internal/cpu/darwin/cpu_arm64_darwin_impl.cs -- derived; headed on the darwin/arm64 branch (D2), where it moves to darwin-arm64/
 own internal/cpu/darwin/cpu_darwin_impl.cs
 own internal/poll/darwin/runtime_netpoll_impl.cs
 own internal/poll/deadline_prepay_impl.cs
@@ -48,7 +47,7 @@ own internal/syscall/windows/windows/net_windows_impl.cs
 own iter/iter_impl.cs
 own math/amd64/hypot_asm_impl.cs
 own math/amd64/log_asm_impl.cs
-own math/linux-arm64/exp2_asm_impl.cs
+own math/arm64/exp2_asm_impl.cs
 own math/math_impl.cs
 own math/rand/rand_impl.cs
 own math/rand/v2/rand_impl.cs
@@ -61,7 +60,7 @@ own os/windows/exec_windows_impl.cs
 own runtime/amd64/cputicks_impl.cs
 own runtime/amd64/test_amd64_impl.cs
 own runtime/cpusampler_impl.cs
-own runtime/darwin/goarch_darwin_impl.cs
+own runtime/darwin-amd64/goarch_darwin_impl.cs
 own runtime/darwin/lock_sema_impl.cs
 own runtime/darwin/netpoll_kqueue_impl.cs
 own runtime/debug/stubs_impl.cs

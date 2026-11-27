@@ -8,11 +8,15 @@
 // internal/buildcfg's defaultGOARCH for the darwin flavour: Go's own `const defaultGOARCH = runtime.GOARCH`
 // (zbootstrap.go), kept as a READ of runtime.GOARCH rather than the "amd64" the conversion folded it to.
 //
-// The darwin runtime reads its GOARCH from the process architecture (runtime/darwin/goarch_darwin_impl.cs).
+// The darwin runtime reads its GOARCH from the process architecture (runtime/darwin-amd64/goarch_darwin_impl.cs).
 // Folded, this default would stay "amd64" on Apple silicon, so go/build's default context (Default.GOARCH,
 // from buildcfg.GOARCH) would disagree with runtime.GOARCH. Its `runtime.GOARCH == c.GOARCH` test would
 // then turn CgoEnabled off, where Go's own arm64 binary, whose two values agree, leaves it on. The converter
 // displaces the const for darwin (manualConversionConsts), and this member restores Go's relation.
+//
+// Scoped, like that member, to the darwin/amd64 TARGET (docs/phase4/DESIGN-darwin-arm64-flavour.md section 4.2):
+// darwin/arm64 is converted for arm64 and compiles Go's converted constant. The name has no principal (no Go
+// file is zbootstrap_darwin.go), so no target's emission can move this file out of darwin-amd64/.
 
 [module: go.GoManualConversion]
 

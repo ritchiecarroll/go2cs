@@ -62,6 +62,27 @@ var ridFlavorMaps = []struct {
 // ridFlavorEntry is one `'rid' = 'flavour'` line of a RID map.
 var ridFlavorEntry = regexp.MustCompile(`'([^']+)'\s*=\s*'([^']+)'`)
 
+// ridFlavoursShippedLater names the universe targets the RID maps do not ship YET, each with the seat that ships it. A
+// target joins the layout before the pack can carry it: darwin/arm64 joined the universe at D2 of
+// DESIGN-darwin-arm64-flavour.md, and osx-arm64 keeps shipping the darwin/amd64 flavour until D6 builds and verifies the
+// darwin/arm64 one (section 3). An entry whose target a map already ships fails, so the list cannot outlive its seat.
+var ridFlavoursShippedLater = map[string]string{
+	"darwin/arm64": "D6 of DESIGN-darwin-arm64-flavour.md moves osx-arm64 onto it (a section 11 stop line: D6 asks P2 before it packs)",
+}
+
+// ridFlavoursOwed is lineKeyedUniverse without the targets ridFlavoursShippedLater names, in universe order.
+func ridFlavoursOwed() []string {
+	var owed []string
+
+	for _, target := range lineKeyedUniverse {
+		if _, later := ridFlavoursShippedLater[target]; !later {
+			owed = append(owed, target)
+		}
+	}
+
+	return owed
+}
+
 func TestRidFlavorMapsShipTheUniverse(t *testing.T) {
 	for _, list := range ridFlavorMaps {
 		found := list.pattern.FindAllStringSubmatch(readRepoFile(t, list.file), -1)
@@ -79,8 +100,15 @@ func TestRidFlavorMapsShipTheUniverse(t *testing.T) {
 			}
 		}
 
-		if !slices.Equal(flavours, lineKeyedUniverse) {
-			t.Errorf("%s ships the flavours %v and the corpus is laid out for %v; they change together", list.file, flavours, lineKeyedUniverse)
+		if owed := ridFlavoursOwed(); !slices.Equal(flavours, owed) {
+			t.Errorf("%s ships the flavours %v and the corpus is laid out for %v (of which %v ship later); they change together",
+				list.file, flavours, owed, sortedKeysOf(ridFlavoursShippedLater))
+		}
+
+		for target, seat := range ridFlavoursShippedLater {
+			if slices.Contains(flavours, target) {
+				t.Errorf("%s now ships %s, which ridFlavoursShippedLater still names (%s): remove the entry", list.file, target, seat)
+			}
 		}
 	}
 }
@@ -118,4 +146,17 @@ func TestLayoutKeyListsAreTheUniverses(t *testing.T) {
 			t.Errorf("%s lists the universe %v and the corpus is laid out for %v; they change together", list.file, got, lineKeyedUniverse)
 		}
 	}
+}
+
+// sortedKeysOf returns a string-keyed map's keys, sorted.
+func sortedKeysOf[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+
+	for key := range m {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	return keys
 }

@@ -211,7 +211,7 @@ const minHoistSlugLength = 3
 // left every "TESTING KEY" in place (TestDecode/TestEncode). So with the relocation unavailable,
 // no literal inside a function a package-level initializer can REACH is hoisted at all — those
 // sites keep their inline Tier-B rendering, and the same literal still hoists from any other use.
-func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.Info, goos string, seed map[string]hoistSeed, initOrderRelocated bool) {
+func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.Info, target string, seed map[string]hoistSeed, initOrderRelocated bool) {
 	packageHoistedLits = make(map[*ast.BasicLit]*hoistedLiteral)
 	packageHoistedDecls = make(map[*ast.FuncDecl][]*hoistedLiteral)
 	packageHoistLitReaders = make(map[*types.Func]bool)
@@ -231,7 +231,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 	c := &hoistCollector{
 		info:    info,
 		pkgPath: pkgPath,
-		goos:    goos,
+		target:  target,
 		seed:    seed,
 		byToken: make(map[string]*hoistedLiteral),
 		uses:    make(map[*ast.BasicLit]*hoistedLiteral),
@@ -272,7 +272,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 			// A declaration owned by a manual conversion emits only a placeholder comment (see
 			// visitFuncDecl's isManualFuncDecl early return) — it renders no FunctionPrefixMarker,
 			// so it can neither declare a field nor reference one from a body that is discarded.
-			if isManualFuncDeclInPackage(c.pkgPath, c.goos, funcDecl) {
+			if isManualFuncDeclInPackage(c.pkgPath, c.target, funcDecl) {
 				continue
 			}
 
@@ -377,7 +377,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 type hoistCollector struct {
 	info    *types.Info
 	pkgPath string
-	goos    string
+	target  string
 	seed    map[string]hoistSeed
 	byToken map[string]*hoistedLiteral
 	ordered []*hoistedLiteral

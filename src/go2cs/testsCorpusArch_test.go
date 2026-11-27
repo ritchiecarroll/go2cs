@@ -22,10 +22,12 @@ import (
 )
 
 // A -tests run of a standard-library package re-emits that package into the COMMITTED corpus, which is built
-// for amd64 on every GOOS (and, on linux alone, for arm64 too). On an arm64 host the -platforms default (the
-// converter binary's own runtime.GOOS/runtime.GOARCH) re-emitted it for darwin/arm64 instead: hash/crc32 then
-// selected crc32_arm64.go beside the committed crc32_amd64.cs and its test host failed to build, CS0111 x6
-// (darwin row pilot, run 37112360853, 2026-10-03). These pin the decision that replaces that default.
+// for amd64 on every GOOS and, on linux and (since D2 of DESIGN-darwin-arm64-flavour.md) darwin, for arm64 too.
+// Before darwin/arm64 had a flavour, an arm64 host's -platforms default (the converter binary's own
+// runtime.GOOS/runtime.GOARCH) re-emitted a package for darwin/arm64 anyway: hash/crc32 then selected
+// crc32_arm64.go beside the committed crc32_amd64.cs and its test host failed to build, CS0111 x6 (darwin row
+// pilot, run 37112360853, 2026-10-03). These pin the decision that replaces that default: the host's corpus
+// flavour, which is the host's own target wherever the universe carries it.
 func TestTestsTargetPlatformPinsTheCorpusArchForGOROOTPackages(t *testing.T) {
 	goRoot := filepath.Join(t.TempDir(), "go")
 	stdlibPackage := filepath.Join(goRoot, "src", "hash", "crc32")
@@ -40,7 +42,7 @@ func TestTestsTargetPlatformPinsTheCorpusArchForGOROOTPackages(t *testing.T) {
 		want         string
 		wantPinned   bool
 	}{
-		{"stdlib on darwin/arm64 pins amd64", "darwin/arm64", false, true, stdlibPackage, "darwin/amd64", true},
+		{"stdlib on darwin/arm64 is its own flavour", "darwin/arm64", false, true, stdlibPackage, "darwin/arm64", false},
 		{"stdlib on linux/arm64 is its own flavour", "linux/arm64", false, true, stdlibPackage, "linux/arm64", false},
 		{"stdlib on darwin/amd64 is unchanged", "darwin/amd64", false, true, stdlibPackage, "darwin/amd64", false},
 		{"stdlib on windows/amd64 is unchanged", "windows/amd64", false, true, stdlibPackage, "windows/amd64", false},
@@ -77,6 +79,8 @@ func TestTestsTargetPlatformFollowsTheUniverse(t *testing.T) {
 	}{
 		{universeArm, "linux/arm64", "linux/arm64", false},
 		{universeArm, "darwin/arm64", "darwin/amd64", true},
+		{universeFive, "darwin/arm64", "darwin/arm64", false},
+		{universeFive, "darwin/amd64", "darwin/amd64", false},
 		{universeArm, "linux/amd64", "linux/amd64", false},
 		{universeArm, "freebsd/arm64", "freebsd/arm64", false},
 		{universeToday, "freebsd/arm64", "freebsd/arm64", false},
@@ -220,6 +224,22 @@ func TestPathsCorpusFlavorArchMatchesTheConverter(t *testing.T) {
 		key := fmt.Sprintf("default|%s|%s", pair[0], pair[1])
 		statements = append(statements, fmt.Sprintf("'%s=' + (Show-FlavorArch (Get-CorpusFlavorArch -Goos %s -Goarch %s))", key, quote(pair[0]), quote(pair[1])))
 		want[key] = expect(corpusLattice(), pair[0], pair[1])
+	}
+
+	// Get-HostFlavorArch is the arch a host's instruments build: the same answer, except for a host _paths.ps1 pins
+	// ($HostFlavorArchInterimPins). darwin/arm64 builds darwin/amd64 until D5 binds the hosted job's GoTargetArch and
+	// removes the pin (COORD ruling 2026-11-25); that cut changes this table too.
+	hostPins := map[string]string{"darwin/arm64": "amd64"}
+
+	for _, pair := range pairs {
+		key := fmt.Sprintf("host|%s|%s", pair[0], pair[1])
+		statements = append(statements, fmt.Sprintf("'%s=' + (Show-FlavorArch (Get-HostFlavorArch -Goos %s -Goarch %s))", key, quote(pair[0]), quote(pair[1])))
+
+		if pinned, found := hostPins[pair[0]+"/"+pair[1]]; found {
+			want[key] = pinned
+		} else {
+			want[key] = expect(corpusLattice(), pair[0], pair[1])
+		}
 	}
 
 	script := strings.Join(statements, "; ")

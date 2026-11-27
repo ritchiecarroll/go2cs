@@ -970,9 +970,9 @@ func TestValueCloneScannerAdmitsTheFourCorpusShapes(t *testing.T) {
 		{
 			name: "arch axis: a flat stamp's type sits whole in the key folders, one per build",
 			files: map[string]string{
-				"package_info.cs":        "namespace go;\npartial class p { [GoValueClone(\"buf\")] public partial struct State {} }\n",
-				"amd64/chacha8.cs":       "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
-				"linux-arm64/chacha8.cs": "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
+				"package_info.cs":  "namespace go;\npartial class p { [GoValueClone(\"buf\")] public partial struct State {} }\n",
+				"amd64/chacha8.cs": "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
+				"arm64/chacha8.cs": "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
 			},
 		},
 		{
@@ -1027,12 +1027,12 @@ func TestValueCloneStampResolvesPerBuild(t *testing.T) {
 		want  stampFinding
 	}{
 		{
-			name: "a flat stamp declared for the amd64 builds only is missing in the arm64 build",
+			name: "a flat stamp declared for the amd64 builds only is missing in the arm64 builds",
 			files: map[string]string{
 				"package_info.cs":  "namespace go;\npartial class p { [GoValueClone(\"buf\")] public partial struct State {} }\n",
 				"amd64/chacha8.cs": "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
 			},
-			want: stampFinding{File: "package_info.cs", Type: "State", Member: "buf", Targets: "linux/arm64"},
+			want: stampFinding{File: "package_info.cs", Type: "State", Member: "buf", Targets: "linux/arm64, darwin/arm64"},
 		},
 		{
 			name: "a pair folder's stamp is not satisfied by the OTHER pair folder",
