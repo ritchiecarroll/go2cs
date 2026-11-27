@@ -191,6 +191,12 @@ const (
 	// into the names it generates (Ꮡ, ᴛ, ˢ, ж, ꞏ...), or a Δ name equal to one go2cs generates in that package. A
 	// refusal: such a name can equal a generated one and bind to it silently (markerGlyphRefusal.go).
 	diagnosticMarkerGlyphIdentifierRefused = "GO2CS2015"
+
+	// diagnosticForeignUnexportedPromotionRefused: a value converted to an interface whose unexported method it
+	// satisfies only through a CONCRETE method promoted from another package. go2cs-gen maps an interface member by its
+	// bare name, so the adapter would call the type's own method of that name, or one internal to another assembly
+	// (foreignUnexportedPromotionRefusal.go).
+	diagnosticForeignUnexportedPromotionRefused = "GO2CS2016"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

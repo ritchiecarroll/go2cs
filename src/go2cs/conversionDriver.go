@@ -415,6 +415,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticSliceWideningRefused, refusal)
 		}
 
+		// ...and a conversion to an interface whose unexported method the value meets only through a concrete method
+		// promoted from another package (foreignUnexportedPromotionRefusal.go).
+		if refusal := refuseForeignUnexportedPromotions(pkg); refusal != nil {
+			refusal.report()
+			return refusePackage(options, diagnosticForeignUnexportedPromotionRefused, refusal)
+		}
+
 		// ...and an assembly function go2cs forwards to a managed body, declared with another signature than
 		// that body answers (asmForwardBodies.go).
 		if refusal := refuseAsmForwardSignatures(pkg); refusal != nil {

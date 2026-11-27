@@ -3111,6 +3111,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		return nil, nil, refusal
 	}
 
+	if refusal := refuseForeignUnexportedPromotions(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
 	if refusal := refuseMarkerGlyphIdentifiers(pkg); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal
