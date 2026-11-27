@@ -86,8 +86,9 @@ func TestValueMethodOnADerefAliasedPointerCallsTheBoxTwin(t *testing.T) {
 		// Every value use is a twin call, so the alias is dead and the parameter keeps its Go name for the box.
 		{"viaParam(", "return p.Abs() + len(p.Hello());", "DerefOrNull"},
 		{"viaParamClosure(", "p.Abs()", "DerefOrNull"},
-		// A field read keeps the alias live; the call still goes through the box.
-		{"viaParamMixed(", "return p.X + Ꮡp.Abs();", ""},
+		// A field read keeps the alias live; the call still goes through the box (ahead of the read, as gc
+		// orders them: operandOrder.go).
+		{"viaParamMixed(", "var evalᴛ1 = Ꮡp.Abs();", ""},
 		{"viaParamControl(", "return p.Value();", ""}, // named like ж<T>'s Value: the box's member would bind
 		{"refRecv(", "return Ꮡh.Size();", ""},         // emitted over the box for this call (bodyCallsValueMethodOnReceiver)
 		{"boxRecv(", "return Ꮡh.Size();", ""},

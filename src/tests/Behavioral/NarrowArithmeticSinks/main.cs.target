@@ -51,7 +51,8 @@ internal static void arm(@string @class, Func<@string> f) {
             }
         }, ref ᒐ);
 
-        fmt.Println(@class + ":", f());
+        var evalᴛ1 = f();
+        fmt.Println(@class + ":", evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

@@ -1298,6 +1298,14 @@ go.golib.GoFuncPair :: method static System.Delegate Underlying(System.Delegate)
 go.golib.GoFuncPair :: property abstract System.Delegate Plain { get; }
 go.golib.GoFuncPair :: property abstract System.Delegate Twin { get; }
 go.golib.GoFuncPair :: shape abstract class; abstract-members get_Plain(), get_Twin()
+# GoNativeCall, NativeCallHint: the consumer contract for a native block under M:N (COORD's Q2 ruling, 2026-11-23,
+# docs/phase4/DESIGN-mn-n5-invisible-blocking.md section 9; row 13).
+go.golib.GoNativeCall :: method static System.Void Enter(go.golib.NativeCallHint = MayBlock)
+go.golib.GoNativeCall :: method static System.Void Exit()
+go.golib.GoNativeCall :: method static System.Void ReenterManaged()
+go.golib.GoNativeCall :: method static System.Void ReturnToNative()
+go.golib.GoNativeCall :: property static System.Int32 TransitionDepth { get; }
+go.golib.GoNativeCall :: shape static class
 go.golib.GoParkForwarderAttribute :: ctor public ()
 go.golib.GoParkForwarderAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
 # GoParkWeakAttribute: the no-park mark, DESIGN-mn-nopark.md 3.2.
@@ -1343,3 +1351,7 @@ go.golib.GoTwinOfAttribute :: property System.String Name { get; }
 go.golib.GoTwinOfAttribute :: property System.Type Host { get; }
 go.golib.GoTwinOfAttribute :: property System.Type[] Parameters { get; }
 go.golib.GoTwinOfAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
+go.golib.NativeCallHint :: field System.Int32 value__
+go.golib.NativeCallHint :: field const go.golib.NativeCallHint Blocks
+go.golib.NativeCallHint :: field const go.golib.NativeCallHint MayBlock
+go.golib.NativeCallHint :: shape struct; implements System.IComparable, System.IConvertible, System.IFormattable, System.ISpanFormattable

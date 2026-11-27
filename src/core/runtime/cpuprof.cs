@@ -83,7 +83,8 @@ public static void SetCPUProfileRate(nint hz) {
         cpuprof.on = true;
         cpuprof.log = newProfBuf(1, profBufWordCount, profBufTagCount);
         var hdr = array<uint64>([(uint64)hz]);
-        cpuprof.log.write(nil, nanotime(), hdr[..], default);
+        var evalᴛ1 = nanotime();
+        cpuprof.log.write(nil, evalᴛ1, hdr[..], default);
         setcpuprofilerate((int32)hz);
     } else if (cpuprof.on) {
         setcpuprofilerate(0);
@@ -117,7 +118,8 @@ internal static void add⁔(/*this*/ ref cpuProfile p, ж<@unsafe.Pointer> tagPt
         // because otherwise its write barrier behavior may not
         // be correct. See the long comment there before
         // changing the argument here.
-        cpuprof.log.write(tagPtr, nanotime(), hdr[..], stk);
+        var evalᴛ1 = nanotime();
+        cpuprof.log.write(tagPtr, evalᴛ1, hdr[..], stk);
     }
 
     Ꮡprof.of(profᴛ1.ᏑsignalLock).Store(0);

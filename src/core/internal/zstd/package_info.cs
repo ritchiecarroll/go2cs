@@ -73,7 +73,7 @@ using System.Runtime.CompilerServices;
 [assembly: GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABguAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmuIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
 [assembly: GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oK4gpSClAALDMKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK4AAkKwqqUgpSCgoKClMaClIKCgrSClIKCguyCpoKCpoK4gqaCgpSUgpSCuILugoKUpoKm6OaCgqaCgpSCgqaCgoKCpgAJCuaClILcgoKmgoKClIKClJSCgpSClIKUgsqSgqaSgqaSgqaSgqaCgoKUlJSCgpSClJKClIKmgoKmgoKmgoKmgoKClIKCpoKClIKClIKCpg==", "289-295:1")]
 [assembly: GoPositionMap("internal/zstd/window.go", "window.cs", "ABQqkoKClIKCqJKokoKUgqaCgoKCuIKCgoKUpoKUgs6igoKUgoKClIKCpoKClA==")]
-[assembly: GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSCqJKUgoKCpoKCgoKCgoKmgoKCgoKmgoK6koKClIiCgoKmlIKCgoKCgoKClIKCgoKUgoKCgqaCgoKClKiSgoKCqJKCgoI=", "", "", "87=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
+[assembly: GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSCqJKUgoKCpoKCgqKioqKmgpKioqKmgoK6koKClIiCgoKmlIKCgoKCgoKClIKCgoKUgoKCgqaCgoKClKiSgoKCqJKCgoI=", "", "", "102=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
 [assembly: GoPositionMap("internal/zstd/zstd.go", "zstd.cs", "AEawAZKCgqqiuIKCgoKCgoIADyKygpSCgqiygpSCgqiygoKUlKiygoKmAAwIkoKmgJSClLaClIKClIKmpqaAgqSUlIKCpoKClKaCpoKCuIKCppSUgIK6opSCgoKCgoKmgsqClIKC3IKCgpS0tLS0tOyCqJKCppSCgqaCgoKCgoKClKiSlIKmlIKCgqaCpoKClIKClIKCuIKClIKmgoKClIIADAiypoCCtpSUgoLKgriUgoCCpIK0goCCpIKCgpS0goCCpLSmgoKUpoKmgpSCpoKCpoKCgqaUpqqigoKUAAgSgqaCpoKmgoKUpoKmgoKU")]
 // </GoSourcePositionMaps>
 

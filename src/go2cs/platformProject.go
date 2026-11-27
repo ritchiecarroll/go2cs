@@ -278,7 +278,7 @@ func platformFullReferenceSet(contents string, target string) ([]string, bool) {
 // the lattice is itself. Any other key is read as its GOOS, the reading every key had before the
 // arch axis: every lattice target of that GOOS, or, when the lattice has none, the GOOS itself as a
 // participant of its own whose only group is its GOOS group. So a single-target conversion at a
-// target outside the declared universe (a host default of darwin/arm64) stands in for its GOOS's
+// target outside the declared universe (a host default of windows/arm64) stands in for its GOOS's
 // target, as it always did.
 func referenceParticipants(lattice *platformLattice, key string) []string {
 	if lattice.includes(key) {

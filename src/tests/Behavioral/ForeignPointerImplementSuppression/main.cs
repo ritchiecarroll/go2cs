@@ -14,7 +14,8 @@ internal static void main() {
     fmt.Println("tone:", l.Tone(), l.Name());
 
     l.Set(7);
-    fmt.Println("alias:", t.D, l.Tone());
+    var evalᴛ1 = l.Tone();
+    fmt.Println("alias:", t.D, evalᴛ1);
 
     tone.Level l2 = new tone.ToneжLevel(t);
     fmt.Println("eq:", AreEqual(l, l2), AreEqual(l, ((tone.Level)new tone.ToneжLevel(Ꮡ(new tone.Tone(D: 7))))));

@@ -43,7 +43,8 @@ internal static void main() {
     fmt.Println("deref operand:", (uintptr)(pp.ValueSlot) == g1);
 
     link.y = 7;
-    fmt.Println("written:", link.x, link.y, addrOf(link) == g1);
+    var evalᴛ1 = addrOf(link);
+    fmt.Println("written:", link.x, link.y, evalᴛ1 == g1);
 
     @unsafe.Pointer none = default;
     var offset = 3 * /* unsafe.Sizeof(buf[0]) */ (uintptr)4;

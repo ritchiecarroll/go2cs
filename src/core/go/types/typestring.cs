@@ -369,7 +369,8 @@ internal static void typ⁔(/*this*/ ж<typeWriter> Ꮡw, Type typ) {
                     // need a clear indication that this is not a predeclared name.
                     if (w.ctxt == nil && Universe.Lookup(t.obj.name) != nil) {
                         if (isTypes2) {
-                            w.@string(fmt.Sprintf(" /* with %s declared at %v */"u8, t.obj.name, t.obj.of(TypeName.Ꮡobject).Pos()));
+                            var evalᴛ1 = t.obj.of(TypeName.Ꮡobject).Pos();
+                            w.@string(fmt.Sprintf(" /* with %s declared at %v */"u8, t.obj.name, evalᴛ1));
                         } else {
                             // Can't print position information because
                             // we don't have a token.FileSet accessible.
@@ -557,12 +558,15 @@ internal static void signature⁔(/*this*/ ж<typeWriter> Ꮡw, ж<Signature> �
         if (sig.TypeParams().Len() != 0) {
             if (w.ctxt != nil) {
                 assert(w.tparams == nil);
-                w.tparams = sig.TypeParams();
+                var evalᴛ1 = sig.TypeParams();
+                w.tparams = evalᴛ1;
                 defer([GoFunc("(*typeWriter).signature.func1")] () => {
                     Ꮡw.Value.tparams = default;
                 }, ref ᒐ);
             }
-            Ꮡw.tParamList(sig.TypeParams().list());
+            var evalᴛ2 = sig.TypeParams();
+            var evalᴛ3 = evalᴛ2.list();
+            Ꮡw.tParamList(evalᴛ3);
         }
 
         Ꮡw.tuple(sig.@params, sig.variadic);

@@ -42,7 +42,8 @@ internal static nint nestedStructCapture() {
         var outʗ2 = outʗ1;
         var pʗ2 = pʗ1;
         goǃ([GoFunc("nestedStructCapture.func1.1")] () => {
-            outʗ2.ᐸꟷ(pʗ2.sum());
+            var evalᴛ1 = pʗ2.sum();
+            outʗ2.ᐸꟷ(evalᴛ1);
         });
     }
     outer();

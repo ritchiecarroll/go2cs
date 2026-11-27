@@ -57,7 +57,8 @@ internal static void main() {
         b.Label = "uint64";
     }
 
-    fmt.Println("uint after write through promoted pointer:", u.BitSize, u.Label, n.String());
+    var evalᴛ1 = n.String();
+    fmt.Println("uint after write through promoted pointer:", u.BitSize, u.Label, evalᴛ1);
 
     var i = Ꮡ(new Int());
     i.Label = "int";
@@ -91,19 +92,25 @@ internal static void main() {
     p.ByteSize = 4;
 
     Node np = new PtrжNode(p);
-    fmt.Println("ptr Common through embed:", np.Common().Label, np.Common().ByteSize);
+    var evalᴛ2 = np.Common();
+    var evalᴛ3 = np.Common();
+    fmt.Println("ptr Common through embed:", evalᴛ2.Label, evalᴛ3.ByteSize);
     fmt.Println("ptr String through embed:", np.String());
 
     var empty = Ꮡ(new Ptr());
     empty.Label = "empty";
     empty.ByteSize = 2;
     Node ne = new PtrжNode(empty);
-    fmt.Println("ptr Common with nil field:", ne.Common().Label, ne.Common().ByteSize);
+    var evalᴛ4 = ne.Common();
+    var evalᴛ5 = ne.Common();
+    fmt.Println("ptr Common with nil field:", evalᴛ4.Label, evalᴛ5.ByteSize);
 
     ne.Common().ByteSize = 16;
     fmt.Println("ptr after write through Common:", empty.ByteSize);
 
-    fmt.Println("ptr field node:", p.Node.Common().Label, p.Node.String());
+    var evalᴛ6 = p.Node.Common();
+    var evalᴛ7 = p.Node.String();
+    fmt.Println("ptr field node:", evalᴛ6.Label, evalᴛ7);
 }
 
 } // end main_package

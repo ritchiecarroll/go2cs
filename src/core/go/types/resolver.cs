@@ -84,7 +84,8 @@ internal static void arityMatch⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.ValueSp
             // TODO(gri) avoid declared and not used error here
         } else {
             // init exprs "inherited"
-            Ꮡcheck.errorf(new ast_ValueSpecжpositioner(Ꮡs), code, "extra init expr at %s", check.fset.Position(init.Pos()));
+            var evalᴛ1 = init.Pos();
+            Ꮡcheck.errorf(new ast_ValueSpecжpositioner(Ꮡs), code, "extra init expr at %s", check.fset.Position(evalᴛ1));
             // TODO(gri) avoid declared and not used error here
         }
         break;
@@ -129,7 +130,8 @@ internal static void declarePkgObj⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.Iden
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var ident = ref Ꮡident.DerefOrNull();
 
-    assert(ident.Name == obj.Name());
+    var evalᴛ1 = obj.Name();
+    assert(ident.Name == evalᴛ1);
 
     // spec: "A package-scope or file-scope identifier with name init
     // may only be declared to be a function with this (func()) signature."
@@ -282,7 +284,8 @@ internal static void collectObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
 
     var fileScopes = new slice<ж<Scope>>(len(check.files)); // fileScopes[i] corresponds to check.files[i]
     foreach (var (fileNo, @file) in range(check.files)) {
-        check.version = asGoVersion(check.versions[@file]);
+        var evalᴛ1 = asGoVersion(check.versions[@file]);
+        check.version = evalᴛ1;
 
         // The package identifier denotes the current package,
         // but there is no corresponding package object.
@@ -293,17 +296,20 @@ internal static void collectObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
         // Be conservative and use the *ast.File extent if we don't have a *token.File.
         token.Pos pos = @file.Pos();
         token.Pos end = @file.End();
-        var f = check.fset.File(@file.Pos()); if (f != nil) {
+        var evalᴛ2 = @file.Pos();
+        var f = check.fset.File(evalᴛ2); if (f != nil) {
             (pos, end) = ((token.Pos)f.Base(), f.End());
         }
-        var fileScope = NewScope(pkg.scope, pos, end, check.filename(fileNo));
+        var evalᴛ3 = check.filename(fileNo);
+        var fileScope = NewScope(pkg.scope, pos, end, evalᴛ3);
         fileScopes[fileNo] = fileScope;
         check.recordScope(new ast.FileжNode(@file), fileScope);
 
         // determine file directory, necessary to resolve imports
         // FileName may be "" (typically for tests) in which case
         // we get "." as the directory which is what we would want.
-        @string fileDir = dir(check.fset.Position(@file.Name.Pos()).Filename);
+        var evalᴛ4 = @file.Name.Pos();
+        @string fileDir = dir(check.fset.Position(evalᴛ4).Filename);
 
         var fileScopeʗ1 = fileScope;
         var pkgʗ1 = pkg;
@@ -385,7 +391,8 @@ internal static void collectObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
                             // concurrently. See go.dev/issue/32154.)
                             var alt = fileScopeʗ1.Lookup(nameΔ1); if (alt != nil) {
                                 var errΔ1 = Ꮡcheck.newError(DuplicateDecl);
-                                errΔ1.addf(new ast_Identжpositioner(dΔ1.spec.Name), "%s redeclared in this block", alt.Name());
+                                var evalᴛ5 = alt.Name();
+                                errΔ1.addf(new ast_Identжpositioner(dΔ1.spec.Name), "%s redeclared in this block", evalᴛ5);
                                 errΔ1.addAltDecl(alt);
                                 errΔ1.report();
                             } else {
@@ -404,7 +411,9 @@ internal static void collectObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
             case constDecl dΔ1: {
                 // declare all constants
                 foreach (var (i, name) in range(dΔ1.spec.Names)) {
-                    var obj = NewConst(name.Pos(), pkgʗ1, name.Name, default, constant.MakeInt64((int64)dΔ1.iota));
+                    var evalᴛ6 = name.Pos();
+                    var evalᴛ7 = constant.MakeInt64((int64)dΔ1.iota);
+                    var obj = NewConst(evalᴛ6, pkgʗ1, name.Name, default, evalᴛ7);
 
                     ast.Expr init = default;
                     if (i < len(dΔ1.init)) {

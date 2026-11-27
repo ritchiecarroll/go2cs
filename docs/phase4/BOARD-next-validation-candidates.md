@@ -42765,6 +42765,58 @@ Unmapped (false) is the conservative direction: a consumer gated on one takes it
 its gated path is assembly with no managed body would trade a skip for a throwing stub, which is the trap the scan
 kernels were.
 
+## 2026-11-25 — R (M:N row 13, N5; COORD's I4 ruling 20261125T015518Z): on R-LAPTOP (Windows) one wake in a few runs waits most of a CPU step under the M:N scheduler (host-only)
+
+**OPEN, Windows host only, not rooted to a fix.** MnInvisible's V4 row (P goroutines in CPU steps of 200 ms between
+parks, one goroutine woken every 25 ms, 200 wakes) at GO2CS_MN_PROCS=8 on R-LAPTOP (16 hardware threads, Windows 11) reads
+p50 11-17 ms and p99 46-83 ms, and in 3 to 4 of every 5 runs one wake waits 150-225 ms. The same build in WSL (10 cores)
+reads p99 10-15 ms and a max of 11-23 ms at P = 4 and P = 8, and the default-mode floor on this host is p99 17-44 ms with
+an occasional 105-132 ms max of its own. So the tail belongs to this host. The hosted linux P = 4 run is the gate of record.
+
+**What it is not** (one axis each, 3-5 runs, all at row 13's branch, uncommitted arms):
+- the run-next slot: GO2CS_MN_RUNNEXT=0 leaves the max at 183-191 ms;
+- the monitor's priority: ThreadPriority.AboveNormal leaves 182-187 ms in 3 of 5;
+- the monitor starting carrier threads itself: a starter thread that starts them leaves 165-183 ms in 3 of 5;
+- idle carriers retiring after 100 ms: never retiring them leaves 117-183 ms, with no carrier re-created.
+
+**What the traces show.** In each long wait the monitor's tick spends 130-200 ms in its injection loop, in AddCarrier
+(27-64 ms each, several per tick: Thread.Start while 16 CPU-bound threads hold the 16 hardware threads); s_p.Release and
+s_carriersLock never reached 20 ms. Deferring the start moves the wait onto the queued wake rather than removing it.
+The injections come mostly from the CPU goroutines' own Gosched requeues (about 860 per 200 wakes at P = 8), which
+oversubscribe the host: Go would preempt instead, and go2cs cannot.
+
+**Likely seat.** The injection policy under CPU-bound load on a host with as many runnable threads as cores (an injection
+budget relative to idle hardware threads, or not injecting for a requeued Gosched), weighed against what 3c buys (V2 and
+MnSpinCap's spinners complete). Not cut.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-25)
+
+## 2026-11-25 — R (M:N row 13 follow-up, hosted darwin): os/exec Wait blocks invisibly on darwin under the M:N scheduler
+
+**OPEN, darwin only.** MnInvisible's C-exec census row (K goroutines blocked in exec.Cmd.Wait, warmed, GO2CS_MN=1) on
+hosted osx-x64 and osx-arm64 (run 45576163996, claude/r-mn-n5-sleep 010bb1ba92) reads handoffs 0, retakes 0 and
+injections 10-21 in each of three runs: the wait is invisible, and the scheduler answers it with injected threads. The
+same row on hosted linux reads retakes 15-16 and 0 injections (the native retake), and on hosted windows handoffs 576,
+retakes 16 and 0 injections. Released 3/3 everywhere, so nothing hangs; on darwin each waiter costs a carrier until the
+monitor injects one.
+
+**Likely seat.** darwin's process wait (wait4 through syscall's darwin path, or os's darwin-specific pidfd-less wait)
+reaching the native call without the runtime's entersyscall family, so GoNativeCall's depth stays even. Not traced.
+
+**Owner.** Unassigned; COORD routes (Q3's default: the lane on row 13).
+
+— R (2026-11-25)
+
+## 2026-11-25 — R (addendum to this BOARD's 2026-11-25 row on R-LAPTOP's wake tail): the tail is not that host's alone
+
+Hosted runs of MnInvisible V4 (run 45576158669, windows; run 45576163996, darwin) read twinned p99 well above each host's
+default-mode floor + 25 ms at 200 ms steps: win-x64 45.7-81.2 ms against a floor of 24.0-31.2; osx-arm64 43.1-133.7
+against 11.9-17.0; osx-x64 133.1-190.6 against 80.7-96.9. Hosted linux, the gate of record, reads 7-14 ms against 3-4.
+So the earlier row's "host-only" applies to linux as the exception rather than to R-LAPTOP: the tail shows on every
+non-linux host read so far. Its likely seat is unchanged.
+
 — R (2026-11-25)
 
 ## 2026-11-26 — P2 (COORD 20261126T091914Z, P3's F7): a refused native-call seam left the goroutine _Gsyscall (CURED, pre-existing)
@@ -42872,5 +42924,70 @@ which the branch would then cross-check by name, as it does for an exact-name ro
   is re-read (runbook rule, `docs/GoCorpusMigration.md`).
 
 — P5 (2026-11-26)
+
+**Update 2026-11-26 (P4): the osx-arm64 slowness is a converter memory leak, and the cure is a seat.** Two readings.
+
+*A soft memory limit is not a cure.* With `GOMEMLIMIT=1GiB` on the mac go-test step (diagnostic run 45846772957),
+swap stayed at zero and pageouts fell from 26,536 to 4,004 against the no-limit sampler run 45833624874, but the
+go2cs test binary's CPU doubled (garbage collection against a live heap above the limit) and the package still hit
+the 50m panic, at test 1528 of 1966 where the three no-limit runs had reached 1586, 1657 and 1714.
+
+*The cause.* A heap profile of the go2cs package on linux (`go test -memprofile`, inuse_space at the end) read 4.7
+GB live, all `go/types` objects from `go/packages` loads, with peak RSS near 11 GB. Five process-global caches were
+keyed by objects of one load and never emptied: `importedGenericFuncInfo` (a dependency's whole `types.Info`),
+`importedGenericFuncDecls`, `declaredStructsByPackage`, `foreignDerivedAliases` and `descriptorCompanionCache`.
+Every load makes new objects, so an old entry is never hit again, but it keeps that load's type graph alive. A
+`-stdlib` run loads once per package, so it grows the same way.
+
+*The cure.* `resetLoadScopedCaches` empties them at the root hand-in in `collectCaptureModeMethods`, guarded by
+`TestLoadScopedCachesEmptyAtEachRoot`. Measured on linux/amd64 at master 51f4d4b37a, one axis: peak RSS 10.96 GB to
+3.53 GB, live heap at the end 4.66 GB to 1.36 GB, the same tests and failures. Owed before this row closes: the
+two-seeded `-stdlib` reconvert on every target, before against after, read as zero emission change (P5), and one
+osx-arm64 go-test run inside 50m.
+
+— P4 (2026-11-26)
+
+**2026-11-26 (P4, from P3's review of the cache seat): OPEN. Within one root, the first asker decides the
+generic-function lookup.** `importedGenericFuncDecls` and `importedGenericFuncInfo` cache, per owning package, the
+generic function declarations `genericFuncSource` finds through `loadedPackageSource(currentLoadedPackage, owner)`,
+which searches only the current root and its direct imports, and they cache a miss as an empty set. The route
+pre-pass asks with `currentLoadedPackage` re-pointed at a dependency (`newGenericRouteVisitor`), so for a root R that
+calls `d.F[T]` where `d.F` calls `o.G[T]` and R does not import `o`, the answer depends on which phase asks first.
+The cache seat keeps the first answer for the whole root (it empties the caches only where a root's work starts, and
+`TestLoadScopedCachesHoldAcrossTheRoutePrePass` holds that), which is master's behavior. A cure would key the two maps
+by root and owner, or stop caching a miss taken under a re-pointed root. No standard-library package has the shape
+(P5's two-seeded reconvert at 0dabfea028a moved nothing); a `-recurse` module is not measured.
+
+**Owner.** Unassigned.
+
+— P4 (2026-11-26)
+
+## 2026-11-26 — P5 (guard-floor seat, P3 20261126T193143Z NIT 3; COORD 20261126T193812Z): golib is outside the hand-own floor (OPEN)
+
+- **A new golib file that follows Go and carries no PROVENANCE block passes both licensing guards.**
+  `TestLicensingGoProvenanceHeaders` reads only files that carry a block, and `TestLicensingHandOwnsAreClassified`
+  (the floor, `claude/p5-attr-t17`) skips golib because its population rule, an `*_impl.cs` or a `GoManualConversion`
+  marker, does not describe golib: every golib file is hand-written. Today the three golib parts derived from Go are
+  headed and named in `src/core/golib/NOTICE`. Until a rule fits golib, P3's seat read of each golib diff is the check:
+  a part that follows a Go function takes a block and a NOTICE entry in the same seat.
+
+— P5 (2026-11-26)
+
+
+## 2026-11-26 — R (P3 F7, COORD 20261126T071719Z): `enterSyscall` moves the status before `GoNativeCall.Enter`, which can throw (CLOSED by P2's cure, train 16)
+
+**OPEN, read.** In `src/core/runtime/syscall_managed_impl.cs` `enterSyscall` CASes the goroutine `_Grunning` →
+`_Gsyscall` and only then calls `GoNativeCall.Enter`, which throws `OutOfOrder` when the goroutine is already inside
+a native call. A throw there leaves the goroutine `_Gsyscall` with no transition open, and the caller's `finally`
+never pairs it (the throw is inside the enter, before the `try`). The order itself is ruled (status first, as Go
+orders it; COORD's Q2 ruling, quoted in the method's comment); the gap is only the unwinding of the first half when
+the second half refuses. Pre-existing and not changed by the darwin syscall bracket (claude/r-darwin-syscall-bracket),
+which reaches `enterSyscall` through the same `syscallEntersyscall` as linux and the three hand-owned darwin sites.
+No caller is known to reach the throw: it needs a nested enter, which is itself a caller defect.
+
+**CLOSED 2026-11-26** by P2's enterSyscall/callback-exit rollback (claude/p2-entersyscall-rollback 1add69f766, train 16;
+P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `_Grunning` before the refusal propagates.
+
+— R (2026-11-26)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

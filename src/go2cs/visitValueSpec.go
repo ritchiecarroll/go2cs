@@ -33,6 +33,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 	defer func(saved bool) { v.inValueSpec = saved }(v.inValueSpec)
 	v.inValueSpec = true
 
+	// A local `var` declaration reads its values after the calls in them, as `:=` does (operandOrder.go); the
+	// prelude goes before the declaration. A package-level one has no statement slot (a named limit).
+	if v.inFunction && tok == token.VAR && len(valueSpec.Values) == len(valueSpec.Names) {
+		endOperandOrder := v.beginOperandOrderPrelude(valueSpec.Values...)
+		defer endOperandOrder()
+	}
+
 	v.outputBuilder.WriteString(v.newline)
 
 	// The comments before the spec go above its doc; those inside it are written where the spec's own

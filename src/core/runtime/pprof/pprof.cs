@@ -605,7 +605,9 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         values[0] = (int64)count[k];
         // For count profiles, all stack addresses are
         // return PCs, which is what appendLocsForStack expects.
-        locs = b.appendLocsForStack(locs[..0], p.Stack(index[k]));
+        var evalᴛ1 = locs[..0];
+        var evalᴛ2 = p.Stack(index[k]);
+        locs = b.appendLocsForStack(evalᴛ1, evalᴛ2);
         nint idx = index[k];
         Action labels = default;
         if (p.Label(idx) != nil) {

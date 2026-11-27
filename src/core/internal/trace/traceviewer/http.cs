@@ -297,7 +297,8 @@ public static http.Handler TraceHandler() {
             http.Error(w, err.Error(), http.StatusInternalServerError);
             return;
         }
-        @string html = strings.ReplaceAll(templTrace, paramsˢ, r.Form.Encode());
+        var evalᴛ1 = r.Form.Encode();
+        @string html = strings.ReplaceAll(templTrace, paramsˢ, evalᴛ1);
         w.Write(slice<byte>(html));
     }));
 }

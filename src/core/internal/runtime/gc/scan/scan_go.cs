@@ -84,8 +84,10 @@ internal static unsafeBuf<T> newUnsafeBuf<T>(ж<T> @base) {
 // must be certain that such a write will still be in-bounds with respect
 // to the buffer's true capacity.
 internal static void addIf⁔<T>(/*this*/ ref unsafeBuf<T> b, T val, bool pred) {
-    (@unsafe.Pointer.To<T>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(b.@base), b.n * (nint)@unsafe.Sizeof(val)))).ValueSlot = val;
-    b.n += bool2int(pred);
+    var evalᴛ1 = @unsafe.Sizeof(val);
+    (@unsafe.Pointer.To<T>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(b.@base), b.n * (nint)evalᴛ1))).ValueSlot = val;
+    var evalᴛ2 = bool2int(pred);
+    b.n += evalᴛ2;
 }
 
 // check performs a bounds check on speculative writes into the buffer.

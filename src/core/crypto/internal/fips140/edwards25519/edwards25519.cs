@@ -136,7 +136,8 @@ internal static slice<byte> bytes⁔(/*this*/ ж<Point> Ꮡv, /*[32]*/ ж<array<
     Ꮡy.Multiply(Ꮡv.Ꮡy, ᏑzInv); // y = Y / Z
 
     var @out = copyFieldElement(buf, Ꮡy);
-    @out[31] |= (byte)((byte)(x.IsNegative() << 7));
+    var evalᴛ1 = x.IsNegative();
+    @out[31] |= (byte)((byte)(evalᴛ1 << 7));
     return @out;
 }
 

@@ -21,9 +21,9 @@ import (
 func TestDarwinSockaddrTranscriptionMatchesItsDeclaration(t *testing.T) {
 	root := repoRootFromPackageDir(t)
 
-	declared := structFieldLines(t, readTrackedText(t, root, "src/core/syscall/darwin/ztypes_darwin_amd64.cs"), "partial struct RawSockaddrInet4 {", "}")
+	declared := structFieldLines(t, readTrackedText(t, root, "src/core/syscall/darwin-amd64/ztypes_darwin_amd64.cs"), "partial struct RawSockaddrInet4 {", "}")
 	test := readTrackedText(t, root, "src/tests/GolibTests/NativeFieldArrayViewTests.cs")
-	begin := strings.Index(test, "// BEGIN TRANSCRIPTION: syscall/darwin/ztypes_darwin_amd64.cs RawSockaddrInet4")
+	begin := strings.Index(test, "// BEGIN TRANSCRIPTION: syscall/darwin-amd64/ztypes_darwin_amd64.cs RawSockaddrInet4")
 
 	if begin < 0 {
 		t.Fatalf("NativeFieldArrayViewTests.cs carries no transcription marker; the arms root on a struct nothing holds to its declaration")
@@ -34,6 +34,13 @@ func TestDarwinSockaddrTranscriptionMatchesItsDeclaration(t *testing.T) {
 	if len(declared) < 5 || strings.Join(declared, "\n") != strings.Join(transcribed, "\n") {
 		t.Errorf("the transcription has drifted from darwin's converted RawSockaddrInet4\n declared:\n  %s\n transcribed:\n  %s",
 			strings.Join(declared, "\n  "), strings.Join(transcribed, "\n  "))
+	}
+
+	// The darwin/arm64 flavour declares its own copy (darwin-arm64/ztypes_darwin_arm64.cs); the arms stand for both
+	// Mac RIDs only while the two declarations agree.
+	if arm64 := structFieldLines(t, readTrackedText(t, root, "src/core/syscall/darwin-arm64/ztypes_darwin_arm64.cs"), "partial struct RawSockaddrInet4 {", "}"); strings.Join(arm64, "\n") != strings.Join(declared, "\n") {
+		t.Errorf("darwin/arm64's RawSockaddrInet4 differs from darwin/amd64's, which the transcription follows\n darwin/arm64:\n  %s\n darwin/amd64:\n  %s",
+			strings.Join(arm64, "\n  "), strings.Join(declared, "\n  "))
 	}
 }
 

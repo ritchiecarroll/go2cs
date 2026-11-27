@@ -564,6 +564,11 @@ func getExprContext[TContext ExprContext](contexts []ExprContext) TContext {
 }
 
 func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
+	// A call or receive the statement hoisted into its prelude reads its temp here (operandOrder.go).
+	if name, hoisted := v.operandTemps[expr]; hoisted {
+		return name
+	}
+
 	// Go gives an untyped constant the type of the integer TYPE PARAMETER it meets -- `return 1` in a func
 	// returning T, `var x T = 1 << n`, an argument for a T parameter, a []T element, the left operand of a
 	// shift typed T -- and C# has no implicit conversion from a numeric literal to a type parameter (CS0029,

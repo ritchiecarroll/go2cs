@@ -36,7 +36,8 @@ internal static void main() {
     var err = pointerSourced();
     var p = err._<ж<myErr>>();
     p.code = 7;
-    fmt.Println("ptr-assert", p.code, err.Error());
+    var evalᴛ1 = err.Error();
+    fmt.Println("ptr-assert", p.code, evalᴛ1);
 
     var v = valueSourced()._<valErr>();
     fmt.Println("val-assert", v.tag, v.Error());

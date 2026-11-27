@@ -33,10 +33,14 @@ internal static CTR newCTR(ref Block b, slice<byte> iv) {
         throw panic("bad IV length");
     }
 
+    var evalᴛ1 = iv[8..16];
+    var evalᴛ2 = byteorder.BEUint64(evalᴛ1);
+    var evalᴛ3 = iv[0..8];
+    var evalᴛ4 = byteorder.BEUint64(evalᴛ3);
     return new CTR(
         b: b.ΔClone(),
-        ivlo: byteorder.BEUint64(iv[8..16]),
-        ivhi: byteorder.BEUint64(iv[0..8]),
+        ivlo: evalᴛ2,
+        ivhi: evalᴛ4,
         offset: 0
     );
 }

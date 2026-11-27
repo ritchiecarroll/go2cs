@@ -207,8 +207,11 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                 case ж<image.RGBA> src0: {
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
+                    var evalᴛ1 = dst0.Pix.slice(d0);
+                    var evalᴛ2 = src0.Pix.slice(s0);
+                    var evalᴛ3 = r.Dx();
                     drawCopySrc(
-                        dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 4 * r.Dx());
+                        evalᴛ1, dst0.Stride, r, evalᴛ2, src0.Stride, sp, 4 * evalᴛ3);
                     return;
                 }
                 case ж<image.NRGBA> src0: {
@@ -262,8 +265,11 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
             var (src0, ok) = src._<ж<image.NRGBA>>(ᐧ); if (ok) {
                 nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                 nint s0 = src0.PixOffset(sp.X, sp.Y);
+                var evalᴛ4 = dst0.Pix.slice(d0);
+                var evalᴛ5 = src0.Pix.slice(s0);
+                var evalᴛ6 = r.Dx();
                 drawCopySrc(
-                    dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 4 * r.Dx());
+                    evalᴛ4, dst0.Stride, r, evalᴛ5, src0.Stride, sp, 4 * evalᴛ6);
                 return;
             }
         }
@@ -274,8 +280,11 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
             var (src0, ok) = src._<ж<image.NRGBA64>>(ᐧ); if (ok) {
                 nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                 nint s0 = src0.PixOffset(sp.X, sp.Y);
+                var evalᴛ7 = dst0.Pix.slice(d0);
+                var evalᴛ8 = src0.Pix.slice(s0);
+                var evalᴛ9 = r.Dx();
                 drawCopySrc(
-                    dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 8 * r.Dx());
+                    evalᴛ7, dst0.Stride, r, evalᴛ8, src0.Stride, sp, 8 * evalᴛ9);
                 return;
             }
         }
@@ -1060,7 +1069,8 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 palette[i][2] = (int32)b;
                 palette[i][3] = (int32)a;
             }
-            (pix, stride) = (p.Pix.slice(p.PixOffset(r.Min.X, r.Min.Y)), p.Stride);
+            var evalᴛ1 = p.PixOffset(r.Min.X, r.Min.Y);
+            (pix, stride) = (p.Pix.slice(evalᴛ1), p.Stride);
         }
     }
 

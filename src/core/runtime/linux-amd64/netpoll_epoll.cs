@@ -159,7 +159,8 @@ retry:
                 // Since EFD_SEMAPHORE was not specified,
                 // the eventfd counter will be reset to 0.
                 ref var one = ref heap(new uint64(), out var Ꮡone);
-                read((int32)netpollEventFd, noescape(@unsafe.Pointer.FromPinnedBox(Ꮡone)), (int32)/* unsafe.Sizeof(one) */ (uintptr)8);
+                var evalᴛ1 = noescape(@unsafe.Pointer.FromPinnedBox(Ꮡone));
+                read((int32)netpollEventFd, evalᴛ1, (int32)/* unsafe.Sizeof(one) */ (uintptr)8);
                 System.GC.KeepAlive(Ꮡone);
                 ᏑnetpollWakeSig.Store(0);
             }

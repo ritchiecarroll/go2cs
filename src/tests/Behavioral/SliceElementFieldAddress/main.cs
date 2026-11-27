@@ -41,7 +41,8 @@ internal static void main() {
 
     var pr = Ꮡ(new prog(Inst: new slice<inst>(4, () => new(nil))));
     foreach (var i in range(len(pr.Inst))) {
-        pr.Inst[i].Name = fmt.Sprintf("i%d"u8, i);
+        var evalᴛ1 = fmt.Sprintf("i%d"u8, i);
+        pr.Inst[i].Name = evalᴛ1;
     }
     var a = Ꮡ(pr.Inst, 0).of(inst.ᏑOut);
     var b = Ꮡ(pr.Inst, 0).of(inst.ᏑArg);

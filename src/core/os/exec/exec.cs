@@ -687,7 +687,8 @@ internal static partial error Start⁔(/*this*/ ж<Cmd> Ꮡc) {
         }, ref ᒐ);
 
         if (c.Path == ""u8 && c.Err == nil && c.lookPathErr == nil) {
-            c.Err = errors.New(execNoCommandˢ);
+            var evalᴛ1 = errors.New(execNoCommandˢ);
+            c.Err = evalᴛ1;
         }
         if (c.Err != nil || c.lookPathErr != nil) {
             if (c.lookPathErr != nil) {

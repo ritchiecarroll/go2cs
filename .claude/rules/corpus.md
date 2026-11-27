@@ -57,6 +57,12 @@ ONE stdlib, on disk and in any build; no path rewriting anywhere. Five kinds of 
    `crypto/internal/boring/bcache`, `internal/concurrent`, `internal/godebug`, `internal/weak` — **re-census, never quote.**
 5. **`golib`** (`src/core/golib/`) — the hand-written runtime, shared by everything, never auto-generated; `src/core/go2cs` (the
    `Symbols.cs` shared project) sits beside it.
+- **The lane that ADDS a hand-own (an `*_impl.cs`, or a file carrying the `GoManualConversion` marker) owes its PROVENANCE
+  block or its row on `src/go2cs/testdata/licensing/handown-unheaded.txt` IN ITS OWN SEAT** — `TestLicensingHandOwnsAreClassified`
+  is red until one lands. A block when anything in the file follows a Go function's statements or contract; `own` only when
+  nothing does. <!-- 2026-11-26, P3 NIT 5 on the guard-floor seat (claude/p5-attr-t17, COORD 193812Z): without this the
+  floor's author would read every other lane's new hand-own at each merge. P3 reads every change to the list at seat reads.
+  Block shape: docs/phase4/DESIGN-provenance-header.md. golib is outside the population (BOARD 2026-11-26). -->
 - **A hand-own that rewires ONE CALLER of a runtime door and leaves the DOOR ITSELF leaves a silent no-op
   for the next caller.** Rewire or RETIRE the door, and grep the callers of every door a hand-own retires.
   <!-- ⚠ 2026-09-13, C1 f9f41e8d8 §3, with COORD ruling `runtime/mcleanup.cs` a hand-own OWED rather than a

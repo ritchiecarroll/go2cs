@@ -26,9 +26,11 @@ internal static uintptr /*reqSize*/ roundupsize(uintptr size, bool noscan) {
         // (reqSize - size) is either mallocHeaderSize or 0. We need to subtract mallocHeaderSize
         // from the result if we have one, since mallocgc will add it back in.
         if (reqSize <= (uintptr)(gc.SmallSizeMax - 8)) {
-            return (uintptr)gc.SizeClassToSize[gc.SizeToSizeClass8[divRoundUp(reqSize, gc.SmallSizeDiv)]] - (reqSize - size);
+            var evalᴛ1 = divRoundUp(reqSize, gc.SmallSizeDiv);
+            return (uintptr)gc.SizeClassToSize[gc.SizeToSizeClass8[evalᴛ1]] - (reqSize - size);
         }
-        return (uintptr)gc.SizeClassToSize[gc.SizeToSizeClass128[divRoundUp(reqSize - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv)]] - (reqSize - size);
+        var evalᴛ2 = divRoundUp(reqSize - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv);
+        return (uintptr)gc.SizeClassToSize[gc.SizeToSizeClass128[evalᴛ2]] - (reqSize - size);
     }
     // Large object. Align reqSize up to the next page. Check for overflow.
     reqSize += pageSize - 1;

@@ -160,7 +160,8 @@ internal static @string Error⁔(/*this*/ ref ValueError e) {
     if (e.Kind == 0) {
         return "reflect: call of "u8 + e.Method + " on zero Value"u8;
     }
-    return "reflect: call of "u8 + e.Method + " on "u8 + e.Kind.String() + " Value"u8;
+    var evalᴛ1 = e.Kind.String();
+    return "reflect: call of "u8 + e.Method + " on "u8 + evalᴛ1 + " Value"u8;
 }
 
 // go2cs generated this placeholder — func methodName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

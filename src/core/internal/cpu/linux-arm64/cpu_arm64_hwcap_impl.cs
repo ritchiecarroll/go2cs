@@ -49,7 +49,7 @@
 // TWO DEPARTURES FROM GO, both S4's on the same host and for the same causes:
 //
 //   - HasDIT is cleared after Initialize, the darwin ruling (COORD, 2026-11-06;
-//     darwin/cpu_arm64_darwin_impl.cs states the cause). The .NET runtime exposes no control for
+//     darwin-amd64/cpu_arm64_process_darwin_impl.cs states the cause). The .NET runtime exposes no control for
 //     PSTATE.DIT, so a true flag would be a false security claim. Go sets it from HWCAP_DIT, and the
 //     converted hwcapInit does too; no GODEBUG option names it, so clearing it after processOptions
 //     loses nothing a user could set.

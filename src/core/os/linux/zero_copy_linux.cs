@@ -45,7 +45,8 @@ internal static (int64 written, bool handled, error err) writeTo⁔(/*this*/ ж<
         err = rerr;
     }
 
-    return (written, handled, wrapSyscallError(sendfileˢ, err));
+    var evalᴛ1 = wrapSyscallError(sendfileˢ, err);
+    return (written, handled, evalᴛ1);
 }
 
 internal static (int64 written, bool handled, error err) readFrom⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {

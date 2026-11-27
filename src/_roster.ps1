@@ -254,6 +254,65 @@ function Get-SweepTargetGoarch {
     return 'amd64'
 }
 
+# THE darwin/arm64 INTERIM PIN (docs/phase4/DESIGN-darwin-arm64-flavour.md section 6, ruling R5; D7 REMOVES IT).
+# From the seat that adds darwin/arm64 to the corpus universe (D2) until the bank re-reads the osx-arm64 cells on that
+# flavour (D7), every banked darwin row still describes the darwin/amd64 flavour. Unpinned, a sweep on an Apple-silicon
+# host would convert and build each row at darwin/arm64 (the converter's -tests default follows the universe,
+# testsCorpusArch.go) and compare it with counts banked on darwin/amd64, so its reds would read as regressions. One
+# entry per host target that is pinned: the key is the host's GOOS/GOARCH, the value the -Platforms the sweep then
+# runs with. It holds before D2 as well, where it restates what the converter already does on that host.
+$SweepInterimPlatformPins = @{ 'darwin/arm64' = 'darwin/amd64' }
+
+<#
+.SYNOPSIS
+    The ONE os/arch target a sweep converts and builds every row at, or '' for the converter's own default.
+.DESCRIPTION
+    An explicit -Platforms wins; it must be one target of the corpus universe ($CorpusPlatformUniverse, which
+    _paths.ps1 defines and a Go test holds equal to platformUniverse) and must name the host's GOOS, because a -tests
+    row runs its converted host on this machine. With none, a host target listed in $SweepInterimPlatformPins takes
+    its pin; any other host returns '' and the sweep passes no -platforms, exactly as before the parameter existed.
+#>
+function Resolve-SweepPlatforms {
+    param(
+        [string] $Explicit,
+        [string] $HostGoos,
+        [string] $HostGoarch,
+        [hashtable] $Pins = $SweepInterimPlatformPins,
+        [string[]] $Universe = $CorpusPlatformUniverse
+    )
+
+    if (-not $Universe -or $Universe.Count -eq 0) {
+        throw 'Resolve-SweepPlatforms: no corpus universe to check against (dot-source _paths.ps1 first, or pass -Universe).'
+    }
+
+    $value = ''
+    $source = ''
+
+    if (-not [string]::IsNullOrWhiteSpace($Explicit)) {
+        $value = $Explicit.Trim()
+        $source = '-Platforms'
+    }
+    elseif ($HostGoos -and $HostGoarch -and $Pins -and $Pins.ContainsKey("$HostGoos/$HostGoarch")) {
+        $value = $Pins["$HostGoos/$HostGoarch"]
+        $source = "the interim pin for a $HostGoos/$HostGoarch host"
+    }
+    else {
+        return ''
+    }
+
+    if ($value -cnotmatch '^[a-z0-9]+/[a-z0-9]+$') {
+        throw "$source must be ONE target written os/arch (e.g. darwin/amd64); got '$value'."
+    }
+    if ($Universe -cnotcontains $value) {
+        throw "$source names $value, which is not a target of the corpus universe ($($Universe -join ', '))."
+    }
+    if ($HostGoos -and $value.Split('/')[0] -cne $HostGoos) {
+        throw "$source names $value, but this host's GOOS is ${HostGoos}: a -tests row runs its converted host on this machine."
+    }
+
+    return $value
+}
+
 # The RID this sweep's converted host runs as, for a segment's per-RID note (Get-RosterRowExpectation -Rid): os-matrix's
 # RID when the leg sets it to one of the GOOS's RIDs ($RosterNoteRids), otherwise the host's architecture on that OS.
 # Empty on windows, where no note applies, so it resolves exactly as before.

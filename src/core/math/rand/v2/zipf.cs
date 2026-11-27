@@ -25,11 +25,13 @@ partial struct Zipf {
 }
 
 internal static float64 h⁔(/*this*/ ref Zipf z, float64 x) {
-    return math.Exp(z.oneminusQ * math.Log(z.v + x)) * z.oneminusQinv;
+    var evalᴛ1 = math.Log(z.v + x);
+    return math.Exp(z.oneminusQ * evalᴛ1) * z.oneminusQinv;
 }
 
 internal static float64 hinv⁔(/*this*/ ref Zipf z, float64 x) {
-    return math.Exp(z.oneminusQinv * math.Log(z.oneminusQ * x)) - z.v;
+    var evalᴛ1 = math.Log(z.oneminusQ * x);
+    return math.Exp(z.oneminusQinv * evalᴛ1) - z.v;
 }
 
 // NewZipf returns a Zipf variate generator.
@@ -51,7 +53,9 @@ public static ж<Zipf> NewZipf(ж<Rand> Ꮡr, float64 s, float64 v, uint64 imax)
     z.oneminusQinv = 1.0D / z.oneminusQ;
     z.hxm = z.h(z.imax + 0.5D);
     z.hx0minusHxm = z.h(0.5D) - math.Exp(math.Log(z.v) * (-z.q)) - z.hxm;
-    z.s = 1D - z.hinv(z.h(1.5D) - math.Exp(-z.q * math.Log(z.v + 1.0D)));
+    var evalᴛ1 = z.h(1.5D);
+    var evalᴛ2 = math.Log(z.v + 1.0D);
+    z.s = 1D - z.hinv(evalᴛ1 - math.Exp(-z.q * evalᴛ2));
     return z;
 }
 

@@ -54,15 +54,29 @@ internal static uintptr memhashFallback(@unsafe.Pointer p, uintptr seed, uintptr
             var seed1 = seed;
             var seed2 = seed;
             for (; l > 48; l -= 48) {
-                seed = mix((uintptr)(r8(p) ^ hashkey[1]), (uintptr)(r8(add(p, 8)) ^ seed));
-                seed1 = mix((uintptr)(r8(add(p, 16)) ^ hashkey[2]), (uintptr)(r8(add(p, 24)) ^ seed1));
-                seed2 = mix((uintptr)(r8(add(p, 32)) ^ hashkey[3]), (uintptr)(r8(add(p, 40)) ^ seed2));
+                var evalᴛ1 = r8(p);
+                var evalᴛ2 = add(p, 8);
+                var evalᴛ3 = r8(evalᴛ2);
+                seed = mix((uintptr)(evalᴛ1 ^ hashkey[1]), (uintptr)(evalᴛ3 ^ seed));
+                var evalᴛ4 = add(p, 16);
+                var evalᴛ5 = r8(evalᴛ4);
+                var evalᴛ6 = add(p, 24);
+                var evalᴛ7 = r8(evalᴛ6);
+                seed1 = mix((uintptr)(evalᴛ5 ^ hashkey[2]), (uintptr)(evalᴛ7 ^ seed1));
+                var evalᴛ8 = add(p, 32);
+                var evalᴛ9 = r8(evalᴛ8);
+                var evalᴛ10 = add(p, 40);
+                var evalᴛ11 = r8(evalᴛ10);
+                seed2 = mix((uintptr)(evalᴛ9 ^ hashkey[3]), (uintptr)(evalᴛ11 ^ seed2));
                 p = add(p, 48);
             }
             seed ^= (uintptr)((uintptr)(seed1 ^ seed2));
         }
         for (; l > 16; l -= 16) {
-            seed = mix((uintptr)(r8(p) ^ hashkey[1]), (uintptr)(r8(add(p, 8)) ^ seed));
+            var evalᴛ12 = r8(p);
+            var evalᴛ13 = add(p, 8);
+            var evalᴛ14 = r8(evalᴛ13);
+            seed = mix((uintptr)(evalᴛ12 ^ hashkey[1]), (uintptr)(evalᴛ14 ^ seed));
             p = add(p, 16);
         }
         a = r8(add(p, l - 16));

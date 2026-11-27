@@ -90,7 +90,10 @@ internal static void typeOps() {
     });
     var ftʗ1 = ft;
     run("1c field type", [GoFunc("typeOps.func3")] () => {
-        fmt.Println("1c", ftʗ1, ftʗ1.Elem(), ftʗ1.Elem().Kind());
+        var evalᴛ1 = ftʗ1.Elem();
+        var evalᴛ2 = ftʗ1.Elem();
+        var evalᴛ3 = evalᴛ2.Kind();
+        fmt.Println("1c", ftʗ1, evalᴛ1, evalᴛ3);
     });
     var ftʗ2 = ft;
     run("1d reflect.New elem", [GoFunc("typeOps.func4")] () => {
