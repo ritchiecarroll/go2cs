@@ -415,4 +415,49 @@ public class CgoLibrariesTests
     {
         Assert.ThrowsException<InvalidOperationException>(() => GoCgoLibraries.SideTable(typeof(object).Assembly, ProbeFileName("go2cssidex"), "go2cs_cgo_table_0"));
     }
+
+    // On windows a side library that does not load is refused with the loader's own error, so a missing dependency
+    // (126, ERROR_MOD_NOT_FOUND) reads apart from a file that is not a loadable image (193, ERROR_BAD_EXE_FORMAT)
+    // (review of 823978ff1a, #4).
+    [TestMethod]
+    public void ASideLibraryThatDoesNotLoadIsRefusedWithTheLoadersErrorOnWindows()
+    {
+        if (!OperatingSystem.IsWindows())
+            Assert.Inconclusive("the loader's error code is windows' (LoadLibraryExW): NOT MEASURED on this host");
+
+        string missing = ProbeFileName("go2cssidemissingcode");
+        DllNotFoundException notFound = Assert.ThrowsException<DllNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, missing, "go2cs_cgo_table_0"));
+        StringAssert.Contains(notFound.Message, "windows error 126");
+
+        string bad = ProbeFileName($"go2cssidebadimage{Environment.ProcessId}");
+        File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(s_assembly.Location)!, bad), "not a portable executable"u8.ToArray());
+        DllNotFoundException badImage = Assert.ThrowsException<DllNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, bad, "go2cs_cgo_table_0"));
+        StringAssert.Contains(badImage.Message, "windows error 193");
+    }
+
+    // A side library whose absolute path is longer than MAX_PATH (260) loads on windows: the load names it with the \\?\
+    // prefix, which LoadLibraryExW takes for a fully qualified path of any length (review of 823978ff1a, #5).
+    [TestMethod]
+    public void ASideLibraryPastMaxPathLoadsOnWindows()
+    {
+        if (!OperatingSystem.IsWindows())
+            Assert.Inconclusive("MAX_PATH is windows': NOT MEASURED on this host");
+
+        string directory = Path.GetDirectoryName(s_assembly.Location)!;
+        string nested = $"go2csside-longpath-{Environment.ProcessId}";
+
+        while (Path.Combine(directory, nested).Length < 280)
+            nested = Path.Combine(nested, "a-directory-segment-that-lengthens-the-path");
+
+        string name = Path.Combine(nested, ProbeFileName("go2csside-long"));
+        string planted = Path.Combine(directory, name);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(@"\\?\" + planted)!);
+        File.Copy(SystemLibraryFile(), @"\\?\" + planted, overwrite: true);
+
+        nint table = GoCgoLibraries.SideTable(s_assembly, name, SideExport);
+
+        Assert.IsTrue(planted.Length > 260, $"the planted path is {planted.Length} characters");
+        Assert.AreNotEqual((nint)0, table, $"the side library at a {planted.Length}-character path loads and exports {SideExport}");
+    }
 }
