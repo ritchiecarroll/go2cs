@@ -276,6 +276,10 @@ the value `a` had before the call. Built with twins and run with `GO2CS_MN=1`, a
 evaluated ahead of the plain reads in its expression, as gc evaluates it, and then the program prints the value after
 the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
 unspecified behavior.
+With twins this also happens when the statement calls another function before the call that can wait, in a compound
+assignment (`s += f()` reads `s` after `f`), and when the value is converted to an interface for the call.
+<!-- 2026-11-25 (P4, row 19 movability, P3's NIT 6): rules M1, M2 and M4 move more twin sites to gc's order while
+     the plain body keeps C#'s left-to-right order; docs/phase4/DESIGN-mn-row19-movability.md section 4. -->
 
 **After a carrier stack could not be reserved, goroutines recurse to two depths.** Under the M:N scheduler each carrier
 thread reserves 1 GiB, or what a set `GO2CS_GOROUTINE_STACK` says ([Tuning](Tuning.md#goroutine-stacks)). A carrier
