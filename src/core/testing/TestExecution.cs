@@ -136,8 +136,12 @@ public sealed partial class TestExecution
     private int m_logsDropped;
     private int m_ownerThread;
     private Goroutine? m_ownerGoroutine;
-    // Set when Execute ran the test as its twin (DESIGN-mn-test-twin.md). A twin moves between carrier threads, so the
-    // owner check then compares goroutines (OnOwnersGoroutine); the plain path keeps the thread check.
+    // Set when Execute OFFERS the test's twin to Goroutine.RunTwin (DESIGN-mn-test-twin.md). RunTwin may still run the
+    // plain body on this thread (a goroutine locked to its thread), so this does not say the twin ran. It need not: a twin
+    // moves between carrier threads, so the owner check compares goroutines (OnOwnersGoroutine), and on the fallback the
+    // body runs on this thread as the owner goroutine, where the goroutine compare answers as the thread compare would
+    // (with no owner goroutine OnOwnersGoroutine is the thread compare). A test whose twin is not offered keeps the
+    // thread check.
     private bool m_twinPath;
     private int m_tempDirSequence;
 
@@ -2367,6 +2371,9 @@ public sealed partial class TestExecution
 
             // Under the M:N scheduler a top-level test with a twin runs as its twin, multiplexed (DESIGN-mn-test-twin.md).
             // With the scheduler off nothing below is read: the plain call is today's path, byte for byte.
+            // Q54 holds on this path too: a runtime lock the twin takes on a carrier is on the GOROUTINE's held list
+            // (runtime/lock_managed_impl.cs, RegisterMounted), which RunTwin's return mounts back on this thread, so
+            // the catches below abandon it here as on the plain path (GoroutineRunTwinTests, host-twin-abandons).
             if (GoScheduler.Enabled && m_parent is null && !m_isSynctest && TwinOf(action) is { } twin)
             {
                 m_twinPath = true;

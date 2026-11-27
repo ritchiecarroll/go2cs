@@ -102,7 +102,8 @@ G ruled the same day: "The cut is right; cut it now, for train 18." COORD set th
 - testing: `Execute` takes the twin path under the conditions above, and sets `m_twinPath`. On that path,
   `TryEnsureOwner` and `InOwnersBubble` compare `Goroutine.Current` with `m_ownerGoroutine`; otherwise they keep the
   thread check.
-- The red row lives in `src/tests/PackageTests/TwinTestHost` (`test-twin-test-host.ps1`, six arms). The fallbacks
+- The red row lives in `src/tests/PackageTests/TwinTestHost` (`test-twin-test-host.ps1`, six arms at the cut, fourteen
+  after the review folds in 6.1). The fallbacks
   are GolibTests rows in a child process (`GoroutineRunTwinTests`).
 
 **Measured on R-LAPTOP:**
@@ -116,7 +117,8 @@ G ruled the same day: "The cut is right; cut it now, for train 18." COORD set th
   - D, `t.Fatal` inside the twin: a test FAIL, not an infrastructure error.
   - E, `t.Fatal` from a started goroutine: still refused.
   - F, `t.Parallel` and then a park: parks=22.
-- `sensed=` reads n/a until N5's step 3a merges.
+- `sensed=` reads n/a until N5's step 3a merges. At the merged tree it read 0 on every arm. That is the design, not a
+  short gate: see 6.1.
 - Each gate was made to fail once, then restored byte-identical:
 
   | Gate | Plant | Red |
@@ -124,3 +126,57 @@ G ruled the same day: "The cut is right; cut it now, for train 18." COORD set th
   | Build | Pre-cut targets | CS1555 "Could not find 'go.GoTwinEntry'" |
   | PublicSurface | Drop the RunTwin line | A violation that names it |
   | RunTwin rows | Drop the locked-thread fallback | Exactly the `locked` row |
+
+### 6.1 Review folds (amended 2026-11-27, after `5015b12085`)
+
+The account A reviewer read `5015b12085` as clear with nits (via COORD). G approved it for train 18 and corrected one
+reading. The folds:
+
+- **Q54 on the twin path: measured, and it holds as cut.** The reviewer read the held-lock list as the carrier's
+  thread state, so a twin panicking between `lock2` and `unlock2` would leave the lock held while `Execute` abandoned
+  on the test's thread.
+  - Under M:N the list is the goroutine's (`runtime/lock_managed_impl.cs`, `RegisterMounted`, row 11). It moves with
+    the goroutine, and `RunTwin`'s return mounts it back on the test's thread, where `Execute`'s existing catch
+    abandons it.
+  - I wrote a carrier-side filter first. With it removed, the new row stayed green, so I dropped it.
+  - The new rows, in `GoroutineRunTwinTests`:
+    - `host-twin-abandons`: a twinned test, run through the real `TestRunner`, takes runtime lock probe 0 on a carrier
+      and panics. The next locker must die by name.
+    - `host-plain-abandons`: the plain control.
+  - A comment at `Execute`'s twin call says why the abandon holds there.
+- **Three more arms.** They are named H, I and J because G took the letter G.
+  - H: a panic in the twin is a test FAIL with "panic: twin panic", not an infrastructure error.
+  - I: `runtime.Goexit` in the twin is a FAIL with "test executed panic(nil) or runtime.Goexit".
+  - J: `t.Skip` in the twin is a SKIP.
+  - Each also runs plain (H0, I0, J0). The plain verdict is the one its twin arm must give.
+- **`m_twinPath`** is reworded: it says the twin was OFFERED to `RunTwin`, not that it ran. On `RunTwin`'s fallback
+  the body runs on the test's thread as the owner goroutine, where the goroutine compare answers as the thread compare
+  does.
+- **`sensed=0` is the design, not a short gate.** This is G's correction and G's measurement, on `5015b12085`.
+  - N5 3a senses only when work waits for a P (a run queue that is not empty, or a P waiter). At 12 procs nothing
+    waits, so nothing is sensed however long the gate is held.
+  - G's control: the fixture plus `TestSerialParks` (`Sum(200)`), run after `TestParallelParks` with
+    `-test.timeout=60s`, one run each:
+
+    | Run | Setting | Result |
+    |---|---|---|
+    | G1 | `GOMAXPROCS=1` | both pass, sensed=1, injections=0, 775 ms |
+    | G2 | `GOMAXPROCS=1`, `GO2CS_MN_SENSE=0` | both pass, sensed=0, injections=203, 3772 ms (3c rescues it, about 5x slower) |
+    | G3 | 12 procs | both pass, sensed=0, injections=0 |
+
+  - G's trap: tests run in file-name order. A serial test that sorts first finds the gate not yet held.
+  - Added as arm G (G1) and G0 (G2), with the serial test in `zserial_test.go`.
+  - R-LAPTOP reads G: parks=125, sensed=1. G0: parks=125, sensed=0.
+  - P6's arm M runs at `GOMAXPROCS=1`, so `sensed > 0` is expected on modules that use `t.Parallel` heavily.
+- **Arm D asserted nothing about the twin.** It held on the plain path before the cut, and it held again under the
+  "no twin path" plant below. It now requires parks > 0, as H-J do. In the green run it reads parks=3.
+- **A trap in the fixture.** The script does not remove the C# emitted for a Go file that no longer exists. A renamed
+  test file leaves its old `.cs` building beside the new one; clean the directory with `git clean -fdX`.
+
+All 14 arms hold on R-LAPTOP. Each new gate was made to fail, then restored byte-identical:
+
+| Gate | Plant | Red |
+|---|---|---|
+| `host-twin-abandons` | the mounted held-lock swap made a no-op | exactly that row: "the next locker is still polling" (the plain control stays green) |
+| Arm G | the serial test in `aserial_test.go`, which sorts first | exactly G: sensed=0 |
+| The twin conjunct of A, D, F, G, G0, H, I, J | `Execute` never takes the twin path | A, F, G, G0, H, I, J. D passed, which is how its gap was found; B, C, E, H0, I0 and J0 hold |

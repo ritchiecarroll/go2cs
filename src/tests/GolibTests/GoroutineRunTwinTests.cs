@@ -10,10 +10,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using go;
 using go.golib;
+using go.testing_runtime;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GolibTests;
@@ -23,14 +25,20 @@ namespace GolibTests;
 // when it is already multiplexed; otherwise the goroutine leaves its thread, runs the twin multiplexed, and comes back.
 // GO2CS_MN is read once per process, so each mode runs in a CHILD. Every row prints its own line, and the parent
 // requires each line by name: a child that stopped early, or a row that never ran, fails here, not silently.
+// The host rows run a test through the real test host (TestRunner), its twin stamped by hand as go2cs-gen stamps one:
+// a test that panics holding a runtime lock (Q54, runtime/lock_managed_impl.cs) must leave the lock abandoned, so the
+// next locker dies by name. Under the scheduler the twin takes the lock on a CARRIER, and the test host abandons on the
+// test's own thread: that holds because the held list is the goroutine's (runtime/lock_managed_impl.cs, RegisterMounted)
+// and RunTwin's return mounts it back. Negative control: that mounted swap made a no-op -> host-twin-abandons reads the
+// next locker still polling at its deadline; host-plain-abandons (the plain path) is unchanged.
 [TestClass]
 public class GoroutineRunTwinTests
 {
     // "mn" or "default": which scheduler the parent started the child under.
     private const string ChildVariable = "GO2CS_TEST_RUNTWIN_CHILD";
 
-    private static readonly string[] s_mnRows = ["twin-runs", "panic-carried", "no-goroutine", "locked", "already-multiplexed"];
-    private static readonly string[] s_defaultRows = ["scheduler-off"];
+    private static readonly string[] s_mnRows = ["twin-runs", "panic-carried", "no-goroutine", "locked", "already-multiplexed", "host-twin-abandons"];
+    private static readonly string[] s_defaultRows = ["scheduler-off", "host-plain-abandons"];
 
     // The CHILD. Run on its own (no variable) it does nothing.
     [TestMethod]
@@ -53,6 +61,10 @@ public class GoroutineRunTwinTests
                 Assert.AreSame(entered, Goroutine.Current, "scheduler off: the goroutine never left");
             });
             Row("scheduler-off");
+
+            // The control: the plain path abandons on the test's own thread, as it always has.
+            HostRunsLockThenPanic(twin: false);
+            Row("host-plain-abandons");
             return;
         }
 
@@ -132,6 +144,94 @@ public class GoroutineRunTwinTests
             Assert.IsTrue(inner.body && !inner.twin, "already multiplexed: body ran, twin did not");
         });
         Row("already-multiplexed");
+
+        // The test host's twin path: the twin takes the lock on a carrier and panics; the lock must be abandoned.
+        HostRunsLockThenPanic(twin: true);
+        Row("host-twin-abandons");
+    }
+
+    // Runs LockHost.TestLockThenPanic through the test host, then takes the same lock on a fresh goroutine, which must
+    // die by name on the abandoned key instead of polling.
+    private static void HostRunsLockThenPanic(bool twin)
+    {
+        LockHost.Reset();
+
+        try
+        {
+            TestRegistry registry = new("runtwin", []);
+            registry.Add(nameof(LockHost.TestLockThenPanic), LockHost.TestLockThenPanic, "runtwin_test.go", 1);
+            TestReporter reporter = new("runtwin", json: false, verbose: false);
+            TestRunner runner = new(registry, TestOptions.Parse([]), reporter, ".", ".");
+
+            Assert.IsTrue(Task.Run(runner.RunAll).Wait(TimeSpan.FromSeconds(60)), "RunAll did not return within 60 s");
+            Assert.IsTrue(reporter.Events.Any(e => e.Test == nameof(LockHost.TestLockThenPanic) && e.Action == "fail"), "the test that panicked did not fail");
+            Assert.AreEqual(twin, LockHost.TwinRan, twin ? "the test ran plain, not as its twin" : "the twin ran with the scheduler off");
+            Assert.IsTrue(LockHost.Locked, "the test never took the lock");
+
+            string? died = null;
+            Exception? failure = null;
+            using ManualResetEventSlim done = new(false);
+
+            Goroutine.Start(() =>
+            {
+                try
+                {
+                    runtime_package.GoRuntimeLockProbeLock(0);
+                    runtime_package.GoRuntimeLockProbeUnlock(0);
+                }
+                catch (PanicException ex)
+                {
+                    died = ex.Message;
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                }
+                finally
+                {
+                    done.Set();
+                }
+            });
+
+            Assert.IsTrue(done.Wait(TimeSpan.FromSeconds(10)), "the next locker is still polling: the lock was never abandoned");
+            Assert.IsNull(failure, $"the next locker failed outside a panic: {failure}");
+            Assert.IsNotNull(died, "the next locker took the lock: it was left unlocked, not abandoned");
+            StringAssert.Contains(died, "runtime lock abandoned by goroutine", "the next locker dies by name");
+            StringAssert.Contains(died, "died holding probe 0", "the panic names the reason the test died");
+        }
+        finally
+        {
+            runtime_package.GoRuntimeLockProbeReset(0);
+        }
+    }
+
+    // A test function and its twin, stamped as go2cs-gen stamps one, for the test host's lookup (TestExecution.TwinOf).
+    private static class LockHost
+    {
+        internal static volatile bool TwinRan;
+        internal static volatile bool Locked;
+
+        internal static void Reset()
+        {
+            TwinRan = false;
+            Locked = false;
+        }
+
+        public static void TestLockThenPanic(ж<testing_package.T> t)
+        {
+            runtime_package.GoRuntimeLockProbeLock(0);
+            Locked = true;
+            throw new PanicException("died holding probe 0");
+        }
+
+        [GoTwinOf(typeof(LockHost), nameof(TestLockThenPanic), [typeof(ж<>)], [], [])]
+        public static async GoTask TestLockThenPanicꞏtwin(ж<testing_package.T> t)
+        {
+            TwinRan = true;
+            runtime_package.GoRuntimeLockProbeLock(0);
+            Locked = true;
+            throw new PanicException("died holding probe 0");
+        }
     }
 
     [TestMethod]

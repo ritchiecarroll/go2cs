@@ -1,6 +1,9 @@
 package twintesthost
 
-import "testing"
+import (
+	"runtime"
+	"testing"
+)
 
 // TestParks parks on a channel and in a select. Run as its twin under GO2CS_MN=1, the reading counts its parks.
 func TestParks(t *testing.T) {
@@ -48,6 +51,33 @@ func TestFatalFromGoroutine(t *testing.T) {
 		fatal("from a goroutine the test started")
 	}()
 	<-done
+}
+
+// TestPanicInTwin parks, then panics on the test's own goroutine. DELIBERATELY FAILS: the panic leaves the twin on a
+// carrier and is rethrown on the test's thread, and the host must report it as the plain path does ("panic: ..."), as a
+// failed test and not as an infrastructure error. Go's own binary would die here; the host fails this one test.
+func TestPanicInTwin(t *testing.T) {
+	if got := Sum(10); got != 45 {
+		t.Fatalf("Sum(10) = %d, want 45", got)
+	}
+	panic("twin panic")
+}
+
+// TestGoexitInTwin parks, then calls runtime.Goexit on the test's own goroutine. DELIBERATELY FAILS, as Go's tRunner
+// fails it: "test executed panic(nil) or runtime.Goexit".
+func TestGoexitInTwin(t *testing.T) {
+	if got := Sum(10); got != 45 {
+		t.Fatalf("Sum(10) = %d, want 45", got)
+	}
+	runtime.Goexit()
+}
+
+// TestSkipInTwin parks, then calls t.Skip on the test's own goroutine: the test is skipped, not failed.
+func TestSkipInTwin(t *testing.T) {
+	if got := Sum(10); got != 45 {
+		t.Fatalf("Sum(10) = %d, want 45", got)
+	}
+	t.Skip("twin skip")
 }
 
 // TestPlainOnly never parks, so it has no twin and runs plain even under GO2CS_MN=1: the near-miss.
