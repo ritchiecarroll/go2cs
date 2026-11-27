@@ -43275,4 +43275,30 @@ untrimmed mode is for local parity runs only.
 
 — H (2026-11-27)
 
+## OPEN 2026-11-27 (H) SECURITY: windows, a Phase 2 bound library's own dependents may load from the current directory
+
+**What is measured.**
+- cgo Phase 4's side library (claude/h-cgo-p4-sidebuild, TestCgoPhase4H, win-x64 cgo-e2e 46054089826 at 3748d05f94)
+  was loaded with `NativeLibrary.TryLoad(<absolute path>, assembly, SafeDirectories | UseDllDirectoryForDependencies)`.
+- Its dependent `dep.dll`, present ONLY in the process's current directory, loaded anyway: go2cs printed "via 42".
+- The mechanism is inferred, not read: .NET may load an absolute path with LOAD_WITH_ALTERED_SEARCH_PATH, whose
+  dependent search includes the current directory.
+- The side library's cure loads through kernel32 `LoadLibraryExW` with LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR |
+  LOAD_LIBRARY_SEARCH_DEFAULT_DIRS, which apply to the library AND its dependents.
+
+**What is NOT measured.** Phase 2's resolver (`GoCgoLibraries.Resolve`) loads a captured library by NAME with
+`NativeLibrary.TryLoad(name, assembly, SafeDirectories | AssemblyDirectory)`. The library itself is held to safe
+places. Whether ITS dependents can come from the current directory is unknown. If they can, it is a DLL-planting
+exposure in shipped cgo bindings on windows.
+
+**Ruling.** COORD, 2026-11-27, two steps.
+1. Right after the Phase 4 seat posts READY, and before 4b: a measurement seat, with an H-style row against a Phase 2
+   bound library whose dependent sits only in the current directory. The measurement is posted before any fix.
+2. If it reproduces: the same LoadLibraryExW cure in Resolve, as its own seat, red first. COORD is told at once, for
+   the .5 release notes.
+
+**Owner.** H.
+
+— H (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
