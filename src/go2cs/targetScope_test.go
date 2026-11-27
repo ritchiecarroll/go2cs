@@ -221,12 +221,12 @@ func f(options Options, scope goosScope) {
 
 // TestTargetScopedRegistrationConvertsEndToEnd converts a module whose package holds a function, a pointer-receiver
 // method and a package var, each registered for darwin/arm64 alone, through the whole package conversion, at
-// windows/amd64, darwin/amd64 and darwin/arm64, with literal hoisting on. Each run must finish with no dropped file
-// (GO2CS2008) and no panic, and each registered declaration is displaced at darwin/arm64 and emitted at the other
-// two. The fixture reaches the registry lookups in the array-dims facts, the emission, the hoisted-literal pass
-// (hoistedLiteralOperations.go, which a user package reaches only with hoistLiterals) and both hand-owned-member
-// passes (fieldAccess.go, methods and vars). manualTypeReceiverRefusal.go's lookup needs a pointer-receiver method
-// whose receiver is refused, and is a follow-up on the BOARD. TestRegistryLookupsReceiveTheFullTarget reads converter source for a registry callee
+// windows/amd64, darwin/amd64 and darwin/arm64, with hoistLiterals on to mirror the stdlib's mode. Each run must
+// finish with no dropped file (GO2CS2008) and no panic, and each registered declaration is displaced at darwin/arm64
+// and emitted at the other two. The fixture reaches the registry lookups in the array-dims facts, the emission, the
+// hoisted-literal pass (hoistedLiteralOperations.go, which runs in both modes and reads the registry before its
+// hoist gate) and both hand-owned-member passes (fieldAccess.go, methods and vars). manualTypeReceiverRefusal.go's
+// lookup runs only in a package with a manual type, and is a follow-up on the BOARD. TestRegistryLookupsReceiveTheFullTarget reads converter source for a registry callee
 // handed goosOfTarget(...) directly, so it cannot see a GOOS stored first and passed later: the array-dims facts
 // did exactly that (arrayDimsInputs held the GOOS in a field), goosScope.includes panicked on the os/arch entry,
 // and every target dropped internal/cpu's cpu.go until a five-target emission found it. This test reads every pass

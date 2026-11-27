@@ -43005,10 +43005,13 @@ P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `
   end-to-end arm.** `TestTargetScopedRegistrationConvertsEndToEnd` now reaches the reads in `arrayDimsCompanion.go`,
   `hoistedLiteralOperations.go` and both `fieldAccess.go` sites (methods and vars), each made red at three targets by
   passing a bare GOOS. The read in `manualTypeReceiverRefusal.go:94` (`isManualFuncDeclInPackage(pkg.PkgPath, target,
-  funcDecl)`) is not reached: it runs only in a package with a manual type (`manualConversionTypes`, runtime's
-  guintptr family), for a pointer-receiver method that converts its own receiver to that type, and the lookup is what
-  exempts a method displaced for the target. Owed: a fixture with such a method displaced for one target, converted at
-  every target, so a bare GOOS there refuses (or exempts) at the wrong targets.
+  funcDecl)`) is not reached. It runs for every bodied pointer-receiver method with a named receiver in a package
+  that has a `manualConversionTypes` entry (runtime's guintptr family), before the check for a conversion of the
+  receiver to a manual type, and it is what exempts a method displaced for the target. A bare GOOS there panics in
+  `goosScope.includes`; it does not answer wrongly. Owed: a fixture in a package with a manual type, holding a
+  pointer-receiver method registered for one target, converted at every target. The method's receiver type must not
+  itself be a manual type, because `isManualFuncDeclInPackage` returns true for any method of one before it reads the
+  target (`manualTypeOperations.go:3061-3065`).
 
 — P5 (2026-11-27)
 

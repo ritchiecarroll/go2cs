@@ -44,9 +44,10 @@ workarounds.
 The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library
 in the macOS packages is the `darwin/amd64` build, and the same packages serve Intel and Apple-silicon Macs. The
 repository also converts a `darwin/arm64` flavour of the standard library, but until the packages carry it, the
-`osx-arm64` package ships the `darwin/amd64` build. A `go2cs -tests` run made by hand on an Apple-silicon Mac converts
-and builds that `darwin/arm64` flavour, which no published test result covers yet: the validated macOS results are
-read on the `darwin/amd64` build. On an Apple-silicon Mac a converted program runs as a native arm64
+`osx-arm64` package ships the `darwin/amd64` build. A `go2cs -tests` run made by hand on an Apple-silicon Mac with an
+arm64-native `go2cs` converts and builds that `darwin/arm64` flavour, which no published test result covers yet: the
+validated macOS results are read on the `darwin/amd64` build. A `go2cs` running under Rosetta defaults to
+`darwin/amd64`. On an Apple-silicon Mac a converted program runs as a native arm64
 .NET process:
 - `runtime.GOARCH` reads `arm64`, as Go's own program on the same Mac does. It is read from the process when the
   program starts, and the `GOARCH` setting that `debug.ReadBuildInfo` returns and `go/build`'s default context

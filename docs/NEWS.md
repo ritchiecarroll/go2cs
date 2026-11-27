@@ -1174,7 +1174,7 @@ reported it abandoned instead of its own result. `t.Deadline()` now reports the 
      time"; GolibTests ProfilerOwnAllocationTests, child-process bound; found as an 84-minute hang of GolibTests Debug in
      batch 283's battery; no platform named). GOARCH: merge 26186c1739 (28cfcf657e darwin, 030725e30e windows: Windows on
      Arm UNMEASURED, no package ships for it; osx-arm64 debug/buildinfo 211, net/http/pprof 15, go/build 57, gcimporter
-     634 validate per the merge subject); KnownIssues.md:38-64#23634e already describes the behaviour; NEWS 1.26.10.3 (line
+     634 validate per the merge subject); KnownIssues.md:38-65#25f8b2 already describes the behaviour; NEWS 1.26.10.3 (line
      229) called it planned work. FuncForPC: merge 40b021f8c4 (b20b20c5db; rows read as master on linux, darwin both
      RIDs and windows). os.Args: merge 813f55b5e8 (6a87a161f4: GolibTests WindowsCommandLineTests, windows/amd64; the
      self-re-exec limitation is disclosed in the hand-own's header). recvfrom: merge 872df69010 (9d31496d45:
