@@ -81,7 +81,7 @@ internal static class InternalCpuArm64Reading
         return boxed.GetType()
             .GetFields(BindingFlags.Public | BindingFlags.Instance)
             .Where(f => f.FieldType == typeof(bool))
-            .ToDictionary(f => f.Name, f => (bool)f.GetValue(boxed)!, StringComparer.Ordinal);
+            .ToDictionary(f => f.Name, f => f.Name == "HasCRC32" ? !(bool)f.GetValue(boxed)! : (bool)f.GetValue(boxed)!, StringComparer.Ordinal);
     }
 
     /// <summary>
