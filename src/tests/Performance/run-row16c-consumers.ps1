@@ -83,6 +83,12 @@
 .PARAMETER SampleSeconds
     The AOT publish's CPU is sampled this often into the arm's aot-cpu.log (default 60).
 
+.PARAMETER PublishArgs
+    Extra arguments appended to every arm's AOT `dotnet publish`, the same in all three arms, so T3 still compares like
+    with like. TypeScript-go-cs needs '-p:TrimMode=full','-p:NativeDebugSymbols=false' (COORD's ruling 2026-11-27: its
+    default TrimMode=partial failed in ILC with "Stream was too long" after about 3 hours; full with no native symbols
+    is the one known-good publish). The readings print them.
+
 .PARAMETER DryRun
     Print every command each arm would run, in order, and exit 0. Nothing is deleted, built or run.
 
@@ -108,6 +114,7 @@ param(
     [string] $OutDir = '',
     [int]    $DiskFloorGB = 30,
     [int]    $SampleSeconds = 60,
+    [string[]] $PublishArgs = @(),
     [switch] $DryRun,
     [string] $ScoreFrom = ''
 )
@@ -150,6 +157,9 @@ function Write-Readings([hashtable] $arms, [string] $dir, [string] $headLine)
     foreach ($a in $armNames)
     {
         $x = $arms[$a]
+        $tn = if ($x.PSObject.Properties.Name -contains 'twinNames') { "$($x.twinNames) in $($x.twinAssemblies) go.*.dll" } else { 'not counted' }
+        $pa = if ($x.PSObject.Properties.Name -contains 'publishArgs' -and $null -ne $x.publishArgs -and @($x.publishArgs).Count -gt 0) { @($x.publishArgs) -join ' ' } else { '(none)' }
+        $md.Add("    arm ${a}: twin names=$tn; extra publish args: $pa")
         $md.Add("    arm ${a}: sha=$($x.sha) twinned=$($x.twinned) runs=$($x.runs) jit-build=$($x.jitBuildSeconds)s aot-publish=$(if ($null -eq $x.aotPublishSeconds) { 'n/a' } else { "$($x.aotPublishSeconds)s" }) stdout=$($x.stdoutSha16) warnings $($warningIds -join '/')=$($x.warnings -join '/')")
     }
     $rehearsal = @($armNames | Where-Object { $arms[$_].noAot -or $arms[$_].runs -lt 3 })
@@ -298,7 +308,8 @@ if ($OutDir -eq '') { $OutDir = Join-Path ([IO.Path]::GetTempPath()) ("row16c-$L
 
 $buildArgs   = @('build', $Project, '-c', 'Release', "-p:GoTargetOS=$GoTargetOS", '-p:UseSharedCompilation=false', '-nodeReuse:false')
 $pathArgs    = @('msbuild', $Project, '-getProperty:TargetPath', '-p:Configuration=Release', "-p:GoTargetOS=$GoTargetOS")
-$publishArgs = @('publish', $Project, '-c', 'Release', '-r', $rid, '-p:PublishAot=true', "-p:GoTargetOS=$GoTargetOS", '-p:UseSharedCompilation=false', '-nodeReuse:false')
+# PowerShell names are case-insensitive: this must not be called $publishArgs, or it overwrites -PublishArgs.
+$aotCommandArgs = @('publish', $Project, '-c', 'Release', '-r', $rid, '-p:PublishAot=true', "-p:GoTargetOS=$GoTargetOS", '-p:UseSharedCompilation=false', '-nodeReuse:false') + $PublishArgs
 
 function Format-Cmd([string] $exe, [string[]] $a) { return ($exe + ' ' + (($a | ForEach-Object { if ($_ -match '\s') { "`"$_`"" } else { $_ } }) -join ' ')) }
 
@@ -315,10 +326,11 @@ if ($DryRun)
         Write-Host "  delete bin/obj/Generated/.artifacts under $coreDir and $ConsumerRoot"
         Write-Host "  $(Format-Cmd 'dotnet' $buildArgs)   > $a.jit-build.log"
         Write-Host "  $(Format-Cmd 'dotnet' $pathArgs)   -> <dll>"
+        Write-Host "  count twin method names in <dll dir>/go.*.dll: $(if ($tw) { 'must exceed plainA''s' } elseif ($a -eq 'plainA') { 'the plain baseline' } else { 'must equal plainA''s' })"
         Write-Host "  dotnet <dll> <$($progArgs.Count) args>   x$($Runs + 1) (first discarded), cwd $WorkDir"
         if (-not $NoAot)
         {
-            Write-Host "  $(Format-Cmd 'dotnet' ($publishArgs + @('-o', (Join-Path $OutDir "$a/aot"))))   > $a.aot-publish.log, CPU sampled every ${SampleSeconds}s"
+            Write-Host "  $(Format-Cmd 'dotnet' ($aotCommandArgs + @('-o', (Join-Path $OutDir "$a/aot"))))   > $a.aot-publish.log, CPU sampled every ${SampleSeconds}s"
             Write-Host "  <aot exe> <$($progArgs.Count) args>   x$($Runs + 1) (first discarded); size in bytes"
         }
         Write-Host "  count $($warningIds -join '/') in both logs; write $a.json"
@@ -406,6 +418,23 @@ function Invoke-Child([string] $exe, [string[]] $a, [string] $cwd, [string] $log
     return @{ Code = $p.ExitCode; Seconds = $sw.Elapsed.TotalSeconds; Stdout = $bytes; Stderr = $errTask.Result }
 }
 
+# Twin methods are named with TwinGenerator.Suffix (U+A78F then 'twin'). Count that name's UTF-8 bytes in the metadata
+# of every go.*.dll beside the consumer: the converted standard library's assemblies. golib is excluded by rule from
+# twinning but carries the name in its own support code (6 occurrences at 317b273e58), so it is not counted.
+$script:twinNeedle = [Text.Encoding]::Latin1.GetString([Text.Encoding]::UTF8.GetBytes([string][char]0xA78F + 'twin'))
+function Count-TwinNames([string] $dir)
+{
+    $names = 0; $assemblies = 0
+    foreach ($f in @(Get-ChildItem -LiteralPath $dir -Filter 'go.*.dll' -File))
+    {
+        $assemblies++
+        $text = [Text.Encoding]::Latin1.GetString([IO.File]::ReadAllBytes($f.FullName))
+        $i = 0
+        while (($i = $text.IndexOf($script:twinNeedle, $i, [StringComparison]::Ordinal)) -ge 0) { $names++; $i += $script:twinNeedle.Length }
+    }
+    return @{ Names = $names; Assemblies = $assemblies }
+}
+
 function Get-Sha16([byte[]] $b) { return [BitConverter]::ToString([Security.Cryptography.SHA256]::HashData($b)).Replace('-', '').Substring(0, 16) }
 
 $script:firstStdout = $null
@@ -476,6 +505,17 @@ function Invoke-Arm([string] $arm, [bool] $twinned)
         $tp = Invoke-Child 'dotnet' $pathArgs $WorkDir '' ''
         $dll = [Text.Encoding]::UTF8.GetString($tp.Stdout).Trim()
         if ($tp.Code -ne 0 -or -not (Test-Path -LiteralPath $dll)) { Fail "arm ${arm}: cannot read TargetPath ('$dll')" }
+        # The arm's standard library is what the flag says it is: twin methods present in the twins arm, absent in
+        # the plain arms. Without this the twins arm rests on the switch alone (R's point, 2026-11-27).
+        $twinNames = Count-TwinNames (Split-Path -Parent $dll)
+        Write-Host "   $arm twin method names in go.*.dll: $($twinNames.Names) across $($twinNames.Assemblies) assemblies"
+        if ($twinNames.Assemblies -eq 0) { Fail "arm ${arm}: no go.*.dll beside $dll to check for twins" }
+        # A plain standard library is not twin-free: its hand-written park points (sync's Lock, time's Sleep, and the
+        # other packages' references to them) carry the name, 11 in the hello closure at 317b273e58. So plainA sets the
+        # baseline, plainB must match it, and the twins arm must exceed it.
+        if ($arm -eq 'plainA') { $script:plainTwinNames = $twinNames.Names }
+        elseif (-not $twinned -and $twinNames.Names -ne $script:plainTwinNames) { Fail "arm ${arm}: $($twinNames.Names) twin names, plainA built $($script:plainTwinNames); two plain builds of one tree differ" }
+        elseif ($twinned -and $twinNames.Names -le $script:plainTwinNames) { Fail "arm ${arm}: the twins arm built $($twinNames.Names) twin names, no more than plain's $($script:plainTwinNames); -TwinArm '$TwinArm' did not reach the standard library build" }
         $jit = Measure-Workload $arm 'JIT' 'dotnet' @($dll)
 
         $aot = $null; $aotBytes = $null; $aotSecs = $null; $logs = @($jitLog)
@@ -484,7 +524,7 @@ function Invoke-Arm([string] $arm, [bool] $twinned)
             $aotDir = Join-Path $OutDir "$arm/aot"
             $aotLog = Join-Path $OutDir "$arm.aot-publish.log"
             $logs += $aotLog
-            $pb = Invoke-Child 'dotnet' ($publishArgs + @('-o', $aotDir)) $WorkDir $aotLog (Join-Path $OutDir "$arm.aot-cpu.log")
+            $pb = Invoke-Child 'dotnet' ($aotCommandArgs + @('-o', $aotDir)) $WorkDir $aotLog (Join-Path $OutDir "$arm.aot-cpu.log")
             $aotSecs = [int]$pb.Seconds
             Write-Host ("   {0} AOT publish: exit {1} in {2:N0}s" -f $arm, $pb.Code, $pb.Seconds)
             if ($pb.Code -ne 0) { Fail "arm ${arm}: AOT publish exit $($pb.Code); read $aotLog" }
@@ -502,6 +542,7 @@ function Invoke-Arm([string] $arm, [bool] $twinned)
     $x = [ordered]@{
         leg = $Leg; arm = $arm; sha = $sha; twinned = $twinned; runs = $Runs; noAot = [bool]$NoAot
         jit = $jit.Median; jitWalls = $jit.Walls; jitBuildSeconds = [int]$b.Seconds
+        twinNames = $twinNames.Names; twinAssemblies = $twinNames.Assemblies; publishArgs = $PublishArgs
         aot = if ($null -eq $aot) { $null } else { $aot.Median }; aotWalls = if ($null -eq $aot) { @() } else { $aot.Walls }
         aotPublishSeconds = $aotSecs; aotBytes = $aotBytes
         stdoutSha16 = (Get-Sha16 $script:firstStdout); warnings = (Count-Warnings $logs)

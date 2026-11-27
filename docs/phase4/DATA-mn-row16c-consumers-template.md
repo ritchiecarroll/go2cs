@@ -56,6 +56,17 @@ go -C <tree>/src/go2cs build -o <bin>/go2cs .
   directory, as in R's tables (`ts-prof-r/README.md` on `claude/r-ts-prof-tables`). The native oracle is the 405-line
   stdout, hash `3EB1134A0D5BFF02` there.
 
+**The TypeScript convert exits 1, and that is expected when it is outside checkdemo** (COORD's ruling 2026-11-27,
+from R's dry run). Converting the whole module refuses 4 packages: `ls/lsconv`, `ls`, `project` and `fourslash`.
+None is in `cmd/checkdemo`'s closure. Accept the rc=1 only after checking every GO2CS error against the closure:
+
+```text
+go -C <module> list -deps ./cmd/checkdemo > checkdemo-closure.txt
+```
+
+Then confirm that no refused package path appears in it. Record the refused list and the check in "The box and the
+tree". A refused package INSIDE the closure is a stop: the consumer is not built, and T3 for it is NOT MEASURED.
+
 Do **not** use `-recurse=nuget`, and do not pass `-p:GoStdLibVersion`. Either builds against the published packages,
 so the switch would twin nothing. The script refuses a root whose `go2csPath` pin is not this tree's `src`.
 
@@ -74,8 +85,17 @@ From `src/tests/Performance` in the clone. Launch detached, with output to a fil
 
 ./run-row16c-consumers.ps1 -Leg typescript-go-cs -ConsumerRoot <out-ts> -Project <checkdemo.csproj> `
     -ArgsFile <units-101.args> -WorkDir <empty-dir> -ExpectedStdout <native-ts.txt> -Runs 5 `
+    -PublishArgs '-p:TrimMode=full','-p:NativeDebugSymbols=false' `
     -TwinArm 'GoStdlibTwins=true' -OutDir <results>/ts -DryRun
 ```
+
+- **`-PublishArgs`, for TypeScript-go-cs only** (COORD's ruling 2026-11-27). checkdemo's default `TrimMode=partial`
+  failed in ILC after about 3 hours with "Stream was too long". The one known-good publish is `TrimMode=full` with
+  `NativeDebugSymbols=false`: 2 h 21 m, 33.4 GB peak, on a 31.3 GB box. The same arguments go to all three arms, so
+  T3 still compares like with like. The readings print them per arm. If the publish still fails, run again with
+  `-NoAot` and report AOT NOT MEASURED. sqlite-cs takes no `-PublishArgs`.
+- Pass `-PublishArgs` from a PowerShell prompt or `pwsh -Command`. Under `pwsh -File`, a value that starts with `-`
+  is parsed as a parameter name, and the run refuses with "parameter name 'p' is ambiguous".
 
 Then the same lines without `-DryRun`.
 
@@ -105,6 +125,15 @@ Per arm:
 2. JIT leg:
    - `dotnet build <project> -c Release -p:GoTargetOS=<os>`, with output in `<arm>.jit-build.log`;
    - read the built assembly's path from MSBuild (`-getProperty:TargetPath`);
+   - **assert the arm's standard library is what the flag says** (R's point, 2026-11-27). Count the twin method names
+     (the generator's suffix, U+A78F then `twin`) in every `go.*.dll` beside the built assembly.
+     - A plain standard library is not twin-free. Its hand-written park points carry the name: `sync`'s `Lock`,
+       `time`'s `Sleep`, and other packages' references to them. That was 11 in the hello closure at 317b273e58,
+       against 6,814 twinned.
+     - So plainA's count is the baseline, plainB must equal it, and the twins arm must exceed it. Otherwise the arm
+       stops by name.
+     - golib is not counted: it is never twinned, but its support code carries the name (6).
+     - The count goes into `<arm>.json` and the readings;
    - run `dotnet <dll> <args>` once as a discarded warm-up, then `-Runs` measured times.
 3. AOT leg:
    - `dotnet publish <project> -c Release -r <rid> -p:PublishAot=true -p:GoTargetOS=<os> -o <results>/<arm>/aot`.
@@ -229,6 +258,22 @@ The miss is reported as read, and it is not evidence about T3 either way:
 
 What it does say: on a real T3 leg, -Runs must be large enough that the A/A band means something. That is why the
 template asks for 21 runs of sqlite's sub-second demo.
+
+**Second and third runs, after COORD's three folds (2026-11-27, same box, tree and consumer):**
+
+| run | -TwinArm | twin names plainA / plainB / twins | JIT medians plainA / plainB / twins (s) | JIT builds (s) | exit |
+|---|---|---|---|---|---|
+| positive | the switch | 11 / 11 / 6,814 | 0.531 / 0.569 / 0.632 | 250 / 261 / 439 | 2 (REHEARSAL; band 7.07%, beyond A/A 7.94%) |
+| negative control | `C2_NOT_A_SWITCH=1` | 11 / 11 / 11 | 0.619 / 0.575 / stopped | 284 / 266 / 269 | 1: "the twins arm built 11 twin names, no more than plain's 11" |
+
+- The twins check fired on the control and named it. It passed the real switch.
+- The control's twins build took 269 s, the same as plain. With the switch, the twins build took 439 s.
+- A first version of the check required a plain arm to count 0. It stopped both runs at plainA (11 names) before the
+  rule was corrected to the plainA baseline. Nothing of that version was pushed.
+- The JIT readings again say only that 2 runs of a 0.6 s program cannot resolve 3%:
+  - the A/A band alone was 7.07%;
+  - the second run's twins arm read 0.567 and 0.698 s.
+- The purged twins closure build over plain: 1.64x in the first run, 1.72x in the second.
 
 Not gated, reported: the purged closure build read 1.64x plain (584 / 355.5 s). That is in stage (c)'s 1.5-1.8x band
 for T2, on one hello closure on a shared box. It is not row 16b's reading.
