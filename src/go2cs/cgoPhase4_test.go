@@ -466,10 +466,20 @@ var cgoPhase4FileProgram = map[string]string{
 	"go2cs_file.h": "static char *go2cs_file(void) { return __FILE__; }\n",
 }
 
+// cgoPhase4OwnFileProgram is cgoPhase4FileProgram with the preamble's own __FILE__ beside the header's. cmd/cgo names
+// the preamble by its absolute path (cmd/cgo/ast.go, ParseGo: #line <n> "<abspath>"), which -trimpath's map turns into
+// /_/<module path>/main.go (review of 823978ff1a, #2). Untrimmed, go prints the absolute path, and go2cs keeps the
+// base name there, so as not to write a machine path into the side unit (the design, §2.2): the untrimmed arm reads
+// the header only.
+var cgoPhase4OwnFileProgram = map[string]string{
+	"main.go":      "package main\n\n/*\n#include \"go2cs_file.h\"\nstatic char *go2cs_own_file(void) { return __FILE__; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"file\", C.GoString(C.go2cs_file()), C.GoString(C.go2cs_own_file())) }\n",
+	"go2cs_file.h": cgoPhase4FileProgram["go2cs_file.h"],
+}
+
 // A header's __FILE__ is go's under each path mode: trimmed (go2cs's default, against go build -trimpath) and
-// untrimmed (-trimpath=false, against a plain go build).
+// untrimmed (-trimpath=false, against a plain go build). Trimmed, so is the preamble's own.
 func TestCgoPhase4IAHeadersFileNameIsGosUnderEachPathMode(t *testing.T) {
-	t.Run("trimmed", func(t *testing.T) { runCgoPhase4With(t, cgoPhase4Case{files: cgoPhase4FileProgram}) })
+	t.Run("trimmed", func(t *testing.T) { runCgoPhase4With(t, cgoPhase4Case{files: cgoPhase4OwnFileProgram}) })
 	t.Run("untrimmed", func(t *testing.T) { runCgoPhase4With(t, cgoPhase4Case{files: cgoPhase4FileProgram, untrimmed: true}) })
 }
 
