@@ -245,7 +245,7 @@ func (v *Visitor) valueMethodHasBoxTwin(fn *types.Func, sig *types.Signature) bo
 	}
 
 	if funcScopes, ok := manualConversionFuncs[pkgPath]; ok {
-		if scope, listed := funcScopes[recvName+"."+fn.Name()]; listed && scope.includes(goosOfTarget(v.options.targetPlatform)) {
+		if scope, listed := funcScopes[recvName+"."+fn.Name()]; listed && scope.includes(v.options.targetPlatform) {
 			return false
 		}
 	}

@@ -117,7 +117,8 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
             continue;
         }
         var (after, found) = strings.CutPrefix(k, httpˢ); if (found) {
-            r.Header.Add(strings.ReplaceAll(after, "_", "-"), v);
+            var evalᴛ1 = strings.ReplaceAll(after, "_", "-");
+            r.Header.Add(evalᴛ1, v);
         }
     }
 
@@ -166,7 +167,8 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
     // Request.RemoteAddr has its port set by Go's standard http
     // server, so we do here too.
     var (remotePort, _) = strconv.Atoi(@params[remotePortˢ]); // zero if unset or invalid
-    r.RemoteAddr = net.JoinHostPort(@params[remoteAddrˢ], strconv.Itoa(remotePort));
+    var evalᴛ2 = strconv.Itoa(remotePort);
+    r.RemoteAddr = net.JoinHostPort(@params[remoteAddrˢ], evalᴛ2);
 
     return (r, default);
 }
@@ -245,9 +247,11 @@ internal static void writeCGIHeader⁔(/*this*/ ref response r, slice<byte> p) {
         return;
     }
     r.wroteCGIHeader = true;
-    fmt.Fprintf(new bufio_WriterжWriter(r.bufw), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
+    var evalᴛ1 = http.StatusText(r.code);
+    fmt.Fprintf(new bufio_WriterжWriter(r.bufw), "Status: %d %s\r\n"u8, r.code, evalᴛ1);
     var (_, hasType) = r.header[contentTypeˢ2, ꟷ]; if (!hasType) {
-        r.header.Set(contentTypeˢ2, http.DetectContentType(p));
+        var evalᴛ2 = http.DetectContentType(p);
+        r.header.Set(contentTypeˢ2, evalᴛ2);
     }
     r.header.Write(new bufio_WriterжWriter(r.bufw));
     r.bufw.WriteString("\r\n");

@@ -132,7 +132,9 @@ internal static void main() {
     byStruct[new holder(p: nil)]++;
     byStruct[field]++;
     byStruct[new holder()]++;
-    fmt.Println(len(byStruct), byStruct[new holder(p: nil)], keyCount(new holder(p: nil), field, new holder()));
+    var evalᴛ1 = len(byStruct);
+    var evalᴛ2 = keyCount(new holder(p: nil), field, new holder());
+    fmt.Println(evalᴛ1, byStruct[new holder(p: nil)], evalᴛ2);
 }
 
 } // end main_package

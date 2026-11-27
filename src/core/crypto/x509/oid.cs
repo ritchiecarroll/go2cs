@@ -26,8 +26,8 @@ partial struct OID {
 // ParseOID parses a Object Identifier string, represented by ASCII numbers separated by dots.
 public static (OID, error) ParseOID(@string oid) {
     OID o = default;
-    var ᴛ1 = o.unmarshalOIDText(oid);
-    return (o, ᴛ1);
+    var evalᴛ1 = o.unmarshalOIDText(oid);
+    return (o, evalᴛ1);
 }
 
 internal static (OID, bool) newOIDFromDER(slice<byte> der) {

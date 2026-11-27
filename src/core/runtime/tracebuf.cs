@@ -205,7 +205,8 @@ internal static traceWriter refill⁔(/*this*/ traceWriter w) {
     w.varint((uint64)w.gen);
     w.varint(mID);
     w.varint((uint64)ts);
-    w.traceBuf.lenPos = w.varintReserve();
+    var evalᴛ1 = w.varintReserve();
+    w.traceBuf.lenPos = evalᴛ1;
     return w;
 }
 

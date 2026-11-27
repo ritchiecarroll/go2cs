@@ -70,8 +70,12 @@ internal static void archInitCastagnoli() {
     for (nint b = 0; b < 4; b++) {
         for (nint i = 0; i < 256; i++) {
             var val = ((uint32)i).Lsh((uint64)((uint32)(b * 8)));
-            castagnoliSSE42TableK1.Value[b][i] = castagnoliSSE42(val, tmp[..(int)(castagnoliK1)]);
-            castagnoliSSE42TableK2.Value[b][i] = castagnoliSSE42(val, tmp[..]);
+            var evalᴛ1 = tmp[..(int)(castagnoliK1)];
+            var evalᴛ2 = castagnoliSSE42(val, evalᴛ1);
+            castagnoliSSE42TableK1.Value[b][i] = evalᴛ2;
+            var evalᴛ3 = tmp[..];
+            var evalᴛ4 = castagnoliSSE42(val, evalᴛ3);
+            castagnoliSSE42TableK2.Value[b][i] = evalᴛ4;
         }
     }
 }

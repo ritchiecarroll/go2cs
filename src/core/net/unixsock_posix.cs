@@ -126,7 +126,8 @@ internal static (nint, ж<UnixAddr>, error) readFrom⁔(/*this*/ ref UnixConn c,
     switch (sa.type()) {
     case ж<syscall.SockaddrUnix> saΔ1: {
         if (saΔ1.Name != ""u8) {
-            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: sotypeToNet(c.fd.sotype)));
+            var evalᴛ1 = sotypeToNet(c.fd.sotype);
+            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: evalᴛ1));
         }
         break;
     }}
@@ -149,7 +150,8 @@ internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) re
     switch (sa.type()) {
     case ж<syscall.SockaddrUnix> saΔ1: {
         if (saΔ1.Name != ""u8) {
-            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: sotypeToNet(c.fd.sotype)));
+            var evalᴛ1 = sotypeToNet(c.fd.sotype);
+            addr = Ꮡ(new UnixAddr(Name: saΔ1.Name, Net: evalᴛ1));
         }
         break;
     }}
@@ -165,7 +167,8 @@ internal static (nint, error) writeTo⁔(/*this*/ ref UnixConn c, slice<byte> b,
     if (Ꮡaddr == nil) {
         return (0, errMissingAddress);
     }
-    if (addr.Net != sotypeToNet(c.fd.sotype)) {
+    var evalᴛ1 = sotypeToNet(c.fd.sotype);
+    if (addr.Net != evalᴛ1) {
         return (0, syscall.EAFNOSUPPORT);
     }
     var sa = Ꮡ(new syscall.SockaddrUnix(Name: addr.Name));
@@ -180,7 +183,8 @@ internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ref UnixConn
     }
     syscall.Sockaddr sa = default;
     if (Ꮡaddr != nil) {
-        if (addr.Net != sotypeToNet(c.fd.sotype)) {
+        var evalᴛ1 = sotypeToNet(c.fd.sotype);
+        if (addr.Net != evalᴛ1) {
             return (0, 0, syscall.EAFNOSUPPORT);
         }
         sa = new syscall.SockaddrUnixжSockaddr(Ꮡ(new syscall.SockaddrUnix(Name: addr.Name)));

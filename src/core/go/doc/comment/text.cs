@@ -165,7 +165,8 @@ internal static void text⁔(/*this*/ ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡ
     if (p.width < 0 || len(words) == 0) {
         seq = slice<nint>([0, len(words)]); // one long line
     } else {
-        seq = wrap(words, p.width - utf8.RuneCountInString(indent));
+        var evalᴛ1 = utf8.RuneCountInString(indent);
+        seq = wrap(words, p.width - evalᴛ1);
     }
     for (nint i = 0; i + 1 < len(seq); i++) {
         if (i > 0) {
@@ -285,7 +286,8 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     var total = new slice<nint>(len(words) + 1);
     total[0] = 0;
     foreach (var (i, s) in range(words)) {
-        total[1 + i] = total[i] + utf8.RuneCountInString(s) + 1;
+        var evalᴛ1 = utf8.RuneCountInString(s);
+        total[1 + i] = total[i] + evalᴛ1 + 1;
     }
 
     // weight returns weight(i, j).
@@ -316,18 +318,23 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     ref var f = ref heap<slice<wrap_score>>(slice<wrap_score>([new(0, 0)]), out var Ꮡf);
     var addʗ1 = add;
     var weightʗ1 = weight;
-    [GoFunc("wrap.func4")] wrap_score g(nint i, nint j) => addʗ1(Ꮡf.ValueSlot[i], weightʗ1(i, j));
+    [GoFunc("wrap.func4")] wrap_score g(nint i, nint j) {
+        var evalᴛ2 = weightʗ1(i, j);
+        return addʗ1(Ꮡf.ValueSlot[i], evalᴛ2);
+    }
 
     var cmpʗ1 = cmp;
     var gʗ1 = g;
     var wordsʗ2 = words;
     [GoFunc("wrap.func5")] bool bridge(nint a, nint b, nint c) {
+        var evalᴛ3 = len(wordsʗ2);
         var cmpʗ2 = cmpʗ1;
         var gʗ2 = gʗ1;
-        nint k = c + sort.Search(len(wordsʗ2) + 1 - c, [GoFunc("wrap.func5.1")] (nint kΔ1) => {
+        var evalᴛ4 = sort.Search(evalᴛ3 + 1 - c, [GoFunc("wrap.func5.1")] (nint kΔ1) => {
             kΔ1 += c;
             return cmpʗ2(gʗ2(a, kΔ1), gʗ2(b, kΔ1)) > 0;
         });
+        nint k = c + evalᴛ4;
         if (k > len(wordsʗ2)) {
             return true;
         }
@@ -340,7 +347,8 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     var bestleft = new slice<nint>(1, len(words));
     bestleft[0] = -1;
     for (nint m = 1; m < len(words); m++) {
-        f = append(fᴷ, f, g(d[0], m));
+        var evalᴛ5 = g(d[0], m);
+        f = append(fᴷ, f, evalᴛ5);
         bestleft = append(bestleftᴷ, bestleft, d[0]);
         while (len(d) > 1 && cmp(g(d[1], m + 1), g(d[0], m + 1)) <= 0) {
             d = d[1..]; // “Retire”

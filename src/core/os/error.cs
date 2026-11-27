@@ -51,7 +51,10 @@ partial struct SyscallError {
     public error Err;
 }
 
-internal static @string Error⁔(/*this*/ ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
+internal static @string Error⁔(/*this*/ ref SyscallError e) {
+    var evalᴛ1 = e.Err.Error();
+    return e.Syscall + ": "u8 + evalᴛ1;
+}
 
 internal static error Unwrap⁔(/*this*/ ref SyscallError e) { return e.Err; }
 

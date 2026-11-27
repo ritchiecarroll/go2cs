@@ -79,7 +79,8 @@ internal static @string debugCallCheck(uintptr pc) {
         }
 
         // Check that this isn't an unsafe-point.
-        if (pc != f.entry()) {
+        var evalᴛ1 = f.entry();
+        if (pc != evalᴛ1) {
             pc--;
         }
         var up = pcdatavalue(f, abi.PCDATA_UnsafePoint, pc);

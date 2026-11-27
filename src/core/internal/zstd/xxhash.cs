@@ -57,18 +57,33 @@ internal static void update⁔(/*this*/ ref xxhash64 xh, slice<byte> b) {
     if (xh.cnt > 0) {
         nint n = copy(xh.buf.slice(xh.cnt), b);
         b = b.slice(n);
-        xh.v[0] = xh.round(xh.v[0], binary.LittleEndian.Uint64(xh.buf[..]));
-        xh.v[1] = xh.round(xh.v[1], binary.LittleEndian.Uint64(xh.buf[8..]));
-        xh.v[2] = xh.round(xh.v[2], binary.LittleEndian.Uint64(xh.buf[16..]));
-        xh.v[3] = xh.round(xh.v[3], binary.LittleEndian.Uint64(xh.buf[24..]));
+        var evalᴛ1 = xh.buf[..];
+        var evalᴛ2 = binary.LittleEndian.Uint64(evalᴛ1);
+        xh.v[0] = xh.round(xh.v[0], evalᴛ2);
+        var evalᴛ3 = xh.buf[8..];
+        var evalᴛ4 = binary.LittleEndian.Uint64(evalᴛ3);
+        xh.v[1] = xh.round(xh.v[1], evalᴛ4);
+        var evalᴛ5 = xh.buf[16..];
+        var evalᴛ6 = binary.LittleEndian.Uint64(evalᴛ5);
+        xh.v[2] = xh.round(xh.v[2], evalᴛ6);
+        var evalᴛ7 = xh.buf[24..];
+        var evalᴛ8 = binary.LittleEndian.Uint64(evalᴛ7);
+        xh.v[3] = xh.round(xh.v[3], evalᴛ8);
         xh.cnt = 0;
     }
 
     while (len(b) >= 32) {
-        xh.v[0] = xh.round(xh.v[0], binary.LittleEndian.Uint64(b));
-        xh.v[1] = xh.round(xh.v[1], binary.LittleEndian.Uint64(b[8..]));
-        xh.v[2] = xh.round(xh.v[2], binary.LittleEndian.Uint64(b[16..]));
-        xh.v[3] = xh.round(xh.v[3], binary.LittleEndian.Uint64(b[24..]));
+        var evalᴛ9 = binary.LittleEndian.Uint64(b);
+        xh.v[0] = xh.round(xh.v[0], evalᴛ9);
+        var evalᴛ10 = b[8..];
+        var evalᴛ11 = binary.LittleEndian.Uint64(evalᴛ10);
+        xh.v[1] = xh.round(xh.v[1], evalᴛ11);
+        var evalᴛ12 = b[16..];
+        var evalᴛ13 = binary.LittleEndian.Uint64(evalᴛ12);
+        xh.v[2] = xh.round(xh.v[2], evalᴛ13);
+        var evalᴛ14 = b[24..];
+        var evalᴛ15 = binary.LittleEndian.Uint64(evalᴛ14);
+        xh.v[3] = xh.round(xh.v[3], evalᴛ15);
         b = b[32..];
     }
 

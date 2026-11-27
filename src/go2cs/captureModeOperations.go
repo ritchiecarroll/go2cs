@@ -46,6 +46,43 @@ var packageCaptureModeBoxIdents map[types.Object]bool
 // (and avoids a per-call ThreadLocal allocation). For generics it also puts T in scope.
 var packageDirectBoxReceiverMethods map[*types.Func]bool
 
+// resetLoadScopedCaches empties the caches keyed by objects of ONE package load. Every load makes new
+// *types objects, so an entry from an earlier load can never be hit again, but it keeps that load's whole
+// type graph reachable (importedGenericFuncInfo holds a dependency's entire types.Info). A process that
+// converts many packages (a -stdlib run, which loads once per package, and the converter's own go test,
+// which converts thousands of fixtures) then grows without bound: the go2cs test binary reached 11 GB on
+// linux and timed out on the 7 GB osx-arm64 runner. A new cache keyed by *types objects is emptied here.
+//
+// WHERE it runs is the property: once, where a root's work STARTS, before any analysis or pre-pass reads
+// a cache (processConversion after resetPackageState, convertTestVariant before prepareShapeWitness), and
+// never again inside that root. Within the root every reader then shares the first answer, as it did
+// before this reset existed. That matters for importedGenericFuncDecls and importedGenericFuncInfo: their
+// value depends on currentLoadedPackage at the first ask (loadedPackageSource searches only that package
+// and its direct imports, and a miss is cached), and the route pre-pass asks them with currentLoadedPackage
+// re-pointed at a DEPENDENCY (newGenericRouteVisitor) before emission asks under the root. A reset between
+// the two would let one conversion take two routes for one call (P3, 2026-11-26).
+//
+// No entry is needed across the boundary between roots. foreignDerivedAliases and
+// declaredStructsByPackage are pure functions of their key. The other three are derived through the
+// current root's state: the two generic-function maps through currentLoadedPackage, and
+// descriptorCompanionCache through descriptorCarrierPackage (currentPackageSource, importedPackages). A
+// -stdlib or single-package run makes one load per root, so its keys never repeat across roots.
+func resetLoadScopedCaches() {
+	packageLock.Lock()
+	foreignDerivedAliases = nil
+	importedGenericFuncDecls = map[*types.Package]map[*types.Func]*ast.FuncDecl{}
+	importedGenericFuncInfo = map[*types.Package]*types.Info{}
+	packageLock.Unlock()
+
+	declaredStructsLock.Lock()
+	declaredStructsByPackage = map[*types.Package][]*types.Struct{}
+	declaredStructsLock.Unlock()
+
+	descriptorCompanionCacheLock.Lock()
+	descriptorCompanionCache = map[*types.Func][]int{}
+	descriptorCompanionCacheLock.Unlock()
+}
+
 // collectCaptureModeMethods records every non-generic pointer-receiver method whose body
 // takes the address of a receiver field — across the package AND its (transitive) imports,
 // since a calling package needs to know that an imported method (e.g. sync/atomic.Int32.Store)

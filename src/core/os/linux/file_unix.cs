@@ -284,7 +284,8 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
         syscall.CloseOnExec(r);
     }
 
-    var f = newFile(r, name, kindOpenFile, unix.HasNonblockFlag(flag));
+    var evalᴛ1 = unix.HasNonblockFlag(flag);
+    var f = newFile(r, name, kindOpenFile, evalᴛ1);
     f.pfd.SysFile = s;
     return (f, default);
 }

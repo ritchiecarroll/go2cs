@@ -518,7 +518,7 @@ tree:
 			}
 ```
 
-<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:696-702 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:703-709 -->
 ```csharp
             if (t == L) {
                 // no change
@@ -705,7 +705,7 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1815-1819 -->
+<!-- source: src/core/time/format.cs:1816-1820 -->
 ```csharp
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"] = (uint64)Nanosecond,
@@ -731,7 +731,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3177-3181 -->
+<!-- source: src/core/database/sql/sql.cs:3178-3182 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
@@ -784,7 +784,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 		clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */)
 ```
 
-<!-- source: src/core/crypto/tls/handshake_client.cs:937 -->
+<!-- source: src/core/crypto/tls/handshake_client.cs:940 -->
 ```csharp
         clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */);
 ```
@@ -810,7 +810,7 @@ own line at the next place it can. The comment is then misplaced, never lost:
 				// underflow to ±0
 ```
 
-<!-- source: src/core/math/big/float.cs:931-933 -->
+<!-- source: src/core/math/big/float.cs:933-935 -->
 ```csharp
             if (p < 0 /* m <= 0.25 */ || p == 0 && x.mant.sticky((nuint)len(x.mant) * (nuint)_W - 1) == 0) {
                 /* m == 0.5 */

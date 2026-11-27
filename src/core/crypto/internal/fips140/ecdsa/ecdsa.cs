@@ -197,7 +197,8 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
     if (d.IsZero() == 1) {
         return (default, errors.New(ecdsaPrivateKeyIsZeroˢ));
     }
-    var priv = Ꮡ(new PrivateKey(pub: pub.Value, d: d.Bytes(c.N)));
+    var evalᴛ1 = d.Bytes(c.N);
+    var priv = Ꮡ(new PrivateKey(pub: pub.Value, d: evalᴛ1));
     return (priv, default);
 }
 
@@ -239,12 +240,14 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         return (default, err);
     }
 
+    var evalᴛ1 = Q.Bytes();
+    var evalᴛ2 = k.Bytes(c.N);
     var priv = Ꮡ(new PrivateKey(
         pub: new PublicKey(
             curve: c.curve,
-            q: Q.Bytes()
+            q: evalᴛ1
         ),
-        d: k.Bytes(c.N)
+        d: evalᴛ2
     ));
     fipsPCT(Ꮡc, priv);
     return (priv, default);
@@ -346,7 +349,8 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
     // per SP 800-90Ar1, Section 8.6.7, and the rest is a personalization
     // string, which per SP 800-90Ar1, Section 8.7.1 may contain secret
     // information.
-    var drbgΔ1 = newDRBG(h, Z, default, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1)}.slice()));
+    var evalᴛ1 = bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1);
+    var drbgΔ1 = newDRBG(h, Z, default, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, evalᴛ1}.slice()));
 
     return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbgΔ1, hashΔ1);
 }
@@ -368,7 +372,8 @@ public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, 
     }
     fips140.RecordApproved();
     fipsSelfTestDeterministic();
-    var drbg = newDRBG(h, priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1), default); // RFC 6979, Section 3.3
+    var evalᴛ1 = bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1);
+    var drbg = newDRBG(h, priv.d, evalᴛ1, default); // RFC 6979, Section 3.3
     return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbg, hashΔ1);
 }
 

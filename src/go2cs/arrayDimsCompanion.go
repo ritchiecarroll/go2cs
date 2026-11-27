@@ -110,8 +110,10 @@ type arrayDimsPackageFacts struct {
 
 // arrayDimsInputs is what the facts read from outside the package's own syntax.
 type arrayDimsInputs struct {
-	// goos is the conversion's target operating system, which decides a scoped manual registration.
-	goos string
+	// target is the conversion's full os/arch target, which decides a scoped manual registration. It is the
+	// target and not its GOOS because goosScope.includes refuses a bare GOOS against an os/arch entry
+	// (internal/cpu's osInit is registered for darwin/arm64 alone).
+	target string
 
 	// foreign answers the companion indices of a callee the package does not convert itself: a
 	// hand-owned sink (handOwnedArrayDimsSinks) or another package's published record.
@@ -186,7 +188,7 @@ func computeArrayDimsFacts(handle *packages.Package, inputs arrayDimsInputs) *ar
 			return true
 		}
 
-		return isManualFuncDeclInPackage(handle.Types.Path(), inputs.goos, decl)
+		return isManualFuncDeclInPackage(handle.Types.Path(), inputs.target, decl)
 	}
 
 	// Every emitted function with a body, in source order: the owners a caller-side phantom can sit beside.
@@ -729,7 +731,7 @@ func (v *Visitor) foreignArrayDimsCompanions(fn *types.Func) []int {
 
 // arrayDimsInputs is the visitor's view of what the facts read from outside the package's syntax.
 func (v *Visitor) arrayDimsInputs() arrayDimsInputs {
-	return arrayDimsInputs{goos: goosOfTarget(v.options.targetPlatform), foreign: v.foreignArrayDimsCompanions}
+	return arrayDimsInputs{target: v.options.targetPlatform, foreign: v.foreignArrayDimsCompanions}
 }
 
 // arrayDimsCompanionParams reports the indices, within fn's declared type-parameter list, that carry an

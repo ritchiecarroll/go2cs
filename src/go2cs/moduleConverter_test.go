@@ -218,8 +218,9 @@ func TestRecurseLocalRefsPinTheTargetPlatform(t *testing.T) {
 		{"linux/amd64", "linux", "amd64"},
 		{"linux/arm64", "linux", "arm64"},
 		{"darwin/amd64", "darwin", "amd64"},
-		// darwin/arm64 converts against the darwin/amd64 layout (corpusFlavourOf), so it builds that layout.
-		{"darwin/arm64", "darwin", "amd64"},
+		// darwin/arm64 is a flavour of its own (D2 of DESIGN-darwin-arm64-flavour.md), so it builds its own layout.
+		{"darwin/arm64", "darwin", "arm64"},
+		// windows/arm64 converts against the windows/amd64 layout (corpusFlavourOf), so it builds that layout.
 		{"windows/arm64", "windows", "amd64"},
 	}
 

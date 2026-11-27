@@ -89,7 +89,7 @@ param(
     # contributes references only to the targets it names. A bare GOOS (the -TargetOS spelling this
     # parameter had) means every default target of that GOOS.
     [Alias('TargetOS')]
-    [string[]] $Target = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64'),
+    [string[]] $Target = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64', 'darwin/arm64'),
 
     # Positive-control edges, '<fromPackage>=<toPackage>' with package paths relative to src\core
     # (e.g. 'runtime=internal/syscall/windows'). Added to the parsed graph in memory only.

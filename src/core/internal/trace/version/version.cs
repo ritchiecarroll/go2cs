@@ -77,10 +77,12 @@ public static (Version, error) ReadHeader(io.Reader r) {
     ref var v = ref heap(new Version(), out var Ꮡv);
     var (_, err) = fmt.Fscanf(r, headerFmt, Ꮡv);
     if (err != nil) {
-        return (v, fmt.Errorf("bad file format: not a Go execution trace?"u8));
+        var evalᴛ1 = fmt.Errorf("bad file format: not a Go execution trace?"u8);
+        return (v, evalᴛ1);
     }
     if (!v.Valid()) {
-        return (v, fmt.Errorf("unknown or unsupported trace version go 1.%d"u8, v));
+        var evalᴛ2 = fmt.Errorf("unknown or unsupported trace version go 1.%d"u8, v);
+        return (v, evalᴛ2);
     }
     return (v, default);
 }

@@ -160,7 +160,10 @@ internal static ж<Alias> newAliasInstance⁔(/*this*/ ж<Checker> Ꮡcheck, tok
 
     assert(len(targs) > 0);
     var obj = NewTypeName(pos, orig.obj.pkg, orig.obj.name, default);
-    var rhs = Ꮡcheck.subst(pos, orig.fromRHS, makeSubstMap(orig.TypeParams().list(), targs), expanding, ctxt);
+    var evalᴛ1 = orig.TypeParams();
+    var evalᴛ2 = evalᴛ1.list();
+    var evalᴛ3 = makeSubstMap(evalᴛ2, targs);
+    var rhs = Ꮡcheck.subst(pos, orig.fromRHS, evalᴛ3, expanding, ctxt);
     var res = Ꮡcheck.newAlias(obj, rhs);
     res.orig = Ꮡorig;
     res.tparams = orig.tparams;

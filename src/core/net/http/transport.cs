@@ -317,6 +317,7 @@ internal static ж<Transport> Clone⁔(/*this*/ ж<Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.ᏑnextProtoOnce.Do(Ꮡt.onceSetNextProtoDefaults);
+    var evalᴛ1 = t.ProxyConnectHeader.Clone();
     var t2 = Ꮡ(new Transport(
         Proxy: t.Proxy,
         OnProxyConnectResponse: t.OnProxyConnectResponse,
@@ -333,7 +334,7 @@ internal static ж<Transport> Clone⁔(/*this*/ ж<Transport> Ꮡt) {
         IdleConnTimeout: t.IdleConnTimeout,
         ResponseHeaderTimeout: t.ResponseHeaderTimeout,
         ExpectContinueTimeout: t.ExpectContinueTimeout,
-        ProxyConnectHeader: t.ProxyConnectHeader.Clone(),
+        ProxyConnectHeader: evalᴛ1,
         GetProxyConnectHeader: t.GetProxyConnectHeader,
         MaxResponseHeaderBytes: t.MaxResponseHeaderBytes,
         ForceAttemptHTTP2: t.ForceAttemptHTTP2,
@@ -441,7 +442,8 @@ internal static void onceSetNextProtoDefaults⁔(/*this*/ ж<Transport> Ꮡt) {
     //
     // http2configureTransport will have already set NextProtos, but adjust it again
     // here to remove HTTP/1.1 if the user has disabled it.
-    t.TLSClientConfig.NextProtos = adjustNextProtos(t.TLSClientConfig.NextProtos, protocols);
+    var evalᴛ1 = adjustNextProtos(t.TLSClientConfig.NextProtos, protocols);
+    t.TLSClientConfig.NextProtos = evalᴛ1;
 }
 
 internal static Protocols protocols⁔(/*this*/ ref Transport t) {
@@ -1663,9 +1665,10 @@ internal static (ж<persistConn>, error err) getConn⁔(/*this*/ ж<Transport> �
         // We retain the request context's values.
         var (dialCtx, dialCancel) = context.WithCancel(context.WithoutCancel(ctx));
 
+        var evalᴛ1 = cm.key();
         var w = Ꮡ(new wantConn(
             cm: cm,
-            key: cm.key(),
+            key: evalᴛ1,
             ctx: dialCtx,
             cancelCtx: dialCancel,
             result: new channel<connOrError>(1),
@@ -1692,9 +1695,10 @@ internal static (ж<persistConn>, error err) getConn⁔(/*this*/ ж<Transport> �
             // Trace success but only for HTTP/1.
             // HTTP/2 calls trace.GotConn itself.
             if (r.pc != nil && r.pc.alt == nil && trace != nil && trace.GotConn != nil) {
+                var evalᴛ2 = r.pc.isReused();
                 var info = new httptrace.GotConnInfo(
                     Conn: r.pc.conn,
-                    Reused: r.pc.isReused()
+                    Reused: evalᴛ2
                 );
                 if (!r.idleAt.IsZero()) {
                     info.WasIdle = true;
@@ -1970,9 +1974,10 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
+        var evalᴛ1 = cm.key();
         pconn = Ꮡ(new persistConn(
             t: Ꮡt,
-            cacheKey: cm.key(),
+            cacheKey: evalᴛ1,
             reqch: new channel<requestAndChan>(1),
             writech: new channel<writeRequest>(1),
             closech: new channel<EmptyStruct>(0),
@@ -2128,7 +2133,8 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
                     }
                     // Okay to use and discard buffered reader here, because
                     // TLS server will not speak until spoken to.
-                    var br = bufio.NewReader(new io.LimitedReaderжReader(Ꮡ(new io.LimitedReader(R: new net_ConnᴠReader(connʗ1), N: Ꮡt.Value.maxHeaderResponseSize()))));
+                    var evalᴛ2 = Ꮡt.Value.maxHeaderResponseSize();
+                    var br = bufio.NewReader(new io.LimitedReaderжReader(Ꮡ(new io.LimitedReader(R: new net_ConnᴠReader(connʗ1), N: evalᴛ2))));
                     (Ꮡresp.ValueSlot, ᏑerrΔ10.ValueSlot) = ReadResponse(br, connectReqʗ1);
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2198,7 +2204,8 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
             if (!ok) {
                 (pconn, err) = (default, errors.New(httpTransportDoesNotˢ)); goto ᒐdone;
             }
-            var alt = next(cm.targetAddr, unencryptedTLSConn(pconn.conn));
+            var evalᴛ3 = unencryptedTLSConn(pconn.conn);
+            var alt = next(cm.targetAddr, evalᴛ3);
             var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
                 // pconn.conn was closed by next (http2configureTransports.upgradeFn).
                 (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;
@@ -2598,7 +2605,8 @@ internal static void readLoop⁔(/*this*/ ж<persistConn> Ꮡpc) {
 
         var alive = true;
         while (alive) {
-            pc.readLimit = pc.maxHeaderResponseSize();
+            var evalᴛ1 = pc.maxHeaderResponseSize();
+            pc.readLimit = evalᴛ1;
             var (_, err) = pc.br.Peek(1);
 
             pc.mu.Lock();
@@ -2750,7 +2758,8 @@ internal static void readLoop⁔(/*this*/ ж<persistConn> Ꮡpc) {
             }
             case 1 when selᴛ114.ꟷᐳ(out _): {
                 alive = false;
-                Ꮡpc.cancelRequest(context.Cause(rc.treq.ctx));
+                var evalᴛ2 = context.Cause(rc.treq.ctx);
+                Ꮡpc.cancelRequest(evalᴛ2);
                 break;
             }
             case 2 when selᴛ115.ꟷᐳ(out _): {
@@ -2989,7 +2998,8 @@ internal static void writeLoop⁔(/*this*/ ж<persistConn> Ꮡpc) {
             switch (select(ᐸꟷ(selᴛ119, ꓸꓸꓸ), ᐸꟷ(selᴛ120, ꓸꓸꓸ))) {
             case 0 when selᴛ119.ꟷᐳ(out var wr): {
                 var startBytesWritten = pc.nwrite;
-                var err = wr.req.Request.write(new bufio_WriterжWriter(pc.bw), pc.isProxy, wr.req.extra, Ꮡpc.waitForContinue(wr.continueCh));
+                var evalᴛ1 = Ꮡpc.waitForContinue(wr.continueCh);
+                var err = wr.req.Request.write(new bufio_WriterжWriter(pc.bw), pc.isProxy, wr.req.extra, evalᴛ1);
                 var (bre, ok) = err._<requestBodyReadError>(ᐧ); if (ok) {
                     err = bre.error;
                     // Errors reading from the user's
@@ -3286,7 +3296,8 @@ internal static (ж<Response> resp, error err) roundTrip⁔(/*this*/ ж<persistC
                     req.logf("writeErrCh recv: %T/%#v", errΔ2, errΔ2);
                 }
                 if (errΔ2 != nil) {
-                    Ꮡpc.close(fmt.Errorf("write error: %w"u8, errΔ2));
+                    var evalᴛ1 = fmt.Errorf("write error: %w"u8, errΔ2);
+                    Ꮡpc.close(evalᴛ1);
                     (resp, err) = (default, Ꮡpc.mapRoundTripError(Ꮡreq, startBytesWritten, errΔ2)); goto ᒐdone;
                 }
                 {
@@ -3341,7 +3352,8 @@ internal static (ж<Response> resp, error err) roundTrip⁔(/*this*/ ж<persistC
                 default: {
                     break;
                 }}
-                Ꮡpc.cancelRequest(context.Cause(req.ctx));
+                var evalᴛ2 = context.Cause(req.ctx);
+                Ꮡpc.cancelRequest(evalᴛ2);
                 break;
             }}
         }

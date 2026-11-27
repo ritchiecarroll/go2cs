@@ -62,7 +62,8 @@ public static http.HandlerFunc SVGProfileHandlerFunc(ProfileFunc f) {
                     var args = argsʗp;
                     w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ);
                     w.Header().Set(xGoPprofˢ, "1");
-                    http.Error(w, fmt.Sprintf(s, args.ꓸꓸꓸ), http.StatusInternalServerError);
+                    var evalᴛ1 = fmt.Sprintf(s, args.ꓸꓸꓸ);
+                    http.Error(w, evalᴛ1, http.StatusInternalServerError);
                 }
                 var (recordsΔ1, errΔ1) = f(r);
                 if (errΔ1 != nil) {
@@ -78,7 +79,8 @@ public static http.HandlerFunc SVGProfileHandlerFunc(ProfileFunc f) {
 
             var (blockf, err) = os.CreateTemp(""u8, blockˢ);
             if (err != nil) {
-                http.Error(w, fmt.Sprintf("failed to create temp file: %v"u8, err), http.StatusInternalServerError);
+                var evalᴛ2 = fmt.Sprintf("failed to create temp file: %v"u8, err);
+                http.Error(w, evalᴛ2, http.StatusInternalServerError);
                 return;
             }
             var blockfʗ1 = blockf;
@@ -88,28 +90,33 @@ public static http.HandlerFunc SVGProfileHandlerFunc(ProfileFunc f) {
             }, ref ᒐ);
             (var records, err) = f(r);
             if (err != nil) {
-                http.Error(w, fmt.Sprintf("failed to generate profile: %v"u8, err), http.StatusInternalServerError);
+                var evalᴛ3 = fmt.Sprintf("failed to generate profile: %v"u8, err);
+                http.Error(w, evalᴛ3, http.StatusInternalServerError);
             }
             var blockb = bufio.NewWriter(new os.FileжWriter(blockf));
             {
                 var errΔ1 = BuildProfile(records).Write(new bufio_WriterжWriter(blockb)); if (errΔ1 != nil) {
-                    http.Error(w, fmt.Sprintf("failed to write profile: %v"u8, errΔ1), http.StatusInternalServerError);
+                    var evalᴛ4 = fmt.Sprintf("failed to write profile: %v"u8, errΔ1);
+                    http.Error(w, evalᴛ4, http.StatusInternalServerError);
                     return;
                 }
             }
             {
                 var errΔ2 = blockb.Flush(); if (errΔ2 != nil) {
-                    http.Error(w, fmt.Sprintf("failed to flush temp file: %v"u8, errΔ2), http.StatusInternalServerError);
+                    var evalᴛ5 = fmt.Sprintf("failed to flush temp file: %v"u8, errΔ2);
+                    http.Error(w, evalᴛ5, http.StatusInternalServerError);
                     return;
                 }
             }
             var errΔ3 = blockf.Close(); if (errΔ3 != nil) {
-                http.Error(w, fmt.Sprintf("failed to close temp file: %v"u8, errΔ3), http.StatusInternalServerError);
+                var evalᴛ6 = fmt.Sprintf("failed to close temp file: %v"u8, errΔ3);
+                http.Error(w, evalᴛ6, http.StatusInternalServerError);
                 return;
             }
             @string svgFilename = blockf.Name() + ".svg"u8;
             var (output, errΔ4) = exec.Command(goCmd(), toolˢ, pprofˢ, svgˢ, outputˢ, svgFilename, blockf.Name()).CombinedOutput(); if (errΔ4 != nil) {
-                http.Error(w, fmt.Sprintf("failed to execute go tool pprof: %v\n%s"u8, errΔ4, output), http.StatusInternalServerError);
+                var evalᴛ7 = fmt.Sprintf("failed to execute go tool pprof: %v\n%s"u8, errΔ4, output);
+                http.Error(w, evalᴛ7, http.StatusInternalServerError);
                 return;
             }
             defer(os.Remove, svgFilename, ref ᒐ);

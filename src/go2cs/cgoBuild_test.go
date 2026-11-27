@@ -510,8 +510,9 @@ func TestACgoProjectHandsItsReferencesATargetTheStandardLibraryIsLaidOutFor(t *t
 		{"linux/amd64", "linux/amd64"},
 		{"linux/arm64", "linux/arm64"},
 		{"darwin/amd64", "darwin/amd64"},
-		// The library has one darwin flavour, which serves both of darwin's architectures.
-		{"darwin/arm64", "darwin/amd64"},
+		{"darwin/arm64", "darwin/arm64"},
+		// A target outside the universe takes the flavour the library has for its operating system.
+		{"windows/arm64", "windows/amd64"},
 	} {
 		goos, goarch, _ := strings.Cut(arm.target, "/")
 		referenceOS, referenceArch, _ := strings.Cut(arm.reference, "/")

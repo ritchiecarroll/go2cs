@@ -179,7 +179,8 @@ internal static void newosproc(ж<m> Ꮡmp) {
 	 * note: strace gets confused if we use CLONE_PTRACE here.
 	 */
     if (false) {
-        print((@string)"newosproc stk=", @unsafe.Pointer.OrTypedNil(stk), (@string)" m=", Ꮡmp.OrTypedNil(), (@string)" g=", mp.g0.OrTypedNil(), (@string)" clone=", abi.FuncPCABI0(clone), (@string)" id=", mp.id, (@string)" ostk=", Ꮡ(mp), (@string)"\n");
+        var evalᴛ1 = abi.FuncPCABI0(clone);
+        print((@string)"newosproc stk=", @unsafe.Pointer.OrTypedNil(stk), (@string)" m=", Ꮡmp.OrTypedNil(), (@string)" g=", mp.g0.OrTypedNil(), (@string)" clone=", evalᴛ1, (@string)" id=", mp.id, (@string)" ostk=", Ꮡ(mp), (@string)"\n");
     }
 
     // Disable signals during clone, so that the new thread starts
@@ -187,7 +188,8 @@ internal static void newosproc(ж<m> Ꮡmp) {
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
     sigprocmask(_SIG_SETMASK, Ꮡsigset_all, Ꮡoset);
     var ret = retryOnEAGAIN([GoFunc("newosproc.func1")] () => {
-        var r = clone(cloneFlags, stk, @unsafe.Pointer.FromPinnedBox(Ꮡmp), @unsafe.Pointer.FromPinnedBox(Ꮡmp.Value.g0), (@unsafe.Pointer)abi.FuncPCABI0(mstart));
+        var evalᴛ2 = abi.FuncPCABI0(mstart);
+        var r = clone(cloneFlags, stk, @unsafe.Pointer.FromPinnedBox(Ꮡmp), @unsafe.Pointer.FromPinnedBox(Ꮡmp.Value.g0), (@unsafe.Pointer)evalᴛ2);
         // clone returns positive TID, negative errno.
         // We don't care about the TID.
         if (r >= 0) {
@@ -417,7 +419,9 @@ internal static void minit() {
     // Cgo-created threads and the bootstrap m are missing a
     // procid. We need this for asynchronous preemption and it's
     // useful in debuggers.
-    getg().Value.m.Value.procid = (uint64)gettid();
+    var evalᴛ1 = getg();
+    var evalᴛ2 = gettid();
+    evalᴛ1.Value.m.Value.procid = (uint64)evalᴛ2;
 }
 
 // Called from dropm to undo the effect of an minit.

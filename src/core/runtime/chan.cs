@@ -405,7 +405,8 @@ internal static bool timerchandrain(ж<hchan> Ꮡc) {
     var any = false;
     while (c.qcount > 0) {
         any = true;
-        typedmemclr(c.elemtype, chanbuf(Ꮡc, c.recvx));
+        var evalᴛ1 = chanbuf(Ꮡc, c.recvx);
+        typedmemclr(c.elemtype, evalᴛ1);
         c.recvx++;
         if (c.recvx == c.dataqsiz) {
             c.recvx = 0;
@@ -494,7 +495,8 @@ internal static void closechan(ж<hchan> Ꮡc) {
             break;
         }
         if (sg.of(sudog.Ꮡelem).get() != nil) {
-            typedmemclr(c.elemtype, sg.of(sudog.Ꮡelem).get());
+            var evalᴛ1 = sg.of(sudog.Ꮡelem).get();
+            typedmemclr(c.elemtype, evalᴛ1);
             sg.of(sudog.Ꮡelem).set(nil);
         }
         if ((~sg).releasetime != 0) {
@@ -798,7 +800,8 @@ internal static void recv(ж<hchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, A
             typedmemmove(c.elemtype, ep, qp);
         }
         // copy data from sender to queue
-        typedmemmove(c.elemtype, qp, sg.elem.get());
+        var evalᴛ1 = sg.elem.get();
+        typedmemmove(c.elemtype, qp, evalᴛ1);
         c.recvx++;
         if (c.recvx == c.dataqsiz) {
             c.recvx = 0;
@@ -1008,8 +1011,10 @@ internal static @unsafe.Pointer raceaddr⁔(/*this*/ ж<hchan> Ꮡc) {
 
 internal static void racesync(ж<hchan> c, ref sudog sg) {
     racerelease(chanbuf(c, 0));
-    raceacquireg(ref (sg.g).DerefOrNull(), chanbuf(c, 0));
-    racereleaseg(ref (sg.g).DerefOrNull(), chanbuf(c, 0));
+    var evalᴛ1 = chanbuf(c, 0);
+    raceacquireg(ref (sg.g).DerefOrNull(), evalᴛ1);
+    var evalᴛ2 = chanbuf(c, 0);
+    racereleaseg(ref (sg.g).DerefOrNull(), evalᴛ2);
     raceacquire(chanbuf(c, 0));
 }
 

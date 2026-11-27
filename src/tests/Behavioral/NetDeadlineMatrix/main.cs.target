@@ -127,13 +127,17 @@ internal static partial void replacedWhileBlocked() {
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
 
-        client.SetReadDeadline(time.Now().Add(300 * time.Millisecond));
+        var evalᴛ1 = time.Now();
+        var evalᴛ2 = evalᴛ1.Add(300 * time.Millisecond);
+        client.SetReadDeadline(evalᴛ2);
 
         var clientʗ1 = client;
         var serverʗ1 = server;
         goǃ([GoFunc("replacedWhileBlocked.func1")] () => {
             time.Sleep(100 * time.Millisecond);
-            clientʗ1.SetReadDeadline(time.Now().Add((time.Duration)(30000000000L)));
+            var evalᴛ3 = time.Now();
+            var evalᴛ4 = evalᴛ3.Add((time.Duration)(30000000000L));
+            clientʗ1.SetReadDeadline(evalᴛ4);
             time.Sleep(400 * time.Millisecond);
             serverʗ1.Write(slice<byte>("late"u8));
         });

@@ -60,7 +60,7 @@ using System.Runtime.CompilerServices;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AChMlrKCppaygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABhYACgKCuIKUgpSClIKmgpSolqKmooIACBKCgoKUgoKClKiygqiAltKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqaowoKCgqiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoK4AAIQ0qaCgoKUlIKCgpSUlII=")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_amd64_noasm.go", "fe_amd64_noasm.cs", "AAgSlA==")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCquaCgoKCgpQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCquaCkoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;

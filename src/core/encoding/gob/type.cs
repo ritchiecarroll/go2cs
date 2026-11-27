@@ -356,7 +356,9 @@ internal static @string safeString⁔(/*this*/ ref arrayType a, map<typeId, bool
         return a.Name;
     }
     seen[a.Id] = true;
-    return fmt.Sprintf("[%d]%s"u8, a.Len, a.Elem.gobType().safeString(seen));
+    var evalᴛ1 = a.Elem.gobType();
+    var evalᴛ2 = evalᴛ1.safeString(seen);
+    return fmt.Sprintf("[%d]%s"u8, a.Len, evalᴛ2);
 }
 
 internal static @string string⁔(/*this*/ ref arrayType a) { return a.safeString(new map<typeId, bool>()); }
@@ -579,7 +581,8 @@ internal static (gobType, error) newTypeObject(@string name, ref userTypeInfo ut
         case var ᴛ when ᴛ == reflect.Struct: {
             var st = newStructType(name);
             types[rt] = new structTypeжgobType(st);
-            idToTypeSlice[st.of(structType.ᏑCommonType).id()] = new structTypeжgobType(st);
+            var evalᴛ1 = st.of(structType.ᏑCommonType).id();
+            idToTypeSlice[evalᴛ1] = new structTypeжgobType(st);
             for (nint i = 0; i < t.NumField(); i++) {
                 var f = t.Field(i);
                 if (!isSent(ref f)) {
@@ -602,7 +605,8 @@ internal static (gobType, error) newTypeObject(@string name, ref userTypeInfo ut
                 if (gt.id() == 0) {
                     setTypeId(gt);
                 }
-                st.Field = append(st.Field, new fieldType(f.Name, gt.id()));
+                var evalᴛ2 = gt.id();
+                st.Field = append(st.Field, new fieldType(f.Name, evalᴛ2));
             }
             return (new structTypeжgobType(st), default);
         }

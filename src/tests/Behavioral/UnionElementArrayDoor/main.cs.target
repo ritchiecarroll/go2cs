@@ -106,7 +106,8 @@ internal static void main() {
     arm("F", [GoFunc("main.func6")] () => {
         ref var arr = ref heap(new array<TRtreeCoord>(4, () => new()), out var Ꮡarr);
         writeCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1, 4.5F);
-        fmt.Println("F", arr[1].Ff, readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1));
+        var evalᴛ1 = readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1);
+        fmt.Println("F", arr[1].Ff, evalᴛ1);
     });
 
     arm("G", [GoFunc("main.func7")] () => {

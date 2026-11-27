@@ -484,11 +484,15 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 
     slice<profileEntry> profiles = default;
     foreach (var (_, p) in range(pprof.Profiles())) {
+        var evalᴛ1 = p.Name();
+        var evalᴛ2 = p.Name();
+        var evalᴛ3 = p.Name();
+        var evalᴛ4 = p.Count();
         profiles = append(profiles, new profileEntry(
-            Name: p.Name(),
-            Href: p.Name(),
-            Desc: profileDescriptions[p.Name()],
-            Count: p.Count()
+            Name: evalᴛ1,
+            Href: evalᴛ2,
+            Desc: profileDescriptions[evalᴛ3],
+            Count: evalᴛ4
         ));
     }
 

@@ -151,7 +151,8 @@ public static void TestAEAD(ж<testing.T> t, MakeAEAD mAEAD) {
 
                         // Make a buffer that can hold a plaintext and ciphertext as we
                         // overlap their slices to check for panic on inexact overlaps.
-                        nint ctLen = ptLen + aeadʗ9.Overhead();
+                        var evalᴛ1 = aeadʗ9.Overhead();
+                        nint ctLen = ptLen + evalᴛ1;
                         var buff = new slice<byte>(ptLen + ctLen);
                         rng.Read(buff);
 

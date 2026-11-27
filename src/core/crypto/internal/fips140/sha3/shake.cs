@@ -53,9 +53,13 @@ internal static ж<SHAKE> newCShake(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S
 
     c.d.AssignFrom(new Digest(rate: rate, outputLen: outputLen, dsbyte: dsbyte));
     c.initBlock = new slice<byte>(0, 9 + len(N) + 9 + len(S)); // leftEncode returns max 9 bytes
-    c.initBlock = appendꓸꓸꓸ(c.initBlock, leftEncode((uint64)len(N) * 8));
+    var evalᴛ1 = len(N);
+    var evalᴛ2 = leftEncode((uint64)evalᴛ1 * 8);
+    c.initBlock = appendꓸꓸꓸ(c.initBlock, evalᴛ2);
     c.initBlock = appendꓸꓸꓸ(c.initBlock, N);
-    c.initBlock = appendꓸꓸꓸ(c.initBlock, leftEncode((uint64)len(S) * 8));
+    var evalᴛ3 = len(S);
+    var evalᴛ4 = leftEncode((uint64)evalᴛ3 * 8);
+    c.initBlock = appendꓸꓸꓸ(c.initBlock, evalᴛ4);
     c.initBlock = appendꓸꓸꓸ(c.initBlock, S);
     bytepadWrite(Ꮡc, c.initBlock, c.d.rate);
     return Ꮡc;

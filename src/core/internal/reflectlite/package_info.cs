@@ -70,7 +70,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC6qKCgoKCggAICoKClIKmgoKUgoIACAaCgpSCgoKClKaCggACGgALDuSCpoKmggAEFpSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
-[assembly: GoPositionMap("internal/reflectlite/value.go", "value.cs", "AEykAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACQq4goKmgpS4lIKClJS4AAYU8qaayrKC")]
+[assembly: GoPositionMap("internal/reflectlite/value.go", "value.cs", "AEykAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAFIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACQq4goKmgpS4lIKClJS4AAYU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

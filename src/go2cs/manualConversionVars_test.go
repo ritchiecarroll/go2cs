@@ -194,8 +194,9 @@ func convertManualConstFixture(t *testing.T, target string) string {
 
 // TestAManualConstIsDisplacedOnlyOnItsTarget drives the real emission: a const registered for a scope emits
 // the placeholder on each target in it, and the ordinary declaration on every other target. Both scopes the
-// corpus uses are driven: darwin alone, and darwin with windows (runtime.GOARCH's). The reference in the
-// function body is emitted either way, so the hand-owned member is what it reads.
+// corpus uses are driven at all five targets: darwin alone, and windows with the darwin/amd64 target
+// (runtime.GOARCH's), whose near-misses are linux/arm64 (never displaced) and darwin/arm64 (same GOOS, other
+// flavour). The reference in the function body is emitted either way, so the hand-owned member is what it reads.
 func TestAManualConstIsDisplacedOnlyOnItsTarget(t *testing.T) {
 	original := manualConversionConsts
 	t.Cleanup(func() { manualConversionConsts = original })
@@ -203,7 +204,7 @@ func TestAManualConstIsDisplacedOnlyOnItsTarget(t *testing.T) {
 	// The declaration's `=>` or `=`, never the first half of an `==` in a one-line body that reads it.
 	member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\bARCH\s*(=>|=[^=])`)
 
-	for _, scope := range []goosScope{goosDarwin, goosWindowsDarwin} {
+	for _, scope := range []goosScope{goosDarwin, goosWindowsDarwinAmd64} {
 		// Copy-on-write: the test installs its own registry and restores the original reference, so no
 		// other test can see the fixture entry or lose a real one.
 		patched := make(map[string]map[string]goosScope, len(original)+1)
@@ -215,8 +216,8 @@ func TestAManualConstIsDisplacedOnlyOnItsTarget(t *testing.T) {
 		patched["example.com/mcc"] = map[string]goosScope{"ARCH": scope}
 		manualConversionConsts = patched
 
-		for _, target := range []string{"darwin/amd64", "linux/amd64", "windows/amd64"} {
-			checkManualConstEmission(t, member, target, scope.includes(goosOfTarget(target)))
+		for _, target := range []string{"darwin/amd64", "darwin/arm64", "linux/amd64", "linux/arm64", "windows/amd64"} {
+			checkManualConstEmission(t, member, target, scope.includes(target))
 		}
 	}
 }
@@ -321,8 +322,8 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 
 			member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
 
-			for _, goos := range scope {
-				missingAt, err := displacedConstMissing(coreDir, pkg, goos, member)
+			for _, entry := range scope {
+				missingAt, err := displacedConstMissing(coreDir, pkg, entry, member)
 
 				if err != nil {
 					t.Errorf("%s.%s: %v", pkg, name, err)
@@ -330,23 +331,25 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 
 				for _, missing := range missingAt {
 					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs in the folders of %s that %s compiles declares it; the displaced const has no destination there",
-						pkg, name, goos, filepath.Join(coreDir, filepath.FromSlash(pkg)), missing)
+						pkg, name, entry, filepath.Join(coreDir, filepath.FromSlash(pkg)), missing)
 				}
 			}
 		}
 	}
 }
 
-// displacedConstMissing names the targets of goos at which a displaced const has no destination: no marked *_impl.cs
-// declaring member in the key folders that target's build compiles (its <goos>/, <arch>/ and <goos>-<arch>/). A goos
-// with no target in the universe is an error: the const is displaced at no target the corpus builds, and a loop over
-// that GOOS's targets would read nothing and pass.
-func displacedConstMissing(coreDir string, pkg string, goos string, member *regexp.Regexp) (missing []string, err error) {
-	if !isUniverseGOOS(goos) {
-		return nil, fmt.Errorf("the scope names %q, which no target in the universe %v builds; the displaced const is off everywhere", goos, platformUniverse)
+// displacedConstMissing names the targets of a scope entry (a GOOS, or one os/arch target) at which a displaced const
+// has no destination: no marked *_impl.cs declaring member in the key folders that target's build compiles (its
+// <goos>/, <arch>/ and <goos>-<arch>/). An entry with no target in the universe is an error: the const is displaced
+// at no target the corpus builds, and a loop over its targets would read nothing and pass.
+func displacedConstMissing(coreDir string, pkg string, entry string, member *regexp.Regexp) (missing []string, err error) {
+	targets := scopeEntryTargets(entry)
+
+	if len(targets) == 0 {
+		return nil, fmt.Errorf("the scope names %q, which no target in the universe %v builds; the displaced const is off everywhere", entry, platformUniverse)
 	}
 
-	for _, target := range corpusLattice().targetsOfGOOS(goos) {
+	for _, target := range targets {
 		found := false
 
 		for _, folder := range platformLayoutFolders(target) {
@@ -376,7 +379,8 @@ func displacedConstMissing(coreDir string, pkg string, goos string, member *rege
 // TestDisplacedConstDestinationReadsTheLayoutKeyFolders plants a const's hand-owned destination in layout key folders.
 // A windows scope is supplied by a body in pkg/amd64/, which the windows/amd64 build compiles; a linux scope whose
 // only body sits in pkg/linux-amd64/ has none at linux/arm64. Read from pkg/<goos>/ alone, the first is a false red
-// and the second names a folder rather than the target that lacks the body.
+// and the second names a folder rather than the target that lacks the body. A darwin scope has no body at
+// darwin/arm64, which does not compile amd64/, while the darwin/amd64 TARGET scope is met there.
 func TestDisplacedConstDestinationReadsTheLayoutKeyFolders(t *testing.T) {
 	coreDir := t.TempDir()
 
@@ -404,7 +408,9 @@ func TestDisplacedConstDestinationReadsTheLayoutKeyFolders(t *testing.T) {
 		want       []string
 	}{
 		{"archConst", "windows", nil},
-		{"archConst", "darwin", nil},
+		{"archConst", "darwin", []string{"darwin/arm64"}},
+		{"archConst", "darwin/amd64", nil},
+		{"archConst", "darwin/arm64", []string{"darwin/arm64"}},
 		{"archConst", "linux", []string{"linux/arm64"}},
 		{"pairConst", "linux", []string{"linux/arm64"}},
 		{"pairConst", "windows", []string{"windows/amd64"}},

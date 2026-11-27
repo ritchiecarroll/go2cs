@@ -79,7 +79,9 @@ internal static void goargs() {
     }
     argslice = new slice<@string>(argc);
     for (var i = (int32)0; i < argc; i++) {
-        argslice[i] = gostringnocopy(argv_index(argv, i));
+        var evalᴛ1 = argv_index(argv, i);
+        var evalᴛ2 = gostringnocopy(evalᴛ1);
+        argslice[i] = evalᴛ2;
     }
 }
 
@@ -94,7 +96,9 @@ internal static void goenvs_unix() {
 
     envs = new slice<@string>(n);
     for (var i = (int32)0; i < n; i++) {
-        envs[i] = gostring(argv_index(argv, argc + 1 + i));
+        var evalᴛ1 = argv_index(argv, argc + 1 + i);
+        var evalᴛ2 = gostring(evalᴛ1);
+        envs[i] = evalᴛ2;
     }
 }
 

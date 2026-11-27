@@ -343,7 +343,8 @@ internal static nint fixOffset⁔(/*this*/ ref File f, nint offset) {
 // in general, holds for the result p:
 // f.Pos(f.Offset(p)) == p.
 internal static Pos Pos⁔(/*this*/ ref File f, nint offset) {
-    return (Pos)(f.@base + f.fixOffset(offset));
+    var evalᴛ1 = f.fixOffset(offset);
+    return (Pos)(f.@base + evalᴛ1);
 }
 
 // Offset returns the offset for the given file position p.
@@ -586,7 +587,9 @@ internal static void AddExistingFiles⁔(/*this*/ ж<FileSet> Ꮡs, params ꓸ�
 
         foreach (var (_, f) in range(files)) {
             Ꮡs.Ꮡtree.add(f);
-            s.@base = max(s.@base, f.Base() + f.Size() + 1);
+            var evalᴛ1 = f.Base();
+            var evalᴛ2 = f.Size();
+            s.@base = max(s.@base, evalᴛ1 + evalᴛ2 + 1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -117,7 +117,9 @@ internal static slice<byte> Seal⁔(/*this*/ ж<GCMWithCounterNonce> Ꮡg, slice
             g.prefixReady = true;
             g.prefix = byteorder.BEUint32(nonce[..4]);
         }
-        if (g.prefix != byteorder.BEUint32(nonce[..4])) {
+        var evalᴛ1 = nonce[..4];
+        var evalᴛ2 = byteorder.BEUint32(evalᴛ1);
+        if (g.prefix != evalᴛ2) {
             throw panic("crypto/cipher: GCM nonce prefix changed");
         }
 
@@ -274,7 +276,9 @@ internal static slice<byte> Seal⁔(/*this*/ ж<GCMWithXORCounterNonce> Ꮡg, sl
             g.mask = counter;
             g.prefix = byteorder.BEUint32(nonce[..4]);
         }
-        if (g.prefix != byteorder.BEUint32(nonce[..4])) {
+        var evalᴛ1 = nonce[..4];
+        var evalᴛ2 = byteorder.BEUint32(evalᴛ1);
+        if (g.prefix != evalᴛ2) {
             throw panic("crypto/cipher: GCM nonce prefix changed");
         }
         counter ^= (uint64)(g.mask);

@@ -135,7 +135,8 @@ internal static ж<abiStep> addArg⁔(/*this*/ ref abiSeq a, ж<abi.Type> Ꮡt) 
         // non-zero-sized struct do not cause it to be
         // stack-assigned. So we need a special case here
         // at the top.
-        a.stackBytes = align(a.stackBytes, (uintptr)t.Align());
+        var evalᴛ1 = t.Align();
+        a.stackBytes = align(a.stackBytes, (uintptr)evalᴛ1);
         return default;
     }
     // Hold a copy of "a" so that we can roll back if

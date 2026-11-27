@@ -390,10 +390,11 @@ internal static (io.Writer, error) CreateHeader⁔(/*this*/ ref Writer w, ж<Fil
     } else {
         fh.Flags |= (uint16)(0x8); // we will write a data descriptor
 
+        var evalᴛ1 = crc32.NewIEEE();
         fw = Ꮡ(new fileWriter(
             zipw: new countWriterжWriter(w.cw),
             compCount: Ꮡ(new countWriter(w: new countWriterжWriter(w.cw))),
-            crc32: crc32.NewIEEE()
+            crc32: evalᴛ1
         ));
         var comp = w.compressor(fh.Method);
         if (comp == nil) {

@@ -1,5 +1,6 @@
 {
     "dotnet.defaultSolution": "src/go2cs.slnx",
+    "go.testExplorer.enable": false,
     "gopls": {
         "build.directoryFilters": [
             "-src/tests",

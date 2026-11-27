@@ -692,7 +692,8 @@ internal static uintptr scavenge⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr nbytes,
             break;
         }
         systemstack([GoFunc("(*pageAlloc).scavenge.func1")] () => {
-            released += Ꮡp.Value.scavengeOne(ci, pageIdx, nbytes - released);
+            var evalᴛ1 = Ꮡp.Value.scavengeOne(ci, pageIdx, nbytes - released);
+            released += evalᴛ1;
         });
         if (shouldStop != nil && shouldStop()) {
             break;

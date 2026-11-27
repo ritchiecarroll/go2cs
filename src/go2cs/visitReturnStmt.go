@@ -218,6 +218,10 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 	defer func() { v.hoistedDecls = savedHoist }()
 
+	// Go reads the results after the calls among them (operandOrder.go).
+	endOperandOrder := v.beginOperandOrder(nil, false, returnStmt.Results...)
+	defer endOperandOrder()
+
 	// In namedReturnDeferMode a `return e1, e2` assigns the named result params and then returns
 	// (via the void func() wrapper); the wrapper's caller side emits the actual `return <named>`
 	// after the defers run. So here we emit `(named1, named2) = (e1, e2); return;` for an explicit

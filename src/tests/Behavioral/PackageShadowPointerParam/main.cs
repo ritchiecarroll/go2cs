@@ -13,7 +13,8 @@ internal static nint helper(ref box b) { return b.n; }
 
 internal static nint consume(ref box ioΔ1, Δio.Writer w) {
     _ = w;
-    return ioΔ1.n + helper(ref ioΔ1);
+    var evalᴛ1 = helper(ref ioΔ1);
+    return ioΔ1.n + evalᴛ1;
 }
 
 internal static nint combine(Δio.Writer ioΔ1, ref box p) {

@@ -164,10 +164,13 @@ internal static (nint, error) Write⁔(/*this*/ ref Writer z, slice<byte> p) {
         if (z.Comment != ""u8) {
             z.buf[3] |= (byte)(0x10);
         }
-        if (z.ModTime.After(time.Unix(0, 0))) {
+        var evalᴛ1 = time.Unix(0, 0);
+        if (z.ModTime.After(evalᴛ1)) {
             // Section 2.3.1, the zero value for MTIME means that the
             // modified time is not set.
-            le.PutUint32(z.buf[4..8], (uint32)z.ModTime.Unix());
+            var evalᴛ2 = z.buf[4..8];
+            var evalᴛ3 = z.ModTime.Unix();
+            le.PutUint32(evalᴛ2, (uint32)evalᴛ3);
         }
         if (z.level == BestCompression) {
             z.buf[8] = 2;

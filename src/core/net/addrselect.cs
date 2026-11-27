@@ -24,11 +24,13 @@ internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netip.Addr
     var addrInfos = new slice<byRFC6724Info>(len(addrs));
     foreach (var (i, v) in range(addrs)) {
         var (addrAttrIP, _) = netip.AddrFromSlice(v.IP);
+        var evalᴛ1 = ipAttrOf(addrAttrIP);
+        var evalᴛ2 = ipAttrOf(srcs[i]);
         addrInfos[i] = new byRFC6724Info(
             addr: addrs[i],
-            addrAttr: ipAttrOf(addrAttrIP),
+            addrAttr: evalᴛ1,
             src: srcs[i],
-            srcAttr: ipAttrOf(srcs[i])
+            srcAttr: evalᴛ2
         );
     }
     slices.SortStableFunc<slice<byRFC6724Info>, byRFC6724Info>(addrInfos, compareByRFC6724);

@@ -101,7 +101,8 @@ internal static slice<byte> byteSliceBitFlip(ж<mutator> Ꮡm, slice<byte> b) {
         return default;
     }
     nint pos = m.rand(len(b));
-    b[pos] ^= (byte)(((byte)1).Lsh((nuint)m.rand(8)));
+    var evalᴛ1 = m.rand(8);
+    b[pos] ^= (byte)(((byte)1).Lsh((nuint)evalᴛ1));
     return b;
 }
 
@@ -116,7 +117,8 @@ internal static slice<byte> byteSliceXORByte(ж<mutator> Ꮡm, slice<byte> b) {
     // In order to avoid a no-op (where the random value matches
     // the existing value), use XOR instead of just setting to
     // the random value.
-    b[pos] ^= (byte)((byte)(1 + m.rand(255)));
+    var evalᴛ1 = m.rand(255);
+    b[pos] ^= (byte)((byte)(1 + evalᴛ1));
     return b;
 }
 
@@ -213,7 +215,9 @@ internal static slice<byte> byteSliceOverwriteInterestingUint8(ж<mutator> Ꮡm,
         return default;
     }
     nint pos = m.rand(len(b));
-    b[pos] = (byte)interesting8[m.rand(len(interesting8))];
+    var evalᴛ1 = len(interesting8);
+    var evalᴛ2 = m.rand(evalᴛ1);
+    b[pos] = (byte)interesting8[evalᴛ2];
     return b;
 }
 
@@ -226,7 +230,9 @@ internal static slice<byte> byteSliceOverwriteInterestingUint16(ж<mutator> Ꮡm
         return default;
     }
     nint pos = m.rand(len(b) - 1);
-    var v = (uint16)interesting16[m.rand(len(interesting16))];
+    var evalᴛ1 = len(interesting16);
+    var evalᴛ2 = m.rand(evalᴛ1);
+    var v = (uint16)interesting16[evalᴛ2];
     m.randByteOrder().PutUint16(b.slice(pos), v);
     return b;
 }
@@ -240,7 +246,9 @@ internal static slice<byte> byteSliceOverwriteInterestingUint32(ж<mutator> Ꮡm
         return default;
     }
     nint pos = m.rand(len(b) - 3);
-    var v = (uint32)interesting32[m.rand(len(interesting32))];
+    var evalᴛ1 = len(interesting32);
+    var evalᴛ2 = m.rand(evalᴛ1);
+    var v = (uint32)interesting32[evalᴛ2];
     m.randByteOrder().PutUint32(b.slice(pos), v);
     return b;
 }
