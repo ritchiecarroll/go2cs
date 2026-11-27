@@ -12521,7 +12521,7 @@ converter's list can likewise name the operating systems it covers.
      bits_impl.cs:86 (`public static (nuint hi, nuint lo) Mul(nuint x, nuint y)`),
      :106 (`public static (nuint sum, nuint carryOut) Add(nuint x, nuint y, nuint carry)`), :117
      (`public static (nuint diff, nuint borrowOut) Sub(nuint x, nuint y, nuint borrow)`); the six list entries:
-     src/go2cs/manualTypeOperations.go:2914-2921#46e257. -->
+     src/go2cs/manualTypeOperations.go:2923-2930#46e257. -->
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference/manual-conversions.md#manually-converted-declarations) — every hand-owned surface and why, `//go:linkname` forwarders in both directions, the poller and system call internals on each OS, native bindings, how hand-owned files and list entries are scoped per platform, and the reflection bridge.
 

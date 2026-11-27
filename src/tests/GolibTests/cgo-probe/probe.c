@@ -6,6 +6,7 @@
 // generated wrappers of GoCgoWrappers.<os>.golden.cs (src/go2cs's cgoProbeDecls declares it as cmd/cgo would), and
 // CgoProbeTests calls it.
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #if defined(_WIN32)
@@ -203,6 +204,63 @@ GO2CS_PROBE_EXPORT long go2cs_probe_sum(const void *bytes, int count)
 GO2CS_PROBE_EXPORT void *go2cs_probe_same(void *pointer)
 {
     return pointer;
+}
+
+// The word it was handed, so the caller sees what crossed (design 20.4 S4: a uintptr_t parameter).
+GO2CS_PROBE_EXPORT uintptr_t go2cs_probe_word(uintptr_t word)
+{
+    return word;
+}
+
+// The near misses of the S4 cure (P3's read, F1): a parameter cmd/cgo declares at a C typedef, beside a void pointer. A
+// void pointer is what makes cmd/cgo write its check closure, which declares the constant at that typedef; a typed
+// pointer to a C integer needs no check, takes no closure, and so never reaches the cast. uint64_t is a typedef of a
+// typedef on glibc (over __uint64_t); go2cs_probe_color is a typedef'd enum.
+typedef enum
+{
+    go2cs_probe_red = 1,
+    go2cs_probe_green = 2,
+    go2cs_probe_blue = 4
+} go2cs_probe_color;
+
+GO2CS_PROBE_EXPORT uint64_t go2cs_probe_wide_into(void *dst, uint64_t value)
+{
+    *(uint64_t *)dst = value;
+    return value >> 32;
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_color_into(void *dst, go2cs_probe_color color)
+{
+    *(int *)dst = (int)color * 10;
+    return (int)color;
+}
+
+// A pointer C KEEPS past the call, and a later call that reads through it (cgo S6, design 21: legal in Go only when a
+// runtime.Pinner pins the memory).
+static void *go2cs_probe_kept_pointer;
+
+GO2CS_PROBE_EXPORT void go2cs_probe_keep(void *pointer)
+{
+    go2cs_probe_kept_pointer = pointer;
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_kept(void)
+{
+    return go2cs_probe_kept_pointer ? *(int *)go2cs_probe_kept_pointer : -1;
+}
+
+// The same, for a C STRUCT passed to a typed parameter (S6, P3's MUST 2): C keeps the struct pointer, a later call reads
+// its second member. go2cs_probe_pair is the struct declared at the top of this file.
+static struct go2cs_probe_pair *go2cs_probe_kept_pair_pointer;
+
+GO2CS_PROBE_EXPORT void go2cs_probe_keep_pair(struct go2cs_probe_pair *pair)
+{
+    go2cs_probe_kept_pair_pointer = pair;
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_kept_pair_b(void)
+{
+    return go2cs_probe_kept_pair_pointer ? go2cs_probe_kept_pair_pointer->b : -1;
 }
 
 // An empty call log of 32 bytes, zeroed.

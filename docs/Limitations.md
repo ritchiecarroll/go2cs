@@ -345,6 +345,22 @@ that lives in C memory (`l.next`), and loads and stores through a `**C.T` (`*p`,
 `addrinfo`'s `ai_next` does). A pointer field reached through a nested struct value, an array of pointers, a field
 whose type is a C pointer typedef, and a union are still refused by name, and so is storing a pointer into Go memory
 into C memory. In go2cs 1.26.11.1, reading a pointer field of a C struct in C memory fails with a panic.
+
+On the master branch, a number made from a Go pointer (`unsafe.Pointer(uintptr(unsafe.Pointer(&x)) + off)`, in one
+expression or through a variable) is handed to C as a `void *` when it points into Go memory that holds no Go pointers,
+and that memory is held still for the call. A number one past the end of that memory, the end of a begin/end pair, is
+not held still, so C may only compare it, never read or write through it. A 64-bit integer argument that is go2cs's
+stand-in for the address of a Go value holding Go pointers is refused by name.
+
+On the master branch, C may keep a Go pointer past the call when a `runtime.Pinner` pins the memory, as cgo requires:
+the pin holds the value and every array inside it still until `Unpin`. A pinned value whose Go layout is not its C
+layout (a struct holding an array, for instance) is refused by name. Two cases are not covered:
+- A pointer C keeps without a Pinner is invalid Go, though it usually works under Go, whose heap does not move. Here
+  the memory can move at the next collection, and nothing reports it.
+- Pinning an element of an array does not pin the struct that holds the array (Go's pin does). Pin the whole value.
+<!-- cgo S6, docs/phase4/DESIGN-cgo-phase3-marshaling.md 21, 21.7 and 21.9: GoPinTable and GoCgoArgs.TryPinnerHeld. -->
+<!-- cgo S4, docs/phase4/DESIGN-cgo-phase3-marshaling.md 20.8 and 20.10: GoCgoArgs.PinNumber and GoCgoArgs.Word; the end
+     cursor's sentence is P3's, on confirming the past-the-end deviation (COORD inbox H 20261125T222108Z). -->
 <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: cgo increment 3.2 seat 1a (train 4, claude/h-cgo-sb2a, merge
      1f2a9afdfc; docs/phase4/DESIGN-cgo-phase3-marshaling.md section 18.9: [GoCgoStruct], the GET/SET accessor at the
      field's Go offset, and the four shapes left out by name) and seat 1c (train 6, claude/h-cgo-1c, merge 5f2f2d0aa3;

@@ -26,6 +26,35 @@ public class GoAsyncIOTests
     // refused to overwrite would wake a retired waiter). Both get a test below, and the first is a
     // real contention test rather than an assertion about intent.
 
+    // Every fake factory goes in through swapFactory and comes out at TestCleanup. The swap is process-global, and a fake
+    // left installed answers every later REAL submit in the process: the class ran before PollPinDisplacementTests'
+    // WriteToInet4 row in the full suite, whose send was handed a fake record staging at 0x7000 and died with a
+    // nil-dereference panic (cgo S6, design 21.12).
+    private static Func<nuint, object, nint, object>? s_realFactory;
+    private static bool s_swapped;
+
+    private static void swapFactory(Func<nuint, object, nint, object>? factory)
+    {
+        Func<nuint, object, nint, object>? previous = GoAsyncIO.ReplaceOperationFactoryForTesting(factory);
+
+        if (!s_swapped)
+        {
+            s_realFactory = previous;
+            s_swapped = true;
+        }
+    }
+
+    [TestCleanup]
+    public void RestoreTheRealOperationFactory()
+    {
+        if (!s_swapped)
+            return;
+
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_realFactory);
+        s_realFactory = null;
+        s_swapped = false;
+    }
+
     // Descriptors are per-test so parallel test execution cannot collide on the shared tables.
     private static int s_next = 0x5000;
 
@@ -340,7 +369,7 @@ public class GoAsyncIOTests
         // here no matter how the tests are ordered. The internal swap is the seam's test hook (golib
         // already grants GolibTests its internals); it also clears the record store, which is what
         // makes each test below independent of the ones before it.
-        GoAsyncIO.ReplaceOperationFactoryForTesting(s_fakeFactory);
+        swapFactory(s_fakeFactory);
     }
 
     private static readonly Func<nuint, object, nint, object> s_fakeFactory = (_, _, _) => {
@@ -577,7 +606,7 @@ public class GoAsyncIOTests
     [TestMethod]
     public void RearmOperation_APooledKeyReusedForAnotherDescriptor_GetsANewRecord()
     {
-        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        swapFactory(s_boundFactory);
         object key = new();
 
         GoAsyncIO.RearmOperation(11, key, 'r');
@@ -596,7 +625,7 @@ public class GoAsyncIOTests
     [TestMethod]
     public void RearmOperation_APooledKeyReusedForTheOtherMode_GetsANewRecord()
     {
-        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        swapFactory(s_boundFactory);
         object key = new();
 
         GoAsyncIO.RearmOperation(13, key, 'r');
@@ -615,7 +644,7 @@ public class GoAsyncIOTests
     [TestMethod]
     public void RearmOperation_Rebinding_DropsTheRetiredRecordsPendingCompletion()
     {
-        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        swapFactory(s_boundFactory);
         object key = new();
 
         GoAsyncIO.RearmOperation(14, key, 'r');
@@ -632,7 +661,7 @@ public class GoAsyncIOTests
     {
         // A descriptor's teardown removes the records IT created. After a re-bind the key names
         // another descriptor's live record, which a removal by key alone would retire.
-        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        swapFactory(s_boundFactory);
         object key = new();
 
         GoAsyncIO.RearmOperation(16, key, 'r');
@@ -683,7 +712,7 @@ public class GoAsyncIOTests
     [TestMethod]
     public void MarkUnassociated_RetiresTheRecordBuiltBeforeIt()
     {
-        GoAsyncIO.ReplaceOperationFactoryForTesting(s_associationFactory);
+        swapFactory(s_associationFactory);
         nuint descriptor = nextDescriptor();
         object key = new();
 
@@ -706,7 +735,7 @@ public class GoAsyncIOTests
     [TestMethod]
     public void MarkUnassociated_KeepsTheRecordBuiltUnderIt()
     {
-        GoAsyncIO.ReplaceOperationFactoryForTesting(s_associationFactory);
+        swapFactory(s_associationFactory);
         nuint descriptor = nextDescriptor();
         object key = new();
 

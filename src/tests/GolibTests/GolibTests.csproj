@@ -93,6 +93,9 @@
   <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
     <Compile Remove="GoCgoWrappers.windows.golden.cs" />
     <Compile Remove="GoCgoWrapperTypes.windows.cs" />
+    <!-- cgo S6's poll guard: it drives internal/poll's Windows displacement through a real overlapped read, so it is a
+         Windows-only file (DESIGN-cgo-phase3-marshaling 21.8), not a skip on every other flavour. -->
+    <Compile Remove="PollPinDisplacementTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
     <Compile Remove="GoCgoWrapperTypes.posix.cs" />
@@ -438,6 +441,10 @@
     <!-- TestenvCPUProfilingBrokenTests: the hand-owned answer runtime/pprof's CPU tests consult. -->
     <ProjectReference Include="..\..\core\internal\testenv\internal.testenv.csproj" />
     <ProjectReference Include="..\..\core\os\exec\os.exec.csproj" />
+
+    <!-- PollPinDisplacementTests (cgo S6, DESIGN-cgo-phase3-marshaling 21.8): a real overlapped read through net's poller on
+         Windows, so the poll pin displacement is guarded by a run rather than a reading. -->
+    <ProjectReference Include="..\..\core\net\net.csproj" />
 
     <!-- MulUnbalancedDiscriminatorTests: the §5.4 discriminator drives math/big's nat.mul through
          Int.SetBits/Int.Mul. Same precedent as sha3 above — an MSTest tier binding a converted

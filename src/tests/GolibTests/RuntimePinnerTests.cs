@@ -402,10 +402,14 @@ public class RuntimePinnerTests
         pinner.Pin(boxes[10]);
         long repeatPin = GC.GetAllocatedBytesForCurrentThread() - before;
 
-        Console.WriteLine($"runtime.Pinner cost: first pin {firstPin} B (pinner box + list + finalizer registration); distinct object {distinctPin} B (table entry + record + list slot); repeat pin {repeatPin} B");
+        Console.WriteLine($"runtime.Pinner cost: first pin {firstPin} B (pinner box + list + finalizer registration); distinct object {distinctPin} B (table entry + record + pinned buffer + storage count + list slot); repeat pin {repeatPin} B");
 
+        // cgo S6 (DESIGN-cgo-phase3-marshaling 21): a distinct pin now HOLDS its allocation still, so it adds a PinnedBuffer
+        // (a finalizable GCHandle owner), the record's one-element array and a storage count beside the table entry.
+        // Measured at Debug: 24 B before S6 (8a7a6d3690), 216 B after, for a reference-free value (one allocation, the fast
+        // path). The GCHandle's table slot is not on the GC heap, so this figure does not include it (golib-gen.md).
         Assert.AreEqual(0L, repeatPin, "a repeat pin is a counter increment and allocates nothing");
-        Assert.IsTrue(distinctPin > 0 && distinctPin <= 256, $"a distinct pin costs one table entry and one record, measured {distinctPin} B");
+        Assert.IsTrue(distinctPin > 0 && distinctPin <= 256, $"a distinct pin costs one table entry, one record, one pinned buffer and one storage count, measured {distinctPin} B");
 
         pinner.Unpin();
         GC.KeepAlive(boxes);

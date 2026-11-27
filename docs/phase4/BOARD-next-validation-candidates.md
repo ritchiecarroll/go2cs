@@ -43016,4 +43016,76 @@ P2's entry above): a refused `GoNativeCall.Enter` now rolls the status back to `
 — P5 (2026-11-27)
 
 
+
+## RESIDUAL 2026-11-26 (H): cgo S3, a struct whose CLR layout is not Go's handed to C as `void *` (DEFERRED by COORD)
+
+**Ruling.** COORD (inbox H 20261126T002923Z) deferred S3 of DESIGN-cgo-phase3-marshaling.md 20.4. There is no .5 work.
+**Evidence.**
+- The 20.9 census of six third-party cgo modules found 10 valid `void *` addresses of Go memory. All are S1 or S2
+  (scalars, slice backings, inline arrays), and none is S3.
+- GOROOT has none either. P3's point 4 (20.8) shows its three candidate sites are a benchmark and a compile-only
+  function.
+
+**State today.** Such a value is refused by name at the void door (R1: "Go pointer to unpinned Go pointer", or "storage
+go2cs cannot hold still").
+- That is stricter than Go for a value whose type holds Go pointers while the value holds none (a zero `string`, a
+  zero `struct{ p *byte }`).
+- It is a refusal, never a wrong result.
+
+**Reopens when** a measured consumer appears. The design is ready in 20.4 S3, with P3's MUST (a non-zero pointer word C
+writes decodes as a C pointer) and SHOULDs folded in (20.8).
+**Owner.** H, when it is ruled back in.
+
+— H (2026-11-26)
+
+
+## OPEN 2026-11-26 (H): cgo S4, linux-x64 cgo-e2e passed on the `_Ctype_size_t` bug (the converted main.cs is unread)
+
+**What is measured.** At S4 alone (3450839689), linux-x64 cgo-e2e (run 45730132792) passed. It did not skip the arm:
+- `govoidnumberwrite` ran both ways. go2cs's build compiled and printed `govoidnumberwrite [0 7 7 0]`, the same as Go.
+- The same arm on windows (run 45794298603) failed CS0246 `_Ctype_size_t` at main.cs(396,62).
+- go2cs's offline probe of cmd/cgo's closure for `C.memset(p, 7, 2)`, with size_t as an alias of ulong, emits the bad
+  cast. So linux's real cmd/cgo must have declared memset's third argument at something other than the size_t alias.
+
+**What is not.** The converted linux main.cs itself. It is not in the job log or the uploaded summary, and this box has
+no C compiler to rerun linux's cmd/cgo. The likeliest cause, unmeasured: GCC's builtin memset declares the parameter at
+the base type (unsigned long), so cmd/cgo's DWARF gives `_Ctype_ulong`, a defined type the old cast already mapped.
+
+**Why it does not hold S6.** The cure's evidence is the windows red, the offline guard and its red-first control, and
+the green legs off linux-x64 (windows, darwin, linux-arm64). The S4 cure's near-miss arms (P3, F1) now give linux-x64 an
+arm the bug reaches: `typedefwide` passes a constant at uint64_t, which glibc declares as a typedef of a typedef, so
+cmd/cgo writes an alias chain there with no builtin in the way.
+
+**Closes when** one linux-x64 converted main.cs at 3450839689 is read, or when a linux run of the pre-cure converter
+fails `typedefwide`.
+**Owner.** H.
+
+— H (2026-11-26)
+
+## CLOSED 2026-11-26 (H): cgo S4, why linux-x64 passed on the `_Ctype_size_t` bug (amends the OPEN entry above)
+
+**Measured.** Two probe branches (not for merge) put the pre-cure cast back and printed the converted main.cs lines at
+the typedef'd calls.
+
+- claude/h-probe-s4-f4, on S6 r10. Runs 45905897040 (linux-x64) and 45905900686 (darwin):
+  - linux/amd64 emitted `C.memset((@unsafe.Pointer)(n + 1), (C.@int)(7), (C.@ulong)(2));`. On linux, cmd/cgo declares
+    memset's third argument at the base type, unsigned long, so the pre-cure cast had no alias to name. The leg ran the
+    arm and was right to pass. It simply does not reach the bug through memset.
+  - darwin/amd64 and darwin/arm64 emitted `(_Ctype_size_t)(2)`, the bug. Both arches failed, so the darwin legs
+    discriminate the cure, alongside windows.
+- claude/h-probe-s4-f1, on S6 r11 (82d80089d9). Runs 45908618071 (windows), 45908620875 (darwin), 45908623601 (linux):
+  - typedefwide emitted `(_Ctype_uint64_t)(0x123456789UL)` and failed CS0246 on all three. That includes linux, so
+    linux-x64 cgo-e2e now has an arm the bug reaches.
+  - typedefenum emitted `(C.go2cs_probe_color)(4)` and compiled. cmd/cgo declares a typedef'd enum as a DEFINED type,
+    not an alias, so that row never depended on the cure. It guards that the cure leaves a defined C type alone.
+
+**Correction to the OPEN entry.** It said the near-miss arm `typedefwide` already gave linux-x64 an arm the bug reaches.
+As first built (6a4e7f1331), it did not. Both arms passed a typed `&out`, which needs no pointer check, so cmd/cgo wrote
+no check closure and the calls carried no cast on any target. They passed before the cure because they never reached
+it. 82d80089d9 passes `unsafe.Pointer(&out)`, as memset does, and the probe above is that change measured.
+
+**Owner.** H. Nothing remains open on this entry.
+
+— H (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

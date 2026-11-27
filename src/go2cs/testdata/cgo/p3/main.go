@@ -16,6 +16,7 @@
 package main
 
 /*
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,6 +25,12 @@ char *go2cs_probe_text_copy(const char *text);
 int go2cs_probe_text_fill(char *buffer, int size);
 long go2cs_probe_sum(const void *bytes, int count);
 void *go2cs_probe_same(void *pointer);
+uintptr_t go2cs_probe_word(uintptr_t word);
+typedef enum { go2cs_probe_red = 1, go2cs_probe_green = 2, go2cs_probe_blue = 4 } go2cs_probe_color;
+uint64_t go2cs_probe_wide_into(void *dst, uint64_t value);
+int go2cs_probe_color_into(void *dst, go2cs_probe_color color);
+void go2cs_probe_keep(void *pointer);
+int go2cs_probe_kept(void);
 char *go2cs_probe_log_new(void);
 void go2cs_probe_log_put(char *log, int value);
 void go2cs_probe_release(void *pointer);
@@ -38,6 +45,8 @@ struct go2cs_probe_entry
 struct go2cs_probe_pair { int a; int b; };
 int go2cs_probe_add_into(struct go2cs_probe_pair *dst, const struct go2cs_probe_pair *x, const struct go2cs_probe_pair *y);
 int go2cs_probe_pair_and_int(struct go2cs_probe_pair *dst, int *n);
+void go2cs_probe_keep_pair(struct go2cs_probe_pair *pair);
+int go2cs_probe_kept_pair_b(void);
 
 struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
@@ -83,6 +92,7 @@ import "C"
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"syscall"
 	"unsafe"
 )
@@ -293,6 +303,61 @@ func main() {
 		// The same address through a uintptr and back in one expression.
 		var x C.int = 7
 		fmt.Println("govoidexpr", C.go2cs_probe_same(unsafe.Pointer(uintptr(unsafe.Pointer(&x)))) != nil, int(x))
+	case "govoidnumberwrite":
+		// S4 (design 20.4), an offset inside: a number one byte into a Go array, through a variable, names the array's
+		// storage at that offset. memset writes two bytes there, and Go reads them back: [0 7 7 0].
+		var x [4]byte
+		n := uintptr(unsafe.Pointer(&x))
+		C.memset(unsafe.Pointer(n+1), 7, 2)
+		fmt.Println("govoidnumberwrite", x)
+	case "typedefwide":
+		// The S4 cure's near miss (P3, F1): a uint64_t parameter, a typedef of a typedef on glibc, handed a constant above
+		// 2^32 beside a void pointer. The void pointer is what makes cmd/cgo write its check closure, which declares the
+		// constant at the typedef (a typed &out takes no closure and no cast). It must cross whole: 4886718345, and C
+		// hands back its high word, 1.
+		var out C.uint64_t
+		high := C.go2cs_probe_wide_into(unsafe.Pointer(&out), 0x123456789)
+		fmt.Println("typedefwide", uint64(out), uint64(high))
+	case "typedefenum":
+		// The same near miss at a typedef'd enum: blue (4) crosses, C stores 40 and returns 4.
+		var out C.int
+		got := C.go2cs_probe_color_into(unsafe.Pointer(&out), 4)
+		fmt.Println("typedefenum", int(out), int(got))
+	case "wordtoken":
+		// S4, P3's read: a uintptr_t parameter handed the number of a Go value whose type holds Go pointers. Go hands C
+		// its address; go2cs's number for it is a token that names no memory, so the call is refused by name.
+		s := []int{1}
+		u := uintptr(unsafe.Pointer(&s))
+		fmt.Println("wordtoken", uintptr(C.go2cs_probe_word(C.uintptr_t(u))) == u)
+	case "pinnerkeep":
+		// cgo S6 (design 21): C keeps a Go pointer past the call, which Go allows while a runtime.Pinner pins the memory.
+		// A collection runs, Go writes through its own pointer, and C reads through the one it kept: 9 both ways.
+		var pinner runtime.Pinner
+		x := new(C.int)
+		*x = 7
+		pinner.Pin(x)
+		C.go2cs_probe_keep(unsafe.Pointer(x))
+		runtime.GC()
+		*x = 9
+		fmt.Println("pinnerkeep", int(C.go2cs_probe_kept()))
+		C.go2cs_probe_keep(nil)
+		pinner.Unpin()
+	case "pinnerkeepstruct":
+		// S6, P3's MUST 2: a pinned C STRUCT passed to a TYPED parameter C keeps. It crosses in place under the pin (a
+		// stack mirror would leave C a dead frame), and C reads Go's later write through it: 9 both ways.
+		var pinner runtime.Pinner
+		pair := new(C.struct_go2cs_probe_pair)
+		pair.a, pair.b = 1, 2
+		pinner.Pin(pair)
+		C.go2cs_probe_keep_pair(pair)
+		runtime.GC()
+		pair.b = 9
+		fmt.Println("pinnerkeepstruct", int(C.go2cs_probe_kept_pair_b()))
+		C.go2cs_probe_keep_pair(nil)
+		pinner.Unpin()
+	case "wordint":
+		// Its near-miss: an ordinary integer crosses a uintptr_t parameter as it is.
+		fmt.Println("wordint", uint64(C.go2cs_probe_word(C.uintptr_t(42))))
 	case "gobytes":
 		// C.GoBytes over Go memory: a Go function reads it, and C is not involved. go2cs refuses it until 3.2.
 		var x [4]C.char
