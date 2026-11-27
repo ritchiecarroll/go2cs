@@ -346,6 +346,14 @@ $OutDir = (Resolve-Path $OutDir).Path
 function Get-FreeGB([string] $path)
 {
     $full = [IO.Path]::GetFullPath($path)
+    # On Windows, query ONLY the drive that holds the path. Enumerating every drive and asking IsReady blocks on a mapped
+    # network drive that is reconnecting: 90 minutes on the i7 before the first arm (2026-11-27, COORD's f7494cabe5).
+    if ($IsWindowsHost)
+    {
+        try { return [int][math]::Floor([IO.DriveInfo]::new([IO.Path]::GetPathRoot($full)).AvailableFreeSpace / 1GB) }
+        catch { return -1 }
+    }
+    # Elsewhere every path's root is '/', so take the longest mount point that holds the path.
     $best = $null
     foreach ($d in [IO.DriveInfo]::GetDrives())
     {
