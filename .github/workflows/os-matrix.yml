@@ -1954,7 +1954,8 @@ jobs:
           $filter = $env:CGO_TEST_FILTER
           $testTimeout = '10m'
           if ($env:STAGE -eq 'cgo-e2e') {
-              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program' }
+              # cgo Phase 4's exit gate (TestCgoPhase4*: preamble-defined C, side-built, run against go) rides here too.
+              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program|^TestCgoPhase4' }
               $testTimeout = '40m'
           }
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }
