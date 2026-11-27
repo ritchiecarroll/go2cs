@@ -1021,6 +1021,20 @@ public class ImplementGenerator : ISourceGenerator
                             if (embedTypeSymbol is not null &&
                                 StructDeclarationSyntaxExtensions.GetForeignBoxReceiverMethodNames(embedTypeSymbol).Contains(methodName))
                             {
+                                // The embed's host classes live in ITS package's namespace, which the
+                                // generated file does not import when that namespace is neither this
+                                // one nor an ancestor of it (a user type embedding a struct from a
+                                // sibling module package: `go` cannot see `go.<module>`'s extensions,
+                                // CS1929). Forward through the host's STATIC call there, exactly as the
+                                // pointer-embed arm above does.
+                                string embedNamespace = embedTypeSymbol.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
+
+                                if (embedNamespace != packageNamespace && embedNamespace != Namespace &&
+                                    !packageNamespace.StartsWith($"{embedNamespace}.", StringComparison.Ordinal))
+                                {
+                                    forwardStaticCalls[methodName] = $"{GoMethodHosts.StaticClass(embedTypeSymbol, methodName)}.{methodName}";
+                                }
+
                                 forwardReceivers[methodName] = receiver;
                                 break;
                             }
