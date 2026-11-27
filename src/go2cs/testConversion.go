@@ -3084,6 +3084,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	//
 	// The test variant's shape-witness selection goes first, as production's does (conversionDriver.go), so the proxy
 	// refusals below decline its witnessed positions; resetPackageState clears it, and it is installed again after.
+	//
+	// The load-scoped caches empty first, before that pre-pass can fill them, and not again in this variant, so the
+	// pre-pass and the emission share their first answers (resetLoadScopedCaches).
+	resetLoadScopedCaches()
+
 	if refusal := prepareShapeWitness(pkg); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal

@@ -1990,9 +1990,10 @@ jobs:
 
           Push-Location 'src/go2cs'
           try {
-              # 50m stays the limit on every leg, osx-arm64 included: there the go2cs package runs past it, and past
-              # 100m (run 45809558237), because one test is at least 16x slower than on linux. That is a BOARD
-              # finding under diagnosis, not a budget; the summary below names the panic and the running test.
+              # 50m stays the limit on every leg, osx-arm64 included. The go2cs package ran past it there, and past
+              # 100m (run 45809558237), because process-global type caches kept every package load alive and the
+              # test binary outgrew the 7 GB runner; resetLoadScopedCaches (captureModeOperations.go) now empties
+              # them at each package root. The summary below names any panic and the test it interrupted.
               & go test -buildvcs=false -count=1 -timeout 50m ./... *>&1 | Tee-Object -FilePath $log -Append
               $runExit = $LASTEXITCODE
           }

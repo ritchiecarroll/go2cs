@@ -42873,4 +42873,41 @@ which the branch would then cross-check by name, as it does for an exact-name ro
 
 — P5 (2026-11-26)
 
+**Update 2026-11-26 (P4): the osx-arm64 slowness is a converter memory leak, and the cure is a seat.** Two readings.
+
+*A soft memory limit is not a cure.* With `GOMEMLIMIT=1GiB` on the mac go-test step (diagnostic run 45846772957),
+swap stayed at zero and pageouts fell from 26,536 to 4,004 against the no-limit sampler run 45833624874, but the
+go2cs test binary's CPU doubled (garbage collection against a live heap above the limit) and the package still hit
+the 50m panic, at test 1528 of 1966 where the three no-limit runs had reached 1586, 1657 and 1714.
+
+*The cause.* A heap profile of the go2cs package on linux (`go test -memprofile`, inuse_space at the end) read 4.7
+GB live, all `go/types` objects from `go/packages` loads, with peak RSS near 11 GB. Five process-global caches were
+keyed by objects of one load and never emptied: `importedGenericFuncInfo` (a dependency's whole `types.Info`),
+`importedGenericFuncDecls`, `declaredStructsByPackage`, `foreignDerivedAliases` and `descriptorCompanionCache`.
+Every load makes new objects, so an old entry is never hit again, but it keeps that load's type graph alive. A
+`-stdlib` run loads once per package, so it grows the same way.
+
+*The cure.* `resetLoadScopedCaches` empties them at the root hand-in in `collectCaptureModeMethods`, guarded by
+`TestLoadScopedCachesEmptyAtEachRoot`. Measured on linux/amd64 at master 51f4d4b37a, one axis: peak RSS 10.96 GB to
+3.53 GB, live heap at the end 4.66 GB to 1.36 GB, the same tests and failures. Owed before this row closes: the
+two-seeded `-stdlib` reconvert on every target, before against after, read as zero emission change (P5), and one
+osx-arm64 go-test run inside 50m.
+
+— P4 (2026-11-26)
+
+**2026-11-26 (P4, from P3's review of the cache seat): OPEN. Within one root, the first asker decides the
+generic-function lookup.** `importedGenericFuncDecls` and `importedGenericFuncInfo` cache, per owning package, the
+generic function declarations `genericFuncSource` finds through `loadedPackageSource(currentLoadedPackage, owner)`,
+which searches only the current root and its direct imports, and they cache a miss as an empty set. The route
+pre-pass asks with `currentLoadedPackage` re-pointed at a dependency (`newGenericRouteVisitor`), so for a root R that
+calls `d.F[T]` where `d.F` calls `o.G[T]` and R does not import `o`, the answer depends on which phase asks first.
+The cache seat keeps the first answer for the whole root (it empties the caches only where a root's work starts, and
+`TestLoadScopedCachesHoldAcrossTheRoutePrePass` holds that), which is master's behavior. A cure would key the two maps
+by root and owner, or stop caching a miss taken under a re-pointed root. No standard-library package has the shape
+(P5's two-seeded reconvert at 0dabfea028a moved nothing); a `-recurse` module is not measured.
+
+**Owner.** Unassigned.
+
+— P4 (2026-11-26)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -297,6 +297,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		resetEmbedTargets()
 		resetPackageState(pkg)
 
+		// The load-scoped caches empty once, here, before the route pre-pass (prepareShapeWitness) and every
+		// analysis below can fill them, so the whole root shares their first answers (resetLoadScopedCaches).
+		resetLoadScopedCaches()
+
 		files := []FileEntry{}
 		unmarkedFileCount := 0
 		var handOwnedTypeNames map[string]bool // the package's C# type names, read at its first hand-owned file

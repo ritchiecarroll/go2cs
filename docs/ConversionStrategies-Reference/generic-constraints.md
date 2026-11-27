@@ -647,7 +647,7 @@ default the refusal is fatal to the conversion; `-warn GO2CS2002` downgrades it 
 then panics with the refusal text when it is reached. The converted standard library reaches no refused shape, and
 no behavioral fixture does either.
 <!-- census of 2026-10-19 (Go 1.24 corpus): 6 self-referential interfaces in std, 12 in the behavioral tree, 0 sharing
-shapes. src/go2cs/conversionDriver.go:394 `return refusePackage(options, diagnosticProxyRefused, refusal)`, fatal outside -recurse: src/go2cs/recurseRefusal.go:44 `log.Fatalf("Refusing to convert: %s\n", err)`. -->
+shapes. src/go2cs/conversionDriver.go:398 `return refusePackage(options, diagnosticProxyRefused, refusal)`, fatal outside -recurse: src/go2cs/recurseRefusal.go:44 `log.Fatalf("Refusing to convert: %s\n", err)`. -->
 
 Two exact designs remain open, and nothing in the corpus needs them: a per-element copy of the generic function
 in which `N` is the box itself (monomorphization), or static-abstract witness types in place of the proxy.
