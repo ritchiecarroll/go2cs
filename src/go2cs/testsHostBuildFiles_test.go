@@ -409,7 +409,13 @@ func TestTestsHostBuildFilesCarryTheModuleRootIntoTheRuntimeconfig(t *testing.T)
 
 	got, _ := config.RuntimeOptions.ConfigProperties["go2cs.ModuleRoot"].(string)
 
-	if filepath.Clean(got) != filepath.Clean(module) {
+	// The SDK writes the full path MSBuild resolved, and the module directory is t.TempDir()'s spelling. They name the
+	// same directory in different spellings on two hosted runners: a Windows 8.3 short name (RUNNER~1) against the long
+	// one, and macOS /var against /private/var. So compare the directories, not the strings.
+	gotInfo, gotErr := os.Stat(got)
+	wantInfo, wantErr := os.Stat(module)
+
+	if gotErr != nil || wantErr != nil || !os.SameFile(gotInfo, wantInfo) {
 		t.Errorf("the built host's runtimeconfig carries go2cs.ModuleRoot %q; want the module's directory %q\n%s", got, module, contents)
 	}
 }
