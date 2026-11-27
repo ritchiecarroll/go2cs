@@ -251,6 +251,34 @@ public class BubbledWaitGroupTests
         AssertNoFailure(InBubble(() => { released.Add(1); released.Done(); }));
     }
 
+    // Wait's twin keeps the Go 1.25 rule (docs/phase4/DESIGN-mn-waitgroup-twin.md): a zero-count wait with no waiter
+    // left disassociates. This process runs with the scheduler off, so the twin answers on its plain path; the twin's own
+    // zero-count return on a carrier is WaitGroupTwinTests' child row.
+    [TestMethod]
+    public void AZeroCountWaitTwinInTheBubbleDisassociates()
+    {
+        ж<sync.WaitGroup> released = NewWaitGroup();
+        SyncTestBubble? before = null, after = null;
+        bool completed = false;
+
+        AssertNoFailure(InBubble(() =>
+        {
+            released.Add(1);
+            released.Done();
+            before = BubbleRecordOf(released);
+
+            GoTask task = released.Waitꞏtwin();   // zero count, no waiter
+            completed = task.GetAwaiter().IsCompleted;
+            task.GetAwaiter().GetResult();
+            after = BubbleRecordOf(released);
+        }));
+
+        Assert.IsNotNull(before, "an Add from a bubble recorded no association");
+        Assert.IsTrue(completed, "a zero count returns a completed task");
+        Assert.IsNull(after, "a zero-count Wait twin left the WaitGroup associated");
+        AssertNoFailure(InBubble(() => { released.Add(1); released.Done(); }));
+    }
+
     // Exactly a converted package-level variable's shape: `internal static ж<T> ᏑX = new StaticBox<T>(...)`.
     private static readonly ж<sync.WaitGroup> ᏑpackageLevelWaitGroup = new StaticBox<sync.WaitGroup>(default(sync.WaitGroup));
 

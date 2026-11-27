@@ -13,9 +13,9 @@ using go.golib;
 namespace GolibTests;
 
 // FROZEN SURFACE of go.sync and go.time from .5 (COORD's ruling, docs/phase4/inbox/G/20261122T114603Z-COORD.md; row 7
-// pieces 2+3): generated code in a twinned user assembly names these two hand-written twins, so their exact signatures
-// hold. A rename, a changed receiver or a lost `public` reds HERE, read off the built sync and time assemblies, never in
-// a user's build.
+// pieces 2+3; WaitGroup's Wait twin by the owner's .5 ruling of 2026-11-27): generated code in a twinned user assembly
+// names these hand-written twins, so their exact signatures hold. A rename, a changed receiver or a lost `public` reds
+// HERE, read off the built sync and time assemblies, never in a user's build.
 [TestClass]
 public class StdlibTwinSurfaceTests
 {
@@ -42,6 +42,18 @@ public class StdlibTwinSurfaceTests
             "no Lockꞏtwin(this ref Mutex) remains");
     }
 
+    // The owner's .5 ruling (2026-11-27, docs/phase4/DESIGN-mn-waitgroup-twin.md): Wait's twin is frozen surface of go.sync
+    // as Lock's is. It carries no GoParkWeak, so a caller that parks only through wg.Wait() becomes a twin.
+    [TestMethod]
+    public void SyncsWaitTwinTakesTheWaitGroupBox()
+    {
+        MethodInfo? twin = typeof(syncᴛWaitGroup).GetMethod("Waitꞏtwin", BindingFlags.Public | BindingFlags.Static, [typeof(ж<sync_package.WaitGroup>)]);
+
+        AssertFrozenTwin(twin, "sync's Waitꞏtwin(this ж<WaitGroup>)");
+        Assert.IsTrue(twin!.IsDefined(typeof(ExtensionAttribute), false), "an extension, so `Ꮡwg.Waitꞏtwin()` binds");
+        Assert.IsFalse(twin.IsDefined(typeof(GoParkWeakAttribute), false), "not weak: a waiter's caller must become a twin to give its carrier back");
+    }
+
     [TestMethod]
     public void TimesSleepTwinTakesADuration()
     {
@@ -53,8 +65,8 @@ public class StdlibTwinSurfaceTests
     [TestMethod]
     public void NoOtherPublicTwinShipsInSyncOrTime()
     {
-        // The frozen surface is exactly these two members: a new public twin in either package is a surface change that
-        // needs its own ruling, so it reds here first.
+        // The frozen surface is exactly these members: a new public twin in either package is a surface change that needs
+        // its own ruling, so it reds here first. Wait's twin joined by the owner's .5 ruling of 2026-11-27.
         string[] twins = [.. new[] { typeof(syncᴛMutex).Assembly, typeof(time_package).Assembly }
             .SelectMany(static assembly => assembly.GetTypes())
             .SelectMany(static type => type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly))
@@ -62,7 +74,7 @@ public class StdlibTwinSurfaceTests
             .Select(static method => method.DeclaringType!.Name + "." + method.Name)
             .OrderBy(static name => name, StringComparer.Ordinal)];
 
-        CollectionAssert.AreEqual(new[] { "syncᴛMutex.Lockꞏtwin", "time_package.Sleepꞏtwin" }, twins, string.Join(", ", twins));
+        CollectionAssert.AreEqual(new[] { "syncᴛMutex.Lockꞏtwin", "syncᴛWaitGroup.Waitꞏtwin", "time_package.Sleepꞏtwin" }, twins, string.Join(", ", twins));
     }
 
     // Row 7's review (2026-11-22): a twin decides by the CALLING THREAD (GoScheduler.OnCarrier), not by GO2CS_MN, so off a
