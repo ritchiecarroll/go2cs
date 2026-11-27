@@ -42765,6 +42765,58 @@ Unmapped (false) is the conservative direction: a consumer gated on one takes it
 its gated path is assembly with no managed body would trade a skip for a throwing stub, which is the trap the scan
 kernels were.
 
+## 2026-11-25 — R (M:N row 13, N5; COORD's I4 ruling 20261125T015518Z): on R-LAPTOP (Windows) one wake in a few runs waits most of a CPU step under the M:N scheduler (host-only)
+
+**OPEN, Windows host only, not rooted to a fix.** MnInvisible's V4 row (P goroutines in CPU steps of 200 ms between
+parks, one goroutine woken every 25 ms, 200 wakes) at GO2CS_MN_PROCS=8 on R-LAPTOP (16 hardware threads, Windows 11) reads
+p50 11-17 ms and p99 46-83 ms, and in 3 to 4 of every 5 runs one wake waits 150-225 ms. The same build in WSL (10 cores)
+reads p99 10-15 ms and a max of 11-23 ms at P = 4 and P = 8, and the default-mode floor on this host is p99 17-44 ms with
+an occasional 105-132 ms max of its own. So the tail belongs to this host. The hosted linux P = 4 run is the gate of record.
+
+**What it is not** (one axis each, 3-5 runs, all at row 13's branch, uncommitted arms):
+- the run-next slot: GO2CS_MN_RUNNEXT=0 leaves the max at 183-191 ms;
+- the monitor's priority: ThreadPriority.AboveNormal leaves 182-187 ms in 3 of 5;
+- the monitor starting carrier threads itself: a starter thread that starts them leaves 165-183 ms in 3 of 5;
+- idle carriers retiring after 100 ms: never retiring them leaves 117-183 ms, with no carrier re-created.
+
+**What the traces show.** In each long wait the monitor's tick spends 130-200 ms in its injection loop, in AddCarrier
+(27-64 ms each, several per tick: Thread.Start while 16 CPU-bound threads hold the 16 hardware threads); s_p.Release and
+s_carriersLock never reached 20 ms. Deferring the start moves the wait onto the queued wake rather than removing it.
+The injections come mostly from the CPU goroutines' own Gosched requeues (about 860 per 200 wakes at P = 8), which
+oversubscribe the host: Go would preempt instead, and go2cs cannot.
+
+**Likely seat.** The injection policy under CPU-bound load on a host with as many runnable threads as cores (an injection
+budget relative to idle hardware threads, or not injecting for a requeued Gosched), weighed against what 3c buys (V2 and
+MnSpinCap's spinners complete). Not cut.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-25)
+
+## 2026-11-25 — R (M:N row 13 follow-up, hosted darwin): os/exec Wait blocks invisibly on darwin under the M:N scheduler
+
+**OPEN, darwin only.** MnInvisible's C-exec census row (K goroutines blocked in exec.Cmd.Wait, warmed, GO2CS_MN=1) on
+hosted osx-x64 and osx-arm64 (run 45576163996, claude/r-mn-n5-sleep 010bb1ba92) reads handoffs 0, retakes 0 and
+injections 10-21 in each of three runs: the wait is invisible, and the scheduler answers it with injected threads. The
+same row on hosted linux reads retakes 15-16 and 0 injections (the native retake), and on hosted windows handoffs 576,
+retakes 16 and 0 injections. Released 3/3 everywhere, so nothing hangs; on darwin each waiter costs a carrier until the
+monitor injects one.
+
+**Likely seat.** darwin's process wait (wait4 through syscall's darwin path, or os's darwin-specific pidfd-less wait)
+reaching the native call without the runtime's entersyscall family, so GoNativeCall's depth stays even. Not traced.
+
+**Owner.** Unassigned; COORD routes (Q3's default: the lane on row 13).
+
+— R (2026-11-25)
+
+## 2026-11-25 — R (addendum to this BOARD's 2026-11-25 row on R-LAPTOP's wake tail): the tail is not that host's alone
+
+Hosted runs of MnInvisible V4 (run 45576158669, windows; run 45576163996, darwin) read twinned p99 well above each host's
+default-mode floor + 25 ms at 200 ms steps: win-x64 45.7-81.2 ms against a floor of 24.0-31.2; osx-arm64 43.1-133.7
+against 11.9-17.0; osx-x64 133.1-190.6 against 80.7-96.9. Hosted linux, the gate of record, reads 7-14 ms against 3-4.
+So the earlier row's "host-only" applies to linux as the exception rather than to R-LAPTOP: the tail shows on every
+non-linux host read so far. Its likely seat is unchanged.
+
 — R (2026-11-25)
 
 ## 2026-11-26 — P2 (COORD 20261126T091914Z, P3's F7): a refused native-call seam left the goroutine _Gsyscall (CURED, pre-existing)
