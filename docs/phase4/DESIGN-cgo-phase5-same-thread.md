@@ -149,10 +149,10 @@ from a call that lasts two ticks (DESIGN-mn-n5-invisible-blocking.md 3b). A call
 
 | Question | Go's answer | This slice's need |
 |---|---|---|
-| Does the callback hold a P while Go code runs? | Yes. `cgocallbackg` calls `exitsyscall`, which takes a P, waiting if none is free. | `ReenterManaged` must take a P back when the call's P was handed off or retaken. Today it only adjusts the depth and the blocked marks. This is F1's seam, so Phase 5 waits for F1. |
-| Can the goroutine migrate threads during the callback? | No. `cgocallbackg` locks it to its M (`lockOSThread`) for the callback, since C frames are on that thread's stack. | The goroutine is pinned to its thread for the callback's duration, as `LockOSThread` pins it. G: does golib's M:N need an explicit pin here, or does a goroutine whose thread is inside native frames never move by construction? |
-| Can the callback block (channel, mutex, sleep)? | Yes. The M is held, and the P is released while it blocks. | A block inside a callback parks the goroutine with C frames beneath it. The thread cannot run other goroutines meanwhile. Under 1:1 that is today's behaviour. Under M:N it costs one M for the duration, as in Go. G to confirm the scheduler tolerates an M held this way. |
-| What happens when the callback returns to C? | `reentersyscall` releases the P again. | `ReturnToNative` must release, or hand off, the P as `Enter` with the call's hint does. |
+| Does the callback hold a P while Go code runs? | Yes. `cgocallbackg` calls `exitsyscall`, which takes a P, waiting if none is free. | `ReenterManaged` must take a P back when the call's P was handed off or retaken. Today it only adjusts the depth and the blocked marks. This is F1's seam, so Phase 5 waits for F1. **Superseded by §9 (a):** a P comes back only for a Blocks call that handed it off; a retaken MayBlock call's callback runs P-less. |
+| Can the goroutine migrate threads during the callback? | No. `cgocallbackg` locks it to its M (`lockOSThread`) for the callback, since C frames are on that thread's stack. | The goroutine is pinned to its thread for the callback's duration, as `LockOSThread` pins it. G: does golib's M:N need an explicit pin here, or does a goroutine whose thread is inside native frames never move by construction? **Answered by §9 (b):** no pin is needed, by construction. |
+| Can the callback block (channel, mutex, sleep)? | Yes. The M is held, and the P is released while it blocks. | A block inside a callback parks the goroutine with C frames beneath it. The thread cannot run other goroutines meanwhile. Under 1:1 that is today's behaviour. Under M:N it costs one M for the duration, as in Go. G to confirm the scheduler tolerates an M held this way. **Answered by §9 (c):** tolerated, as in Go. |
+| What happens when the callback returns to C? | `reentersyscall` releases the P again. | `ReturnToNative` must release, or hand off, the P as `Enter` with the call's hint does. **Superseded by §9 (d):** no release. ReturnToNative is MayBlock and keeps the P. |
 | Nested Go→C→Go→C | Allowed, with depth alternating. | The depth parity already refuses out-of-order transitions. One row nests a C call inside a callback. |
 
 The 1:1 model (the default) needs none of the P handling. `ReenterManaged` and `ReturnToNative` already keep the
@@ -200,3 +200,62 @@ depth and the blocked marks, so the slice can be measured under 1:1 first and un
 - **OQ-3: foreign threads** (needm). Out, by ruling.
 - **OQ-4: what F1 makes `ReenterManaged` do under M:N.** G and R's answer bounds §5's table. The note is amended when
   F1 lands.
+
+## 9. G's rulings on §5 and OQ-1 (2026-11-27)
+
+G read §5 and OQ-1 at 87e2d633c8, against master 317b273e58 (GoNativeCall; GoScheduler's EnterBlocked/ExitBlocked,
+retake and step end), F1 as approved, and Go 1.26.11 `cgocall.go`. The rulings stand as written here, and the §5
+table rows they supersede are marked there.
+
+**§5:**
+- **(a) A P on re-entry.** After F1, `ReenterManaged` takes a P back ONLY for a call that handed its P off
+  (`Blocks`). A `MayBlock` call that the monitor RETOOK runs its callback without a P. F1's Q-b, which would cover
+  that case, is OUT of .5, as a BOARD row for after .5.
+  - It is tolerable: the callback's Go code runs beside GOMAXPROCS others.
+  - A park inside the callback heals it. EnterBlocked swaps Retaken 1 -> 0 without a release, and the wake's
+    ExitBlocked takes a P.
+- **(b) Pinning.** None is needed, by construction. A multiplexed goroutine changes carrier only between steps, at a
+  twin's await. The C call is a synchronous P/Invoke inside a step, and the callback runs the synchronous Go function
+  on that stack, so the step cannot end and the goroutine cannot move until C returns. A user's
+  LockOSThread/UnlockOSThread inside a callback is DESIGN-mn-pin's, as anywhere.
+- **(c) A blocking callback** is tolerated, as in Go.
+  - A park in synchronous code takes the plain-park path: EnterBlocked releases the P (unless it was retaken) and
+    backfills a carrier. The thread is held; the P is not.
+  - While the callback runs Go code, the depth is even, so the monitor sees running Go: 3c injection, and 3a sensing
+    for a managed wait.
+- **(d) ReturnToNative releases nothing.** F1's (2) ruled it MayBlock, since Go's `reentersyscall` is `entersyscall`,
+  not `entersyscallblock`. The P stays, and the monitor retakes it if the rest of C runs for two ticks.
+- **(e) Nesting** rides the depth parity. After F1, every EnterBlocked meets one ExitBlocked, at any depth.
+
+**A trap in step 1 (§3).** `GoNativeCall.TransitionDepth` reads -1 when there is no goroutine, and -1 is ODD. The
+same-thread check tests depth < 0 FIRST. Otherwise `ReenterManaged` goes inert and Go code runs with no goroutine.
+Test threads do carry a goroutine (Goroutine.Enter).
+
+**Rows added.** These run under GO2CS_MN=1 at GOMAXPROCS=1, after F1, and are counted by F1's blocked= and p-free=
+keys:
+- **(r1)** A callback blocks on a channel another goroutine fills, once under a Blocks outer call and once under a
+  MayBlock outer call. It completes, and both counts return to base.
+- **(r2)** C holds a MayBlock call past two ticks, then calls back (the retaken path). It completes, and the counts
+  are at base.
+- The nested row also runs under GO2CS_MN=1.
+
+**OQ-1.** G reads (ii) as workable under M:N and recommends it to the owner, on five conditions:
+1. **The state.** By (b), the goroutine is fixed for the whole C call, so per-goroutine state is exact. There is one
+   slot on the Goroutine, beside m_nativeDepth: the captured ExceptionDispatchInfo, and the depth of the C call it
+   belongs to. It is never a thread-static (the seam design's 12.1).
+2. **One slot covers nesting.** An inner record drains when the inner C call returns, before the panic reaches the
+   outer thunk, which records it again for the outer call. The slot is asserted empty when a panic is recorded.
+3. **The drain is in GoNativeCall.Exit, not in the cgo wrapper.**
+   - Exit is the one seam every native call passes, a syscall funnel's and a consumer's own bracket included.
+   - A wrapper-only drain would leave a stale slot, which short-circuits the next call at that depth.
+   - Exit rethrows after the depth and P bookkeeping.
+   - Exit throwing is new to the frozen contract. The owner's OQ-1 ruling is its recorded decision, landed as a dated
+     amendment to DESIGN-native-call-seam and to Exit's documentation.
+4. **The short-circuit runs BEFORE ReenterManaged.** It runs no Go code, so it must not wait for a P to return zero.
+5. **The thunk catches every exception.** Not every runtime panic in converted Go is a PanicException, and anything
+   that escapes [UnmanagedCallersOnly] ends the process. A GoexitException (t.FailNow inside a callback) uses the same
+   slot. It gets a row of its own against go run, because Go's Goexit through C frames is not yet probed.
+
+**Still held:** no golib code before F1 lands. r1, r2 and the GO2CS_MN=1 leg run on F1's master. The owner rules
+OQ-1 with this read.
+
