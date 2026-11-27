@@ -106,6 +106,14 @@ func cgoRealToolchainLine(t *testing.T) (string, []string) {
 func convertCgoReal(t *testing.T, probeDir string, files map[string]string, args ...string) (string, string, string, error) {
 	t.Helper()
 
+	return convertCgoRealSetup(t, probeDir, files, nil, args...)
+}
+
+// convertCgoRealSetup is convertCgoReal, with setup run on the module directory before the conversion (a library the
+// package links, built by the test).
+func convertCgoRealSetup(t *testing.T, probeDir string, files map[string]string, setup func(dir string), args ...string) (string, string, string, error) {
+	t.Helper()
+
 	treeSrc, err := filepath.Abs("..")
 
 	if err != nil {
@@ -117,6 +125,10 @@ func convertCgoReal(t *testing.T, probeDir string, files map[string]string, args
 
 	for name, contents := range files {
 		writeCgoFixture(t, dir, name, contents)
+	}
+
+	if setup != nil {
+		setup(dir)
 	}
 
 	output := t.TempDir()

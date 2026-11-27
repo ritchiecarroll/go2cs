@@ -372,3 +372,17 @@ func TestCgoSideThreadFlagIsCmdGos(t *testing.T) {
 		}
 	}
 }
+
+// The darwin dependent check (review of ef369204c9, #1), offline: an absolute install name passes; a bare name and an
+// @rpath name are refused, naming the library.
+func TestCgoDarwinInstallNameRefusesWhatDyldWouldSearch(t *testing.T) {
+	if err := cgoDarwinInstallName("libx.dylib", "/usr/lib/libSystem.B.dylib"); err != nil {
+		t.Errorf("an absolute install name is refused: %v", err)
+	}
+
+	for _, name := range []string{"libdep.dylib", "@rpath/libdep.dylib", "@loader_path/libdep.dylib"} {
+		if err := cgoDarwinInstallName("libx.dylib", name); err == nil || !strings.Contains(err.Error(), name) {
+			t.Errorf("%s: refused %v, want a refusal naming it", name, err)
+		}
+	}
+}
