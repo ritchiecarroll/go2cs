@@ -437,6 +437,10 @@
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\bad\prelude\prelude.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\good\prelude\prelude.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\goroot\src\prelude\prelude.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\e1census\census.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\e1census\e1census_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\e1census\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\e1census\testdata\fixture\fixture.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gencommandline\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gencorpusrelease\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genpopulation\main.go" />
