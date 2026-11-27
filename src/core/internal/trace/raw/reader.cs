@@ -93,7 +93,7 @@ internal static (slice<uint64>, error) readArgs⁔(/*this*/ ref Reader r, nint n
         }
         args = append(argsᴷ, args, val);
     }
-    args = move2heap(argsᴷ, args);
+    args = builtin.move2heap(argsᴷ, args);
     return (args, default);
 }
 
@@ -112,7 +112,7 @@ internal static (slice<byte>, error) readData⁔(/*this*/ ref Reader r) {
         }
         data = append(dataᴷ, data, b);
     }
-    data = move2heap(dataᴷ, data);
+    data = builtin.move2heap(dataᴷ, data);
     return (data, default);
 }
 

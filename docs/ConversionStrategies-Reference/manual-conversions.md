@@ -1214,7 +1214,7 @@ all: with tzdata registered, `loadLocation` falls back to the embedded database 
 ```csharp
 //go:linkname clone maps.clone
 /*linkname*/ internal static partial any clone(any m) {
-    return mapclone(m);
+    return builtin.mapclone(m);
 }
 ```
 

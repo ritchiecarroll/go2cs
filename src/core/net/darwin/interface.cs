@@ -7,7 +7,7 @@ using errors = errors_package;
 using strconv = @internal.strconv_package;
 using Δsync = sync_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using @internal;
 
 partial class net_package {

@@ -348,7 +348,7 @@ internal static UntypedInt doInRootAlwaysResolveTerminalSlash => 4;
 // If f or openDirFunc return a *PathError, doInRoot will set PathError.Path to the
 // full path which caused the error.
 internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, nuint flags, Func<sysfdType, @string, (sysfdType, error)> openDirFunc, Func<sysfdType, @string, bool, (T, error)> f) {
-    T ret = GoZero<T>();
+    T ret = builtin.GoZero<T>();
     error err = default;
     GoFrame ᒐ = default;
     try {

@@ -23,10 +23,10 @@ public delegate hash.Hash MakeHash();
 // documented requirements of Write, Sum, Reset, Size, and BlockSize.
 public static void TestHash(ж<testing.T> t, MakeHash mh) {
     if (Δboring.Enabled || Δfips140.Version() == "v1.0.0"u8) {
-        testhash.TestHashWithoutClone(t, NilSafeDelegateConversion<testhash.MakeHash, MakeHash>(mh));
+        testhash.TestHashWithoutClone(t, builtin.NilSafeDelegateConversion<testhash.MakeHash, MakeHash>(mh));
         return;
     }
-    testhash.TestHash(t, NilSafeDelegateConversion<testhash.MakeHash, MakeHash>(mh));
+    testhash.TestHash(t, builtin.NilSafeDelegateConversion<testhash.MakeHash, MakeHash>(mh));
 }
 
 internal static partial io.Reader newRandReader(ж<testing.T> t) {

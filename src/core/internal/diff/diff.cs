@@ -234,7 +234,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     // In those terms, A = J = inv and B = [0, n).
     // We add sentinel pairs {0,0}, and {len(x),len(y)}
     // to the returned sequence, to help the processing loop.
-    inv = move2heap(invᴷ, inv);
+    inv = builtin.move2heap(invᴷ, inv);
     var J = inv;
     nint n = len(xi);
     var T = new slice<nint>(n);

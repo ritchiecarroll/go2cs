@@ -232,7 +232,7 @@ private static readonly @string cryptoRsaDTooSmallˢᵇ = "crypto/rsa: d too sma
 internal static error checkPrivateKey(ref PrivateKey priv) {
     priv.fipsApproved = true;
 
-    var (fipsApproved, errΔ1) = checkPublicKey(ref nonnil(ref priv).pub); if (errΔ1 != nil) {
+    var (fipsApproved, errΔ1) = checkPublicKey(ref builtin.nonnil(ref priv).pub); if (errΔ1 != nil) {
         return errΔ1;
     } else if (!fipsApproved) {
         priv.fipsApproved = false;

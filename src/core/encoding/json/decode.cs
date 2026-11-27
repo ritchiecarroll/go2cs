@@ -15,7 +15,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using go.encoding;
 using go.unicode;
 
@@ -770,9 +770,9 @@ internal static error object⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) 
             }
             subv = mapElem;
         } else {
-            var f = fields.byExactName[tmpstring(key)];
+            var f = fields.byExactName[builtin.tmpstring(key)];
             if (f == nil) {
-                f = fields.byFoldedName[tmpstring(foldName(key))];
+                f = fields.byFoldedName[builtin.tmpstring(foldName(key))];
             }
             if (f != nil) {
                 subv = v;

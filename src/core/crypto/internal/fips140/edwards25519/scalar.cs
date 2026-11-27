@@ -75,7 +75,7 @@ internal static ж<Scalar> Add⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<
     ref var y = ref Ꮡy.DerefOrNull();
 
     // s = 1 * x + y mod l
-    fiatScalarAdd(ref nonnil(ref s).s, ref nonnil(ref x).s, ref nonnil(ref y).s);
+    fiatScalarAdd(ref builtin.nonnil(ref s).s, ref builtin.nonnil(ref x).s, ref builtin.nonnil(ref y).s);
     return Ꮡs;
 }
 
@@ -86,7 +86,7 @@ internal static ж<Scalar> Subtract⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx
     ref var y = ref Ꮡy.DerefOrNull();
 
     // s = -1 * y + x mod l
-    fiatScalarSub(ref nonnil(ref s).s, ref nonnil(ref x).s, ref nonnil(ref y).s);
+    fiatScalarSub(ref builtin.nonnil(ref s).s, ref builtin.nonnil(ref x).s, ref builtin.nonnil(ref y).s);
     return Ꮡs;
 }
 
@@ -96,7 +96,7 @@ internal static ж<Scalar> Negate⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) 
     ref var x = ref Ꮡx.DerefOrNull();
 
     // s = -1 * x + 0 mod l
-    fiatScalarOpp(ref nonnil(ref s).s, ref nonnil(ref x).s);
+    fiatScalarOpp(ref builtin.nonnil(ref s).s, ref builtin.nonnil(ref x).s);
     return Ꮡs;
 }
 
@@ -107,7 +107,7 @@ internal static ж<Scalar> Multiply⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx
     ref var y = ref Ꮡy.DerefOrNull();
 
     // s = x * y + 0 mod l
-    fiatScalarMul(ref nonnil(ref s).s, ref nonnil(ref x).s, ref nonnil(ref y).s);
+    fiatScalarMul(ref builtin.nonnil(ref s).s, ref builtin.nonnil(ref x).s, ref builtin.nonnil(ref y).s);
     return Ꮡs;
 }
 
@@ -175,10 +175,10 @@ internal static ж<Scalar> setShortBytes⁔(/*this*/ ж<Scalar> Ꮡs, slice<byte
     }
     ref var buf = ref heap(new array<byte>(32), out var Ꮡbuf);
     copy(buf[..], x);
-    var ᴛ1 = nonnil(ref s).s.Value;
+    var ᴛ1 = builtin.nonnil(ref s).s.Value;
     fiatScalarFromBytes(ref ᴛ1, Ꮡbuf);
-    var ᴛ2 = (fiatScalarNonMontgomeryDomainFieldElement)((nonnil(ref s).s).Value);
-    fiatScalarToMontgomery(ref nonnil(ref s).s, ref ᴛ2);
+    var ᴛ2 = (fiatScalarNonMontgomeryDomainFieldElement)((builtin.nonnil(ref s).s).Value);
+    fiatScalarToMontgomery(ref builtin.nonnil(ref s).s, ref ᴛ2);
     return Ꮡs;
 }
 
@@ -201,10 +201,10 @@ internal static (ж<Scalar>, error) SetCanonicalBytes⁔(/*this*/ ж<Scalar> Ꮡ
         return (default, errors.New(invalidScalarEncodingˢ));
     }
 
-    var ᴛ3 = nonnil(ref s).s.Value;
+    var ᴛ3 = builtin.nonnil(ref s).s.Value;
     fiatScalarFromBytes(ref ᴛ3, Ꮡ(array<byte>.Alias(x, 32)));
-    var ᴛ4 = (fiatScalarNonMontgomeryDomainFieldElement)((nonnil(ref s).s).Value);
-    fiatScalarToMontgomery(ref nonnil(ref s).s, ref ᴛ4);
+    var ᴛ4 = (fiatScalarNonMontgomeryDomainFieldElement)((builtin.nonnil(ref s).s).Value);
+    fiatScalarToMontgomery(ref builtin.nonnil(ref s).s, ref ᴛ4);
 
     return (Ꮡs, default);
 }
@@ -285,7 +285,7 @@ internal static slice<byte> bytes⁔(/*this*/ ж<Scalar> Ꮡs, /*[32]*/ ж<array
     ref var @out = ref Ꮡout.DerefOrNull();
 
     fiatScalarNonMontgomeryDomainFieldElement ss = default;
-    fiatScalarFromMontgomery(ref ss, ref nonnil(ref s).s);
+    fiatScalarFromMontgomery(ref ss, ref builtin.nonnil(ref s).s);
     var ᴛ5 = ss.Value;
     fiatScalarToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ5);
     return @out[..];
@@ -297,7 +297,7 @@ internal static nint Equal⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     fiatScalarMontgomeryDomainFieldElement diff = default;
-    fiatScalarSub(ref diff, ref nonnil(ref s).s, ref nonnil(ref t).s);
+    fiatScalarSub(ref diff, ref builtin.nonnil(ref s).s, ref builtin.nonnil(ref t).s);
     uint64 nonzero = default;
     var ᴛ6 = diff.Value;
     fiatScalarNonzero(ref nonzero, ref ᴛ6);

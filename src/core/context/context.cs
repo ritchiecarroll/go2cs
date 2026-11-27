@@ -528,7 +528,7 @@ internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Con
     }
 
     var doneᴛ1 = done;
-    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
     case 0 when doneᴛ1.ꟷᐳ(out _): {
         // parent is already canceled
         var evalᴛ1 = parent.Err();

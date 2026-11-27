@@ -151,7 +151,7 @@ internal static bool IsNormalString⁔(/*this*/ Form f, @string s) {
 internal static bool patchTail(ж<reorderBuffer> Ꮡrb) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
-    var (info, p) = lastRuneStart(ref nonnil(ref rb).f, rb.@out);
+    var (info, p) = lastRuneStart(ref builtin.nonnil(ref rb).f, rb.@out);
     if (p == -1 || info.size == 0) {
         return true;
     }

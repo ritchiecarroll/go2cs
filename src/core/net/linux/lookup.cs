@@ -70,7 +70,7 @@ internal static (nint, error) lookupProtocolMap(@string name) {
     array<byte> lowerProtocol = new(25); /* maxProtoLength */
     nint n = copy(lowerProtocol[..], name);
     lowerASCIIBytes(lowerProtocol.slice(0, n));
-    var (proto, found) = protocols[tmpstring(lowerProtocol.slice(0, n)), ꟷ];
+    var (proto, found) = protocols[builtin.tmpstring(lowerProtocol.slice(0, n)), ꟷ];
     if (!found || n != len(name)) {
         return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "unknown IP protocol specified", Addr: name))));
     }
@@ -110,7 +110,7 @@ internal static (nint port, error error) lookupPortMapWithNetwork(@string networ
         array<byte> lowerService = new(25); /* maxPortBufSize */
         nint n = copy(lowerService[..], service);
         lowerASCIIBytes(lowerService.slice(0, n));
-        var (portΔ1, okΔ1) = m[tmpstring(lowerService.slice(0, n)), ꟷ]; if (okΔ1 && n == len(service)) {
+        var (portΔ1, okΔ1) = m[builtin.tmpstring(lowerService.slice(0, n)), ꟷ]; if (okΔ1 && n == len(service)) {
             return (portΔ1, default);
         }
         return (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), errNetwork + "/"u8 + service, ""u8)));
@@ -313,7 +313,7 @@ internal static context.Context _ᴛ1ʗ = new onlyValuesCtxжContext(((ж<onlyVa
 // Value performs a lookup if the original context hasn't expired.
 internal static any Value⁔(/*this*/ ref onlyValuesCtx ovc, any key) {
     var selᴛ11 = ovc.lookupValues.Done();
-    switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
     case 0 when selᴛ11.ꟷᐳ(out _): {
         return default;
     }
@@ -912,7 +912,7 @@ internal static (slice<ж<NS>>, error) goLookupNS⁔(/*this*/ ж<Resolver> Ꮡr,
         }
         nss = append(nssᴷ, nss, Ꮡ(new NS(Host: ns.NS.String())));
     }
-    nss = move2heap(nssᴷ, nss);
+    nss = builtin.move2heap(nssᴷ, nss);
     return (nss, default);
 }
 

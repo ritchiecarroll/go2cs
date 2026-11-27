@@ -848,7 +848,7 @@ internal static (Conn, error) dialSerial⁔(/*this*/ ж<sysDialer> Ꮡsd, contex
 
         foreach (var (i, ra) in range<Addr>(ras)) {
             var selᴛ9 = ctx.Done();
-            switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
             case 0 when selᴛ9.ꟷᐳ(out _): {
                 var evalᴛ1 = ctx.Err();
                 var evalᴛ2 = mapErr(evalᴛ1);

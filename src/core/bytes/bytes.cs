@@ -10,7 +10,7 @@ using bytealg = @internal.bytealg_package;
 using bits = math.bits_package;
 using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 using go.unicode;
 using math;

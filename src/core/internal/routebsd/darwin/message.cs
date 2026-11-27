@@ -52,7 +52,7 @@ internal static (slice<Message>, error) parseRIB(slice<byte> b) {
     if (nmsgs != len(msgs) + nskips) {
         return (default, errMessageMismatch);
     }
-    msgs = move2heap(msgsᴷ, msgs);
+    msgs = builtin.move2heap(msgsᴷ, msgs);
     return (msgs, default);
 }
 

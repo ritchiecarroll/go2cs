@@ -563,7 +563,7 @@ internal static void godebug_registerMetric(@string name, Func<uint64> read) {
     if (!ok) {
         @throw("runtime: unexpected metric registration for "u8 + name);
     }
-    var recvʗ1 = NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
+    var recvʗ1 = builtin.NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
     d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => recvʗ1.compute(p1, p2);
     metrics[name] = d.ΔClone();
     metricsUnlock();

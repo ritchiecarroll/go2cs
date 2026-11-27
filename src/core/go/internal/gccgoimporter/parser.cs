@@ -1241,7 +1241,7 @@ internal static void parseTypes⁔(/*this*/ ж<parser> Ꮡp, ж<types.Package> p
         @string allTypeData = sb.String();
 
         p.typeData = [""]; // type 0, unused
-        typeOffsets = move2heap(typeOffsetsᴷ, typeOffsets);
+        typeOffsets = builtin.move2heap(typeOffsetsᴷ, typeOffsets);
         foreach (var (_, to) in range(typeOffsets)) {
             p.typeData = append(p.typeData, allTypeData.slice(to.offset, to.offset + to.length));
         }

@@ -881,21 +881,21 @@ internal static void http2setDefault<T>(ref T v, T minval, T maxval, T defval)
 }
 
 internal static void http2setConfigDefaults(ref http2http2Config conf, bool server) {
-    http2setDefault<uint32>(ref nonnil(ref conf).MaxConcurrentStreams, (uint32)1, (uint32)(math.MaxUint32), (uint32)(http2defaultMaxStreams));
-    http2setDefault<uint32>(ref nonnil(ref conf).MaxEncoderHeaderTableSize, (uint32)1, (uint32)(math.MaxUint32), (uint32)(http2initialHeaderTableSize));
-    http2setDefault<uint32>(ref nonnil(ref conf).MaxDecoderHeaderTableSize, (uint32)1, (uint32)(math.MaxUint32), (uint32)(http2initialHeaderTableSize));
+    http2setDefault<uint32>(ref builtin.nonnil(ref conf).MaxConcurrentStreams, (uint32)1, (uint32)(math.MaxUint32), (uint32)(http2defaultMaxStreams));
+    http2setDefault<uint32>(ref builtin.nonnil(ref conf).MaxEncoderHeaderTableSize, (uint32)1, (uint32)(math.MaxUint32), (uint32)(http2initialHeaderTableSize));
+    http2setDefault<uint32>(ref builtin.nonnil(ref conf).MaxDecoderHeaderTableSize, (uint32)1, (uint32)(math.MaxUint32), (uint32)(http2initialHeaderTableSize));
     if (server) {
-        http2setDefault<int32>(ref nonnil(ref conf).MaxUploadBufferPerConnection, (int32)(http2initialWindowSize), (int32)(math.MaxInt32), (int32)(1 << 20));
+        http2setDefault<int32>(ref builtin.nonnil(ref conf).MaxUploadBufferPerConnection, (int32)(http2initialWindowSize), (int32)(math.MaxInt32), (int32)(1 << 20));
     } else {
-        http2setDefault<int32>(ref nonnil(ref conf).MaxUploadBufferPerConnection, (int32)(http2initialWindowSize), (int32)(math.MaxInt32), (int32)(http2transportDefaultConnFlow));
+        http2setDefault<int32>(ref builtin.nonnil(ref conf).MaxUploadBufferPerConnection, (int32)(http2initialWindowSize), (int32)(math.MaxInt32), (int32)(http2transportDefaultConnFlow));
     }
     if (server) {
-        http2setDefault<int32>(ref nonnil(ref conf).MaxUploadBufferPerStream, (int32)1, (int32)(math.MaxInt32), (int32)(1 << 20));
+        http2setDefault<int32>(ref builtin.nonnil(ref conf).MaxUploadBufferPerStream, (int32)1, (int32)(math.MaxInt32), (int32)(1 << 20));
     } else {
-        http2setDefault<int32>(ref nonnil(ref conf).MaxUploadBufferPerStream, (int32)1, (int32)(math.MaxInt32), (int32)(http2transportDefaultStreamFlow));
+        http2setDefault<int32>(ref builtin.nonnil(ref conf).MaxUploadBufferPerStream, (int32)1, (int32)(math.MaxInt32), (int32)(http2transportDefaultStreamFlow));
     }
-    http2setDefault<uint32>(ref nonnil(ref conf).MaxReadFrameSize, (uint32)(http2minMaxFrameSize), (uint32)(http2maxFrameSize), (uint32)(http2defaultMaxReadFrameSize));
-    http2setDefault<time.Duration>(ref nonnil(ref conf).PingTimeout, (time.Duration)1, (time.Duration)(math.MaxInt64), (time.Duration)(15000000000L));
+    http2setDefault<uint32>(ref builtin.nonnil(ref conf).MaxReadFrameSize, (uint32)(http2minMaxFrameSize), (uint32)(http2maxFrameSize), (uint32)(http2defaultMaxReadFrameSize));
+    http2setDefault<time.Duration>(ref builtin.nonnil(ref conf).PingTimeout, (time.Duration)1, (time.Duration)(math.MaxInt64), (time.Duration)(15000000000L));
 }
 
 // adjustHTTP1MaxHeaderSize converts a limit in bytes on the size of an HTTP/1 header
@@ -4085,7 +4085,7 @@ internal static void closeDoneLocked⁔(/*this*/ ref http2pipe p) {
     // Close if unclosed. This isn't racy since we always
     // hold p.mu while closing.
     var selᴛ7 = p.donec;
-    switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
     case 0 when selᴛ7.ꟷᐳ(out _): {
         break;
     }
@@ -4670,7 +4670,7 @@ internal static (context.Context ctx, Action cancel) http2serverConnBaseContext(
     Action cancel = default;
 
     (ctx, var cancelᴛ1) = context.WithCancel(opts.context());
-    cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
+    cancel = builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
     var evalᴛ1 = c.LocalAddr();
     ctx = context.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), evalᴛ1);
     var hs = opts.baseConfig(); if (hs != nil) {
@@ -5145,7 +5145,7 @@ internal static partial void serve⁔(/*this*/ ж<http2serverConn> Ꮡsc, http2h
                 // written frame could have triggered a new stream to be started.
                 if (sc.writingFrameAsync) {
                     var selᴛ17 = sc.wroteFrameCh;
-                    switch (trySelect(ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
+                    switch (builtin.trySelect(ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
                     case 0 when selᴛ17.ꟷᐳ(out var wroteRes): {
                         Ꮡsc.wroteFrame(wroteRes);
                         break;
@@ -5405,7 +5405,7 @@ internal static error writeDataFromHandler⁔(/*this*/ ref http2serverConn sc, �
         // that the ch send will happen before the stream.cw
         // close.
         var chᴛ2 = ch;
-        switch (trySelect(ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
         case 0 when chᴛ2.ꟷᐳ(out err): {
             frameWriteDone = true;
             break;
@@ -6279,7 +6279,7 @@ internal static error processData⁔(/*this*/ ж<http2serverConn> Ꮡsc, ж<http
     }
     if (f.Length > 0) {
         // Check whether the client has flow control quota.
-        if (!http2takeInflows(ref nonnil(ref sc).inflow, ref (st.Ꮡinflow).DerefOrNull(), f.Length)) {
+        if (!http2takeInflows(ref builtin.nonnil(ref sc).inflow, ref (st.Ꮡinflow).DerefOrNull(), f.Length)) {
             return Ꮡsc.countError(flowOnDataLengthˢ, http2streamError(id, http2ErrCodeFlowControl));
         }
 
@@ -6510,7 +6510,7 @@ internal static error processHeaders⁔(/*this*/ ж<http2serverConn> Ꮡsc, ж<h
         st.readDeadline = time.AfterFunc(sc.hs.ReadTimeout, st.onReadTimeout);
     }
 
-    return Ꮡsc.scheduleHandler(st, rw, req, NilSafeDelegateConversion<Action<ResponseWriter, ж<Request>>, HandlerFunc>(handler));
+    return Ꮡsc.scheduleHandler(st, rw, req, builtin.NilSafeDelegateConversion<Action<ResponseWriter, ж<Request>>, HandlerFunc>(handler));
 }
 
 internal static partial void upgradeRequest⁔(/*this*/ ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {
@@ -6623,7 +6623,7 @@ internal static ж<http2stream> newStream⁔(/*this*/ ж<http2serverConn> Ꮡsc,
         id: id,
         state: state,
         ctx: ctx,
-        cancelCtx: NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtx)
+        cancelCtx: builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtx)
     ));
     st.Ꮡcw.Init();
     st.flow.conn = Ꮡsc.Ꮡflow; // link to conn-level counter
@@ -7425,7 +7425,7 @@ internal static error FlushError⁔(/*this*/ ref http2responseWriter w) {
         (_, err) = new http2chunkWriter(rws).Write(default);
         if (err == nil) {
             var selᴛ33 = rws.stream.cw;
-            switch (trySelect(ᐸꟷ<EmptyStruct>(selᴛ33, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ<EmptyStruct>(selᴛ33, ꓸꓸꓸ))) {
             case 0 when selᴛ33.ꟷᐳ(out _): {
                 err = rws.stream.closeErr;
                 break;
@@ -9517,7 +9517,7 @@ internal static partial (ж<Response>, error) roundTrip⁔(/*this*/ ж<http2Clie
         }
         case 1 when selᴛ50.ꟷᐳ(out _): {
             var selᴛ53 = cs.respHeaderRecv;
-            switch (trySelect(ᐸꟷ(selᴛ53, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ53, ꓸꓸꓸ))) {
             case 0 when selᴛ53.ꟷᐳ(out _): {
                 // If both cs.respHeaderRecv and cs.abort are signaling,
                 // pick respHeaderRecv. The server probably wrote the
@@ -9777,7 +9777,7 @@ internal static error encodeAndWriteHeaders⁔(/*this*/ ж<http2clientStream> �
         var selᴛ71 = cs.abort;
         var selᴛ72 = ctx.Done();
         var selᴛ73 = cs.reqCancel;
-        switch (trySelect(ᐸꟷ(selᴛ71, ꓸꓸꓸ), ᐸꟷ(selᴛ72, ꓸꓸꓸ), ᐸꟷ(selᴛ73, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ71, ꓸꓸꓸ), ᐸꟷ(selᴛ72, ꓸꓸꓸ), ᐸꟷ(selᴛ73, ꓸꓸꓸ))) {
         case 0 when selᴛ71.ꟷᐳ(out _): {
             return cs.abortErr;
         }
@@ -9879,7 +9879,7 @@ internal static void cleanupWriteRequest⁔(/*this*/ ж<http2clientStream> Ꮡcs
         // we may be aborted before finishing up here. If the stream was closed
         // cleanly on both sides, there is no error.
         var selᴛ74 = cs.peerClosed;
-        switch (trySelect(ᐸꟷ(selᴛ74, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ74, ꓸꓸꓸ))) {
         case 0 when selᴛ74.ꟷᐳ(out _): {
             err = default;
             break;
@@ -9976,7 +9976,7 @@ internal static error awaitOpenSlotForStreamLocked⁔(/*this*/ ref http2ClientCo
         cc.cond.Wait();
         cc.pendingRequests--;
         var selᴛ75 = cs.abort;
-        switch (trySelect(ᐸꟷ(selᴛ75, ꓸꓸꓸ))) {
+        switch (builtin.trySelect(ᐸꟷ(selᴛ75, ꓸꓸꓸ))) {
         case 0 when selᴛ75.ꟷᐳ(out _): {
             return cs.abortErr;
         }
@@ -10242,7 +10242,7 @@ internal static (int32 taken, error err) awaitFlowControl⁔(/*this*/ ж<http2cl
             var selᴛ76 = cs.abort;
             var selᴛ77 = ctx.Done();
             var selᴛ78 = cs.reqCancel;
-            switch (trySelect(ᐸꟷ(selᴛ76, ꓸꓸꓸ), ᐸꟷ(selᴛ77, ꓸꓸꓸ), ᐸꟷ(selᴛ78, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ76, ꓸꓸꓸ), ᐸꟷ(selᴛ77, ꓸꓸꓸ), ᐸꟷ(selᴛ78, ꓸꓸꓸ))) {
             case 0 when selᴛ76.ꟷᐳ(out _): {
                 (taken, err) = (0, cs.abortErr); goto ᒐdone;
             }
@@ -10475,7 +10475,7 @@ internal static void cleanup⁔(/*this*/ ж<http2clientConnReadLoop> Ꮡrl) {
 
         foreach (var (_, cs) in cc.streams) {
             var selᴛ79 = cs.peerClosed;
-            switch (trySelect(ᐸꟷ(selᴛ79, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ79, ꓸꓸꓸ))) {
             case 0 when selᴛ79.ꟷᐳ(out _): {
                 break;
             }
@@ -10804,7 +10804,7 @@ internal static (ж<Response>, error) handleResponse⁔(/*this*/ ref http2client
         if (statusCode == 100) {
             http2traceGot100Continue(cs.trace);
             var selᴛ80 = cs.on100.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-            switch (trySelect(selᴛ80)) {
+            switch (builtin.trySelect(selᴛ80)) {
             case 0: {
                 break;
             }
@@ -12641,7 +12641,7 @@ internal static void replyToWriter⁔(/*this*/ ref http2FrameWriteRequest wr, er
         return;
     }
     var selᴛ88 = wr.done.ᐸꟷ(err, ꓸꓸꓸ);
-    switch (trySelect(selᴛ88)) {
+    switch (builtin.trySelect(selᴛ88)) {
     case 0: {
         break;
     }

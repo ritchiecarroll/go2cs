@@ -304,7 +304,7 @@ internal static UntypedInt cleanupBlockSize => 512;
     internal array<cleanupFn> cleanups = new((uintptr)((uintptr)cleanupBlockSize - /* unsafe.Sizeof(cleanupBlockHeader{}) */ (uintptr)32) / /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24);
 }
 
-internal static readonly ж<array<uint8>> ᏑcleanupFnPtrMask = new StaticBox<array<uint8>>(new uint8[]{0b111}.array());
+internal static readonly ж<array<uint8>> ᏑcleanupFnPtrMask = new StaticBox<array<uint8>>(array<uint8>([0b111]));
 internal static ref array<uint8> cleanupFnPtrMask => ref ((StaticBox<array<uint8>>)ᏑcleanupFnPtrMask).ValueSlot;
 
 // cleanupFn represents a cleanup function with it's argument, yet to be called.

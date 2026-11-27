@@ -8,7 +8,7 @@ using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using Δmath = @internal.runtime.math_package;
 using strconv = @internal.strconv_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using @internal;
 using @internal.runtime;
 using @unsafe = unsafe_package;

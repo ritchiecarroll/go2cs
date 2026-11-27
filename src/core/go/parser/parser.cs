@@ -81,7 +81,7 @@ internal static void init⁔(/*this*/ ж<parser> Ꮡp, ж<token.File> Ꮡfile, s
     var eh = [GoFunc("(*parser).init.func1")] (token.Position pos, @string msg) => {
         Ꮡp.Value.errors.Add(pos, msg);
     };
-    p.scanner.Init(p.@file, src, NilSafeDelegateConversion<scanner.ErrorHandler, Action<token.Position, @string>>(eh), scanner.ScanComments);
+    p.scanner.Init(p.@file, src, builtin.NilSafeDelegateConversion<scanner.ErrorHandler, Action<token.Position, @string>>(eh), scanner.ScanComments);
 
     p.top = true;
     p.mode = mode;

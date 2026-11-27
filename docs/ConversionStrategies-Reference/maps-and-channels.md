@@ -618,7 +618,7 @@ default:   // send but do not block for it
 <!-- source: src/core/os/signal/signal.cs:268-275 -->
 ```csharp
 var cᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
-switch (trySelect(cᴛ1)) {
+switch (builtin.trySelect(cᴛ1)) {
 case 0: {
     break;
 }

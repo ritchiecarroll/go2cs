@@ -11,7 +11,7 @@ using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 
 partial class time_package {

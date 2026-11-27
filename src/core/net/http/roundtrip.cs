@@ -4,7 +4,7 @@
 //go:build !js
 namespace go.net;
 
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 
 partial class http_package {
 

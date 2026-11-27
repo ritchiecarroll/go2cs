@@ -1052,7 +1052,7 @@ public static void TextVar(encoding.TextUnmarshaler p, @string name, encoding.Te
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
 internal static void Func⁔(/*this*/ ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
-    f.Var(new funcValueᴠValue(NilSafeDelegateConversion<funcValue, Func<@string, error>>(fn)), name, usage);
+    f.Var(new funcValueᴠValue(builtin.NilSafeDelegateConversion<funcValue, Func<@string, error>>(fn)), name, usage);
 }
 
 // Func defines a flag with the specified name and usage string.
@@ -1066,7 +1066,7 @@ public static void Func(@string name, @string usage, Func<@string, error> fn) {
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
 internal static void BoolFunc⁔(/*this*/ ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
-    f.Var(new boolFuncValueᴠValue(NilSafeDelegateConversion<boolFuncValue, Func<@string, error>>(fn)), name, usage);
+    f.Var(new boolFuncValueᴠValue(builtin.NilSafeDelegateConversion<boolFuncValue, Func<@string, error>>(fn)), name, usage);
 }
 
 // BoolFunc defines a flag with the specified name and usage string without requiring values.

@@ -56,7 +56,7 @@ using strings = strings_package;
 using sync = sync_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @unsafe = unsafe_package;
 using go.encoding;
 using go.unicode;
@@ -462,10 +462,10 @@ internal static encoderFunc newTypeEncoder(reflect.Type t, bool allowAddr) {
         return uintEncoder;
     }
     case var ᴛ when ᴛ == reflect.Float32: {
-        return NilSafeDelegateConversion<encoderFunc, Action<ж<encodeState>, reflect.Value, encOpts>>(float32Encoder);
+        return builtin.NilSafeDelegateConversion<encoderFunc, Action<ж<encodeState>, reflect.Value, encOpts>>(float32Encoder);
     }
     case var ᴛ when ᴛ == reflect.Float64: {
-        return NilSafeDelegateConversion<encoderFunc, Action<ж<encodeState>, reflect.Value, encOpts>>(float64Encoder);
+        return builtin.NilSafeDelegateConversion<encoderFunc, Action<ж<encodeState>, reflect.Value, encOpts>>(float64Encoder);
     }
     case var ᴛ when ᴛ == reflect.String: {
         return stringEncoder;
@@ -1407,7 +1407,7 @@ internal static structFields typeFields(reflect.Type t) {
     foreach (var (i, field) in range(fields)) {
         exactNameIndex[field.name] = Ꮡ(fields, i);
         // For historical reasons, first folded match takes precedence.
-        var (_, ok) = foldedNameIndex[tmpstring(foldName(field.nameBytes)), ꟷ]; if (!ok) {
+        var (_, ok) = foldedNameIndex[builtin.tmpstring(foldName(field.nameBytes)), ꟷ]; if (!ok) {
             foldedNameIndex[((@string)foldName(field.nameBytes))] = Ꮡ(fields, i);
         }
     }

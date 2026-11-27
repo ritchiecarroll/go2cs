@@ -27,7 +27,7 @@ internal static UntypedInt p256ElementLen => 32;
 internal static ж<P256Element> One⁔(/*this*/ ж<P256Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    p256SetOne(ref nonnil(ref e).x);
+    p256SetOne(ref builtin.nonnil(ref e).x);
     return Ꮡe;
 }
 
@@ -67,7 +67,7 @@ internal static slice<byte> bytes⁔(/*this*/ ж<P256Element> Ꮡe, /*[32]*/ ж<
     ref var @out = ref Ꮡout.DerefOrNull();
 
     p256NonMontgomeryDomainFieldElement tmp = default;
-    p256FromMontgomery(ref tmp, ref nonnil(ref e).x);
+    p256FromMontgomery(ref tmp, ref builtin.nonnil(ref e).x);
     var ᴛ1 = tmp.Value;
     p256ToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ1);
     p256InvertEndianness(@out[..]);
@@ -102,7 +102,7 @@ internal static (ж<P256Element>, error) SetBytes⁔(/*this*/ ж<P256Element> �
     p256NonMontgomeryDomainFieldElement tmp = default;
     var ᴛ2 = tmp.Value;
     p256FromBytes(ref ᴛ2, ref @in);
-    p256ToMontgomery(ref nonnil(ref e).x, ref tmp);
+    p256ToMontgomery(ref builtin.nonnil(ref e).x, ref tmp);
     return (Ꮡe, default);
 }
 
@@ -112,7 +112,7 @@ internal static ж<P256Element> Add⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p256Add(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p256Add(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -122,7 +122,7 @@ internal static ж<P256Element> Sub⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p256Sub(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p256Sub(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -132,7 +132,7 @@ internal static ж<P256Element> Mul⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Ele
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
 
-    p256Mul(ref nonnil(ref e).x, ref nonnil(ref t1).x, ref nonnil(ref t2).x);
+    p256Mul(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t1).x, ref builtin.nonnil(ref t2).x);
     return Ꮡe;
 }
 
@@ -141,7 +141,7 @@ internal static ж<P256Element> Square⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
-    p256Square(ref nonnil(ref e).x, ref nonnil(ref t).x);
+    p256Square(ref builtin.nonnil(ref e).x, ref builtin.nonnil(ref t).x);
     return Ꮡe;
 }
 
@@ -151,11 +151,11 @@ internal static ж<P256Element> Select⁔(/*this*/ ж<P256Element> Ꮡv, ж<P256
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var ᴛ3 = nonnil(ref v).x.Value;
+    var ᴛ3 = builtin.nonnil(ref v).x.Value;
 
-    var ᴛ4 = nonnil(ref b).x.Value;
+    var ᴛ4 = builtin.nonnil(ref b).x.Value;
 
-    var ᴛ5 = nonnil(ref a).x.Value;
+    var ᴛ5 = builtin.nonnil(ref a).x.Value;
     p256Selectznz(ref ᴛ3, (p256Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;

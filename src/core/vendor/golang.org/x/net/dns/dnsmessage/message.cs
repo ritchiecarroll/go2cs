@@ -2060,7 +2060,7 @@ internal static (slice<byte>, error) pack⁔(/*this*/ ref Name n, slice<byte> ms
         // segment. A pointer is two bytes with the two most significant
         // bits set to 1 to indicate that it is a pointer.
         if ((i == 0 || n.Data[i - 1] == '.') && compression != nil) {
-            var (ptr, ok) = compression[tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
+            var (ptr, ok) = compression[builtin.tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
                 // Hit. Emit a pointer instead of the rest of
                 // the domain.
                 return (append(msg, (byte)((uint16)(ptr >> 8 | 0xC0)), (byte)ptr), default);

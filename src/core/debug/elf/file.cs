@@ -1927,7 +1927,7 @@ internal static (slice<@string>, error) DynString⁔(/*this*/ ref File f, DynTag
             }
         }
     }
-    all = move2heap(allᴷ, all);
+    all = builtin.move2heap(allᴷ, all);
     return (all, default);
 }
 
@@ -1975,7 +1975,7 @@ internal static (slice<uint64>, error) DynValue⁔(/*this*/ ref File f, DynTag t
             vals = append(valsᴷ, vals, v);
         }
     }
-    vals = move2heap(valsᴷ, vals);
+    vals = builtin.move2heap(valsᴷ, vals);
     return (vals, default);
 }
 

@@ -158,7 +158,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
         }
         vals = append(valsᴷ, vals, v);
     }
-    vals = move2heap(valsᴷ, vals);
+    vals = builtin.move2heap(valsᴷ, vals);
     return (vals, default);
 }
 

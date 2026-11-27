@@ -745,7 +745,7 @@ internal static (Token, error) rawToken⁔(/*this*/ ref Decoder d) {
                 (b, ok) = d.mustgetc(); if (!ok) {
                     return (default, d.err);
                 }
-                if (b != LiteralByteAt("CDATA["u8, i)) {
+                if (b != builtin.LiteralByteAt("CDATA["u8, i)) {
                     d.err = d.syntaxError(invalidSequenceˢ);
                     return (default, d.err);
                 }

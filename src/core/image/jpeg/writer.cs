@@ -331,8 +331,8 @@ internal static void writeSOF0⁔(/*this*/ ref encoder e, image.Point size, nint
         for (nint i = 0; i < nComponent; i++) {
             e.buf[3 * i + 6] = (uint8)(i + 1);
             // We use 4:2:0 chroma subsampling.
-            e.buf[3 * i + 7] = LiteralByteAt("\x22\x11\x11"u8, i);
-            e.buf[3 * i + 8] = LiteralByteAt("\x00\x01\x01"u8, i);
+            e.buf[3 * i + 7] = builtin.LiteralByteAt("\x22\x11\x11"u8, i);
+            e.buf[3 * i + 8] = builtin.LiteralByteAt("\x00\x01\x01"u8, i);
         }
     }
     e.write(e.buf.slice(0, 3 * (nComponent - 1) + 9));
@@ -355,7 +355,7 @@ internal static void writeDHT⁔(/*this*/ ref encoder e, nint nComponent) {
     foreach (var (i, vᴛ2) in range(specs)) {
         var s = vᴛ2.ΔClone();
 
-        e.writeByte(LiteralByteAt("\x00\x10\x01\x11"u8, i));
+        e.writeByte(builtin.LiteralByteAt("\x00\x10\x01\x11"u8, i));
         e.write(s.count[..]);
         e.write(s.value);
     }

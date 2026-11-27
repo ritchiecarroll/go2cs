@@ -310,7 +310,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<Event> events
         var evalᴛ4 = addUtil(@out[ps[i].series], mu);
         @out[ps[i].series] = evalᴛ4;
     }
-    @out = move2heap(outᴷ, @out);
+    @out = builtin.move2heap(outᴷ, @out);
     return @out;
 }
 

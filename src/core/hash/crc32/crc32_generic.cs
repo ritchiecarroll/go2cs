@@ -88,7 +88,7 @@ internal static uint32 slicingUpdate(uint32 crc, ж<slicing8Table> Ꮡtab, slice
     if (len(p) == 0) {
         return crc;
     }
-    return simpleUpdate(crc, ref nonnil(ref tab)[0], p);
+    return simpleUpdate(crc, ref builtin.nonnil(ref tab)[0], p);
 }
 
 } // end crc32_package

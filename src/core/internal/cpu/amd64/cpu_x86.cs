@@ -279,7 +279,7 @@ internal static slice<byte> appendBytes(slice<byte> b, params ꓸꓸꓸuint32 ar
             (byte)(arg >> 16),
             (byte)(arg >> 24));
     }
-    b = move2heap(bᴷ, b);
+    b = builtin.move2heap(bᴷ, b);
     return b;
 }
 

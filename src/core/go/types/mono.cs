@@ -146,7 +146,7 @@ internal static void reportInstanceLoop⁔(/*this*/ ж<Checker> Ꮡcheck, nint v
     err.addf(new TypeNameжpositioner(obj0), "instantiation cycle:");
 
     var qf = RelativeTo(check.pkg);
-    stack = move2heap(stackᴷ, stack);
+    stack = builtin.move2heap(stackᴷ, stack);
     foreach (var (_, vΔ1) in range(stack)) {
         var edge = check.mono.edges[check.mono.vertices[vΔ1].pre];
         var obj = check.mono.vertices[edge.dst].obj;
