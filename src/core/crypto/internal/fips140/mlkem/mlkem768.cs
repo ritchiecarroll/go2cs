@@ -298,7 +298,8 @@ internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, /*[32]*/ ж<array<
     foreach (var i in range(t, 3)) { // t = A ◦ s + e
         t.Value[i].Assign(e[i]);
         foreach (var j in range(s, 3)) {
-            t.Value[i].Assign(polyAdd<nttElement>(t.Value[i], nttMul(A.Value[i * (nint)k + j], s.Value[j])));
+            var evalᴛ1 = nttMul(A.Value[i * (nint)k + j], s.Value[j]);
+            t.Value[i].Assign(polyAdd<nttElement>(t.Value[i], evalᴛ1));
         }
     }
 
@@ -447,7 +448,8 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
             // Note that i and j are inverted, as we need the transposed of A.
             uHat.Assign(polyAdd<nttElement>(uHat, nttMul(ex.a[j * (nint)k + i], r[j])));
         }
-        u[i].Assign(polyAdd(e1[i], inverseNTT(uHat)));
+        var evalᴛ1 = inverseNTT(uHat);
+        u[i].Assign(polyAdd(e1[i], evalᴛ1));
     }
 
     var μ = ringDecodeAndDecompress1(ref (m).DerefOrNull());
@@ -534,7 +536,8 @@ internal static slice<byte> pkeDecrypt(ref decryptionKey dx, /*[1088]*/ ж<array
 
     nttElement mask = default; // s⊺ ◦ NTT(u)
     foreach (var i in range(len(dx.s))) {
-        mask.Assign(polyAdd(mask, nttMul(dx.s[i], ntt(u[i]))));
+        var evalᴛ1 = ntt(u[i]);
+        mask.Assign(polyAdd(mask, nttMul(dx.s[i], evalᴛ1)));
     }
     var w = polySub(v, inverseNTT(mask));
 

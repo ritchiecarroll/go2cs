@@ -15,7 +15,8 @@ partial struct local {
 
 internal static nint Take(this ref local l) {
     nint v = ᐸꟷ(l.ch);
-    l.trail = append(l.trail, glyphlib.Frames("local Take"));
+    var evalᴛ1 = glyphlib.Frames("local Take");
+    l.trail = append(l.trail, evalᴛ1);
 
     return v;
 }
@@ -27,7 +28,8 @@ internal static partial void main() {
     var bʗ1 = b;
     var doneʗ1 = done;
     goǃ([GoFunc("main.func1")] () => {
-        doneʗ1.ᐸꟷ(bʗ1.Take());
+        var evalᴛ1 = bʗ1.Take();
+        doneʗ1.ᐸꟷ(evalᴛ1);
     });
     b.Put(7);
     fmt.Println(ᐸꟷ(done));
@@ -40,7 +42,8 @@ internal static partial void main() {
     var doneʗ2 = done;
     var lʗ1 = l;
     goǃ([GoFunc("main.func2")] () => {
-        doneʗ2.ᐸꟷ(lʗ1.Take());
+        var evalᴛ2 = lʗ1.Take();
+        doneʗ2.ᐸꟷ(evalᴛ2);
     });
     l.ch.ᐸꟷ(8);
     fmt.Println(ᐸꟷ(done));

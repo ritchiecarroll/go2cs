@@ -853,7 +853,8 @@ internal static token.Pos End⁔(/*this*/ ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
-    return (token.Pos)((nint)s.TokPos + len(s.Tok.String()));
+    var evalᴛ1 = s.Tok.String();
+    return (token.Pos)((nint)s.TokPos + len(evalᴛ1));
 }
 internal static token.Pos End⁔(/*this*/ ref BlockStmt s) {
     if (s.Rbrace.IsValid()) {

@@ -54,7 +54,8 @@ internal static void main() {
     bump(Ꮡp.Ꮡn);
     bump(Ꮡcounter.Ꮡn);
     fmt.Println(counter.n);
-    fmt.Println(p.n, usesTypeP());
+    var evalᴛ1 = usesTypeP();
+    fmt.Println(p.n, evalᴛ1);
     fmt.Println(lastBox.n, lastInt.Value);
 }
 

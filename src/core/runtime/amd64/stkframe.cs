@@ -129,8 +129,11 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal⁔(/*
             // doesn't have locals yet, but we
             // also know its argument map is
             // empty.
-            if (frame.pc != f.entry()) {
-                print((@string)"runtime: confused by ", funcname(f), (@string)": no frame (sp=", (hex)(uint64)frame.sp, (@string)" fp=", (hex)(uint64)frame.fp, (@string)") at entry+", (hex)(uint64)(frame.pc - f.entry()), (@string)"\n");
+            var evalᴛ1 = f.entry();
+            if (frame.pc != evalᴛ1) {
+                var evalᴛ2 = funcname(f);
+                var evalᴛ3 = f.entry();
+                print((@string)"runtime: confused by ", evalᴛ2, (@string)": no frame (sp=", (hex)(uint64)frame.sp, (@string)" fp=", (hex)(uint64)frame.fp, (@string)") at entry+", (hex)(uint64)(frame.pc - evalᴛ3), (@string)"\n");
                 @throw(reflectMismatchˢ);
             }
             return (new bitvector(), false); // No locals, so also no stack objects
@@ -141,7 +144,8 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal⁔(/*
         // Reflect will update this value after it copies
         // in the return values.
         var retValid = ~@unsafe.Pointer.To<bool>((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
-        if (mv.fn != f.entry()) {
+        var evalᴛ4 = f.entry();
+        if (mv.fn != evalᴛ4) {
             print((@string)"runtime: confused by ", funcname(f), (@string)"\n");
             @throw(reflectMismatchˢ);
         }
@@ -218,7 +222,8 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         if (stkmap.nbit > 0) {
             if (stackid < 0 || stackid >= stkmap.n) {
                 // don't know where we are
-                print((@string)"runtime: pcdata is ", stackid, (@string)" and ", stkmap.n, (@string)" locals stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
+                var evalᴛ1 = funcname(f);
+                print((@string)"runtime: pcdata is ", stackid, (@string)" and ", stkmap.n, (@string)" locals stack map entries for ", evalᴛ1, (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
                 @throw(badSymbolTableˢ);
             }
             locals = stackmapdata(stkmap, stackid);
@@ -243,7 +248,8 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         }
         if (pcdata < 0 || pcdata >= stackmap.n) {
             // don't know where we are
-            print((@string)"runtime: pcdata is ", pcdata, (@string)" and ", stackmap.n, (@string)" args stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
+            var evalᴛ2 = funcname(f);
+            print((@string)"runtime: pcdata is ", pcdata, (@string)" and ", stackmap.n, (@string)" args stack map entries for ", evalᴛ2, (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
             @throw(badSymbolTableˢ);
         }
         if (stackmap.nbit == 0) {
@@ -303,11 +309,13 @@ internal static void stkobjinit() {
     if (mod == nil) {
         @throw(methodValueCallFrameObjsˢ);
     }
+    var evalᴛ1 = alignUp(abiRegArgsType.Size_, 8);
+    var evalᴛ2 = getGCMask(abiRegArgsType);
     methodValueCallFrameObjs[0] = new stackObjectRecord(
-        off: -(int32)alignUp(abiRegArgsType.Size_, 8), // It's always the highest address local.
+        off: -(int32)evalᴛ1, // It's always the highest address local.
         size: (int32)abiRegArgsType.Size_,
         ptrBytes: (int32)abiRegArgsType.PtrBytes,
-        gcdataoff: (uint32)((uintptr)getGCMask(abiRegArgsType) - mod.rodata)
+        gcdataoff: (uint32)((uintptr)evalᴛ2 - mod.rodata)
     );
 }
 

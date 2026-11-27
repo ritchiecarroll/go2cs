@@ -63,7 +63,9 @@ internal static void fipsPCT<P>(ж<Curve<P>> c, ж<PrivateKey> k)
 {
     fips140.PCT(ecdsaPctˢ, [GoFunc("fipsPCT[...].func1")] () => {
         var hash = testHash();
-        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.Value.d, bits2octets<P256PointжPoint>(ref (P256()).DerefOrNull(), hash), default);
+        var evalᴛ1 = P256();
+        var evalᴛ2 = bits2octets<P256PointжPoint>(ref (evalᴛ1).DerefOrNull(), hash);
+        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.Value.d, evalᴛ2, default);
         var (sig, err) = sign(ref (c).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
         if (err != nil) {
             return err;
@@ -131,7 +133,9 @@ internal static void initᴛfipsSelfTestDeterministic() { fipsSelfTestDeterminis
             0xb9, 0xfa, 0x0f, 0xbd, 0x3b, 0x9b, 0xc2, 0xfe
         ]
         ));
-        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.d, bits2octets<P256PointжPoint>(ref (P256()).DerefOrNull(), hash), default);
+        var evalᴛ3 = P256();
+        var evalᴛ4 = bits2octets<P256PointжPoint>(ref (evalᴛ3).DerefOrNull(), hash);
+        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.d, evalᴛ4, default);
         var (got, err) = sign<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
         if (err != nil) {
             return err;

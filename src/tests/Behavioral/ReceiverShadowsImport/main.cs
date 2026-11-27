@@ -58,7 +58,8 @@ internal static void main() {
     fmt.Println("copy:", readAll(new strings_ReaderжReader(t.CopyTo(Ꮡdst))), dst.s);
 
     var (p, r) = t.Addr();
-    fmt.Println("addr:", p.s, readAll(new strings_ReaderжReader(r)), t.s);
+    var evalᴛ1 = readAll(new strings_ReaderжReader(r));
+    fmt.Println("addr:", p.s, evalᴛ1, t.s);
     fmt.Println("len:", t.Len());
 }
 

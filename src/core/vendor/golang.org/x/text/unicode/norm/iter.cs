@@ -184,7 +184,10 @@ internal static slice<byte> nextHangul(ж<Iter> Ꮡi) {
         return i.next(Ꮡi);
     }
     i.p = next;
-    return i.buf.slice(0, decomposeHangul(i.buf[..], i.rb.src.hangul(p)));
+    var evalᴛ1 = i.buf[..];
+    var evalᴛ2 = i.rb.src.hangul(p);
+    var evalᴛ3 = decomposeHangul(evalᴛ1, evalᴛ2);
+    return i.buf.slice(0, evalᴛ3);
 }
 
 internal static slice<byte> nextDone(ж<Iter> i) {
@@ -225,7 +228,9 @@ internal static slice<byte> nextMultiNorm(ж<Iter> Ꮡi) {
         var info = i.rb.f.info(new input(bytes: d), j);
         if (info.BoundaryBefore()) {
             i.rb.compose();
-            var seg = i.buf.slice(0, i.rb.flushCopy(i.buf[..]));
+            var evalᴛ1 = i.buf[..];
+            var evalᴛ2 = i.rb.flushCopy(evalᴛ1);
+            var seg = i.buf.slice(0, evalᴛ2);
             Ꮡi.Ꮡrb.insertUnsafe(new input(bytes: d), j, info);
             i.multiSeg = d.slice(j + (nint)info.size);
             return seg;
@@ -379,7 +384,9 @@ internal static slice<byte> doNormDecomposed(ж<Iter> Ꮡi) {
         }
     }
     // new segment or too many combining characters: exit normalization
-    return i.buf.slice(0, i.rb.flushCopy(i.buf[..]));
+    var evalᴛ1 = i.buf[..];
+    var evalᴛ2 = i.rb.flushCopy(evalᴛ1);
+    return i.buf.slice(0, evalᴛ2);
 }
 
 internal static slice<byte> nextCGJDecompose(ж<Iter> Ꮡi) {
@@ -472,7 +479,9 @@ internal static slice<byte> doNormComposed(ж<Iter> Ꮡi) {
         Ꮡi.Ꮡrb.insertUnsafe(i.rb.src, i.p, i.info);
     }
     i.rb.compose();
-    var seg = i.buf.slice(0, i.rb.flushCopy(i.buf[..]));
+    var evalᴛ1 = i.buf[..];
+    var evalᴛ2 = i.rb.flushCopy(evalᴛ1);
+    var seg = i.buf.slice(0, evalᴛ2);
     return seg;
 }
 

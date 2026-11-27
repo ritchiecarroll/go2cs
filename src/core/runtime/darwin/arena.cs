@@ -351,7 +351,8 @@ internal static @unsafe.Pointer userArenaNextFree⁔(/*this*/ ж<mspan> Ꮡs, ж
     if ((~mp).mallocing != 0) {
         @throw(mallocDeadlockˢ);
     }
-    if ((~mp).gsignal == getg()) {
+    var evalᴛ1 = getg();
+    if ((~mp).gsignal == evalᴛ1) {
         @throw(mallocDuringSignalˢ);
     }
     mp.Value.mallocing = 1;
@@ -654,7 +655,8 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     if ((~mp).mallocing != 0) {
         @throw(mallocDeadlockˢ);
     }
-    if ((~mp).gsignal == getg()) {
+    var evalᴛ1 = getg();
+    if ((~mp).gsignal == evalᴛ1) {
         @throw(mallocDuringSignalˢ);
     }
     mp.Value.mallocing = 1;
@@ -674,7 +676,8 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     // This may be racing with GC so do it atomically if there can be
     // a race marking the bit.
     if (gcphase != _GCoff) {
-        gcmarknewobject(span, span.@base());
+        var evalᴛ2 = span.@base();
+        gcmarknewobject(span, evalᴛ2);
     }
 
     if (raceenabled) {
@@ -780,7 +783,8 @@ internal static void setUserArenaChunkToFault⁔(/*this*/ ж<mspan> Ꮡs) {
     // treated as a large object span and there's no meaningful difference between scan
     // and noscan large objects in the sweeper. The STW at the start of the GC acts as a
     // barrier for this update.
-    s.spanclass = makeSpanClass(0, true);
+    var evalᴛ1 = makeSpanClass(0, true);
+    s.spanclass = evalᴛ1;
 
     // Actually set the arena chunk to fault, so we'll get dangling pointer errors.
     // sysFault currently uses a method on each OS that forces it to evacuate all
@@ -981,7 +985,8 @@ internal static ж<mspan> allocUserArenaChunk⁔(/*this*/ ж<mheap> Ꮡh) {
     // kernel guarantees it will be zero-filled on its next use.
     Ꮡh.initSpan(s, spanAllocHeap, spc, @base, userArenaChunkPages, userArenaChunkBytes);
     s.isUserArenaChunk = true;
-    s.elemsize -= userArenaChunkReserveBytes();
+    var evalᴛ1 = userArenaChunkReserveBytes();
+    s.elemsize -= evalᴛ1;
     s.freeindex = 1;
     s.allocCount = 1;
 
@@ -996,7 +1001,8 @@ internal static ж<mspan> allocUserArenaChunk⁔(/*this*/ ж<mheap> Ꮡh) {
 
     // Adjust size to include redzone.
     if (asanenabled) {
-        s.elemsize -= redZoneSize(s.elemsize);
+        var evalᴛ2 = redZoneSize(s.elemsize);
+        s.elemsize -= evalᴛ2;
     }
 
     // Account for this new arena chunk memory.

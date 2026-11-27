@@ -751,6 +751,32 @@ Under Native AOT, `runtime.Caller` reports line 0 instead of the call's line, me
 name it reports matches Go. Neither route above applies to a Native AOT program, so for Go's lines run the program
 under the JIT with one of them.
 
+## In a few statement forms, a variable read beside a call can see its value from before the call {#operand-order-limits}
+
+**Symptom.** A statement reads a variable and also calls a function that changes that variable, and the converted
+program prints the value from before the call where Go prints the value from after it. For example, with a
+package variable `g` and a function `bump` that adds one to `g`, a package-level `var x = pick(g, bump())` passes
+`pick` the old `g` in the converted program and the new one under Go.
+
+**Cause.** Go's specification fixes the order of the calls in a statement but not when the statement's other
+operands are read against them. Go's compiler runs every call of the statement first and reads the other operands
+after, and C# reads every operand left to right. go2cs moves a statement's calls ahead of it where a call can change
+something an earlier operand reads, so most statements match Go
+([Multi-Assignment and Evaluation Order](ConversionStrategies-Reference/multi-assignment.md#a-call-runs-before-the-plain-operands-of-its-statement)).
+These forms keep C#'s left-to-right order:
+- a `case` expression of a `switch` (the switch's own tag is covered);
+- a package-level variable's initializer;
+- a statement in which a call whose several results pass straight into another call, such as `sum(two())`, would
+  have to move, as in `x := g + sum(two())`.
+- any other statement whose calls the converter cannot fully order: such a statement keeps C#'s left-to-right order
+  as a whole, and none of its calls moves.
+
+A division that panics is a related case. In `fmt.Println(x/y, bump())` with `y` zero, Go runs `bump` and then panics
+on the division; the converted program panics first, so `bump` never runs.
+
+**Workaround.** Make the call its own statement first, then read the variable: `b := bump()` and then
+`x := pick(g, b)` reads `g` after the call in both languages.
+
 ## Issues in older versions {#issues-in-older-versions}
 
 These issues affect only go2cs and `go.*` releases before 1.26.11.1. Each entry names the release that fixed it.

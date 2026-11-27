@@ -220,7 +220,9 @@ internal static void moveInlineMarks⁔(/*this*/ ref mspan s, ж<gcBits> dst) {
         if (i / (uintptr)goarch.PtrSize == (uintptr)((uintptr)((uintptr)(len(imb.marks) + 1) / (uintptr)goarch.PtrSize) - 1)) {
             marks &= unchecked((uintptr)~(uintptr)(((uintptr)0xff << (int)((goarch.PtrSize - 1) * 8)))); // mask out class
         }
-        (dst.bytep(i).Reinterpret<uint8, uintptr>()).Value |= bswapIfBigEndian(marks);
+        var evalᴛ1 = dst.bytep(i);
+        var evalᴛ2 = bswapIfBigEndian(marks);
+        (evalᴛ1.Reinterpret<uint8, uintptr>()).Value |= evalᴛ2;
     }
     if (doubleCheckGreenTea && !s.spanclass.noscan() && imb.marks != imb.scans) {
         @throw(marksDonTMatchScansForˢ);
@@ -299,7 +301,8 @@ internal static bool tryDeferToSpanScan(uintptr p, ж<gcWork> Ꮡgcw) {
     // Find the object's index from the span class info stored in the inline mark bits.
     var @base = alignDown(p, gc.PageSize);
     var q = spanInlineMarkBitsFromBase(@base);
-    var objIndex = (uint16)(((uint64)(p - @base) * (uint64)gc.SizeClassToDivMagic[q.@class.sizeclass()]) >> 32);
+    var evalᴛ1 = q.@class.sizeclass();
+    var objIndex = (uint16)(((uint64)(p - @base) * (uint64)gc.SizeClassToDivMagic[evalᴛ1]) >> 32);
 
     // Set mark bit.
     var (idx, mask) = ((uint16)(objIndex / 8), (uint8)((uint8)1 << (int)(objIndex % 8)));
@@ -310,7 +313,8 @@ internal static bool tryDeferToSpanScan(uintptr p, ж<gcWork> Ꮡgcw) {
 
     // Fast-track noscan objects.
     if (q.@class.noscan()) {
-        gcw.bytesMarked += (uint64)gc.SizeClassToSize[q.@class.sizeclass()];
+        var evalᴛ2 = q.@class.sizeclass();
+        gcw.bytesMarked += (uint64)gc.SizeClassToSize[evalᴛ2];
         return true;
     }
 
@@ -860,10 +864,12 @@ internal static objptr tryStealSpan⁔(/*this*/ ref gcWork w) {
     var pp = (~(~getg()).m).p.ptr();
 
     for (var @enum = stealOrder.start(cheaprand()); !@enum.done(); @enum.next()) {
-        if (!work.spanqMask.read(@enum.position())) {
+        var evalᴛ1 = @enum.position();
+        if (!work.spanqMask.read(evalᴛ1)) {
             continue;
         }
-        var p2 = allp[@enum.position()];
+        var evalᴛ2 = @enum.position();
+        var p2 = allp[evalᴛ2];
         if (pp == p2) {
             continue;
         }
@@ -877,7 +883,8 @@ internal static objptr tryStealSpan⁔(/*this*/ ref gcWork w) {
         // the bit on each P if there's local work we missed. This race
         // should generally be rare, since the window between noticing
         // an empty local queue and this bit being set is quite small.
-        work.spanqMask.clear((int32)@enum.position());
+        var evalᴛ3 = @enum.position();
+        work.spanqMask.clear((int32)evalᴛ3);
     }
     return 0;
 }
@@ -920,7 +927,8 @@ internal static void scanSpan(objptr p, ж<gcWork> Ꮡgcw) {
     if (spanclass.noscan()) {
         @throw(noscanObjectInScanSpanˢ);
     }
-    var elemsize = (uintptr)gc.SizeClassToSize[spanclass.sizeclass()];
+    var evalᴛ1 = spanclass.sizeclass();
+    var elemsize = (uintptr)gc.SizeClassToSize[evalᴛ1];
 
     // Release span.
     if (imb.release() == spanScanOneMark) {
@@ -943,7 +951,8 @@ internal static void scanSpan(objptr p, ж<gcWork> Ꮡgcw) {
     }
 
     // Compute nelems.
-    var divMagic = (uint64)gc.SizeClassToDivMagic[spanclass.sizeclass()];
+    var evalᴛ2 = spanclass.sizeclass();
+    var divMagic = (uint64)gc.SizeClassToDivMagic[evalᴛ2];
     var usableSpanSize = (uint64)((uintptr)gc.PageSize - /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128);
     if (!spanclass.noscan()) {
         usableSpanSize -= gc.PageSize / goarch.PtrSize / 8;
@@ -964,7 +973,8 @@ internal static void scanSpan(objptr p, ж<gcWork> Ꮡgcw) {
     if (!scan.HasFastScanSpanPacked() || objsMarked < (nint)(nelems / 8)) {
         if (debug.gctrace > 1) {
             gcw.stats[spanclass.sizeclass()].spansSparseScanned++;
-            gcw.stats[spanclass.sizeclass()].spanObjsSparseScanned += (uint64)objsMarked;
+            var evalᴛ3 = spanclass.sizeclass();
+            gcw.stats[evalᴛ3].spanObjsSparseScanned += (uint64)objsMarked;
         }
         scanObjectsSmall(spanBase, elemsize, nelems, Ꮡgcw, ref toScan);
         return;
@@ -975,18 +985,21 @@ internal static void scanSpan(objptr p, ж<gcWork> Ꮡgcw) {
     // N.B. Use gcw.ptrBuf as the output buffer. This is a bit different
     // from scanObjectsSmall, which puts addresses to dereference. ScanSpanPacked
     // on the other hand, fills gcw.ptrBuf with already dereferenced pointers.
+    var evalᴛ4 = spanclass.sizeclass();
+    var evalᴛ5 = spanPtrMaskUnsafe(spanBase);
     var nptrs = scan.ScanSpanPacked(
         (@unsafe.Pointer)spanBase,
         gcw.ptrBuf.at<uintptr>(0),
         ᏑtoScan,
-        (uintptr)spanclass.sizeclass(),
-        spanPtrMaskUnsafe(spanBase));
+        (uintptr)evalᴛ4,
+        evalᴛ5);
     gcw.heapScanWork += (int64)objsMarked * (int64)elemsize;
 
     if (debug.gctrace > 1) {
         // Write down some statistics.
         gcw.stats[spanclass.sizeclass()].spansDenseScanned++;
-        gcw.stats[spanclass.sizeclass()].spanObjsDenseScanned += (uint64)objsMarked;
+        var evalᴛ6 = spanclass.sizeclass();
+        gcw.stats[evalᴛ6].spanObjsDenseScanned += (uint64)objsMarked;
     }
 
     // Process all the pointers we just got.
@@ -1056,7 +1069,8 @@ internal static void scanObjectSmall(uintptr spanBase, uintptr b, uintptr objSiz
     var (hbitsBase, _) = spanHeapBitsRange(spanBase, gc.PageSize, objSize);
     var hbits = @unsafe.Pointer.To<byte>((@unsafe.Pointer)hbitsBase);
     var ptrBits = extractHeapBitsSmall(hbits, spanBase, b, objSize);
-    gcw.heapScanWork += (int64)(sys.Len64((uint64)ptrBits) * (nint)goarch.PtrSize);
+    var evalᴛ1 = sys.Len64((uint64)ptrBits);
+    gcw.heapScanWork += (int64)(evalᴛ1 * (nint)goarch.PtrSize);
     nint nptrs = 0;
     nint n = sys.OnesCount64((uint64)ptrBits);
     foreach (var _ᴛ1 in range(n)) {
@@ -1108,7 +1122,8 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
 
             var b = @base + (uintptr)(i * (nint)(goarch.PtrSize * 8) + j) * objSize;
             var ptrBits = extractHeapBitsSmall(hbits, @base, b, objSize);
-            gcw.heapScanWork += (int64)(sys.Len64((uint64)ptrBits) * (nint)goarch.PtrSize);
+            var evalᴛ1 = sys.Len64((uint64)ptrBits);
+            gcw.heapScanWork += (int64)(evalᴛ1 * (nint)goarch.PtrSize);
 
             nint nΔ1 = sys.OnesCount64((uint64)ptrBits);
             foreach (var _ᴛ2 in range(nΔ1)) {

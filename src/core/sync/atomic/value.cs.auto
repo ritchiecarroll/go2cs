@@ -134,7 +134,8 @@ internal static any /*old*/ Swap⁔(/*this*/ ж<Value> Ꮡv, any @newʗp) {
             throw panic("sync/atomic: swap of inconsistently typed value into Value");
         }
         var op = Ꮡold.Reinterpret<any, efaceWords>();
-        (op.of(efaceWords.Ꮡtyp).Value, op.of(efaceWords.Ꮡdata).Value) = (np.of(efaceWords.Ꮡtyp).Value, SwapPointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value));
+        var evalᴛ1 = SwapPointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value);
+        (op.of(efaceWords.Ꮡtyp).Value, op.of(efaceWords.Ꮡdata).Value) = (np.of(efaceWords.Ꮡtyp).Value, evalᴛ1);
         return old;
     }
 }

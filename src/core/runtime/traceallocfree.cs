@@ -72,7 +72,8 @@ internal static void traceSnapshotMemory(uintptr gen) {
         for (var i = (uintptr)0; i < (uintptr)s.nelems; i++) {
             if (abits.index < (uintptr)s.freeindex || abits.isMarked()) {
                 var x = s.@base() + i * s.elemsize;
-                traceΔ1.HeapObjectExists(x, s.typePointersOfUnchecked(x).typ);
+                var evalᴛ1 = s.typePointersOfUnchecked(x);
+                traceΔ1.HeapObjectExists(x, evalᴛ1.typ);
             }
             abits.advance();
         }
@@ -99,14 +100,20 @@ internal static traceArg traceSpanTypeAndClass(ж<mspan> Ꮡs) {
 internal static void SpanExists⁔(/*this*/ traceLocker tl, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpan, traceSpanID(Ꮡs), (traceArg)(uint64)s.npages, traceSpanTypeAndClass(Ꮡs));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning);
+    var evalᴛ2 = traceSpanID(Ꮡs);
+    var evalᴛ3 = traceSpanTypeAndClass(Ꮡs);
+    evalᴛ1.@event(tracev2.EvSpan, evalᴛ2, (traceArg)(uint64)s.npages, evalᴛ3);
 }
 
 // SpanAlloc records an event indicating that the span has just been allocated.
 internal static void SpanAlloc⁔(/*this*/ traceLocker tl, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanAlloc, traceSpanID(Ꮡs), (traceArg)(uint64)s.npages, traceSpanTypeAndClass(Ꮡs));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning);
+    var evalᴛ2 = traceSpanID(Ꮡs);
+    var evalᴛ3 = traceSpanTypeAndClass(Ꮡs);
+    evalᴛ1.@event(tracev2.EvSpanAlloc, evalᴛ2, (traceArg)(uint64)s.npages, evalᴛ3);
 }
 
 // SpanFree records an event indicating that the span is about to be freed.

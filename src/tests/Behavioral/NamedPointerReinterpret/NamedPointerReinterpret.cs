@@ -58,7 +58,8 @@ internal static void main() {
     fmt.Println(classify(boxed));
     ref var n = ref heap<int64>((int64)5, out var Ꮡn);
     intRef r = Ꮡn;
-    fmt.Println(r.Value, classify((r ?? (intRef)nil)));
+    var evalᴛ1 = classify((r ?? (intRef)nil));
+    fmt.Println(r.Value, evalᴛ1);
 
     fmt.Println(consume("abcd"));
 

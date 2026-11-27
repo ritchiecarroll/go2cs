@@ -25,7 +25,9 @@ internal static nint spin(nint n) {
 
 internal static void report(@string phase, time.Time began) {
     if (reading) {
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: %s elapsed_ms=%.1f\n"u8, phase, (float64)time.Since(began).Microseconds() / 1000D);
+        var evalᴛ1 = time.Since(began);
+        var evalᴛ2 = evalᴛ1.Microseconds();
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: %s elapsed_ms=%.1f\n"u8, phase, (float64)evalᴛ2 / 1000D);
     }
 }
 
@@ -48,9 +50,11 @@ internal static partial void contendedMutex(nint workers) {
                 for (nint i = 0; i < lockIters; i++) {
                     Ꮡmu.Lock();
                     counter++;
-                    sinkʗ1[wΔ1] += spin(20);
+                    var evalᴛ1 = spin(20);
+                    sinkʗ1[wΔ1] += evalᴛ1;
                     Ꮡmu.Unlock();
-                    sinkʗ1[wΔ1] += spin(50);
+                    var evalᴛ2 = spin(50);
+                    sinkʗ1[wΔ1] += evalᴛ2;
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -102,7 +106,8 @@ internal static partial void contendedChannel(nint pairs) {
                 defer(Ꮡrg.Done, ref ᒐ);
                 ᐸꟷ(startʗ2);
                 for (nint i = 0; i < chanItems; i++) {
-                    sumsʗ1[rΔ1] += ᐸꟷ(chʗ2);
+                    var evalᴛ1 = ᐸꟷ(chʗ2);
+                    sumsʗ1[rΔ1] += evalᴛ1;
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

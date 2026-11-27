@@ -316,10 +316,12 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 // sessionState returns a partially filled-out [SessionState] with information
 // from the current connection.
 internal static ж<SessionState> sessionState⁔(/*this*/ ref Conn c) {
+    var evalᴛ1 = c.config.time();
+    var evalᴛ2 = evalᴛ1.Unix();
     return Ꮡ(new SessionState(
         version: c.vers,
         cipherSuite: c.cipherSuite,
-        createdAt: (uint64)c.config.time().Unix(),
+        createdAt: (uint64)evalᴛ2,
         alpnProtocol: c.clientProtocol,
         peerCertificates: c.peerCertificates,
         ocspResponse: c.ocspResponse,

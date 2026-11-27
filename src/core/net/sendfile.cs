@@ -65,7 +65,8 @@ internal static (int64 written, error err, bool handled) sendFile(ж<netFD> c, �
         lr.N = remain - written;
     }
 
-    return (written, wrapSyscallError(sendfileˢ, err), handled);
+    var evalᴛ1 = wrapSyscallError(sendfileˢ, err);
+    return (written, evalᴛ1, handled);
 }
 
 } // end net_package

@@ -424,7 +424,8 @@ internal static (reflect.Value val, error err) safeCall(reflect.Value fun, slice
         }, ref ᒐ);
         var ret = fun.Call(args);
         if (len(ret) == 2 && !ret[1].IsNil()) {
-            (val, err) = (ret[0], ret[1].Interface()._<error>()); goto ᒐdone;
+            var evalᴛ1 = ret[1].Interface();
+            (val, err) = (ret[0], evalᴛ1._<error>()); goto ᒐdone;
         }
         (val, err) = (ret[0], default);
     }

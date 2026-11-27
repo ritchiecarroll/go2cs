@@ -301,7 +301,8 @@ internal static (SignatureScheme, error) selectSignatureScheme(uint16 vers, ж<C
     if (!ok) {
         return (0, unsupportedCertificateError(ref (Ꮡc).DerefOrNull()));
     }
-    var supportedAlgs = signatureSchemesForPublicKey(vers, priv.Public());
+    var evalᴛ1 = priv.Public();
+    var supportedAlgs = signatureSchemesForPublicKey(vers, evalᴛ1);
     if (c.SupportedSignatureAlgorithms != nil) {
         supportedAlgs = slices.DeleteFunc(supportedAlgs, [GoFunc("selectSignatureScheme.func1")] (SignatureScheme sigAlg) => !isSupportedSignatureAlgorithm(sigAlg, Ꮡc.Value.SupportedSignatureAlgorithms));
     }

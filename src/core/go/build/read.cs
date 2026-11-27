@@ -349,7 +349,8 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             if (!isValidImport(path)) {
                 // The parser used to return a parse error for invalid import paths, but
                 // no longer does, so check for and create the error here instead.
-                info.parseErr = new scanner_Errorᴠerror(new scanner.Error(Pos: info.fset.Position(spec.Pos()), Msg: "invalid import path: "u8 + path));
+                var evalᴛ1 = spec.Pos();
+                info.parseErr = new scanner_Errorᴠerror(new scanner.Error(Pos: info.fset.Position(evalᴛ1), Msg: "invalid import path: "u8 + path));
                 info.imports = default;
                 return default;
             }
@@ -361,7 +362,8 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             if (doc == nil && len(d.Specs) == 1) {
                 doc = d.Doc;
             }
-            info.imports = append(info.imports, new fileImport(path, spec.Pos(), doc));
+            var evalᴛ2 = spec.Pos();
+            info.imports = append(info.imports, new fileImport(path, evalᴛ2, doc));
         }
     }
 
@@ -372,7 +374,8 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
         }
         foreach (var (_, c) in range(group.List)) {
             if (strings.HasPrefix(c.Text, "//go:")) {
-                info.directives = append(info.directives, new Directive(c.Text, info.fset.Position(c.Slash)));
+                var evalᴛ3 = info.fset.Position(c.Slash);
+                info.directives = append(info.directives, new Directive(c.Text, evalᴛ3));
             }
         }
     }

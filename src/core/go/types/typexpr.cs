@@ -95,7 +95,8 @@ internal static void ident⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     // If so, mark the respective package as used.
     // (This code is only needed for dot-imports. Without them,
     // we only have to mark variables, see *Var case below).
-    var pkgName = check.dotImportMap[new dotImportKey(scope, obj.Name())]; if (pkgName != nil) {
+    var evalᴛ1 = obj.Name();
+    var pkgName = check.dotImportMap[new dotImportKey(scope, evalᴛ1)]; if (pkgName != nil) {
         check.usedPkgNames[pkgName] = true;
     }
 
@@ -197,7 +198,8 @@ internal static void validVarType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, 
     // to interface methods. Delay this check to the end of type-checking.
     check.later([GoFunc("(*Checker).validVarType.func1")] () => {
         var (t, _) = typ.Underlying()._<ж<Interface>>(ᐧ); if (t != nil) {
-            var tset = computeInterfaceTypeSet(Ꮡcheck, e.Pos(), t); // TODO(gri) is this the correct position?
+            var evalᴛ1 = e.Pos();
+            var tset = computeInterfaceTypeSet(Ꮡcheck, evalᴛ1, t); // TODO(gri) is this the correct position?
             if (!tset.IsMethodSet()) {
                 if (tset.comparable) {
                     Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(e), MisplacedConstraintIface, "cannot use type %s outside a type constraint: interface is (or embeds) comparable", typ);
@@ -279,7 +281,8 @@ internal static Type /*T*/ typInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Exp
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(e0.Pos(), typeSˢ, e0);
+            var evalᴛ1 = e0.Pos();
+            Ꮡcheck.trace(evalᴛ1, typeSˢ, e0);
             check.indent++;
             defer([GoFunc("(*Checker).typInternal.func1")] () => {
                 Ꮡcheck.Value.indent--;
@@ -290,9 +293,13 @@ internal static Type /*T*/ typInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Exp
                     under = safeUnderlying(T);
                 }
                 if (AreEqual(T, under)) {
-                    Ꮡcheck.trace(e0.Pos(), "=> %s // %s", T, goTypeName(T));
+                    var evalᴛ2 = e0.Pos();
+                    var evalᴛ3 = goTypeName(T);
+                    Ꮡcheck.trace(evalᴛ2, "=> %s // %s", T, evalᴛ3);
                 } else {
-                    Ꮡcheck.trace(e0.Pos(), sUnderSSˢ, T, under, goTypeName(T));
+                    var evalᴛ4 = e0.Pos();
+                    var evalᴛ5 = goTypeName(T);
+                    Ꮡcheck.trace(evalᴛ4, sUnderSSˢ, T, under, evalᴛ5);
                 }
             }, ref ᒐ);
         }
@@ -350,7 +357,8 @@ internal static Type /*T*/ typInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Exp
         case ж<ast.IndexListExpr> _: {
             var e = e0;
             var ix = unpackIndexedExpr(e);
-            Ꮡcheck.verifyVersionf(inNode(e, ix.lbrack), go1_18, "type instantiation");
+            var evalᴛ6 = inNode(e, ix.lbrack);
+            Ꮡcheck.verifyVersionf(evalᴛ6, go1_18, "type instantiation");
             T = Ꮡcheck.instantiatedType(ix); goto ᒐdone;
         }
         case ж<ast.ParenExpr> e: {
@@ -416,8 +424,10 @@ internal static Type /*T*/ typInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Exp
         }
         case ж<ast.MapType> e: {
             var typΔ7 = @new<Map>();
-            typΔ7.key = Ꮡcheck.varType(e.Key);
-            typΔ7.elem = Ꮡcheck.varType((~e).Value);
+            var evalᴛ7 = Ꮡcheck.varType(e.Key);
+            typΔ7.key = evalᴛ7;
+            var evalᴛ8 = Ꮡcheck.varType((~e).Value);
+            typΔ7.elem = evalᴛ8;
 
             // spec: "The comparison operators == and != must be fully defined
             // for operands of the key type; thus the key type must not be a
@@ -496,12 +506,14 @@ internal static Type /*res*/ instantiatedType⁔(/*this*/ ж<Checker> Ꮡcheck, 
         ref var ix = ref Ꮡix.DerefOrNull();
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(ix.Pos(), instantiatingTypeSWithSˢ, ix.x, ix.indices);
+            var evalᴛ1 = ix.Pos();
+            Ꮡcheck.trace(evalᴛ1, instantiatingTypeSWithSˢ, ix.x, ix.indices);
             check.indent++;
             defer([GoFunc("(*Checker).instantiatedType.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 // Don't format the underlying here. It will always be nil.
-                Ꮡcheck.trace(Ꮡix.Value.Pos(), "=> %s", res);
+                var evalᴛ2 = Ꮡix.Value.Pos();
+                Ꮡcheck.trace(evalᴛ2, "=> %s", res);
             }, ref ᒐ);
         }
 
@@ -529,7 +541,9 @@ internal static Type /*res*/ instantiatedType⁔(/*this*/ ж<Checker> Ꮡcheck, 
         // The instance is not generic anymore as it has type arguments, but unless
         // instantiation failed, it still satisfies the genericType interface because
         // it has type parameters, too.
-        var ityp = Ꮡcheck.instance(ix.Pos(), gtyp, targs, nil, check.context());
+        var evalᴛ3 = ix.Pos();
+        var evalᴛ4 = check.context();
+        var ityp = Ꮡcheck.instance(evalᴛ3, gtyp, targs, nil, evalᴛ4);
         var (inst, _) = ityp._<genericType>(ᐧ);
         if (inst == nil) {
             res = new BasicжType(Typ[Invalid]); goto ᒐdone;
@@ -546,7 +560,8 @@ internal static Type /*res*/ instantiatedType⁔(/*this*/ ж<Checker> Ꮡcheck, 
 
             @string name = instʗ1._<genericType, instantiatedType_type>().Obj().name;
             var tparams = instʗ1.TypeParams().list();
-            if (Ꮡcheck.validateTArgLen(Ꮡix.Value.Pos(), name, len(tparams), len(targsʗ1))) {
+            var evalᴛ5 = Ꮡix.Value.Pos();
+            if (Ꮡcheck.validateTArgLen(evalᴛ5, name, len(tparams), len(targsʗ1))) {
                 // check type constraints
                 var (i, err) = Ꮡcheck.verify(Ꮡix.Value.Pos(), instʗ1.TypeParams().list(), targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
                     // best position for error reporting
@@ -556,7 +571,8 @@ internal static Type /*res*/ instantiatedType⁔(/*this*/ ж<Checker> Ꮡcheck, 
                     }
                     Ꮡcheck.softErrorf((atPos)pos, InvalidTypeArg, "%v", err);
                 } else {
-                    Ꮡcheck.Ꮡmono.recordInstance(Ꮡcheck.Value.pkg, Ꮡix.Value.Pos(), tparams, targsʗ1, Ꮡix.Value.indices);
+                    var evalᴛ6 = Ꮡix.Value.Pos();
+                    Ꮡcheck.Ꮡmono.recordInstance(Ꮡcheck.Value.pkg, evalᴛ6, tparams, targsʗ1, Ꮡix.Value.indices);
                 }
             }
         }).describef(new indexedExprжpositioner(Ꮡix), "verify instantiation %s", inst);

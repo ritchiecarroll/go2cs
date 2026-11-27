@@ -64,7 +64,9 @@ internal static void main() {
     z = 22;
     @unsafe.Pointer pa = @unsafe.Pointer.FromBox(Ꮡa);
     @unsafe.Pointer pz = @unsafe.Pointer.FromBox(Ꮡz);
-    fmt.Println(~@unsafe.Pointer.To<uintptr>(pick(true, pa, pz)), ~@unsafe.Pointer.To<uintptr>(pick(false, pa, pz)));
+    var evalᴛ1 = pick(true, pa, pz);
+    var evalᴛ2 = pick(false, pa, pz);
+    fmt.Println(~@unsafe.Pointer.To<uintptr>(evalᴛ1), ~@unsafe.Pointer.To<uintptr>(evalᴛ2));
     var (n2, fd2) = advance(pa, 5);
     fmt.Println(n2, ~@unsafe.Pointer.To<uintptr>(fd2));
     var w = same(Ꮡa);

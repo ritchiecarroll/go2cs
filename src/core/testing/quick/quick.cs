@@ -288,7 +288,8 @@ partial struct CheckError {
 }
 
 internal static @string Error⁔(/*this*/ ref CheckError s) {
-    return fmt.Sprintf("#%d: failed on input %s"u8, s.Count, toString(s.In));
+    var evalᴛ1 = toString(s.In);
+    return fmt.Sprintf("#%d: failed on input %s"u8, s.Count, evalᴛ1);
 }
 
 // A CheckEqualError is the result [CheckEqual] finding an error.
@@ -299,7 +300,10 @@ partial struct CheckEqualError {
 }
 
 internal static @string Error⁔(/*this*/ ref CheckEqualError s) {
-    return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s"u8, s.Count, toString(s.In), toString(s.Out1), toString(s.Out2));
+    var evalᴛ1 = toString(s.In);
+    var evalᴛ2 = toString(s.Out1);
+    var evalᴛ3 = toString(s.Out2);
+    return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s"u8, s.Count, evalᴛ1, evalᴛ2, evalᴛ3);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

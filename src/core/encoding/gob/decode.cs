@@ -973,23 +973,29 @@ internal static ж<decOp> decOpFor⁔(/*this*/ ж<Decoder> Ꮡdec, typeId wireId
             case var ᴛ when ᴛ == reflect.Array: {
                 name = "element of "u8 + name;
                 var elemId = dec.wireType[wireId].ArrayT.Elem;
-                var elemOp = Ꮡdec.decOpFor(elemId, t.Elem(), name, inProgress);
+                var evalᴛ1 = t.Elem();
+                var elemOp = Ꮡdec.decOpFor(elemId, evalᴛ1, name, inProgress);
                 var ovfl = overflow(name);
-                var helper = decArrayHelper[t.Elem().Kind()];
+                var evalᴛ2 = t.Elem();
+                var evalᴛ3 = evalᴛ2.Kind();
+                var helper = decArrayHelper[evalᴛ3];
                 var elemOpʗ1 = elemOp;
                 var helperʗ1 = helper;
                 var ovflʗ1 = ovfl;
                 var tʗ1 = t;
                 op = [GoFunc("(*Decoder).decOpFor.func1")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
-                    state.dec.decodeArray(state, value, elemOpʗ1.ValueSlot, tʗ1.Len(), ovflʗ1, helperʗ1);
+                    var evalᴛ4 = tʗ1.Len();
+                    state.dec.decodeArray(state, value, elemOpʗ1.ValueSlot, evalᴛ4, ovflʗ1, helperʗ1);
                 };
                 break;
             }
             case var ᴛ when ᴛ == reflect.Map: {
                 var keyId = dec.wireType[wireId].MapT.Key;
                 var elemId = dec.wireType[wireId].MapT.Elem;
-                var keyOp = Ꮡdec.decOpFor(keyId, t.Key(), "key of "u8 + name, inProgress);
-                var elemOp = Ꮡdec.decOpFor(elemId, t.Elem(), "element of "u8 + name, inProgress);
+                var evalᴛ5 = t.Key();
+                var keyOp = Ꮡdec.decOpFor(keyId, evalᴛ5, "key of "u8 + name, inProgress);
+                var evalᴛ6 = t.Elem();
+                var elemOp = Ꮡdec.decOpFor(elemId, evalᴛ6, "element of "u8 + name, inProgress);
                 var ovfl = overflow(name);
                 var elemOpʗ2 = elemOp;
                 var keyOpʗ1 = keyOp;
@@ -1012,9 +1018,12 @@ internal static ж<decOp> decOpFor⁔(/*this*/ ж<Decoder> Ꮡdec, typeId wireId
                 } else {
                     elemId = dec.wireType[wireId].SliceT.Elem;
                 }
-                var elemOp = Ꮡdec.decOpFor(elemId, t.Elem(), name, inProgress);
+                var evalᴛ7 = t.Elem();
+                var elemOp = Ꮡdec.decOpFor(elemId, evalᴛ7, name, inProgress);
                 var ovfl = overflow(name);
-                var helper = decSliceHelper[t.Elem().Kind()];
+                var evalᴛ8 = t.Elem();
+                var evalᴛ9 = evalᴛ8.Kind();
+                var helper = decSliceHelper[evalᴛ9];
                 var elemOpʗ3 = elemOp;
                 var helperʗ2 = helper;
                 var ovflʗ3 = ovfl;

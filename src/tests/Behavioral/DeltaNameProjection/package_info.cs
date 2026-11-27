@@ -74,7 +74,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAN1aWlJSUgoLsACoqgoKCgoKCgpSCgoKClIKUgoKCgoKChJaClIKClIKCgpSCgpSUgoKCgpSCgpSClIKCgpSCgoKCgpSClJSCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoKUgoKChLiCgoKUpg==", "214-214:1;215-215:2;216-216:3;218-218:4", "", "223=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1;239=TypeOf/2/2/1,Field/2/2/1;252=Field/3/3/1,Sprintf/1/1/1;258=TypeOf/1/2/1,Name/1/2/1,TypeOf/2/2/1,Name/2/2/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAN1aWlJSUgoLsACoqgoKCgoKCgpSCgoKClIKUgoKCgoKChJaClIKCpIKCgpSCgpSUgoKCguSCgrSClIKCgpSCgoKCgpSClJSCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoLUgoKChLiCgoKUpg==", "214-214:1;215-215:2;216-216:3;218-218:4", "", "231=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1;247=TypeOf/2/2/1,Field/2/2/1;260=Field/3/3/1,Sprintf/1/1/1;270=TypeOf/1/2/1,Name/1/2/1,TypeOf/2/2/1,Name/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

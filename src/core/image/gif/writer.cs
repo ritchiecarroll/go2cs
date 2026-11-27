@@ -497,13 +497,15 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         pm = Ꮡdup;
     }
 
+    var evalᴛ1 = b.Dx();
+    var evalᴛ2 = b.Dy();
     return EncodeAll(w, Ꮡ(new GIF(
         Image: [pm],
         Delay: [0],
         Config: new image.Config(
             ColorModel: pm.Palette,
-            Width: b.Dx(),
-            Height: b.Dy()
+            Width: evalᴛ1,
+            Height: evalᴛ2
         )
     )));
 }

@@ -1000,7 +1000,8 @@ internal static ж<Int> Rand⁔(/*this*/ ж<Int> Ꮡz, ж<rand.Rand> rnd, ж<Int
         return Ꮡz;
     }
     z.neg = false;
-    z.abs = z.abs.random(rnd, n.abs, n.abs.bitLen());
+    var evalᴛ1 = n.abs.bitLen();
+    z.abs = z.abs.random(rnd, n.abs, evalᴛ1);
     return Ꮡz;
 }
 
@@ -1320,7 +1321,8 @@ internal static ж<Int> And⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy
             // (-x) & (-y) == ^(x-1) & ^(y-1) == ^((x-1) | (y-1)) == -(((x-1) | (y-1)) + 1)
             var x1 = ((nat)default).sub(x.abs, natOne);
             var y1Δ1 = ((nat)default).sub(y.abs, natOne);
-            z.abs = z.abs.add(z.abs.or(x1, y1Δ1), natOne);
+            var evalᴛ1 = z.abs.or(x1, y1Δ1);
+            z.abs = z.abs.add(evalᴛ1, natOne);
             z.neg = true; // z cannot be zero if x and y are negative
             return Ꮡz;
         }
@@ -1368,7 +1370,8 @@ internal static ж<Int> AndNot⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> �
     if (x.neg) {
         // (-x) &^ y == ^(x-1) &^ y == ^(x-1) & ^y == ^((x-1) | y) == -(((x-1) | y) + 1)
         var x1 = ((nat)default).sub(x.abs, natOne);
-        z.abs = z.abs.add(z.abs.or(x1, y.abs), natOne);
+        var evalᴛ1 = z.abs.or(x1, y.abs);
+        z.abs = z.abs.add(evalᴛ1, natOne);
         z.neg = true; // z cannot be zero if x is negative and y is positive
         return Ꮡz;
     }
@@ -1391,7 +1394,8 @@ internal static ж<Int> Or⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy)
             // (-x) | (-y) == ^(x-1) | ^(y-1) == ^((x-1) & (y-1)) == -(((x-1) & (y-1)) + 1)
             var x1 = ((nat)default).sub(x.abs, natOne);
             var y1Δ1 = ((nat)default).sub(y.abs, natOne);
-            z.abs = z.abs.add(z.abs.and(x1, y1Δ1), natOne);
+            var evalᴛ1 = z.abs.and(x1, y1Δ1);
+            z.abs = z.abs.add(evalᴛ1, natOne);
             z.neg = true; // z cannot be zero if x and y are negative
             return Ꮡz;
         }
@@ -1409,7 +1413,8 @@ internal static ж<Int> Or⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy)
 
     // x | (-y) == x | ^(y-1) == ^((y-1) &^ x) == -(^((y-1) &^ x) + 1)
     var y1 = ((nat)default).sub(y.abs, natOne);
-    z.abs = z.abs.add(z.abs.andNot(y1, x.abs), natOne);
+    var evalᴛ2 = z.abs.andNot(y1, x.abs);
+    z.abs = z.abs.add(evalᴛ2, natOne);
     z.neg = true; // z cannot be zero if one of x or y is negative
     return Ꮡz;
 }
@@ -1443,7 +1448,8 @@ internal static ж<Int> Xor⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy
 
     // x ^ (-y) == x ^ ^(y-1) == ^(x ^ (y-1)) == -((x ^ (y-1)) + 1)
     var y1 = ((nat)default).sub(y.abs, natOne);
-    z.abs = z.abs.add(z.abs.xor(x.abs, y1), natOne);
+    var evalᴛ1 = z.abs.xor(x.abs, y1);
+    z.abs = z.abs.add(evalᴛ1, natOne);
     z.neg = true; // z cannot be zero if only one of x or y is negative
     return Ꮡz;
 }

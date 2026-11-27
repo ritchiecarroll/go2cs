@@ -121,18 +121,24 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
     Ꮡr.readPackage(Ꮡpkg, mode);
     r.computeMethodSets();
     r.cleanupTypes();
+    var evalᴛ1 = sortedKeys(r.imports);
+    var evalᴛ2 = noteBodies(r.notes[bugˢ]);
+    var evalᴛ3 = sortedValues(r.values, token.CONST);
+    var evalᴛ4 = sortedTypes(r.types, (Mode)(mode & AllMethods) != 0);
+    var evalᴛ5 = sortedValues(r.values, token.VAR);
+    var evalᴛ6 = sortedFuncs(r.funcs, true);
     var p = Ꮡ(new Package(
         Doc: r.doc,
         Name: pkg.Name,
         ImportPath: importPath,
-        Imports: sortedKeys(r.imports),
+        Imports: evalᴛ1,
         Filenames: r.filenames,
         Notes: r.notes,
-        Bugs: noteBodies(r.notes[bugˢ]),
-        Consts: sortedValues(r.values, token.CONST),
-        Types: sortedTypes(r.types, (Mode)(mode & AllMethods) != 0),
-        Vars: sortedValues(r.values, token.VAR),
-        Funcs: sortedFuncs(r.funcs, true),
+        Bugs: evalᴛ2,
+        Consts: evalᴛ3,
+        Types: evalᴛ4,
+        Vars: evalᴛ5,
+        Funcs: evalᴛ6,
 
         importByName: r.importByName,
         syms: new map<@string, bool>()

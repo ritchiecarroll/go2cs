@@ -390,7 +390,8 @@ internal static token.Pos /*pos*/ expect2⁔(/*this*/ ж<parser> Ꮡp, token.Tok
     if (p.tok == tok) {
         pos = p.pos;
     } else {
-        Ꮡp.errorExpected(p.pos, "'"u8 + tok.String() + "'"u8);
+        var evalᴛ1 = tok.String();
+        Ꮡp.errorExpected(p.pos, "'"u8 + evalᴛ1 + "'"u8);
     }
     Ꮡp.next(); // make progress
     return pos;
@@ -2377,7 +2378,8 @@ internal static ast.Expr parsePrimaryExpr⁔(/*this*/ ж<parser> Ꮡp, ast.Expr 
                     return x;
                 }}
                 if (!AreEqual(t, x)) {
-                    Ꮡp.error(t.Pos(), cannotParenthesizeTypeInˢ);
+                    var evalᴛ1 = t.Pos();
+                    Ꮡp.error(evalᴛ1, cannotParenthesizeTypeInˢ);
                     // already progressed, no need to advance
                 }
                 x = Ꮡp.parseLiteralValue(x);
@@ -3242,13 +3244,14 @@ internal static ast.Stmt parseForStmt⁔(/*this*/ ж<parser> Ꮡp) {
             // parseSimpleStmt returned a right-hand side that
             // is a single unary expression of the form "range x"
             var x = @as.Rhs[0]._<ж<ast.UnaryExpr>>().X;
+            var evalᴛ1 = @as.Rhs[0].Pos();
             return new ast.RangeStmtжStmt(Ꮡ(new ast.RangeStmt(
                 For: pos,
                 Key: key,
                 Value: value,
                 TokPos: @as.TokPos,
                 Tok: @as.Tok,
-                Range: @as.Rhs[0].Pos(),
+                Range: evalᴛ1,
                 X: x,
                 Body: body
             )));

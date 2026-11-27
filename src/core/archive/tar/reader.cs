@@ -84,7 +84,8 @@ internal static (ж<Header>, error) next⁔(/*this*/ ж<Reader> Ꮡtr) {
     for (;;) {
         // Discard the remainder of the file and any padding.
         {
-            var errΔ1 = discard(tr.r, tr.curr.physicalRemaining()); if (errΔ1 != nil) {
+            var evalᴛ1 = tr.curr.physicalRemaining();
+            var errΔ1 = discard(tr.r, evalᴛ1); if (errΔ1 != nil) {
                 return (default, errΔ1);
             }
         }
@@ -826,7 +827,8 @@ internal static (nint n, error err) Read⁔(/*this*/ ж<sparseFileReader> Ꮡsr,
     var endPos = sr.pos + (int64)len(b);
     while (endPos > sr.pos && err == nil) {
         nint nf = default; // Bytes read in fragment
-        var (holeStart, holeEnd) = (sr.sp[0].Offset, sr.sp[0].endOffset());
+        var evalᴛ1 = sr.sp[0].endOffset();
+        var (holeStart, holeEnd) = (sr.sp[0].Offset, evalᴛ1);
         if (sr.pos < holeStart) { // In a data fragment
             var bf = b.slice(0, (nint)(min((int64)len(b), holeStart - sr.pos)));
             (nf, err) = tryReadFull(sr.fr, bf);
@@ -879,7 +881,8 @@ internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<sparseFileReader> �
     var pos0 = sr.pos;
     while (Ꮡsr.logicalRemaining() > 0 && !writeLastByte && err == nil) {
         int64 nf = default; // Size of fragment
-        var (holeStart, holeEnd) = (sr.sp[0].Offset, sr.sp[0].endOffset());
+        var evalᴛ1 = sr.sp[0].endOffset();
+        var (holeStart, holeEnd) = (sr.sp[0].Offset, evalᴛ1);
         if (sr.pos < holeStart) { // In a data fragment
             nf = holeStart - sr.pos;
             (nf, err) = io.CopyN(ws, sr.fr, nf);

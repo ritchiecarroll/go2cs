@@ -71,7 +71,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
-[assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaCgoKCADRegoKCgoKCgqaCgpSCgoKUlJSqoqqiqJKokgAJFJTWkoI=")]
+[assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaCgoKCADRegoKCgoKCgqaCgpSCgoKUlJSqoqqiqJKokgAJFIC01pKC")]
 [assembly: GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSCuIKUgoKUpoKUgriCpoKCgpSCgoKmqJKUpAADEPKCgoKmgoKCgpSCpqqigpSm")]
 [assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABo6AAgCgqaCgpSkgoKmgoYAChCCpoKmgqaCpoKqooKU", "46-48:1", "", "", "45:21")]
 [assembly: GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgqaCgpSkgoKCgriCgoKClIKCgoKU", "", "", "", "45:21")]

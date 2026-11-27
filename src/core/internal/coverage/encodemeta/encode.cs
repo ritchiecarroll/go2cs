@@ -71,8 +71,10 @@ internal static nuint AddFunc⁔(/*this*/ ref CoverageMetaDataBuilder b, coverag
     var fd = new funcDesc();
     b.tmp = b.tmp[..0];
     b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)len(f.Units));
-    b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)b.stab.Lookup(f.Funcname));
-    b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)b.stab.Lookup(f.Srcfile));
+    var evalᴛ1 = b.stab.Lookup(f.Funcname);
+    b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)evalᴛ1);
+    var evalᴛ2 = b.stab.Lookup(f.Srcfile);
+    b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)evalᴛ2);
     foreach (var (_, u) in range(f.Units)) {
         b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.StLine);
         b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.StCol);
@@ -137,12 +139,13 @@ internal static (array<byte>, error) Emit⁔(/*this*/ ж<CoverageMetaDataBuilder
     // back-patch it later.
     array<byte> digest = new(16);
     copy(digest[..], b.h.Sum(default));
+    var evalᴛ1 = b.stab.Nentries();
     var mh = new coverage.MetaSymbolHeader(
         // hash and length initially zero, will be back-patched
         PkgPath: (uint32)b.pkgpath,
         PkgName: (uint32)b.pkgname,
         ModulePath: (uint32)b.modpath,
-        NumFiles: (uint32)b.stab.Nentries(),
+        NumFiles: (uint32)evalᴛ1,
         NumFuncs: (uint32)len(b.funcs),
         MetaHash: digest.Clone()
     );
@@ -151,7 +154,8 @@ internal static (array<byte>, error) Emit⁔(/*this*/ ж<CoverageMetaDataBuilder
     }
     {
         var err = binary.Write(w, binary.LittleEndian, mh); if (err != nil) {
-            return (digest.Clone(), fmt.Errorf("error writing meta-file header: %v"u8, err));
+            var evalᴛ2 = fmt.Errorf("error writing meta-file header: %v"u8, err);
+            return (digest.Clone(), evalᴛ2);
         }
     }
     var off = (int64)coverage.CovMetaHeaderSize;

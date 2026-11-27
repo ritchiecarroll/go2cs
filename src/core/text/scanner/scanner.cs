@@ -509,7 +509,8 @@ internal static (rune, rune) scanNumber⁔(/*this*/ ж<Scanner> Ꮡs, rune ch, b
     }
 
     if (tok == Int && invalid != 0) {
-        Ꮡs.errorf("invalid digit %q in %s", invalid, litname(prefix));
+        var evalᴛ1 = litname(prefix);
+        Ꮡs.errorf("invalid digit %q in %s", invalid, evalᴛ1);
     }
 
     if ((digsep & 2) != 0) {

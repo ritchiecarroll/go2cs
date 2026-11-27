@@ -18,7 +18,8 @@ internal static @string Name⁔(/*this*/ ref Base b) { return "base:"u8 + b.Tag;
 internal static @string Trace⁔(/*this*/ ref Base b, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
-    return "trace["u8 + b.Tag + "] "u8 + fmt.Sprintf(format, args.ꓸꓸꓸ);
+    var evalᴛ1 = fmt.Sprintf(format, args.ꓸꓸꓸ);
+    return "trace["u8 + b.Tag + "] "u8 + evalᴛ1;
 }
 
 public static @string Use(Host h) {

@@ -171,9 +171,10 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 return;
             }
             if (Ꮡerr.ValueSlot == nil) {
+                var evalᴛ1 = errors.New(cʗ2.crashMinimizing.crasherMsg);
                 Ꮡerr.ValueSlot = new crashErrorжerror(Ꮡ(new crashError(
                     path: cʗ2.crashMinimizing.entry.Path,
-                    err: errors.New(cʗ2.crashMinimizing.crasherMsg)
+                    err: evalᴛ1
                 )));
             }
         }, ref ᒐ);
@@ -274,7 +275,8 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 if (result.crasherMsg != ""u8) {
                     if (c.warmupRun() && result.entry.IsSeed) {
                         @string target = filepath.Base(c.opts.CorpusDir);
-                        fmt.Fprintf(c.opts.Log, "failure while testing seed corpus entry: %s/%s\n"u8, target, testName(result.entry.Parent));
+                        var evalᴛ2 = testName(result.entry.Parent);
+                        fmt.Fprintf(c.opts.Log, "failure while testing seed corpus entry: %s/%s\n"u8, target, evalᴛ2);
                         stop(errors.New(result.crasherMsg));
                         break;
                     }
@@ -299,9 +301,10 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                         var errΔ6 = writeToCorpus(Ꮡresult.Ꮡentry, opts.CorpusDir);
                         if (errΔ6 == nil) {
                             crashWritten = true;
+                            var evalᴛ3 = errors.New(result.crasherMsg);
                             errΔ6 = new crashErrorжerror(Ꮡ(new crashError(
                                 path: result.entry.Path,
-                                err: errors.New(result.crasherMsg)
+                                err: evalᴛ3
                             )));
                         }
                         if (shouldPrintDebugInfo()) {
@@ -318,22 +321,27 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 } else if (result.coverageData != nil) {
                     if (c.warmupRun()) {
                         if (shouldPrintDebugInfo()) {
+                            var evalᴛ4 = diffCoverage(c.coverageMask, result.coverageData);
+                            var evalᴛ5 = countBits(evalᴛ4);
                             c.debugLogf(
                                 "processed an initial input, id: %s, new bits: %d, size: %d, exec time: %s",
                                 result.entry.Parent,
-                                countBits(diffCoverage(c.coverageMask, result.coverageData)),
+                                evalᴛ5,
                                 len(result.entry.Data),
                                 result.entryDuration);
                         }
                         c.updateCoverage(result.coverageData);
                         c.warmupInputLeft--;
                         if (c.warmupInputLeft == 0) {
-                            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, gathering baseline coverage: %d/%d completed, now fuzzing with %d workers\n"u8, c.elapsed(), c.warmupInputCount, c.warmupInputCount, c.opts.Parallel);
+                            var evalᴛ6 = c.elapsed();
+                            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, gathering baseline coverage: %d/%d completed, now fuzzing with %d workers\n"u8, evalᴛ6, c.warmupInputCount, c.warmupInputCount, c.opts.Parallel);
                             if (shouldPrintDebugInfo()) {
+                                var evalᴛ7 = len(c.corpus.entries);
+                                var evalᴛ8 = countBits(c.coverageMask);
                                 c.debugLogf(
                                     "finished processing input corpus, entries: %d, initial coverage bits: %d",
-                                    len(c.corpus.entries),
-                                    countBits(c.coverageMask));
+                                    evalᴛ7,
+                                    evalᴛ8);
                             }
                         }
                     } else if (diffCoverage(c.coverageMask, result.coverageData) is var keepCoverage && keepCoverage != nil) {
@@ -369,13 +377,15 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                             c.ᏑinputQueue.enqueue(result.entry);
                             c.interestingCount++;
                             if (shouldPrintDebugInfo()) {
+                                var evalᴛ9 = countBits(keepCoverage);
+                                var evalᴛ10 = countBits(c.coverageMask);
                                 c.debugLogf(
                                     "new interesting input, id: %s, parent: %s, gen: %d, new bits: %d, total bits: %d, size: %d, exec time: %s",
                                     result.entry.Path,
                                     result.entry.Parent,
                                     result.entry.Generation,
-                                    countBits(keepCoverage),
-                                    countBits(c.coverageMask),
+                                    evalᴛ9,
+                                    evalᴛ10,
                                     inputSize,
                                     result.entryDuration);
                             }
@@ -394,7 +404,8 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                     // warmup, so continue processing results.
                     c.warmupInputLeft--;
                     if (c.warmupInputLeft == 0) {
-                        fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, testing seed corpus: %d/%d completed, now fuzzing with %d workers\n"u8, c.elapsed(), c.warmupInputCount, c.warmupInputCount, c.opts.Parallel);
+                        var evalᴛ11 = c.elapsed();
+                        fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, testing seed corpus: %d/%d completed, now fuzzing with %d workers\n"u8, evalᴛ11, c.warmupInputCount, c.warmupInputCount, c.opts.Parallel);
                         if (shouldPrintDebugInfo()) {
                             c.debugLogf(
                                 "finished testing-only phase, entries: %d",
@@ -725,19 +736,26 @@ internal static void logStats⁔(/*this*/ ref coordinator c) {
     if (c.warmupRun()) {
         nint runSoFar = c.warmupInputCount - c.warmupInputLeft;
         if (coverageEnabled) {
-            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, gathering baseline coverage: %d/%d completed\n"u8, c.elapsed(), runSoFar, c.warmupInputCount);
+            var evalᴛ1 = c.elapsed();
+            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, gathering baseline coverage: %d/%d completed\n"u8, evalᴛ1, runSoFar, c.warmupInputCount);
         } else {
-            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, testing seed corpus: %d/%d completed\n"u8, c.elapsed(), runSoFar, c.warmupInputCount);
+            var evalᴛ2 = c.elapsed();
+            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, testing seed corpus: %d/%d completed\n"u8, evalᴛ2, runSoFar, c.warmupInputCount);
         }
     } else if (c.crashMinimizing != nil) {
-        fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, minimizing\n"u8, c.elapsed());
+        var evalᴛ3 = c.elapsed();
+        fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, minimizing\n"u8, evalᴛ3);
     } else {
-        var rate = (float64)(c.count - c.countLastLog) / now.Sub(c.timeLastLog).Seconds();
+        var evalᴛ4 = now.Sub(c.timeLastLog);
+        var evalᴛ5 = evalᴛ4.Seconds();
+        var rate = (float64)(c.count - c.countLastLog) / evalᴛ5;
         if (coverageEnabled) {
             nint total = c.warmupInputCount + c.interestingCount;
-            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, execs: %d (%.0f/sec), new interesting: %d (total: %d)\n"u8, c.elapsed(), c.count, rate, c.interestingCount, total);
+            var evalᴛ6 = c.elapsed();
+            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, execs: %d (%.0f/sec), new interesting: %d (total: %d)\n"u8, evalᴛ6, c.count, rate, c.interestingCount, total);
         } else {
-            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, execs: %d (%.0f/sec)\n"u8, c.elapsed(), c.count, rate);
+            var evalᴛ7 = c.elapsed();
+            fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, execs: %d (%.0f/sec)\n"u8, evalᴛ7, c.count, rate);
         }
     }
     c.countLastLog = c.count;

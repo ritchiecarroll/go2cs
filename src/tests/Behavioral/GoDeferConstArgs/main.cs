@@ -41,13 +41,22 @@ internal static @string kind(any v) {
     }}
 }
 
-internal static void report(any v) { results.ᐸꟷ(kind(v)); }
+internal static void report(any v) {
+    var evalᴛ1 = kind(v);
+    results.ᐸꟷ(evalᴛ1);
+}
 
 internal static void show(any v) { fmt.Println("deferred", kind(v)); }
 
-internal static void worker(nint n) { results.ᐸꟷ(fmt.Sprint("worker ", n)); }
+internal static void worker(nint n) {
+    var evalᴛ1 = fmt.Sprint("worker ", n);
+    results.ᐸꟷ(evalᴛ1);
+}
 
-internal static void pair(@string label, nint n) { results.ᐸꟷ(fmt.Sprint(label, " ", n)); }
+internal static void pair(@string label, nint n) {
+    var evalᴛ1 = fmt.Sprint(label, " ", n);
+    results.ᐸꟷ(evalᴛ1);
+}
 
 internal static void showPair(@string label, nint n) { fmt.Println("deferred", label, n); }
 

@@ -72,7 +72,8 @@ internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflect.Value v, ni
             // This is a slice that we only partially allocated.
             growSlice(v, ref Δslice, length);
         }
-        Δslice[i] = state.decodeUint() != 0;
+        var evalᴛ1 = state.decodeUint();
+        Δslice[i] = evalᴛ1 != 0;
     }
     return true;
 }
@@ -166,7 +167,9 @@ internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflect.Value v,
             // This is a slice that we only partially allocated.
             growSlice(v, ref Δslice, length);
         }
-        Δslice[i] = (float32)float32FromBits(state.decodeUint(), ovfl);
+        var evalᴛ1 = state.decodeUint();
+        var evalᴛ2 = float32FromBits(evalᴛ1, ovfl);
+        Δslice[i] = (float32)evalᴛ2;
     }
     return true;
 }
@@ -196,7 +199,9 @@ internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflect.Value v,
             // This is a slice that we only partially allocated.
             growSlice(v, ref Δslice, length);
         }
-        Δslice[i] = float64FromBits(state.decodeUint());
+        var evalᴛ1 = state.decodeUint();
+        var evalᴛ2 = float64FromBits(evalᴛ1);
+        Δslice[i] = evalᴛ2;
     }
     return true;
 }
@@ -329,7 +334,8 @@ internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflect.Value v, n
             // This is a slice that we only partially allocated.
             growSlice(v, ref Δslice, length);
         }
-        Δslice[i] = state.decodeInt();
+        var evalᴛ1 = state.decodeInt();
+        Δslice[i] = evalᴛ1;
     }
     return true;
 }
@@ -539,7 +545,8 @@ internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflect.Value v, 
             // This is a slice that we only partially allocated.
             growSlice(v, ref Δslice, length);
         }
-        Δslice[i] = state.decodeUint();
+        var evalᴛ1 = state.decodeUint();
+        Δslice[i] = evalᴛ1;
     }
     return true;
 }

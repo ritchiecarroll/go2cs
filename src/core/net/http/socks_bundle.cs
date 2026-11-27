@@ -49,7 +49,8 @@ internal static partial (net.Addr, error ctxErr) connect⁔(/*this*/ ж<socksDia
                 defer(c.SetDeadline, socksnoDeadline, ref ᒐ);
             }
         }
-        if (!AreEqual(ctx, context.Background())) {
+        var evalᴛ1 = context.Background();
+        if (!AreEqual(ctx, evalᴛ1)) {
             var errCh = new channel<error>(1);
             var done = new channel<EmptyStruct>(0);
             var doneʗ1 = done;
@@ -68,7 +69,8 @@ internal static partial (net.Addr, error ctxErr) connect⁔(/*this*/ ж<socksDia
                 switch (select(ᐸꟷ(selᴛ94, ꓸꓸꓸ), ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
                 case 0 when selᴛ94.ꟷᐳ(out _): {
                     c.SetDeadline(socksaLongTimeAgo);
-                    errChʗ2.ᐸꟷ(ctx.Err());
+                    var evalᴛ2 = ctx.Err();
+                    errChʗ2.ᐸꟷ(evalᴛ2);
                     break;
                 }
                 case 1 when doneᴛ1.ꟷᐳ(out _): {

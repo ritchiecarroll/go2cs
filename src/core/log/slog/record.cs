@@ -120,7 +120,8 @@ internal static void AddAttrs⁔(/*this*/ ref Record r, params ꓸꓸꓸAttr att
         if (!end.isEmpty()) {
             // Don't panic; copy and muddle through.
             r.back = slices.Clip<slice<Attr>, Attr>(r.back);
-            r.back = append(r.back, String(bugˢ, addAttrsUnsafelyCalledOnˢ));
+            var evalᴛ1 = String(bugˢ, addAttrsUnsafelyCalledOnˢ);
+            r.back = append(r.back, evalᴛ1);
         }
     }
     nint ne = countEmptyGroups(attrs.slice(i));

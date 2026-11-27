@@ -352,7 +352,8 @@ internal static ж<Named> lookup⁔(/*this*/ ref instanceLookup l, ж<Named> ins
             return t;
         }
     }
-    foreach (var (_, t) in range(l.m[inst.Origin()])) {
+    var evalᴛ1 = inst.Origin();
+    foreach (var (_, t) in range(l.m[evalᴛ1])) {
         if (Identical(new NamedжType(inst), new NamedжType(t))) {
             return t;
         }
@@ -370,8 +371,10 @@ internal static void add⁔(/*this*/ ref instanceLookup l, ж<Named> inst) {
     if (l.m == nil) {
         l.m = new map<ж<Named>, slice<ж<Named>>>();
     }
-    var insts = l.m[inst.Origin()];
-    l.m[inst.Origin()] = append(insts, inst);
+    var evalᴛ1 = inst.Origin();
+    var insts = l.m[evalᴛ1];
+    var evalᴛ2 = inst.Origin();
+    l.m[evalᴛ2] = append(insts, inst);
 }
 
 // MissingMethod returns (nil, false) if V implements T, otherwise it

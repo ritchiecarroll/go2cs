@@ -31,7 +31,8 @@ internal static void annotate(@string label) {
         subtask.End();
         subtask.End();
 
-        fmt.Println(label, "annotated, enabled =", trace.IsEnabled());
+        var evalᴛ1 = trace.IsEnabled();
+        fmt.Println(label, "annotated, enabled =", evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

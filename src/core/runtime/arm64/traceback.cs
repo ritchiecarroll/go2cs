@@ -215,9 +215,10 @@ internal static void initAt⁔(/*this*/ ж<unwinder> Ꮡu, uintptr pc0, uintptr 
     frame.fn = f;
 
     // Populate the unwinder.
+    var evalᴛ1 = Ꮡgp.guintptr();
     u = new unwinder(
         frame: frame,
-        g: Ꮡgp.guintptr(),
+        g: evalᴛ1,
         cgoCtxt: len(gp.cgoCtxt) - 1,
         calleeFuncID: abi.FuncIDNormal,
         flags: flags
@@ -335,7 +336,8 @@ internal static void resolveInternal⁔(/*this*/ ж<unwinder> Ꮡu, bool innermo
                 break;
             }}
         }
-        frame.fp = frame.sp + (uintptr)funcspdelta(f, frame.pc);
+        var evalᴛ1 = funcspdelta(f, frame.pc);
+        frame.fp = frame.sp + (uintptr)evalᴛ1;
         if (!usesLR) {
             // On x86, call instruction pushes return PC before entering new function.
             frame.fp += goarch.PtrSize;
@@ -487,7 +489,8 @@ internal static void next⁔(/*this*/ ж<unwinder> Ꮡu) {
             doPrint = false;
         }
         if (fail || doPrint) {
-            print((@string)"runtime: g ", (~gp).goid, (@string)": unexpected return pc for ", funcname(f), (@string)" called from ", (hex)(uint64)frame.lr, (@string)"\n");
+            var evalᴛ1 = funcname(f);
+            print((@string)"runtime: g ", (~gp).goid, (@string)": unexpected return pc for ", evalᴛ1, (@string)" called from ", (hex)(uint64)frame.lr, (@string)"\n");
             tracebackHexdump((~gp).stack, frame, 0);
         }
         if (fail) {
@@ -525,7 +528,8 @@ internal static void next⁔(/*this*/ ж<unwinder> Ꮡu) {
     if (usesLR && injectedCall) {
         var x = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)frame.sp);
         // same as the size bump used in scanframeworker.
-        frame.sp += alignUp(sys.MinFrameSize, sys.StackAlign);
+        var evalᴛ2 = alignUp(sys.MinFrameSize, sys.StackAlign);
+        frame.sp += evalᴛ2;
         f = findfunc(frame.pc);
         frame.fn = f;
         if (!f.valid()) {
@@ -863,7 +867,8 @@ internal static void tracebacktrap(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡ
 
     if ((~gp.m).libcallsp != 0) {
         // We're in C code somewhere, traceback from the saved position.
-        traceback1((~gp.m).libcallpc, (~gp.m).libcallsp, 0, (~gp.m).libcallg.ptr(), 0);
+        var evalᴛ1 = (~gp.m).libcallg.ptr();
+        traceback1((~gp.m).libcallpc, (~gp.m).libcallsp, 0, evalᴛ1, 0);
         return;
     }
     traceback1(pc, sp, lr, Ꮡgp, unwindTrap);
@@ -1053,8 +1058,10 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
             print((@string)")\n");
             print((@string)"\t", @file, (@string)":", line);
             if (!iu.isInlined(uf)) {
-                if (u.frame.pc > f.entry()) {
-                    print((@string)" +", (hex)(uint64)(u.frame.pc - f.entry()));
+                var evalᴛ1 = f.entry();
+                if (u.frame.pc > evalᴛ1) {
+                    var evalᴛ2 = f.entry();
+                    print((@string)" +", (hex)(uint64)(u.frame.pc - evalᴛ2));
                 }
                 if ((~gp).m != nil && (~(~gp).m).throwing >= throwTypeRuntime && gp == (~(~gp).m).curg || level >= 2) {
                     print((@string)" fp=", (hex)(uint64)u.frame.fp, (@string)" sp=", (hex)(uint64)u.frame.sp, (@string)" pc=", (hex)(uint64)u.frame.pc);
@@ -1668,7 +1675,8 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
             context: context,
             symbolizer: symbolizer
         ), out var Ꮡarg);
-        cgocall(_cgo_set_traceback_functions, noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+        var evalᴛ1 = noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg));
+        cgocall(_cgo_set_traceback_functions, evalᴛ1);
         System.GC.KeepAlive(Ꮡarg);
     }
 }
@@ -1791,7 +1799,8 @@ internal static void callCgoSymbolizer(ж<cgoSymbolizerArg> arg) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(arg), /* unsafe.Sizeof(cgoSymbolizerArg{}) */ (uintptr)56);
     }
-    call(_cgo_call_symbolizer_function, noescape(@unsafe.Pointer.FromPinnedBox(arg)));
+    var evalᴛ1 = noescape(@unsafe.Pointer.FromPinnedBox(arg));
+    call(_cgo_call_symbolizer_function, evalᴛ1);
 }
 
 // cgoContextPCs gets the PC values from a cgo traceback.
@@ -1815,7 +1824,8 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡarg), /* unsafe.Sizeof(arg) */ (uintptr)32);
     }
-    call(_cgo_call_traceback_function, noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+    var evalᴛ1 = noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg));
+    call(_cgo_call_traceback_function, evalᴛ1);
     System.GC.KeepAlive(Ꮡarg);
 }
 

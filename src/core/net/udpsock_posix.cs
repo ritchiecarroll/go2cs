@@ -17,7 +17,9 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
         return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port)));
     }
     case ж<syscall.SockaddrInet6> saΔ1: {
-        return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port, Zone: zoneCache.name((nint)saΔ1.ZoneId))));
+        var evalᴛ1 = saΔ1.Addr[0..];
+        var evalᴛ2 = zoneCache.name((nint)saΔ1.ZoneId);
+        return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: evalᴛ1, Port: saΔ1.Port, Zone: evalᴛ2)));
     }}
     return default;
 }
@@ -67,7 +69,9 @@ internal static (nint, ж<UDPAddr>, error) readFrom⁔(/*this*/ ref UDPConn c, s
         (n, err) = c.fd.readFromInet6(b, Ꮡfrom);
         if (err == nil) {
             var ip = from.Addr.Clone(); // copy from.Addr; ip escapes, so this line allocates 16 bytes
-            addr = new UDPAddr(IP: ip[..], Port: from.Port, Zone: zoneCache.name((nint)from.ZoneId));
+            var evalᴛ1 = ip[..];
+            var evalᴛ2 = zoneCache.name((nint)from.ZoneId);
+            addr = new UDPAddr(IP: evalᴛ1, Port: from.Port, Zone: evalᴛ2);
         }
         break;
     }}

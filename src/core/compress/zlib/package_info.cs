@@ -63,7 +63,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("compress/zlib/reader.go", "reader.cs", "ACpWlJQAEjbyAAIQ0oKCgpSmgoKmgoKClLiCgpSCpoKCgpSssoKUgqaCgoKUuIKCgpSUgoKClIKCgoKClJSCgoK4goKUppSC")]
-[assembly: GoPositionMap("compress/zlib/writer.go", "writer.cs", "ACZY0oIAAhLiAAIQ0oKUAAYUspSClIKUgoKosrjKlLS0tLSkgpSCgpSUgoKmpoKClJSs4oKUgpSClIKCgpSCqJKClIKUgqqigpSClIKClJSCgg==")]
+[assembly: GoPositionMap("compress/zlib/writer.go", "writer.cs", "ACZY0oIAAhLiAAIQ0oKUAAYUspSClIKUgoKosrjKlLS0tLSkgpSigpSUooKmpoKClJSs4oKUgpSClIKCgpSCqJKClIKUgqqigpSClIKClJSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

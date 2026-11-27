@@ -69,7 +69,8 @@ internal static ж<Regexp> Simplify⁔(/*this*/ ж<Regexp> Ꮡre) {
             for (nint i = 0; i < re.Min - 1; i++) {
                 nre.Sub = append(nre.Sub, sub);
             }
-            nre.Sub = append(nre.Sub, simplify1(OpPlus, re.Flags, sub, nil));
+            var evalᴛ1 = simplify1(OpPlus, re.Flags, sub, nil);
+            nre.Sub = append(nre.Sub, evalᴛ1);
             return nre;
         }
 

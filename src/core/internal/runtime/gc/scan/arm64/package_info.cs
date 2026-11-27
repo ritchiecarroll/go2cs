@@ -61,7 +61,7 @@ using System.Runtime.CompilerServices;
 [assembly: GoPositionMap("internal/runtime/gc/scan/expand_reference.go", "expand_reference.cs", "AAweAAoKgsqClIK4goI=")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/filter.go", "filter.cs", "AAkYsoKCgoKClIKUgpSClIKU")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/scan_generic.go", "scan_generic.cs", "AAwcuKaC")]
-[assembly: GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA4ewoKUooKClMqC3IIADRyCgoLuggAIEoIAAhDSggACEOSCuISSgpQ=")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA4ewoKUooKClMqC3IIADRyCgoLuggAIEoIAAhDSkgADEOSCuISSgpQ=")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/scan_reference.go", "scan_reference.cs", "AA0qAAwCgoKCgoKUgpSCgpSClA==")]
 // </GoSourcePositionMaps>
 

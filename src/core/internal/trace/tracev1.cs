@@ -383,7 +383,8 @@ internal static (Event OUT, error ERR) convertEvent⁔(/*this*/ ж<traceV1Conver
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvSTWStart: {
-        var sid = it.builtinToStringID[(nint)sSTWUnknown + it.trace.STWReason(ev.Args[0])];
+        var evalᴛ1 = it.trace.STWReason(ev.Args[0]);
+        var sid = it.builtinToStringID[(nint)sSTWUnknown + evalᴛ1];
         it.lastStwReason = sid;
         mappedType = tracev2.EvSTWBegin;
         mappedArgs.Assign(new timedEventArgs(new uint64[]{(uint64)sid}.array(4)));
@@ -625,14 +626,16 @@ internal static (Event OUT, error ERR) convertEvent⁔(/*this*/ ж<traceV1Conver
         var (ts, ok) = it.tasks[((TaskID)ev.Args[0]), ꟷ];
         if (ok) {
             delete(it.tasks, (TaskID)ev.Args[0]);
+            var evalᴛ2 = it.evt.addExtraString(ts.name);
             mappedArgs.Assign(new timedEventArgs(new uint64[]{
                 ev.Args[0],
                 ev.Args[1],
                 (uint64)ts.parentID,
-                (uint64)it.evt.addExtraString(ts.name)
+                (uint64)evalᴛ2
             }.array()));
         } else {
-            mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[1], (uint64)NoTask, (uint64)it.evt.addExtraString(""u8)}.array()));
+            var evalᴛ3 = it.evt.addExtraString(""u8);
+            mappedArgs.Assign(new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[1], (uint64)NoTask, (uint64)evalᴛ3}.array()));
         }
         break;
     }

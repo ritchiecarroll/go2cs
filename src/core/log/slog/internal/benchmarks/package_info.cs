@@ -65,7 +65,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "AClSuIKW", "", "", "49=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
-[assembly: GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqYACQTSgqSCgoKUgoKCgoKSgoKCgpSCgtailLS0tLS0tLSClMTWyKKmgqaCAA8ggqaUooKCpoKmguyClIKmgg==", "50-56:1")]
+[assembly: GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqYACQTSgqSCgoKUgpKCgoKSgoKCgpSCgtailLTExMTE1LSClMTWyKK2gqaCAA8ggqaUopKCpoKmguyClIKmgg==", "50-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;

@@ -1041,7 +1041,8 @@ internal static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
 private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
 
 internal static (nint, error) Read⁔(/*this*/ ref openDir d, slice<byte> _) {
-    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.e.name, Err: errors.New(isADirectoryˢ)))));
+    var evalᴛ1 = errors.New(isADirectoryˢ);
+    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.e.name, Err: evalᴛ1))));
 }
 
 internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ref openDir d, nint count) {
@@ -1061,10 +1062,11 @@ internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ref openDir d, n
         if (err != nil) {
             return (default, err);
         } else if (((fs.FileInfo)(s)).Name() == "."u8 || !fs.ValidPath(((fs.FileInfo)(s)).Name())) {
+            var evalᴛ1 = fmt.Errorf("invalid file name: %v"u8, d.files[d.offset + i].name);
             return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(
                 Op: "readdir",
                 Path: d.e.name,
-                Err: fmt.Errorf("invalid file name: %v"u8, d.files[d.offset + i].name)
+                Err: evalᴛ1
             ))));
         }
         list[i] = s;

@@ -1767,7 +1767,8 @@ internal static error /*ret*/ handshakeContext⁔(/*this*/ ж<Conn> Ꮡc, contex
         Ꮡc.Ꮡin.of(halfConn.ᏑMutex).Lock();
         defer(Ꮡc.Ꮡin.of(halfConn.ᏑMutex).Unlock, ref ᒐ);
 
-        c.handshakeErr = c.handshakeFn(handshakeCtx);
+        var evalᴛ1 = c.handshakeFn(handshakeCtx);
+        c.handshakeErr = evalᴛ1;
         if (c.handshakeErr == nil) {
             c.handshakes++;
         } else {
@@ -1777,7 +1778,8 @@ internal static error /*ret*/ handshakeContext⁔(/*this*/ ж<Conn> Ꮡc, contex
         }
 
         if (c.handshakeErr == nil && !Ꮡc.ᏑisHandshakeComplete.Load()) {
-            c.handshakeErr = errors.New(tlsInternalErrorˢ4);
+            var evalᴛ2 = errors.New(tlsInternalErrorˢ4);
+            c.handshakeErr = evalᴛ2;
         }
         if (c.handshakeErr != nil && Ꮡc.ᏑisHandshakeComplete.Load()) {
             throw panic("tls: internal error: handshake returned an error but is marked successful");
@@ -1803,7 +1805,9 @@ internal static error /*ret*/ handshakeContext⁔(/*this*/ ж<Conn> Ꮡc, contex
                 // any alert error we may have sent, or alertInternalError
                 // if we didn't send an alert.
                 // Truncate the text of the alert to 0 characters.
-                c.handshakeErr = fmt.Errorf("%w%.0w"u8, c.handshakeErr, (AlertError)(uint8)a);
+                var evalᴛ3 = ((AlertError)(uint8)a);
+                var evalᴛ4 = fmt.Errorf("%w%.0w"u8, c.handshakeErr, evalᴛ3);
+                c.handshakeErr = evalᴛ4;
             }
             close(c.quic.blockedc);
             close(c.quic.signalc);
