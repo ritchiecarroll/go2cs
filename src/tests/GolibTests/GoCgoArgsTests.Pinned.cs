@@ -77,7 +77,7 @@ public unsafe partial class GoCgoArgsTests
 
     // 18.1's I-2, AVoidPointerIntoGoMemoryIsRefusedBeforeTheCallInEveryFormItArrivesIn's nine forms: the pinning and
     // retaining mints of a scalar cross (2 of 9). A box that holds references is a token (cgo's text). Every bare mint
-    // and every number stays refused.
+    // and since S4 (design 20.4) every number crosses too, through the record its mint left: only a token is refused.
     [TestMethod]
     public void PinnedTheNineFormsOfAGoScalarCrossOnlyThroughTheMintsThatCarryTheBox()
     {
@@ -91,15 +91,15 @@ public unsafe partial class GoCgoArgsTests
 
         (string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms =
         [
-            ("a pointer minted from a box of one scalar", () => new @unsafe.Pointer(scalar), Pinned.NumberRefusal),
+            ("a pointer minted from a box of one scalar", () => new @unsafe.Pointer(scalar), Pinned.Crosses),
             ("the retaining mint", () => @unsafe.Pointer.FromBox(scalar), Pinned.Crosses),
             ("the pinning mint", () => @unsafe.Pointer.FromPinnedBox(scalar), Pinned.Crosses),
-            ("a pointer minted from a box of a struct", () => new @unsafe.Pointer(whole), Pinned.NumberRefusal),
+            ("a pointer minted from a box of a struct", () => new @unsafe.Pointer(whole), Pinned.Crosses),
             ("a pointer minted from a box that holds Go references", () => new @unsafe.Pointer(references), Pinned.CgoRefusal),
-            ("a pointer minted from an element", () => new @unsafe.Pointer(element), Pinned.NumberRefusal),
-            ("a scalar box's number from a variable", () => new @unsafe.Pointer(scalarNumber), Pinned.NumberRefusal),
-            ("an element's number from a variable", () => new @unsafe.Pointer(elementNumber), Pinned.NumberRefusal),
-            ("a number minted and converted back in one expression", () => new @unsafe.Pointer((uintptr)new @unsafe.Pointer(whole)), Pinned.NumberRefusal),
+            ("a pointer minted from an element", () => new @unsafe.Pointer(element), Pinned.Crosses),
+            ("a scalar box's number from a variable", () => new @unsafe.Pointer(scalarNumber), Pinned.Crosses),
+            ("an element's number from a variable", () => new @unsafe.Pointer(elementNumber), Pinned.Crosses),
+            ("a number minted and converted back in one expression", () => new @unsafe.Pointer((uintptr)new @unsafe.Pointer(whole)), Pinned.Crosses),
         ];
 
         AssertOutcomes(forms);
@@ -112,8 +112,8 @@ public unsafe partial class GoCgoArgsTests
 
     // 18.1's I-2 over APointerOverManagedStorageNeverCrossesAVoidPointer's nine boxes and four mints: the pinning and
     // retaining mints of seven boxes cross (14 of 36). A view over a struct that holds references, and a native box that
-    // aliases an order token, are tokens in every mint (cgo's text, 8). The bare mint and the number of every other box,
-    // stay refused (14).
+    // aliases an order token, are tokens in every mint (cgo's text, 8). The bare mint and the number of every other box
+    // stayed refused (14) until S4 (design 20.4), and now cross through the registry or the pin extent (28 of 36).
     [TestMethod]
     public void PinnedAPointerOverManagedStorageCrossesOnlyWhenItsBoxNamesTheStorage()
     {
@@ -130,18 +130,18 @@ public unsafe partial class GoCgoArgsTests
 
         (string form, object box, Pinned carried, Pinned bare)[] boxes =
         [
-            ("a wider view pinned over an element", element.Reinterpret<byte, int32>(), Pinned.Crosses, Pinned.NumberRefusal),
-            ("a view aliasing a struct", standard.Reinterpret<cgoPoint, int32>(), Pinned.Crosses, Pinned.NumberRefusal),
+            ("a wider view pinned over an element", element.Reinterpret<byte, int32>(), Pinned.Crosses, Pinned.Crosses),
+            ("a view aliasing a struct", standard.Reinterpret<cgoPoint, int32>(), Pinned.Crosses, Pinned.Crosses),
             ("a view over a struct that holds references", holder.Reinterpret<cgoHolder, int32>(), Pinned.CgoRefusal, Pinned.CgoRefusal),
-            ("a native box with a retained source", new NativeBox<int32>(((uintptr)standard).Value, retainedSource: standard), Pinned.Crosses, Pinned.NumberRefusal),
+            ("a native box with a retained source", new NativeBox<int32>(((uintptr)standard).Value, retainedSource: standard), Pinned.Crosses, Pinned.Crosses),
             ("a native box that aliases an order token", new NativeBox<int32>(((uintptr)holder).Value, aliasesAnOrderToken: true), Pinned.CgoRefusal, Pinned.CgoRefusal),
-            ("a native box over a pinned managed buffer", new NativeBox<byte>((nuint)pinned.Pointer, pin: pinned), Pinned.Crosses, Pinned.NumberRefusal),
-            ("unsafe.StringData", @unsafe.StringData(text), Pinned.Crosses, Pinned.NumberRefusal),
-            ("unsafe.SliceData", @unsafe.SliceData(sliced), Pinned.Crosses, Pinned.NumberRefusal),
+            ("a native box over a pinned managed buffer", new NativeBox<byte>((nuint)pinned.Pointer, pin: pinned), Pinned.Crosses, Pinned.Crosses),
+            ("unsafe.StringData", @unsafe.StringData(text), Pinned.Crosses, Pinned.Crosses),
+            ("unsafe.SliceData", @unsafe.SliceData(sliced), Pinned.Crosses, Pinned.Crosses),
             // 18.1 scored this form as a number ("its native box has no source"). It is not: the number-to-pointer
             // conversion resolved to the live array box and the native box KEEPS it (NativeDerivation.KeptResolved,
             // d87e1dd863, before 18.1), so its box names the storage and it crosses (18.12 record, P-2's two misses).
-            ("a pointer rebuilt from a Go array's number", (ж<byte>)(uintptr)wideBox, Pinned.Crosses, Pinned.NumberRefusal),
+            ("a pointer rebuilt from a Go array's number", (ж<byte>)(uintptr)wideBox, Pinned.Crosses, Pinned.Crosses),
         ];
 
         var forms = new List<(string, Func<@unsafe.Pointer>, Pinned)>();

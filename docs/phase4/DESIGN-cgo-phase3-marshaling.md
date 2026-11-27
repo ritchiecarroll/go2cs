@@ -3297,3 +3297,680 @@ cgo-e2e, golib-tests and the net probe follow as their own lines.
   Mirror is claimed; Pinned comes only from the image arm, the scalar door and the out-parameter door, and the
   wrapper's ref-images overloads claim the scalar door's. (b) CopyBack after a throw: every refusal is raised before
   the call, and C cannot throw into the wrapper, so CopyBack runs after every call that reached C.
+
+## 20. Amendment 2026-11-25: Go memory handed to C as `void *` (COORD's B-10 note; design only, no code)
+
+COORD asked for this on 2026-11-25 (inbox H 20261125T171306Z). It covers:
+- a pointer into Go memory that C receives as `void *` (`unsafe.Pointer`);
+- its population, its shapes, and what cgo's own rules allow;
+- how the pinned class (seat 1b) and the image door (3.4) generalize to it;
+- a size for each piece.
+COORD decides .5 or .6 with the owner. P3 reads it.
+
+This note uses B-10 the way COORD's request does: the `void *` class. Sections 18 and 19 use "B-10" for the cgocheck arm that refuses a published `unsafe.Pointer` word. Where that arm is meant here, it is named "the word arm".
+
+### 20.1 What the door does today (read at r5, `2c1bf60809`)
+
+A `void *` argument goes through `GoCgoArgs.PinVoidPointer` (seat 1b, 18.12):
+- nil and C memory cross as their number.
+- Go memory whose box names its storage crosses as an address inside that storage. The wrapper's `fixed` holds it still for the call.
+  - The storage must hold no Go reference (`RequireCrossable`, by element TYPE) and no published word (the word arm).
+  - An element of a Go array of C pointers crosses as a word mirror (.5 cgo item 2).
+
+Still refused before the call:
+- **(R1)** A Go value whose type holds a Go reference: a token, or storage with no pinnable slot. The text is cgo's "Go pointer to unpinned Go pointer", or "storage go2cs cannot hold still".
+- **(R2)** A number of Go memory. This is `uintptr` in either form: `unsafe.Pointer(uintptr(unsafe.Pointer(&x)))` and a number held in a variable. The text is "handing C a pointer into Go memory is not supported yet". These are the only two e2e arms that still read that refusal: `govoidnumber` and `govoidexpr`.
+- **(R3)** A field or view reached through a Go pointer into C memory.
+
+Two neighbours are refused by name today, and both matter here:
+- `//export` (C calling Go);
+- an import of `runtime/cgo`, which is where `cgo.Handle` lives.
+
+### 20.2 Population (a syntactic census: GOROOT go1.26.11, plus `golang.org/x/sys` v0.32.0)
+
+The instrument is scratch and never lands. It walks every file that imports "C" and classifies each argument of a C call by its written form. It needs no types, because cmd/cgo types a `void *` parameter as `unsafe.Pointer`: an argument written `unsafe.Pointer(...)` goes to a `void *`, and one written `(*C.T)(unsafe.Pointer(...))` goes to a `T *`.
+
+It does not type a variable. So "pointer variable" means the origin is unknown. Every such site in the population, read by hand, is C memory: 11 of 11 are `C.free`.
+
+Totals: 118 cgo files, 168 pointer-shaped argument sites; `x/sys` 11 cgo files, 0 sites.
+
+| Form | Production std | cgo's own tests (`cmd/cgo/internal/...`) |
+|---|---|---|
+| `void *` = `unsafe.Pointer(&x...)` | **16**: `crypto/internal/boring` (15 `&*addr(p)`, 1 `base(key)`): all `[]byte` backings | **14**: 8 `&variable`, 6 `&element` |
+| `void *` = a number (`uintptr`) | 0 | 0 real. The census's 2 are `C.HANDLE(unsafe.Pointer(uintptr(...)))`, a C type conversion, not a call |
+| `void *` = a pointer variable | 0 | 11, all `C.free` of C memory |
+| `T *` view = `(*C.T)(unsafe.Pointer(&b[i]))` | 26: boring 19, plugin 4, net 3: all byte or char buffers | 1 |
+| `&x` handed to a `T *` | 50: boring 35, os/user 8, cmd 5, plugin 2 | 48 |
+
+Readings:
+- **Production std needs `void *` into Go memory only in `crypto/internal/boring`.** That is linux-only, under `GOEXPERIMENT=boringcrypto`, and not in the corpus. All 16 are slice backings, the shape 1b already admits.
+- **net, os/user and plugin pass Go memory through TYPED pointers.** Typed pointers are the 3.2 and 3.4 doors: the mirror, the scalar door and the image. net's seven `TestCgoLookup*` pass on that path (3.4).
+- **Third-party cgo is UNMEASURED.** The module cache here holds no third-party cgo module. The idioms we expect in the wild are below, offered as shapes, not counts:
+  - `unsafe.Pointer(&buf[0])` into a library (sqlite's blob binds, GL buffer uploads, pcap): a slice backing;
+  - `unsafe.Pointer(&req)` for an `ioctl` or `setsockopt` struct (`ifreq`, `sockaddr`): a struct with inline arrays;
+  - a cookie C carries back to a Go callback.
+  - A measured third-party population needs about six modules fetched (20.7, Q1).
+
+The 14 cgo-suite sites, scored against today's door by reading:
+
+| Site | Shape | Go | go2cs today |
+|---|---|---|---|
+| `test.go:1852` `&v` (`C.int`) | scalar | admits | pins (1b) |
+| `issue21897.go:38` `&v` (`int64`, darwin CF) | scalar | admits | pins (1b) |
+| `test.go:2316/2322/2329` `&b[0]`, `&a[0]`, `&d[0]` (5 sites) | slice/array element | admits | pins (1b; the whole backing is asked) |
+| `test.go:2316` `&a` (`a [256]byte`) | whole array | admits | through the array's backing; **row owed** (issue 30065) |
+| `test.go:2346` `&s[0].data[0]` (`[1]C.struct_S32579`) | array inside an element of a C struct | admits | depends on the C struct's layout; **row owed** (issue 32579) |
+| `test.go:1195/1201` `&s` (`var s string`, zero) | value whose TYPE holds a pointer | **admits**: cgocheck is by VALUE, and a zero string holds none | **refuses (R1)**: a false refusal |
+| `test.go:2221` `&v` (`struct{ p *byte }`, zero) | same | **admits** | **refuses (R1)**: a false refusal |
+| `callback.go:45` `&i` | cookie: C calls back into Go | admits | pins; the call-back is `//export`, refused |
+| `testx.go:594` `&h` (`cgo.Handle`) | cookie through a handle | admits | pins; `runtime/cgo` is refused |
+
+### 20.3 What cgo allows (cmd/cgo doc, "Passing pointers"; checked by cgocheck=1)
+
+1. A Go pointer passed as an argument is pinned for the call. C may keep it after the call only if a `runtime.Pinner` holds it.
+2. The memory it points to may hold no Go pointer to unpinned memory. For `&s.f` the memory is the field. For `&a[i]` it is the whole backing array.
+3. **The check is dynamic.** It reads the VALUE: a type that can hold a Go pointer is fine while the value holds none. That is why the zero `string` and the zero `struct{ p *byte }` pass in Go.
+4. A Go function called from C may receive Go pointers. Pointers must not be stored into C memory except pinned ones.
+5. `cgo.Handle` is the documented way to give C an opaque reference to a Go value: an integer, never a pointer.
+
+go2cs's door matches rules 1, 2 and 5. It differs on rule 3: it asks the TYPE (`RequireCrossable`), so it refuses values Go admits. That is the only place the door is stricter than Go on the measured population.
+
+### 20.4 The shapes and how 1b and the image door generalize
+
+**S1. Scalar, or reference-free struct with Go layout equal to CLR layout.** Done (1b). Owed: rows for the two cgo-suite shapes the door has not met: `&a` of a whole Go array, and an array inside an element of a C struct.
+
+**S2. Slice backing or array element.** Done (1b, with the word mirror for arrays of C pointers). Boring's 16 sites are this shape.
+
+**S3. A struct whose CLR layout is not its Go layout.** Two kinds:
+- inline arrays held as references: `unsafe.Pointer(&sa)` with `sa` a `syscall.RawSockaddrInet4`, an `ifreq`;
+- a type holding Go pointers or strings whose value holds none.
+
+This is the image door's root, reached through `void *` instead of a typed struct view. The generalization:
+- **Wrapper:** a function with a `void *` parameter declares `GoCgoImages images` and passes `ref images` to `PinVoidPointer`, as the struct and scalar doors already do. `images.CopyBack()` runs after the call. One generator change: the `images` flag is set by a `void *` parameter too.
+- **Door:** `PinCarried` keeps the pin when `TryPinTarget` finds storage. Where it finds none and the root is a struct value, it asks `images.Image(ImageKeys(root, value), ...)`. The image is the root's Go size at Go offsets, and the address is the image plus the pointer's offset in the root.
+  - A `void *` has no C type, so the size is the root's own: under rule 2, for a field pointer, the field's bytes lie inside that size.
+  - B5 is unchanged: one image per allocation set; a mixed door is refused by name; the image's keys include every backing.
+- **Rule 3, by value:** the encode replaces the type test.
+  - A nil Go pointer encodes as 0. An empty string encodes as `{0, 0}`.
+  - A non-nil Go pointer or a non-empty heap string is refused with cgocheck's own text, "argument of cgo function has Go pointer to unpinned Go pointer".
+  - A pointer pinned by a `runtime.Pinner` is still refused by name: an image cannot carry its address, because the image is a copy. That case is S6's.
+- **Copy-back:** as the image door (B6, B7): decoded only if C changed the image. A nil pointer field C sets non-zero decodes to a refusal by name: C stored a pointer into Go memory.
+- The struct doors' readings carry over unchanged, under the same documented limit: C's writes land when the call returns.
+
+This retires R1's false refusals: the zero string and the zero `struct{ p *byte }` cross as Go does.
+
+**S4. A number (R2).** Go allows `unsafe.Pointer(uintptr(unsafe.Pointer(&x)) + off)` in ONE expression (unsafe rule 3). A number held in a variable is invalid Go, though it often works.
+- go2cs's registry already recognizes a minted number as a live box's: the mint is the record (3.1's `GoMemory`).
+- The door would resolve that entry to its box and pin it as for S1, S2 or S3, at the entry's offset. A number the registry does not know stays C memory, as today.
+- Lean: admit both forms. The registry rule cannot tell them apart, and a refusal keyed on Go's syntax would need the converter to mark the one-expression form. Either way `govoidexpr` crosses.
+- Residue: a number whose box has died names no memory. It stays refused, as M3 says.
+
+**S5. A callback cookie.** C stores a Go pointer and hands it back to a Go function it calls. Two forms:
+- **(a) A pointer cookie (`&i`).** It needs `//export` first. Inside the call, the wrapper's pin already maps the address back to the box, so an inbound call can recover it. After the call it cannot (rule 1).
+  - This is the `//export` increment's design. Here it is named only as a prerequisite.
+- **(b) `cgo.Handle`.** It is an integer. Pass it as `C.uintptr_t(h)` and no door is involved; pass it as `unsafe.Pointer(&h)` and it is S1. What blocks it is the `runtime/cgo` import refusal.
+  - `handle.go` is pure Go: a `sync.Map` from integers to values. It converts as ordinary Go.
+  - The refusal exists because runtime/cgo's cgo-off build is not a working build of its cgo API. A hand-own, or a narrower refusal that admits `runtime/cgo`'s Handle API alone, unblocks every program that follows cgo's own advice.
+
+**S6. Retention past the call (rule 1's Pinner case).** C keeps a Go pointer after returning, and a `runtime.Pinner` holds it.
+- go2cs's Pinner (`pinner_impl.cs`) records pinned-ness by identity (`PinTable`). It does not hold an ADDRESS still: there is no GCHandle and no pinned-object heap.
+- The 1b pin is call-scoped (`fixed`), so a retained address goes stale at the next compaction.
+- The generalization is for `Pinner.Pin` to take a durable pin of reference-free storage, through a GCHandle or a pinned allocation. The cgo door then admits a retained pointer whose storage the Pinner holds, and the Pinner releases it at `Unpin`.
+- S3 roots cannot be retained (an image is a copy). They stay refused by name.
+- No population is measured. Retention is an async-API pattern (event loops, sqlite's static blobs), and none of the 16 + 14 sites retains.
+
+### 20.5 Size (seats as 3.4's ran; the image door took one seat and one revision)
+
+| Piece | What | Size | Footprint |
+|---|---|---|---|
+| S1/S2 rows | rows for `&a` (whole array) and `&s[0].data[0]`; e2e arms after issues 30065 and 32579 | small, folds into S3's seat | e2e only |
+| **S3** | the void-door image arm, the value-checked encode (nil pointer = 0, cgocheck text otherwise), the generator's `images` on `void *` | **one seat** | GolibTests wrapper goldens (every `void *` wrapper gains `images`); e2e arms (a sockaddr through `void *`, the zero string, the zero pointer struct, a non-nil pointer refused); no corpus file (the corpus is cgo-off) |
+| **S4** | registry resolve on the void door | **a half seat**, folds into S3 | `govoidnumber` and `govoidexpr` move from csFails to passing |
+| S5b | `runtime/cgo`'s Handle admitted (hand-own or narrowed refusal) | a half seat, its own | the route refusal's guard rows; a handle e2e arm |
+| S5a | pointer cookies | waits for `//export` | none here |
+| S6 | durable Pinner pins plus the retained-pointer arm | one seat, and only with a measured consumer | Pinner rows; runtime is touched (the alloc instrument applies: a pin's cost is priced from its type, golib-gen.md) |
+
+### 20.6 Lean
+
+S3 plus S4 as one seat. It is the only work that changes a verdict in the measured population (the three false refusals and the two number arms). It also reuses the image door's B5 and B6/B7 rules whole.
+
+S5b as a separate half seat, because it touches the route and not the door. S5a and S6 wait for `//export` and for a measured consumer.
+
+### 20.7 Questions for COORD
+
+- **Q1. A measured third-party population.** Fetch about six cgo modules into a scratch module cache and run the census: go-sqlite3, gopacket/pcap, go-gl, go-sdl2, a libvirt or kafka binding, and one `ioctl`-heavy package. That is a download. Lean: yes, before P3's read, so the shapes table carries counts.
+- **Q2. A typed census on the hosted linux runner.** It needs a C compiler, so a probe branch, never landed. It would type the "pointer variable" bucket and score each site against the door by running it. Lean: only if Q1's syntactic reading leaves a bucket that counts.
+- **Q3. S4's policy.** Admit both number forms through the registry (lean), or only the one-expression form.
+- **Q4. S5b's form.** A hand-own of `runtime/cgo`'s handle (lean), or a refusal narrowed to the Handle API.
+
+— H (2026-11-25)
+
+### 20.8 Record 2026-11-25: P3's read folded, COORD's rulings, and S4 as built
+
+P3 read section 20 at `3c0207a893`: APPROVE WITH CHANGES (inbox/COORD/20261125T193346Z-P3.md). COORD ruled the same day
+(inbox H 20261125T193518Z): Q3 both number forms, with P3's conditions; Q4 the narrowed refusal, not a hand-own; S4 split
+out as its own seat and coded now; S3 waits for the third-party counts (Q1).
+
+**P3's points, folded (they amend 20.4 to 20.6 where those read otherwise):**
+- **MUST, S3's copy-back.** "A nil pointer field C sets non-zero decodes to a refusal by name" is withdrawn. C storing a
+  malloc'd pointer into a Go struct's pointer field (`C.fill(unsafe.Pointer(&v))`) is the ordinary out-parameter idiom,
+  and a refusal after C ran would leave its side effects done and its memory leaked where Go continues. A non-zero word
+  decodes as a pointer into C memory, as a C result does, and is refused only when it resolves to Go memory. On encode,
+  a non-nil pointer into C memory crosses as its address. One row each, in S3's seat.
+- **SHOULD, the offset into an image.** 3.4 refuses any non-zero offset (B4, `ImageRoot`). S3 derives the Go offset per
+  way in, bounded by the root's Go size: a field box (its field's Go offset); an element of an inline array (today 1b
+  pins the array's own backing, so `&sa.Addr[0]` never reaches the image, and stays so); S4's number plus offset. One
+  row per way in. A number into an S3 root is refused by name until S3 lands.
+- **SHOULD, strings.** Go admits a string whose bytes are a literal (cgocall.go: read-only data is not a Go pointer).
+  go2cs cannot tell a literal's bytes from a heap string's, so S3 refuses every non-empty string inside a void pointer's
+  root; that stricter case goes into Limitations.md with S3.
+- **SHOULD, the case for S3.** The three false refusals of 20.2 are not Go test verdicts: test.go:1195 and :1201 sit
+  inside a benchmark's `b.Run`, and `twoargsF` has no caller (compile-only, issue 28540). The two number arms are
+  go2cs's own. So S3's case rests on the third-party counts (Q1), not on GOROOT. 20.6's sentence is withdrawn.
+- **Sizing.** S3 and S4 are two seats, not one: S4 first, alone; S3 its own full seat (an offset into an image, the
+  by-value encode, the decode of pointer fields, every void-pointer wrapper golden). S5b (Q4: the narrowed refusal, so
+  runtime/cgo's handle.go converts as ordinary Go and keeps in step at every hop) moves no row alone, since both Handle
+  sites in Go's suite call back into Go (testx.go:594, test.go:2360): it is seated with or just before `//export`.
+
+**Q1.** The owner's yes was relayed by COORD (inbox H 20261125T195912Z); H asked for it in the owner's own chat, as its
+session rules require for a download. The census, its module paths and versions, and the cache's removal are recorded
+here when it runs.
+
+**S4 as built** (on `claude/h-cgo-b10-design-r2`, docs, then two commits):
+- `PinVoidPointer`, after the token test, asks `PinNumber`. A number the registry resolves to a live box crosses as that
+  box's storage, pinned for the call by the wrapper's `fixed` like any void pointer (TryPinTarget, RequireCrossable: the
+  storage holds no Go pointer). An interior number inside a pin golib holds crosses at its offset in that pin's storage,
+  bounded by the pin's extent. A number whose box has been collected is refused by name: the table keeps the dead entry
+  until it is next read, and `ManagedPointerTokens.HoldsCollectedEntry` is asked before `Resolve` removes it.
+- **One deviation from P3's four rows, for COORD:** "an offset past the end" is answered by pinning nothing rather than
+  refusing. A number carries no provenance, so past a pin's extent it is indistinguishable from C memory; the pin-extent
+  index rules one past the end end-exclusive (docs/phase4/DESIGN-cgo-pin-extents.md), and refusing it would break the
+  begin/end cursor idiom, whose begin pins the same storage. The row asserts that the number is never pinned as Go
+  memory and crosses as its number.
+- **Residue, stated:** a number further past a pin, or one whose dead entry the opportunistic sweep has already removed,
+  names nothing golib can see and crosses as C memory, as a wild pointer does under Go. A token id reused after its box
+  died can name another live box (ids wrap at 2^29): remote, and no worse than Go's use-after-free.
+- **The uintptr_t parameter** (P3's note): a `uintptr_t` or `intptr_t` parameter goes through `GoCgoArgs.Word`, which
+  refuses go2cs's TOKEN for a Go value with no address by name (Go would hand C that value's address; a token names no
+  memory). Any other integer crosses, a real address of Go memory included. The word types are read off the outermost
+  alias name, since cmd/cgo declares a typedef as an alias of its base type; `size_t`, an alias of the same `ulong`, is
+  not a word type.
+- **Rows.** GolibTests `GoCgoArgsTests.Numbers`: a live box (the address is the box's own slot, and C's write lands), an
+  offset inside (the write lands in the element), past the end (pins nothing), a dead box (refused), and `Word` (a token
+  refused; an address, 42 and `(uintptr_t)-1` cross). `GoCgoArgsTests.Pinned`: exactly the predicted 20 number and
+  bare-mint forms flip from refused to crossing; every token form keeps cgo's refusal. Converter:
+  `TestCgoWordParametersGoThroughTheWordCheck`. e2e (p3): `govoidnumber` and `govoidexpr` pass; `govoidnumberwrite`
+  (memset through `n+1` into a Go array, `[0 7 7 0]`); `wordtoken` refused by name; `wordint` crosses.
+- **Controls, each red, each restored byte-identical (cmp):** the collected-entry check off (the dead-box row); the
+  number pin off (three rows); `Word`'s check off (its row); the alias read off (the converter row).
+
+— H (2026-11-25)
+
+### 20.9 Record 2026-11-25: Q1, the third-party census (the case for S3)
+
+The owner said yes in H's own chat (2026-11-25, after COORD's relay). Six cgo modules were fetched from proxy.golang.org
+into a scratch module cache (`GOMODCACHE` pointed at it, nothing installed, no toolchain change), read by the same
+syntactic instrument as 20.2, and the cache was then deleted. The instrument gained one class for this run: a bare
+`unsafe.Pointer` PARAMETER of the enclosing function handed straight to a C call (`void*:param-passthrough`), which the
+20.2 run did not classify. Over GOROOT that class reads 2, both inside `cmd/cgo/internal/test` (20.2's table is otherwise
+unchanged).
+
+| Module | Version | cgo files | Sites | `void *` = `&x` in Go memory | `void *` = number | `void *` pass-through of a caller's `unsafe.Pointer` | `T *` view of Go memory | `&x` to a `T *` |
+|---|---|---|---|---|---|---|---|---|
+| github.com/mattn/go-sqlite3 | v1.14.53 | 37 | 67 | 4: `&cArg` (a `C.int`) x2; `&bs[0]`, `&v[0]` (blob binds) | 0 (its handles are `C.malloc`'d cookies: C memory) | 2 | 4 `&b[i]`; 2 pointer | 18 |
+| github.com/google/gopacket | v1.1.19 | 4 | 24 | 0 | 0 | 0 | 2 `&variable` | 4 |
+| github.com/go-gl/gl | v0.0.0-20260331235117-4566fea9a276 | 84 | 25,199 | 0 | 0 in the bindings (`PtrOffset` makes buffer offsets, which name no Go memory) | 3,713 | 21,296 pointer pass-throughs | 0 |
+| github.com/veandco/go-sdl2 | v0.4.40 | 64 | 234 | 2: `&data[0]`, `&pixels[0]` | 1: `Mix_RegisterEffect`'s index cookie (not Go memory) | 11 | 82 pointer; 17 `&variable`; 1 `&b[i]` | 53 |
+| libvirt.org/go/libvirt | v1.12009.0 | 76 | 1,017 | 3: `&cmodel.model`, `&cmodel.doi`, `&clabel.label` (an inline char array in a C struct, memcpy's destination) | 0 | 0 | 14 `&variable`; 3 `&b[i]`; 2 `**T` out-parameters | 727 |
+| github.com/google/gousb | v1.1.3 | 3 | 10 | 0 | 0 | 0 | 1 each `&variable`, `&b[i]`, pointer | 7 |
+
+The `void *` = pointer-variable class (382 sites; the instrument does not type a variable, so each was read) is 375
+`free`/`sqlite3_free`/`SDL_free` of C memory; libvirt's 3 `memcpy` sources (`C.CString`) and 1 `memset` destination
+(`C.malloc`); sqlite's `sqlite3_unlock_notify` argument (`C.malloc`); and two that are Go memory. sqlite's
+`my_result_blob(unsafe.Pointer(p))` with `p = &b[0]` is a slice backing (S2). go-sdl2's
+`LogSetOutputFunction(unsafe.Pointer(ctx))` hands C a Go struct holding a `func` and an `interface{}`, which C keeps as
+a callback's user data: invalid under cgo's rules, and refused by Go's own cgocheck ("Go pointer to unpinned Go
+pointer") as by go2cs's door (R1, the same text).
+
+**Readings.**
+- **Every valid `void *` address of Go memory in the six modules is S1 or S2: 10 sites.** Two are a scalar
+  (`&cArg`), five a slice backing, three an inline array in a C struct, which 1b pins through the array's own backing.
+  The eleventh, go-sdl2's log context, is invalid Go and refused alike by both. **None is S3**: no
+  site hands a `void *` a struct whose CLR layout differs from Go's, or a pointer-bearing value. With 20.2's GOROOT
+  reading (S3's three cgo-suite sites are a benchmark and a compile-only function, P3's point 4), **S3 has no measured
+  consumer**.
+- **The large class is the pass-through: 3,726 sites** (go-gl 3,713, go-sdl2 11, sqlite 2), where the binding hands C
+  whatever `unsafe.Pointer` its own caller passed. The shape is decided at the CALLER, outside these modules, so this
+  census cannot score it. go-gl's own helpers say what callers pass: `gl.Ptr` (reflect's `UnsafeAddr` of a scalar or a
+  slice element: S1 or S2), `gl.Str` (a string's bytes) and `gl.PtrOffset` (a number into a bound GPU buffer, never Go
+  memory: S4 crosses it as C memory). go-gl's 21,296 typed views are the same pass-through into typed parameters, the
+  3.2 and 3.4 doors.
+- **S6 now has a measured consumer.** Four go-sdl2 pass-throughs hand C a pointer it KEEPS past the call:
+  `SDL_CreateRGBSurfaceFrom` and `SDL_CreateRGBSurfaceWithFormatFrom` (SDL does not copy the pixels; the surface reads
+  them for its whole life) and `SDL_SetTextureUserData`, `SDL_SetWindowData` (stored, handed back later). Under cgo's
+  rules each needs the caller to hold a `runtime.Pinner`, so each is S6's shape when the caller passes Go memory. The
+  call-scoped `fixed` of 1b is wrong for them: the address goes stale at the next compaction after the call returns.
+- **Cookies.** sqlite's callback handles are `C.malloc`'d one-byte allocations used as keys (C memory) and SDL_mixer's
+  is an integer index; both cross today, and the call-backs they serve wait for `//export` (S5a).
+
+**For COORD's .5/.6 call.** S3's case does not rest on these counts: zero of 10 measured valid Go-memory `void *` sites is S3.
+S6 has four (one module, all caller-dependent), and it is the class where go2cs's current behaviour is silently wrong
+rather than refused: a retained address of Go memory crosses pinned for the call only. A refusal by name for a retained
+pointer is not possible at the door (the door cannot know C keeps it); the remedy is S6's durable Pinner pin, or a
+Limitations.md entry naming the retention class until it lands.
+
+Census rows are the scratch instrument's output (not committed). The scratch module cache was removed after the run.
+
+— H (2026-11-25)
+
+### 20.10 Record 2026-11-26: P3's CHANGES on S4 folded
+
+P3 read S4 at `53d4da880e`: CHANGES, one MUST (inbox/COORD/20261125T222025Z-P3.md). COORD (inbox H 20261125T222108Z)
+confirmed the past-the-end deviation and asked for the fold, SHOULDs 2 and 3, and a Limitations sentence.
+
+- **MUST, `Word`.** It refused by bit pattern alone (bit 63 set, bit 47 clear), so one 64-bit value in four, a hash or an
+  opaque id such as `0x8000000000000001`, panicked where Go passes it. It now refuses only when the pattern matches AND
+  the registry holds an entry for that number, live or collected. Every token the box-to-uintptr operator mints is
+  registered (its reference-bearing arm, `ManagedPointerTokens.Register`), so a minted token is always seen; a tagged
+  number never minted crosses. Row: `0x8000000000000001` crosses. Control: the registry clause removed reds that row
+  alone; restored byte-identical. Residue: an identity token (a channel's, a map's) is not registered by any number
+  conversion, so one handed to a 64-bit integer parameter crosses as the integer it is.
+- **SHOULD 2, every 64-bit integer.** The word flag now covers every `int64`/`uint64` parameter (the `ioctl(fd, req,
+  unsigned long arg)` shape), not only `uintptr_t` and `intptr_t`; a 32-bit integer cannot carry an address and is
+  unchanged. On a non-token the check is one bit test. Footprint: one line in each non-Windows wrapper golden (`labs`,
+  whose `long` is 64-bit there; Windows' `long` is 32-bit). Converter row extended: `size_t` goes through, `int` does
+  not.
+- **SHOULD 3, a struct field's number.** Row `S4_AStructFieldsNumberCrossesAtTheField`: `uintptr(unsafe.Pointer(&s)) + 4`
+  on a reference-free struct in its own box crosses at the field, pinned, and C's write lands in `s.Y`. A struct box's
+  conversion pins its one-element slot and registers the pin, so the pin-extent index holds it and `PinNumber`'s
+  interior branch answers. No hole.
+- **NIT 4, residue.** `HoldsCollectedEntry` runs for every void pointer that carries no box, C memory included, so a C
+  address equal to a dead entry's number (heap returned to the OS, then malloc'd) is refused by name. Remote, and a
+  refusal, not corruption.
+- **Limitations.md**: the number door, the end cursor (held still for nothing, good only for comparison), and the
+  refusal of a minted token in a 64-bit integer argument.
+
+— H (2026-11-26)
+
+## 21. Sizing 2026-11-26: S6, `runtime.Pinner` holding a real pin (COORD's ruling; design only, P3 reads)
+
+COORD ruled on 20.9's census (inbox H 20261126T002923Z): S3 is deferred to a BOARD residual, and S6 is sized now. S6
+is the one class where valid Go gets a wrong result with no refusal. cgo lets C keep a Go pointer past the call only
+if a `runtime.Pinner` pins the memory, and go2cs's Pinner records that the memory is pinned without holding its
+address still.
+
+### 21.1 What exists (read at `3450839689`)
+
+- **`runtime.Pinner`** (`src/core/runtime/pinner_impl.cs`, hand-owned).
+  - `Pin(p)` resolves the referent with Go's `pinnerGetPtr` panics (`pinnerReferentOf`). It takes a box's
+    `ReferentObject`, so an element's referent is its canonical backing and a field's is its source allocation.
+  - It counts the referent in `PinTable` (a weak-keyed table, one count per object) and keeps it in the pinner's own
+    `pinnedReferents` list.
+  - `Unpin` uncounts every referent. A pinner collected with pins outstanding runs Go's leak finalizer, which unpins
+    and calls `pinnerLeakPanic`.
+  - **No `GCHandle`, no address, no pin-extent entry.** It records identity and lifetime, not stillness.
+- **The pins golib already takes.**
+  - `PinnedBuffer` holds a pinned `GCHandle` over an array (`PinOnly(storage)`). Its indexed form enters the pin-extent
+    index (`PinExtents`), which is how S4 finds interior numbers.
+  - A box's own conversion to a number pins its storage for the BOX's lifetime (the uintptr operator).
+  - The cgo doors pin call-scoped with `fixed` (1b), or copy into a stack mirror or an image.
+- **The doors decide by the box**, through `TryPinTarget`: storage, offset, `RequireCrossable`.
+  - A whole scalar box in the typed door takes a stack MIRROR (`PinnedAScalarPointerPinsAnElementAndAViewAndKeepsTheMirrorForAWholeBox`).
+  - A struct view no door can pin takes an IMAGE (3.4).
+  - A mirror's or an image's address is not the Go memory, so C keeping it is wrong even when the Go memory itself is
+    still.
+
+### 21.2 Consumers
+
+- **cgo: go-sdl2's four retaining calls (20.9).** In GOROOT, the only cgo use of Pinner is a cgocheck error test
+  (`testerrors/ptr_test.go`). It pins a Go pointer and stores it into C memory, and go2cs refuses that by name anyway,
+  as a store of a Go pointer into C memory.
+- **Not cgo, and larger: `internal/poll` on Windows.**
+  - Every overlapped read and write calls `fd.pin(mode, ptr)`, which is `readPinner.Pin` or `writePinner.Pin`, and
+    `execIO` defers the Unpin.
+  - The kernel writes into the buffer asynchronously, after the submitting syscall returns. That is exactly cgo's
+    retention case.
+  - Whether go2cs is exposed there today is NOT measured. Two things may already hold the bytes still: the managed
+    poller (`golib.GoAsyncIO`, DESIGN-netpoll-managed-poller.md), and the buffer's own box (`Ꮡ(buf, 0)`, whose
+    conversion pins for the box's life).
+  - So S6's first measurement is that path. It decides S6's cost as well as its reach (21.4).
+
+### 21.3 The design
+
+**(a) `Pin` takes a real pin.** The table moves DOWN to golib (`go.golib.GoPinTable`, `[EditorBrowsable(Never)]`): the
+doors are in golib, and golib cannot reference `runtime`. `runtime`'s hand-own calls it, so there is one rule rather
+than two (the shape the fatal-report type took for the runtime/sync shims, `golib/runtime/FatalReport.cs`). `Pin` resolves the referent as now. It then asks golib
+for the storage the doors would pin (`TryPinTarget`'s own resolution, never a copy of it) and holds it still:
+- If the storage is already inside a live indexed pin (`PinExtents.Find`), it takes a COUNT on that pin, and no new
+  handle.
+- Otherwise it pins the storage with an indexed `PinnedBuffer`, so the extent index sees it, and every door and S4's
+  number path find it pinned.
+
+The pin is kept with the pinner's referent and released at the referent's last `Unpin` (counts as Go's
+`specialPinCounter`). A referent with no pinnable storage keeps today's identity-only record. That is a value holding Go
+references, which has no address C could hold, so C was never handed its address.
+
+**(b) The doors honour it.**
+- A pointer whose referent `GoPinTable` holds never takes a stack mirror or an image. The door pins its storage in
+  place (the 1b path), so the address C keeps is the Go memory's own.
+- Where the storage cannot be handed over in place (a struct whose CLR layout is not Go's, the S3 shape), the door
+  refuses by name: "pinned with runtime.Pinner, so C may keep it, and go2cs cannot hand C this value's own memory".
+- Today's call-scoped answer stays for every pointer that nothing pinned.
+
+**(c) Go's semantics, kept.**
+- `Unpin` releases every pin the pinner holds.
+- A double unpin of an object panics ("runtime.Pinner: object already unpinned").
+- A pinner collected with pins outstanding unpins and panics (`pinnerLeakPanic`).
+- `isPinned` and `pinnerGetPinCounter` read the same table.
+- The leak finalizer now also releases handles. It must run before the handles' own finalizers would, so the pinner
+  holds its buffers strongly and releases them itself.
+
+### 21.4 Cost
+
+- **Per first pin of an allocation:** one `PinnedBuffer` (an object holding a handle, a length and a state byte; 32 B, as
+  R6 holds), plus its `GCHandle` table entry, plus an extent node. Re-pinning an already-pinned extent costs a count.
+  Everything is freed at Unpin. A B/op row cannot see the handle (golib-gen.md's pin-pricing rule), so it is priced
+  from the type.
+- **GC:** a pinned object cannot move, so long-lived pins in gen0/gen1 fragment the ephemeral segments. Go's own pins
+  are free, because its heap does not move. That is why Go code pins freely, as `internal/poll` does on every I/O.
+- **The hot-path question is the one to measure first.**
+  - If `internal/poll`'s per-I/O `Pin` reaches a buffer that is not already pinned, (a) adds a handle allocation and a
+    free to every overlapped read and write.
+  - The count-on-an-existing-pin arm is what keeps it free when the buffer's box has already pinned it.
+  - The net and os alloc rows are the gate.
+- **Residue, not cured:** a program that hands C a retained pointer WITHOUT a Pinner is invalid Go.
+  - It usually works under Go (its heap does not move), and here the pointer goes stale after a compaction.
+  - The door cannot see C keep a pointer, so this stays silent; Limitations.md should name it.
+  - Allocating such buffers on the pinned-object heap would be a separate increment, with its own cost.
+
+### 21.5 The interim COORD asked for
+
+- Yes, the door can detect it, but only after the table moves to golib, which is (a)'s first step. The door asks
+  `GoPinTable.IsPinned(referent)` and refuses by name: "pinned with runtime.Pinner, so C may keep it past the call;
+  go2cs holds Go memory still only for the call".
+- Cost: the move, one test per door, and a GolibTests row per door. It is a half seat.
+- But it refuses every Pinner-pinned pointer handed to C, including the valid uses that do not retain. And (a)+(b)
+  replace it, in the same files.
+- Lean: land (a)+(b) as one seat, and the interim only if S6 goes to .6.
+
+### 21.6 Size
+
+**One seat**, in three commits:
+1. The table moves to golib (mechanical; the runtime hand-own calls it). The rows that already guard it (`TestPinner*`
+   in the converted runtime suite) stay green.
+2. `Pin` takes or counts a real pin; `Unpin` and the leak finalizer release it.
+3. The doors honour it. New probe functions `go2cs_probe_keep` and `go2cs_probe_kept` (C keeps a pointer, and a later
+   call reads it). An e2e arm: Pin, keep, force a compacting collection, read back through C, Unpin.
+
+**Rows:**
+- A pinned scalar box survives compaction at the kept address. Near-miss: unpinned, the door still mirrors.
+- An element's pin counts on its backing's existing extent.
+- A struct whose layout differs is refused by name.
+- Double unpin and the leak panic are unchanged.
+- S4's number into a Pinner-pinned box resolves to the same pin.
+
+**Measurement first:** the `internal/poll` path (does a per-I/O Pin reach an unpinned buffer?), then the net and os
+alloc rows before and after.
+
+— H (2026-11-26)
+
+### 21.7 Record 2026-11-26: P3's read of S6 folded (amends 21.3 to 21.6)
+
+P3 read section 21 at `3d8ec0ffca`: APPROVE WITH CHANGES (inbox/COORD/20261126T021610Z-P3.md). COORD (inbox H
+20261126T021746Z): fold MUSTs 1 and 2 and SHOULD 3 before code. The poll measurement stays first, and code waits for it
+and for the .5/.6 call.
+
+**MUST 1: a pin covers the whole value, not one storage.** Go's pin holds the whole object. In go2cs, an inline array is
+its own allocation (the image door's B5 rests on that).
+- So `p.Pin(&b)` with `b struct{ hdr [16]byte; n int32 }`, then `C.keep(unsafe.Pointer(&b.hdr[0]))`, must pin `hdr`'s
+  backing as well as `b`'s slot. Otherwise the door finds no pin on the backing, pins for the call only, and C keeps an
+  address that moves at the next compaction: the silent class S6 exists to close.
+- **Amended (a):** `Pin` of a value pins EVERY allocation inside it. `GoCgoImages.ImageKeys` already enumerates them
+  (the root plus each backing in its value), so the set is one definition shared by the image door and the pin.
+- **Row:** pin `&b`; the door then pins `&b.hdr[0]` in place under the Pinner's pin, and it survives a compaction.
+- **The reverse cannot be done, and is stated:** `p.Pin(&b.hdr[0])` then `C.keep(unsafe.Pointer(&b.n))`. Go pins the
+  object holding `hdr`, so `b.n` is pinned too. golib cannot walk from a backing up to the struct that holds it: an
+  array has no back-reference to its containers.
+  - In go2cs only `hdr`'s backing is pinned, and `&b.n` then gets the call-scoped answer.
+  - This goes in Limitations.md with S6: pin the whole value (`&b`), not an element inside it.
+
+**MUST 2: the count arm needs an owner.** `PinnedBuffer` frees its `GCHandle` in `Dispose` and in its finalizer, and has
+no count. An existing indexed pin belongs to someone else (a call-scoped pin, or a box's conversion pin) with its own
+release. A Pinner that counted on it would lose the handle when that owner released it. For example, poll pins a buffer
+that a call-scoped pin holds; the syscall returns; the owner disposes; the kernel writes to an address the collector
+may move; and the table still says pinned.
+- **Amended (a):** `Pin` ALWAYS takes its own handle; two pinned handles on one object are legal.
+- The count arm is kept only for repeat pins of storage the TABLE ITSELF already holds (a second `Pin` of the same
+  allocation). That count lives in the table's own record, and the table frees its handle at zero.
+- No pin belonging to another owner is ever counted on.
+- **Row:** the first owner releases its pin, and the Pinner's pin still holds the address across a compaction.
+
+**SHOULD 3: the typed struct door pins in place only under the S1 condition.** Today a whole Go struct always takes the
+mirror, because the mirror is where its layout is marshalled.
+- **Amended (b):** for a Pinner-pinned referent, the typed struct door pins in place only when the struct's CLR layout
+  IS its C layout. That is the void door's S1 condition (`RequireCrossable` and `NativeStructMarshal`'s blittable test:
+  no reference fields, the mirror's layout equal to the struct's own).
+- A Pinner-pinned struct that fails the test is refused by name: "pinned with runtime.Pinner, so C may keep it, and its
+  Go layout is not its C layout".
+- **Row:** a pinned struct holding an inline array, handed to a typed struct parameter, is refused by name.
+
+**SHOULD 4: a gate that can see a handle.** The alloc rows cannot (21.4 says so itself). The gate for the poll hot path
+is:
+- a count of handles the table takes per I/O, through a test seam on `GoPinTable`;
+- a timed read/write row, before and after.
+
+The long-pin case is written down too. A read parked on an idle connection keeps a gen0 buffer pinned for as long as it
+waits, minutes on an idle socket, as plain .NET sockets do with their own overlapped buffers.
+
+**NIT 5: locking.** `GoPinTable` is reached from every I/O goroutine at once.
+- The record lookup is a lock-free read of a weak-keyed table, as today's `PinTable`.
+- Count transitions and handle allocation take the table's one lock, as `PinTable.Pin` does now.
+- A repeat pin (the count arm) allocates nothing. A first pin allocates its record and its buffer.
+
+**Unchanged:** the table moves to golib; poll is measured first; one seat for (a)+(b); the interim only if S6 goes to .6;
+the no-Pinner residue goes in Limitations.md.
+
+— H (2026-11-26)
+
+### 21.8 Record 2026-11-26: the `internal/poll` reading (the first measurement 21.2 and P3 asked for)
+
+**Question.** Every banked Windows net row has passed without real Pinner pins. So either something already holds an
+overlapped buffer still, or those rows never met a compaction mid-flight (P3). This is a CODE READING at `2da4575956`;
+nothing was run.
+
+**Answer: something already holds it, on both async paths.**
+- **File and pipe I/O:** `syscall.readFile` / `writeFile` are `fileIO` (`zsyscall_windows_file_impl.cs`).
+  - When the handle is registered with the managed poller (`GoAsyncIO.HasReadiness`), the submit converts the buffer's
+    element box `Ꮡ(buf, 0)` to an address. That conversion takes the box's own pinned `GCHandle`, released with the box.
+  - Then `operation.Pin(Ꮡbuf)` keeps the BOX in the operation record for the flight, until the next `Rearm`.
+- **Sockets:** `rearmOverlapped` (`zsyscall_windows_wsa_impl.cs`) does the same through `retainForFlight`. Its own comment:
+  "the pin is a GCHandle owned by that one box and released with it", so the box is what is retained.
+- So the kernel's asynchronous write lands in memory a pin holds for as long as the operation is in flight, whatever
+  `runtime.Pinner` does.
+- `internal/poll`'s `fd.pin` → `readPinner.Pin` / `writePinner.Pin` is therefore REDUNDANT in go2cs. Today it records
+  identity only, and costs a table entry and a list slot per I/O.
+- **Not exposed today.** The banked net rows pass because the bytes are held, not because no compaction came.
+
+**What this changes in S6.**
+- **The hot-path cost becomes a pure loss unless removed.** Under 21.7's MUST 2, `Pin` takes its own handle every time,
+  so poll's per-I/O Pin would add a second `GCHandle` and a `PinnedBuffer` to every overlapped read and write, for
+  nothing.
+- **Amended (21.3, 21.6):** the seat displaces poll's `pin` (and the deferred `Unpin`) on Windows, in the poll hand-own,
+  to the managed poller's retention, which already holds the buffer. It stays a no-op when the descriptor is not
+  registered: then `fileIO` and the WSA path take the synchronous branch, and the call holds the box itself (its
+  `GC.KeepAlive`).
+  - The displacement carries a guard row: the handle count per I/O stays 0 on the poll path (21.7's SHOULD 4 seam).
+  - A second row: an overlapped read survives a forced compaction mid-flight. That is the property the displacement
+    relies on, asserted instead of read.
+- **S6's reach is then cgo alone** (go-sdl2's four retaining calls, 20.9), and its cost is off every hot path: a first pin
+  is about 32 B plus a handle, at a `Pin` a program writes on purpose.
+- **Size: unchanged, one seat.** Three commits plus the poll displacement, which is about ten lines and two rows.
+
+— H (2026-11-26)
+
+### 21.9 Record 2026-11-26: S6 as built (COORD's ruling: in .5; inbox H 20261126T023252Z)
+
+Branch `claude/h-cgo-s6`, stacked on `claude/h-cgo-s6-size-r2` (S4-r3 plus sections 21 to 21.8). Five commits:
+- **Table.** `go.golib.GoPinTable` holds the pins, and runtime's `PinTable` forwards to it.
+  - A first pin takes its OWN pinned handle over every allocation inside the value: the box's slot, and each backing
+    that `ImageKeys` finds. Each allocation is counted per storage.
+  - A repeat pin counts and allocates nothing. The last unpin frees the handles.
+  - A reference-free value takes a one-allocation fast path.
+- **Doors.** A Pinner-pinned pointer crosses in place under the S1 test, or is refused by name. It is never a mirror and
+  never an image.
+- **Poll.** `FD.pin` is displaced on Windows (the registry key plus the hand-own), with the emission from a seeded
+  `-stdlib` reconvert of `internal/poll`. The `fd_poll_runtime.cs` blank-import comment that the same reconvert
+  rewrote is unrelated corpus drift, and was not overlaid.
+- **e2e.** The `pinnerkeep` arm and the probe's `keep`/`kept`.
+- **This record.**
+
+**Measured cost** (`TheCostPerPinIsMeasured`, Debug): a distinct pin is 24 B before and 216 B after. That is the table
+entry, the record, a `PinnedBuffer` and a storage count, plus a `GCHandle` table slot that is not on the GC heap. A
+repeat pin is 0 B before and after. Without the fast path it was 568 B; 21.4's "about 32 B" counted the buffer alone.
+
+**Correction to 21.8's citation.** The socket READ path retains its buffer box in `writeWSABufs` (called from
+`stageBuffers`: `operation?.Pin(buf.Buf)`). `retainForFlight` is the send path's. The FD's own operation struct
+(`o.buf.Buf`) also holds the same box for the flight. So there are two holders: dropping `retainForFlight` alone left
+the compaction row green in 3 of 3 runs, and the measured control is the one below.
+
+**Rows and controls.** Each control was restored byte-identical (`cmp`).
+
+| Row | Control | Read |
+|---|---|---|
+| a pinned scalar crosses in place; its kept address survives compaction (near-miss: unpinned keeps the mirror) | door check off / no real pins | red / red 3 of 3 |
+| pinning a value pins its inline arrays (MUST 1) | no real pins | red 3 of 3 |
+| another owner's release does not release the Pinner's pin (MUST 2) | door check off / no real pins | red / red 3 of 3 |
+| a pinned struct whose layout is not C's is refused by name (SHOULD 3) | door check off | red |
+| a repeat pin counts, takes no handle; a third unpin is "already unpinned" | no real pins | red 3 of 3 |
+| S4's number into a pinned box crosses at the pinned bytes | no real pins | GREEN: the box's own conversion pin holds it, so this row guards S4's resolution, not the Pinner's handle |
+| poll: 50 overlapped TCP reads and writes take no pin handle (Windows) | Go's `pin` body restored | red (which also proves the reads reach `fd.pin`) |
+| poll: an overlapped read survives three forced compactions mid-flight (Windows) | the kernel handed an unpinned address of the same buffer | red 3 of 3 (byte 0 read 0, expected 3) |
+| e2e `pinnerkeep`: "pinnerkeep 9" both ways (hosted linux) | none | |
+
+**Limitations.md** gains two lines. A retained pointer handed to C without a Pinner goes stale after a compaction,
+silently. A pin of an element does not cover the value that holds its array.
+
+— H (2026-11-26)
+
+### 21.10 Record 2026-11-26: every Pin site in fd_windows.go, and what holds its memory in go2cs (COORD's requirement)
+
+COORD made P3's SHOULD a requirement (inbox H 20261126T030411Z): before the displacement, one line per `fd.pin` site in
+go1.26.11's `internal/poll/fd_windows.go`, naming what holds that memory for the flight. Any site with NOTHING holding
+it would be a live core-I/O bug today. All eleven are below. This is a code reading at `2ce6812305`; the two poll rows
+measure Read's path.
+
+**Holders, defined.**
+- **(R) the native record.** Memory `OverlappedOp` allocates natively and frees itself (`Rearm`, `Staging`,
+  `GoAsyncIO.StageOperationBuffer`). It never moves.
+- **(B) the retained box.** The buffer's element box `Ꮡ(buf, 0)`. Its conversion to an address takes the box's own
+  pinned `GCHandle`, held for the box's life, and the operation record keeps the box until the next `Rearm`
+  (`operation.Pin`).
+- **(F) the box held by the FD.** The same box, reachable from the FD's own `operation` (`o.buf.Buf`, `o.msg`) for the
+  whole flight, because `execIO` blocks on the completion it submitted. Its pin is the box's own. This holder relies on
+  reachability rather than an explicit retention.
+
+| Go line | Function | Path in go2cs | What `pin` pinned in Go | Holder in go2cs |
+|---|---|---|---|---|
+| :303 | `execIO`, `fd.pin(mode, o)` | every overlapped submit | the operation: OVERLAPPED, WSABuf(s), WSAMsg, `rsa`/`rsan`, flags | **R** for each part. The OVERLAPPED is `Rearm`'s native one. WSABUFs, WSAMSG and the from-address image with its length are staged natively (`stageBuffers`, `StageOperationBuffer`), and the from-address, `Control.Len` and flags are transcribed back at harvest (`WSARecvFrom`, `WSARecvMsg`). An async completion's flags come through the overlapped result, never through `o.flags` |
+| :592 | `Read` | `ReadFile` (`fileIO`) / `WSARecv` | the data buffer | **B** (file: `operation.Pin`; socket: `writeWSABufs`), and **F** |
+| :722 | `Pread` | `ReadFile` (`fileIO`) | the data buffer | **B** |
+| :772 | `ReadFrom` | `WSARecvFrom` | the data buffer | **B** (`stageBuffers` → `writeWSABufs`), and **F** |
+| :802 | `ReadFromInet4` | `WSARecvFrom` | the data buffer | **B**, and **F** |
+| :832 | `ReadFromInet6` | `WSARecvFrom` | the data buffer | **B**, and **F** |
+| :864 | `Write` | `WriteFile` (`fileIO`) / `WSASend` | the data buffer | **B**, and **F** |
+| :959 | `Pwrite` | `WriteFile` (`fileIO`) | the data buffer | **B** |
+| :1041 | `WriteTo` | `WSASendto` (or `windows.WSASendtoInet4/6`) | the data buffer | `WSASendto`: **B** (`stageBuffers`) and **F**. `WSASendtoInet4/6`: **F only** |
+| :1078 | `WriteToInet4` | `windows.WSASendtoInet4` | the data buffer | **F only**: `stageWSABufs` (`net_windows_impl.cs`) writes the box's address and does not retain the box |
+| :1115 | `WriteToInet6` | `windows.WSASendtoInet6` | the data buffer | **F only**, as :1078 |
+
+**Readings.**
+- **No site is unheld.** There is no finding to post.
+- **Three sends rest on (F) alone:** `WriteToInet4`, `WriteToInet6`, and `WriteTo` when it routes to them. Their buffer
+  is held because the FD's operation keeps the box for the flight, not because the record retains it.
+  - That is sound while `execIO` blocks until completion. That is Go's own structure, and the same argument
+    `WSARecvMsg`'s note makes for its data and control buffers.
+  - It is the weakest holder in the table, so it is named, not hidden.
+  - Hardening it is a one-line change, outside this seat: `stageWSABufs` would retain each box through the operation,
+    as `writeWSABufs` does.
+- **The data a send hands the kernel is read, not written**, so a moved buffer on those three would send stale bytes,
+  not corrupt the heap. The read paths, where a move would corrupt, all have (B).
+- **ConnectEx** is not a pin site. Its sockaddr is a `stackalloc` image, read by the kernel during the call. Its send
+  buffer and byte count are retained through `rearmOverlapped` (**B**).
+- **TransmitFile**: the overlapped is native (**R**), and so are its buffer descriptors (**R**).
+- **The displacement stands for all eleven sites.** `FD.pin` is one function, and every site it covers has an owner for
+  the flight. The two poll rows measure Read's path. A compaction row for the (F)-only sends is offered if COORD wants
+  the weakest holder measured too.
+
+— H (2026-11-26)
+
+### 21.11 Record 2026-11-26: P3's CHANGES on S6 folded (COORD inbox H 20261126T053128Z)
+
+P3 read S6 at `2ce6812305`: CHANGES, three MUSTs and two SHOULDs (inbox/COORD/20261126T052923Z-P3.md). All five are
+folded, as new commits on top of that tip.
+
+- **MUST 1: copying doors.** Both `OutParameter` overloads, and `PinVoidPointer`'s word-mirror arm, hand C a COPY of a
+  Go pointer slot: one stack word, or a mirror of the whole array of C pointers. A slot pinned with `runtime.Pinner` is
+  now refused by name (`RefusePinnerHeldCopy`). A slot holds a reference here, so it has no in-place answer.
+  - Rows: a pinned out-parameter slot (both overloads), and a pinned array of C pointers handed as a void pointer, each
+    with its unpinned near-miss.
+  - Control: with the refusal off, exactly those two rows go red.
+- **MUST 2: what crosses in place, and the second refusal.**
+  - Unit rows: a pinned reference-free struct crosses the typed struct door in place (kind Pinned, no image), and its
+    kept address survives compaction. A pinned root reached through an image view is refused by name; the unpinned
+    near-miss is still imaged.
+  - e2e arm `pinnerkeepstruct`: a pinned `C.struct_go2cs_probe_pair` handed to a typed parameter that C keeps.
+    `go2cs_probe_keep_pair` keeps it, a collection runs, Go writes `b = 9`, and C reads `b` through its kept pointer.
+    Hosted linux reads "pinnerkeepstruct 9" from both Go and go2cs.
+  - No layout counter-example was found: the struct of two `int`s crossed in place, and C read Go's write.
+- **MUST 3: the per-site table.** 21.10 holds the table, one row per site (the ten buffer sites plus :303). The
+  RUN/READ marks P3 asked for:
+  - **RUN:** :592 (`Read`) over a loopback TCP socket, through `WSARecv` / `writeWSABufs`. Measured by both poll rows:
+    zero handles per I/O, and a compaction mid-flight.
+  - **READ only:** :303, :722, :772, :802, :832, :864, :959, :1041, :1078 and :1115. Their holders are code readings.
+    `Write`'s socket path also runs inside the handle row's loop, but only as the writer of the bytes that are read,
+    so it is not claimed.
+  - **The unowned-descriptor branch is unchanged.** When the handle is not registered with the managed poller,
+    `fileIO`'s first branch (`zsyscall_windows_file_impl.cs`, `Ꮡoverlapped == nil || !GoAsyncIO.HasReadiness`) keeps
+    the box for the CALL only, through `GC.KeepAlive`. Go's `pin` was a no-op there too, since an FD that is not
+    pollable is blocking (`if fd.isBlocking { return }`). So the displacement changes nothing on that branch.
+- **SHOULD 4: `pinnerkeep` with real pins off.** A probe branch, `claude/h-cgo-s6-probe-nopins-r2` = `cc5446f3de`
+  (never lands), has `HoldAll` return no handles.
+  - Hosted linux cgo-e2e (run 45773373910): `pinnerkeep` still reads "pinnerkeep 9". It is therefore a **SMOKE arm**:
+    the void door hands C the box's storage in place with or without S6, and the collection did not move `x`.
+  - `pinnerkeepstruct` reads "pinnerkeepstruct **2**" against Go's 9. Without the Pinner's handle, the typed door's
+    in-place answer is gone, and C kept the call's stack mirror, which still holds the value from before Go's write.
+  - So `pinnerkeepstruct` is the arm that discriminates S6 end to end. Every other arm passed on the probe.
+- **SHOULD 5: the element walk.** `HoldAll` skips the per-element walk, which boxes every element, when the element type
+  holds no reference.
+
+One hosted-only fault came up along the way. The first push of `pinnerkeepstruct` (`6609cf41dc`) redefined
+`struct go2cs_probe_pair`, which the probe and the p3 preamble already declare. Both redefinitions are removed
+(`cc4bd6fe0b`), and the preamble's new prototypes sit below its own definition.
+
+— H (2026-11-26)
+
+### 21.12 Record 2026-11-26: the (F)-only sends hardened (COORD inbox H 20261126T055209Z); 21.10's rows amended
+
+COORD accepted 21.10 and ruled the hardening into S6. `internal/syscall/windows`' `stageWSABufs`, shared by
+`WSASendtoInet4/6`, `WSASendMsg` and `WSARecvMsg`, now retains each buffer's box through the operation record for the
+flight, as `syscall`'s `writeWSABufs` does.
+- **The seam.** It goes through golib: `GoAsyncIO.RetainForFlight`, and a new OPTIONAL interface `IGoAsyncRetainer`.
+  `IGoAsyncOperation` is not widened. `syscall`'s `OverlappedOp` implements the interface over its existing pin list,
+  cleared at the same `Rearm`.
+- **Amended rows of 21.10** (the dated amendment; 21.10 itself is not rewritten):
+  - :1041 `WriteTo` via `WSASendtoInet4/6`, :1078 `WriteToInet4` and :1115 `WriteToInet6` read **B+F**, not "F only".
+  - `WriteToInet4` (:1078) is **RUN**, through row `AWriteToInet4SendCarriesItsOwnBytesWhileTheHeapCompacts` on Windows.
+    That row sends 200 datagrams through `UDPConn.WriteTo` on udp4 (`fd.writeToInet4` → `WSASendtoInet4`) while another
+    thread compacts the heap.
+  - :1115 and the `WriteTo` route share the same function (`prepareSendto` → `stageWSABufs`) and stay **READ**.
+- **What the row can and cannot show.** It has two halves:
+  - **Bytes:** every datagram arrives with its own buffer's bytes. The unpinned-address control (the kernel handed
+    `Unsafe.AsPointer` of the same bytes, with no retention) left this half GREEN in 3 of 3 runs. On loopback the kernel
+    copies a datagram inside the call, before a compaction can move it, so the bytes half is a smoke arm.
+  - **Retention:** the record retained at least one box per send, read through a test seam
+    (`GoAsyncIO.RetainedForFlight`). With the retention line removed this half reads "retained 0 for 200 sends", so it
+    is the discriminating half.
+- **The compactor sleeps 1 ms per collection.** Without the sleep, the send goroutine starved for 60 s in 3 of 3 runs.
+  That is the BOARD's 2026-11-25 collector hang, with the same cure.
+
+— H (2026-11-26)

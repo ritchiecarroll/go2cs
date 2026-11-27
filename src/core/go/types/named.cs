@@ -722,7 +722,7 @@ internal static void resolveUnderlying⁔(/*this*/ ж<Named> Ꮡn) {
         }}
     }
 
-    path = move2heap(pathᴷ, path);
+    path = builtin.move2heap(pathᴷ, path);
     foreach (var (_, t) in range(path)) {
         var tʗ1 = t;
         var uʗ1 = u;

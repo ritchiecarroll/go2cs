@@ -42,7 +42,7 @@ internal static void add⁔<K, V>(/*this*/ ref mapping<K, V> h, K k, V v) {
 // The second return value is false if there is no value
 // with that key.
 internal static (V v, bool found) find⁔<K, V>(/*this*/ ж<mapping<K, V>> Ꮡh, K k) {
-    V v = GoZero<V>();
+    V v = builtin.GoZero<V>();
     bool found = default;
     ref var h = ref Ꮡh.DerefOrNull();
 

@@ -158,12 +158,12 @@ internal static UntypedInt fNegInf => 0xFFF0000000000000;
 
 internal static float64 float64Inf() {
     var inf = (uint64)fInf;
-    return bitcast<uint64, float64>(inf);
+    return builtin.bitcast<uint64, float64>(inf);
 }
 
 internal static float64 float64NegInf() {
     var inf = (uint64)fNegInf;
-    return bitcast<uint64, float64>(inf);
+    return builtin.bitcast<uint64, float64>(inf);
 }
 
 // timeHistogramMetricsBuckets generates a slice of boundaries for

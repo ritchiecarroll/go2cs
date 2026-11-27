@@ -274,7 +274,7 @@ internal static error processBatch(ж<generation> Ꮡg, batch b, version.Version
     }
     case {} when b.isSyncBatch(ver): {
         {
-            var err = setSyncBatch(ref nonnil(ref g).sync, b, ver); if (err != nil) {
+            var err = setSyncBatch(ref builtin.nonnil(ref g).sync, b, ver); if (err != nil) {
                 return err;
             }
         }

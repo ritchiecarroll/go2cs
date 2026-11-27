@@ -475,7 +475,7 @@ internal static void tryUpdate⁔(/*this*/ ж<resolverConfig> Ꮡconf, @string n
 
 internal static bool tryAcquireSema⁔(/*this*/ ref resolverConfig conf) {
     var selᴛ8 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    switch (trySelect(selᴛ8)) {
+    switch (builtin.trySelect(selᴛ8)) {
     case 0: {
         return true;
     }
@@ -983,7 +983,7 @@ internal static (slice<@string>, error) goLookupPTR⁔(/*this*/ ж<Resolver> Ꮡ
         ptrs = append(ptrsᴷ, ptrs, ptr.PTR.String());
     }
 
-    ptrs = move2heap(ptrsᴷ, ptrs);
+    ptrs = builtin.move2heap(ptrsᴷ, ptrs);
     return (ptrs, default);
 }
 

@@ -19,7 +19,7 @@ public static slice<byte> AppendUleb128(slice<byte> b, nuint v) {
             break;
         }
     }
-    b = move2heap(bᴷ, b);
+    b = builtin.move2heap(bᴷ, b);
     return b;
 }
 

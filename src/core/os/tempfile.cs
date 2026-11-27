@@ -6,7 +6,7 @@ namespace go;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using strconv = @internal.strconv_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using @internal;
 using fs = go.io.fs_package;
 

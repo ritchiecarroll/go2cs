@@ -820,7 +820,16 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
+    public void CheckForeignEmbedPromotedPointer() => CheckTarget("ForeignEmbedPromotedPointer");
+
+    [TestMethod]
+    public void CheckForeignEmbedSealedMarker() => CheckTarget("ForeignEmbedSealedMarker");
+
+    [TestMethod]
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
+
+    [TestMethod]
+    public void CheckForeignInterfaceFieldPromotion() => CheckTarget("ForeignInterfaceFieldPromotion");
 
     [TestMethod]
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
@@ -875,6 +884,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
+
+    [TestMethod]
+    public void CheckFuncLitTupleResultInfer() => CheckTarget("FuncLitTupleResultInfer");
 
     [TestMethod]
     public void CheckFuncLitUntypedConstReturn() => CheckTarget("FuncLitUntypedConstReturn");
@@ -1649,6 +1661,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
+
+    [TestMethod]
+    public void CheckNamedFuncTupleResult() => CheckTarget("NamedFuncTupleResult");
 
     [TestMethod]
     public void CheckNamedFuncTypeMapParam() => CheckTarget("NamedFuncTypeMapParam");

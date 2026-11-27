@@ -75,7 +75,7 @@ internal static bool isNaN<T>(T x)
 public static T Or<T>(params variadic<T> valsʗp) {
     var vals = valsʗp.sslice();
 
-    T zero = GoZero<T>();
+    T zero = builtin.GoZero<T>();
     foreach (var (_, val) in range(vals)) {
         if (!AreEqual(val, zero)) {
             return val;

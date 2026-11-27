@@ -29,7 +29,7 @@ using strconv = strconv_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using go.database.sql;
 using go.sync;
 using iter = iter_package;
@@ -952,7 +952,7 @@ public static partial ж<DB> OpenDB(driver.Connector c) {
         connector: c,
         openerCh: new channel<EmptyStruct>(connectionRequestQueueSize),
         lastPut: new map<ж<driverConn>, @string>(),
-        stop: NilSafeDelegateConversion<Action, context.CancelFunc>(cancel)
+        stop: builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancel)
     ));
 
     var dbʗ1 = db;
@@ -1188,7 +1188,7 @@ internal static void SetConnMaxLifetime⁔(/*this*/ ж<DB> Ꮡdb, time.Duration 
     // Wake cleaner up when lifetime is shortened.
     if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != nil) {
         var selᴛ7 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-        switch (trySelect(selᴛ7)) {
+        switch (builtin.trySelect(selᴛ7)) {
         case 0: {
             break;
         }
@@ -1221,7 +1221,7 @@ internal static void SetConnMaxIdleTime⁔(/*this*/ ж<DB> Ꮡdb, time.Duration 
         // Wake cleaner up when idle time is shortened.
         if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != nil) {
             var selᴛ8 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-            switch (trySelect(selᴛ8)) {
+            switch (builtin.trySelect(selᴛ8)) {
             case 0: {
                 break;
             }
@@ -1288,7 +1288,7 @@ internal static void connectionCleaner⁔(/*this*/ ж<DB> Ꮡdb, time.Duration d
 
         if (!t.Stop()) {
             var selᴛ11 = t.C;
-            switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+            switch (builtin.trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
             case 0 when selᴛ11.ꟷᐳ(out _): {
                 break;
             }
@@ -1508,7 +1508,7 @@ internal static (ж<driverConn>, error) conn⁔(/*this*/ ж<DB> Ꮡdb, context.C
     }
     // Check if the context is expired.
     var selᴛ14 = ctx.Done();
-    switch (trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
     case 0 when selᴛ14.ꟷᐳ(out _): {
         db.mu.Unlock();
         return (default, ctx.Err());
@@ -1578,7 +1578,7 @@ internal static (ж<driverConn>, error) conn⁔(/*this*/ ж<DB> Ꮡdb, context.C
                 // outstanding, we should probably block on req (in a new
                 // goroutine) to get the connection back.
                 var reqᴛ2 = req;
-                switch (trySelect(ᐸꟷ(reqᴛ2, ꓸꓸꓸ))) {
+                switch (builtin.trySelect(ᐸꟷ(reqᴛ2, ꓸꓸꓸ))) {
                 case 0 when reqᴛ2.ꟷᐳ(out var ret, out var ok): {
                     if (ok && ret.conn != nil) {
                         Ꮡdb.putConn(ret.conn, ret.err, false);
@@ -2186,7 +2186,7 @@ internal static partial (ж<Tx> tx, error err) beginDC⁔(/*this*/ ж<DB> Ꮡdb,
         dc: dc,
         releaseConn: release,
         txi: txi,
-        cancel: NilSafeDelegateConversion<Action, context.CancelFunc>(cancel),
+        cancel: builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancel),
         keepConnOnRollback: keepConnOnRollback,
         ctx: ctx
     ));
@@ -2284,7 +2284,7 @@ internal static error PingContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx
     if (err != nil) {
         return err;
     }
-    return c.db.pingDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release));
+    return c.db.pingDC(ctx, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release));
 }
 
 // ExecContext executes a query without returning any rows.
@@ -2297,7 +2297,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<Conn> Ꮡc, context.C
     if (err != nil) {
         return (default, err);
     }
-    return c.db.execDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
+    return c.db.execDC(ctx, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // QueryContext executes a query that returns rows, typically a SELECT.
@@ -2310,7 +2310,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Conn> Ꮡc, contex
     if (err != nil) {
         return (default, err);
     }
-    return c.db.queryDC(ctx, default, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
+    return c.db.queryDC(ctx, default, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // QueryRowContext executes a query that is expected to return at most one row.
@@ -2341,7 +2341,7 @@ internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<Conn> Ꮡc, cont
     if (err != nil) {
         return (default, err);
     }
-    return c.db.prepareDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), new ConnжstmtConnGrabber(Ꮡc), query);
+    return c.db.prepareDC(ctx, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release), new ConnжstmtConnGrabber(Ꮡc), query);
 }
 
 // Raw executes f exposing the underlying driver connection for the
@@ -2401,7 +2401,7 @@ internal static (ж<Tx>, error) BeginTx⁔(/*this*/ ж<Conn> Ꮡc, context.Conte
     if (err != nil) {
         return (default, err);
     }
-    return c.db.beginDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), opts);
+    return c.db.beginDC(ctx, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release), opts);
 }
 
 // closemuRUnlockCondReleaseConn read unlocks closemu
@@ -2539,7 +2539,7 @@ internal static (ж<driverConn>, releaseConn, error) grabConn⁔(/*this*/ ж<Tx>
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     var selᴛ18 = ctx.Done();
-    switch (trySelect(ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
     case 0 when selᴛ18.ꟷᐳ(out _): {
         return (default, default, ctx.Err());
     }
@@ -2597,7 +2597,7 @@ internal static error Commit⁔(/*this*/ ж<Tx> Ꮡtx) {
     // If put it behind tx.done CompareAndSwap statement, we can't ensure
     // the consistency between tx.done and the real COMMIT operation.
     var selᴛ19 = tx.ctx.Done();
-    switch (trySelect(ᐸꟷ(selᴛ19, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ19, ꓸꓸꓸ))) {
     case 0 when selᴛ19.ꟷᐳ(out _): {
         if (Ꮡtx.Ꮡdone.Load()) {
             return ErrTxDone;
@@ -2690,7 +2690,7 @@ internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<Tx> Ꮡtx, conte
         return (default, err);
     }
 
-    (var stmt, err) = tx.db.prepareDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), new TxжstmtConnGrabber(Ꮡtx), query);
+    (var stmt, err) = tx.db.prepareDC(ctx, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release), new TxжstmtConnGrabber(Ꮡtx), query);
     if (err != nil) {
         return (default, err);
     }
@@ -2745,7 +2745,7 @@ internal static ж<Stmt> StmtContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context c
             return Ꮡ(new Stmt(stickyErr: err));
         }
         var releaseʗ1 = release;
-        defer(NilSafeDelegateConversion<Action<error>, releaseConn>(releaseʗ1), (error)(default), ref ᒐ);
+        defer(builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(releaseʗ1), (error)(default), ref ᒐ);
 
         if (tx.db != stmt.db) {
             return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢ)));
@@ -2847,7 +2847,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Co
     if (err != nil) {
         return (default, err);
     }
-    return tx.db.execDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
+    return tx.db.execDC(ctx, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // Exec executes a query that doesn't return rows.
@@ -2871,7 +2871,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Tx> Ꮡtx, context
         return (default, err);
     }
 
-    return tx.db.queryDC(ctx, tx.ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
+    return tx.db.queryDC(ctx, tx.ctx, dc, builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // Query executes a query that returns rows, typically a SELECT.
@@ -3097,7 +3097,7 @@ internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds
     if (s.cg != nil) {
         s.mu.Unlock();
         (dc, var releaseConnᴛ1, err) = s.cg.grabConn(ctx); // blocks, waiting for the connection.
-        releaseConn = NilSafeDelegateConversion<Action<error>, releaseConn>(releaseConnᴛ1);
+        releaseConn = builtin.NilSafeDelegateConversion<Action<error>, releaseConn>(releaseConnᴛ1);
         if (err != nil) {
             return (dc, releaseConn, ds, err);
         }
@@ -3398,7 +3398,7 @@ internal static partial void initContextClose⁔(/*this*/ ж<Rows> Ꮡrs, contex
         return;
     }
     var (closectx, cancel) = context.WithCancel(ctx);
-    rs.cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancel);
+    rs.cancel = builtin.NilSafeDelegateConversion<Action, context.CancelFunc>(cancel);
     goǃ(Ꮡrs.awaitDone, ctx, txctx, closectx);
 }
 

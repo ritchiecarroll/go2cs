@@ -581,7 +581,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
         lines = append(linesᴷ, lines, line.String());
     }
 
-    lines = move2heap(linesᴷ, lines);
+    lines = builtin.move2heap(linesᴷ, lines);
     return (lines, default);
 }
 

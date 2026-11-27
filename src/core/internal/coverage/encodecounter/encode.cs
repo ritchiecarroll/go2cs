@@ -316,7 +316,7 @@ internal static error writeCounters⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, C
         return default;
     };
     {
-        var err = visitor.VisitFuncs(NilSafeDelegateConversion<CounterVisitorFn, Func<uint32, uint32, slice<uint32>, error>>(emitter)); if (err != nil) {
+        var err = visitor.VisitFuncs(builtin.NilSafeDelegateConversion<CounterVisitorFn, Func<uint32, uint32, slice<uint32>, error>>(emitter)); if (err != nil) {
             return err;
         }
     }

@@ -437,7 +437,7 @@ internal static void grow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr
             }
             // Store the new chunk block but avoid a write barrier.
             // grow is used in call chains that disallow write barriers.
-            Ꮡ(p.chunks, c.l1()).Value = NativeArrayPointer<pallocData>((nuint)((uintptr)r), 8192);
+            Ꮡ(p.chunks, c.l1()).Value = builtin.NativeArrayPointer<pallocData>((nuint)((uintptr)r), 8192);
         }
         p.chunkOf(c).Ꮡscavenged.setRange(0, pallocChunkPages);
     }

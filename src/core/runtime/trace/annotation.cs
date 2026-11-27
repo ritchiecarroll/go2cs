@@ -6,7 +6,7 @@ namespace go.runtime;
 using context = context_package;
 using fmt = fmt_package;
 using atomic = go.sync.atomic_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using go.sync;
 using ꓸꓸꓸany = variadic<any>;
 

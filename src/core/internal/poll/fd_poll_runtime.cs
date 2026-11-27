@@ -8,7 +8,7 @@ using errors = errors_package;
 using sync = go.sync_package;
 using Δsyscall = syscall_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using go;
 
 partial class poll_package {

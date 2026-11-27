@@ -1355,3 +1355,7 @@ go.golib.NativeCallHint :: field System.Int32 value__
 go.golib.NativeCallHint :: field const go.golib.NativeCallHint Blocks
 go.golib.NativeCallHint :: field const go.golib.NativeCallHint MayBlock
 go.golib.NativeCallHint :: shape struct; implements System.IComparable, System.IConvertible, System.IFormattable, System.ISpanFormattable
+# The test host's twin entry (decided 2026-11-27, G on docs/phase4/DESIGN-mn-test-twin.md): the testing package's
+# TestExecution, compiled into every converted test host, calls it, so it is frozen like the named twin entry points;
+# hidden (EditorBrowsable Never), never tier 1.
+go.golib.Goroutine :: method static System.Void RunTwin(System.Action, System.Func<go.golib.GoTask>)

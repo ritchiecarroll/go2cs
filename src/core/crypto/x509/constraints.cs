@@ -102,7 +102,7 @@ internal static void sortAndPrune⁔<T, V>(/*this*/ ref nameConstraintsSet<T, V>
 internal static (T lowerBound, bool exactMatch) search⁔<T, V>(/*this*/ ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match)
     where V : /* net.IP | string */ new()
 {
-    T lowerBound = GoZero<T>();
+    T lowerBound = builtin.GoZero<T>();
 
     if (len(nc.set) == 0) {
         return (lowerBound, false);
@@ -118,7 +118,7 @@ internal static (T lowerBound, bool exactMatch) search⁔<T, V>(/*this*/ ref nam
         return (lowerBound, false);
     }
 
-    T constraint = GoZero<T>();
+    T constraint = builtin.GoZero<T>();
     if (i == 0) {
         constraint = nc.set[0];
     } else {

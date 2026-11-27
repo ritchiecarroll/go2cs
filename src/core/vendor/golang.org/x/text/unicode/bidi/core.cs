@@ -841,7 +841,7 @@ internal static slice<ж<isolatingRunSequence>> determineIsolatingRunSequences�
             sequences = append(sequencesᴷ, sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
         }
     }
-    sequences = move2heap(sequencesᴷ, sequences);
+    sequences = builtin.move2heap(sequencesᴷ, sequences);
     return sequences;
 }
 

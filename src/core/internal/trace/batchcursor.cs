@@ -40,7 +40,7 @@ internal static (bool ok, error err) nextEvent⁔(/*this*/ ж<batchCursor> Ꮡb,
         b.lastTs = freq.mul(batches[b.idx].time);
     }
     // Read an event out.
-    (var n, var tsdiff, err) = readTimedBaseEvent(batches[b.idx].data.slice(b.dataOff), ref nonnil(ref b).ev);
+    (var n, var tsdiff, err) = readTimedBaseEvent(batches[b.idx].data.slice(b.dataOff), ref builtin.nonnil(ref b).ev);
     if (err != nil) {
         return (false, err);
     }

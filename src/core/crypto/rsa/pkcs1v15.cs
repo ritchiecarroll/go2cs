@@ -121,7 +121,7 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
 public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+    var errΔ1 = checkPublicKeySize(ref builtin.nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
         return (default, errΔ1);
     }
 
@@ -191,7 +191,7 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateK
 public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> key) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+    var errΔ1 = checkPublicKeySize(ref builtin.nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
         return errΔ1;
     }
 

@@ -147,7 +147,7 @@ internal static (slice<DirectiveArg>, error) ParseArgs⁔(/*this*/ ref Directive
 
         list = append(listᴷ, list, new DirectiveArg(arg, argPos));
     }
-    list = move2heap(listᴷ, list);
+    list = builtin.move2heap(listᴷ, list);
     return (list, default);
 }
 

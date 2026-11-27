@@ -555,7 +555,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		default:
 			externParams = append(externParams, fmt.Sprintf("%s p%d", param.scalar.primitive, i))
 			wrapperParams = append(wrapperParams, fmt.Sprintf("%s p%d", param.scalar.goSide, i))
-			arguments = append(arguments, param.scalar.toPrimitive(fmt.Sprintf("p%d", i)))
+			arguments = append(arguments, param.scalar.argument(function, fmt.Sprintf("p%d", i)))
 		}
 
 		if param.mirror != nil && !checked[param.mirror.name] {

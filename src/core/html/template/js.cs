@@ -110,7 +110,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
         }
         // An IdentifierName after a property-access dot is a property name,
         // which precedes a div op.
-        if (regexpPrecederKeywords[tmpstring(s.slice(j))] && !bytes.HasSuffix(bytes.TrimRight(s.slice(0, j), jsWhitespace), slice<byte>("."u8))) {
+        if (regexpPrecederKeywords[builtin.tmpstring(s.slice(j))] && !bytes.HasSuffix(bytes.TrimRight(s.slice(0, j), jsWhitespace), slice<byte>("."u8))) {
             return jsCtxRegexp;
         }
         break;

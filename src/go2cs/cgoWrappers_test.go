@@ -496,6 +496,68 @@ func _Cfunc_handle(p0 uintptr) (r1 _Ctype_int) { return }
 	}
 }
 
+// Design 20.4 S4 and 20.10 (P3's reads): every 64-bit integer parameter, and uintptr_t/intptr_t, goes through
+// GoCgoArgs.Word, which refuses by name a token go2cs minted for a Go value with no address. A 32-bit integer cannot
+// carry an address and passes as before.
+func TestCgoWordParametersGoThroughTheWordCheck(t *testing.T) {
+	source := `package cgotest
+
+type _Ctype_ulong uint64
+type _Ctype_long int64
+type _Ctype_uintptr_t = _Ctype_ulong
+type _Ctype_intptr_t = _Ctype_long
+type _Ctype_size_t = _Ctype_ulong
+type _Ctype_int int32
+
+func _Cfunc_word(p0 _Ctype_uintptr_t, p1 _Ctype_size_t, p2 _Ctype_intptr_t, p3 _Ctype_int) (r1 _Ctype_ulong) { return }
+`
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "cgotest.go", source, 0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pkg, err := (&types.Config{Importer: importer.Default()}).Check("cgotest", fset, []*ast.File{file}, nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found := false
+
+	for _, declaration := range cgoDeclarations(pkg) {
+		if declaration.cName != "word" {
+			continue
+		}
+
+		found = true
+		text, err := cgoScalarWrapper(declaration, cgoBindingTarget{goos: "linux", library: "libc.so.6"})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, want := range []string{
+			`(uint64)global::go.golib.GoCgoArgs.Word((ulong)(uint64)p0, "word")`,
+			`(int64)global::go.golib.GoCgoArgs.Word((ulong)(int64)p2, "word")`,
+			`(uint64)global::go.golib.GoCgoArgs.Word((ulong)(uint64)p1, "word")`,
+		} {
+			if !strings.Contains(text, want) {
+				t.Errorf("the wrapper does not hand its word parameter through the check: want %s in\n%s", want, text)
+			}
+		}
+
+		if strings.Contains(text, `p3, "word")`) {
+			t.Errorf("a 32-bit int cannot carry an address, and went through the check:\n%s", text)
+		}
+	}
+
+	if !found {
+		t.Fatal("C.word was not recognized")
+	}
+}
+
 // Increment 4d: the two-result form crosses a pointer for a SCALAR result (the probe's strtol is its arm); an errno form
 // returning a struct or a pointer waits for a measured arm and is refused by name.
 func TestCgoErrnoFormThroughAPointerTakesAScalarResultOnly(t *testing.T) {

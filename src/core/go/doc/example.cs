@@ -592,7 +592,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
             prevEnd = imp.Comment.End();
         }
     }
-    groupStarts = move2heap(groupStartsᴷ, groupStarts);
+    groupStarts = builtin.move2heap(groupStartsᴷ, groupStarts);
     return groupStarts;
 }
 
@@ -629,7 +629,7 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
     // Copy the File, as it may be used elsewhere.
     ref var f = ref heap<ast.File>(@file, out var Ꮡf);
     f.Name = ast.NewIdent(mainˢ);
-    decls = move2heap(declsᴷ, decls);
+    decls = builtin.move2heap(declsᴷ, decls);
     f.Decls = decls;
     f.Comments = comments;
     return Ꮡf;

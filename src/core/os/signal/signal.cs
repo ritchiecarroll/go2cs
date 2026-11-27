@@ -266,7 +266,7 @@ internal static void process(os.Signal sig) {
             if (h.want(n)) {
                 // send but do not block for it
                 var cᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
-                switch (trySelect(cᴛ1)) {
+                switch (builtin.trySelect(cᴛ1)) {
                 case 0: {
                     break;
                 }
@@ -280,7 +280,7 @@ internal static void process(os.Signal sig) {
         foreach (var (_, d) in range(handlers.stopping)) {
             if (d.h.want(n)) {
                 var selᴛ2 = d.c.ᐸꟷ(sig, ꓸꓸꓸ);
-                switch (trySelect(selᴛ2)) {
+                switch (builtin.trySelect(selᴛ2)) {
                 case 0: {
                     break;
                 }

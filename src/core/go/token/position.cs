@@ -243,7 +243,7 @@ internal static void SetLinesForContent⁔(/*this*/ ж<File> Ꮡf, slice<byte> c
 
     // set lines table
     f.mutex.Lock();
-    lines = move2heap(linesᴷ, lines);
+    lines = builtin.move2heap(linesᴷ, lines);
     f.lines = lines;
     f.mutex.Unlock();
 }

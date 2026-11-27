@@ -142,20 +142,22 @@ internal class ValueAdapterImplTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append("\r\n\r\n        ");
 
-                // A cross-assembly unexported interface marker (Go's package-sealing exprNode()/tree()
-                // etc.) has no accessible implementation to forward to (CS1061) and is never callable
-                // from outside its package — satisfy the required member with a no-op / default stub.
-                if (method.IsInaccessibleMarker)
-                {
-                    result.Append($"{method.ReturnType} {method.GetSignature()}{(method.ReturnType == "void" ? " { }" : " => default!;")}");
-                    continue;
-                }
-
                 // Promoted through an embedded interface FIELD — the member is on the field's
-                // interface value, not on the struct, so no extension form can reach it.
+                // interface value, not on the struct, so no extension form can reach it. Ahead of the
+                // inaccessible-marker stub below: the field's member is public in C# and dispatches to the
+                // dynamic value's own method, the one Go calls, even when the interface's member is internal.
                 if (PromotedFieldForwards is not null && PromotedFieldForwards.TryGetValue(simpleMethodName, out string? promotedField))
                 {
                     result.Append($"{method.ReturnType} {method.GetSignature()} => m_value.{promotedField}.{forwardName}{method.GetGenericSignature()}({method.CallParameters});");
+                    continue;
+                }
+
+                // A cross-assembly unexported interface marker (Go's package-sealing exprNode()/tree()
+                // etc.) has no accessible implementation to forward to (CS1061) and is never callable
+                // from outside its package — satisfy the required member with a no-op / default stub.
+                if (method.IsInaccessibleMarker && method.ForwardTargetReachable != true)
+                {
+                    result.Append($"{method.ReturnType} {method.GetSignature()}{(method.ReturnType == "void" ? " { }" : " => default!;")}");
                     continue;
                 }
 

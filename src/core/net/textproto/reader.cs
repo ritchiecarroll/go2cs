@@ -12,7 +12,7 @@ using math = math_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 
 partial class textproto_package {
 
@@ -506,7 +506,7 @@ internal static (slice<@string>, error) ReadDotLines⁔(/*this*/ ref Reader r) {
         }
         v = append(vᴷ, v, line);
     }
-    v = move2heap(vᴷ, v);
+    v = builtin.move2heap(vᴷ, v);
     return (v, err);
 }
 
@@ -835,7 +835,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
     // The compiler recognizes m[string(byteSlice)] as a special
     // case, so a copy of a's bytes into a new string does not
     // happen in this map lookup:
-    @string v = commonHeader[tmpstring(a)]; if (v != ""u8) {
+    @string v = commonHeader[builtin.tmpstring(a)]; if (v != ""u8) {
         return (v, true);
     }
     return ((@string)a, true);

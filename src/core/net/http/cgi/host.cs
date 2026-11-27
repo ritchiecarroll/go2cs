@@ -121,7 +121,7 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
             ret = append(retᴷ, ret, e);
         }
     }
-    ret = move2heap(retᴷ, ret);
+    ret = builtin.move2heap(retᴷ, ret);
     return ret;
 }
 

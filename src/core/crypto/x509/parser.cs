@@ -635,8 +635,8 @@ internal static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseE
             unknownUsages = append(unknownUsagesᴷ, unknownUsages, eku);
         }
     }
-    extKeyUsages = move2heap(extKeyUsagesᴷ, extKeyUsages);
-    unknownUsages = move2heap(unknownUsagesᴷ, unknownUsages);
+    extKeyUsages = builtin.move2heap(extKeyUsagesᴷ, extKeyUsages);
+    unknownUsages = builtin.move2heap(unknownUsagesᴷ, unknownUsages);
     return (extKeyUsages, unknownUsages, default);
 }
 
@@ -669,7 +669,7 @@ internal static (slice<OID>, error) parseCertificatePoliciesExtension(cryptobyte
         }
         oids = append(oidsᴷ, oids, oid);
     }
-    oids = move2heap(oidsᴷ, oids);
+    oids = builtin.move2heap(oidsᴷ, oids);
     return (oids, default);
 }
 
@@ -849,10 +849,10 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
             }}
         }
 
-        dnsNames = move2heap(dnsNamesᴷ, dnsNames);
-        ips = move2heap(ipsᴷ, ips);
-        emails = move2heap(emailsᴷ, emails);
-        uriDomains = move2heap(uriDomainsᴷ, uriDomains);
+        dnsNames = builtin.move2heap(dnsNamesᴷ, dnsNames);
+        ips = builtin.move2heap(ipsᴷ, ips);
+        emails = builtin.move2heap(emailsᴷ, emails);
+        uriDomains = builtin.move2heap(uriDomainsᴷ, uriDomains);
         return (dnsNames, ips, emails, uriDomains, default);
     }
 
@@ -1396,7 +1396,7 @@ public static (slice<ж<Certificate>>, error) ParseCertificates(slice<byte> der)
         certs = append(certsᴷ, certs, cert);
         der = der.slice(len(cert.Raw));
     }
-    certs = move2heap(certsᴷ, certs);
+    certs = builtin.move2heap(certsᴷ, certs);
     return (certs, default);
 }
 

@@ -104,7 +104,7 @@ using os = os_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 
 partial class net_package {

@@ -14,7 +14,7 @@
 namespace go.@internal.runtime;
 
 using atomic = go.@internal.runtime.atomic_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using go.@internal.runtime;
 
 partial class exithook_package {

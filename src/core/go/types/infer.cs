@@ -358,7 +358,7 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
         // Collect all remaining parameters that don't have a type yet and determine the
         // maximum untyped type for each of those parameters, if possible.
         map<ж<TypeParam>, Type> maxUntyped = default; // lazily allocated (we may not need it)
-        untyped = move2heap(untypedᴷ, untyped);
+        untyped = builtin.move2heap(untypedᴷ, untyped);
         foreach (var (_, index) in range(untyped)) {
             var tpar = @params.At(index).typ._<ж<TypeParam>>(); // is type parameter (no alias) by construction of untyped
             if (u.at(tpar) == nil) {

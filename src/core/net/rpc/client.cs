@@ -193,7 +193,7 @@ internal static void done⁔(/*this*/ ж<Call> Ꮡcall) {
     ref var call = ref Ꮡcall.DerefOrNull();
 
     var selᴛ1 = call.Done.ᐸꟷ(Ꮡcall, ꓸꓸꓸ);
-    switch (trySelect(selᴛ1)) {
+    switch (builtin.trySelect(selᴛ1)) {
     case 0: {
         break;
     }

@@ -101,7 +101,7 @@ internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<
         chain = append(chainᴷ, chain, parsedCert);
     }
 
-    chain = move2heap(chainᴷ, chain);
+    chain = builtin.move2heap(chainᴷ, chain);
     return (chain, default);
 }
 

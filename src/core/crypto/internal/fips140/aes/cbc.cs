@@ -43,7 +43,7 @@ internal static void CryptBlocks⁔(/*this*/ ж<CBCEncrypter> Ꮡc, slice<byte> 
     if (len(src) == 0) {
         return;
     }
-    cryptBlocksEnc(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
+    cryptBlocksEnc(ref builtin.nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
 internal static void SetIV⁔(/*this*/ ref CBCEncrypter x, slice<byte> iv) {
@@ -104,7 +104,7 @@ internal static void CryptBlocks⁔(/*this*/ ж<CBCDecrypter> Ꮡc, slice<byte> 
     if (len(src) == 0) {
         return;
     }
-    cryptBlocksDec(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
+    cryptBlocksDec(ref builtin.nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
 internal static void SetIV⁔(/*this*/ ref CBCDecrypter x, slice<byte> iv) {

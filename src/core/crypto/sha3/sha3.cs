@@ -9,7 +9,7 @@ namespace go.crypto;
 using crypto = crypto_package;
 using sha3 = go.crypto.@internal.fips140.sha3_package;
 using hash = hash_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using go.crypto.@internal.fips140;
 
 partial class sha3_package {

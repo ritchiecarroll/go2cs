@@ -10,7 +10,7 @@ using os = os_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using go.sync;
 
 partial class sysrand_package {
