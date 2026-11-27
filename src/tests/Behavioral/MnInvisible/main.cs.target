@@ -23,6 +23,10 @@ internal static Func<bool, (Action, Action)> newBracketedFlag;
 
 internal static Func<(int64, int64, int64, int64, bool)> counters;
 
+internal static Action<nint, Action> nestedNative;
+
+internal static Func<(int64, int64, bool)> balance;
+
 internal static bool reading = Δos.Getenv("MN_INV_READING") == "1"u8;
 
 internal static (Action wait, Action set) channelEvent() {
@@ -136,6 +140,74 @@ internal static bool bracketed(nint k, bool blocks) {
         return released && r1 > r0 && i1 - i0 < (int64)(k / 3);
     }}
 
+}
+
+internal static void nester(channel<EmptyStruct> gate, channel/*<-*/<nint> done) {
+    ᐸꟷ(gate);
+    nint n = 0;
+    var cross = [GoFunc("nester.func1")] () => {
+        n++;
+    };
+    if (nestedNative != nil) {
+        nestedNative(2, cross);
+    } else {
+        cross();
+    }
+    done.ᐸꟷ(n);
+}
+
+internal static (int64 blocked, int64 pFree) quiet() {
+    var (b, f, _) = balance();
+    for (nint i = 0; i < 100; i++) {
+        time.Sleep(50 * time.Millisecond);
+        var (b1, f1, _) = balance();
+        if (b1 == b && f1 == f) {
+            break;
+        }
+        (b, f) = (b1, f1);
+    }
+    return (b, f);
+}
+
+internal static partial void v9(nint k) {
+    var (ww, ws) = channelEvent();
+    blockAll(k, ww, ws);
+    int64 b0 = default;
+    int64 f0 = default;
+    var on = false;
+    if (balance != nil) {
+        (_, _, on) = balance();
+    }
+    if (on) {
+        (b0, f0) = quiet();
+    }
+    var gate = new channel<EmptyStruct>(0);
+    var done = new channel<nint>(k);
+    for (nint i = 0; i < k; i++) {
+        goǃ(nester, gate, done.AsSendOnly());
+    }
+    close(gate);
+    nint n = 0;
+    for (nint i = 0; i < k; i++) {
+        n += ᐸꟷ(done);
+    }
+    var ok = n == k;
+    if (on) {
+        var deadline = time.Now().Add((time.Duration)(5000000000L));
+        for (;;) {
+            var (b, f, _) = balance();
+            if (b == b0 && f == f0) {
+                break;
+            }
+            if (time.Now().After(deadline)) {
+                fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "V9 blocked=%d p-free=%d, the base blocked=%d p-free=%d\n"u8, b, f, b0, f0);
+                ok = false;
+                break;
+            }
+            time.Sleep(20 * time.Millisecond);
+        }
+    }
+    fmt.Println("V9 nested native callbacks balanced:", ok);
 }
 
 internal static nint busy(time.Duration d) {
@@ -504,6 +576,9 @@ internal static void main() {
     }
     if (runs("V6")) {
         fmt.Println("V6 a MayBlock native call has its P retaken, not injected:", bracketed(k, false));
+    }
+    if (runs("V9")) {
+        v9(k);
     }
 }
 

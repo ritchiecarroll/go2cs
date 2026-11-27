@@ -43216,4 +43216,48 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — P4 (2026-11-27)
 
+## 2026-11-27 — R (P3's F1; G's rulings 2026-11-27, COORD's order): a callback from a handed-off native call ran with no P and leaked one P permit and one blocked count per nested Blocks call (CURED by the F1 seat)
+
+**The defect.**
+- Before the cut, `GoNativeCall.ReenterManaged` took no P.
+- A callback from inside an `Enter(Blocks)` call therefore ran Go code P-less.
+- A `Blocks` call made inside that callback released a SECOND P and raised `s_blocked` again.
+- The inner `Exit` took one back; the outer `Exit` took none.
+- Net, per `Blocks -> callback -> Blocks`: one free P permit and one `s_blocked` for good.
+
+**Read at** 317b273e58, against Go 1.26.11's `cgocall.go` (`cgocallbackg`: `exitsyscall` at entry, `reentersyscall` at return).
+
+**The cure.**
+- `ReenterManaged` now takes the handed-off P back (`ExitBlocked`) before Go code runs, as its frozen doc line already said.
+- `ReturnToNative` stays the `MayBlock` form.
+- The record is DESIGN-mn-n5-invisible-blocking.md section 10, which amends 3b. No decision record is owed (G, Q-a): the [mn-frozen] signature is unchanged.
+- READING gains `blocked=` and `p-free=`, appended last; every reader of the line was censused.
+- The rows are GolibTests `NativeCallNestingTests` and MnInvisible V9.
+
+Owner: R. Seat: `claude/r-mn-f1-reenter`.
+
+— R (2026-11-27)
+
+
+## 2026-11-27 — R (G's Q-b ruling on F1): N5 3b, a retaken step runs P-less to its end (OPEN, post-.5, measure first)
+
+**The property.**
+- When the monitor retakes the P of a `MayBlock` native call, the step runs with no P from the call's `Exit` to the step's end.
+- The same holds inside a callback from that call.
+- Go's `exitsyscall` reacquires a P in both places.
+- Counts balance (G's trace at 317b273e58: a `Blocks` call inside such a callback swaps `Retaken` 1 -> 0 with no second release), so this is not a leak.
+- It is a step that runs Go code beside the P budget.
+
+**Why it is not in F1.** Fixing only the callback branch would make the callback and the plain `Exit` inconsistent. The real change is "a retaken `Exit` reacquires", which adds a P wait to every retaken call's return and has its own latency profile.
+
+**What is owed.**
+- Measure first: how often, and for how long, retaken steps run P-less on the M:N rows (MnInvisible V6, the census rows, the storm gate).
+- Then propose the reacquire with its latency cost.
+- F1's `control-retaken-outer` row guards the counts in the meantime.
+
+Owner: unrouted (R proposes).
+
+— R (2026-11-27)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -641,7 +641,10 @@ public static class GoScheduler
                $" pin-retired={Interlocked.Read(ref s_pinRetired)} peak-pinned-waiting={Volatile.Read(ref s_peakPinnedWaiting)}" +
                $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)} shared-floor-violations={Interlocked.Read(ref s_sharedFloorViolations)} pinned-blocked-violations={Interlocked.Read(ref s_pinnedBlockedViolations)}" +
                $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading() +
-               $" gosched-yields={Interlocked.Read(ref s_goschedYields)}";
+               $" gosched-yields={Interlocked.Read(ref s_goschedYields)}" +
+               // F1 (G's ruling 2026-11-27): snapshots, appended LAST so no reader's positions move; meaningful only at
+               // quiescence (a base, then a poll after every goroutine has ended), where a leaked handoff stays raised.
+               $" blocked={Volatile.Read(ref s_blocked)} p-free={s_p.CurrentCount}";
     }
 
     private static void SampleThreads()

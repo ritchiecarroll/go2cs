@@ -228,3 +228,56 @@ Section 7's size grows by the debug.SetMaxThreads binding, the doc paragraph and
 **I0, read (2026-11-23):** **MET.** os-matrix run 45214659319, `golib-tests` on darwin, filter
 `FullyQualifiedName~WaitSenseTests`, at e70fd17104: osx-arm64 10/10 and osx-x64 10/10. Windows read 10/10 locally,
 and linux read the probe in WSL. The policy keeps its shape on every OS the scheduler runs on.
+
+## 10. 3b amended: a callback from a handed-off call takes a P back (dated block, 2026-11-27, R; F1)
+
+Ruled by G on 2026-11-27 (read at 317b273e58 against Go 1.26.11's `cgocall.go`, where `cgocallbackg` calls
+`exitsyscall` at entry and `reentersyscall` at return). Sections 1-9 above are kept as written; this block amends 3b.
+
+- **The defect (P3's F1).** Before this block, `GoNativeCall.ReenterManaged` did not take a P. A callback from inside
+  an `Enter(Blocks)` call therefore ran Go code with no P. If that code made another `Blocks` call, `EnterBlocked`
+  released a SECOND P and raised `s_blocked` again. The inner `Exit` took one P back and cleared the hand-off flag, so
+  the outer `Exit` took none. Net, for each `Blocks -> callback -> Blocks`: one free P permit too many and `s_blocked`
+  one too high, for the life of the process. (`ReleaseP` retires a permit only against `s_overBudget`, which
+  injections raise, not this.)
+- **The fix.** `ReenterManaged` now does what its frozen doc already said. `GoNativeCall.cs:105` at 4a56f17a3a says
+  "Native code calls back into Go: `cgocallbackg`'s `exitsyscall`". If the goroutine's call handed its P off,
+  `ReenterManaged` clears the flag and calls `GoScheduler.ExitBlocked()` before any Go code runs. The outer `Exit`
+  then takes nothing.
+  - `ReturnToNative` stays the `MayBlock` form, because `reentersyscall` is `entersyscall`, not
+    `entersyscallblock`. The rest of the outer call holds that P until the monitor retakes it.
+  - Each `EnterBlocked` meets exactly one `ExitBlocked`, at any nesting depth. Default mode is unchanged (behind
+    `GoScheduler.Enabled`).
+- **No decision record (G, Q-a).** [mn-frozen] freezes the signature, and the signature does not change:
+  PublicSurface.golib.txt's `GoNativeCall` rows are untouched. The cut makes the code match the frozen contract text.
+  No consumer can depend on a leaked permit.
+- **Observability.** The READING line gains two keys, appended LAST so that no positional reader moves:
+  - `blocked=` (`s_blocked`) and `p-free=` (`s_p.CurrentCount`).
+  - They are snapshots, read only at quiescence: take a base, then poll after every goroutine has ended.
+  - Every reader of the line was censused in the same cut. All of them read keys by name (`\bkey=`, `" key="`), or
+    embed or print the whole line without parsing it. None compares the whole line or splits it by position.
+- **Rows.**
+  - GolibTests `NativeCallNestingTests`, in children under GO2CS_MN=1:
+    - Red before the fix: `nested-blocks-balances` (Blocks -> callback -> Blocks, K=8) and `nested-two-deep`.
+    - Controls, green on both sides: `control-plain-blocks`, `control-mayblock-outer`, and at one P
+      `control-retaken-outer`. The last is a MayBlock outer the monitor retook -> callback -> Blocks, K=8, and
+      `retakes` must rise. G's trace: the inner `Enter` swaps `Retaken` 1 -> 0 with no second release, so the counts
+      balance before and after.
+    - Liveness: `liveness-p1`, K=64 at GOMAXPROCS=1. The callback's `ExitBlocked` waits for the one P, which another
+      goroutine's native call holds until the monitor retakes it. It completes, and the counts return to base; this
+      proves that 3b's retake and the fix compose.
+  - MnInvisible V9, against `go run`: "V9 nested native callbacks balanced: true".
+- **Plants.**
+  - Reverting the `ReenterManaged` branch (`false &&` on its condition) reddens exactly the two nested rows,
+    `liveness-p1` and V9; the three controls stay green. Measured on R-LAPTOP (Windows, 16 Ps), 2026-11-27, with the
+    file restored byte-identical (cmp) afterwards:
+    - `nested-blocks-balances`: blocked=8 p-free=24 against a base of 0/16.
+    - `liveness-p1`: blocked=64 p-free=65 against a base of 0/1.
+    - V9 (K=64): blocked=64 p-free=79 against a base of 0/15 (main holds one P), on 2 runs of 2.
+    - With the fix: every row is ok, and V9 reads 0/16 at its end on 3 runs of 3.
+  - (2), the `MayBlock` form of `ReturnToNative`, has NO plant. A `Blocks` `ReturnToNative` would balance too, so
+    the form is Go's semantics (`reentersyscall` is `entersyscall`), not a count a row can tell apart.
+- **Out of this block (G, Q-b): a retaken step runs P-less to its end.** A `MayBlock` call the monitor retook leaves
+  its step with no P, after a plain `Exit` and inside a callback alike. Go's `exitsyscall` would reacquire in both
+  places. Fixing only the callback branch would make the two inconsistent; the real change is "a retaken `Exit`
+  reacquires", which has its own latency profile. It is a BOARD row, post-.5, to be measured first.
