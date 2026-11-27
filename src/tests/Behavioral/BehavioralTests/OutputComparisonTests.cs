@@ -797,6 +797,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
+    public void CheckForeignInterfaceFieldPromotion() => CheckTarget("ForeignInterfaceFieldPromotion");
+
+    [TestMethod]
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
 
     [TestMethod]

@@ -826,6 +826,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
+    public void CheckForeignInterfaceFieldPromotion() => CheckTarget("ForeignInterfaceFieldPromotion");
+
+    [TestMethod]
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
 
     [TestMethod]

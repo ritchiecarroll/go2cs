@@ -826,6 +826,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForeignIfaceFieldPointer() => CheckTarget("ForeignIfaceFieldPointer");
 
     [TestMethod]
+    public void CheckForeignInterfaceFieldPromotion() => CheckTarget("ForeignInterfaceFieldPromotion");
+
+    [TestMethod]
     public void CheckForeignPairNumericConv() => CheckTarget("ForeignPairNumericConv");
 
     [TestMethod]
