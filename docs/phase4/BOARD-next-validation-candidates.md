@@ -43301,4 +43301,25 @@ exposure in shipped cgo bindings on windows.
 
 — H (2026-11-27)
 
+## GAP 2026-11-27 (H): cgo Phase 4 row I untrimmed on darwin, /var against /private/var (READY with it; 4b closes)
+
+**Ruling.** COORD's RULING (a), inbox H 20261127T212126Z: Phase 4 is READY at 823978ff1a with this gap named.
+
+**Measured.** At 823978ff1a, on darwin (osx-arm64 and osx-x64), cgo-e2e default 46065874032 and `;cc=zig`
+46059610587:
+- Rows A to H and I/trimmed PASS.
+- I/untrimmed fails. go prints `/private/var/folders/.../go2cs_file.h` and go2cs `/var/folders/.../go2cs_file.h`.
+- windows and linux match on both arms.
+
+**Root.** `/var` is a symlink to `/private/var`. cmd/go compiles in, and hands CC with `-I`, the package directory it
+resolves itself (go list's Dir); the side compile used the loader's spelling (`pkg.Dir`). Trimmed, go2cs's default,
+both sides map the directory to `/_/<module path>`, so it matches.
+
+**Closes on** claude/h-cgo-p4b-own-sources: d5485d03f6 (the trim's module from go list's Module) and 2a6bf89442 (`-I`,
+the compile directory and the preamble `#line` from go list's Dir), read on darwin's hosted legs. The design's §7
+records it.
+**Owner.** H.
+
+— H (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

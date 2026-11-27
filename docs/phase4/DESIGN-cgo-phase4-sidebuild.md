@@ -306,3 +306,17 @@ own unit defines is side-built without asking the probe. TestCgoPhase4F then bec
 - **The windows load failure** names "or one of its dependencies".
 - **R1** asserts no debug section in the library.
 
+## 7. Amendment, 2026-11-27: the final reading at 823978ff1a, and a known gap 4b closes
+
+**Known gap (COORD's RULING (a), 2026-11-27): on darwin, untrimmed, a header's `__FILE__` names the package directory
+by the loader's spelling.** At 823978ff1a, row I untrimmed is red on both darwin arches and every other row is green
+on every leg (cgo-e2e default 46065874032, zig 46059610587). go prints `/private/var/folders/.../go2cs_file.h`, and
+go2cs prints `/var/folders/.../go2cs_file.h`. On macOS `/var` is a symlink to `/private/var`. cmd/go compiles in, and
+hands CC with `-I`, the package directory it resolves itself; the side compile used the loader's spelling (`pkg.Dir`).
+Trimmed, go2cs's default, matches on every leg, because both sides map the directory to `/_/<module path>`.
+
+The cure is 4b's first commits, on claude/h-cgo-p4b-own-sources:
+- d5485d03f6 takes the trim's module directory from go list's Module (the reviewer's #1).
+- 2a6bf89442 makes the side compile's `-I`, its working directory and the preamble's `#line` path take go list's Dir.
+Both land together, because a map from go list's `/private/var` and a `-I` left on `/var` would break the trimmed arm
+too. darwin's hosted legs are the discriminating reading. BOARD entry of 2026-11-27.
