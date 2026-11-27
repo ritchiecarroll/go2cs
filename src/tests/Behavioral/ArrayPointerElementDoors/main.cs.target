@@ -88,16 +88,22 @@ internal static void nativeMemory() {
 
     p = native(xs);
     @unsafe.Pointer.ElementRef<byte>((@unsafe.Pointer)p, 5, 64) = 0;
-    fmt.Println("index store, small array:", @unsafe.Pointer.ElementRef<byte>((@unsafe.Pointer)p, 4, 64), peek(p, 8));
+    var evalᴛ1 = peek(p, 8);
+    fmt.Println("index store, small array:", @unsafe.Pointer.ElementRef<byte>((@unsafe.Pointer)p, 4, 64), evalᴛ1);
 
     p = native("");
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4) = 7;
-    fmt.Println("store, then read        :", @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4), @unsafe.Pointer.ElementRef<int32>(ptr(p), 0, 4), peek(p, 8));
+    var evalᴛ2 = ptr(p);
+    var evalᴛ3 = ptr(p);
+    var evalᴛ4 = peek(p, 8);
+    fmt.Println("store, then read        :", @unsafe.Pointer.ElementRef<int32>(evalᴛ2, 1, 4), @unsafe.Pointer.ElementRef<int32>(evalᴛ3, 0, 4), evalᴛ4);
 
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4) += 3;
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4)++;
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 2, 4) |= (int32)(0x0102);
-    fmt.Println("compound and increment  :", @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4), peek(p + 8, 4));
+    var evalᴛ5 = ptr(p);
+    var evalᴛ6 = peek(p + 8, 4);
+    fmt.Println("compound and increment  :", @unsafe.Pointer.ElementRef<int32>(evalᴛ5, 1, 4), evalᴛ6);
 
     var bound = @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4);
     @unsafe.Pointer.ElementRef<int32>(ptr(p), 1, 4) = 100;
@@ -106,14 +112,17 @@ internal static void nativeMemory() {
     uint64 wide = 3;
     uintptr off = 2;
     @unsafe.Pointer.ElementRef<int32>(ptr(p), (nint)(wide), 4) = -1;
-    fmt.Println("wide index              :", @unsafe.Pointer.ElementRef<int32>(ptr(p), (nint)(off + 1), 4), peek(p + 12, 4));
+    var evalᴛ7 = ptr(p);
+    var evalᴛ8 = peek(p + 12, 4);
+    fmt.Println("wide index              :", @unsafe.Pointer.ElementRef<int32>(evalᴛ7, (nint)(off + 1), 4), evalᴛ8);
 
     p = native("");
     var e = @unsafe.Pointer.Element<int32>(ptr(p), 2, 4);
     e.Value = 9;
     var next = @unsafe.Pointer.To<int32>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(e), 4));
     next.Value = 10;
-    fmt.Println("address of an element   :", ~@unsafe.Pointer.To<int32>((@unsafe.Pointer)(p + 8)), @unsafe.Pointer.ElementRef<int32>(ptr(p), 3, 4), (uintptr)e == p + 8);
+    var evalᴛ9 = ptr(p);
+    fmt.Println("address of an element   :", ~@unsafe.Pointer.To<int32>((@unsafe.Pointer)(p + 8)), @unsafe.Pointer.ElementRef<int32>(evalᴛ9, 3, 4), (uintptr)e == p + 8);
 
     p = native("");
     @unsafe.Pointer.ElementRef<pair>(ptr(p), 1, 3).a = 5;
@@ -133,7 +142,12 @@ internal static void nativeMemory() {
     var q = native("12345678");
     @unsafe.Pointer.StoreArray<byte>(ptr(q + 4), 4, @unsafe.Pointer.LoadArray<byte>(ptr(p), 4));
     fmt.Println("stored from a load      :", peek(q, 8));
-    fmt.Println("two compared            :", @unsafe.Pointer.LoadArray<byte>(ptr(q + 4), 4) == @unsafe.Pointer.LoadArray<byte>(ptr(p), 4), @unsafe.Pointer.LoadArray<byte>(ptr(q), 4) != @unsafe.Pointer.LoadArray<byte>(ptr(p), 4));
+    var evalᴛ10 = ptr(q + 4);
+    var evalᴛ11 = ptr(p);
+    var evalᴛ12 = @unsafe.Pointer.LoadArray<byte>(evalᴛ10, 4) == @unsafe.Pointer.LoadArray<byte>(evalᴛ11, 4);
+    var evalᴛ13 = ptr(q);
+    var evalᴛ14 = ptr(p);
+    fmt.Println("two compared            :", evalᴛ12, @unsafe.Pointer.LoadArray<byte>(evalᴛ13, 4) != @unsafe.Pointer.LoadArray<byte>(evalᴛ14, 4));
 
     p = native(xs);
     @unsafe.Pointer.ElementRef<uint64>(ptr(p), 0, 2) = 0;
@@ -173,7 +187,8 @@ internal static void goMemory() {
     var n = (uintptr)Ꮡarr;
     @unsafe.Pointer.ElementRef<int32>(ptr(n), 2, 4) = 5;
     arr[3] = 6;
-    fmt.Println("array by its number     :", arr, @unsafe.Pointer.ElementRef<int32>(ptr(n), 3, 4));
+    var evalᴛ1 = ptr(n);
+    fmt.Println("array by its number     :", arr, @unsafe.Pointer.ElementRef<int32>(evalᴛ1, 3, 4));
 
     ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
     var m = (uintptr)Ꮡbuf.at<byte>(4);

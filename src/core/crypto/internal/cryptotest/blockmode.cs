@@ -272,8 +272,9 @@ internal static void testBlockMode(ж<testing.T> t, MakeBlockMode bm, cipher.Blo
         var (src, serialDst, compositeDst) = (new slice<byte>(blockSize * 4), new slice<byte>(blockSize * 4), new slice<byte>(blockSize * 4));
         rng.Read(src);
 
+        var evalᴛ1 = bm(b, ivʗ14);
         nint length = 2 * blockSize;
-        var block = bm(b, ivʗ14);
+        var block = evalᴛ1;
         block.CryptBlocks(serialDst, src.slice(0, length));
         block.CryptBlocks(serialDst.slice(length), src.slice(length));
 

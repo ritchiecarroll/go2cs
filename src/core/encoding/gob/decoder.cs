@@ -73,7 +73,8 @@ internal static void recvType⁔(/*this*/ ж<Decoder> Ꮡdec, typeId id) {
 
     // Type:
     var wire = @new<wireType>();
-    Ꮡdec.decodeValue(tWireType, reflect.ValueOf(wire.OrTypedNil()));
+    var evalᴛ1 = reflect.ValueOf(wire.OrTypedNil());
+    Ꮡdec.decodeValue(tWireType, evalᴛ1);
     if (dec.err != nil) {
         return;
     }

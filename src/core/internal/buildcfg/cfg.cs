@@ -77,7 +77,8 @@ public static error Error;
 // Check exits the program with a fatal error if Error is non-nil.
 public static void Check() {
     if (Error != nil) {
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %v\n"u8, filepath.Base(os.Args[0]), Error);
+        var evalᴛ1 = filepath.Base(os.Args[0]);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %v\n"u8, evalᴛ1, Error);
         os.Exit(2);
     }
 }

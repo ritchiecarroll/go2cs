@@ -363,6 +363,12 @@ func censusOneTarget(options Options, target string, packageFilter []string) (*r
 		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 		packageRefReturnPrimaryMethods = make(map[*types.Func]bool)
 
+		// No resetLoadScopedCaches here, on purpose. Every package in this loop comes from the ONE
+		// packages.Load above, so an entry cached for one package is still keyed by live objects of
+		// that load for the next, and the caches stop growing once the load's closure is seen. A
+		// reset would also empty the drivers' caches, which this census promises to leave as it found
+		// them. A caller that runs the census over several loads in one process must reset between
+		// loads, as processConversion and convertTestVariant do per root.
 		collectCaptureModeMethods(pkg)
 
 		handles := censusLinknameHandles(syntax)

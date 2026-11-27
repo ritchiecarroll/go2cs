@@ -120,9 +120,10 @@ internal static (ж<ProcessState>, error) pidfdWait⁔(/*this*/ ж<Process> Ꮡp
         // This also releases a reference to the handle.
         Ꮡp.doRelease(statusDone);
 
+        var evalᴛ1 = info.WaitStatus();
         return (Ꮡ(new ProcessState(
             pid: (nint)info.Pid,
-            status: info.WaitStatus(),
+            status: evalᴛ1,
             rusage: Ꮡrusage
         )), default);
     }

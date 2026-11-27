@@ -34,7 +34,8 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
     b.pbValueType(tagProfile_SampleType, inuseObjectsˢ, countˢ);
     b.pbValueType(tagProfile_SampleType, inuseSpaceˢ, bytesˢ);
     if (defaultSampleType != ""u8) {
-        b.Ꮡpb.int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
+        var evalᴛ1 = b.stringIndex(defaultSampleType);
+        b.Ꮡpb.int64Opt(tagProfile_DefaultSampleType, evalᴛ1);
     }
 
     var values = slice<int64>([0, 0, 0, 0]);

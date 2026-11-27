@@ -37,7 +37,8 @@ internal static Driver Driver⁔(/*this*/ counting recvᴛ) => recvᴛ.Connector
 
 internal static @string Name⁔(/*this*/ ref counting c) {
     c.hits++;
-    return fmt.Sprintf("counting(%d):%s"u8, c.hits, c.Connector.Name());
+    var evalᴛ1 = c.Connector.Name();
+    return fmt.Sprintf("counting(%d):%s"u8, c.hits, evalᴛ1);
 }
 
 partial struct fbase {
@@ -91,7 +92,8 @@ internal static void foreign() {
     driver.Connector k = new fcountingжConnector(fc);
     k.Connect(context.Background());
     var (d, ok) = k.Driver()._<ж<Driver>>(ᐧ);
-    fmt.Println("foreign:", ok, fc.n, d.name, (~fc).Connector.Driver() != nil);
+    var evalᴛ1 = (~fc).Connector.Driver();
+    fmt.Println("foreign:", ok, fc.n, d.name, evalᴛ1 != nil);
 }
 
 } // end main_package

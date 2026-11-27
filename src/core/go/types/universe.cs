@@ -113,7 +113,9 @@ internal static void defPredeclaredTypes() {
         // into the Universe, but we lean toward the future and insert the Alias
         // representation.
         universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default);
-        _ = NewAlias(universeAnyAlias, universeAnyNoAlias.of(TypeName.Ꮡobject).Type().Underlying()); // Link TypeName and Alias
+        var evalᴛ1 = universeAnyNoAlias.of(TypeName.Ꮡobject).Type();
+        var evalᴛ2 = evalᴛ1.Underlying();
+        _ = NewAlias(universeAnyAlias, evalᴛ2); // Link TypeName and Alias
         def(new TypeNameжObject(universeAnyAlias));
     }
 

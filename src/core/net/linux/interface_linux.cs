@@ -69,7 +69,8 @@ internal static UntypedInt sysARPHardwareGREIPv4 => 778;  // any over GRE over I
 internal static UntypedInt sysARPHardwareGREIPv6 => 823;  // any over GRE over IPv6 tunneling
 
 internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.NetlinkRouteAttr> attrs) {
-    var ifi = Ꮡ(new Interface(Index: (nint)ifim.Index, Flags: linkFlags(ifim.Flags)));
+    var evalᴛ1 = linkFlags(ifim.Flags);
+    var ifi = Ꮡ(new Interface(Index: (nint)ifim.Index, Flags: evalᴛ1));
     foreach (var (_, a) in range(attrs)) {
         switch (a.Attr.Type) {
         case var ᴛ when ᴛ == syscall.IFLA_ADDRESS: {

@@ -59,15 +59,29 @@ internal static uint64 wyhash(slice<byte> key, uint64 seed, uint64 len) {
             var seed1 = seed;
             var seed2 = seed;
             for (; i > 48; i -= 48) {
-                seed = mix(r8(p) ^ hashkey[1], r8(p[8..]) ^ seed);
-                seed1 = mix(r8(p[16..]) ^ hashkey[2], r8(p[24..]) ^ seed1);
-                seed2 = mix(r8(p[32..]) ^ hashkey[3], r8(p[40..]) ^ seed2);
+                var evalᴛ1 = r8(p);
+                var evalᴛ2 = p[8..];
+                var evalᴛ3 = r8(evalᴛ2);
+                seed = mix(evalᴛ1 ^ hashkey[1], evalᴛ3 ^ seed);
+                var evalᴛ4 = p[16..];
+                var evalᴛ5 = r8(evalᴛ4);
+                var evalᴛ6 = p[24..];
+                var evalᴛ7 = r8(evalᴛ6);
+                seed1 = mix(evalᴛ5 ^ hashkey[2], evalᴛ7 ^ seed1);
+                var evalᴛ8 = p[32..];
+                var evalᴛ9 = r8(evalᴛ8);
+                var evalᴛ10 = p[40..];
+                var evalᴛ11 = r8(evalᴛ10);
+                seed2 = mix(evalᴛ9 ^ hashkey[3], evalᴛ11 ^ seed2);
                 p = p[48..];
             }
             seed ^= (uint64)((seed1 ^ seed2));
         }
         for (; i > 16; i -= 16) {
-            seed = mix(r8(p) ^ hashkey[1], r8(p[8..]) ^ seed);
+            var evalᴛ12 = r8(p);
+            var evalᴛ13 = p[8..];
+            var evalᴛ14 = r8(evalᴛ13);
+            seed = mix(evalᴛ12 ^ hashkey[1], evalᴛ14 ^ seed);
             p = p[16..];
         }
     }

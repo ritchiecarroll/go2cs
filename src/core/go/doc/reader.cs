@@ -354,9 +354,11 @@ internal static void readValue⁔(/*this*/ ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡd
         }
     }
 
+    var evalᴛ1 = decl.Doc.Text();
+    var evalᴛ2 = specNames(decl.Specs);
     values.ValueSlot = append(values.ValueSlot, Ꮡ(new Value(
-        Doc: decl.Doc.Text(),
-        Names: specNames(decl.Specs),
+        Doc: evalᴛ1,
+        Names: evalᴛ2,
         Decl: Ꮡdecl,
         order: r.order
     )));
@@ -567,9 +569,12 @@ internal static void readNote⁔(/*this*/ ref reader r, slice<ж<ast.Comment>> l
         ref var body = ref heap<@string>(clean(text.slice(m[1])), out var Ꮡbody);
         if (body != ""u8) {
             @string marker = text.slice(m[2], m[3]);
+            var evalᴛ1 = list[0].Pos();
+            var evalᴛ2 = len(list);
+            var evalᴛ3 = list[evalᴛ2 - 1].End();
             r.notes[marker] = append(r.notes[marker], Ꮡ(new Note(
-                Pos: list[0].Pos(),
-                End: list[len(list) - 1].End(),
+                Pos: evalᴛ1,
+                End: evalᴛ3,
                 UID: text.slice(m[4], m[5]),
                 Body: body
             )));
@@ -671,6 +676,7 @@ internal static void readFile⁔(/*this*/ ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) 
                         // for each type; this also ensures that each type
                         // gets to (re-)use the declaration documentation
                         // if there's none associated with the spec itself
+                        var evalᴛ1 = s.Pos();
                         var fake = Ꮡ(new ast.GenDecl(
                             Doc: d.Doc,
                             // don't use the existing TokPos because it
@@ -678,7 +684,7 @@ internal static void readFile⁔(/*this*/ ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) 
                             // the fake declaration if there are more
                             // than one type in the group (this affects
                             // src/cmd/godoc/godoc.go's posLink_urlFunc)
-                            TokPos: s.Pos(),
+                            TokPos: evalᴛ1,
                             Tok: token.TYPE,
                             Specs: [new ast.TypeSpecжSpec(s)]
                         ));
@@ -920,14 +926,18 @@ internal static slice<ж<Type>> sortedTypes(map<@string, ж<namedType>> m, bool 
     var list = new slice<ж<Type>>(len(m));
     nint i = 0;
     foreach (var (_, t) in m) {
+        var evalᴛ1 = sortedValues(t.values, token.CONST);
+        var evalᴛ2 = sortedValues(t.values, token.VAR);
+        var evalᴛ3 = sortedFuncs(t.funcs, true);
+        var evalᴛ4 = sortedFuncs(t.methods, allMethods);
         list[i] = Ꮡ(new Type(
             Doc: t.doc,
             Name: t.name,
             Decl: t.decl,
-            Consts: sortedValues(t.values, token.CONST),
-            Vars: sortedValues(t.values, token.VAR),
-            Funcs: sortedFuncs(t.funcs, true),
-            Methods: sortedFuncs(t.methods, allMethods)
+            Consts: evalᴛ1,
+            Vars: evalᴛ2,
+            Funcs: evalᴛ3,
+            Methods: evalᴛ4
         ));
         i++;
     }

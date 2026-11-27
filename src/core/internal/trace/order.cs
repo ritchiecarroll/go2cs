@@ -200,7 +200,8 @@ internal static (schedCtx, bool, error) advanceProcStatus⁔(/*this*/ ref orderi
         }
         s.seq = makeSeq(gen, 0); // Reset seq.
     } else {
-        o.pStates[pid] = Ꮡ(new pState(id: pid, status: status, seq: makeSeq(gen, 0)));
+        var evalᴛ1 = makeSeq(gen, 0);
+        o.pStates[pid] = Ꮡ(new pState(id: pid, status: status, seq: evalᴛ1));
         if (gen == o.initialGen) {
             oldState = ProcUndetermined;
         } else {
@@ -393,7 +394,8 @@ internal static (schedCtx, bool, error) advanceGoStatus⁔(/*this*/ ref ordering
         s.seq = makeSeq(gen, 0); // Reset seq.
     } else if (gen == o.initialGen) {
         // Set the state.
-        o.gStates[gid] = Ꮡ(new gState(id: gid, status: status, seq: makeSeq(gen, 0)));
+        var evalᴛ1 = makeSeq(gen, 0);
+        o.gStates[gid] = Ꮡ(new gState(id: gid, status: status, seq: evalᴛ1));
         oldState = GoUndetermined;
     } else {
         return (curCtx, false, fmt.Errorf("found goroutine status for new goroutine after the first generation: id=%v status=%v"u8, gid, status));
@@ -479,7 +481,8 @@ internal static (schedCtx, bool, error) advanceGoCreate⁔(/*this*/ ref ordering
     if (ev.typ == tracev2.EvGoCreateBlocked) {
         status = tracev2.GoWaiting;
     }
-    o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: status, seq: makeSeq(gen, 0)));
+    var evalᴛ1 = makeSeq(gen, 0);
+    o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: status, seq: evalᴛ1));
     o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
@@ -767,7 +770,8 @@ internal static (schedCtx, bool, error) advanceGoCreateSyscall⁔(/*this*/ ref o
     var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
         return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) in syscall that already exists"u8, newgid));
     }
-    o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: tracev2.GoSyscall, seq: makeSeq(gen, 0)));
+    var evalᴛ1 = makeSeq(gen, 0);
+    o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: tracev2.GoSyscall, seq: evalᴛ1));
     // Goroutine is executing. Bind it to the context.
     var newCtx = curCtx;
     newCtx.G = newgid;
@@ -817,7 +821,8 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall⁔(/*this*/ ref 
             return (curCtx, false, fmt.Errorf("found invalid proc %d during %s"u8, curCtx.P, o.evName(ev.typ)));
         }
         if (pState.status != tracev2.ProcSyscall) {
-            return (curCtx, false, fmt.Errorf("proc %d in unexpected state %s during %s"u8, curCtx.P, pState.status, o.evName(ev.typ)));
+            var evalᴛ1 = o.evName(ev.typ);
+            return (curCtx, false, fmt.Errorf("proc %d in unexpected state %s during %s"u8, curCtx.P, pState.status, evalᴛ1));
         }
         // See the go122-create-syscall-reuse-thread-id test case for more details.
         pState.status = tracev2.ProcSyscallAbandoned;
@@ -1069,7 +1074,8 @@ internal static (schedCtx, bool, error) advanceGCSweepBegin⁔(/*this*/ ref orde
         }
     }
     {
-        var err = o.pStates[curCtx.P].of(pState.ᏑrangeState).beginRange(makeRangeType(ev.typ, 0)); if (err != nil) {
+        var evalᴛ1 = makeRangeType(ev.typ, 0);
+        var err = o.pStates[curCtx.P].of(pState.ᏑrangeState).beginRange(evalᴛ1); if (err != nil) {
             return (curCtx, false, err);
         }
     }

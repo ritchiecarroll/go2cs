@@ -229,13 +229,15 @@
        (docs/phase4/DESIGN-multiplatform-corpus.md §8). A group with no items is not noise: it
        records that the platform takes part in this package's axis and adds nothing beyond the
        shared list above, which is what lets a single-target reconvert reproduce this file. -->
-  <ItemGroup Condition="'$(GoTargetOS)'=='darwin'">
-    <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
-  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)'=='darwin'" />
 
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'" />
 
   <ItemGroup Condition="'$(GoTargetOS)'=='windows'" />
+
+  <ItemGroup Condition="'$(GoTargetOS)'=='darwin' And '$(GoTargetArch)'=='amd64'">
+    <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(GoTargetOS)'=='linux' And '$(GoTargetArch)'=='arm64'">
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />

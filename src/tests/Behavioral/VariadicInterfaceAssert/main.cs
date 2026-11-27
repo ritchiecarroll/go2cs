@@ -19,7 +19,9 @@ partial struct L {
 public static void Error(this ref L l, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    fmt.Println("L.Error", l.tag, len(args), fmt.Sprint(args.ꓸꓸꓸ));
+    var evalᴛ1 = len(args);
+    var evalᴛ2 = fmt.Sprint(args.ꓸꓸꓸ);
+    fmt.Println("L.Error", l.tag, evalᴛ1, evalᴛ2);
 }
 
 partial struct LL {

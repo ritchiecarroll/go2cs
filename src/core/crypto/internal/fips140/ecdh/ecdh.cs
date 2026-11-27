@@ -265,7 +265,8 @@ public static (ж<PublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<by
         return (default, err);
     }
 
-    return (Ꮡ(new PublicKey(curve: c.curve, q: bytes.Clone(key))), default);
+    var evalᴛ1 = bytes.Clone(key);
+    return (Ꮡ(new PublicKey(curve: c.curve, q: evalᴛ1)), default);
 }
 
 public static (slice<byte>, error) ECDH<P>(ж<Curve<P>> c, ж<PrivateKey> k, ж<PublicKey> peer)

@@ -1090,7 +1090,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		return err
 	}
 
-	writeTestsHostBuildFiles(outputPath, options)
+	writeTestsHostBuildFiles(inputPath, outputPath, options)
 
 	sources, err := classifyTestSources(inputPath, includedSources, compileExcluded, handOwnHostExcluded, external)
 	if err != nil {
@@ -3084,6 +3084,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	//
 	// The test variant's shape-witness selection goes first, as production's does (conversionDriver.go), so the proxy
 	// refusals below decline its witnessed positions; resetPackageState clears it, and it is installed again after.
+	//
+	// The load-scoped caches empty first, before that pre-pass can fill them, and not again in this variant, so the
+	// pre-pass and the emission share their first answers (resetLoadScopedCaches).
+	resetLoadScopedCaches()
+
 	if refusal := prepareShapeWitness(pkg); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal
@@ -3101,7 +3106,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		return nil, nil, refusal
 	}
 
-	if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
+	if refusal := refuseManualTypeReceiverOperands(pkg, options.targetPlatform); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal
 	}
@@ -3355,7 +3360,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// an empty result. Runs BEFORE escape analysis, which consults the reversion verdicts; the
 	// signature/call-site emission reads the lowered sets during the visits.
 	performRefLoweringAnalysis(prodEntries, pkg.Types, pkg.TypesInfo, options)
-	collectHandOwnedDecls(prodEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform))
+	collectHandOwnedDecls(prodEntries, pkg.Types, pkg.TypesInfo, options.targetPlatform)
 
 	performEscapeAnalysis(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo)
 	collectStackAppendHints(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
@@ -3393,9 +3398,9 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// suppressing test-file hoists in initializer-reachable functions is a pure (and tiny)
 	// allocation pessimization, never a correctness risk, and flipping the flag would drift the
 	// hoist claims of every banked *_test.cs for no behavioral gain.
-	collectHoistedLiterals(prodEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform), nil, true)
+	collectHoistedLiterals(prodEntries, pkg.Types, pkg.TypesInfo, options.targetPlatform, nil, true)
 	productionHoistSeed := packageHoistNames
-	collectHoistedLiterals(allEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform), productionHoistSeed, false)
+	collectHoistedLiterals(allEntries, pkg.Types, pkg.TypesInfo, options.targetPlatform, productionHoistSeed, false)
 	testAssemblyBoxesBareLiterals = testAssemblyBoxesBareLiterals || packageBoxesBareLiterals
 
 	// Find test-file package-level var initializers whose Go dependency order C#'s
@@ -8104,7 +8109,7 @@ func testPublishTimeout(options Options) time.Duration {
 //
 // Right after it rides the corpus flavour's GOARCH (-p:GoTargetArch=, testHostPlatformProperties), always: an
 // explicit -p: beats an inherited environment variable exactly as for GoTargetOS, and the arch is the one the
-// flavour was converted at, not the target's or the host's (darwin/arm64 builds against darwin/amd64's).
+// flavour was converted at, not the target's or the host's (windows/arm64 builds against windows/amd64's).
 //
 // The publish also states its build output (-getProperty:TargetPath), which publishBuildOutput reads. MSBuild prints
 // the value after the build and, asked for a property, writes no build log to the console: errors still reach the
@@ -8232,7 +8237,10 @@ func testHostDeadlineEnv(options Options) string {
 // testHostModuleEnv hands a NON-standard-library package's host the root of the module it belongs to,
 // as GO2CS_MODULE_ROOT (PackageAncestry.ModuleRootEnvironmentVariable): the host stages a COPY of that
 // module tree so a test reads ../test/key.pem or ../go.mod as `go test` lets it. Through the
-// environment, never the emitted host, so no machine path lands in emitted output. A standard-library
+// environment, never the emitted host, so no machine path lands in emitted output; the build files
+// beside a host converted outside a go2cs root also record these values for a by-hand run, but only
+// as paths relative to that file, and only when testsHostRecordableModulePath finds no machine path
+// in them (the T17 seat, P3 194127Z). A standard-library
 // package gets nothing -- it sits under $GOROOT/src/go.mod (`module std`), which the GOROOT ancestry
 // already mirrors -- and so does a directory with no go.mod above it. A module-cache release that ships
 // no go.mod also hands over the go.mod `go` reads for it (goModFile), as GO2CS_MODULE_GOMOD
@@ -8336,7 +8344,7 @@ func oracleOptions(options Options) Options {
 // convertedHostOptions is the options the converted test HOST runs under (its child environment): the oracle's,
 // so the host sees the GOARCH Go's own test binary sees. Go's test binary inherits GOARCH from the oracle's `go test`
 // child, and reads it through buildcfg.GOARCH (go/build's default context) and every `go` command it runs. The darwin
-// host reads runtime.GOARCH from the process (runtime/darwin/goarch_darwin_impl.cs), so on osx-arm64 it is arm64; with
+// host reads runtime.GOARCH from the process (runtime/darwin-amd64/goarch_darwin_impl.cs), so on osx-arm64 it is arm64; with
 // the target's GOARCH=amd64 in its environment, go/build's default context and gcimporter's `go list std` read amd64
 // beside it (TestMatch, TestGoodOSArch, and gcimporter's two amd64-only subtests on the osx-arm64 runner, run
 // 42645179767). Unchanged wherever -test-oracle-goarch is unset or equals the target.
@@ -10052,6 +10060,14 @@ func validateDisclosureRetirement(label, class, want, reading, plan string, floo
 func validateDisclosurePlatforms(label string, platforms goosScope) error {
 	seenPlatforms := map[string]bool{}
 	for _, platform := range platforms {
+		// A disclosure scope is GOOS-only: every caller measures it against the run's GOOS, and an
+		// `os/arch` entry (the form the hand-own registry also admits) would be measured against a
+		// bare GOOS, which goosScope.includes refuses.
+		if strings.Contains(platform, "/") {
+			return fmt.Errorf("disclosure %s names platform %q: a disclosure scope names a GOOS (one of %s), never an os/arch target",
+				label, platform, strings.Join(disclosurePlatformTargets, ", "))
+		}
+
 		if !disclosurePlatformTargets.includes(platform) {
 			return fmt.Errorf("disclosure %s names platform %q, which is not one of %s: a scope naming a target this corpus does not build could never be in scope on any run, so it would disable the entry's absorption silently and forever",
 				label, platform, strings.Join(disclosurePlatformTargets, ", "))

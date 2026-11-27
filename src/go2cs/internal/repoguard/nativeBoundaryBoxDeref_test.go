@@ -417,7 +417,54 @@ func pickDecl(decls []structDecl, dir string) (structDecl, bool) {
 		return decls[0], true
 	}
 
+	// A site in a GOOS folder (runtime/darwin/) serves every target of that GOOS, and since the darwin/arm64
+	// flip its pointee is declared once per target in the sibling folders (darwin-amd64/, darwin-arm64/).
+	// Those copies resolve as one declaration only when every sibling declares the same fields; copies that
+	// differ are a real per-target difference, and the name stays unresolved rather than taking one target's. Only
+	// the GOOS's own os/arch folders count: linux-arm64/ is runtime's sibling too, and serves no darwin site.
+	if parent := filepath.ToSlash(filepath.Dir(dir)); parent != "." && parent != "/" {
+		var siblings []structDecl
+
+		for _, decl := range decls {
+			if filepath.ToSlash(filepath.Dir(decl.dir)) == parent && strings.HasPrefix(filepath.Base(decl.dir), filepath.Base(dir)+"-") {
+				siblings = append(siblings, decl)
+			}
+		}
+
+		if len(siblings) > 1 {
+			for _, decl := range siblings[1:] {
+				if strings.Join(decl.fields, "\x00") != strings.Join(siblings[0].fields, "\x00") {
+					return structDecl{}, false
+				}
+			}
+
+			return siblings[0], true
+		}
+	}
+
 	return structDecl{}, false
+}
+
+// TestPickDeclResolvesAgreeingTargetCopies holds the sibling arm of pickDecl to its two directions: a GOOS
+// folder's site takes the GOOS's per-target copies as one declaration when they agree, refuses them when they
+// differ, and never takes another GOOS's folder.
+func TestPickDeclResolvesAgreeingTargetCopies(t *testing.T) {
+	amd64 := structDecl{dir: "src/core/runtime/darwin-amd64", fields: []string{"ж<byte> ss_sp", "uintptr ss_size"}}
+	arm64 := structDecl{dir: "src/core/runtime/darwin-arm64", fields: []string{"ж<byte> ss_sp", "uintptr ss_size"}}
+	differs := structDecl{dir: "src/core/runtime/darwin-arm64", fields: []string{"ж<byte> ss_sp", "uint32 ss_size"}}
+	linux := structDecl{dir: "src/core/runtime/linux-arm64", fields: []string{"ж<byte> ss_sp"}}
+
+	if decl, ok := pickDecl([]structDecl{amd64, arm64, linux}, "src/core/runtime/darwin"); !ok || decl.dir != amd64.dir {
+		t.Errorf("agreeing darwin copies did not resolve as one declaration: %+v %v", decl, ok)
+	}
+
+	if _, ok := pickDecl([]structDecl{amd64, differs}, "src/core/runtime/darwin"); ok {
+		t.Error("darwin copies that declare different fields resolved: one target's layout answered for both")
+	}
+
+	if _, ok := pickDecl([]structDecl{linux, {dir: "src/core/runtime/windows", fields: linux.fields}}, "src/core/runtime/darwin"); ok {
+		t.Error("a darwin site resolved against other GOOS folders")
+	}
 }
 
 func simpleName(pointee string) string {

@@ -126,13 +126,17 @@ internal static error /*err*/ writeHeader⁔(/*this*/ ref Writer z) {
     if (z.dict != nil) {
         z.scratch[1] |= (byte)((byte)(1 << 5));
     }
-    z.scratch[1] += (uint8)(31 - binary.BigEndian.Uint16(z.scratch[..2]) % 31);
+    var evalᴛ1 = z.scratch[..2];
+    var evalᴛ2 = binary.BigEndian.Uint16(evalᴛ1);
+    z.scratch[1] += (uint8)(31 - evalᴛ2 % 31);
     (_, err) = z.w.Write(z.scratch[0..2]); if (err != nil) {
         return err;
     }
     if (z.dict != nil) {
         // The next four bytes are the Adler-32 checksum of the dictionary.
-        binary.BigEndian.PutUint32(z.scratch[..], adler32.Checksum(z.dict));
+        var evalᴛ3 = z.scratch[..];
+        var evalᴛ4 = adler32.Checksum(z.dict);
+        binary.BigEndian.PutUint32(evalᴛ3, evalᴛ4);
         (_, err) = z.w.Write(z.scratch[0..4]); if (err != nil) {
             return err;
         }

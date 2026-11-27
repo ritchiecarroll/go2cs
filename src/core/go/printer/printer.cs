@@ -208,7 +208,8 @@ internal static void writeLineDirective⁔(/*this*/ ref printer p, token.Positio
         }
 
         p.output = append(p.output, (byte)(tabwriter.Escape)); // protect '\n' in //line from tabwriter interpretation
-        p.output = append(p.output, fmt.Sprintf("//line %s:%d\n"u8, pos.Filename, pos.Line).ꓸꓸꓸ);
+        var evalᴛ1 = fmt.Sprintf("//line %s:%d\n"u8, pos.Filename, pos.Line);
+        p.output = append(p.output, evalᴛ1.ꓸꓸꓸ);
         p.output = append(p.output, (byte)(tabwriter.Escape));
         // p.out must match the //line directive
         p.@out.Filename = pos.Filename;
@@ -308,7 +309,8 @@ internal static void writeString⁔(/*this*/ ref printer p, token.Position pos, 
     }
 
     if (debug) {
-        p.output = append(p.output, fmt.Sprintf("/*%s*/"u8, pos).ꓸꓸꓸ); // do not update p.pos!
+        var evalᴛ1 = fmt.Sprintf("/*%s*/"u8, pos);
+        p.output = append(p.output, evalᴛ1.ꓸꓸꓸ); // do not update p.pos!
     }
     p.output = append(p.output, s.ꓸꓸꓸ);
 
@@ -655,7 +657,8 @@ internal static void writeComment⁔(/*this*/ ж<printer> Ꮡp, ж<ast.Comment> 
         ref var comment = ref Ꮡcomment.DerefOrNull();
 
         @string text = comment.Text;
-        var pos = p.posFor(comment.Pos());
+        var evalᴛ1 = comment.Pos();
+        var pos = p.posFor(evalᴛ1);
 
         @string linePrefix = linePrefixᶜ;
         if (strings.HasPrefix(text, linePrefix) && (!pos.IsValid() || pos.Column == 1)) {
@@ -674,7 +677,8 @@ internal static void writeComment⁔(/*this*/ ж<printer> Ꮡp, ж<ast.Comment> 
             } else if (constraint.IsPlusBuild(text)) {
                 p.plusBuild = append(p.plusBuild, len(p.output));
             }
-            p.writeString(pos, trimRight(text), true);
+            var evalᴛ2 = trimRight(text);
+            p.writeString(pos, evalᴛ2, true);
             return;
         }
 
@@ -704,7 +708,8 @@ internal static void writeComment⁔(/*this*/ ж<printer> Ꮡp, ж<ast.Comment> 
                 pos = p.pos;
             }
             if (len(line) > 0) {
-                p.writeString(pos, trimRight(line), true);
+                var evalᴛ3 = trimRight(line);
+                p.writeString(pos, evalᴛ3, true);
             }
         }
     }

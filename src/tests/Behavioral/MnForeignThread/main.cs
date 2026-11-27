@@ -33,7 +33,9 @@ internal static partial void runForeign(Action f) {
 
 internal static void report(@string row, time.Time began) {
     if (reading) {
-        fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: %s elapsed_ms=%.1f\n"u8, row, (float64)time.Since(began).Microseconds() / 1000D);
+        var evalᴛ1 = time.Since(began);
+        var evalᴛ2 = evalᴛ1.Microseconds();
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: %s elapsed_ms=%.1f\n"u8, row, (float64)evalᴛ2 / 1000D);
     }
 }
 
@@ -44,7 +46,8 @@ internal static partial void f1() {
     var chʗ1 = ch;
     var doneʗ1 = done;
     runForeign([GoFunc("f1.func1")] () => {
-        doneʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
+        var evalᴛ1 = ᐸꟷ(chʗ1);
+        doneʗ1.ᐸꟷ(evalᴛ1);
     });
     var chʗ2 = ch;
     goǃ([GoFunc("f1.func2")] () => {
@@ -63,7 +66,8 @@ internal static partial void f2() {
     var chʗ1 = ch;
     var gotʗ1 = got;
     goǃ([GoFunc("f2.func1")] () => {
-        gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
+        var evalᴛ1 = ᐸꟷ(chʗ1);
+        gotʗ1.ᐸꟷ(evalᴛ1);
     });
     var chʗ2 = ch;
     runForeign([GoFunc("f2.func2")] () => {
@@ -227,7 +231,8 @@ internal static void f6() {
         try {
             var resʗ2 = resʗ1;
             defer([GoFunc("f6.func1.1")] () => {
-                resʗ2.ᐸꟷ(fmt.Sprint(recover()));
+                var evalᴛ1 = fmt.Sprint(recover());
+                resʗ2.ᐸꟷ(evalᴛ1);
             }, ref ᒐ);
             throw panic("foreign boom");
         }

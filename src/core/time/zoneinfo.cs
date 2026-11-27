@@ -120,7 +120,8 @@ public static ж<Location> FixedZone(@string name, nint offset) {
         ᏑunnamedFixedZonesOnce.Do([GoFunc("FixedZone.func1")] () => {
             unnamedFixedZones = new slice<ж<Location>>(hoursBeforeUTC + 1 + hoursAfterUTC);
             for (nint hr = -hoursBeforeUTC; hr <= (nint)(+hoursAfterUTC); hr++) {
-                unnamedFixedZones[hr + (nint)hoursBeforeUTC] = fixedZone(""u8, hr * 60 * 60);
+                var evalᴛ1 = fixedZone(""u8, hr * 60 * 60);
+                unnamedFixedZones[hr + (nint)hoursBeforeUTC] = evalᴛ1;
             }
         });
         return unnamedFixedZones[hour + (nint)hoursBeforeUTC];
@@ -176,7 +177,8 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     }
 
     if (len(l.tx) == 0 || sec < l.tx[0].when) {
-        var zoneΔ2 = Ꮡ(l.zone, l.lookupFirstZone());
+        var evalᴛ1 = l.lookupFirstZone();
+        var zoneΔ2 = Ꮡ(l.zone, evalᴛ1);
         name = zoneΔ2.name;
         offset = zoneΔ2.offset;
         start = alpha;

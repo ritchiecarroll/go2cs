@@ -59,7 +59,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUtsqCgt6SgoKCgoKCADKEAQAPAoKUgoKCgoKUlJSUlKiSgoKCgoKUlAAIEoKCgpSCuIKCgpSogpaClIKmgoKClIK4ppSigoKmlIKUppSCuIKCgoKCpoKUgsqmgqamruKCgoKUggAJFIKmgoKCgoKmlIKmgtyCyoKCgriokoKokoIAChiSlLS0AAQQwpSCgvikgqqigoKCgqbigpSUgoKUtKzC6gAIAoKC7MSClJS4gqbaAAoCpoKClKaCgoKClILcgpT+goKCgpTIlIKCgtyUgoKUgoLcgoLaog==")]
+[assembly: GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUtsqCgt6SgoKCgoKCADKEAQAPAoKUgoKCgoKUlJSUlKiSgoKCgoKUlAAIEoKCgpSCuIKCgpSogpaClIKmgoKClIK4ppSigoKmlIKUppSCuIKCgoKCpoKUgsqmgqamruKCgoKUggAJFIKmgoKCgoKmlIKmgtyCyoKCgriokoKokqIAChiSlLS0AAQQwpSCgvikgqqigoKCgqbigpSUgoKUtKzC6gAIAoKC7MSClJS4gqbaAAoCpoKClKaCgoKClILcgpT+goKCgpTIlIKCgtyUgoKUgoLcgoLaog==")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

@@ -151,7 +151,8 @@ internal static (ж<LineReader>, error) LineReader⁔(/*this*/ ж<Data> Ꮡd, ж
     var (compDir, _) = cu.Val(AttrCompDir)._<@string>(ᐧ);
 
     // Create the LineReader.
-    var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
+    var evalᴛ1 = Ꮡd.offsetToUnit(cu.Offset);
+    var u = Ꮡ(d.unit, evalᴛ1);
     var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, (Offset)(uint32)off, d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
     ref var r = ref heap<LineReader>(new LineReader(
@@ -239,7 +240,8 @@ internal static error readHeader⁔(/*this*/ ж<LineReader> Ꮡr, @string compDi
     r.opcodeBase = (nint)buf.uint8();
     r.opcodeLengths = new slice<nint>(r.opcodeBase);
     for (nint i = 1; i < r.opcodeBase; i++) {
-        r.opcodeLengths[i] = (nint)buf.uint8();
+        var evalᴛ1 = buf.uint8();
+        r.opcodeLengths[i] = (nint)evalᴛ1;
     }
 
     // Validate opcode lengths.
@@ -364,7 +366,8 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT⁔
             b1.skip((nint)off);
             str = b1.@string();
             if (b1.err != nil) {
-                return ("", 0, 0, new DecodeError("line", r.buf.off, b1.err.Error()));
+                var evalᴛ1 = b1.err.Error();
+                return ("", 0, 0, new DecodeError("line", r.buf.off, evalᴛ1));
             }
             break;
         }
@@ -643,7 +646,8 @@ internal static bool step⁔(/*this*/ ref LineReader r, ж<LineEntry> Ꮡentry) 
         break;
     }
     case var ᴛ when ᴛ == lnsAdvanceLine: {
-        r.state.Line += (nint)r.buf.@int();
+        var evalᴛ1 = r.buf.@int();
+        r.state.Line += (nint)evalᴛ1;
         break;
     }
     case var ᴛ when ᴛ == lnsSetFile: {
@@ -668,7 +672,8 @@ internal static bool step⁔(/*this*/ ref LineReader r, ж<LineEntry> Ꮡentry) 
         break;
     }
     case var ᴛ when ᴛ == lnsFixedAdvancePC: {
-        r.state.Address += (uint64)r.buf.uint16();
+        var evalᴛ2 = r.buf.uint16();
+        r.state.Address += (uint64)evalᴛ2;
         break;
     }
     // DWARF3 standard opcodes [DWARF3 6.2.5.2]

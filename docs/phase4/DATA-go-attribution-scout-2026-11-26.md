@@ -625,3 +625,31 @@ Control: the same pack with the file moved aside produced a package with no `NOT
 
 **NITs 6 and 7** are a BOARD block of this date: the darwin/arm64 file headed on D2 only, and the 11 parts pinned to an
 older release than the corpus.
+
+## Train 17 follow-ups: the NOTICE arm and the guard floor (amended 2026-11-26)
+
+<!-- P5, on COORD 20261126T190241Z (P3 CLEAR on the NOTICE at 183152Z; one small seat for train 17: a release-smoke line
+     asserting NOTICE in go.lib's package, and P3's SHOULD 3b). Base: claude/p5-go-attribution 796eef671c. -->
+
+**Release-smoke arm L.** `src/tests/PackageTests/release-smoke.ps1` gains arm L: the `go.lib` that arm B restored into
+its fresh cache must hold `NOTICE` at its root, equal to `src/core/golib/NOTICE` with line endings normalized. It gates
+for a folder feed (the pre-publish pack) and is a measurement against a published version, since every go.lib up to
+1.26.11.1 shipped without the file. Exercised under pwsh 7 against three packages: this branch's pack (PASS, 52 lines),
+the pack without the file (FAIL, no NOTICE) and the pack with one word of the license changed (FAIL, differs), plus an
+absent restore (FAIL, not read); the whole script parses with 0 errors. Not yet run on a hosted release-smoke leg.
+
+Amended after P3's read of 060f239d72 (20261126T193143Z, SHOULD 1; COORD 20261126T193812Z): arm L now also gates a published feed whose version is above 1.26.11.1, and is measured only at or below it. The comparison reads the numeric part before any `-` suffix, and a version that does not parse gates. Decision table run under pwsh: 1.26.11.1, 1.26.11.1-ci.7 and 1.26.11.0 published measure; 1.26.11.2, 1.26.11.2-ci.1, 1.27.0.1 and an unparsable version published gate; any folder feed gates.
+
+**Guard floor (SHOULD 3b).** `TestLicensingHandOwnsAreClassified` (`src/go2cs/licensing_test.go`) walks the sweep's
+population: every `*_impl.cs`, or `.cs` with an uncommented `GoManualConversion` marker, outside golib, go2cs,
+go.arrays and go2cs.CpuProfiler. Each must carry a PROVENANCE block or a row on
+`src/go2cs/testdata/licensing/handown-unheaded.txt` (classes `own` and `pending`), never both, and every row must name a
+file in the population. At the base: 243 hand-owned files (the step 2 table's 242 plus train 15's
+`scan_amd64_impl.cs`, headed), 149 headed, 94 listed (93 own, 1 pending: the darwin/arm64 file of NIT 6). Eight
+fixtures; red controls on the real tree, each failing naming its file and restored with sha256 checked: a row removed
+(`crypto/rand/rand_impl.cs`), a new unheaded `*_impl.cs` planted, a new marked `.cs` planted, a PROVENANCE block added to
+a listed file. A commented-out marker does not enter the population.
+
+**Merge order.** The floor is red by construction for any hand-own that lands without a header or a row: when train 16
+lands, and again before this seat is gated in train 17, master merges into it and every hand-own added since the base is read and
+classified there (train 16's seats and train 17's, R's darwin bracket and H's S6, are the expected members). When D2 lands, its move of the darwin/arm64 file retires the pending row in the same merge.

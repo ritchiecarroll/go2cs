@@ -142,12 +142,17 @@ partial interface bumper {
 internal static void main() {
     var f1 = Ꮡ(new rawFile());
     use(new pipeжPipeConn(Ꮡ(new pipe(rawFile: f1, path: @"\.\pipe\a"))));
-    fmt.Println(f1.closed, f1.rd.t.Unix(), f1.wd.t.Unix());
+    var evalᴛ1 = f1.rd.t.Unix();
+    var evalᴛ2 = f1.wd.t.Unix();
+    fmt.Println(f1.closed, evalᴛ1, evalᴛ2);
 
     var f2 = Ꮡ(new rawFile());
     var m = Ꮡ(new msgPipe(pipe: new pipe(rawFile: f2, path: @"\.\pipe\b")));
     use(new msgPipeжPipeConn(m));
-    fmt.Println(f2.closed, f2.rd.t.Unix(), f2.wd.t.Unix(), m.CloseWrite() == nil, m.writeClosed);
+    var evalᴛ3 = f2.rd.t.Unix();
+    var evalᴛ4 = f2.wd.t.Unix();
+    var evalᴛ5 = m.CloseWrite();
+    fmt.Println(f2.closed, evalᴛ3, evalᴛ4, evalᴛ5 == nil, m.writeClosed);
 
     var f3 = Ꮡ(new rawFile());
     Δio.Closer c = new msgPipe(pipe: new pipe(rawFile: f3));

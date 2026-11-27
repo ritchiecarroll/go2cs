@@ -180,7 +180,8 @@ internal static (slice<byte>, error) readContinuedLineSlice⁔(/*this*/ ref Read
         if (errΔ2 != nil) {
             return (default, errΔ2);
         }
-        r.buf = appendꓸꓸꓸ(r.buf, trim(lineΔ1));
+        var evalᴛ1 = trim(lineΔ1);
+        r.buf = appendꓸꓸꓸ(r.buf, evalᴛ1);
     }
     return (r.buf, default);
 }

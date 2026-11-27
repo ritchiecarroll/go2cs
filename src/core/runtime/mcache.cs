@@ -100,7 +100,8 @@ internal static ж<mcache> allocmcache() {
     foreach (var i in range(len(c.alloc))) {
         c.of(mcache.Ꮡalloc).ElementRef(i) = Ꮡemptymspan;
     }
-    c.nextSample = nextSample();
+    var evalᴛ1 = nextSample();
+    c.nextSample = evalᴛ1;
 
     return c;
 }

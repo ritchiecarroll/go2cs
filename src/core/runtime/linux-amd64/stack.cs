@@ -699,7 +699,11 @@ internal static void adjustpointers(@unsafe.Pointer scanp, ж<bitvector> Ꮡbv, 
     for (var i = (uintptr)0; i < num; i += 8) {
         if (stackDebug >= 4) {
             for (var j = (uintptr)0; j < 8; j++) {
-                print((@string)"        ", @unsafe.Pointer.OrTypedNil(add(scanp, (i + j) * (uintptr)goarch.PtrSize)), (@string)":", ptrnames[bv.ptrbit(i + j)], (@string)":", (hex)(uint64)(~@unsafe.Pointer.To<uintptr>(add(scanp, (i + j) * (uintptr)goarch.PtrSize))), (@string)" # ", i, (@string)" ", addb(bv.bytedata, i / 8).Value, (@string)"\n");
+                var evalᴛ1 = add(scanp, (i + j) * (uintptr)goarch.PtrSize);
+                var evalᴛ2 = bv.ptrbit(i + j);
+                var evalᴛ3 = add(scanp, (i + j) * (uintptr)goarch.PtrSize);
+                var evalᴛ4 = addb(bv.bytedata, i / 8);
+                print((@string)"        ", @unsafe.Pointer.OrTypedNil(evalᴛ1), (@string)":", ptrnames[evalᴛ2], (@string)":", (hex)(uint64)(~@unsafe.Pointer.To<uintptr>(evalᴛ3)), (@string)" # ", i, (@string)" ", evalᴛ4.Value, (@string)"\n");
             }
         }
         var b = (addb(bv.bytedata, i / 8)).Value;
@@ -1167,7 +1171,8 @@ internal static void newstack() {
         var f = findfunc((~gp).sched.pc);
         if (f.valid()) {
             pcname = funcname(f);
-            pcoff = (~gp).sched.pc - f.entry();
+            var evalᴛ1 = f.entry();
+            pcoff = (~gp).sched.pc - evalᴛ1;
         }
         print((@string)"runtime: newstack at ", pcname, (@string)"+", (hex)(uint64)pcoff,
             (@string)" sp=", (hex)(uint64)(~gp).sched.sp, (@string)" stack=[", (hex)(uint64)(~gp).stack.lo, (@string)", ", (hex)(uint64)(~gp).stack.hi, (@string)"]\n",
@@ -1226,7 +1231,8 @@ internal static void newstack() {
             (@string)"\tsched={pc:", (hex)(uint64)(~gp).sched.pc, (@string)" sp:", (hex)(uint64)(~gp).sched.sp, (@string)" lr:", (hex)(uint64)(~gp).sched.lr, (@string)" ctxt:", @unsafe.Pointer.OrTypedNil((~gp).sched.ctxt), (@string)"}\n");
     }
     if (sp < (~gp).stack.lo) {
-        print((@string)"runtime: gp=", gp.OrTypedNil(), (@string)", goid=", (~gp).goid, (@string)", gp->status=", (hex)(uint64)readgstatus(gp), (@string)"\n ");
+        var evalᴛ2 = readgstatus(gp);
+        print((@string)"runtime: gp=", gp.OrTypedNil(), (@string)", goid=", (~gp).goid, (@string)", gp->status=", (hex)(uint64)evalᴛ2, (@string)"\n ");
         print((@string)"runtime: split stack overflow: ", (hex)(uint64)sp, (@string)" < ", (hex)(uint64)(~gp).stack.lo, (@string)"\n");
         @throw(runtimeSplitStackˢ);
     }

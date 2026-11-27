@@ -29,7 +29,8 @@ internal static void call(@string label, Func<@string> f) {
                 fmt.Println(label, "panic:", r);
             }
         }, ref ᒐ);
-        fmt.Println(label, "=", f());
+        var evalᴛ1 = f();
+        fmt.Println(label, "=", evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

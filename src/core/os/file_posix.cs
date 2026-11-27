@@ -93,7 +93,10 @@ internal static uint32 /*o*/ syscallMode(FileMode i) {
 // See docs in file.go:Chmod.
 internal static error chmod(@string name, FileMode mode) {
     @string longName = fixLongPath(name);
-    var e = ignoringEINTR([GoFunc("chmod.func1")] () => syscall.Chmod(longName, syscallMode(mode)));
+    var e = ignoringEINTR([GoFunc("chmod.func1")] () => {
+        var evalᴛ1 = syscallMode(mode);
+        return syscall.Chmod(longName, evalᴛ1);
+    });
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chmod", Path: name, Err: e)));
     }

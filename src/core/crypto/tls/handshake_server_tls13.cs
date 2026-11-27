@@ -179,7 +179,8 @@ internal static error processClientHello⁔(/*this*/ ж<serverHandshakeStateTLS1
         if (id == TLS_FALLBACK_SCSV) {
             // Use c.vers instead of max(supported_versions) because an attacker
             // could defeat this by adding an arbitrary high version otherwise.
-            if (c.vers < c.config.maxSupportedVersion(roleServer)) {
+            var evalᴛ1 = c.config.maxSupportedVersion(roleServer);
+            if (c.vers < evalᴛ1) {
                 c.sendAlert(alertInappropriateFallback);
                 return errors.New(tlsClientUsingˢ);
             }
@@ -230,7 +231,8 @@ internal static error processClientHello⁔(/*this*/ ж<serverHandshakeStateTLS1
         preferenceList = allowedCipherSuitesTLS13FIPS;
     }
     foreach (var (_, suiteID) in range(preferenceList)) {
-        hs.suite = mutualCipherSuiteTLS13(hs.clientHello.cipherSuites, suiteID);
+        var evalᴛ2 = mutualCipherSuiteTLS13(hs.clientHello.cipherSuites, suiteID);
+        hs.suite = evalᴛ2;
         if (hs.suite != nil) {
             break;
         }
@@ -242,7 +244,8 @@ internal static error processClientHello⁔(/*this*/ ж<serverHandshakeStateTLS1
     }
     c.cipherSuite = hs.suite.id;
     hs.hello.cipherSuite = hs.suite.id;
-    hs.transcript = hs.suite.hash.New();
+    var evalᴛ3 = hs.suite.hash.New();
+    hs.transcript = evalᴛ3;
 
     // First, if a post-quantum key exchange is available, use one. See
     // draft-ietf-tls-key-share-prediction-01, Section 4 for why this must be
@@ -1041,8 +1044,9 @@ internal static error sendSessionTicket⁔(/*this*/ ж<Conn> Ꮡc, bool earlyDat
     }
     // ticket_nonce, which must be unique per connection, is always left at
     // zero because we only ever send one ticket per connection.
+    var evalᴛ1 = suite.hash.Size();
     var psk = tls13.ExpandLabel<hash.Hash>(() => suite.hash.New(), c.resumptionSecret, resumptionˢ,
-        default, suite.hash.Size());
+        default, evalᴛ1);
 
     var m = @new<newSessionTicketMsgTLS13>();
 
@@ -1101,7 +1105,8 @@ internal static error readClientCertificate⁔(/*this*/ ref serverHandshakeState
         // Make sure the connection is still being verified whether or not
         // the server requested a client certificate.
         if (c.config.VerifyConnection != nil) {
-            var errΔ1 = c.config.VerifyConnection(c.connectionStateLocked()); if (errΔ1 != nil) {
+            var evalᴛ1 = c.connectionStateLocked();
+            var errΔ1 = c.config.VerifyConnection(evalᴛ1); if (errΔ1 != nil) {
                 c.sendAlert(alertBadCertificate);
                 return errΔ1;
             }
@@ -1128,7 +1133,8 @@ internal static error readClientCertificate⁔(/*this*/ ref serverHandshakeState
     }
 
     if (c.config.VerifyConnection != nil) {
-        var errΔ3 = c.config.VerifyConnection(c.connectionStateLocked()); if (errΔ3 != nil) {
+        var evalᴛ2 = c.connectionStateLocked();
+        var errΔ3 = c.config.VerifyConnection(evalᴛ2); if (errΔ3 != nil) {
             c.sendAlert(alertBadCertificate);
             return errΔ3;
         }

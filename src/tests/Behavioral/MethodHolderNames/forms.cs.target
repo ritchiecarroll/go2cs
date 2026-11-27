@@ -62,7 +62,8 @@ internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
 
     nint count = len(list) + len(table) + len(made) + pick<Tag>(list, 0).id;
 
-    return fmt.Sprint(lit.id, (~ptr).Value, zero.id, count, (~fresh).Value, c.tag.id, isTag, isPtr, kind, Ꮡc.Seal().Value);
+    var evalᴛ1 = Ꮡc.Seal();
+    return fmt.Sprint(lit.id, (~ptr).Value, zero.id, count, (~fresh).Value, c.tag.id, isTag, isPtr, kind, evalᴛ1.Value);
 }
 
 internal static T pick<T>(slice<T> s, nint i) { return s[i]; }

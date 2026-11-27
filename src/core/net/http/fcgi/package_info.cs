@@ -74,7 +74,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACVKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAMBoKClIKClIKClIIAAxDCgpSCgoKUgoKmgoKUpoKCAAgUgu7CgoKCgoCCpICCAAgKlLi41LKClKaUpqaCgpSCgpSCgsiCgpSCpIKCgqaklJSmlIKCpqSCgrakgoKClJSUpIKCgryigoKCpqaygoKUgpSCgoKCpoKCAAgSgpSCuIKCpgAEFPKCgoKClJSClIKCgpSCAAcS8oLqtJqUgtyUpg==", "", "", "87=newWriter/1/1/3;172=newConn/1/1/1", "184:21,388:25")]
+[assembly: GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACVKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAMBoKClIKClIKClIIABhDCgpSCkoKkgoKmgoKUpoKCAAgUgu7CgoKCgoCCpICCAAgKlLi41LKClKaUpqaCgpSCgpSCgsiCkpSCpIKCgqaklJSmlIKCpqSCgrakgoKClJSUpIKCgryigoKCpqaygoKUgqSCgoKCpoKCAAgSgpSCuIKCpgAEFPKCgoKClJSClIKCgpSCAAcS8oLqtJqUgtyUpg==", "", "", "87=newWriter/1/1/3;177=newConn/1/1/1", "189:21,395:25")]
 [assembly: GoPositionMap("net/http/fcgi/fcgi.go", "fcgi.cs", "AEqeAYKClIKC7oKCgoKCAA0egqjigoKCgpQADhCygpSClIKClKaCqOKCgoKCgpSClIKUgtaCgoKCpoKCgoKCgoCCpICCpICCtoKmgoKUkoKClIKClKaCgpSmgoKCgpSCAAkUgoKClKaCgoIAChaCgoKCgpSClIKUppQ=")]
 // </GoSourcePositionMaps>
 

@@ -458,7 +458,8 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
                 whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%d"u8, name, n);
                 format.mustNotBe(FormatPAX);
             } else {
-                paxHdrsʗ2[paxKey] = strconv.FormatInt(n, 10);
+                var evalᴛ1 = strconv.FormatInt(n, 10);
+                paxHdrsʗ2[paxKey] = evalᴛ1;
             }
         }
         var (v, ok) = hʗ2.PAXRecords[paxKey, ꟷ]; if (ok && v == strconv.FormatInt(n, 10)) {
@@ -488,7 +489,8 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
                 whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%v"u8, name, ts);
                 format.mustNotBe(FormatPAX);
             } else {
-                paxHdrsʗ3[paxKey] = formatPAXTime(ts);
+                var evalᴛ2 = formatPAXTime(ts);
+                paxHdrsʗ3[paxKey] = evalᴛ2;
             }
         }
         var (v, ok) = hʗ3.PAXRecords[paxKey, ꟷ]; if (ok && v == formatPAXTime(ts)) {
@@ -501,19 +503,32 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     var v7 = Ꮡblk.toV7();
     var ustar = Ꮡblk.toUSTAR();
     var gnu = Ꮡblk.toGNU();
-    verifyString(h.Name, len(v7.name()), nameˢ, paxPath);
-    verifyString(h.Linkname, len(v7.linkName()), linknameˢ, paxLinkpath);
-    verifyString(h.Uname, len(ustar.userName()), unameˢ, paxUname);
-    verifyString(h.Gname, len(ustar.groupName()), gnameˢ, paxGname);
-    verifyNumeric(h.Mode, len(v7.mode()), modeˢ, paxNone);
-    verifyNumeric((int64)h.Uid, len(v7.uid()), uidˢ, paxUid);
-    verifyNumeric((int64)h.Gid, len(v7.gid()), gidˢ, paxGid);
-    verifyNumeric(h.Size, len(v7.size()), sizeˢ, paxSize);
-    verifyNumeric(h.Devmajor, len(ustar.devMajor()), devmajorˢ, paxNone);
-    verifyNumeric(h.Devminor, len(ustar.devMinor()), devminorˢ, paxNone);
-    verifyTime(h.ModTime, len(v7.modTime()), modTimeˢ, paxMtime);
-    verifyTime(h.AccessTime, len(gnu.accessTime()), accessTimeˢ, paxAtime);
-    verifyTime(h.ChangeTime, len(gnu.changeTime()), changeTimeˢ, paxCtime);
+    var evalᴛ3 = v7.name();
+    verifyString(h.Name, len(evalᴛ3), nameˢ, paxPath);
+    var evalᴛ4 = v7.linkName();
+    verifyString(h.Linkname, len(evalᴛ4), linknameˢ, paxLinkpath);
+    var evalᴛ5 = ustar.userName();
+    verifyString(h.Uname, len(evalᴛ5), unameˢ, paxUname);
+    var evalᴛ6 = ustar.groupName();
+    verifyString(h.Gname, len(evalᴛ6), gnameˢ, paxGname);
+    var evalᴛ7 = v7.mode();
+    verifyNumeric(h.Mode, len(evalᴛ7), modeˢ, paxNone);
+    var evalᴛ8 = v7.uid();
+    verifyNumeric((int64)h.Uid, len(evalᴛ8), uidˢ, paxUid);
+    var evalᴛ9 = v7.gid();
+    verifyNumeric((int64)h.Gid, len(evalᴛ9), gidˢ, paxGid);
+    var evalᴛ10 = v7.size();
+    verifyNumeric(h.Size, len(evalᴛ10), sizeˢ, paxSize);
+    var evalᴛ11 = ustar.devMajor();
+    verifyNumeric(h.Devmajor, len(evalᴛ11), devmajorˢ, paxNone);
+    var evalᴛ12 = ustar.devMinor();
+    verifyNumeric(h.Devminor, len(evalᴛ12), devminorˢ, paxNone);
+    var evalᴛ13 = v7.modTime();
+    verifyTime(h.ModTime, len(evalᴛ13), modTimeˢ, paxMtime);
+    var evalᴛ14 = gnu.accessTime();
+    verifyTime(h.AccessTime, len(evalᴛ14), accessTimeˢ, paxAtime);
+    var evalᴛ15 = gnu.changeTime();
+    verifyTime(h.ChangeTime, len(evalᴛ15), changeTimeˢ, paxCtime);
 
     // Check for header-only types.
     @string whyOnlyPAX = default;

@@ -165,7 +165,8 @@ internal static slice<byte> appendJSONMayExpand⁔(/*this*/ ж<Map> Ꮡv, slice<
         }
         default: {
             var vΔ1 = kv.Value;
-            b = append(b, vΔ1.String().ꓸꓸꓸ);
+            var evalᴛ1 = vΔ1.String();
+            b = append(b, evalᴛ1.ꓸꓸꓸ);
             break;
         }}
     });

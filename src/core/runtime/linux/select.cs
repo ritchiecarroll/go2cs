@@ -431,9 +431,11 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
 
     if (raceenabled) {
         if (casi < nsends) {
-            raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chansendpc);
+            var evalᴛ1 = casePC(casi);
+            raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, evalᴛ1, chansendpc);
         } else if (cas.elem != nil) {
-            raceWriteObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chanrecvpc);
+            var evalᴛ2 = casePC(casi);
+            raceWriteObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, evalᴛ2, chanrecvpc);
         }
     }
     if (msanenabled) {
@@ -458,7 +460,8 @@ bufrecv:
     if (raceenabled) {
         // can receive from buffer
         if (cas.elem != nil) {
-            raceWriteObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chanrecvpc);
+            var evalᴛ3 = casePC(casi);
+            raceWriteObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, evalᴛ3, chanrecvpc);
         }
         racenotify(c, c.recvx, nil);
     }
@@ -486,7 +489,8 @@ bufsend:
     if (raceenabled) {
         // can send to buffer
         racenotify(c, c.sendx, nil);
-        raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chansendpc);
+        var evalᴛ4 = casePC(casi);
+        raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, evalᴛ4, chansendpc);
     }
     if (msanenabled) {
         msanread(cas.elem, c.elemtype.Size_);
@@ -494,7 +498,8 @@ bufsend:
     if (asanenabled) {
         asanread(cas.elem, c.elemtype.Size_);
     }
-    typedmemmove(c.elemtype, chanbuf(c, c.sendx), cas.elem);
+    var evalᴛ5 = chanbuf(c, c.sendx);
+    typedmemmove(c.elemtype, evalᴛ5, cas.elem);
     c.sendx++;
     if (c.sendx == c.dataqsiz) {
         c.sendx = 0;
@@ -531,7 +536,8 @@ rclose:
 send:
     if (raceenabled) {
         // can send to a sleeping receiver (sg)
-        raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, casePC(casi), chansendpc);
+        var evalᴛ6 = casePC(casi);
+        raceReadObjectPC(ref (c.elemtype).DerefOrNull(), cas.elem, evalᴛ6, chansendpc);
     }
     if (msanenabled) {
         msanread(cas.elem, c.elemtype.Size_);

@@ -930,7 +930,8 @@ internal static partial void start⁔(/*this*/ ж<traceAdvancerState> Ꮡs) {
 
     // Start a goroutine to periodically advance the trace generation.
     s.done = new channel<EmptyStruct>(0);
-    s.timer = newWakeableSleep();
+    var evalᴛ1 = newWakeableSleep();
+    s.timer = evalᴛ1;
     goǃ([GoFunc("(*traceAdvancerState).start.func1")] () => {
         while (traceEnabled()) {
             // Set a timer to wake us up
@@ -988,7 +989,8 @@ internal static ж<wakeableSleep> newWakeableSleep() {
 internal static void sleep⁔(/*this*/ ж<wakeableSleep> Ꮡs, int64 ns) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s.timer.reset(nanotime() + ns, 0);
+    var evalᴛ1 = nanotime();
+    s.timer.reset(evalᴛ1 + ns, 0);
     @lock(Ꮡs.Ꮡlock);
     if (raceenabled) {
         raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));

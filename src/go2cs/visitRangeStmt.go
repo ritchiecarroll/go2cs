@@ -199,7 +199,10 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	}
 
 	if !isRangeWindow {
+		// Go reads the range operand after the calls in it (operandOrder.go).
+		endOperandOrder := v.beginOperandOrder(nil, false, rangeStmt.X)
 		rangeExpr = v.convExpr(rangeStmt.X, nil)
+		endOperandOrder()
 	}
 
 	v.hoistedDecls = savedHoist

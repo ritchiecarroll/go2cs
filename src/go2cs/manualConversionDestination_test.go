@@ -142,7 +142,7 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 					continue
 				}
 
-				inScope := scope.includes(goos)
+				inScope := scope.includes(target)
 
 				if inScope {
 					checked++

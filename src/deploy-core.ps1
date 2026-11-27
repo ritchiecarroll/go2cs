@@ -204,8 +204,11 @@ if ($PSCmdlet.ShouldProcess($collisionsDst, 'stage go2cs/fieldAccessCollisions.t
 # csproj default, the windows flavor, and a program built on Linux or macOS died at start on
 # kernel32.dll unless each build named -p:GoTargetOS. Both stay condition-guarded on empty, so an
 # explicit -p: global or an environment variable still wins. A host whose GOOS the corpus does not
-# carry ($HostGoos is $null) gets no default rather than a guess, as in _paths.ps1.
-$hostFlavorArch = Get-CorpusFlavorArch -Goos $HostGoos -Goarch $HostGoarch
+# carry ($HostGoos is $null) gets no default rather than a guess, as in _paths.ps1. The arch is
+# Get-HostFlavorArch's, the one every other instrument on this host builds: an Apple-silicon host keeps
+# darwin/amd64 under _paths.ps1's interim pin until D5, so a deploy there does not default a flavor
+# the host's own instruments do not build.
+$hostFlavorArch = Get-HostFlavorArch -Goos $HostGoos -Goarch $HostGoarch
 $platformLines = ''
 if ($HostGoos -and $hostFlavorArch) {
     $platformLines = @"

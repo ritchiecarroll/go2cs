@@ -100,7 +100,8 @@ internal static void ExpectSuccess⁔(/*this*/ ref Trace t) {
 internal static void RawEvent⁔(/*this*/ ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp;
 
-    t.events = append(t.events, t.createEvent(typ, data, args.ꓸꓸꓸ));
+    var evalᴛ1 = t.createEvent(typ, data, args.ꓸꓸꓸ);
+    t.events = append(t.events, evalᴛ1);
 }
 
 // DisableTimestamps makes the timestamps for all events generated after
@@ -472,10 +473,15 @@ internal static void RawEvent⁔(/*this*/ ref Batch b, tracev2.EventType typ, sl
     b.size += 1; // One byte for the event header.
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     foreach (var (_, arg) in range(args)) {
-        b.size += (uint64)binary.PutUvarint(buf[..], arg);
+        var evalᴛ1 = buf[..];
+        var evalᴛ2 = binary.PutUvarint(evalᴛ1, arg);
+        b.size += (uint64)evalᴛ2;
     }
     if (len(data) != 0) {
-        b.size += (uint64)binary.PutUvarint(buf[..], (uint64)len(data));
+        var evalᴛ3 = buf[..];
+        var evalᴛ4 = len(data);
+        var evalᴛ5 = binary.PutUvarint(evalᴛ3, (uint64)evalᴛ4);
+        b.size += (uint64)evalᴛ5;
         b.size += (uint64)len(data);
     }
 

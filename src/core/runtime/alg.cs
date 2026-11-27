@@ -257,7 +257,8 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer p, uintptr h) {
     case var ᴛ when ᴛ == abi.Array: {
         var a = Ꮡt.Reinterpret<_type, arraytype>();
         for (var i = (uintptr)0; i < a.of(arraytype.ᏑLen).Value; i++) {
-            h = typehash(a.of(arraytype.ᏑElem).Value, add(p, i * a.of(arraytype.ᏑElem).Value.Size_), h);
+            var evalᴛ1 = add(p, i * a.of(arraytype.ᏑElem).Value.Size_);
+            h = typehash(a.of(arraytype.ᏑElem).Value, evalᴛ1, h);
         }
         return h;
     }

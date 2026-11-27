@@ -1708,7 +1708,8 @@ internal static void putConn⁔(/*this*/ ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, err
         err = driver.ErrBadConn;
     }
     if (debugGetPut) {
-        db.lastPut[Ꮡdc] = stack();
+        var evalᴛ1 = stack();
+        db.lastPut[Ꮡdc] = evalᴛ1;
     }
     dc.inUse = false;
     dc.returnedAt = nowFunc();
@@ -3553,7 +3554,8 @@ internal static bool NextResultSet⁔(/*this*/ ж<Rows> Ꮡrs) {
         rs.dc.of(driverConn.ᏑMutex).Lock();
         defer(Ꮡrs.Value.dc.of(driverConn.ᏑMutex).Unlock, ref ᒐ);
 
-        rs.lasterr = nextResultSet.NextResultSet();
+        var evalᴛ1 = nextResultSet.NextResultSet();
+        rs.lasterr = evalᴛ1;
         if (rs.lasterr != nil) {
             doClose = true;
             return false;
@@ -3956,7 +3958,8 @@ internal static error close⁔(/*this*/ ж<Rows> Ꮡrs, error errʗp) {
         }
         rs.releaseConn(err);
 
-        rs.lasterr = rs.lasterrOrErrLocked(err);
+        var evalᴛ1 = rs.lasterrOrErrLocked(err);
+        rs.lasterr = evalᴛ1;
         return err;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -4077,7 +4080,9 @@ internal static (int64, error) RowsAffected⁔(/*this*/ driverResult dr) {
 
 internal static partial @string stack() {
     array<byte> buf = new(2048); /* (2 << 10) */
-    return (@string)(buf.slice(0, runtime.Stack(buf[..], false)));
+    var evalᴛ1 = buf[..];
+    var evalᴛ2 = runtime.Stack(evalᴛ1, false);
+    return (@string)(buf.slice(0, evalᴛ2));
 }
 
 // withLock runs while holding lk.

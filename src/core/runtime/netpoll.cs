@@ -404,13 +404,15 @@ internal static void poll_runtime_pollSetDeadline(ж<pollDesc> Ꮡpd, int64 d, n
             // Copy current seq into the timer arg.
             // Timer func will check the seq against current descriptor seq,
             // if they differ the descriptor was reused or timers were reset.
-            Ꮡpd.Ꮡrt.modify(pd.rd, 0, rtf, Ꮡpd.makeArg(), pd.rseq);
+            var evalᴛ1 = Ꮡpd.makeArg();
+            Ꮡpd.Ꮡrt.modify(pd.rd, 0, rtf, evalᴛ1, pd.rseq);
             pd.rrun = true;
         }
     } else if (pd.rd != rd0 || combo != combo0) {
         pd.rseq++; // invalidate current timers
         if (pd.rd > 0) {
-            Ꮡpd.Ꮡrt.modify(pd.rd, 0, rtf, Ꮡpd.makeArg(), pd.rseq);
+            var evalᴛ2 = Ꮡpd.makeArg();
+            Ꮡpd.Ꮡrt.modify(pd.rd, 0, rtf, evalᴛ2, pd.rseq);
         } else {
             Ꮡpd.Ꮡrt.stop();
             pd.rrun = false;
@@ -418,13 +420,15 @@ internal static void poll_runtime_pollSetDeadline(ж<pollDesc> Ꮡpd, int64 d, n
     }
     if (!pd.wrun) {
         if (pd.wd > 0 && !combo) {
-            Ꮡpd.Ꮡwt.modify(pd.wd, 0, netpollWriteDeadline, Ꮡpd.makeArg(), pd.wseq);
+            var evalᴛ3 = Ꮡpd.makeArg();
+            Ꮡpd.Ꮡwt.modify(pd.wd, 0, netpollWriteDeadline, evalᴛ3, pd.wseq);
             pd.wrun = true;
         }
     } else if (pd.wd != wd0 || combo != combo0) {
         pd.wseq++; // invalidate current timers
         if (pd.wd > 0 && !combo) {
-            Ꮡpd.Ꮡwt.modify(pd.wd, 0, netpollWriteDeadline, Ꮡpd.makeArg(), pd.wseq);
+            var evalᴛ4 = Ꮡpd.makeArg();
+            Ꮡpd.Ꮡwt.modify(pd.wd, 0, netpollWriteDeadline, evalᴛ4, pd.wseq);
         } else {
             Ꮡpd.Ꮡwt.stop();
             pd.wrun = false;

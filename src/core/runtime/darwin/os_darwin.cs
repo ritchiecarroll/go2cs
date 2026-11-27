@@ -375,7 +375,9 @@ internal static void minit() {
         minitSignalStack();
     }
     minitSignalMask();
-    getg().Value.m.Value.procid = (uint64)pthread_self();
+    var evalᴛ1 = getg();
+    var evalᴛ2 = pthread_self();
+    evalᴛ1.Value.m.Value.procid = (uint64)evalᴛ2;
     libc_error_addr((~getg()).m.of(m.ᏑerrnoAddr));
 }
 

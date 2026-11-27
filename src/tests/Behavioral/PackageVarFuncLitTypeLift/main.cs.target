@@ -35,7 +35,8 @@ internal static void main() {
         fmt.Println(m.label, m.build("world").Greet());
     }
 
-    fmt.Println(varFirstLabel, varFirst.Greet());
+    var evalᴛ1 = varFirst.Greet();
+    fmt.Println(varFirstLabel, evalᴛ1);
 }
 
 } // end main_package
