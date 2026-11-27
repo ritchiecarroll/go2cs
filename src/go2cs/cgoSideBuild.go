@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -381,10 +382,10 @@ func (trim cgoSideTrim) mapping() (string, string) {
 func cgoSidePrefixMaps(toolchain cgoToolchain, workDir string, trim cgoSideTrim) []string {
 	flag := "-ffile-prefix-map"
 
-	if !cgoSideFlagSupported(toolchain, flag+"=a=b") {
+	if !cgoSideFlagSupported(toolchain, workDir, flag+"=a=b") {
 		flag = "-fdebug-prefix-map"
 
-		if !cgoSideFlagSupported(toolchain, flag+"=a=b") {
+		if !cgoSideFlagSupported(toolchain, workDir, flag+"=a=b") {
 			return nil
 		}
 	}
@@ -405,8 +406,10 @@ var (
 
 // cgoSideFlagSupported reports whether the compiler takes a flag, probed as cmd/go probes (work/exec.go,
 // gccSupportsFlag): a compile of an empty C file with the flag, which must succeed and say nothing of an unknown or
-// unused option.
-func cgoSideFlagSupported(toolchain cgoToolchain, flag string) bool {
+// unused option. The compile writes to the null device, except on a windows or ios host, where cmd/go writes to a file
+// it makes in its work directory and removes, so a compiler that cannot open NUL is not read as taking no flag (review
+// of 823978ff1a, #3); go2cs does the same in the side build's work directory.
+func cgoSideFlagSupported(toolchain cgoToolchain, workDir, flag string) bool {
 	key := strings.Join(toolchain.cc, "\x00") + "\x00" + flag
 
 	cgoSideFlagMutex.Lock()
@@ -416,7 +419,21 @@ func cgoSideFlagSupported(toolchain cgoToolchain, flag string) bool {
 		return supported
 	}
 
-	args := append(append(append([]string{}, toolchain.cc[1:]...), toolchain.arch...), flag, "-c", "-x", "c", "-", "-o", os.DevNull)
+	output := os.DevNull
+
+	if runtime.GOOS == "windows" || runtime.GOOS == "ios" {
+		file, err := os.CreateTemp(workDir, "")
+
+		if err != nil {
+			return false
+		}
+
+		file.Close()
+		output = file.Name()
+		defer os.Remove(output)
+	}
+
+	args := append(append(append([]string{}, toolchain.cc[1:]...), toolchain.arch...), flag, "-c", "-x", "c", "-", "-o", output)
 	cmd := exec.Command(toolchain.cc[0], args...)
 	cmd.Env = append(os.Environ(), toolchain.env...)
 	cmd.Stdin = strings.NewReader("")
