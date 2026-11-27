@@ -51,10 +51,10 @@ func main() {
 		goarch = runtime.GOARCH
 	}
 	fmt.Printf("e1census %s/%s, %d target packages, %s, runtime followed: %v\n", goos, goarch, len(roots), runtime.Version(), followRuntime)
-	fmt.Println("module\tfuncs\tparkers\tgeneric\tgeneric-exported\tgeneric-parks-direct\tgeneric-parks-transitive\tgeneric-parkers-exported\tgeneric-noparks-dynamic\tgeneric-noparks-static\tgeneric-parks-nolocks\tgeneric-parks-nolocks-exported")
-	fmt.Printf("%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", r.Module, r.Funcs, r.Parkers, r.Generic, r.GenericExported,
+	fmt.Println("module\tfuncs\tparkers\tgeneric\tgeneric-exported\tgeneric-parks-direct\tgeneric-parks-transitive\tgeneric-parkers-exported\tgeneric-noparks-dynamic\tgeneric-noparks-static\tgeneric-parks-nolocks\tgeneric-parks-nolocks-exported\texported-generic-funcs\texported-generic-func-parkers\texported-generic-func-parkers-nolocks")
+	fmt.Printf("%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", r.Module, r.Funcs, r.Parkers, r.Generic, r.GenericExported,
 		r.GenericDirect, r.GenericTransitive, r.GenericParkersExported, r.GenericNoParkDynamic, r.GenericNoParkStatic,
-		r.GenericParksNoLocks, r.GenericParksNoLocksExported)
+		r.GenericParksNoLocks, r.GenericParksNoLocksExported, r.ExportedFuncs, r.ExportedFuncParkers, r.ExportedFuncParkersNoLocks)
 	if *why != "" {
 		fmt.Println("WHY all-parks:", strings.Join(c.chain(*why, false), " -> "))
 		fmt.Println("WHY no-locks: ", strings.Join(c.chain(*why, true), " -> "))

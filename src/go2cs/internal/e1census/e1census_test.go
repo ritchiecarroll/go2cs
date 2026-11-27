@@ -62,6 +62,11 @@ func TestE1CensusControls(t *testing.T) {
 	if r.Generic != 5 || r.GenericDirect != 1 || r.GenericTransitive != 1 || r.GenericNoParkDynamic != 1 || r.GenericNoParkStatic != 2 {
 		t.Errorf("fixture row: %+v; want generic 5, direct 1 (Box.Get), transitive 1 (GenericParker), dynamic 1, static 2 (GenericQuiet, GenericFinalizer)", r)
 	}
+	// Exported generic functions (the C# population's E1 members): GenericParker, GenericQuiet, GenericDynamic and
+	// GenericFinalizer; of them GenericParker parks, in both readings. (*Box).Get is a method, so not among them.
+	if r.ExportedFuncs != 4 || r.ExportedFuncParkers != 1 || r.ExportedFuncParkersNoLocks != 1 {
+		t.Errorf("fixture exported generic funcs: %d, parkers %d, parkers without locks %d; want 4, 1, 1", r.ExportedFuncs, r.ExportedFuncParkers, r.ExportedFuncParkersNoLocks)
+	}
 	if len(parkers) != 2 {
 		t.Errorf("fixture parkers: %+v; want exactly GenericParker and (*Box).Get", parkers)
 	}

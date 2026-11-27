@@ -301,6 +301,9 @@ type row struct {
 	GenericParkersExported                           int
 	GenericNoParkDynamic, GenericNoParkStatic        int
 	GenericParksNoLocks, GenericParksNoLocksExported int
+	// Exported generic FUNCTIONS only: in C# a method of a generic type is an internal glyph body (`Scan⁔<T>`) behind a
+	// generated public extension, so the twin population's E1 members are the exported generic functions.
+	ExportedFuncs, ExportedFuncParkers, ExportedFuncParkersNoLocks int
 }
 
 // parker is one generic that parks, with the first reason found.
@@ -339,6 +342,15 @@ func (c *census) summarize(module string) (row, []parker) {
 			r.GenericNoParkDynamic++
 		default:
 			r.GenericNoParkStatic++
+		}
+		if sig, _ := f.obj.Type().(*types.Signature); exp && sig != nil && sig.Recv() == nil {
+			r.ExportedFuncs++
+			if f.parks {
+				r.ExportedFuncParkers++
+			}
+			if f.strongs {
+				r.ExportedFuncParkersNoLocks++
+			}
 		}
 		if f.strongs {
 			r.GenericParksNoLocks++
