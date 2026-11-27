@@ -211,7 +211,7 @@ net/windows/dnsclient_unix.cs	B
 net/windows/fd_windows.cs	B
 net/windows/interface.cs	I
 net/windows/lookup.cs	B
-net/windows/lookup_windows.cs.auto	T
+net/windows/lookup_windows.cs.auto	T+P
 net/windows/net.cs	I
 net/windows/nss.cs	B
 net/windows/pipe.cs	B

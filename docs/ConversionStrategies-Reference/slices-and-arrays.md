@@ -1277,7 +1277,7 @@ renders exactly that operand as the length-only `makeꓸꓸꓸ<T>(n)`, and nothi
 
 <!-- source: src/core/slices/slices.cs:466 -->
 ```csharp
-s = subslice<S, E>(appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, cap(s)), makeꓸꓸꓸ<E>(n)), 0, len(s));
+s = builtin.subslice<S, E>(appendꓸꓸꓸ<S, E>(builtin.subslice<S, E>(s, 0, cap(s)), makeꓸꓸꓸ<E>(n)), 0, len(s));
 ```
 
 golib's `makeꓸꓸꓸ<T>` validates the length as `make` does (same panic), and `appendꓸꓸꓸ` over it calls

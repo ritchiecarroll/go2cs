@@ -374,7 +374,7 @@ internal static void walkList<N>(Visitor v, slice<N> list)
     }
 }
 …
-walkList(v, widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
+walkList(v, builtin.widen<ж<Ident>, Node>(n.Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
 ```
 
 golib's `widen<T, TWide>(slice<T>, Func<T, TWide>)` copies the slice element by element into a new
