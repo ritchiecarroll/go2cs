@@ -83,6 +83,9 @@ Per arm:
 
 ## Scoring, against the record as written
 
+**Superseded by the dated block "Amendment 2026-11-27" at the end of this file** (scoring and the bytes). The text below
+is kept as it was first posted.
+
 12.1's revised predictions, scored on the default arm against arm N **on this box** (12.1: "on another host, read
 arms O and N first ... and restate PB-1 relative to that N"; row 14 reads N, not O):
 
@@ -113,3 +116,33 @@ computed by hand, and the stub `src/core` obj folder was deleted by the purge. N
 reading above N scored PB-1 MISSED and a 100-byte delta PB-4 MISSED; a failing closure run stopped the driver at
 arm d1 with exit 1; a disk floor above the free space refused before any arm; an unset `ROW14_TWIN_PROPS` refused.
 Nothing in this kit has been built or run against .NET.
+
+## Amendment 2026-11-27 (COORD, from G's first run of row 14 with the kit at `3300b095b9`)
+
+G ran row 14 with this kit: every run completed, 15 of 15 EQUAL to Go. G scored it by hand, because the kit's own
+scoring was defective in two places. Both are fixed on `claude/c1-mn-row14-16c-kit` and this block replaces the scoring
+section above.
+
+**1. The bytes read 0.** The kit looked for the assembly under `out/src/MnHttpClosure/bin`, while the build writes under
+the output root's `.artifacts/bin/<hash>/…`. `dirname ""` is `.`, so the folder guard passed and the kit summed the
+working directory. Now `run-mn-closure.sh` records the assembly MSBuild resolves (`-getProperty:TargetPath`) as an
+`assembly:` line in each arm's `summary.txt`, and the kit sums the go.*.dll beside that file. The arm stops by name when
+the line is missing, the recorded path is not a file, or no go.*.dll sits beside it. Red first: the old logic against an
+empty arm folder passed its guard with the folder `.` and read 0 bytes; the new reader fails on all three cases and reads
+the bytes from an `.artifacts` layout.
+
+**2. PB-1 and PB-4 were scored relative to this tree's n1, but n1 is no longer section 12's arm N** (the tree's twin set
+has moved since). The kit now scores section 12's clauses as written:
+
+| line | as written (section 12) | scored against |
+|---|---|---|
+| PB-1 | the plain-block total's median **105-128**; thread-blocks **0** in every run; peak OS threads **at most 39** in every run | each default arm's own runs |
+| PB-4 | go.*.dll **+0.05 to +0.35 MB** over arm N | section 12's arm N as recorded: **83,961,344** bytes (DATA-mn-n2-receivers.md). Path-length and SDK sensitive (12.1's PDB-path rule): off G's box, read it as reported |
+| PB-6 | Go's 9 lines in **every** closure run | every run |
+
+The readings file adds a **population table**: section 12's arm N as recorded (twinned 3,806; refused parkers 175;
+byref-param 63; named-plain 24) beside this tree's n1, d1 and d2, read from the twin reports. It shows twinned, refused
+(the sum of each `// refused <reason>=N`), refused parkers (the sum of `blocked=`), byref-param refused and parking, and
+box named-plain. A population shift is then visible before any line reads as a miss. 12.1's n1-relative forms (a fall of
+4-21% from N, threads at most N's, bytes over N) are still printed, marked REPORTED and not scored.
+

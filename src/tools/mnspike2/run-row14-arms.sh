@@ -76,6 +76,18 @@ purge() {
 tracked=$(git -C "$src" ls-files -- src/core 2>/dev/null | grep -cE '/(bin|obj|Generated)/' || true)
 [ "${tracked:-0}" = "0" ] || die "src/core tracks $tracked file(s) under bin/obj/Generated; the purge would delete them"
 
+# bytes_of DIR: "<count> <bytes>" of the go.*.dll beside the assembly DIR/summary.txt records, or a reason and rc 1.
+bytes_of() {
+    local asm folder
+    asm=$(sed -n 's/^assembly: //p' "$1/summary.txt" 2>/dev/null | tail -1)
+    [ -n "$asm" ] || { echo "no 'assembly:' line in $1/summary.txt (run-mn-closure.sh older than the kit?)"; return 1; }
+    [ -f "$asm" ] || { echo "the recorded assembly '$asm' is not a file"; return 1; }
+    folder=$(dirname "$asm")
+    set -- "$folder"/go.*.dll
+    [ -f "$1" ] || { echo "no go.*.dll beside the recorded assembly in '$folder'"; return 1; }
+    ls -l "$folder"/go.*.dll | awk '{ s += $5; n++ } END { print n + 0, s + 0 }'
+}
+
 median() { sort -n | awk '{ v[NR] = $1 } END { if (NR == 0) { print "?"; exit } m = int((NR + 1) / 2); if (NR % 2) print v[m]; else printf "%.1f\n", (v[m] + v[m + 1]) / 2 }'; }
 field() { sed -n "s/.* $1=\([0-9][0-9]*\).*/\1/p"; }
 
@@ -110,11 +122,11 @@ arm() {
         echo $((h + t)) >> "$dir/total.txt"; echo "$t" >> "$dir/tb.txt"; echo "$p" >> "$dir/threads.txt"; echo "${w:-0}" >> "$dir/wall.txt"
     done < "$dir/runs.txt"
 
-    # PB-4: go.*.dll beside the program's assembly, summed.
-    local bindir
-    bindir=$(dirname "$(find "$dir/out/src/MnHttpClosure/bin" -name MnHttpClosure.dll -path "*$config*" 2>/dev/null | head -1)")
-    [ -d "$bindir" ] || die "arm $name: no MnHttpClosure.dll under $dir/out/src/MnHttpClosure/bin"
-    ls -l "$bindir"/go.*.dll 2>/dev/null | awk '{ s += $5; n++ } END { print n + 0, s + 0 }' > "$dir/bytes.txt"
+    # PB-4: go.*.dll beside the program's assembly, summed. The folder is the one run-mn-closure.sh resolved through
+    # MSBuild's TargetPath and recorded as `assembly:` (the build writes under the output root's .artifacts tree, not
+    # the project's own bin). Anything less than a recorded, existing assembly with go.*.dll beside it stops the arm by
+    # name: a guessed folder once summed the working directory and read 0 bytes as a reading.
+    bytes_of "$dir" > "$dir/bytes.txt" || die "arm $name: $(cat "$dir/bytes.txt")"
 
     # Host-independent: the twin reports this arm's build wrote, summed (12.1's report lines). Kept whole for the reader.
     find "$src/core" "$dir/out" -name 'go2cs.twins.report.g.cs' -newer "$stamp" 2>/dev/null > "$dir/reports.list"
@@ -124,6 +136,10 @@ arm() {
         grep -o 'twinned=[0-9]*' "$dir/reports.txt" | awk -F= '{ s += $2 } END { print s + 0 }'
         grep -o 'refused byref-param=[0-9]*' "$dir/reports.txt" | awk -F= '{ s += $2 } END { print s + 0 }'
         grep '^// box:' "$dir/reports.txt" | grep -o 'plain=[0-9]*' | awk -F= '{ s += $2 } END { print s + 0 }'
+        # `// refused <reason>=N blocked=M`, one reason per line: N refused members, M of them parking.
+        grep '^// refused ' "$dir/reports.txt" | sed -n 's/^\/\/ refused [^=]*=\([0-9][0-9]*\) blocked=\([0-9][0-9]*\).*/\1 \2/p' |
+            awk '{ n += $1; b += $2 } END { print n + 0; print b + 0 }'
+        grep '^// refused byref-param=' "$dir/reports.txt" | sed -n 's/.* blocked=\([0-9][0-9]*\).*/\1/p' | awk '{ s += $1 } END { print s + 0 }'
     } > "$dir/twins.txt"
 }
 
@@ -153,33 +169,60 @@ md="$root/row14-readings.md"
     row d1; row n1; row d2
 } > "$md"
 
-# ---- scoring, per DESIGN-mn-box-twin.md 12.1 (which supersedes 12 where they differ); predictions as written ----
+# ---- scoring: section 12's ABSOLUTE clauses as written, against its own arm N (DATA-mn-n2-receivers.md) ----
+# Row 14's n1 is arm N's switches on THIS tree, and this tree is not section 12's: the twin set has moved since. So the
+# scored lines compare with the numbers section 12 states (PB-1's 105-128, threads at most 39, thread-blocks 0) and with
+# section 12's arm N as recorded (83,961,344 go.*.dll bytes; twinned 3,806; refused 175; byref-param 63; named-plain 24).
+# n1's own population is printed beside those, so a population shift is visible before anything is read as a miss; the
+# n1-relative forms (12.1) are REPORTED, not scored.
+REC_N_BYTES=83961344 REC_N_TWINNED=3806 REC_N_REFUSED=175 REC_N_BYREF=63 REC_N_PLAIN=24
+pop() { # arm -> "twinned refused refused-parking byref-param byref-param-parking box-plain"
+    local rep tw rb np ra rp bp
+    { read -r rep; read -r tw; read -r rb; read -r np; read -r ra; read -r rp; read -r bp; } < "$root/$1/twins.txt"
+    echo "$tw $ra $rp $rb $bp $np"
+}
+in_mb() { # delta -> MET / MISSED / one-unit note, against +0.05 to +0.35 MB read both ways
+    if [ "$1" -ge 52429 ] && [ "$1" -le 350000 ]; then echo MET
+    elif [ "$1" -ge 50000 ] && [ "$1" -le 367002 ]; then echo "MET in one unit only (MB 10^6 against MiB): name both"
+    else echo MISSED; fi
+}
 n_tot=$(median < "$root/n1/total.txt"); n_thr=$(sort -n "$root/n1/threads.txt" | tail -1)
 read -r _ n_bytes < "$root/n1/bytes.txt"
 score() {
     local a=$1 d="$root/$1"
-    local tot tb thr bytes fall delta
+    local tot tb thr bytes runs fall pb1 c1 c2 c3
     tot=$(median < "$d/total.txt"); tb=$(sort -n "$d/tb.txt" | tail -1); thr=$(sort -n "$d/threads.txt" | tail -1)
+    runs=$(wc -l < "$d/total.txt" | tr -d ' ')
     read -r _ bytes < "$d/bytes.txt"
+    c1=MISSED; awk -v t="$tot" 'BEGIN { exit !(t >= 105 && t <= 128) }' && c1=MET
+    c2=MISSED; [ "$tb" = 0 ] && c2=MET
+    c3=MISSED; [ "$thr" -le 39 ] && c3=MET
+    pb1=MISSED; [ $c1 = MET ] && [ $c2 = MET ] && [ $c3 = MET ] && pb1=MET
+    echo "- $a, PB-1 $pb1: total median $tot against 105-128 ($c1); thread-blocks max $tb over $runs runs against 0 in every run ($c2); peak OS threads max $thr against at most 39 in every run ($c3)."
+    echo "- $a, PB-4 $(in_mb $((bytes - REC_N_BYTES))): go.*.dll $bytes against section 12's arm N $REC_N_BYTES, $((bytes - REC_N_BYTES)) bytes against +0.05 to +0.35 MB. Path-length and SDK sensitive (12.1's PDB-path rule): on a box other than G's, or a root path of another length, read it as reported."
     fall=$(awk -v n="$n_tot" -v d="$tot" 'BEGIN { printf "%.1f", (n - d) * 100 / n }')
-    delta=$((bytes - n_bytes))
-    local pb1=MISSED pb4=MISSED
-    awk -v f="$fall" 'BEGIN { exit !(f >= 4 && f <= 21) }' && [ "$tb" = 0 ] && [ "$thr" -le "$n_thr" ] && pb1=MET
-    if [ $delta -ge 52429 ] && [ $delta -le 367002 ] && [ $delta -ge 50000 ] && [ $delta -le 350000 ]; then pb4=MET
-    elif [ $delta -ge 50000 ] && [ $delta -le 367002 ]; then pb4="MET in one unit only (MB 10^6 against MiB): name both"; fi
-    echo "- $a against n1: PB-1 $pb1 (total median $n_tot -> $tot, a fall of $fall% against 4-21%; thread-blocks max $tb against 0; peak OS threads max $thr against n1's $n_thr). PB-4 $pb4 (go.*.dll $n_bytes -> $bytes, $delta bytes against +0.05 to +0.35 MB). PB-6 MET (every run EQUAL to Go; the arm would have failed otherwise)."
+    echo "- $a, REPORTED against this tree's n1 (12.1's relative forms, not scored): total $n_tot -> $tot ($fall% fall; 12.1 says 4-21%); threads max $n_thr -> $thr; go.*.dll $n_bytes -> $bytes ($((bytes - n_bytes)) bytes, $(in_mb $((bytes - n_bytes))))."
+    echo "- $a, PB-6 MET: every run EQUAL to Go (the arm would have stopped otherwise)."
 }
 d1_tot=$(median < "$root/d1/total.txt"); d2_tot=$(median < "$root/d2/total.txt")
 read -r _ d1_b < "$root/d1/bytes.txt"; read -r _ d2_b < "$root/d2/bytes.txt"
 {
     echo
-    echo "## Scoring (DESIGN-mn-box-twin.md 12.1 as written; arm n1 is N on this box)"
+    echo "## Population (host-independent; section 12's arm N as recorded in DATA-mn-n2-receivers.md beside this tree's arms)"
+    echo
+    echo "| arm | twinned | refused (sum of N) | refused parkers (sum of blocked) | byref-param refused | byref-param parking | box named-plain |"
+    echo "|---|---:|---:|---:|---:|---:|---:|"
+    echo "| section 12's arm N (recorded) | $REC_N_TWINNED | | $REC_N_REFUSED | $REC_N_BYREF | | $REC_N_PLAIN |"
+    for a in n1 d1 d2; do set -- $(pop $a); echo "| $a | $1 | $2 | $3 | $4 | $5 | $6 |"; done
+    echo
+    echo "If n1 differs from the recorded arm N here, the tree's twin set has moved: the absolute clauses below still read as written, and the relative lines say by how much this tree's own N differs."
+    echo
+    echo "## Scoring (DESIGN-mn-box-twin.md section 12's absolute clauses, as written)"
     echo
     score d1
     score d2
     echo "- A/A (d1 against d2): total median $d1_tot against $d2_tot (spread $(awk -v a="$d1_tot" -v b="$d2_tot" 'BEGIN { d = a - b; if (d < 0) d = -d; printf "%.1f", d }')); go.*.dll $d1_b against $d2_b ($((d1_b - d2_b)) bytes). A d1/d2 pair that disagrees on MET is inside the band: say so rather than pick one."
-    echo "- As written in section 12 on G's box (12 cores): total 105-128 and peak OS threads at most 39 in every run. Quote it only when this box is G's."
-    echo "- Not read by row 14: SB-3 (needs the plain arm P), PB-2/3/5 are host-independent (the table's report columns, for the reader)."
+    echo "- Not scored by row 14: SB-3 (needs the plain arm P); PB-2/3/5 are the population table's, for the reader against section 12's ranges."
 } >> "$md"
 cat "$md" | tee -a "$log" > /dev/null
 say ""

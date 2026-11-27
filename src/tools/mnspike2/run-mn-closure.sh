@@ -85,6 +85,9 @@ note "build rc=$rc wall=$(( $(date +%s) - t0 ))s ${gd:+[$gd]}"
 
 dll=$(dotnet msbuild "$proj" -nologo -p:Configuration="$config" -p:go2csPath="$src/" ${goos_arg[@]+"${goos_arg[@]}"} -getProperty:TargetPath 2>/dev/null | tr -d '\r')
 [ -f "$dll" ] || fail "no assembly at '$dll'"
+# The resolved assembly, for a caller that reads the bytes beside it (run-row14-arms.sh). The build may write under the
+# output root's .artifacts tree rather than the project's own bin, so a caller must not guess the folder.
+note "assembly: $dll"
 
 ref="$out/go.stdout"
 if run_deadline "$timeout_s" "" sh -c 'cd "$1" && exec go run .' sh "$prog" > "$ref" 2> "$out/go.stderr"; then
