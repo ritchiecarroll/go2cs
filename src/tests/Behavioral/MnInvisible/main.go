@@ -206,8 +206,10 @@ func v9(k int) {
 	if balance != nil {
 		_, _, on = balance()
 	}
+	var h0 int64
 	if on {
 		b0, f0 = quiet()
+		h0, _, _, _, _ = counters()
 	}
 	gate := make(chan struct{})
 	done := make(chan int, k)
@@ -221,6 +223,11 @@ func v9(k int) {
 	}
 	ok := n == k
 	if on {
+		// Not vacuous: every goroutine's two Blocks calls handed a P off (k goroutines, 2 calls each).
+		if h1, _, _, _, _ := counters(); h1-h0 < int64(2*k) {
+			fmt.Fprintf(os.Stderr, "V9 handoffs rose by %d, under 2k = %d: the crossings did not hand off\n", h1-h0, 2*k)
+			ok = false
+		}
 		deadline := time.Now().Add(5 * time.Second)
 		for {
 			b, f, _ := balance()

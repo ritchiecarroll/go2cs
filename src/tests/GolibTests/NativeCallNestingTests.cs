@@ -34,8 +34,10 @@ namespace GolibTests;
 //   control-retaken-outer   a MayBlock outer the monitor RETOOK -> callback -> Blocks, K=8; retakes must rise
 //                           (G's trace: the inner Enter swaps Retaken 1 -> 0 with no second release)   green both sides
 //   liveness-p1             Blocks -> callback -> Blocks, K=64 at one P: the callback's ExitBlocked waits for the one
-//                           P, which another goroutine's native call holds until the monitor retakes it (3b and the
-//                           fix compose). It completes, and the counts return to base.   counts red before the fix
+//                           P, which another goroutine's native call holds 20 ms until the monitor retakes it (3b and
+//                           the fix compose; retakes must rise). It completes, and the counts return to base.
+//                           counts red before the fix
+//   (this process, scheduler off) the same crossings move neither blocked nor p-free nor handoffs
 //
 // Made to fail: revert the ReenterManaged branch (GoNativeCall.cs) -> the two nested rows and liveness-p1 read
 // blocked and p-free raised by K; the controls stay green. ReturnToNative's MayBlock form gets no plant: a Blocks
@@ -78,11 +80,63 @@ public class NativeCallNestingTests
             long retaken = Counter(GoScheduler.Reading(), "retakes") - retakes;
             Assert.IsTrue(retaken > 0, $"control-retaken-outer is vacuous: the monitor retook no outer call ({GoScheduler.Reading()})");
 
-            Balanced("liveness-p1", baseline, () => RunConcurrently(64, () => Nest(2, holdAfterMs: 1)));
+            // P3's SHOULD: the hold after the callback is 20 ms, past several monitor ticks even where a 1 ms sleep and a
+            // 2 ms tick round to a 15.6 ms timer period, so the one P the callback took is held until the monitor
+            // RETAKES it, and the row asserts that it did: it proves 3b's retake and the fix compose, not luck.
+            retakes = Counter(GoScheduler.Reading(), "retakes");
+            Balanced("liveness-p1", baseline, () => RunConcurrently(64, () => Nest(2, holdAfterMs: 20)));
+            retaken = Counter(GoScheduler.Reading(), "retakes") - retakes;
+            Assert.IsTrue(retaken > 0, $"liveness-p1 is vacuous: the monitor retook no held P ({GoScheduler.Reading()})");
         }
 
         if (s_failures.Count > 0)
             Assert.Fail(string.Join("\n", s_failures));
+    }
+
+    // Default mode (P3's NIT): with the scheduler off there is no P to hand off, so the same crossings move neither
+    // count. Run in this process, on goroutine threads; under a GO2CS_MN=1 test run it is NOT MEASURED.
+    [TestMethod]
+    public void WithTheSchedulerOffNestedNativeCallbacksMoveNoCount()
+    {
+        if (GoScheduler.Enabled)
+            Assert.Inconclusive("GO2CS_MN=1 is set for this run: the scheduler-off row is NOT MEASURED");
+
+        string before = GoScheduler.Reading();
+        Exception? failure = null;
+        Thread[] threads = new Thread[8];
+
+        for (int i = 0; i < threads.Length; i++)
+        {
+            threads[i] = new Thread(() =>
+            {
+                try
+                {
+                    using Goroutine.Scope scope = Goroutine.Enter();
+                    Nest(3);
+                    MayBlockOuter(holdMs: 1);
+                }
+                catch (Exception ex)
+                {
+                    Interlocked.CompareExchange(ref failure, ex, null);
+                }
+            });
+
+            threads[i].Start();
+        }
+
+        foreach (Thread thread in threads)
+            Assert.IsTrue(thread.Join(60_000), "a crossing finished");
+
+        if (failure is not null)
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+
+        string after = GoScheduler.Reading();
+
+        foreach (string name in new[] { "blocked", "p-free", "handoffs" })
+        {
+            Assert.IsTrue(Counter(before, name) >= 0, $"the reading names {name}: {before}");
+            Assert.AreEqual(Counter(before, name), Counter(after, name), $"{name} moved with the scheduler off: {before} -> {after}");
+        }
     }
 
     [TestMethod]

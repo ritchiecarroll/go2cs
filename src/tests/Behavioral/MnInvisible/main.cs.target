@@ -178,8 +178,10 @@ internal static partial void v9(nint k) {
     if (balance != nil) {
         (_, _, on) = balance();
     }
+    int64 h0 = default;
     if (on) {
         (b0, f0) = quiet();
+        (h0, _, _, _, _) = counters();
     }
     var gate = new channel<EmptyStruct>(0);
     var done = new channel<nint>(k);
@@ -193,6 +195,10 @@ internal static partial void v9(nint k) {
     }
     var ok = n == k;
     if (on) {
+        var (h1, _, _, _, _) = counters(); if (h1 - h0 < (int64)(2 * k)) {
+            fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "V9 handoffs rose by %d, under 2k = %d: the crossings did not hand off\n"u8, h1 - h0, 2 * k);
+            ok = false;
+        }
         var deadline = time.Now().Add((time.Duration)(5000000000L));
         for (;;) {
             var (b, f, _) = balance();
