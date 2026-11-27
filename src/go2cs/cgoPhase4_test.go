@@ -160,11 +160,30 @@ func TestCgoPhase4EASideBuildUnderPkgConfigIsRefusedByName(t *testing.T) {
 // library's (review of 500b0855c7, #5): cmd/cgo compiles the preamble's own, so the library's is not what C calls.
 func TestCgoPhase4FAPreambleDefinitionALibraryAlsoExportsIsRefusedByName(t *testing.T) {
 	probeDir := cgoRealProbeDir(t)
-	program := "package main\n\n/*\nstatic int isatty(int fd) { return 42; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"isatty\", C.isatty(0)) }\n"
+
+	// A name the target's C runtime exports from a shared library: the UCRT exports _isatty, not isatty (mingw's isatty
+	// is a static alias, so on windows a preamble isatty collides with nothing and is side-built; f3b092c978's windows
+	// leg, 46029370800).
+	name := "isatty"
+
+	if runtime.GOOS == "windows" {
+		name = "_isatty"
+	}
+
+	program := "package main\n\n/*\nstatic int " + name + "(int fd) { return 42; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"tty\", C." + name + "(0)) }\n"
 	combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{"main.go": program})
 	requireNothingWritten(t, output, err, combined)
 	t.Logf("READING %s/%s: the conversion's output ends:\n%s", runtime.GOOS, runtime.GOARCH, lastLines(combined, 12))
-	requireCgoUseRefused(t, cgoRefusalLinesIn(combined, "main.go"), "main.go(", "C.isatty")
+	requireCgoUseRefused(t, cgoRefusalLinesIn(combined, "main.go"), "main.go(", "C."+name+":")
+}
+
+// A relative #cgo CFLAGS include directory is the package directory's, as cmd/go runs each cgo compile there (review
+// of 500b0855c7, (c)): the side compile must find sub/dir/go2cs_rel.h through -Isub/dir.
+func TestCgoPhase4GARelativeIncludeDirectoryIsThePackages(t *testing.T) {
+	runCgoPhase4Files(t, map[string]string{
+		"main.go":             "package main\n\n/*\n#cgo CFLAGS: -Isub/dir\n#include <go2cs_rel.h>\nstatic int rel(void) { return GO2CS_REL; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"rel\", C.rel()) }\n",
+		"sub/dir/go2cs_rel.h": "#define GO2CS_REL 5\n",
+	})
 }
 
 // cgoPhase4PathNeedles are the path spellings a side library must not carry: the side build's work-directory stem, and
@@ -184,10 +203,15 @@ func cgoPhase4PathNeedles(module string) []string {
 // and compares the two runs.
 func runCgoPhase4(t *testing.T, program string) {
 	t.Helper()
+	runCgoPhase4Files(t, map[string]string{"main.go": program})
+}
+
+// runCgoPhase4Files is runCgoPhase4 over a package of several files, main.go among them.
+func runCgoPhase4Files(t *testing.T, files map[string]string) {
+	t.Helper()
 
 	probeDir := cgoRealProbeDir(t)
 	target := runtime.GOOS + "/" + runtime.GOARCH
-	files := map[string]string{"main.go": program}
 
 	combined, input, output, err := convertCgoReal(t, probeDir, files)
 
@@ -235,7 +259,9 @@ func runCgoPhase4(t *testing.T, program string) {
 	// go's own build, with this host's compiler, in the same environment the conversion read.
 	module := t.TempDir()
 	writeCgoFixture(t, module, "go.mod", "module example.com/cgop4\n\ngo 1.26\n")
-	writeCgoFixture(t, module, "main.go", program)
+	for name, contents := range files {
+		writeCgoFixture(t, module, name, contents)
+	}
 
 	binaries := t.TempDir()
 	goProgram := filepath.Join(binaries, "p4go")
