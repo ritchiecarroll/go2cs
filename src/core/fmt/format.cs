@@ -91,7 +91,8 @@ internal static void pad⁔(/*this*/ ref fmt f, slice<byte> b) {
         f.buf.write(b);
         return;
     }
-    nint width = f.wid - utf8.RuneCount(b);
+    var evalᴛ1 = utf8.RuneCount(b);
+    nint width = f.wid - evalᴛ1;
     if (!f.minus) {
         // left padding
         f.writePadding(width);
@@ -109,7 +110,8 @@ internal static void padString⁔(/*this*/ ref fmt f, sstring s) {
         f.buf.writeString(s);
         return;
     }
-    nint width = f.wid - utf8.RuneCountInString(s);
+    var evalᴛ1 = utf8.RuneCountInString(s);
+    nint width = f.wid - evalᴛ1;
     if (!f.minus) {
         // left padding
         f.writePadding(width);

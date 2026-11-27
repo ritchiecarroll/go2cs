@@ -81,10 +81,10 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsggANIoIAEy6C")]
-[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADd+oJaAmrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggACFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUqIA=")]
-[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACVMgAABEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABIuspaSyoKUgoKCgoKCpoKClKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCApoCWgAABEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiA", "61-63:1")]
+[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADd+oJaAmrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgsamotyCgoKCgpSUgoLGAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCtoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoK6ooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggACFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUqIA=")]
+[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACVMgAABEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABIuspaSyoKUgoKCgoKCpoKCpKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCApoCWgAABEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiA", "61-63:1")]
 [assembly: GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
-[assembly: GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "ABAcsoKUlJQABBCygqaCgoKCgg==", "16-21:1")]
+[assembly: GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "ABAcsoKUlKQABBCygqaCgoKCgg==", "16-21:1")]
 [assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKClA==")]
 [assembly: GoPositionMap("internal/pkgbits/version.go", "version.cs", "AECIAQAHEN6S")]
 // </GoSourcePositionMaps>

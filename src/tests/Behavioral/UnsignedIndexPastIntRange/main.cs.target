@@ -16,7 +16,8 @@ internal static void @try(@string name, Func<byte> f) {
                 fmt.Printf("%s: %v\n"u8, name, r);
             }
         }, ref ᒐ);
-        fmt.Printf("%s: read %d\n"u8, name, f());
+        var evalᴛ1 = f();
+        fmt.Printf("%s: read %d\n"u8, name, evalᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

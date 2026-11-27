@@ -240,9 +240,14 @@ internal static partial void probeRequestBody⁔(/*this*/ ж<transferWriter> Ꮡ
             t.ContentLength = 0;
         } else if (rres.n == 1) {
             if (rres.err != nil) {
-                t.Body = io.MultiReader(new byteReaderжReader(Ꮡ(new byteReader(b: rres.b))), new errorReader(rres.err));
+                var evalᴛ1 = Ꮡ(new byteReader(b: rres.b));
+                var evalᴛ2 = new errorReader(rres.err);
+                var evalᴛ3 = io.MultiReader(new byteReaderжReader(evalᴛ1), evalᴛ2);
+                t.Body = evalᴛ3;
             } else {
-                t.Body = io.MultiReader(new byteReaderжReader(Ꮡ(new byteReader(b: rres.b))), t.Body);
+                var evalᴛ4 = Ꮡ(new byteReader(b: rres.b));
+                var evalᴛ5 = io.MultiReader(new byteReaderжReader(evalᴛ4), t.Body);
+                t.Body = evalᴛ5;
             }
         } else if (rres.err != nil) {
             t.Body = new errorReader(rres.err);
@@ -254,7 +259,9 @@ internal static partial void probeRequestBody⁔(/*this*/ ж<transferWriter> Ꮡ
         // assuming that this is ContentLength == -1
         // (unknown), which means we'll send a
         // "Transfer-Encoding: chunked" header.
-        t.Body = io.MultiReader(new finishAsyncByteRead(Ꮡt), t.Body);
+        var evalᴛ6 = new finishAsyncByteRead(Ꮡt);
+        var evalᴛ7 = io.MultiReader(evalᴛ6, t.Body);
+        t.Body = evalᴛ7;
         // Request that Request.Write flush the headers to the
         // network before writing the body, since our body may not
         // become readable until it's seen the response headers.

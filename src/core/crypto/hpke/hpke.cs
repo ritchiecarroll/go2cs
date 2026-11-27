@@ -194,7 +194,8 @@ internal static (slice<byte>, error) Seal⁔(/*this*/ ref Sender s, slice<byte> 
     if (s.aead == nil) {
         return (default, errors.New(exportOnlyInstantiationˢ));
     }
-    var ciphertext = s.aead.Seal(default, s.nextNonce(), plaintext, aad);
+    var evalᴛ1 = s.nextNonce();
+    var ciphertext = s.aead.Seal(default, evalᴛ1, plaintext, aad);
     s.seqNum++;
     return (ciphertext, default);
 }

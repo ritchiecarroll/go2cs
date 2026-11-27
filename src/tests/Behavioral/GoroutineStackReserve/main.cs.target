@@ -28,7 +28,8 @@ internal static partial void main() {
 
     var deepʗ1 = deep;
     goǃ([GoFunc("main.func1")] () => {
-        deepʗ1.ᐸꟷ(depthOf(depth, new nint[]{}.array(4)));
+        var evalᴛ1 = depthOf(depth, new nint[]{}.array(4));
+        deepʗ1.ᐸꟷ(evalᴛ1);
     });
 
     fmt.Println("deep recursion levels:", ᐸꟷ(deep));

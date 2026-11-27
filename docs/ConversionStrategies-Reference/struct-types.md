@@ -825,7 +825,7 @@ func convLocal(h hertz) int       { x := struct{ Hz int }(h); x.Hz++; return x.H
 func sameLocal(a struct{ Hz int }, h hertz) (bool, bool)       { return a == h, h != a }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:34-82 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:34-85 -->
 ```csharp
 internal static hertz made() { return (hertz)lib.Middle(); }
 …
@@ -851,7 +851,7 @@ internal static nint convLocal(hertz h) {
   user-defined `==` candidates for `a == h` (CS9342), so the unnamed side is cast: `(hertz)a == h`. A `switch`
   whose tag and case value are one of each does the same in its `when` clause.
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246-592 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:249-596 -->
 ```csharp
 internal static (bool, bool) sameLocal(anonBox_V a, hertz h) { return ((hertz)a == h, h != (hertz)a); }
 …
@@ -913,7 +913,7 @@ func laterTempo() (r struct{ Bpm int }) {
 }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:681-834 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:688-842 -->
 ```csharp
 internal static nint liftVar() {
     liftVar_x x = laterTempo();

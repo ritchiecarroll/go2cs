@@ -106,8 +106,10 @@ internal static partial void main() {
     fmt.Println("the spinners ran:", a.Ꮡspins.Load() > 0);
 
     if (os.Getenv("MN_SPIN_READING") == "1"u8) {
+        var evalᴛ1 = elapsed.Microseconds();
+        var evalᴛ2 = a.Ꮡspins.Load();
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: procs=%d spinners=%d elapsed_ms=%.1f spins=%d\n"u8,
-            procs, spinners, (float64)elapsed.Microseconds() / 1000D, a.Ꮡspins.Load());
+            procs, spinners, (float64)evalᴛ1 / 1000D, evalᴛ2);
     }
 }
 

@@ -140,8 +140,11 @@ library solution holds only libraries, so it has nothing to start.
 
 In VS Code, open the repository root: the committed `.vscode/settings.json` selects `src/go2cs.slnx` as
 the C# Dev Kit's solution (opening `src/` selects it too), and **Terminal > Run Build Task** builds it. The Go
-extension's workspace leaves out the behavioral tests, the converted standard library, the archived examples and
-`docs/`, whose small Go modules would otherwise fill its views; open one of those folders on its own to work in it.
+extension's language server leaves out the behavioral tests, the converted standard library, the archived examples
+and `docs/`, whose small Go modules would otherwise fill its views; open one of those folders on its own to work in it.
+The Go extension's Test Explorer is turned off at the root, because it lists every `go.mod` it finds and has no
+setting to leave any out; run the converter's tests with `go test` in `src/go2cs`, or with the **run test** link
+above each test function, or open `src/go2cs` on its own to get the Test Explorer back.
 
 ## Contributing
 

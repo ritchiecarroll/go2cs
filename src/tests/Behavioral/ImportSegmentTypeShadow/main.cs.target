@@ -23,7 +23,8 @@ internal static void main() {
     s.bump(Ꮡc);
     s.bump(Ꮡc);
 
-    fmt.Println(s.label, s.hits, Ꮡc.Load());
+    var evalᴛ1 = Ꮡc.Load();
+    fmt.Println(s.label, s.hits, evalᴛ1);
 }
 
 } // end main_package

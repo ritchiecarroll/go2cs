@@ -69,7 +69,8 @@ internal static void churn() {
 internal static void main() {
     @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡtbl), 8), (Func<nint, nint, nint>)add);
     fmt.Println("1 func store at +8 landed:", tbl.a != 0);
-    fmt.Println("1 slot is add's word:", tbl.a == wordOf(add));
+    var evalᴛ1 = wordOf(add);
+    fmt.Println("1 slot is add's word:", tbl.a == evalᴛ1);
     func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {

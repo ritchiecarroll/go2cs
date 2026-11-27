@@ -361,8 +361,18 @@ internal static void main() {
     selfer sx = new aStmtжselfer(@as);
     selfer sy = new aIfжselfer(ai);
     var (_, aok) = ((any)ai.OrTypedNil())._<selfer>(ᐧ);
-    fmt.Println("A", @as.of(aStmt.ᏑaDefault).Self().k, ai.of(aIf.ᏑaDefault).Self().k, sx.Self().k, sy.Self() == ai.of(aIf.ᏑaNode), ai.of(aIf.ᏑaSide).Flag(), aok);
-    fmt.Println("A", @as.of(aStmt.ᏑaNode).Root().k, ai.of(aIf.ᏑaNode).Root().k, sx.Root().k, sy.Root() == ai.of(aIf.ᏑaNode), @as.hits, ai.hits);
+    var evalᴛ1 = @as.of(aStmt.ᏑaDefault).Self();
+    var evalᴛ2 = ai.of(aIf.ᏑaDefault).Self();
+    var evalᴛ3 = sx.Self();
+    var evalᴛ4 = sy.Self();
+    var evalᴛ5 = evalᴛ4 == ai.of(aIf.ᏑaNode);
+    var evalᴛ6 = ai.of(aIf.ᏑaSide).Flag();
+    fmt.Println("A", evalᴛ1.k, evalᴛ2.k, evalᴛ3.k, evalᴛ5, evalᴛ6, aok);
+    var evalᴛ7 = @as.of(aStmt.ᏑaNode).Root();
+    var evalᴛ8 = ai.of(aIf.ᏑaNode).Root();
+    var evalᴛ9 = sx.Root();
+    var evalᴛ10 = sy.Root();
+    fmt.Println("A", evalᴛ7.k, evalᴛ8.k, evalᴛ9.k, evalᴛ10 == ai.of(aIf.ᏑaNode), @as.hits, ai.hits);
 
     var bb = Ꮡ(new bBoth());
     var bo = Ꮡ(new bOuter());
@@ -381,7 +391,11 @@ internal static void main() {
     bi.n = 5;
     flowData fx = new bStmtжflowData(bs);
     flowData fy = new bIfжflowData(bi);
-    fmt.Println("B", bs.of(bStmt.ᏑbFlow).Data().n, bi.of(bIf.ᏑbFlow).Data().n, fx.Data().n, fy.Data() == bi.of(bIf.ᏑbFlow));
+    var evalᴛ11 = bs.of(bStmt.ᏑbFlow).Data();
+    var evalᴛ12 = bi.of(bIf.ᏑbFlow).Data();
+    var evalᴛ13 = fx.Data();
+    var evalᴛ14 = fy.Data();
+    fmt.Println("B", evalᴛ11.n, evalᴛ12.n, evalᴛ13.n, evalᴛ14 == bi.of(bIf.ᏑbFlow));
 
     var cb = Ꮡ(new cBase());
     cb.k = 1;
@@ -420,9 +434,20 @@ internal static void main() {
     var tokenNode = newNode(4, new gTokenжgData(Ꮡ(new gToken())));
     var refNode = newNode(5, new gRefжgData(Ꮡ(new gRef())));
     var v = Ꮡ(new gVisitor());
-    fmt.Println("G", ifNode.AsNode() == ifNode, ifNode.VisitEachChild(v) == ifNode, ifNode.FlowNodeData().flow,
-        ifNode.Modifiers(), ifNode.propagateSubtreeFacts(), ifNode.data.subtreeFactsWorker(ifNode.data));
-    fmt.Println("G", varNode.FlowNodeData().flow, varNode.Modifiers(), varNode.propagateSubtreeFacts());
+    var evalᴛ15 = ifNode.AsNode();
+    var evalᴛ16 = evalᴛ15 == ifNode;
+    var evalᴛ17 = ifNode.VisitEachChild(v);
+    var evalᴛ18 = evalᴛ17 == ifNode;
+    var evalᴛ19 = ifNode.FlowNodeData();
+    var evalᴛ20 = ifNode.Modifiers();
+    var evalᴛ21 = ifNode.propagateSubtreeFacts();
+    var evalᴛ22 = ifNode.data.subtreeFactsWorker(ifNode.data);
+    fmt.Println("G", evalᴛ16, evalᴛ18, evalᴛ19.flow,
+        evalᴛ20, evalᴛ21, evalᴛ22);
+    var evalᴛ23 = varNode.FlowNodeData();
+    var evalᴛ24 = varNode.Modifiers();
+    var evalᴛ25 = varNode.propagateSubtreeFacts();
+    fmt.Println("G", evalᴛ23.flow, evalᴛ24, evalᴛ25);
     fmt.Println("G", unionNode.FlowNodeData() == nil, unionNode.propagateSubtreeFacts(),
         unionNode.data.computeSubtreeFacts(), unionNode.data.subtreeFactsWorker(unionNode.data));
     fmt.Println("G", tokenNode.VisitEachChild(v) == tokenNode, tokenNode.FlowNodeData() == nil,

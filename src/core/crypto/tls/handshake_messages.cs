@@ -747,35 +747,55 @@ internal static slice<byte> originalBytes⁔(/*this*/ ref clientHelloMsg m) {
 }
 
 internal static ж<clientHelloMsg> clone⁔(/*this*/ ref clientHelloMsg m) {
+    var evalᴛ1 = slices.Clone<slice<byte>, byte>(m.original);
+    var evalᴛ2 = slices.Clone<slice<byte>, byte>(m.random);
+    var evalᴛ3 = slices.Clone<slice<byte>, byte>(m.sessionId);
+    var evalᴛ4 = slices.Clone<slice<uint16>, uint16>(m.cipherSuites);
+    var evalᴛ5 = slices.Clone<slice<uint8>, uint8>(m.compressionMethods);
+    var evalᴛ6 = slices.Clone<slice<CurveID>, CurveID>(m.supportedCurves);
+    var evalᴛ7 = slices.Clone<slice<uint8>, uint8>(m.supportedPoints);
+    var evalᴛ8 = slices.Clone<slice<uint8>, uint8>(m.sessionTicket);
+    var evalᴛ9 = slices.Clone<slice<SignatureScheme>, SignatureScheme>(m.supportedSignatureAlgorithms);
+    var evalᴛ10 = slices.Clone<slice<SignatureScheme>, SignatureScheme>(m.supportedSignatureAlgorithmsCert);
+    var evalᴛ11 = slices.Clone<slice<byte>, byte>(m.secureRenegotiation);
+    var evalᴛ12 = slices.Clone<slice<@string>, @string>(m.alpnProtocols);
+    var evalᴛ13 = slices.Clone<slice<uint16>, uint16>(m.supportedVersions);
+    var evalᴛ14 = slices.Clone<slice<byte>, byte>(m.cookie);
+    var evalᴛ15 = slices.Clone<slice<keyShare>, keyShare>(m.keyShares);
+    var evalᴛ16 = slices.Clone<slice<uint8>, uint8>(m.pskModes);
+    var evalᴛ17 = slices.Clone<slice<pskIdentity>, pskIdentity>(m.pskIdentities);
+    var evalᴛ18 = slices.Clone<slice<slice<byte>>, slice<byte>>(m.pskBinders);
+    var evalᴛ19 = slices.Clone<slice<byte>, byte>(m.quicTransportParameters);
+    var evalᴛ20 = slices.Clone<slice<byte>, byte>(m.encryptedClientHello);
     return Ꮡ(new clientHelloMsg(
-        original: slices.Clone<slice<byte>, byte>(m.original),
+        original: evalᴛ1,
         vers: m.vers,
-        random: slices.Clone<slice<byte>, byte>(m.random),
-        sessionId: slices.Clone<slice<byte>, byte>(m.sessionId),
-        cipherSuites: slices.Clone<slice<uint16>, uint16>(m.cipherSuites),
-        compressionMethods: slices.Clone<slice<uint8>, uint8>(m.compressionMethods),
+        random: evalᴛ2,
+        sessionId: evalᴛ3,
+        cipherSuites: evalᴛ4,
+        compressionMethods: evalᴛ5,
         serverName: m.serverName,
         ocspStapling: m.ocspStapling,
-        supportedCurves: slices.Clone<slice<CurveID>, CurveID>(m.supportedCurves),
-        supportedPoints: slices.Clone<slice<uint8>, uint8>(m.supportedPoints),
+        supportedCurves: evalᴛ6,
+        supportedPoints: evalᴛ7,
         ticketSupported: m.ticketSupported,
-        sessionTicket: slices.Clone<slice<uint8>, uint8>(m.sessionTicket),
-        supportedSignatureAlgorithms: slices.Clone<slice<SignatureScheme>, SignatureScheme>(m.supportedSignatureAlgorithms),
-        supportedSignatureAlgorithmsCert: slices.Clone<slice<SignatureScheme>, SignatureScheme>(m.supportedSignatureAlgorithmsCert),
+        sessionTicket: evalᴛ8,
+        supportedSignatureAlgorithms: evalᴛ9,
+        supportedSignatureAlgorithmsCert: evalᴛ10,
         secureRenegotiationSupported: m.secureRenegotiationSupported,
-        secureRenegotiation: slices.Clone<slice<byte>, byte>(m.secureRenegotiation),
+        secureRenegotiation: evalᴛ11,
         extendedMasterSecret: m.extendedMasterSecret,
-        alpnProtocols: slices.Clone<slice<@string>, @string>(m.alpnProtocols),
+        alpnProtocols: evalᴛ12,
         scts: m.scts,
-        supportedVersions: slices.Clone<slice<uint16>, uint16>(m.supportedVersions),
-        cookie: slices.Clone<slice<byte>, byte>(m.cookie),
-        keyShares: slices.Clone<slice<keyShare>, keyShare>(m.keyShares),
+        supportedVersions: evalᴛ13,
+        cookie: evalᴛ14,
+        keyShares: evalᴛ15,
         earlyData: m.earlyData,
-        pskModes: slices.Clone<slice<uint8>, uint8>(m.pskModes),
-        pskIdentities: slices.Clone<slice<pskIdentity>, pskIdentity>(m.pskIdentities),
-        pskBinders: slices.Clone<slice<slice<byte>>, slice<byte>>(m.pskBinders),
-        quicTransportParameters: slices.Clone<slice<byte>, byte>(m.quicTransportParameters),
-        encryptedClientHello: slices.Clone<slice<byte>, byte>(m.encryptedClientHello)
+        pskModes: evalᴛ16,
+        pskIdentities: evalᴛ17,
+        pskBinders: evalᴛ18,
+        quicTransportParameters: evalᴛ19,
+        encryptedClientHello: evalᴛ20
     ));
 }
 

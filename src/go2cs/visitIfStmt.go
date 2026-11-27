@@ -39,7 +39,7 @@ func (v *Visitor) visitIfStmtChain(ifStmt *ast.IfStmt, elseIf bool) {
 		v.visitStmt(ifStmt.Init, []StmtContext{})
 
 		v.hoistedDecls = hoistBuf
-		cond = v.convExpr(ifStmt.Cond, nil)
+		cond = v.convIfCond(ifStmt.Cond)
 		v.hoistedDecls = savedHoist
 
 		if hoistBuf.Len() > 0 {
@@ -58,7 +58,7 @@ func (v *Visitor) visitIfStmtChain(ifStmt *ast.IfStmt, elseIf bool) {
 		initText := v.popBlockAppend(false)
 
 		v.hoistedDecls = hoistBuf
-		cond = v.convExpr(ifStmt.Cond, nil)
+		cond = v.convIfCond(ifStmt.Cond)
 		v.hoistedDecls = savedHoist
 
 		folded, ok := "", false
@@ -99,10 +99,19 @@ func (v *Visitor) visitIfStmtChain(ifStmt *ast.IfStmt, elseIf bool) {
 	} else if ifStmt.Init == nil {
 		// Convert the condition first: on a hoist the buffer supplies the leading newline + the decls.
 		v.hoistedDecls = hoistBuf
-		cond = v.convExpr(ifStmt.Cond, nil)
+		cond = v.convIfCond(ifStmt.Cond)
 		v.hoistedDecls = savedHoist
 
-		if hoistBuf.Len() > 0 {
+		if hoistBuf.Len() > 0 && elseIf {
+			// An else-if's prelude cannot follow `else` (a declaration is not an embedded statement, CS1023), so
+			// the else-if takes a block of its own, `} else { prelude; if (cond) {…} }`, as an init that cannot
+			// fold does. The prelude was written at the chain's indent; it moves one level in.
+			braced = true
+			v.writeInitBlockOpen(elseIf)
+			v.indentLevel++
+			v.outputBuilder.WriteString(strings.TrimRight(strings.ReplaceAll(hoistBuf.String(), v.newline, v.newline+v.indent(1)), " "))
+			v.writeOutput("")
+		} else if hoistBuf.Len() > 0 {
 			// The buffer carries its own leading newline+indent per decl and a trailing newline (the
 			// per-decl trailing indent is trimmed by convFuncLit); the `if`'s own indent follows.
 			v.outputBuilder.WriteString(hoistBuf.String())
@@ -121,7 +130,7 @@ func (v *Visitor) visitIfStmtChain(ifStmt *ast.IfStmt, elseIf bool) {
 		// Convert the condition AFTER the init (preserving capture-counter ordering); hoist any
 		// snapshot decls onto their own lines between the init and the `if`.
 		v.hoistedDecls = hoistBuf
-		cond = v.convExpr(ifStmt.Cond, nil)
+		cond = v.convIfCond(ifStmt.Cond)
 		v.hoistedDecls = savedHoist
 
 		if hoistBuf.Len() > 0 {

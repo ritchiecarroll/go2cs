@@ -311,7 +311,9 @@ internal static void mutateBytes⁔(/*this*/ ж<mutator> Ꮡm, ж<slice<byte>> �
         }, ref ᒐ);
 
         for (;;) {
-            var mut = byteSliceMutators[m.rand(len(byteSliceMutators))];
+            var evalᴛ1 = len(byteSliceMutators);
+            var evalᴛ2 = m.rand(evalᴛ1);
+            var mut = byteSliceMutators[evalᴛ2];
             var mutated = mut(Ꮡm, b); if (mutated != nil) {
                 b = mutated;
                 return;

@@ -50,7 +50,14 @@ public sealed partial class TwinGenerator
 
     // Weak members whose twin the GENERATOR writes, by package class. sync's Mutex.Lockꞏtwin is hand-owned and carries
     // [GoParkWeak] in its own source (sync/mutex.cs).
-    internal static readonly (string Package, string Member)[] StdlibWeak = [];
+    internal static readonly (string Package, string Member)[] StdlibWeak =
+    [
+        // M:N row 19, owner ruling 2 (2026-11-25, DESIGN-mn-row19-movability.md 3.1): a hash constructor never parks.
+        // crypto.Hash.New calls the registered constructor through a func value, so the generator could not rule it out,
+        // and crypto/tls's `tls13.ExpandLabel(() => recvʗ1.New(), …)` paired its lambda and ref-blocked the call inside
+        // it. Weak, New's twin carries [GoParkWeak], and a caller in any package leaves such a lambda unpaired.
+        ("go.crypto_package", "go.crypto_package.Hash.New")
+    ];
 
     internal sealed partial class Run
     {

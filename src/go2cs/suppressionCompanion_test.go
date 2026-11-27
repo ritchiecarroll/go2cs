@@ -65,7 +65,9 @@ func TestScopedSuppressionsHaveCompanions(t *testing.T) {
 
 		for member, scope := range members {
 			for _, goos := range knownTargetGOOS {
-				if scope.includes(goos) {
+				// Asked at GOOS grain: an os/arch entry suppresses on its GOOS here, and which target of
+				// it owes the body is TestManualConversionRegistrationsHaveBodies's question.
+				if scopeTouchesGOOS(scope, goos) {
 					suppressedOn[goos] = append(suppressedOn[goos], member)
 				}
 			}

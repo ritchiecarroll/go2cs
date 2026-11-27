@@ -70,7 +70,9 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
                     continue;
                     break;
                 }}
-                conf.servers = append(conf.servers, JoinHostPort(ip.String(), "53"));
+                var evalᴛ1 = ip.String();
+                var evalᴛ2 = JoinHostPort(evalᴛ1, "53");
+                conf.servers = append(conf.servers, evalᴛ2);
             }
         }
     }

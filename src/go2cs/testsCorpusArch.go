@@ -15,7 +15,8 @@ import (
 // THE CORPUS FLAVOUR A TARGET IS SERVED BY. The committed standard-library corpus is converted once per
 // target of platformUniverse (platformLattice.go), and each of those conversions is a FLAVOUR. A target
 // of the universe is its own flavour; any other target is served by the FIRST universe target of its
-// GOOS (darwin/arm64 by darwin/amd64, the one flavour published under both mac RIDs); a GOOS with no
+// GOOS (windows/arm64 by windows/amd64; darwin/arm64 was served by darwin/amd64 until it became a flavour
+// of its own, DESIGN-darwin-arm64-flavour.md); a GOOS with no
 // universe target has no flavour, and a value that is not os/arch names none. Every -tests and harness
 // reader of the corpus's architecture derives it here, so a target joins the readers through
 // platformUniverse alone (S1b, 2026-11-09).
@@ -43,8 +44,8 @@ func corpusFlavourOf(lattice *platformLattice, target string) string {
 // testsTargetPlatform decides the os/arch a single-package conversion targets. A -tests run of a package
 // under GOROOT/src re-emits that package INTO the committed corpus, so with no explicit -platforms it
 // targets the corpus flavour of the host default (corpusFlavourOf) rather than the converter binary's
-// own runtime.GOOS/runtime.GOARCH: darwin/arm64 converts at darwin/amd64, and linux/arm64 at linux/amd64
-// until the universe gains linux/arm64. The GOOS stays the host's, which is what every -tests caller
+// own runtime.GOOS/runtime.GOARCH: a windows/arm64 host converts at windows/amd64, as linux/arm64 and
+// darwin/arm64 did until each became a flavour. The GOOS stays the host's, which is what every -tests caller
 // already relies on.
 //
 // Unchanged: a host default that is a flavour (a target of the universe); a host GOOS with no flavour,
@@ -81,8 +82,8 @@ func testsTargetPlatformOver(lattice *platformLattice, hostDefault string, expli
 // The arch is passed always, for the reason the GOOS is: an explicit -p: beats an inherited environment
 // variable, so what a run compiles never depends on the caller's environment. And it is the FLAVOUR's
 // arch, the one the corpus was converted at, not the conversion target's and not the host's: a module
-// run on an Apple-silicon host converts at darwin/arm64 while the corpus it builds against is the
-// darwin/amd64 flavour.
+// run on a windows/arm64 host converts at windows/arm64 while the corpus it builds against is the
+// windows/amd64 flavour.
 func testHostPlatformProperties(lattice *platformLattice, target string) []string {
 	goos := goosOfTarget(target)
 

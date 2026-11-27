@@ -53,7 +53,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("dotimport.go", "dotimport.cs", "/IKC")]
-[assembly: GoPositionMap("main.go", "main.cs", "ABQqgoKoloKCgoKC6pSUgoKCgpaCgpaCloKWgpaCgoKC")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABQqgoKoloKCgoKC6pSUgoKCgpaCgpaCtoLGgpaCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;

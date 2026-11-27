@@ -34,7 +34,10 @@ public static bool ContainsKey(this Cache c, @string k) { return k == "always"u8
 
 partial struct PEnv /*map[@string, @string]*/;
 
-internal static void Set⁔(/*this*/ ref PEnv p, @string k, @string v) { (p)[strings.ToUpper(k)] = v; }
+internal static void Set⁔(/*this*/ ref PEnv p, @string k, @string v) {
+    var evalᴛ1 = strings.ToUpper(k);
+    (p)[evalᴛ1] = v;
+}
 
 partial struct Uniq<T> /*map[T, EmptyStruct]*/;
 
@@ -106,7 +109,8 @@ internal static void main() {
 
     var p = new Pipe(1);
     p.Send(4);
-    fmt.Println("exact Send:", sends, ᐸꟷ<nint>(p));
+    var evalᴛ1 = ᐸꟷ<nint>(p);
+    fmt.Println("exact Send:", sends, evalᴛ1);
 
     var sets = new map<@string, Set>{["a"] = new map<@string, nint>{}};
     sets["a"].Set‿("k", 7);

@@ -86,7 +86,8 @@ internal static error handshake⁔(/*this*/ ж<clientHandshakeStateTLS13> Ꮡhs)
     }
 
     if (hs.echContext != nil) {
-        hs.echContext.innerTranscript = hs.suite.hash.New();
+        var evalᴛ1 = hs.suite.hash.New();
+        hs.echContext.innerTranscript = evalᴛ1;
         var err = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.echContext.innerHello), new hash_HashᴠtranscriptHash(hs.echContext.innerTranscript)); if (err != nil) {
             return err;
         }
@@ -706,7 +707,8 @@ internal static error readServerCertificate⁔(/*this*/ ref clientHandshakeState
         // is a resumption. Resumptions currently don't reverify certificates so
         // they don't call verifyServerCertificate. See Issue 31641.
         if (c.config.VerifyConnection != nil) {
-            var errΔ1 = c.config.VerifyConnection(c.connectionStateLocked()); if (errΔ1 != nil) {
+            var evalᴛ1 = c.connectionStateLocked();
+            var errΔ1 = c.config.VerifyConnection(evalᴛ1); if (errΔ1 != nil) {
                 c.sendAlert(alertBadCertificate);
                 return errΔ1;
             }
@@ -994,8 +996,9 @@ internal static error handleNewSessionTicket⁔(/*this*/ ж<Conn> Ꮡc, ж<newSe
         return Ꮡc.sendAlert(alertInternalError);
     }
 
+    var evalᴛ1 = cipherSuite.hash.Size();
     var psk = tls13.ExpandLabel<hash.Hash>(() => cipherSuite.hash.New(), c.resumptionSecret, resumptionˢ,
-        msg.nonce, cipherSuite.hash.Size());
+        msg.nonce, evalᴛ1);
 
     var session = c.sessionState();
     session.secret = psk;

@@ -43,7 +43,7 @@ public class NativeFieldArrayViewTests
 {
     private const int SockaddrBytes = 16;
 
-    // BEGIN TRANSCRIPTION: syscall/darwin/ztypes_darwin_amd64.cs RawSockaddrInet4
+    // BEGIN TRANSCRIPTION: syscall/darwin-amd64/ztypes_darwin_amd64.cs RawSockaddrInet4
     private struct DarwinRawSockaddrInet4
     {
         public uint8 Len;

@@ -67,7 +67,8 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                     // just an IP address. Otherwise we need DNS
                     // to look it up.
                     var (_, errΔ3) = netip.ParseAddr(f[1]); if (errΔ3 == nil) {
-                        conf.servers = append(conf.servers, JoinHostPort(f[1], "53"));
+                        var evalᴛ1 = JoinHostPort(f[1], "53");
+                        conf.servers = append(conf.servers, evalᴛ1);
                     }
                 }
                 break;

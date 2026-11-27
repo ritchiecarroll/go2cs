@@ -90,7 +90,7 @@ partial class debug_package
     // Go's own defaults, so a first GET returns what Go would report. GOGC and GOMEMLIMIT live in
     // runtime's gcController (setGCPercent, setMemoryLimit below).
     private static nint s_maxStack = 1_000_000_000;         // runtime.maxstacksize on 64-bit
-    private static nint s_maxThreads = 10_000;              // runtime sched.maxmcount
+    // runtime sched.maxmcount is runtime's (SetMaxThreadsManaged): the M:N scheduler's thread ceiling.
 
     // paniconfault is a per-goroutine flag in Go; a goroutine runs on one managed thread here, and a
     // pooled coro thread clears it before its next goroutine.
@@ -137,7 +137,7 @@ partial class debug_package
 
     internal static partial nint setMaxThreads(nint @in)
     {
-        return Interlocked.Exchange(ref s_maxThreads, @in);
+        return global::go.runtime_package.SetMaxThreadsManaged(@in);
     }
 
     internal static partial bool setPanicOnFault(bool @new)

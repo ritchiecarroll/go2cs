@@ -113,7 +113,15 @@ internal static void main() {
     any sink = (lambda).OrTypedNilFunc();
     holder h = default;
     h.put(new nint[]{}.array(3));
-    fmt.Println(new inline(), new marked(), new tagged(), new nn(new array<array<nint>>(2, () => new(3))), (P)nil, h, hash(new byte[]{}.array(32)), first(new nint[]{}.array(2)), noted(new byte[]{}.array(4), 1), local(new nint[]{}.array(3)), sink != nil);
+    var evalᴛ1 = new inline();
+    var evalᴛ2 = new marked();
+    var evalᴛ3 = new tagged();
+    var evalᴛ4 = new nn(new array<array<nint>>(2, () => new(3)));
+    var evalᴛ5 = hash(new byte[]{}.array(32));
+    var evalᴛ6 = first(new nint[]{}.array(2));
+    var evalᴛ7 = noted(new byte[]{}.array(4), 1);
+    var evalᴛ8 = local(new nint[]{}.array(3));
+    fmt.Println(evalᴛ1, evalᴛ2, evalᴛ3, evalᴛ4, (P)nil, h, evalᴛ5, evalᴛ6, evalᴛ7, evalᴛ8, sink != nil);
     fill(0, ref ((ж<array<int32>>)default).DerefOrNull(), new array<byte>[]{}.array(4, () => new(8)));
 }
 

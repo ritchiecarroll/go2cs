@@ -636,8 +636,10 @@ internal static void comparison⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> �
         // time will be materialized. Update the expression trees.
         // If the current types are untyped, the materialized type
         // is the respective default type.
-        Ꮡcheck.updateExprType(x.expr, Default(x.typ), true);
-        Ꮡcheck.updateExprType(y.expr, Default(y.typ), true);
+        var evalᴛ1 = Default(x.typ);
+        Ꮡcheck.updateExprType(x.expr, evalᴛ1, true);
+        var evalᴛ2 = Default(y.typ);
+        Ꮡcheck.updateExprType(y.expr, evalᴛ2, true);
     }
 
     // spec: "Comparison operators compare two operands and yield
@@ -1061,11 +1063,13 @@ internal static exprKind rawExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T,
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(e.Pos(), exprSˢ, e);
+            var evalᴛ1 = e.Pos();
+            Ꮡcheck.trace(evalᴛ1, exprSˢ, e);
             check.indent++;
             defer([GoFunc("(*Checker).rawExpr.func1")] () => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(e.Pos(), "=> %s", x.OrTypedNil());
+                var evalᴛ2 = e.Pos();
+                Ꮡcheck.trace(evalᴛ2, "=> %s", x.OrTypedNil());
             }, ref ᒐ);
         }
 
@@ -1222,7 +1226,8 @@ internal static exprKind exprInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ж<targe
             if (!enableReverseTypeInference) {
                 ᏑT = default; T = ref ᏑT.DerefOrNull();
             }
-            Ꮡcheck.funcInst(ᏑT, eΔ1.Pos(), Ꮡx, ix, true);
+            var evalᴛ1 = eΔ1.Pos();
+            Ꮡcheck.funcInst(ᏑT, evalᴛ1, Ꮡx, ix, true);
         }
         if (x.mode == invalid) {
             goto Error;
@@ -1335,7 +1340,8 @@ internal static exprKind exprInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ж<targe
     case ж<ast.ChanType> _: {
         var eΔ1 = e;
         x.mode = typexpr;
-        x.typ = Ꮡcheck.typ(eΔ1);
+        var evalᴛ2 = Ꮡcheck.typ(eΔ1);
+        x.typ = evalᴛ2;
         // Note: rawExpr (caller of exprInternal) will call check.recordTypeAndValue
         // even though check.typ has already called it. This is fine as both
         // times the same expression and type are recorded. It is also not a
@@ -1345,7 +1351,8 @@ internal static exprKind exprInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ж<targe
     }
     default: {
         var eΔ1 = e;
-        throw panic(fmt.Sprintf("%s: unknown expression type %T"u8, check.fset.Position(eΔ1.Pos()), eΔ1));
+        var evalᴛ3 = eΔ1.Pos();
+        throw panic(fmt.Sprintf("%s: unknown expression type %T"u8, check.fset.Position(evalᴛ3), eΔ1));
         break;
     }}
 

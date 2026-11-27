@@ -24,7 +24,8 @@ internal static void main() {
     fmt.Println(z.tz, z.loc.String());
 
     slice<ж<gotime.Location>> locs = default;
-    locs = append(locs, gotime.UTC, @fixed("EST", -5 * 3600));
+    var evalᴛ1 = @fixed("EST", -5 * 3600);
+    locs = append(locs, gotime.UTC, evalᴛ1);
     foreach (var (_, l) in range(locs)) {
         fmt.Println(l.OrTypedNil());
     }

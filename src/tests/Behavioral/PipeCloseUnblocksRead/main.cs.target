@@ -19,7 +19,8 @@ internal static partial void main() {
         ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
         var (_, rerr) = rʗ1.Read(buf[..]);
         if (rerr != nil) {
-            doneʗ1.ᐸꟷ(rerr.Error());
+            var evalᴛ1 = rerr.Error();
+            doneʗ1.ᐸꟷ(evalᴛ1);
         } else {
             doneʗ1.ᐸꟷ("read returned no error");
         }

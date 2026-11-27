@@ -689,7 +689,8 @@ internal static void Set⁔(/*this*/ ref Alpha p, nint x, nint y, color.Color c)
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i] = color.AlphaModel.Convert(c)._<color.Color, color.Alpha>().A;
+    var evalᴛ1 = color.AlphaModel.Convert(c);
+    p.Pix[i] = evalᴛ1._<color.Color, color.Alpha>().A;
 }
 
 internal static void SetRGBA64⁔(/*this*/ ref Alpha p, nint x, nint y, color.RGBA64 c) {
@@ -918,7 +919,8 @@ internal static void Set⁔(/*this*/ ref Gray p, nint x, nint y, color.Color c) 
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i] = color.GrayModel.Convert(c)._<color.Color, color.Gray>().Y;
+    var evalᴛ1 = color.GrayModel.Convert(c);
+    p.Pix[i] = evalᴛ1._<color.Color, color.Gray>().Y;
 }
 
 internal static void SetRGBA64⁔(/*this*/ ref Gray p, nint x, nint y, color.RGBA64 c) {
@@ -1251,7 +1253,8 @@ internal static void Set⁔(/*this*/ ref Paletted p, nint x, nint y, color.Color
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i] = (uint8)p.Palette.Index(c);
+    var evalᴛ1 = p.Palette.Index(c);
+    p.Pix[i] = (uint8)evalᴛ1;
 }
 
 internal static void SetRGBA64⁔(/*this*/ ref Paletted p, nint x, nint y, color.RGBA64 c) {
@@ -1259,7 +1262,8 @@ internal static void SetRGBA64⁔(/*this*/ ref Paletted p, nint x, nint y, color
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i] = (uint8)p.Palette.Index(c);
+    var evalᴛ1 = p.Palette.Index(c);
+    p.Pix[i] = (uint8)evalᴛ1;
 }
 
 internal static uint8 ColorIndexAt⁔(/*this*/ ref Paletted p, nint x, nint y) {
@@ -1291,10 +1295,12 @@ internal static Image SubImage⁔(/*this*/ ref Paletted p, Rectangle r) {
         )));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
+    var evalᴛ1 = p.Pix.slice(i);
+    var evalᴛ2 = p.Rect.Intersect(r);
     return new PalettedжImage(Ꮡ(new Paletted(
-        Pix: p.Pix.slice(i),
+        Pix: evalᴛ1,
         Stride: p.Stride,
-        Rect: p.Rect.Intersect(r),
+        Rect: evalᴛ2,
         Palette: p.Palette
     )));
 }

@@ -530,7 +530,8 @@ internal static partial error set⁔(/*this*/ ref FlagSet f, @string name, @stri
         if (f.undef == nil) {
             f.undef = new map<@string, @string>{};
         }
-        f.undef[name] = fmt.Sprintf("%s:%d"u8, @file, line);
+        var evalᴛ1 = fmt.Sprintf("%s:%d"u8, @file, line);
+        f.undef[name] = evalᴛ1;
 
         return fmt.Errorf("no such flag -%v"u8, name);
     }
@@ -817,7 +818,8 @@ internal static void BoolVar⁔(/*this*/ ref FlagSet f, ж<bool> p, @string name
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
 public static void BoolVar(ж<bool> p, @string name, bool value, @string usage) {
-    CommandLine.Var(new boolValueжValue(newBoolValue(value, p)), name, usage);
+    var evalᴛ1 = newBoolValue(value, p);
+    CommandLine.Var(new boolValueжValue(evalᴛ1), name, usage);
 }
 
 // Bool defines a bool flag with specified name, default value, and usage string.
@@ -843,7 +845,8 @@ internal static void IntVar⁔(/*this*/ ref FlagSet f, ж<nint> p, @string name,
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
 public static void IntVar(ж<nint> p, @string name, nint value, @string usage) {
-    CommandLine.Var(new intValueжValue(newIntValue(value, p)), name, usage);
+    var evalᴛ1 = newIntValue(value, p);
+    CommandLine.Var(new intValueжValue(evalᴛ1), name, usage);
 }
 
 // Int defines an int flag with specified name, default value, and usage string.
@@ -869,7 +872,8 @@ internal static void Int64Var⁔(/*this*/ ref FlagSet f, ж<int64> p, @string na
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
 public static void Int64Var(ж<int64> p, @string name, int64 value, @string usage) {
-    CommandLine.Var(new int64ValueжValue(newInt64Value(value, p)), name, usage);
+    var evalᴛ1 = newInt64Value(value, p);
+    CommandLine.Var(new int64ValueжValue(evalᴛ1), name, usage);
 }
 
 // Int64 defines an int64 flag with specified name, default value, and usage string.
@@ -895,7 +899,8 @@ internal static void UintVar⁔(/*this*/ ref FlagSet f, ж<nuint> p, @string nam
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
 public static void UintVar(ж<nuint> p, @string name, nuint value, @string usage) {
-    CommandLine.Var(new uintValueжValue(newUintValue(value, p)), name, usage);
+    var evalᴛ1 = newUintValue(value, p);
+    CommandLine.Var(new uintValueжValue(evalᴛ1), name, usage);
 }
 
 // Uint defines a uint flag with specified name, default value, and usage string.
@@ -921,7 +926,8 @@ internal static void Uint64Var⁔(/*this*/ ref FlagSet f, ж<uint64> p, @string 
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
 public static void Uint64Var(ж<uint64> p, @string name, uint64 value, @string usage) {
-    CommandLine.Var(new uint64ValueжValue(newUint64Value(value, p)), name, usage);
+    var evalᴛ1 = newUint64Value(value, p);
+    CommandLine.Var(new uint64ValueжValue(evalᴛ1), name, usage);
 }
 
 // Uint64 defines a uint64 flag with specified name, default value, and usage string.
@@ -947,7 +953,8 @@ internal static void StringVar⁔(/*this*/ ref FlagSet f, ж<@string> p, @string
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
 public static void StringVar(ж<@string> p, @string name, @string value, @string usage) {
-    CommandLine.Var(new stringValueжValue(newStringValue(value, p)), name, usage);
+    var evalᴛ1 = newStringValue(value, p);
+    CommandLine.Var(new stringValueжValue(evalᴛ1), name, usage);
 }
 
 // String defines a string flag with specified name, default value, and usage string.
@@ -973,7 +980,8 @@ internal static void Float64Var⁔(/*this*/ ref FlagSet f, ж<float64> p, @strin
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
 public static void Float64Var(ж<float64> p, @string name, float64 value, @string usage) {
-    CommandLine.Var(new float64ValueжValue(newFloat64Value(value, p)), name, usage);
+    var evalᴛ1 = newFloat64Value(value, p);
+    CommandLine.Var(new float64ValueжValue(evalᴛ1), name, usage);
 }
 
 // Float64 defines a float64 flag with specified name, default value, and usage string.
@@ -1001,7 +1009,8 @@ internal static void DurationVar⁔(/*this*/ ref FlagSet f, ж<time.Duration> p,
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
 public static void DurationVar(ж<time.Duration> p, @string name, time.Duration value, @string usage) {
-    CommandLine.Var(new durationValueжValue(newDurationValue(value, p)), name, usage);
+    var evalᴛ1 = newDurationValue(value, p);
+    CommandLine.Var(new durationValueжValue(evalᴛ1), name, usage);
 }
 
 // Duration defines a time.Duration flag with specified name, default value, and usage string.
@@ -1035,7 +1044,8 @@ internal static void TextVar⁔(/*this*/ ref FlagSet f, encoding.TextUnmarshaler
 // If the flag is used, the flag value will be passed to p's UnmarshalText method.
 // The type of the default value must be the same as the type of p.
 public static void TextVar(encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) {
-    CommandLine.Var(newTextValue(value, p), name, usage);
+    var evalᴛ1 = newTextValue(value, p);
+    CommandLine.Var(evalᴛ1, name, usage);
 }
 
 // Func defines a flag with the specified name and usage string.

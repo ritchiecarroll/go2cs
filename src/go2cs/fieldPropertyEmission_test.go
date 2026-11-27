@@ -165,7 +165,9 @@ func TestFieldPropertyReadsAsGoSpellsIt(t *testing.T) {
 		"q.X++;",
 		"c.prev.prev.next.x = 20;",
 		`m["k"].Y = 3;`,
-		`fmt.Println(q.X, c.prev.next.x, mk().Y, m["k"].Y);`,
+		// mk() runs before the field reads beside it, as gc orders them (operandOrder.go).
+		"var evalᴛ1 = mk();",
+		`fmt.Println(q.X, c.prev.next.x, evalᴛ1.Y, m["k"].Y);`,
 	} {
 		if !strings.Contains(positives, want) {
 			t.Errorf("a field through a pointer does not read as Go spells it (want %q):\n%s", want, positives)

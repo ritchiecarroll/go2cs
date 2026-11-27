@@ -44,7 +44,8 @@ internal static (uint128 mant, nint exp, bool ok) pow10(nint e) {
     if (e < pow10Min || e > pow10Max) {
         return (mant, exp, ok);
     }
-    return (pow10Tab[e - (nint)pow10Min], 1 + mulLog2_10(e), true);
+    var evalᴛ1 = mulLog2_10(e);
+    return (pow10Tab[e - (nint)pow10Min], 1 + evalᴛ1, true);
 }
 
 // mulLog10_2 returns math.Floor(x * log(2)/log(10)) for an integer x in

@@ -326,13 +326,19 @@ internal static nint Len⁔(/*this*/ ref Events l) {
 }
 
 internal static bool Less⁔(/*this*/ ref Events l, nint i, nint j) {
-    return l.Ptr(i).Ts < l.Ptr(j).Ts;
+    var evalᴛ1 = l.Ptr(i);
+    var evalᴛ2 = l.Ptr(j);
+    return evalᴛ1.Ts < evalᴛ2.Ts;
 }
 
 internal static void Swap⁔(/*this*/ ref Events l, nint i, nint j) {
-    ref var valᴛ1 = ref l.Ptr(i).Value;
-    ref var valᴛ3 = ref l.Ptr(j).Value;
-    (var valᴛ2, var valᴛ4) = (l.Ptr(j).Value.ΔClone(), l.Ptr(i).Value.ΔClone());
+    var evalᴛ1 = l.Ptr(i);
+    var evalᴛ2 = l.Ptr(j);
+    var evalᴛ3 = l.Ptr(j);
+    var evalᴛ4 = l.Ptr(i);
+    ref var valᴛ1 = ref evalᴛ1.Value;
+    ref var valᴛ3 = ref evalᴛ2.Value;
+    (var valᴛ2, var valᴛ4) = (evalᴛ3.Value.ΔClone(), evalᴛ4.Value.ΔClone());
     valᴛ1.AssignFrom(valᴛ2);
     valᴛ3.AssignFrom(valᴛ4);
 }

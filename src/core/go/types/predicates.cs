@@ -542,7 +542,9 @@ internal static bool identical⁔(/*this*/ ref comparer c, Type x, Type y, ж<if
 // identicalOrigin reports whether x and y originated in the same declaration.
 internal static bool identicalOrigin(ж<Named> x, ж<Named> y) {
     // TODO(gri) is this correct?
-    return x.Origin().obj == y.Origin().obj;
+    var evalᴛ1 = x.Origin();
+    var evalᴛ2 = y.Origin();
+    return evalᴛ1.obj == evalᴛ2.obj;
 }
 
 // identicalInstance reports if two type instantiations are identical.

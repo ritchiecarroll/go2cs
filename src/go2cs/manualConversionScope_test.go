@@ -494,6 +494,36 @@ func TestEveryManualConversionScopeNamesAKnownGOOS(t *testing.T) {
 	}
 }
 
+// scopeEntryTargets names the universe targets one scope entry covers: every target of a GOOS entry, or the one
+// target an os/arch entry names when the universe builds it. An entry outside the universe covers none.
+func scopeEntryTargets(entry string) []string {
+	if strings.Contains(entry, "/") {
+		if slices.Contains(platformUniverse, entry) {
+			return []string{entry}
+		}
+
+		return nil
+	}
+
+	return corpusLattice().targetsOfGOOS(entry)
+}
+
+// scopeTouchesGOOS reports whether the scope covers some target of goos: the empty scope and a GOOS entry by name,
+// an os/arch entry by its GOOS half. It is the GOOS-grain reading a per-GOOS guard asks, never a displacement test.
+func scopeTouchesGOOS(scope goosScope, goos string) bool {
+	if len(scope) == 0 {
+		return true
+	}
+
+	for _, entry := range scope {
+		if goosOfTarget(entry) == goos {
+			return true
+		}
+	}
+
+	return false
+}
+
 // manualScopeRegistry is one goosScope-keyed registry the typo guard walks, and the test a scope's GOOS must pass.
 type manualScopeRegistry struct {
 	name     string
@@ -529,11 +559,21 @@ func manualScopeFindings(registries []manualScopeRegistry) (scoped int, findings
 
 				scoped++
 
-				for _, goos := range scope {
-					if !registry.accepts(goos) {
+				for _, entry := range scope {
+					if strings.Contains(entry, "/") {
+						if !slices.Contains(platformUniverse, entry) {
+							findings = append(findings, fmt.Sprintf("%s: %s.%s is scoped to the target %q, which is not a target "+
+								"of the universe %v: the entry matches nothing and the hand-own it names is silently unprotected",
+								registry.name, pkgPath, name, entry, platformUniverse))
+						}
+
+						continue
+					}
+
+					if !registry.accepts(entry) {
 						findings = append(findings, fmt.Sprintf("%s: %s.%s is scoped to %q, which is not %s: the entry "+
 							"matches nothing and the hand-own it names is silently unprotected", registry.name, pkgPath, name,
-							goos, registry.accepted))
+							entry, registry.accepted))
 					}
 				}
 			}

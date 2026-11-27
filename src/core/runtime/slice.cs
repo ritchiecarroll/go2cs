@@ -199,7 +199,8 @@ internal static Δslice growslice(@unsafe.Pointer oldPtr, nint newLen, nint oldC
     nint oldLen = newLen - num;
     if (raceenabled) {
         var callerpc = sys.GetCallerPC();
-        racereadrangepc(oldPtr, (uintptr)(oldLen * (nint)et.Size_), callerpc, abi.FuncPCABIInternal(growslice));
+        var evalᴛ1 = abi.FuncPCABIInternal(growslice);
+        racereadrangepc(oldPtr, (uintptr)(oldLen * (nint)et.Size_), callerpc, evalᴛ1);
     }
     if (msanenabled) {
         msanread(oldPtr, (uintptr)(oldLen * (nint)et.Size_));
@@ -567,7 +568,8 @@ internal static Δslice growsliceBuf(@unsafe.Pointer oldPtr, nint newLen, nint o
     // Instead, we try to just bump up to the next size class.
     // This will ensure that we don't waste any space when we eventually
     // call moveSlice with the resulting slice.
-    nint newCap = (nint)(roundupsize((uintptr)newLen * et.Size_, !et.Pointers()) / et.Size_);
+    var evalᴛ1 = et.Pointers();
+    nint newCap = (nint)(roundupsize((uintptr)newLen * et.Size_, !evalᴛ1) / et.Size_);
 
     // Zero slice beyond newLen.
     // The buffer is stack memory, so NoHeapPointers is ok.

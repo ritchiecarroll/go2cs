@@ -434,7 +434,8 @@ Read:
         noteclear(Ꮡb.Ꮡwait);
         goto Read;
     }
-    data = b.data.slice((nint)(br.dataCount() % (uint32)len(b.data)));
+    var evalᴛ1 = br.dataCount();
+    data = b.data.slice((nint)(evalᴛ1 % (uint32)len(b.data)));
     if (len(data) > numData) {
         data = data.slice(0, numData);
     } else {
@@ -454,7 +455,8 @@ Read:
     if (ntag == 0) {
         @throw(runtimeMalformedProfBufˢ);
     }
-    tags = b.tags.slice((nint)(br.tagCount() % (uint32)len(b.tags)));
+    var evalᴛ2 = br.tagCount();
+    tags = b.tags.slice((nint)(evalᴛ2 % (uint32)len(b.tags)));
     if (len(tags) > ntag) {
         tags = tags.slice(0, ntag);
     }

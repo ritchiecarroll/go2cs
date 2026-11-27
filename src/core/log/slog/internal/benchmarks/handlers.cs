@@ -57,7 +57,8 @@ internal static error Handle⁔(/*this*/ ж<fastTextHandler> Ꮡh, context.Conte
             buf.WriteByte((byte)' ');
         }
         buf.WriteString(levelˢ);
-        buf.ValueSlot = strconv.AppendInt(buf.ValueSlot, (int64)r.Level, 10);
+        var evalᴛ1 = strconv.AppendInt(buf.ValueSlot, (int64)r.Level, 10);
+        buf.ValueSlot = evalᴛ1;
         buf.WriteByte((byte)' ');
         buf.WriteString(msgˢ);
         buf.WriteString(r.Message);
@@ -86,23 +87,29 @@ internal static void appendValue⁔(/*this*/ ref fastTextHandler h, ж<buffer.Bu
         break;
     }
     case var ᴛ when ᴛ == slog.KindInt64: {
-        buf = strconv.AppendInt(buf, v.Int64(), 10);
+        var evalᴛ1 = v.Int64();
+        buf = strconv.AppendInt(buf, evalᴛ1, 10);
         break;
     }
     case var ᴛ when ᴛ == slog.KindUint64: {
-        buf = strconv.AppendUint(buf, v.Uint64(), 10);
+        var evalᴛ2 = v.Uint64();
+        buf = strconv.AppendUint(buf, evalᴛ2, 10);
         break;
     }
     case var ᴛ when ᴛ == slog.KindFloat64: {
-        buf = strconv.AppendFloat(buf, v.Float64(), (byte)'g', -1, 64);
+        var evalᴛ3 = v.Float64();
+        buf = strconv.AppendFloat(buf, evalᴛ3, (byte)'g', -1, 64);
         break;
     }
     case var ᴛ when ᴛ == slog.KindBool: {
-        buf = strconv.AppendBool(buf, v.Bool());
+        var evalᴛ4 = v.Bool();
+        buf = strconv.AppendBool(buf, evalᴛ4);
         break;
     }
     case var ᴛ when ᴛ == slog.KindDuration: {
-        buf = strconv.AppendInt(buf, v.Duration().Nanoseconds(), 10);
+        var evalᴛ5 = v.Duration();
+        var evalᴛ6 = evalᴛ5.Nanoseconds();
+        buf = strconv.AppendInt(buf, evalᴛ6, 10);
         break;
     }
     case var ᴛ when ᴛ == slog.KindTime: {
@@ -132,7 +139,8 @@ internal static void appendValue⁔(/*this*/ ref fastTextHandler h, ж<buffer.Bu
 internal static void appendTime⁔(/*this*/ ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    buf = strconv.AppendInt(buf, t.Unix(), 10);
+    var evalᴛ1 = t.Unix();
+    buf = strconv.AppendInt(buf, evalᴛ1, 10);
 }
 
 internal static slog.Handler WithAttrs⁔(/*this*/ ref fastTextHandler h, slice<slog.Attr> _) {
@@ -165,7 +173,8 @@ internal static bool Enabled⁔(/*this*/ ref asyncHandler _Δp0, context.Context
 internal static error Handle⁔(/*this*/ ref asyncHandler h, context.Context _, slog.Record r) {
     r = r.ΔClone();
 
-    h.ringBuffer[h.next].AssignFrom(r.Clone());
+    var evalᴛ1 = r.Clone();
+    h.ringBuffer[h.next].AssignFrom(evalᴛ1);
     h.next = (h.next + 1) % len(h.ringBuffer);
     return default;
 }

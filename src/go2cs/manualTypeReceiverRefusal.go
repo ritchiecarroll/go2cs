@@ -54,8 +54,8 @@ func (refusal *manualTypeReceiverRefusal) report() {
 
 // refuseManualTypeReceiverOperands finds every `T(unsafe.Pointer(r))` in the package where T is one of
 // its manual types and r is the enclosing method's pointer receiver, by object identity, in a method
-// that is not itself displaced for goos. It returns nil when there is none.
-func refuseManualTypeReceiverOperands(pkg *packages.Package, goos string) *manualTypeReceiverRefusal {
+// that is not itself displaced for target (the full os/arch). It returns nil when there is none.
+func refuseManualTypeReceiverOperands(pkg *packages.Package, target string) *manualTypeReceiverRefusal {
 	if pkg.Types == nil || pkg.TypesInfo == nil {
 		return nil
 	}
@@ -91,7 +91,7 @@ func refuseManualTypeReceiverOperands(pkg *packages.Package, goos string) *manua
 
 			receiver := info.Defs[field.Names[0]]
 
-			if receiver == nil || isManualFuncDeclInPackage(pkg.PkgPath, goos, funcDecl) {
+			if receiver == nil || isManualFuncDeclInPackage(pkg.PkgPath, target, funcDecl) {
 				continue
 			}
 

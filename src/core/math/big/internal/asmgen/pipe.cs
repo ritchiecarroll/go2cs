@@ -140,10 +140,12 @@ internal static void LoadPtrs⁔(/*this*/ ref Pipe p, Reg n) {
     // Load the actual pointers.
     p.loaded = true;
     foreach (var (_, name) in range(p.f.inputs)) {
-        p.inPtr = append(p.inPtr, (RegPtr)p.f.Arg(name + "_base"u8));
+        var evalᴛ1 = p.f.Arg(name + "_base"u8);
+        p.inPtr = append(p.inPtr, (RegPtr)evalᴛ1);
     }
     foreach (var (_, name) in range(p.f.outputs)) {
-        p.outPtr = append(p.outPtr, (RegPtr)p.f.Arg(name + "_base"u8));
+        var evalᴛ2 = p.f.Arg(name + "_base"u8);
+        p.outPtr = append(p.outPtr, (RegPtr)evalᴛ2);
     }
 
     // Decide the memory access strategy for LoadN and StoreN.
@@ -222,7 +224,8 @@ internal static slice<slice<Reg>> LoadN⁔(/*this*/ ref Pipe p, nint n) {
         case {} when a.Arch.loadIncN != nil: {
             // Load from memory and advance pointers at the same time.
             foreach (var j in range(len(regs[i]))) {
-                regs[i][j] = p.f.Asm.Reg();
+                var evalᴛ1 = p.f.Asm.Reg();
+                regs[i][j] = evalᴛ1;
             }
             if (p.backward) {
                 a.Arch.loadDecN(a, ptr, regs[i]);
@@ -350,7 +353,8 @@ internal static void DropInput⁔(/*this*/ ref Pipe p, @string name) {
     var ptr = p.inPtr[i];
     p.f.Asm.Free((Reg)ptr);
     p.inPtr = slices.Delete<slice<RegPtr>, RegPtr>(p.inPtr, i, i + 1);
-    p.f.inputs = slices.Delete<slice<@string>, @string>(p.f.inputs, i, i + 1);
+    var evalᴛ1 = slices.Delete<slice<@string>, @string>(p.f.inputs, i, i + 1);
+    p.f.inputs = evalᴛ1;
     if (len(p.hints) > i) {
         p.hints = slices.Delete<slice<Hint>, Hint>(p.hints, i, i + 1);
     }

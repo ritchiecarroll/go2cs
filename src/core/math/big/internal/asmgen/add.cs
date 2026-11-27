@@ -35,7 +35,8 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
         // Carry smashed by loop tests; allocate and save in register
         // around unrolled blocks.
         c = Ꮡa.Reg();
-        Ꮡa.Mov(a.Imm(0), c);
+        var evalᴛ1 = a.Imm(0);
+        Ꮡa.Mov(evalᴛ1, c);
         Ꮡa.EOL(clearSavedCarryˢ);
         p.AtUnrollStart([GoFunc("addOrSubVV.func1")] () => {
             Ꮡa.RestoreCarry(Ꮡc.Value);

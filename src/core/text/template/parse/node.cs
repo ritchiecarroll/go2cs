@@ -288,7 +288,8 @@ internal static ж<Tree> tree⁔(/*this*/ ref ActionNode a) {
 }
 
 internal static Node Copy⁔(/*this*/ ref ActionNode a) {
-    return new ActionNodeжNode(a.tr.newAction(a.Pos, a.Line, a.Pipe.CopyPipe()));
+    var evalᴛ1 = a.Pipe.CopyPipe();
+    return new ActionNodeжNode(a.tr.newAction(a.Pos, a.Line, evalᴛ1));
 }
 
 // CommandNode holds a command (a pipeline inside an evaluating action).
@@ -956,7 +957,10 @@ internal static ж<IfNode> newIf⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line, 
 }
 
 internal static Node Copy⁔(/*this*/ ref IfNode i) {
-    return new IfNodeжNode(i.tr.newIf(i.Pos, i.Line, i.Pipe.CopyPipe(), i.List.CopyList(), i.ElseList.CopyList()));
+    var evalᴛ1 = i.Pipe.CopyPipe();
+    var evalᴛ2 = i.List.CopyList();
+    var evalᴛ3 = i.ElseList.CopyList();
+    return new IfNodeжNode(i.tr.newIf(i.Pos, i.Line, evalᴛ1, evalᴛ2, evalᴛ3));
 }
 
 // BreakNode represents a {{break}} action.
@@ -1011,7 +1015,10 @@ internal static ж<RangeNode> newRange⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint 
 }
 
 internal static Node Copy⁔(/*this*/ ref RangeNode r) {
-    return new RangeNodeжNode(r.tr.newRange(r.Pos, r.Line, r.Pipe.CopyPipe(), r.List.CopyList(), r.ElseList.CopyList()));
+    var evalᴛ1 = r.Pipe.CopyPipe();
+    var evalᴛ2 = r.List.CopyList();
+    var evalᴛ3 = r.ElseList.CopyList();
+    return new RangeNodeжNode(r.tr.newRange(r.Pos, r.Line, evalᴛ1, evalᴛ2, evalᴛ3));
 }
 
 // WithNode represents a {{with}} action and its commands.
@@ -1024,7 +1031,10 @@ internal static ж<WithNode> newWith⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint li
 }
 
 internal static Node Copy⁔(/*this*/ ref WithNode w) {
-    return new WithNodeжNode(w.tr.newWith(w.Pos, w.Line, w.Pipe.CopyPipe(), w.List.CopyList(), w.ElseList.CopyList()));
+    var evalᴛ1 = w.Pipe.CopyPipe();
+    var evalᴛ2 = w.List.CopyList();
+    var evalᴛ3 = w.ElseList.CopyList();
+    return new WithNodeжNode(w.tr.newWith(w.Pos, w.Line, evalᴛ1, evalᴛ2, evalᴛ3));
 }
 
 // TemplateNode represents a {{template}} action.
@@ -1066,7 +1076,8 @@ internal static ж<Tree> tree⁔(/*this*/ ref TemplateNode t) {
 }
 
 internal static Node Copy⁔(/*this*/ ref TemplateNode t) {
-    return new TemplateNodeжNode(t.tr.newTemplate(t.Pos, t.Line, t.Name, t.Pipe.CopyPipe()));
+    var evalᴛ1 = t.Pipe.CopyPipe();
+    return new TemplateNodeжNode(t.tr.newTemplate(t.Pos, t.Line, t.Name, evalᴛ1));
 }
 
 } // end parse_package

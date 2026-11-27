@@ -29,7 +29,7 @@
 function Resolve-HandOwnUpstream([string] $Rel, [string] $FromGoRoot, [string] $ToGoRoot) {
     # The layout key folders: a target's GOOS, its GOARCH and the pair, for each target of the converter's
     # platform universe (src/go2cs/platformLattice.go). Repoguard holds this list to that universe.
-    $layoutKeys = @('windows', 'linux', 'darwin', 'amd64', 'arm64', 'windows-amd64', 'linux-amd64', 'darwin-amd64', 'linux-arm64')
+    $layoutKeys = @('windows', 'linux', 'darwin', 'amd64', 'arm64', 'windows-amd64', 'linux-amd64', 'darwin-amd64', 'linux-arm64', 'darwin-arm64')
     $parts = $Rel -split '[\\/]'
     $file = $parts[-1]
     # DROP THE LEAF via Select-Object, never `$x[0..($x.Count - 2)]`. On a SINGLE-element array that

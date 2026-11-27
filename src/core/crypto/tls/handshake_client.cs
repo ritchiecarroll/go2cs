@@ -255,7 +255,8 @@ internal static error /*err*/ clientHandshake⁔(/*this*/ ж<Conn> Ꮡc, context
         ref var err = ref Ꮡerr.ValueSlot;
 
         if (c.config == nil) {
-            c.config = defaultConfig();
+            var evalᴛ1 = defaultConfig();
+            c.config = evalᴛ1;
         }
 
         // This may be a renegotiation handshake, in which case some fields
@@ -640,7 +641,8 @@ internal static error handshake⁔(/*this*/ ж<clientHandshakeState> Ꮡhs) {
         // is a resumption. Resumptions currently don't reverify certificates so
         // they don't call verifyServerCertificate. See Issue 31641.
         if (c.config.VerifyConnection != nil) {
-            var errΔ6 = c.config.VerifyConnection(c.connectionStateLocked()); if (errΔ6 != nil) {
+            var evalᴛ1 = c.connectionStateLocked();
+            var errΔ6 = c.config.VerifyConnection(evalᴛ1); if (errΔ6 != nil) {
                 c.sendAlert(alertBadCertificate);
                 return errΔ6;
             }
@@ -844,8 +846,9 @@ internal static error doFullHandshake⁔(/*this*/ ж<clientHandshakeState> Ꮡhs
 
     if (hs.serverHello.extendedMasterSecret) {
         c.extMasterSecret = true;
+        var evalᴛ1 = hs.finishedHash.Sum();
         hs.masterSecret = extMasterFromPreMasterSecret(c.vers, ref (hs.suite).DerefOrNull(), preMasterSecret,
-            hs.finishedHash.Sum());
+            evalᴛ1);
     } else {
         if (fips140tls.Required()) {
             if (fips140ems.Value() != "0"u8) {
@@ -1246,16 +1249,19 @@ internal static error verifyServerCertificate⁔(/*this*/ ж<Conn> Ꮡc, slice<s
     var echRejected = c.config.EncryptedClientHelloConfigList != nil && !c.echAccepted;
     if (echRejected) {
         if (c.config.EncryptedClientHelloRejectionVerify != nil) {
-            var err = c.config.EncryptedClientHelloRejectionVerify(Ꮡc.connectionStateLocked()); if (err != nil) {
+            var evalᴛ1 = Ꮡc.connectionStateLocked();
+            var err = c.config.EncryptedClientHelloRejectionVerify(evalᴛ1); if (err != nil) {
                 Ꮡc.sendAlert(alertBadCertificate);
                 return err;
             }
         } else {
+            var evalᴛ2 = c.config.time();
+            var evalᴛ3 = Δx509.NewCertPool();
             var opts = new Δx509.VerifyOptions(
                 Roots: c.config.RootCAs,
-                CurrentTime: c.config.time(),
+                CurrentTime: evalᴛ2,
                 DNSName: c.serverName,
-                Intermediates: Δx509.NewCertPool()
+                Intermediates: evalᴛ3
             );
 
             foreach (var (_, cert) in range(certs[1..])) {
@@ -1274,11 +1280,13 @@ internal static error verifyServerCertificate⁔(/*this*/ ж<Conn> Ꮡc, slice<s
             }
         }
     } else if (!c.config.InsecureSkipVerify) {
+        var evalᴛ4 = c.config.time();
+        var evalᴛ5 = Δx509.NewCertPool();
         var opts = new Δx509.VerifyOptions(
             Roots: c.config.RootCAs,
-            CurrentTime: c.config.time(),
+            CurrentTime: evalᴛ4,
             DNSName: c.config.ServerName,
-            Intermediates: Δx509.NewCertPool()
+            Intermediates: evalᴛ5
         );
 
         foreach (var (_, cert) in range(certs[1..])) {
@@ -1319,7 +1327,8 @@ internal static error verifyServerCertificate⁔(/*this*/ ж<Conn> Ꮡc, slice<s
     }
 
     if (c.config.VerifyConnection != nil && !echRejected) {
-        var err = c.config.VerifyConnection(Ꮡc.connectionStateLocked()); if (err != nil) {
+        var evalᴛ6 = Ꮡc.connectionStateLocked();
+        var err = c.config.VerifyConnection(evalᴛ6); if (err != nil) {
             Ꮡc.sendAlert(alertBadCertificate);
             return err;
         }

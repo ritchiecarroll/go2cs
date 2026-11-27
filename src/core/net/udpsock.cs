@@ -51,7 +51,8 @@ internal static @string String⁔(/*this*/ ж<UDPAddr> Ꮡa) {
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {
-        return JoinHostPort(ip + "%"u8 + a.Zone, strconv.Itoa(a.Port));
+        var evalᴛ1 = strconv.Itoa(a.Port);
+        return JoinHostPort(ip + "%"u8 + a.Zone, evalᴛ1);
     }
     return JoinHostPort(ip, strconv.Itoa(a.Port));
 }
@@ -246,7 +247,8 @@ internal static (nint, error) WriteToUDP⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byt
     }
     var (n, err) = c.writeTo(b, addr);
     if (err != nil) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: addr.opAddr(), Err: err)));
+        var evalᴛ1 = addr.opAddr();
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: evalᴛ1, Err: err)));
     }
     return (n, err);
 }
@@ -278,7 +280,8 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> 
     }
     var (n, err) = c.writeTo(b, a);
     if (err != nil) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: a.opAddr(), Err: err)));
+        var evalᴛ1 = a.opAddr();
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: evalᴛ1, Err: err)));
     }
     return (n, err);
 }
@@ -302,7 +305,8 @@ internal static (nint n, nint oobn, error err) WriteMsgUDP⁔(/*this*/ ж<UDPCon
     }
     (n, oobn, err) = c.writeMsg(b, oob, addr);
     if (err != nil) {
-        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: addr.opAddr(), Err: err)));
+        var evalᴛ1 = addr.opAddr();
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: c.fd.net, Source: c.fd.laddr, Addr: evalᴛ1, Err: err)));
     }
     return (n, oobn, err);
 }

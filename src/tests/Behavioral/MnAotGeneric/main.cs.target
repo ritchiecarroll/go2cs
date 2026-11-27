@@ -204,7 +204,8 @@ internal static partial (nint, nint) storm(nint count) {
         var i = iᴛ1;
         var doneʗ1 = done;
         goǃ([GoFunc("storm.func1")] () => {
-            doneʗ1.ᐸꟷ(stormOne(i));
+            var evalᴛ1 = stormOne(i);
+            doneʗ1.ᐸꟷ(evalᴛ1);
         });
     }
 

@@ -288,7 +288,9 @@ public class PublicSurfaceTests
     [
         "go.golib.GoTask", "go.golib.GoTask`1", "go.golib.GoTaskAwaiter", "go.golib.GoTaskAwaiter`1",
         "go.golib.GoTaskBuilder", "go.golib.GoTaskBuilder`1", "go.golib.GoFuncPair",
-        "go.golib.GoParkForwarderAttribute", "go.golib.GoParkWeakAttribute", "go.golib.GoTwinOfAttribute"
+        "go.golib.GoParkForwarderAttribute", "go.golib.GoParkWeakAttribute", "go.golib.GoTwinOfAttribute",
+        // N5 (COORD's Q2 ruling, 2026-11-23): the native-call seam is the consumer contract for a native block under M:N.
+        "go.golib.GoNativeCall", "go.golib.NativeCallHint"
     ];
 
     private static readonly (string Type, string[] Names)[] s_mnFrozenMembers =

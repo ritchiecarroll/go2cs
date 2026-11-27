@@ -23,7 +23,9 @@ public static void RemakeString(this ж<Tag> Ꮡt) {
         return;
     }
     array<byte> buf = new(8);
-    var b = buf.slice(0, Ꮡt.gen(buf[..]));
+    var evalᴛ1 = buf[..];
+    var evalᴛ2 = Ꮡt.gen(evalᴛ1);
+    var b = buf.slice(0, evalᴛ2);
     t.pExt = (uint16)len(b);
     t.str = ((sstring)b) + "!"u8;
 }

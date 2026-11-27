@@ -60,7 +60,8 @@ internal static void objDecl⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (tracePos) {
-            check.pushPos((atPos)obj.Pos());
+            var evalᴛ1 = obj.Pos();
+            check.pushPos((atPos)evalᴛ1);
             defer([GoFunc("(*Checker).objDecl.func1")] () => {
                 // If we're panicking, keep stack of source positions.
                 var p = recover(); if (p != nil) {
@@ -74,11 +75,14 @@ internal static void objDecl⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
             if (check.indent == 0) {
                 fmt.Println(); // empty line between top-level objects for readability
             }
-            Ꮡcheck.trace(obj.Pos(), checkingSObjPathSˢ, obj, pathString(check.objPath));
+            var evalᴛ2 = obj.Pos();
+            var evalᴛ3 = pathString(check.objPath);
+            Ꮡcheck.trace(evalᴛ2, checkingSObjPathSˢ, obj, evalᴛ3);
             check.indent++;
             defer([GoFunc("(*Checker).objDecl.func2")] () => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(obj.Pos(), "=> %s", obj);
+                var evalᴛ4 = obj.Pos();
+                Ꮡcheck.trace(evalᴛ4, "=> %s", obj);
             }, ref ᒐ);
         }
 
@@ -229,7 +233,8 @@ internal static bool /*valid*/ validCycle⁔(/*this*/ ж<Checker> Ꮡcheck, Obje
             var inObjMap = info != nil && (info.fdecl == nil || info.fdecl.Recv == nil); // exclude methods
             var isPkgObj = obj.Parent() == check.pkg.scope;
             if (isPkgObj != inObjMap) {
-                Ꮡcheck.dump(vInconsistentObjectMapˢ, obj.Pos(), obj, isPkgObj, inObjMap);
+                var evalᴛ1 = obj.Pos();
+                Ꮡcheck.dump(vInconsistentObjectMapˢ, evalᴛ1, obj, isPkgObj, inObjMap);
                 throw panic("unreachable");
             }
         }
@@ -297,17 +302,24 @@ continue_loop:;
 break_loop:;
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(obj.Pos(), cycleDetectedObjPathSSˢ, pathString(cycle), obj.Name(), len(cycle));
+            var evalᴛ2 = obj.Pos();
+            var evalᴛ3 = pathString(cycle);
+            var evalᴛ4 = obj.Name();
+            Ꮡcheck.trace(evalᴛ2, cycleDetectedObjPathSSˢ, evalᴛ3, evalᴛ4, len(cycle));
             if (tparCycle) {
-                Ꮡcheck.trace(obj.Pos(), cycleContainsGenericTypeˢ);
+                var evalᴛ5 = obj.Pos();
+                Ꮡcheck.trace(evalᴛ5, cycleContainsGenericTypeˢ);
             } else {
-                Ꮡcheck.trace(obj.Pos(), cycleContainsDValuesDˢ, nval, ndef);
+                var evalᴛ6 = obj.Pos();
+                Ꮡcheck.trace(evalᴛ6, cycleContainsDValuesDˢ, nval, ndef);
             }
             defer([GoFunc("(*Checker).validCycle.func1")] () => {
                 if (valid) {
-                    Ꮡcheck.trace(obj.Pos(), cycleIsValidˢ);
+                    var evalᴛ7 = obj.Pos();
+                    Ꮡcheck.trace(evalᴛ7, cycleIsValidˢ);
                 } else {
-                    Ꮡcheck.trace(obj.Pos(), errorCycleIsInvalidˢ);
+                    var evalᴛ8 = obj.Pos();
+                    Ꮡcheck.trace(evalᴛ8, errorCycleIsInvalidˢ);
                 }
             }, ref ᒐ);
         }
@@ -331,7 +343,8 @@ break_loop:;
             valid = true; goto ᒐdone;
         }
 
-        Ꮡcheck.cycleError(cycle, firstInSrc(cycle));
+        var evalᴛ9 = firstInSrc(cycle);
+        Ꮡcheck.cycleError(cycle, evalᴛ9);
         valid = false;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -367,9 +380,11 @@ internal static void cycleError⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Object> 
     // report a more concise error for self references
     if (len(cycle) == 1) {
         if (tname != nil) {
-            Ꮡcheck.errorf(new Objectᴠpositioner(obj), InvalidDeclCycle, "invalid recursive type: %s refers to itself", name(obj));
+            var evalᴛ1 = name(obj);
+            Ꮡcheck.errorf(new Objectᴠpositioner(obj), InvalidDeclCycle, "invalid recursive type: %s refers to itself", evalᴛ1);
         } else {
-            Ꮡcheck.errorf(new Objectᴠpositioner(obj), InvalidDeclCycle, "invalid cycle in declaration: %s refers to itself", name(obj));
+            var evalᴛ2 = name(obj);
+            Ꮡcheck.errorf(new Objectᴠpositioner(obj), InvalidDeclCycle, "invalid cycle in declaration: %s refers to itself", evalᴛ2);
         }
         return;
     }
@@ -656,13 +671,15 @@ internal static void typeDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡ
         var versionErr = false;
 
         ref var rhs = ref heap<Type>(out var Ꮡrhs);
-        check.later([GoFunc("(*Checker).typeDecl.func1")] () => {
+        var evalᴛ1 = check.later([GoFunc("(*Checker).typeDecl.func1")] () => {
             var t = asNamed(Ꮡobj.Value.typ); if (t != nil) { // type may be invalid
                 Ꮡcheck.validType(t);
             }
             // If typ is local, an error was already reported where typ is specified/defined.
             _ = !versionErr && Ꮡcheck.Value.isImportedConstraint(Ꮡrhs.ValueSlot) && Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(Ꮡtdecl.Value.Type), go1_18, "using type constraint %s", Ꮡrhs.ValueSlot);
-        }).describef(new TypeNameжpositioner(Ꮡobj), "validType(%s)", Ꮡobj.of(TypeName.Ꮡobject).Name());
+        });
+        var evalᴛ2 = Ꮡobj.of(TypeName.Ꮡobject).Name();
+        evalᴛ1.describef(new TypeNameжpositioner(Ꮡobj), "validType(%s)", evalᴛ2);
 
         // First type parameter, or nil.
         ж<ast.Field> tparam0 = default;
@@ -932,9 +949,12 @@ internal static void collectMethods⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeNam
         assert(m.name != "_"u8);
         var alt = mset.insert(new FuncжObject(m)); if (alt != nil) {
             if (alt.Pos().IsValid()) {
-                Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared at %v", Ꮡobj.of(TypeName.Ꮡobject).Name(), m.name, alt.Pos());
+                var evalᴛ1 = Ꮡobj.of(TypeName.Ꮡobject).Name();
+                var evalᴛ2 = alt.Pos();
+                Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared at %v", evalᴛ1, m.name, evalᴛ2);
             } else {
-                Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared", Ꮡobj.of(TypeName.Ꮡobject).Name(), m.name);
+                var evalᴛ3 = Ꮡobj.of(TypeName.Ꮡobject).Name();
+                Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared", evalᴛ3, m.name);
             }
             continue;
         }
@@ -993,8 +1013,10 @@ internal static void funcDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Func> Ꮡobj,
 
     // Set the scope's extent to the complete "func (...) { ... }"
     // so that Scope.Innermost works correctly.
-    sig.scope.pos = fdecl.Pos();
-    sig.scope.end = fdecl.End();
+    var evalᴛ1 = fdecl.Pos();
+    sig.scope.pos = evalᴛ1;
+    var evalᴛ2 = fdecl.End();
+    sig.scope.end = evalᴛ2;
 
     if (fdecl.Type.TypeParams.NumFields() > 0 && fdecl.Body == nil) {
         Ꮡcheck.softErrorf(new ast_Identжpositioner(fdecl.Name), BadDecl, "generic function is missing function body");
@@ -1025,7 +1047,9 @@ internal static void declStmt⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d) {
             // declare all constants
             var lhs = new slice<ж<Const>>(len(dΔ2.spec.Names));
             foreach (var (i, name) in range(dΔ2.spec.Names)) {
-                var obj = NewConst(name.Pos(), pkgʗ1, name.Name, default, constant.MakeInt64((int64)dΔ2.iota));
+                var evalᴛ1 = name.Pos();
+                var evalᴛ2 = constant.MakeInt64((int64)dΔ2.iota);
+                var obj = NewConst(evalᴛ1, pkgʗ1, name.Name, default, evalᴛ2);
                 lhs[i] = obj;
 
                 ast.Expr init = default;
@@ -1121,7 +1145,9 @@ internal static void declStmt⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d) {
         }
         default: {
             var dΔ2 = dΔ1;
-            Ꮡcheck.errorf(new ast_Nodeᴠpositioner(dΔ2.node()), InvalidSyntaxTree, "unknown ast.Decl node %T", dΔ2.node());
+            var evalᴛ3 = dΔ2.node();
+            var evalᴛ4 = dΔ2.node();
+            Ꮡcheck.errorf(new ast_Nodeᴠpositioner(evalᴛ3), InvalidSyntaxTree, "unknown ast.Decl node %T", evalᴛ4);
             break;
         }}
     });

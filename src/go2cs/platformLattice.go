@@ -45,7 +45,7 @@ import (
 // target is this constant plus the corpus apply that re-homes the files the new target does not
 // share, committed together: a tree and a constant that disagree are a tree no single-target
 // conversion reproduces.
-var platformUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
+var platformUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64", "darwin/arm64"}
 
 // layoutKeyKind orders the lattice's keys from coarsest to finest.
 type layoutKeyKind int

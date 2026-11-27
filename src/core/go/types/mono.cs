@@ -212,7 +212,8 @@ internal static void assign⁔(/*this*/ ж<monoGraph> Ꮡw, ж<Package> pkg, tok
             weight = 0;
         }
 
-        Ꮡw.Value.addEdge(Ꮡw.Value.typeParamVertex(Ꮡtpar), src, weight, pos, targ);
+        var evalᴛ1 = Ꮡw.Value.typeParamVertex(Ꮡtpar);
+        Ꮡw.Value.addEdge(evalᴛ1, src, weight, pos, targ);
     }
 
     // Recursively walk the type argument to find any defined types or
@@ -233,7 +234,8 @@ internal static void assign⁔(/*this*/ ж<monoGraph> Ꮡw, ж<Package> pkg, tok
             break;
         }
         case ж<Named> typΔ1: {
-            nint src = Ꮡw.Value.localNamedVertex(pkg, typΔ1.Origin()); if (src >= 0) {
+            var evalᴛ2 = typΔ1.Origin();
+            nint src = Ꮡw.Value.localNamedVertex(pkg, evalᴛ2); if (src >= 0) {
                 flowʗ1(src, new NamedжType(typΔ1));
             }
 

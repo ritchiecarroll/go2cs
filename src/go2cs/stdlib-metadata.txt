@@ -1348,7 +1348,7 @@
 [assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<digest, hash_package.Hash32>(Pointer = true)]
 
-##hash.crc32@linux-arm64
+##hash.crc32@arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
@@ -1522,7 +1522,7 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.bytealg@linux-arm64
+##internal.bytealg@arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -1616,7 +1616,11 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.cpu@darwin
+##internal.cpu@darwin-amd64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.cpu@darwin-arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -1837,7 +1841,7 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.runtime.atomic@linux-arm64
+##internal.runtime.atomic@arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -1885,7 +1889,7 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.runtime.gc.scan@linux-arm64
+##internal.runtime.gc.scan@arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -1910,7 +1914,7 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.runtime.sys@linux-arm64
+##internal.runtime.sys@arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -2298,7 +2302,7 @@
 [assembly: GoImplement<Zipf, Source>(Pointer = true)]
 [assembly: GoImplement<runtimeSource, Source>]
 
-##math@linux-arm64
+##math@arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -3119,7 +3123,17 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##runtime@darwin
+##runtime@darwin-amd64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<PanicNilError, Error>(Pointer = true)]
+[assembly: GoImplement<TypeAssertionError, Error>(Pointer = true)]
+[assembly: GoImplement<boundsError, Error>]
+[assembly: GoImplement<errorAddressString, Error>]
+[assembly: GoImplement<errorString, Error>]
+[assembly: GoImplement<plainError, Error>]
+
+##runtime@darwin-arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<PanicNilError, Error>(Pointer = true)]
@@ -3208,7 +3222,20 @@
 [assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
 [assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
 
-##syscall@darwin
+##syscall@darwin-amd64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<Errno, error>]
+[assembly: GoImplement<InterfaceAddrMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<InterfaceMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<InterfaceMulticastAddrMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<RouteMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<SockaddrDatalink, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet4, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
+
+##syscall@darwin-arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<Errno, error>]
@@ -3497,9 +3524,15 @@
 [assembly: GoImplement<bigEndian, byteOrder>]
 [assembly: GoImplement<littleEndian, byteOrder>]
 
-##vendor.golang.org.x.sys.cpu@darwin
+##vendor.golang.org.x.sys.cpu@darwin-amd64
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Errno", "go.syscall_package.Errno")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<bigEndian, byteOrder>]
+[assembly: GoImplement<littleEndian, byteOrder>]
+
+##vendor.golang.org.x.sys.cpu@darwin-arm64
+// <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<bigEndian, byteOrder>]
 [assembly: GoImplement<littleEndian, byteOrder>]

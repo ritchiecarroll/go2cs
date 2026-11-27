@@ -210,12 +210,14 @@ partial struct commonHandler {
 
 internal static ж<commonHandler> clone⁔(/*this*/ ref commonHandler h) {
     // We can't use assignment because we can't copy the mutex.
+    var evalᴛ1 = slices.Clip<slice<byte>, byte>(h.preformattedAttrs);
+    var evalᴛ2 = slices.Clip<slice<@string>, @string>(h.groups);
     return Ꮡ(new commonHandler(
         json: h.json,
         opts: h.opts,
-        preformattedAttrs: slices.Clip<slice<byte>, byte>(h.preformattedAttrs),
+        preformattedAttrs: evalᴛ1,
         groupPrefix: h.groupPrefix,
-        groups: slices.Clip<slice<@string>, @string>(h.groups),
+        groups: evalᴛ2,
         nOpenGroups: h.nOpenGroups,
         w: h.w,
         mu: h.mu // mutex shared among all clones of this handler
@@ -351,7 +353,8 @@ internal static void appendNonBuiltIns⁔(/*this*/ ж<handleState> Ꮡs, Record 
     var pfa = s.h.preformattedAttrs; if (len(pfa) > 0) {
         s.buf.WriteString(s.sep);
         s.buf.Write(pfa);
-        s.sep = s.h.attrSep();
+        var evalᴛ1 = s.h.attrSep();
+        s.sep = evalᴛ1;
         if (s.h.json && pfa[len(pfa) - 1] == '{') {
             s.sep = ""u8;
         }
@@ -605,12 +608,14 @@ internal static void appendTwoStrings⁔(/*this*/ ref handleState s, @string x, 
 internal static void appendString⁔(/*this*/ ref handleState s, @string str) {
     if (s.h.json) {
         s.buf.WriteByte((byte)'"');
-        s.buf.ValueSlot = appendEscapedJSONString(s.buf.ValueSlot, str);
+        var evalᴛ1 = appendEscapedJSONString(s.buf.ValueSlot, str);
+        s.buf.ValueSlot = evalᴛ1;
         s.buf.WriteByte((byte)'"');
     } else {
         // text
         if (needsQuoting(str)) {
-            s.buf.ValueSlot = strconv.AppendQuote(s.buf.ValueSlot, str);
+            var evalᴛ2 = strconv.AppendQuote(s.buf.ValueSlot, str);
+            s.buf.ValueSlot = evalᴛ2;
         } else {
             s.buf.WriteString(str);
         }
@@ -640,7 +645,8 @@ internal static void appendValue⁔(/*this*/ ж<handleState> Ꮡs, Value v) {
                 }
 
                 // Otherwise just print the original panic message.
-                Ꮡs.Value.appendString(fmt.Sprintf("!PANIC: %v"u8, r));
+                var evalᴛ1 = fmt.Sprintf("!PANIC: %v"u8, r);
+                Ꮡs.Value.appendString(evalᴛ1);
             }
         }, ref ᒐ);
 
@@ -664,7 +670,8 @@ internal static void appendTime⁔(/*this*/ ж<handleState> Ꮡs, time.Time t) {
     if (s.h.json) {
         appendJSONTime(Ꮡs, t);
     } else {
-        s.buf.ValueSlot = appendRFC3339Millis(s.buf.ValueSlot, t);
+        var evalᴛ1 = appendRFC3339Millis(s.buf.ValueSlot, t);
+        s.buf.ValueSlot = evalᴛ1;
     }
 }
 

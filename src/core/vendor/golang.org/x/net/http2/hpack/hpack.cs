@@ -170,7 +170,8 @@ internal static void setMaxSize⁔(/*this*/ ref dynamicTable dt, uint32 v) {
 
 internal static void add⁔(/*this*/ ref dynamicTable dt, HeaderField f) {
     dt.table.addEntry(f);
-    dt.size += f.Size();
+    var evalᴛ1 = f.Size();
+    dt.size += evalᴛ1;
     dt.evict();
 }
 
@@ -178,7 +179,8 @@ internal static void add⁔(/*this*/ ref dynamicTable dt, HeaderField f) {
 internal static void evict⁔(/*this*/ ref dynamicTable dt) {
     nint n = default;
     while (dt.size > dt.maxSize && n < dt.table.len()) {
-        dt.size -= dt.table.ents[n].Size();
+        var evalᴛ1 = dt.table.ents[n].Size();
+        dt.size -= evalᴛ1;
         n++;
     }
     dt.table.evictOldest(n);
@@ -209,7 +211,9 @@ internal static (HeaderField hf, bool ok) at⁔(/*this*/ ref Decoder d, uint64 i
     // However, dt.ents[0] is the oldest entry. Hence, dt.ents is
     // the reversed dynamic table.
     var dt = d.dynTab.table;
-    return (dt.ents[dt.len() - ((nint)i - staticTable.len())], true);
+    var evalᴛ1 = dt.len();
+    var evalᴛ2 = staticTable.len();
+    return (dt.ents[evalᴛ1 - ((nint)i - evalᴛ2)], true);
 }
 
 // DecodeFull decodes an entire block.

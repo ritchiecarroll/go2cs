@@ -12,8 +12,8 @@ public static (Int128 r, error err) SetBig(this ж<Int128> Ꮡx, int64 v) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (v > 1000) {
-        var ᴛ1 = fmt.Errorf("%T.SetBig: overflow"u8, Ꮡx.OrTypedNil());
-        return (x, ᴛ1);
+        var evalᴛ1 = fmt.Errorf("%T.SetBig: overflow"u8, Ꮡx.OrTypedNil());
+        return (x, evalᴛ1);
     }
     (x.Lo, x.Hi) = (v, v >> 63);
     return (x, default);
@@ -46,7 +46,8 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         defer([GoFunc("(*Tally).Add.func1")] () => {
-            Ꮡt.Value.log = fmt.Sprintf("%s+%d"u8, Ꮡt.Value.log, n);
+            var evalᴛ1 = fmt.Sprintf("%s+%d"u8, Ꮡt.Value.log, n);
+            Ꮡt.Value.log = evalᴛ1;
         }, ref ᒐ);
         t.total += n;
     }

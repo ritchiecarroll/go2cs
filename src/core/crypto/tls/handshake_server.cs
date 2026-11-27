@@ -466,7 +466,8 @@ internal static error pickCipherSuite⁔(/*this*/ ж<serverHandshakeState> Ꮡhs
 
     var c = hs.c;
 
-    var preferenceList = c.config.cipherSuites(isAESGCMPreferred(hs.clientHello.cipherSuites));
+    var evalᴛ1 = isAESGCMPreferred(hs.clientHello.cipherSuites);
+    var preferenceList = c.config.cipherSuites(evalᴛ1);
 
     hs.suite = selectCipherSuite(preferenceList, hs.clientHello.cipherSuites, Ꮡhs.cipherSuiteOk);
     if (hs.suite == nil) {
@@ -488,7 +489,8 @@ internal static error pickCipherSuite⁔(/*this*/ ж<serverHandshakeState> Ꮡhs
     foreach (var (_, id) in range(hs.clientHello.cipherSuites)) {
         if (id == TLS_FALLBACK_SCSV) {
             // The client is doing a fallback connection. See RFC 7507.
-            if (hs.clientHello.vers < c.config.maxSupportedVersion(roleServer)) {
+            var evalᴛ2 = c.config.maxSupportedVersion(roleServer);
+            if (hs.clientHello.vers < evalᴛ2) {
                 c.sendAlert(alertInappropriateFallback);
                 return errors.New(tlsClientUsingˢ);
             }
@@ -584,8 +586,9 @@ internal static error checkForResumption⁔(/*this*/ ж<serverHandshakeState> �
     }
 
     // Check that we also support the ciphersuite from the session.
+    var evalᴛ1 = c.config.supportedCipherSuites();
     var suite = selectCipherSuite([sessionState.cipherSuite],
-        c.config.supportedCipherSuites(), Ꮡhs.cipherSuiteOk);
+        evalᴛ1, Ꮡhs.cipherSuiteOk);
     if (suite == nil) {
         return default;
     }
@@ -667,7 +670,8 @@ internal static error doResumeHandshake⁔(/*this*/ ж<serverHandshakeState> Ꮡ
     }
 
     if (c.config.VerifyConnection != nil) {
-        var err = c.config.VerifyConnection(c.connectionStateLocked()); if (err != nil) {
+        var evalᴛ1 = c.connectionStateLocked();
+        var err = c.config.VerifyConnection(evalᴛ1); if (err != nil) {
             c.sendAlert(alertBadCertificate);
             return err;
         }
@@ -807,7 +811,8 @@ internal static error doFullHandshake⁔(/*this*/ ж<serverHandshakeState> Ꮡhs
         }
     }
     if (c.config.VerifyConnection != nil) {
-        var errΔ10 = c.config.VerifyConnection(c.connectionStateLocked()); if (errΔ10 != nil) {
+        var evalᴛ1 = c.connectionStateLocked();
+        var errΔ10 = c.config.VerifyConnection(evalᴛ1); if (errΔ10 != nil) {
             c.sendAlert(alertBadCertificate);
             return errΔ10;
         }
@@ -827,8 +832,9 @@ internal static error doFullHandshake⁔(/*this*/ ж<serverHandshakeState> Ꮡhs
     }
     if (hs.hello.extendedMasterSecret) {
         c.extMasterSecret = true;
+        var evalᴛ2 = hs.finishedHash.Sum();
         hs.masterSecret = extMasterFromPreMasterSecret(c.vers, ref (hs.suite).DerefOrNull(), preMasterSecret,
-            hs.finishedHash.Sum());
+            evalᴛ2);
     } else {
         if (fips140tls.Required()) {
             if (fips140ems.Value() != "0"u8) {
@@ -1082,10 +1088,12 @@ internal static error processCertsFromClient⁔(/*this*/ ж<Conn> Ꮡc, Certific
     }
 
     if (c.config.ClientAuth >= VerifyClientCertIfGiven && len(certs) > 0) {
+        var evalᴛ1 = c.config.time();
+        var evalᴛ2 = Δx509.NewCertPool();
         var opts = new Δx509.VerifyOptions(
             Roots: c.config.ClientCAs,
-            CurrentTime: c.config.time(),
-            Intermediates: Δx509.NewCertPool(),
+            CurrentTime: evalᴛ1,
+            Intermediates: evalᴛ2,
             KeyUsages: [Δx509.ExtKeyUsageClientAuth]
         );
 

@@ -78,7 +78,9 @@ internal static void XORKeyStream⁔(/*this*/ ref ofb x, slice<byte> dst, slice<
         throw panic("crypto/cipher: invalid buffer overlap");
     }
     while (len(src) > 0) {
-        if (x.outUsed >= len(x.@out) - x.b.BlockSize()) {
+        var evalᴛ1 = len(x.@out);
+        var evalᴛ2 = x.b.BlockSize();
+        if (x.outUsed >= evalᴛ1 - evalᴛ2) {
             x.refill();
         }
         nint n = subtle.XORBytes(dst, src, x.@out.slice(x.outUsed));
