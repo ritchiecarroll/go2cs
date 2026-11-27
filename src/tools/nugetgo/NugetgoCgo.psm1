@@ -13,9 +13,10 @@
 # `-recurse=nuget -cgo`, each with the pinned zig for that flavor's target as CC, and the package is always RID-specific:
 #
 #   * runtimes/<rid>/lib/<tfm>/ carries each packed RID's own flavor, for the RIDs whose go.* bytes are TRUE for it.
-#     osx-arm64 is OUT BY NAME: the go.* packages ship it the darwin/amd64 flavor, so its cgo flavor would bind a C
-#     layout to go.* bytes built for another architecture. It joins when true darwin/arm64 go.* assets ship; the guard
-#     below needs no change then.
+#     osx-arm64 is OUT BY NAME. Until D6 of DESIGN-darwin-arm64-flavour.md the go.* packages shipped it the darwin/amd64
+#     flavor, so a cgo flavor would have bound a C layout to go.* bytes built for another architecture. Since D6 they
+#     ship it darwin/arm64, and osx-arm64 joins with its own cgo flavor (zig's aarch64-macos target and a consume leg),
+#     a seat of its own; the guard below needs no change then. nugetgo-pack.ps1 converts the -Cgo map's flavors only.
 #   * lib/<tfm>/ carries REFERENCE assemblies only (the reference flavor's), never an implementation another RID could
 #     fall back to: NuGet takes lib/ for any RID with no runtimes/ folder of its own, and a reference assembly refuses to
 #     load (BadImageFormatException), where an implementation would bind another target's C.
@@ -47,7 +48,7 @@ $script:Triples = [ordered]@{
 # The RIDs a -Cgo pack leaves out, each with the reason its README, VALIDATION.md and self-description state.
 function Get-NugetgoCgoExcludedRids {
     [ordered]@{
-        'osx-arm64' = 'the go.* packages ship osx-arm64 their darwin/amd64 flavor, and a cgo package''s C binding is per target, so osx-arm64 waits for true darwin/arm64 go.* assets'
+        'osx-arm64' = 'a cgo package''s C binding is per target, and the darwin/arm64 C target (zig aarch64-macos) is not yet built or consumed, so osx-arm64 waits for its own darwin/arm64 cgo flavor'
     }
 }
 

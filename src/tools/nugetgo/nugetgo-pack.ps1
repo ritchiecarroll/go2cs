@@ -65,7 +65,7 @@
 
     Flavors (COORD ruling 2026-10-12): the pack adopts the go.* release's per-OS promotion (push-nuget.ps1). A -recurse
     conversion emits one target, so the pack converts the module's own source once per flavor of the release's RID map
-    (windows/amd64, linux/amd64, darwin/amd64, linux/arm64) with this tree's converter, requires its conversion of
+    (windows/amd64, linux/amd64, darwin/amd64, linux/arm64, darwin/arm64) with this tree's converter, requires its conversion of
     -RecurseRoot's flavor to reproduce every
     packed project's GoInputDigest, builds every flavor, and compares the flavors' assemblies with the release's material
     check (GoAssemblyMaterial.psm1). Equal in meaning: one neutral assembly set in lib/<tfm>/, packed from -RecurseRoot as
@@ -89,8 +89,9 @@
     Cgo (-Cgo, the cgo-against-go.* item's INC 2b; COORD's ruling (a), 2026-11-21): a module with a cgo package. Each
     flavor converts with `-recurse=nuget -cgo`, its CC the pinned zig (-Zig) for that flavor's target
     (NugetgoCgo.psm1), and the package is RID-specific whatever the material check says, since a cgo package's C binding
-    is per target. It ships the RIDs whose go.* bytes are true for them -- win-x64, linux-x64, osx-x64, linux-arm64 --
-    and leaves osx-arm64 out by name until true darwin/arm64 go.* assets ship. lib/<tfm>/ carries the reference
+    is per target. It ships win-x64, linux-x64, osx-x64 and linux-arm64, and converts only their flavors (every flavor
+    call takes the pack's own map). osx-arm64 stays out by name: its go.* assets are darwin/arm64 since D6, and its cgo
+    flavor (zig's aarch64-macos target) is its own seat. lib/<tfm>/ carries the reference
     flavor's REFERENCE assemblies, never an implementation another RID could fall back to; build/<id>.targets fails a
     consumer build for a RID the package does not carry with NUGETGOCGO001, reading the set from the package's own
     runtimes/ folders. VALIDATION.md and the self-description state both. The read-back adds R7: each RID's assembly has
@@ -461,9 +462,10 @@ foreach ($page in $pages) {
 # converter and the module's own source, and the flavors' assemblies are compared with the release's material check
 # (NugetgoFlavors.psm1). Equal in meaning: one neutral assembly set, packed from -RecurseRoot as always. Different: the
 # release's RID-specific layout, after the pack. The proof's flavor is -RecurseRoot itself; the pack's own conversion of
-# that flavor, at the target -RecurseRoot's RID converts for (osx-arm64: darwin/arm64), must reproduce every packed
-# project's GoInputDigest, so the other flavors are known to be the same input, options and converter. Every other
-# flavor converts at its own pair: linux/arm64 is a flavor of its own, never linux/amd64's twin.
+# that flavor, at the target -RecurseRoot's RID converts for (since D6 always the RID's own flavor), must reproduce
+# every packed project's GoInputDigest, so the other flavors are known to be the same input, options and converter.
+# Every other flavor converts at its own pair: linux/arm64 and darwin/arm64 are flavors of their own, never their x64
+# twins'. The flavors are the pack's own map's ($ridFlavors): a -Cgo pack leaves osx-arm64, and so darwin/arm64, out.
 $flavorDir = Join-Path $Scratch 'flavors'
 if (Test-Path $flavorDir) { Remove-Item -Recurse -Force $flavorDir }
 New-Item -ItemType Directory -Force $flavorDir | Out-Null
@@ -498,7 +500,7 @@ else {
     finally { Pop-Location }
 }
 $flavorProjects = @{}
-foreach ($flavor in Get-NugetgoFlavors) {
+foreach ($flavor in Get-NugetgoFlavors -RidFlavors $ridFlavors) {
     $root = Join-Path $flavorDir (Get-NugetgoFlavorFolder $flavor)
     $log = Join-Path $flavorDir "$(Get-NugetgoFlavorFolder $flavor).log"
     $target = if ($flavor -ceq $proofFlavor) { $proofTarget } else { $flavor }
@@ -544,7 +546,7 @@ try {
     # The pack's own build environment (below), each flavor's root mapped to /_/ as -RecurseRoot is, so the flavors
     # differ only where their sources do.
     $env:NUGET_PACKAGES = $isolated; $env:GoStdLibVersion = $stdlibRange; $env:ContinuousIntegrationBuild = 'true'
-    foreach ($flavor in Get-NugetgoFlavors) {
+    foreach ($flavor in Get-NugetgoFlavors -RidFlavors $ridFlavors) {
         $root = if ($flavor -ceq $proofFlavor) { $RecurseRoot } else { Join-Path $flavorDir (Get-NugetgoFlavorFolder $flavor) }
         $env:PathMap = "$([System.IO.Path]::GetFullPath($root).TrimEnd('\', '/'))=/_/,$([System.IO.Path]::GetFullPath($Scratch).TrimEnd('\', '/'))=/_scratch/"
         $flavorAssemblies[$flavor] = @{}
@@ -565,7 +567,7 @@ try {
     }
 }
 finally { foreach ($k in $saved.Keys) { Set-Item "env:$k" $saved[$k] -ErrorAction SilentlyContinue; if ($null -eq $saved[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } } }
-$flavorDecision = Get-NugetgoFlavorDecision -Assemblies $flavorAssemblies -ProofFlavor $proofFlavor
+$flavorDecision = Get-NugetgoFlavorDecision -Assemblies $flavorAssemblies -ProofFlavor $proofFlavor -RidFlavors $ridFlavors
 # A6's floor (COORD's push-lift ruling (a)): the flavors' builds restored the go.lib this package declares as its floor, and
 # a -Cgo pack is made only on one whose Register refuses bindings at load in a process they were not converted for.
 if ($Cgo) {
@@ -580,18 +582,18 @@ $layoutArgs = if ($Cgo) { @{ RidFlavors = $ridFlavors; LibAssemblies = $flavorRe
 # Third-party requires, per TFM: the union of every flavor's (COORD ruling 2026-10-12). A neutral package's flavors agree,
 # so for one the union is -RecurseRoot's own list.
 $flavorRequires = @{}
-foreach ($flavor in Get-NugetgoFlavors) {
+foreach ($flavor in Get-NugetgoFlavors -RidFlavors $ridFlavors) {
     $root = if ($flavor -ceq $proofFlavor) { $RecurseRoot } else { Join-Path $flavorDir (Get-NugetgoFlavorFolder $flavor) }
     $flavorRequires[$flavor] = @(Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries $flavorProjects[$flavor] -ThirdPartyPackage $ThirdPartyPackage -AllowUnreferenced)
 }
-try { $requires = @(Merge-NugetgoFlavorRequires -Requires $flavorRequires -ThirdPartyPackage $ThirdPartyPackage) }
+try { $requires = @(Merge-NugetgoFlavorRequires -Requires $flavorRequires -ThirdPartyPackage $ThirdPartyPackage -RidFlavors $ridFlavors) }
 catch { Refuse ($_.Exception.Message -replace '^REFUSED: ', '') }
 if ($ridSpecific) {
     if ($Cgo) { Write-Host "  flavors: -Cgo: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceFlavor) flavor's reference assemblies (the material check read $(if ($flavorDecision.RidSpecific) { 'a difference' } else { 'none' }))" }
-    else { Write-Host "  flavors: $((Get-NugetgoFlavors) -join ', ') differ in meaning: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceFlavor) flavor, as the go.* release packs them" }
+    else { Write-Host "  flavors: $((Get-NugetgoFlavors -RidFlavors $ridFlavors) -join ', ') differ in meaning: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceFlavor) flavor, as the go.* release packs them" }
     foreach ($why in $flavorDecision.Reasons) { Write-Host "    $why" }
     # Dependencies are per target framework, never per RID (push-nuget.ps1): the package declares every flavor's.
-    foreach ($flavor in Get-NugetgoFlavors) {
+    foreach ($flavor in Get-NugetgoFlavors -RidFlavors $ridFlavors) {
         foreach ($p in $flavorProjects[$flavor]) {
             [xml]$x = Get-Content -Raw -LiteralPath $p.FullName
             foreach ($ref in @($x.Project.ItemGroup | ForEach-Object { $_.PackageReference } | Where-Object { $_ })) {
@@ -600,7 +602,7 @@ if ($ridSpecific) {
         }
     }
 }
-else { Write-Host "  flavors: $((Get-NugetgoFlavors) -join ', ') agree in meaning: one neutral assembly set, packed from -RecurseRoot ($proofFlavor)" }
+else { Write-Host "  flavors: $((Get-NugetgoFlavors -RidFlavors $ridFlavors) -join ', ') agree in meaning: one neutral assembly set, packed from -RecurseRoot ($proofFlavor)" }
 
 # ---- the generated module pack project --------------------------------------------------------------------------------
 $packDir = Join-Path (Join-Path $Scratch 'pack') $id.Id
@@ -611,7 +613,7 @@ Copy-Item -LiteralPath $packageIcon.Path (Join-Path $packDir $packageIcon.Name)
 [System.IO.File]::WriteAllText((Join-Path $packDir 'README.md'), $readme, (New-Object System.Text.UTF8Encoding($false)))
 # VALIDATION.md = the ruled two sentences as its header, then the proof page itself, unchanged below them.
 # A RID-specific package's page discloses, in one line, the flavors its self-description does not describe.
-$flavorDisclosure = Get-NugetgoFlavorDisclosure -ProofFlavor $proofFlavor -RidSpecific:$ridSpecific
+$flavorDisclosure = Get-NugetgoFlavorDisclosure -ProofFlavor $proofFlavor -RidSpecific:$ridSpecific -RidFlavors $ridFlavors
 $cgoStatement = if ($Cgo) { Get-NugetgoCgoStatement -PackageId $id.Id } else { $null }
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
     ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + $(if ($cgoStatement) { "> $cgoStatement`n`n" } else { '' }) + $proofSummary +

@@ -58,8 +58,8 @@ $armOnly = Get-NugetgoFlavorDecision -Assemblies (Flavors @{ 'App.dll' = $alpha 
 Check 'a difference at linux/arm64 alone is RID-specific (it is not linux/amd64''s twin)' ($armOnly.RidSpecific -and @($armOnly.Reasons | Where-Object { $_ -like '*linux/arm64*' }).Count -eq 1) "reasons: $($armOnly.Reasons -join ' | ')"
 $darwinArmOnly = Get-NugetgoFlavorDecision -Assemblies (Flavors @{ 'App.dll' = $alpha } @{ 'App.dll' = $alpha } @{ 'App.dll' = $alpha } @{ 'App.dll' = $alpha } @{ 'App.dll' = $bravo }) -ProofFlavor 'linux/amd64'
 Check 'a difference at darwin/arm64 alone is RID-specific (it is not darwin/amd64''s twin)' ($darwinArmOnly.RidSpecific -and @($darwinArmOnly.Reasons | Where-Object { $_ -like '*darwin/arm64*' }).Count -eq 1) "reasons: $($darwinArmOnly.Reasons -join ' | ')"
-$darwinOnly = Get-NugetgoFlavorDecision -Assemblies (Flavors @{ 'App.dll' = $alpha } @{ 'App.dll' = $alpha } @{ 'App.dll' = $bravo }) -ProofFlavor 'linux/amd64'
-Check 'a difference in one flavor alone is RID-specific' ($darwinOnly.RidSpecific -and @($darwinOnly.Reasons | Where-Object { $_ -like '*darwin*' }).Count -eq 1) "reasons: $($darwinOnly.Reasons -join ' | ')"
+$darwinOnly = Get-NugetgoFlavorDecision -Assemblies (Flavors @{ 'App.dll' = $alpha } @{ 'App.dll' = $alpha } @{ 'App.dll' = $bravo } @{ 'App.dll' = $alpha } @{ 'App.dll' = $alpha }) -ProofFlavor 'linux/amd64'
+Check 'a difference in one flavor alone is RID-specific' ($darwinOnly.RidSpecific -and @($darwinOnly.Reasons | Where-Object { $_ -like '*darwin*' }).Count -eq 1 -and $darwinOnly.Reasons[0] -like '*darwin/amd64*') "reasons: $($darwinOnly.Reasons -join ' | ')"
 $missing = Get-NugetgoFlavorDecision -Assemblies (Flavors @{ 'App.dll' = $alpha } @{ 'App.dll' = $alpha; 'Extra.dll' = $alpha } @{ 'App.dll' = $alpha; 'Extra.dll' = $alpha }) -ProofFlavor 'linux/amd64'
 Check 'a different assembly set is RID-specific' ($missing.RidSpecific -and @($missing.Reasons | Where-Object { $_ -like '*Extra.dll*' }).Count -ge 1) "reasons: $($missing.Reasons -join ' | ')"
 $noFlavor = $null
