@@ -33,7 +33,8 @@ partial struct baseEvent {
 internal static slice<uint64> extra⁔(/*this*/ ref baseEvent e, version.Version v) {
     switch (v) {
     case var ᴛ when ᴛ == version.Go122: {
-        return e.args.slice(len(tracev2.Specs()[e.typ].Args) - 1);
+        var evalᴛ1 = tracev2.Specs();
+        return e.args.slice(len(evalᴛ1[e.typ].Args) - 1);
     }}
     throw panic(fmt.Sprintf("unsupported version: go 1.%d"u8, v));
 }

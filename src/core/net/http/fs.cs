@@ -1111,7 +1111,8 @@ internal static void ServeHTTP⁔(/*this*/ ref fileHandler f, ResponseWriter w, 
         upath = "/"u8 + upath;
         r.URL.Path = upath;
     }
-    serveFile(w, Ꮡr, f.root, path.Clean(upath), true);
+    var evalᴛ1 = path.Clean(upath);
+    serveFile(w, Ꮡr, f.root, evalᴛ1, true);
 }
 
 // httpRange specifies the byte range to be sent to the client.

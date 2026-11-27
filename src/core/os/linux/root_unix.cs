@@ -185,7 +185,10 @@ internal static error afterResolvingSymlink(nint parent, @string name, Func<erro
 }
 
 internal static error chmodat(nint parent, @string name, FileMode mode) {
-    return afterResolvingSymlink(parent, name, [GoFunc("chmodat.func1")] () => ignoringEINTR([GoFunc("chmodat.func1.1")] () => unix.Fchmodat(parent, name, syscallMode(mode), unix.AT_SYMLINK_NOFOLLOW)));
+    return afterResolvingSymlink(parent, name, [GoFunc("chmodat.func1")] () => ignoringEINTR([GoFunc("chmodat.func1.1")] () => {
+            var evalᴛ1 = syscallMode(mode);
+            return unix.Fchmodat(parent, name, evalᴛ1, unix.AT_SYMLINK_NOFOLLOW);
+        }));
 }
 
 internal static error chownat(nint parent, @string name, nint uid, nint gid) {
@@ -210,7 +213,10 @@ internal static error chtimesat(nint parent, @string name, time.Time atime, time
 }
 
 internal static error mkdirat(nint fd, @string name, FileMode perm) {
-    return ignoringEINTR([GoFunc("mkdirat.func1")] () => unix.Mkdirat(fd, name, syscallMode(perm)));
+    return ignoringEINTR([GoFunc("mkdirat.func1")] () => {
+        var evalᴛ1 = syscallMode(perm);
+        return unix.Mkdirat(fd, name, evalᴛ1);
+    });
 }
 
 internal static error removeat(nint fd, @string name) {

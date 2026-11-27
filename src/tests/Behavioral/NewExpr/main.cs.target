@@ -42,7 +42,8 @@ internal static void main() {
     (p.Value, pp.x, pa.Value[0], pr.Value[0], pc.Value[0]) = (43, 10, 100, 1, 40);
     fmt.Println(p.Value, f.Value, s.Value, q.Value, r.Value);
     fmt.Println(pt, pp.Value, arr, pa.Value, rw, pr.Value, raw, pc.Value);
-    fmt.Println((~cfg).name, (~cfg).n, limit.Value, boxed(21).Value, new holder(p: Ꮡ((@string)("field"u8))).p.Value);
+    var evalᴛ1 = boxed(21);
+    fmt.Println((~cfg).name, (~cfg).n, limit.Value, evalᴛ1.Value, new holder(p: Ꮡ((@string)("field"u8))).p.Value);
     fmt.Printf("%T %T %T %T %T\n"u8, p.OrTypedNil(), f.OrTypedNil(), s.OrTypedNil(), pa.OrTypedNil(), pc.OrTypedNil());
 }
 

@@ -200,7 +200,8 @@ internal static (ж<Rat>, bool) SetString⁔(/*this*/ ж<Rat> Ꮡz, @string s) {
             if (n > 1000000) {
                 return (default, false); // avoid excessively large exponents
             }
-            var pow5 = z.b.abs.expNN(stk, natFive, ((nat)default).setWord((Word)(nuint)n), default, false); // use underlying array of z.b.abs
+            var evalᴛ1 = ((nat)default).setWord((Word)(nuint)n);
+            var pow5 = z.b.abs.expNN(stk, natFive, evalᴛ1, default, false); // use underlying array of z.b.abs
             if (exp5 > 0) {
                 z.a.abs = z.a.abs.mul(stk, z.a.abs, pow5);
                 z.b.abs = z.b.abs.setWord(1);
@@ -393,7 +394,8 @@ internal static @string FloatString⁔(/*this*/ ж<Rat> Ꮡx, nint prec) {
 
         var p = natOne;
         if (prec > 0) {
-            p = ((nat)default).expNN(stk, natTen, ((nat)default).setUint64((uint64)prec), default, false);
+            var evalᴛ1 = ((nat)default).setUint64((uint64)prec);
+            p = ((nat)default).expNN(stk, natTen, evalᴛ1, default, false);
         }
 
         r = r.mul(stk, r, p);

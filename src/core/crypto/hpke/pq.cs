@@ -247,7 +247,8 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) enca
         (ssPQ, ctPQ) = testingOnlyEncapsulate();
     }
 
-    var ss = pk.kem.sharedSecret(ssPQ, ssT, ctT, pk.t.Bytes());
+    var evalᴛ1 = pk.t.Bytes();
+    var ss = pk.kem.sharedSecret(ssPQ, ssT, ctT, evalᴛ1);
     var ct = appendꓸꓸꓸ(ctPQ, ctT);
     return (ss, ct, default);
 }
@@ -328,19 +329,22 @@ internal static (PrivateKey, error) newHybridPrivateKey(crypto.Decapsulator pq, 
         if (!pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(out _)) {
             return (default, errors.New(invalidPqKemForX25519ˢ));
         }
-        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768X25519, bytes.Clone(seed), t, pq))), default);
+        var evalᴛ1 = bytes.Clone(seed);
+        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768X25519, evalᴛ1, t, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
         if (!pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(out _)) {
             return (default, errors.New(invalidPqKemForP256ˢ));
         }
-        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768P256, bytes.Clone(seed), t, pq))), default);
+        var evalᴛ2 = bytes.Clone(seed);
+        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768P256, evalᴛ2, t, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
         if (!pq.Encapsulator()._<ж<mlkem.EncapsulationKey1024>>(out _)) {
             return (default, errors.New(invalidPqKemForP384ˢ));
         }
-        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem1024P384, bytes.Clone(seed), t, pq))), default);
+        var evalᴛ3 = bytes.Clone(seed);
+        return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem1024P384, evalᴛ3, t, pq))), default);
     }
     default: {
         return (default, errors.New(unsupportedCurveˢ));
@@ -378,10 +382,12 @@ internal static (slice<byte>, error) Bytes⁔(/*this*/ ref hybridPrivateKey k) {
 }
 
 internal static PublicKey PublicKey⁔(/*this*/ ref hybridPrivateKey k) {
+    var evalᴛ1 = k.t.PublicKey();
+    var evalᴛ2 = k.pq.Encapsulator();
     return new hybridPublicKeyжPublicKey(Ꮡ(new hybridPublicKey(
         kem: k.kem,
-        t: k.t.PublicKey(),
-        pq: k.pq.Encapsulator()
+        t: evalᴛ1,
+        pq: evalᴛ2
     )));
 }
 
@@ -416,7 +422,9 @@ internal static (slice<byte>, error) decap⁔(/*this*/ ж<hybridPrivateKey> Ꮡk
     if (err != nil) {
         return (default, err);
     }
-    var ss = k.kem.sharedSecret(ssPQ, ssT, ctT, k.t.PublicKey().Bytes());
+    var evalᴛ1 = k.t.PublicKey();
+    var evalᴛ2 = evalᴛ1.Bytes();
+    var ss = k.kem.sharedSecret(ssPQ, ssT, ctT, evalᴛ2);
     return (ss, default);
 }
 
@@ -608,9 +616,10 @@ internal static (slice<byte>, error) Bytes⁔(/*this*/ ref mlkemPrivateKey k) {
 }
 
 internal static PublicKey PublicKey⁔(/*this*/ ref mlkemPrivateKey k) {
+    var evalᴛ1 = k.pq.Encapsulator();
     return new mlkemPublicKeyжPublicKey(Ꮡ(new mlkemPublicKey(
         kem: k.kem,
-        pq: k.pq.Encapsulator()
+        pq: evalᴛ1
     )));
 }
 

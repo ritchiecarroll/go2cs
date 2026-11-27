@@ -316,7 +316,8 @@ internal static error HandleData⁔(/*this*/ ж<QUICConn> Ꮡq, QUICEncryptionLe
             var b = q.conn.Ꮡhand.Bytes();
             nint n = (nint)b[1] << 16 | (nint)b[2] << 8 | (nint)b[3];
             if (n > maxHandshake) {
-                q.conn.handshakeErr = fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, (nint)(maxHandshake));
+                var evalᴛ1 = fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, (nint)(maxHandshake));
+                q.conn.handshakeErr = evalᴛ1;
                 break;
             }
             if (len(b) < 4 + n) {

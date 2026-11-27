@@ -142,11 +142,15 @@ internal static void write⁔(/*this*/ ж<timeHistogram> Ꮡh, ж<metricValue> �
     // The bottom-most bucket, containing negative values, is tracked
     // separately as underflow, so fill that in manually and then iterate
     // over the rest.
-    hist.counts[0] = Ꮡh.Ꮡunderflow.Load();
+    var evalᴛ1 = Ꮡh.Ꮡunderflow.Load();
+    hist.counts[0] = evalᴛ1;
     foreach (var i in range(len(h.counts))) {
-        hist.counts[i + 1] = Ꮡ(h.counts, i).Load();
+        var evalᴛ2 = Ꮡ(h.counts, i).Load();
+        hist.counts[i + 1] = evalᴛ2;
     }
-    hist.counts[len(hist.counts) - 1] = Ꮡh.Ꮡoverflow.Load();
+    var evalᴛ3 = len(hist.counts);
+    var evalᴛ4 = Ꮡh.Ꮡoverflow.Load();
+    hist.counts[evalᴛ3 - 1] = evalᴛ4;
 }
 
 internal static UntypedInt fInf => 0x7FF0000000000000;

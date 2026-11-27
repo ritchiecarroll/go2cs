@@ -47,7 +47,8 @@ internal static partial void main() {
             nint tid = syscall.Gettid();
             tidChʗ1.ᐸꟷ(tid);
             ᐸꟷ(releaseʗ1);
-            doneʗ1.ᐸꟷ(gidLine(tid));
+            var evalᴛ1 = gidLine(tid);
+            doneʗ1.ᐸꟷ(evalᴛ1);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }

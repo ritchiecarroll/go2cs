@@ -220,7 +220,8 @@ internal static void putObjBatch⁔(/*this*/ ref gcWork w, slice<uintptr> obj) {
         while (wbuf.nobj == len(wbuf.obj)) {
             putfull(wbuf);
             w.flushedWork = true;
-            (w.wbuf1, w.wbuf2) = (w.wbuf2, getempty());
+            var evalᴛ1 = getempty();
+            (w.wbuf1, w.wbuf2) = (w.wbuf2, evalᴛ1);
             wbuf = w.wbuf1;
             flushed = true;
         }

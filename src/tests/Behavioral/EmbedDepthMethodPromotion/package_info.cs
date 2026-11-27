@@ -89,7 +89,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsggu6iggAKDgASJAAIDAAbMMgAFiTYgoIAERzIAAkSABEgAAgMABEeyAAJEgAlRoKCgoLYgqKClIKCgoKClIIACg4ACRKCAAoSggAQIgAOGoKCgoKmhIKCgoKCgoKCloKCgoKUgoKClIKCgoKCgpaCgoKCgoKWgoKCgoKWgoKCgpaCgoKWgoKCgoKCgoKCgoKUgpSU", "", "", "423=Modifiers/1/1/1,propagateSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;426=computeSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;428=propagateSubtreeFacts/1/1/1;430=subtreeFactsWorker/1/1/1,Modifiers/1/1/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAsggu6iggAKDgASJAAIDAAbMMgAFiTYgoIAERzIAAkSABEgAAgMABEeyAAJEgAlRoKCgoLYgqKClIKCgoKClIIACg4ACRKCAAoSggAQIgAOGoKCgoKmhIKCgoKCgoLi1oKCgoKUgoKClIKCgoKCgtaCgoKCgoKWgoKCgoKWgoKCgpaCgoKWgoKCgoKCgoKCgoIACQSylJQ=", "", "", "437=Modifiers/1/1/1,propagateSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;451=computeSubtreeFacts/1/1/1,subtreeFactsWorker/1/1/1;453=propagateSubtreeFacts/1/1/1;455=subtreeFactsWorker/1/1/1,Modifiers/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

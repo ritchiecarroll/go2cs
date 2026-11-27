@@ -197,7 +197,8 @@ internal static slice<byte> Exporter⁔(/*this*/ ref ExporterMasterSecret s, @st
     var secret = deriveSecret(s.hash, s.secret, label, default);
     var h = s.hash();
     h.Write(context);
-    return ExpandLabel(s.hash, secret, exporterˢ, h.Sum(default), length);
+    var evalᴛ1 = h.Sum(default);
+    return ExpandLabel(s.hash, secret, exporterˢ, evalᴛ1, length);
 }
 
 public static slice<byte> TestingOnlyExporterSecret(ж<ExporterMasterSecret> Ꮡs) {

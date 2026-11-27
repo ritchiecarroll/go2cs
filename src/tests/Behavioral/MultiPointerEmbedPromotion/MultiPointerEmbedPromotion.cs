@@ -93,7 +93,8 @@ internal static void main() {
     (n, err) = rwc.Write(buf.slice(0, n));
     fmt.Println("write:", n, err == nil);
 
-    fmt.Println("aliased:", r.pos, w.String());
+    var evalᴛ1 = w.String();
+    fmt.Println("aliased:", r.pos, evalᴛ1);
 
     fmt.Println("close:", rwc.Close() == nil, r.pos, w.flush);
 

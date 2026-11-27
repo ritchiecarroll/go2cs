@@ -331,7 +331,8 @@ type fromRefRow struct {
 }
 
 // receiverFromRefSites is the declared census: "<file under src/core>|<method>" -> its FromRef lines. The kept
-// rows are 13 sites at every target (runtime's mheap.cs is one file per layout key folder).
+// rows are 13 sites at every target (runtime's mheap.cs is one file per layout key folder: since the darwin/arm64
+// flip, arm64/ serves linux/arm64 and darwin/arm64 and darwin-amd64/ serves darwin/amd64).
 var receiverFromRefSites = map[string]fromRefRow{
 	"internal/abi/type.cs|Methods":         {1, fromRefKept, "an argument of addChecked"},
 	"internal/abi/type.cs|ExportedMethods": {1, fromRefKept, "an argument of addChecked"},
@@ -342,9 +343,9 @@ var receiverFromRefSites = map[string]fromRefRow{
 	"reflect/type.cs|nameOff":              {1, fromRefKept, "an argument of resolveNameOff"},
 	"reflect/type.cs|typeOff":              {1, fromRefKept, "an argument of resolveTypeOff"},
 	"reflect/type.cs|textOff":              {1, fromRefKept, "an argument of resolveTextOff"},
-	"runtime/darwin/mheap.cs|init":         {1, fromRefKept, "an argument of fixalloc.init"},
+	"runtime/arm64/mheap.cs|init":          {1, fromRefKept, "an argument of fixalloc.init"},
+	"runtime/darwin-amd64/mheap.cs|init":   {1, fromRefKept, "an argument of fixalloc.init"},
 	"runtime/linux-amd64/mheap.cs|init":    {1, fromRefKept, "an argument of fixalloc.init"},
-	"runtime/linux-arm64/mheap.cs|init":    {1, fromRefKept, "an argument of fixalloc.init"},
 	"runtime/windows/mheap.cs|init":        {1, fromRefKept, "an argument of fixalloc.init"},
 	"runtime/mgcmark_greenteagc.cs|init":   {1, fromRefKept, "an argument of memclrNoHeapPointers"},
 	"runtime/synctest.cs|raceaddr":         {1, fromRefKept, "a return"},

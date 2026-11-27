@@ -76,7 +76,7 @@ using System.Runtime.CompilerServices;
 [assembly: GoPositionMap("internal/strconv/ftoadbox.go", "ftoadbox.cs", "AAcyABICgoKUpoKUgoKCgpSCgoKClIKCgoKUgqjegoKCgpSCgoKClIKCgoKCgoLKgoKCgoKCpqqilIKCgoKUgoKCgpSCgoKClIKo3oKCgoKUgoKCgpSCgoKCgoKCyoKCgoKCgqaqooKCgqiSlIKUgqiSqJKClIKUqJKokoKCgpSCgoKUlKiSgoKokoKCrOKCgoKs4oKCgqzigoKCrOKCgoKokqiSqrQABRLCgoKowoKCqJKokqjCgoKUgqiygoKUgg==")]
 [assembly: GoPositionMap("internal/strconv/ftoafixed.go", "ftoafixed.cs", "AAoSAAQSABAagtyCggAWLoKClJQAESSUgpiiuAAKEtgACBCCgri4goKCgoLcgoKCgoLcgoKmAAgSgoKUgriCgpSCgg==")]
 [assembly: GoPositionMap("internal/strconv/itoa.go", "itoa.cs", "AAoYsoKClIKClIKssoKClIKCgpSCgoKUlIKokqqigoKClKqigoKUgoKUggAFFgAJAoK4goKC3JSCgoKCgoKmgqaCgriCgqaCuIKCpoKClIKmggAMLJKClK7CAAISAAsMgoKCpoKCgoKUgtyCyoKCgoKClIKCgoKClA==")]
-[assembly: GoPositionMap("internal/strconv/math.go", "math.cs", "ABEikoKo0oKCgqzygpQAAhDkAAIQ5KaCgpQAAkAAHQLcABhCAAgCAAsisoKCgqaCgoKUgIKCpICCgqSAgoKk")]
+[assembly: GoPositionMap("internal/strconv/math.go", "math.cs", "ABEikoKo0oKCgqzygpQAAxDkAAIQ5KaCgpQAAkAAHQLcABhCAAgCAAsisoKCgqaCgoKUgIKCpICCgqSAgoKk")]
 [assembly: GoPositionMap("internal/strconv/pow10tab.go", "pow10tab.cs", "AA8k")]
 // </GoSourcePositionMaps>
 

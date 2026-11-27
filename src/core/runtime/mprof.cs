@@ -856,12 +856,13 @@ internal static partial (nint n, bool ok) memProfileInternal(nint size, bool inu
         for (var b = head; b != nil; b = b.allnext) {
             var mp = b.mp();
             if (inuseZero || mp.active.alloc_bytes != mp.active.free_bytes) {
+                var evalᴛ1 = b.stk();
                 var r = new profilerecord.MemProfileRecord(
                     AllocBytes: (int64)mp.active.alloc_bytes,
                     FreeBytes: (int64)mp.active.free_bytes,
                     AllocObjects: (int64)mp.active.allocs,
                     FreeObjects: (int64)mp.active.frees,
-                    Stack: b.stk()
+                    Stack: evalᴛ1
                 );
                 copyFn(r);
             }
@@ -904,7 +905,8 @@ internal static void iterate_memprof(Action<ж<bucket>, uintptr, ж<uintptr>, ui
     var head = @unsafe.Pointer.To<bucket>(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.allnext) {
         var mp = b.mp();
-        fn(b, b.nstk, Ꮡ(b.stk(), 0), b.size, mp.active.allocs, mp.active.frees);
+        var evalᴛ1 = b.stk();
+        fn(b, b.nstk, Ꮡ(evalᴛ1, 0), b.size, mp.active.allocs, mp.active.frees);
     }
     unlock(ᏑprofMemActiveLock);
 }
@@ -976,10 +978,11 @@ internal static (nint n, bool ok) blockProfileInternal(nint size, Action<profile
         ok = true;
         for (var b = head; b != nil; b = b.allnext) {
             var bp = b.bp();
+            var evalᴛ1 = b.stk();
             var r = new profilerecord.BlockProfileRecord(
                 Count: (int64)bp.count,
                 Cycles: bp.cycles,
-                Stack: b.stk()
+                Stack: evalᴛ1
             );
             // Prevent callers from having to worry about division by zero errors.
             // See discussion on http://golang.org/cl/299991.
@@ -1064,10 +1067,11 @@ internal static (nint n, bool ok) mutexProfileInternal(nint size, Action<profile
         ok = true;
         for (var b = head; b != nil; b = b.allnext) {
             var bp = b.bp();
+            var evalᴛ1 = b.stk();
             var r = new profilerecord.BlockProfileRecord(
                 Count: (int64)bp.count,
                 Cycles: bp.cycles,
-                Stack: b.stk()
+                Stack: evalᴛ1
             );
             copyFn(r);
         }

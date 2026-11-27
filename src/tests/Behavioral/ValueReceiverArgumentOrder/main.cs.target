@@ -32,7 +32,8 @@ internal static void main() {
         pʗ1.X = x;
         return x;
     }
-    fmt.Println("argument writes through p:", p.Show(set(10)));
+    var evalᴛ1 = set(10);
+    fmt.Println("argument writes through p:", p.Show(evalᴛ1));
 
     nint bumped = p.Bump();
     fmt.Println("method writes its copy:", bumped, p.X);
@@ -43,7 +44,8 @@ internal static void main() {
         bʗ1.Item = "new";
         return "tag";
     }
-    fmt.Println("generic receiver:", b.Get(retag()));
+    var evalᴛ2 = retag();
+    fmt.Println("generic receiver:", b.Get(evalᴛ2));
 
     fmt.Println("call result as the pointer:", current().Show(func([GoFunc("main.func3")] nint () => {
         shared.X = 5;
@@ -64,7 +66,8 @@ internal static void main() {
             defer([GoFunc("main.func5.1")] () => {
                 fmt.Println("nil pointer:", recover(), "| argument ran:", ran);
             }, ref ᒐ);
-            fmt.Println(qʗ1.Show(sideʗ1()));
+            var evalᴛ3 = sideʗ1();
+            fmt.Println(qʗ1.Show(evalᴛ3));
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }

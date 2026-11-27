@@ -193,7 +193,8 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
                 heapUpdate(Ꮡr.Value.frontier, i);
             } else {
                 // There's nothing else to read. Delete this cursor from the frontier.
-                Ꮡr.Value.frontier = heapRemove(Ꮡr.Value.frontier, i);
+                var evalᴛ1 = heapRemove(Ꮡr.Value.frontier, i);
+                Ꮡr.Value.frontier = evalᴛ1;
             }
             return (true, default);
         }
@@ -208,7 +209,9 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
         // Try to advance the head of the frontier, which should have the minimum timestamp.
         // This should be by far the most common case
         if (len(r.frontier) == 0) {
-            (var eᴛ12, err) = (new Event(), fmt.Errorf("broken trace: frontier is empty:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); e.AssignFrom(eᴛ12); goto ᒐdone;
+            var evalᴛ2 = dumpFrontier(r.frontier);
+            var evalᴛ3 = dumpOrdering(ref nonnil(ref r).order);
+            (var eᴛ12, err) = (new Event(), fmt.Errorf("broken trace: frontier is empty:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, evalᴛ2, evalᴛ3)); e.AssignFrom(eᴛ12); goto ᒐdone;
         }
         {
             var (okΔ5, errΔ5) = tryAdvance(0); if (errΔ5 != nil) {
@@ -230,7 +233,9 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
                     }
                 }
                 if (!success) {
-                    (var eᴛ15, err) = (new Event(), fmt.Errorf("broken trace: failed to advance: frontier:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); e.AssignFrom(eᴛ15); goto ᒐdone;
+                    var evalᴛ4 = dumpFrontier(r.frontier);
+                    var evalᴛ5 = dumpOrdering(ref nonnil(ref r).order);
+                    (var eᴛ15, err) = (new Event(), fmt.Errorf("broken trace: failed to advance: frontier:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, evalᴛ4, evalᴛ5)); e.AssignFrom(eᴛ15); goto ᒐdone;
                 }
             }
         }
@@ -325,7 +330,8 @@ internal static (Event, error) installGen⁔(/*this*/ ref Reader r, ж<generatio
     r.syncs++;
 
     // Always emit a sync event at the beginning of the generation.
-    return (syncEvent(r.gen.evTable, r.gen.freq.mul(r.gen.minTs), r.syncs), default);
+    var evalᴛ1 = r.gen.freq.mul(r.gen.minTs);
+    return (syncEvent(r.gen.evTable, evalᴛ1, r.syncs), default);
 }
 
 internal static @string dumpFrontier(slice<ж<batchCursor>> frontier) {

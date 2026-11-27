@@ -22,16 +22,24 @@ internal static void main() {
     var v = (Value)slice<byte>((@string)"abc"u8);
     v.Add((byte)'d');
     v.Set(0, (byte)'A');
-    fmt.Println(v.Len(), (@string)(slice<byte>)v, v.At(3), (@string)(slice<byte>)v[1..3]);
+    var evalᴛ1 = v.Len();
+    var evalᴛ2 = v.At(3);
+    fmt.Println(evalᴛ1, (@string)(slice<byte>)v, evalᴛ2, (@string)(slice<byte>)v[1..3]);
 
     numval.Value n = (numval.Value)3;
     n.Inc();
-    fmt.Println(n, n.Double(), numval.Conv((numval.Other)4), numval.Back(6));
+    var evalᴛ3 = n.Double();
+    var evalᴛ4 = numval.Conv((numval.Other)4);
+    var evalᴛ5 = numval.Back(6);
+    fmt.Println(n, evalᴛ3, evalᴛ4, evalᴛ5);
 
     var a = new arrval.Value(new nint[]{1, 2, 3}.array());
     a.Set(0, 5);
     a.Bump();
-    fmt.Println(a, a.First(), a.Sum(), a.Head());
+    var evalᴛ6 = a.First();
+    var evalᴛ7 = a.Sum();
+    var evalᴛ8 = a.Head();
+    fmt.Println(a, evalᴛ6, evalᴛ7, evalᴛ8);
 
     var m = new mapval.Value(new map<@string, nint>{["a"] = 1});
     m.Put("b", 2);

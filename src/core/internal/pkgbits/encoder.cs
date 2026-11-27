@@ -191,7 +191,8 @@ internal static RelElemIdx Flush⁔(/*this*/ ж<Encoder> Ꮡw) {
 
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡw.ᏑData));
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡtmp));
-    w.p.elems[w.k][w.Idx] = sb.String();
+    var evalᴛ1 = sb.String();
+    w.p.elems[w.k][w.Idx] = evalᴛ1;
 
     return w.Idx;
 }

@@ -21,7 +21,9 @@ internal static void main() {
     var l = lib.NewLink("dest");
     l.Add("a");
     l.Add("b");
-    fmt.Println("link:", l.Dest, l.Count(), l.Last());
+    var evalᴛ1 = l.Count();
+    var evalᴛ2 = l.Last();
+    fmt.Println("link:", l.Dest, evalᴛ1, evalᴛ2);
 
     lib.Link v = new(nil);
     v.Add("v1");

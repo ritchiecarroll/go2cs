@@ -70,7 +70,8 @@ internal static ssState backwards⁔(/*this*/ ref streamSafe ss, Properties p) {
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
-    var c = (streamSafe)(ss + ((streamSafe)p.nTrailingNonStarters()));
+    var evalᴛ1 = p.nTrailingNonStarters();
+    var c = (streamSafe)(ss + ((streamSafe)evalᴛ1));
     if (c > maxNonStarters) {
         return ssOverflow;
     }

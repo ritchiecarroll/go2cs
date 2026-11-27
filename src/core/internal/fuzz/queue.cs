@@ -41,10 +41,12 @@ internal static void grow⁔(/*this*/ ref queue q) {
 }
 
 internal static void enqueue⁔(/*this*/ ref queue q, any e) {
-    if (q.len + 1 > q.cap()) {
+    var evalᴛ1 = q.cap();
+    if (q.len + 1 > evalᴛ1) {
         q.grow();
     }
-    nint i = rem((q.head + q.len), q.cap());
+    var evalᴛ2 = q.cap();
+    nint i = rem((q.head + q.len), evalᴛ2);
     q.elems[i] = e;
     q.len++;
 }
@@ -55,7 +57,8 @@ internal static (any, bool) dequeue⁔(/*this*/ ref queue q) {
     }
     var e = q.elems[q.head];
     q.elems[q.head] = default;
-    q.head = rem((q.head + 1), q.cap());
+    var evalᴛ1 = q.cap();
+    q.head = rem((q.head + 1), evalᴛ1);
     q.len--;
     return (e, true);
 }

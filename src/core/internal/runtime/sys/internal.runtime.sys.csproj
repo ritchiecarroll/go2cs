@@ -232,7 +232,7 @@
 
   <ItemGroup Condition="'$(GoTargetOS)'=='windows'" />
 
-  <ItemGroup Condition="'$(GoTargetOS)'=='linux' And '$(GoTargetArch)'=='arm64'">
+  <ItemGroup Condition="'$(GoTargetArch)'=='arm64'">
     <ProjectReference Include="$(go2csPath)core/internal/cpu/internal.cpu.csproj" />
   </ItemGroup>
 

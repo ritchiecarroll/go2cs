@@ -827,7 +827,8 @@ internal static void binaryExpr⁔(/*this*/ ж<printer> Ꮡp, ж<ast.BinaryExpr>
     var printBlank = prec < cutoff;
 
     var ws = indent;
-    Ꮡp.expr1(x.X, prec, depth + diffPrec(x.X, prec));
+    var evalᴛ1 = diffPrec(x.X, prec);
+    Ꮡp.expr1(x.X, prec, depth + evalᴛ1);
     if (printBlank) {
         Ꮡp.print(blank);
     }
@@ -947,7 +948,8 @@ internal static void expr1⁔(/*this*/ ж<printer> Ꮡp, ast.Expr expr, nint pre
             Ꮡp.expr0(x.X, depth);
         } else {
             Ꮡp.print(token.LPAREN);
-            Ꮡp.expr0(x.X, reduceDepth(depth)); // parentheses undo one level of depth
+            var evalᴛ1 = reduceDepth(depth);
+            Ꮡp.expr0(x.X, evalᴛ1); // parentheses undo one level of depth
             p.setPos(x.Rparen);
             Ꮡp.print(token.RPAREN);
         }

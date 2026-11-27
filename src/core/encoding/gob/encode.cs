@@ -573,7 +573,9 @@ internal static (ж<encOp>, nint) encOpFor(reflect.Type rt, map<reflect.Type, ж
                 }
                 // Slices have a header; we decode it to find the underlying array.
                 var (elemOp, elemIndir) = encOpFor(t.Elem(), inProgress, building);
-                var helper = encSliceHelper[t.Elem().Kind()];
+                var evalᴛ1 = t.Elem();
+                var evalᴛ2 = evalᴛ1.Kind();
+                var helper = encSliceHelper[evalᴛ2];
                 var elemOpʗ1 = elemOp;
                 var helperʗ1 = helper;
                 op = [GoFunc("encOpFor.func1")] (ж<encInstr> i, ж<encoderState> state, reflect.Value Δslice) => {
@@ -581,19 +583,23 @@ internal static (ж<encOp>, nint) encOpFor(reflect.Type rt, map<reflect.Type, ж
                         return;
                     }
                     state.update(i);
-                    state.enc.encodeArray(state.b, Δslice, elemOpʗ1.ValueSlot, elemIndir, Δslice.Len(), helperʗ1);
+                    var evalᴛ3 = Δslice.Len();
+                    state.enc.encodeArray(state.b, Δslice, elemOpʗ1.ValueSlot, elemIndir, evalᴛ3, helperʗ1);
                 };
                 break;
             }
             case var ᴛ when ᴛ == reflect.Array: {
                 // True arrays have size in the type.
                 var (elemOp, elemIndir) = encOpFor(t.Elem(), inProgress, building);
-                var helper = encArrayHelper[t.Elem().Kind()];
+                var evalᴛ4 = t.Elem();
+                var evalᴛ5 = evalᴛ4.Kind();
+                var helper = encArrayHelper[evalᴛ5];
                 var elemOpʗ2 = elemOp;
                 var helperʗ2 = helper;
                 op = [GoFunc("encOpFor.func2")] (ж<encInstr> i, ж<encoderState> state, reflect.Value Δarray) => {
                     state.update(i);
-                    state.enc.encodeArray(state.b, Δarray, elemOpʗ2.ValueSlot, elemIndir, Δarray.Len(), helperʗ2);
+                    var evalᴛ6 = Δarray.Len();
+                    state.enc.encodeArray(state.b, Δarray, elemOpʗ2.ValueSlot, elemIndir, evalᴛ6, helperʗ2);
                 };
                 break;
             }

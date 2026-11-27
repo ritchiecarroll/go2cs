@@ -14,11 +14,15 @@ internal static (Message, error) parseInterfaceMulticastAddrMessage⁔(/*this*/ 
     if (len(b) < l) {
         return (default, errInvalidMessage);
     }
+    var evalᴛ1 = b[8..12];
+    var evalᴛ2 = nativeEndian.Uint32(evalᴛ1);
+    var evalᴛ3 = b[12..14];
+    var evalᴛ4 = nativeEndian.Uint16(evalᴛ3);
     var m = Ꮡ(new InterfaceMulticastAddrMessage(
         Version: (nint)b[2],
         Type: (nint)b[3],
-        Flags: (nint)nativeEndian.Uint32(b[8..12]),
-        Index: (nint)nativeEndian.Uint16(b[12..14]),
+        Flags: (nint)evalᴛ2,
+        Index: (nint)evalᴛ4,
         raw: b.slice(0, l)
     ));
     error err = default;

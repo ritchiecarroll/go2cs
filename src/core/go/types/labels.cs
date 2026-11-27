@@ -130,7 +130,8 @@ internal static slice<ж<ast.BranchStmt>> blockBranches⁔(/*this*/ ж<Checker> 
     [GoFunc("(*Checker).blockBranches.func3")] void blockBranches(ж<ast.LabeledStmt> lstmtΔ1, slice<ast.Stmt> listΔ1) {
         // Unresolved forward jumps inside the nested block
         // become forward jumps in the current block.
-        ᏑfwdJumps.ValueSlot = appendꓸꓸꓸ(ᏑfwdJumps.ValueSlot, Ꮡcheck.blockBranches(all, bʗ1, lstmtΔ1, listΔ1));
+        var evalᴛ1 = Ꮡcheck.blockBranches(all, bʗ1, lstmtΔ1, listΔ1);
+        ᏑfwdJumps.ValueSlot = appendꓸꓸꓸ(ᏑfwdJumps.ValueSlot, evalᴛ1);
     }
 
     ref var stmtBranches = ref heap<Action<ж<ast.LabeledStmt>, ast.Stmt>>(out var ᏑstmtBranches);
@@ -170,12 +171,13 @@ internal static slice<ж<ast.BranchStmt>> blockBranches⁔(/*this*/ ж<Checker> 
                             lbl.used = true;
                             Ꮡcheck.Value.recordUse(jmp.Label, new LabelжObject(lbl));
                             if (jumpsOverVarDeclʗ1(jmp)) {
+                                var evalᴛ2 = Ꮡcheck.Value.fset.Position(varDeclPos);
                                 Ꮡcheck.softErrorf(
                                     new ast_Identжpositioner(jmp.Label),
                                     JumpOverDecl,
                                     "goto %s jumps over variable declaration at line %d",
                                     name,
-                                    Ꮡcheck.Value.fset.Position(varDeclPos).Line);
+                                    evalᴛ2.Line);
                                 // ok to continue
                             }
                         } else {

@@ -109,7 +109,8 @@ internal static void appendJSONTime(ж<handleState> Ꮡs, time.Time t) {
         s.appendError(errors.New(timeTimeYearOutsideOfˢ));
     }
     s.buf.WriteByte((byte)'"');
-    s.buf.ValueSlot = t.AppendFormat(s.buf.ValueSlot, time.RFC3339Nano);
+    var evalᴛ1 = t.AppendFormat(s.buf.ValueSlot, time.RFC3339Nano);
+    s.buf.ValueSlot = evalᴛ1;
     s.buf.WriteByte((byte)'"');
 }
 
@@ -122,11 +123,15 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
         break;
     }
     case var ᴛ when ᴛ == KindInt64: {
-        s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, v.Int64(), 10);
+        var evalᴛ1 = v.Int64();
+        var evalᴛ2 = strconv.AppendInt(s.buf.ValueSlot, evalᴛ1, 10);
+        s.buf.ValueSlot = evalᴛ2;
         break;
     }
     case var ᴛ when ᴛ == KindUint64: {
-        s.buf.ValueSlot = strconv.AppendUint(s.buf.ValueSlot, v.Uint64(), 10);
+        var evalᴛ3 = v.Uint64();
+        var evalᴛ4 = strconv.AppendUint(s.buf.ValueSlot, evalᴛ3, 10);
+        s.buf.ValueSlot = evalᴛ4;
         break;
     }
     case var ᴛ when ᴛ == KindFloat64: {
@@ -134,19 +139,24 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
         // always match strconv.AppendFloat. So just call it.
         // That's expensive, but floats are rare.
         {
-            var err = appendJSONMarshal(s.buf, v.Float64()); if (err != nil) {
+            var evalᴛ5 = v.Float64();
+            var err = appendJSONMarshal(s.buf, evalᴛ5); if (err != nil) {
                 return err;
             }
         }
         break;
     }
     case var ᴛ when ᴛ == KindBool: {
-        s.buf.ValueSlot = strconv.AppendBool(s.buf.ValueSlot, v.Bool());
+        var evalᴛ6 = v.Bool();
+        var evalᴛ7 = strconv.AppendBool(s.buf.ValueSlot, evalᴛ6);
+        s.buf.ValueSlot = evalᴛ7;
         break;
     }
     case var ᴛ when ᴛ == KindDuration: {
         // Do what json.Marshal does.
-        s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, (int64)v.Duration(), 10);
+        var evalᴛ8 = v.Duration();
+        var evalᴛ9 = strconv.AppendInt(s.buf.ValueSlot, (int64)evalᴛ8, 10);
+        s.buf.ValueSlot = evalᴛ9;
         break;
     }
     case var ᴛ when ᴛ == KindTime: {

@@ -418,7 +418,9 @@ internal static void append⁔(/*this*/ ref Writer b, slice<byte> text) {
 
 // Update the cell width.
 internal static void updateWidth⁔(/*this*/ ref Writer b) {
-    b.cell.width += utf8.RuneCount(b.buf.slice(b.pos));
+    var evalᴛ1 = b.buf.slice(b.pos);
+    var evalᴛ2 = utf8.RuneCount(evalᴛ1);
+    b.cell.width += evalᴛ2;
     b.pos = len(b.buf);
 }
 

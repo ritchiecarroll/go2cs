@@ -16,7 +16,8 @@ partial class debug_package {
 
 // PrintStack prints to standard error the stack trace returned by runtime.Stack.
 public static partial void PrintStack() {
-    os.Stderr.Write(Stack());
+    var evalᴛ1 = Stack();
+    os.Stderr.Write(evalᴛ1);
 }
 
 // Stack returns a formatted stack trace of the goroutine that calls it.

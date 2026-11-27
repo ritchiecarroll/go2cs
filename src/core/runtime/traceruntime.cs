@@ -282,7 +282,9 @@ internal static void ProcStart⁔(/*this*/ traceLocker tl) {
     // Procs are typically started within the scheduler when there is no user goroutine. If there is a user goroutine,
     // it must be in _Gsyscall because the only time a goroutine is allowed to have its Proc moved around from under it
     // is during a syscall.
-    tl.eventWriter(tracev2.GoSyscall, tracev2.ProcIdle).@event(tracev2.EvProcStart, (traceArg)(uint64)(~pp).id, pp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoSyscall, tracev2.ProcIdle);
+    var evalᴛ2 = pp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen);
+    evalᴛ1.@event(tracev2.EvProcStart, (traceArg)(uint64)(~pp).id, evalᴛ2);
 }
 
 // ProcStop traces a ProcStop event.
@@ -308,7 +310,9 @@ internal static void GCActive⁔(/*this*/ traceLocker tl) {
 // Must be emitted by an actively running goroutine on an active P. This restriction can be changed
 // easily and only depends on where it's currently called.
 internal static void GCStart⁔(/*this*/ traceLocker tl) {
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCBegin, (traceArg)trace.seqGC, tl.stack(3));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning);
+    var evalᴛ2 = tl.stack(3);
+    evalᴛ1.@event(tracev2.EvGCBegin, (traceArg)trace.seqGC, evalᴛ2);
     // N.B. Only one GC can be running at a time, so this is naturally
     // serialized by the caller.
     trace.seqGC++;
@@ -419,7 +423,10 @@ internal static void GoCreate⁔(/*this*/ traceLocker tl, ж<g> Ꮡnewg, uintptr
     if (blocked) {
         ev = tracev2.EvGoCreateBlocked;
     }
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(ev, (traceArg)newg.goid, tl.startPC(pc), tl.stack(2));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning);
+    var evalᴛ2 = tl.startPC(pc);
+    var evalᴛ3 = tl.stack(2);
+    evalᴛ1.@event(ev, (traceArg)newg.goid, evalᴛ2, evalᴛ3);
 }
 
 // GoStart emits a GoStart event.
@@ -429,9 +436,11 @@ internal static void GoStart⁔(/*this*/ traceLocker tl) {
     var gp = getg().Value.m.Value.curg;
     var pp = gp.Value.m.Value.p;
     var w = tl.eventWriter(tracev2.GoRunnable, tracev2.ProcRunning);
-    w.@event(tracev2.EvGoStart, (traceArg)(~gp).goid, gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen));
+    var evalᴛ1 = gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen);
+    w.@event(tracev2.EvGoStart, (traceArg)(~gp).goid, evalᴛ1);
     if ((~pp.ptr()).gcMarkWorkerMode != gcMarkWorkerNotWorker) {
-        w.@event(tracev2.EvGoLabel, trace.markWorkerLabels[tl.gen % 2][(~pp.ptr()).gcMarkWorkerMode]);
+        var evalᴛ2 = pp.ptr();
+        w.@event(tracev2.EvGoLabel, trace.markWorkerLabels[tl.gen % 2][(~evalᴛ2).gcMarkWorkerMode]);
     }
 }
 
@@ -454,7 +463,9 @@ internal static void GoPreempt⁔(/*this*/ traceLocker tl) {
 
 // GoStop emits a GoStop event with the provided reason.
 internal static void GoStop⁔(/*this*/ traceLocker tl, traceGoStopReason reason) {
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoStop, trace.goStopReasons[tl.gen % 2][reason], tl.stack(0));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning);
+    var evalᴛ2 = tl.stack(0);
+    evalᴛ1.@event(tracev2.EvGoStop, trace.goStopReasons[tl.gen % 2][reason], evalᴛ2);
 }
 
 // GoPark emits a GoBlock event with the provided reason.
@@ -462,7 +473,9 @@ internal static void GoStop⁔(/*this*/ traceLocker tl, traceGoStopReason reason
 // TODO(mknyszek): Replace traceBlockReason with waitReason. It's silly
 // that we have both, and waitReason is way more descriptive.
 internal static void GoPark⁔(/*this*/ traceLocker tl, traceBlockReason reason, nint skip) {
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoBlock, trace.goBlockReasons[tl.gen % 2][reason], tl.stack(skip));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning);
+    var evalᴛ2 = tl.stack(skip);
+    evalᴛ1.@event(tracev2.EvGoBlock, trace.goBlockReasons[tl.gen % 2][reason], evalᴛ2);
 }
 
 // GoUnpark emits a GoUnblock event.
@@ -471,7 +484,10 @@ internal static void GoUnpark⁔(/*this*/ traceLocker tl, ж<g> Ꮡgp, nint skip
 
     // Emit a GoWaiting status if necessary for the unblocked goroutine.
     tl.emitUnblockStatus(Ꮡgp, tl.gen);
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoUnblock, (traceArg)gp.goid, Ꮡgp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen), tl.stack(skip));
+    var evalᴛ1 = tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning);
+    var evalᴛ2 = Ꮡgp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen);
+    var evalᴛ3 = tl.stack(skip);
+    evalᴛ1.@event(tracev2.EvGoUnblock, (traceArg)gp.goid, evalᴛ2, evalᴛ3);
 }
 
 // GoSwitch emits a GoSwitch event. If destroy is true, the calling goroutine
@@ -486,7 +502,8 @@ internal static void GoSwitch⁔(/*this*/ traceLocker tl, ж<g> Ꮡnextg, bool d
     if (destroy) {
         ev = tracev2.EvGoSwitchDestroy;
     }
-    w.@event(ev, (traceArg)nextg.goid, Ꮡnextg.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen));
+    var evalᴛ1 = Ꮡnextg.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen);
+    w.@event(ev, (traceArg)nextg.goid, evalᴛ1);
 }
 
 // emitUnblockStatus emits a GoStatus GoWaiting event for a goroutine about to be
@@ -566,7 +583,9 @@ internal static void ProcSteal⁔(/*this*/ traceLocker tl, ж<p> Ꮡpp) {
         goStatus = tracev2.GoSyscall;
         procStatus = tracev2.ProcSyscallAbandoned;
     }
-    tl.eventWriter(goStatus, procStatus).@event(tracev2.EvProcSteal, (traceArg)(uint64)pp.id, Ꮡpp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen), (traceArg)(uint64)mStolenFrom);
+    var evalᴛ1 = tl.eventWriter(goStatus, procStatus);
+    var evalᴛ2 = Ꮡpp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).nextSeq(tl.gen);
+    evalᴛ1.@event(tracev2.EvProcSteal, (traceArg)(uint64)pp.id, evalᴛ2, (traceArg)(uint64)mStolenFrom);
 }
 
 // HeapAlloc emits a HeapAlloc event.

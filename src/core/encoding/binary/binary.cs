@@ -1202,7 +1202,8 @@ internal static void value⁔(/*this*/ ref encoder e, reflect.Value v) {
 }
 
 internal static void skip⁔(/*this*/ ref decoder d, reflect.Value v) {
-    d.offset += dataSize(v);
+    var evalᴛ1 = dataSize(v);
+    d.offset += evalᴛ1;
 }
 
 internal static void skip⁔(/*this*/ ref encoder e, reflect.Value v) {

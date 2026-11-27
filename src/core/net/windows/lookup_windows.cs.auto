@@ -65,7 +65,8 @@ internal static partial (nint, error) lookupProtocol(context.Context ctx, @strin
         GoFrame ᒐ = default;
         try {
             var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
-                chʗ1.ᐸꟷ(new lookupProtocol_result(err: mapErr(errΔ1)));
+                var evalᴛ1 = mapErr(errΔ1);
+                chʗ1.ᐸꟷ(new lookupProtocol_result(err: evalᴛ1));
                 return;
             }
             defer(releaseThread, ref ᒐ);

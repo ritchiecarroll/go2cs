@@ -101,9 +101,10 @@ type node struct {
 	pat     *counter
 }
 
-// CONTROL 4 - net/http's shape. The read is inside *nd; the call writes *(nd.pat), which is storage
-// of its own. A root-plus-indirect model reads both as "behind nd" and spills; the access path
-// diverges at .handler vs .pat and does not.
+// HAZARD 6 (a control until the operand-order rule) - net/http's shape. The read is inside *nd and the
+// call writes *(nd.pat), storage of its own, so the return-only path analysis kept the call in the tuple.
+// The statement-wide rule (operandOrder.go) spills every call that follows a read through a pointer,
+// without path analysis: the order is gc's either way, and here it changes nothing observable.
 func pointerFieldUnrelated(nd *node) (int, int) {
 	return nd.handler, nd.pat.bump()
 }
@@ -177,6 +178,10 @@ func main() {
 //     replaced - exactly `pointerIdentity` and `pointerFieldUnrelated` report, the very pair the
 //     path model exists to separate, and net/http's `return n.handler, n.pattern.String(), ...` is
 //     the corpus instance of the second.
+//
+// Those neuters were read when the controls were four. The statement-wide operand-order rule
+// (operandOrder.go) runs ahead of the return path and spills `pointerFieldUnrelated` too, so it is a
+// hazard row now and three controls remain.
 func TestMultiValueReturnSpillsCallsThatCanWriteAnEarlierOperand(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
@@ -197,17 +202,21 @@ func TestMultiValueReturnSpillsCallsThatCanWriteAnEarlierOperand(t *testing.T) {
 		{"addressArgument", "= raise(ref n);", "return (n, "},
 		{"throughPointer", "= c.bump();", "return (c.n, "}, // `c.n` reads the field in place (parity seat #31), after the spill
 		{"pointerFieldSame", "= nd.pat.bump();", "return (nd.pat.n, "},
+		{"pointerFieldUnrelated", "= nd.pat.bump();", "return (nd.handler, "},
 	}
 
 	for _, hazard := range hazards {
-		if !strings.Contains(mainCs, "var "+TempVarMarker) || !strings.Contains(mainCs, hazard.spill) {
+		// The temporary is an operand-order hoist (operandOrder.go), named eval with the temp marker.
+		temp := "eval" + TempVarMarker
+
+		if !strings.Contains(mainCs, "var "+temp) || !strings.Contains(mainCs, hazard.spill) {
 			t.Errorf("%s: expected its call spilled to a temporary (`var %s… %s`); emission:\n%s",
-				hazard.name, TempVarMarker, hazard.spill, mainCs)
+				hazard.name, temp, hazard.spill, mainCs)
 		}
 
-		if !strings.Contains(mainCs, hazard.spilled+TempVarMarker) {
+		if !strings.Contains(mainCs, hazard.spilled+temp) {
 			t.Errorf("%s: expected the tuple to name the temporary (`%s%s…`); emission:\n%s",
-				hazard.name, hazard.spilled, TempVarMarker, mainCs)
+				hazard.name, hazard.spilled, temp, mainCs)
 		}
 	}
 
@@ -220,7 +229,6 @@ func TestMultiValueReturnSpillsCallsThatCanWriteAnEarlierOperand(t *testing.T) {
 		{"pointerIdentity", "return (c, c.bump());"},
 		{"unrelatedOperand", "return (a.n, b.bump());"},
 		{"valueReceiverCall", "return (c.n, c.peek());"},
-		{"pointerFieldUnrelated", "return (nd.handler, nd.pat.bump());"},
 	}
 
 	for _, control := range controls {

@@ -38,7 +38,8 @@ internal static void main() {
 
     var hz = Ꮡp.ᏑHz;
     hz.Value += 3;
-    fmt.Println(p.Hz, r.Label());
+    var evalᴛ1 = r.Label();
+    fmt.Println(p.Hz, evalᴛ1);
 }
 
 } // end main_package

@@ -251,23 +251,28 @@ internal static void reflectSide() {
     var mʗ1 = m;
     var sliceʗ1 = Δslice;
     @try("reflect MapIndex []int on empty MapOf(any)", [GoFunc("reflectSide.func1")] () => {
-        mʗ1.MapIndex(reflect.ValueOf(sliceʗ1));
+        var evalᴛ1 = reflect.ValueOf(sliceʗ1);
+        mʗ1.MapIndex(evalᴛ1);
     });
     var mʗ2 = m;
     var sliceʗ2 = Δslice;
     @try("reflect SetMapIndex []int", [GoFunc("reflectSide.func2")] () => {
-        mʗ2.SetMapIndex(reflect.ValueOf(sliceʗ2), reflect.ValueOf(true));
+        var evalᴛ2 = reflect.ValueOf(sliceʗ2);
+        var evalᴛ3 = reflect.ValueOf(true);
+        mʗ2.SetMapIndex(evalᴛ2, evalᴛ3);
     });
     ref var nilm = ref heap<reflect.Value>(reflect.Zero(reflect.TypeFor<map<any, bool>>()), out var Ꮡnilm);
     var nilmʗ1 = nilm;
     var sliceʗ3 = Δslice;
     @try("reflect MapIndex []int on nil map", [GoFunc("reflectSide.func3")] () => {
-        nilmʗ1.MapIndex(reflect.ValueOf(sliceʗ3));
+        var evalᴛ4 = reflect.ValueOf(sliceʗ3);
+        nilmʗ1.MapIndex(evalᴛ4);
     });
     var nilmʗ2 = nilm;
     var sliceʗ4 = Δslice;
     @try("reflect delete []int on nil map", [GoFunc("reflectSide.func4")] () => {
-        nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflect.Value());
+        var evalᴛ5 = reflect.ValueOf(sliceʗ4);
+        nilmʗ2.SetMapIndex(evalᴛ5, new reflect.Value());
     });
 
     var fm = reflect.MakeMap(reflect.MapOf(reflect.TypeFor<float64>(), reflect.TypeFor<bool>()));

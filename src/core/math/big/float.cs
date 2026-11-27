@@ -394,7 +394,8 @@ internal static @string validate0⁔(/*this*/ ж<Float> Ꮡx) {
     }
     UntypedInt msb = /* 1 << (_W - 1) */ 9223372036854775808;
     if ((Word)(x.mant[m - 1] & (nuint)msb) == 0) {
-        return fmt.Sprintf("msb not set in last word %#x of %s"u8, x.mant[m - 1], Ꮡx.Text((byte)'p', 0));
+        var evalᴛ1 = Ꮡx.Text((byte)'p', 0);
+        return fmt.Sprintf("msb not set in last word %#x of %s"u8, x.mant[m - 1], evalᴛ1);
     }
     if (x.prec == 0) {
         return zeroPrecisionFiniteˢ;
@@ -602,7 +603,8 @@ internal static ж<Float> SetFloat64⁔(/*this*/ ж<Float> Ꮡz, float64 x) {
     // normalized x != 0
     z.form = finite;
     var (fmant, exp) = math.Frexp(x); // get normalized mantissa
-    z.mant = z.mant.setUint64((uint64)((uint64)1 << 63 | math.Float64bits(fmant) << 11));
+    var evalᴛ1 = math.Float64bits(fmant);
+    z.mant = z.mant.setUint64((uint64)((uint64)1 << 63 | evalᴛ1 << 11));
     z.exp = (int32)exp; // always fits
     if (z.prec < 53) {
         Ꮡz.round(0);

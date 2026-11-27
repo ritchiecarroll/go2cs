@@ -166,7 +166,8 @@ internal static @string Error⁔(/*this*/ ref ValueError e) {
     if (e.Kind == 0) {
         return "reflect: call of "u8 + e.Method + " on zero Value"u8;
     }
-    return "reflect: call of "u8 + e.Method + " on "u8 + e.Kind.String() + " Value"u8;
+    var evalᴛ1 = e.Kind.String();
+    return "reflect: call of "u8 + e.Method + " on "u8 + evalᴛ1 + " Value"u8;
 }
 
 // go2cs generated this placeholder — func valueMethodName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -524,10 +525,12 @@ break_stepsLoop:;
                 // Pointer-valued data gets put directly
                 // into v.ptr.
                 if (steps[0].kind != abiStepPointer) {
-                    print((@string)"kind=", steps[0].kind, (@string)", type=", stringFor(tv), (@string)"\n");
+                    var evalᴛ1 = stringFor(tv);
+                    print((@string)"kind=", steps[0].kind, (@string)", type=", evalᴛ1, (@string)"\n");
                     throw panic("mismatch between ABI description and types");
                 }
-                ret[i] = new Value(tv, regArgs.Ptrs[steps[0].ireg], (flag)(uintptr)tv.Kind());
+                var evalᴛ2 = tv.Kind();
+                ret[i] = new Value(tv, regArgs.Ptrs[steps[0].ireg], (flag)(uintptr)evalᴛ2);
                 continue;
             }
 
@@ -679,7 +682,8 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                 // Pointer-valued data gets put directly
                 // into v.ptr.
                 if (steps[0].kind != abiStepPointer) {
-                    print((@string)"kind=", steps[0].kind, (@string)", type=", stringFor(typ), (@string)"\n");
+                    var evalᴛ1 = stringFor(typ);
+                    print((@string)"kind=", steps[0].kind, (@string)", type=", evalᴛ1, (@string)"\n");
                     throw panic("mismatch between ABI description and types");
                 }
                 v.ptr = regs.Ptrs[steps[0].ireg];

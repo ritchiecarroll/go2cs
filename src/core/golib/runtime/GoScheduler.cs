@@ -157,10 +157,19 @@ public static class GoScheduler
     // Go's forcePreemptNS). 0 turns injection off: a measurement arm, not a mode.
     private static readonly long s_preemptTicks = ReadPreemptTicks();
 
-    // GO2CS_MN_MAXINJECT: how many injected Ps may be live at once (default: the P count, so a storm of long
-    // steps at most doubles the running carriers). Injection adds parallelism where Go would preempt, and
-    // each added carrier past the core count makes the next step likelier to be descheduled and read as long.
+    // N5 3c (DESIGN-mn-n5-invisible-blocking.md): a step earns an injected P each time it runs another threshold past
+    // the last while work waits, and a tick injects no more Ps than there is work waiting. Injection then stops only at
+    // the thread ceiling (s_maxThreads), where Go's own "thread exhaustion" ends the program. GO2CS_MN_REARM=0 (an arm
+    // only) restores the old rule: once per step, under GO2CS_MN_MAXINJECT.
+    private static readonly bool s_rearm = Environment.GetEnvironmentVariable("GO2CS_MN_REARM") != "0";
+
+    // GO2CS_MN_MAXINJECT (an arm only): how many injected Ps may be live at once. Unset, there is no cap of its own
+    // under re-arm, and the P count under GO2CS_MN_REARM=0 (the cap before N5).
     private static readonly int s_maxInject = ReadMaxInject();
+
+    // Go's sched.maxmcount: how many threads the scheduler may make, 10,000 by default (GO2CS_MN_MAXTHREADS), set by
+    // runtime/debug.SetMaxThreads. A carrier past it ends the program as Go's checkmcount does.
+    private static int s_maxThreads = ReadMaxThreads();
 
     // GO2CS_MN_RUNNEXT=0 turns the run-next slot off (a measurement arm). With it on, a goroutine made
     // runnable by a running step goes to that carrier's slot and runs next on the same thread, as Go's
@@ -187,12 +196,58 @@ public static class GoScheduler
     // DESIGN-mn-pin.md 15.3 (arms only): GO2CS_MN_RETAKE_UNPINNED=1 counts a retake as shared, as before 15.2.
     private static readonly bool s_retakeUnpinned = Environment.GetEnvironmentVariable("GO2CS_MN_RETAKE_UNPINNED") == "1";
     private static long s_retakes;
+
+    // N5 3a (DESIGN-mn-n5-invisible-blocking.md): a step whose thread is blocked in a managed wait golib does not know
+    // about (a lock, a .NET event, Task.Wait, Thread.Sleep) holds its P; the monitor senses it from the thread's state
+    // and retakes the P as it retakes a native call's. GO2CS_MN_SENSE=0 turns it off (an arm only).
+    private static readonly bool s_sense = Environment.GetEnvironmentVariable("GO2CS_MN_SENSE") != "0";
+    private static long s_sensed;
     private static int s_pWaiters;
 
     private static int ReadMaxInject()
     {
         string? text = Environment.GetEnvironmentVariable("GO2CS_MN_MAXINJECT");
-        return int.TryParse(text, out int value) && value >= 0 ? value : s_procs;
+        return int.TryParse(text, out int value) && value >= 0 ? value : s_rearm ? int.MaxValue : s_procs;
+    }
+
+    private static int ReadMaxThreads()
+    {
+        string? text = Environment.GetEnvironmentVariable("GO2CS_MN_MAXTHREADS");
+        return int.TryParse(text, out int value) ? value : 10_000;
+    }
+
+    /// <summary>
+    /// runtime/debug.SetMaxThreads: sets the thread ceiling and returns the old one. As Go's setMaxThreads, a value past
+    /// int32 is clamped to it, and a ceiling below the threads already made ends the program at once.
+    /// </summary>
+    internal static nint SetMaxThreads(nint value)
+    {
+        int limit = value > int.MaxValue ? int.MaxValue : (int)value;
+        int old = Interlocked.Exchange(ref s_maxThreads, limit);
+        int count;
+
+        lock (s_carriersLock)
+            count = s_carriers.Count;
+
+        if (count > limit)
+            ThreadExhaustion(limit);
+
+        return old;
+    }
+
+    // Go's checkmcount: "runtime: program exceeds N-thread limit", then throw("thread exhaustion"), exit status 2.
+    [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+    private static void ThreadExhaustion(int limit)
+    {
+        try
+        {
+            Console.Error.Write($"runtime: program exceeds {limit}-thread limit\n");
+        }
+        catch (Exception)
+        {
+        }
+
+        FatalReport.Fatal("thread exhaustion", userFault: false);
     }
 
     private static long ReadPreemptTicks()
@@ -561,20 +616,25 @@ public static class GoScheduler
     /// <summary>The scheduler's counters, one line.</summary>
     public static string Reading()
     {
+        // The block counters are read BEFORE the thread sample: the sample is slow on some hosts (linux reads /proc for
+        // every thread), and a reading taken inside a step must not count what its own sampling caused (N5's fixture).
+        long handoffs = Interlocked.Read(ref s_handoffs), injections = Interlocked.Read(ref s_injections);
+        long retakes = Interlocked.Read(ref s_retakes), sensed = Interlocked.Read(ref s_sensed);
+
         SampleThreads();
 
         return $"READING go-scheduler procs={s_procs} peak-carriers={Volatile.Read(ref s_peakCarriers)}" +
                $" carriers-started={Interlocked.Read(ref s_carriersStarted)} peak-os-threads={Volatile.Read(ref s_peakThreads)}" +
                $" steps={Interlocked.Read(ref s_steps)} parks={Interlocked.Read(ref s_parks)}" +
                $" migrations={Interlocked.Read(ref s_migrations)} migrated-goroutines={Interlocked.Read(ref s_migrated)}" +
-               $" handoffs={Interlocked.Read(ref s_handoffs)} thread-blocks={Interlocked.Read(ref s_threadBlocks)}" +
-               $" injections={Interlocked.Read(ref s_injections)}" +
+               $" handoffs={handoffs} thread-blocks={Interlocked.Read(ref s_threadBlocks)}" +
+               $" injections={injections}" +
                $" run-next-steps={Interlocked.Read(ref s_runNextSteps)} run-next-steals={Interlocked.Read(ref s_runNextSteals)}" +
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
                $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
                $" carrier-stack-mb={Volatile.Read(ref s_carrierStackSize) / (1024 * 1024)}" +
-               $" retakes={Interlocked.Read(ref s_retakes)}" +
+               $" retakes={retakes} sensed={sensed}" +
                $" off-carrier-resumes={Interlocked.Read(ref s_offCarrierResumes)}" +
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
@@ -707,7 +767,7 @@ public static class GoScheduler
 
         if (t_carrier is { } carrier)
         {
-            carrier.Injected = false;
+            carrier.Injections = 0;
             carrier.PauseAtStart = GC.GetTotalPauseDuration().Ticks;
             Volatile.Write(ref carrier.RunningSince, Stopwatch.GetTimestamp());
         }
@@ -733,14 +793,20 @@ public static class GoScheduler
     private static void AddCarrier()
     {
         Carrier carrier = new();
+        int count;
 
         lock (s_carriersLock)
         {
             s_carriers.Add(carrier);
+            count = s_carriers.Count;
 
-            if (s_carriers.Count > s_peakCarriers)
-                s_peakCarriers = s_carriers.Count;
+            if (count > s_peakCarriers)
+                s_peakCarriers = count;
         }
+
+        // N5 (Q1): past the ceiling the program ends as Go's does; reported outside the lock.
+        if (count > Volatile.Read(ref s_maxThreads))
+            ThreadExhaustion(Volatile.Read(ref s_maxThreads));
 
         if (!StartCarrierThread(carrier.Loop))
         {
@@ -859,17 +925,27 @@ public static class GoScheduler
             {
                 int retake = 0;
                 int retakePinned = 0;
+                int sensed = 0;
 
                 lock (s_carriersLock)
                 {
                     foreach (Carrier carrier in s_carriers)
                     {
-                        bool native = Volatile.Read(ref carrier.RunningSince) != 0 &&
-                                      carrier.Mounted is { } mounted && (Volatile.Read(ref mounted.m_nativeDepth) & 1) != 0;
+                        bool inStep = Volatile.Read(ref carrier.RunningSince) != 0 && carrier.Mounted is not null;
+                        bool native = inStep && carrier.Mounted is { } mounted && (Volatile.Read(ref mounted.m_nativeDepth) & 1) != 0;
+
+                        // N5 3a: in a step, holding its P (RunningSince is cleared at a hand-off, and a retaken step is
+                        // skipped by the exchange below), and its thread blocked in a managed wait.
+                        bool waiting = s_sense && inStep && !native && carrier.Thread is { } thread &&
+                                       (thread.ThreadState & System.Threading.ThreadState.WaitSleepJoin) != 0;
 
                         if (!native)
                             carrier.NativeTicks = 0;
-                        else if (++carrier.NativeTicks >= 2)
+
+                        if (!waiting)
+                            carrier.SensedTicks = 0;
+
+                        if ((native && ++carrier.NativeTicks >= 2) || (waiting && ++carrier.SensedTicks >= 2))
                         {
                             // DESIGN-mn-pin.md 15.2: the flag is set BEFORE the retake is published, so a step that releases
                             // the retake at once still lowers the pinned count it raises.
@@ -880,6 +956,9 @@ public static class GoScheduler
                             {
                                 retake++;
 
+                                if (!native)
+                                    sensed++;
+
                                 if (pinned)
                                     retakePinned++;
                             }
@@ -889,7 +968,11 @@ public static class GoScheduler
 
                 for (int i = 0; i < retake; i++)
                 {
-                    Interlocked.Increment(ref s_retakes);
+                    if (i < sensed)
+                        Interlocked.Increment(ref s_sensed);
+                    else
+                        Interlocked.Increment(ref s_retakes);
+
                     Interlocked.Increment(ref s_blocked);
 
                     if (i < retakePinned)
@@ -911,24 +994,31 @@ public static class GoScheduler
             long pauses = GC.GetTotalPauseDuration().Ticks;
             int inject = 0;
 
+            // N5 3c: no more injections in a tick than there is work waiting, the queued items counted with the waiters.
+            int demand = (queued ? s_runq.Count : 0) + Math.Max(waiters, 0);
+
             lock (s_carriersLock)
             {
                 foreach (Carrier carrier in s_carriers)
                 {
-                    // Only as many carriers spend their once-per-step injection as there are waiters to serve.
-                    if (!queued && inject >= waiters)
+                    // Only as many carriers spend an injection as there is work to serve.
+                    if (s_rearm ? inject >= demand : !queued && inject >= waiters)
                         break;
 
                     long since = Volatile.Read(ref carrier.RunningSince);
 
-                    if (since == 0 || carrier.Injected || Volatile.Read(ref carrier.Retaken) != 0)
+                    // A step the retake walk has seen inside a native call is answered by the retake alone (N5): on a
+                    // host whose timer makes two ticks outlast the threshold it would otherwise be injected first.
+                    if (since == 0 || (!s_rearm && carrier.Injections > 0) || Volatile.Read(ref carrier.Retaken) != 0 ||
+                        carrier.NativeTicks > 0 || carrier.SensedTicks > 0)
                         continue;
 
                     long paused = (pauses - carrier.PauseAtStart) * Stopwatch.Frequency / TimeSpan.TicksPerSecond;
 
-                    if (now - since - paused > s_preemptTicks)
+                    // The step's (n+1)th injection comes once it has run n+1 thresholds (N5 3c re-arm).
+                    if (now - since - paused > s_preemptTicks * (carrier.Injections + 1))
                     {
-                        carrier.Injected = true;
+                        carrier.Injections++;
                         inject++;
                     }
                 }
@@ -966,12 +1056,18 @@ public static class GoScheduler
         internal object? PendingContinuation;
         internal long RunningSince;
         internal long PauseAtStart;
-        internal volatile bool Injected;
+        // How many Ps the monitor has injected beside this step (N5 3c); zero at the step's start.
+        internal volatile int Injections;
 
         // 1 while the monitor holds this step's P retaken (the mounted goroutine was inside a native call),
         // and how many ticks in a row the monitor has found it there.
         internal int Retaken;
         internal int NativeTicks;
+
+        // N5 3a: this carrier's thread, read by the monitor for its wait state, and how many ticks in a row the monitor
+        // has found it in a managed wait while in a step and holding its P.
+        internal Thread? Thread;
+        internal int SensedTicks;
 
         // The run-next slot (the goroutine carries its step), whether this carrier is inside a step, and
         // how many slot runs in a row it has made.
@@ -1093,6 +1189,7 @@ public static class GoScheduler
         internal void Loop()
         {
             t_carrier = this;
+            Thread = Thread.CurrentThread;
             m_baseContext = ExecutionContext.Capture();
 
             while (true)
@@ -1174,7 +1271,7 @@ public static class GoScheduler
                 s_p.Wait();
                 Interlocked.Decrement(ref s_pWaiters);
                 InStep = true;
-                Injected = false;
+                Injections = 0;
                 PauseAtStart = GC.GetTotalPauseDuration().Ticks;
                 Volatile.Write(ref RunningSince, Stopwatch.GetTimestamp());
 

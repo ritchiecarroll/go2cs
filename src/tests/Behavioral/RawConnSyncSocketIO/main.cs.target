@@ -116,7 +116,8 @@ internal static partial void step(@string name, Func<@string> body) {
     var done = new channel<@string>(1);
     var doneʗ1 = done;
     goǃ([GoFunc("step.func1")] () => {
-        doneʗ1.ᐸꟷ(body());
+        var evalᴛ1 = body();
+        doneʗ1.ᐸꟷ(evalᴛ1);
     });
 
     var doneᴛ1 = done;
@@ -201,15 +202,18 @@ internal static void main() {
                         var msg = slice<byte>([tag, tag, tag, tag]);
                         for (nint r = 0; r < rounds; r++) {
                             var err = writeRawConn(rawOf(from), msg); if (err != nil) {
-                                resultsʗ1[i] = fmt.Sprintf("round %d write: %v"u8, r, err);
+                                var evalᴛ1 = fmt.Sprintf("round %d write: %v"u8, r, err);
+                                resultsʗ1[i] = evalᴛ1;
                                 return;
                             }
                             @string got = rawReadFull(to, len(msg)); if (got != ((sstring)msg)) {
-                                resultsʗ1[i] = fmt.Sprintf("round %d read %q"u8, r, got);
+                                var evalᴛ2 = fmt.Sprintf("round %d read %q"u8, r, got);
+                                resultsʗ1[i] = evalᴛ2;
                                 return;
                             }
                         }
-                        resultsʗ1[i] = fmt.Sprintf("%c ok"u8, tag);
+                        var evalᴛ3 = fmt.Sprintf("%c ok"u8, tag);
+                        resultsʗ1[i] = evalᴛ3;
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }

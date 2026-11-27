@@ -501,7 +501,8 @@ internal static partial void ServeCodec⁔(/*this*/ ж<Server> Ꮡserver, Server
             }
             // send a response if we actually managed to read a header.
             if (req != nil) {
-                Ꮡserver.sendResponse(sending, req, invalidRequest, codec, err.Error());
+                var evalᴛ1 = err.Error();
+                Ꮡserver.sendResponse(sending, req, invalidRequest, codec, evalᴛ1);
                 Ꮡserver.freeRequest(req);
             }
             continue;
@@ -527,7 +528,8 @@ internal static error ServeRequest⁔(/*this*/ ж<Server> Ꮡserver, ServerCodec
         }
         // send a response if we actually managed to read a header.
         if (req != nil) {
-            Ꮡserver.sendResponse(sending, req, invalidRequest, codec, err.Error());
+            var evalᴛ1 = err.Error();
+            Ꮡserver.sendResponse(sending, req, invalidRequest, codec, evalᴛ1);
             Ꮡserver.freeRequest(req);
         }
         return err;
@@ -776,7 +778,8 @@ internal static void ServeHTTP⁔(/*this*/ ж<Server> Ꮡserver, Δhttp.Response
     }
     var (conn, _, err) = w._<Δhttp.Hijacker>().Hijack();
     if (err != nil) {
-        log.Print(rpcHijackingˢ, req.RemoteAddr, ": ", err.Error());
+        var evalᴛ1 = err.Error();
+        log.Print(rpcHijackingˢ, req.RemoteAddr, ": ", evalᴛ1);
         return;
     }
     io.WriteString(new net_ConnᴠWriter(conn), "HTTP/1.0 "u8 + connected + "\n\n"u8);

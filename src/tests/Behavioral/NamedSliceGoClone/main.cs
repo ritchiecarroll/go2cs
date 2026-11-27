@@ -73,7 +73,9 @@ internal static void main() {
     fmt.Println(g.Clone(), len(g));
 
     var m = new M(new map<@string, nint>{["x"] = 2});
-    fmt.Println(m.Clone()["cloned"], m.Clone()["x"], len(m));
+    var evalᴛ1 = m.Clone();
+    var evalᴛ2 = m.Clone();
+    fmt.Println(evalᴛ1["cloned"], evalᴛ2["x"], len(m));
 
     var u = new U(new @string[]{"q"}.slice());
     var uc = slices.Clone<U, @string>(u);

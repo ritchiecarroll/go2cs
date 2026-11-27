@@ -45,7 +45,9 @@ internal static void startCheckmarks() {
 
     // Clear all checkmarks.
     [GoFunc("startCheckmarks.func1")] void clearCheckmarks(arenaIdx ai) {
-        var arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
+        var evalᴛ1 = ai.l1();
+        var evalᴛ2 = ai.l2();
+        var arena = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
         var bitmap = arena.checkmarks;
 
         if (bitmap == nil) {
@@ -126,7 +128,9 @@ internal static (ж<byte> bytep, uint8 mask) getCheckmark(uintptr obj) {
     uint8 mask = default;
 
     arenaIdx ai = arenaIndex(obj);
-    var arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
+    var evalᴛ1 = ai.l1();
+    var evalᴛ2 = ai.l2();
+    var arena = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
     if (arena == nil) {
         // Non-heap pointer.
         return (default, 0);
@@ -294,7 +298,8 @@ internal static void checkFinalizersAndCleanups() {
             if (funcInfo.valid()) {
                 var (@file, line) = funcline(funcInfo, ctx.funcPC);
                 print((@string)"  ", funcname(funcInfo), (@string)"()\n");
-                print((@string)"      ", @file, (@string)":", line, (@string)" +", (hex)(uint64)(ctx.funcPC - funcInfo.entry()), (@string)"\n");
+                var evalᴛ1 = funcInfo.entry();
+                print((@string)"      ", @file, (@string)":", line, (@string)" +", (hex)(uint64)(ctx.funcPC - evalᴛ1), (@string)"\n");
             } else {
                 print((@string)"  <bad pc ", (hex)(uint64)ctx.funcPC, (@string)">\n");
             }
@@ -304,7 +309,8 @@ internal static void checkFinalizersAndCleanups() {
             if (createInfo.valid()) {
                 var (@file, line) = funcline(createInfo, ctx.createPC);
                 print((@string)"  ", funcname(createInfo), (@string)"()\n");
-                print((@string)"      ", @file, (@string)":", line, (@string)" +", (hex)(uint64)(ctx.createPC - createInfo.entry()), (@string)"\n");
+                var evalᴛ2 = createInfo.entry();
+                print((@string)"      ", @file, (@string)":", line, (@string)" +", (hex)(uint64)(ctx.createPC - evalᴛ2), (@string)"\n");
             } else {
                 print((@string)"  <bad pc ", (hex)(uint64)ctx.createPC, (@string)">\n");
             }
@@ -329,7 +335,9 @@ internal static void forEachSpecial(Func<uintptr, ж<mspan>, ж<special>, bool> 
 
     // Find the arena and page index into that arena for this shard.
     foreach (var (_, ai) in range(mheap_.markArenas)) {
-        var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
+        var evalᴛ1 = ai.l1();
+        var evalᴛ2 = ai.l2();
+        var ha = mheap_.arenas[evalᴛ1].Value[evalᴛ2];
 
         // Construct slice of bitmap which we'll iterate over.
         foreach (var i in range(len(ha.pageSpecials[..]))) {

@@ -56,9 +56,10 @@ internal static void set⁔(/*this*/ ж<pipeDeadline> Ꮡd, time.Time t) {
                 if (closed) {
                     d.cancel = new channel<EmptyStruct>(0);
                 }
-                d.timer = time.AfterFunc(dur, [GoFunc("(*pipeDeadline).set.func1")] () => {
+                var evalᴛ1 = time.AfterFunc(dur, [GoFunc("(*pipeDeadline).set.func1")] () => {
                     close(Ꮡd.Value.cancel);
                 });
+                d.timer = evalᴛ1;
                 return;
             }
         }

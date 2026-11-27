@@ -133,13 +133,18 @@ internal static error ReadFunc⁔(/*this*/ ref CoverageMetaDataDecoder d, uint32
         f.Units = new slice<coverage.CoverableUnit>(0, (nint)(numUnits));
     }
     for (var k = (uint32)0; k < numUnits; k++) {
+        var evalᴛ1 = d.r.ReadULEB128();
+        var evalᴛ2 = d.r.ReadULEB128();
+        var evalᴛ3 = d.r.ReadULEB128();
+        var evalᴛ4 = d.r.ReadULEB128();
+        var evalᴛ5 = d.r.ReadULEB128();
         f.Units = append(f.Units,
             new coverage.CoverableUnit(
-                StLine: (uint32)d.r.ReadULEB128(),
-                StCol: (uint32)d.r.ReadULEB128(),
-                EnLine: (uint32)d.r.ReadULEB128(),
-                EnCol: (uint32)d.r.ReadULEB128(),
-                NxStmts: (uint32)d.r.ReadULEB128()
+                StLine: (uint32)evalᴛ1,
+                StCol: (uint32)evalᴛ2,
+                EnLine: (uint32)evalᴛ3,
+                EnCol: (uint32)evalᴛ4,
+                NxStmts: (uint32)evalᴛ5
             ));
     }
     var lit = d.r.ReadULEB128();
