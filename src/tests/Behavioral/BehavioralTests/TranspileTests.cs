@@ -877,6 +877,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
 
     [TestMethod]
+    public void CheckFuncLitTupleResultInfer() => CheckTarget("FuncLitTupleResultInfer");
+
+    [TestMethod]
     public void CheckFuncLitUntypedConstReturn() => CheckTarget("FuncLitUntypedConstReturn");
 
     [TestMethod]
@@ -1640,6 +1643,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
+
+    [TestMethod]
+    public void CheckNamedFuncTupleResult() => CheckTarget("NamedFuncTupleResult");
 
     [TestMethod]
     public void CheckNamedFuncTypeMapParam() => CheckTarget("NamedFuncTypeMapParam");

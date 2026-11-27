@@ -880,6 +880,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
 
     [TestMethod]
+    public void CheckFuncLitTupleResultInfer() => CheckTarget("FuncLitTupleResultInfer");
+
+    [TestMethod]
     public void CheckFuncLitUntypedConstReturn() => CheckTarget("FuncLitUntypedConstReturn");
 
     [TestMethod]
@@ -1643,6 +1646,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
+
+    [TestMethod]
+    public void CheckNamedFuncTupleResult() => CheckTarget("NamedFuncTupleResult");
 
     [TestMethod]
     public void CheckNamedFuncTypeMapParam() => CheckTarget("NamedFuncTypeMapParam");
