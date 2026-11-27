@@ -1511,6 +1511,7 @@
     <Project Path="tests/Behavioral/VersionedImport/VersionedImport.csproj" />
     <Project Path="tests/Behavioral/VersionedImport/vlib/vlib.v2.csproj" />
     <Project Path="tests/Behavioral/WindowsNewCallback/WindowsNewCallback.csproj" />
+    <Project Path="tests/Behavioral/WindowsSyscallFloatReturn/WindowsSyscallFloatReturn.csproj" />
     <Project Path="tests/Behavioral/WrittenCaptureParam/WrittenCaptureParam.csproj" />
     <Project Path="tests/Behavioral/WsaProtocolInfo/WsaProtocolInfo.csproj" />
     <Project Path="tests/Behavioral/WsaSendtoRoundTrip/WsaSendtoRoundTrip.csproj" />

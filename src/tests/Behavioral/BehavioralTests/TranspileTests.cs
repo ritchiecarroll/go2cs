@@ -3256,6 +3256,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckWindowsNewCallback() => CheckTarget("WindowsNewCallback");
 
     [TestMethod]
+    public void CheckWindowsSyscallFloatReturn() => CheckTarget("WindowsSyscallFloatReturn");
+
+    [TestMethod]
     public void CheckWritevIovecSeam() => CheckTarget("WritevIovecSeam");
 
     [TestMethod]

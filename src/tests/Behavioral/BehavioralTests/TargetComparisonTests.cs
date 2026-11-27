@@ -3259,6 +3259,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckWindowsNewCallback() => CheckTarget("WindowsNewCallback");
 
     [TestMethod]
+    public void CheckWindowsSyscallFloatReturn() => CheckTarget("WindowsSyscallFloatReturn");
+
+    [TestMethod]
     public void CheckWritevIovecSeam() => CheckTarget("WritevIovecSeam");
 
     [TestMethod]
