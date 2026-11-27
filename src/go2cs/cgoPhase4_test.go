@@ -46,12 +46,48 @@ func main() {
 }
 `
 
+// cgoPhase4VariableProgram is OQ-A's arm (the owner's ruling, 2026-11-27: in this slice): a variable the preamble
+// defines, read, written from Go and changed by C, through the same table. cmd/cgo binds a C variable with
+// //go:cgo_import_static, so the preamble's is not static.
+const cgoPhase4VariableProgram = `package main
+
+/*
+int counter = 41;
+static void bump(void) { counter++; }
+*/
+import "C"
+
+import "fmt"
+
+func main() {
+	fmt.Println("counter", C.counter)
+	C.bump()
+	fmt.Println("bumped", C.counter)
+	C.counter = 7
+	C.bump()
+	fmt.Println("set and bumped", C.counter)
+}
+`
+
 // The design's §3 red. Arm 1 converts on every leg with a C compiler and the probe; arm 2 builds the converted program
 // and runs it against go's own build where the build tests are on (cgo-e2e, GO2CS_CGO_BUILD=1).
 func TestCgoPhase4APreambleDefinedFunctionConvertsAndRunsAsGoDoes(t *testing.T) {
+	runCgoPhase4(t, cgoPhase4Program)
+}
+
+// OQ-A: a variable the preamble defines converts and runs as Go does.
+func TestCgoPhase4BPreambleDefinedVariableConvertsAndRunsAsGoDoes(t *testing.T) {
+	runCgoPhase4(t, cgoPhase4VariableProgram)
+}
+
+// runCgoPhase4 converts program as package main, and where the build tests are on, builds it with go and with dotnet
+// and compares the two runs.
+func runCgoPhase4(t *testing.T, program string) {
+	t.Helper()
+
 	probeDir := cgoRealProbeDir(t)
 	target := runtime.GOOS + "/" + runtime.GOARCH
-	files := map[string]string{"main.go": cgoPhase4Program}
+	files := map[string]string{"main.go": program}
 
 	combined, _, output, err := convertCgoReal(t, probeDir, files)
 
@@ -70,6 +106,10 @@ func TestCgoPhase4APreambleDefinedFunctionConvertsAndRunsAsGoDoes(t *testing.T) 
 		t.Errorf("the conversion wrote %d side translation units in %s, want 1", len(units), sideDir)
 	}
 
+	if library := filepath.Join(sideDir, cgoSideLibraryFile(runtime.GOOS, "main", "example.com/cgoreal")); !fileExists(library) {
+		t.Errorf("the conversion wrote no side library %s", library)
+	}
+
 	if os.Getenv(cgoBuildEnv) != "1" {
 		t.Skipf("NOT RUN: set %s=1 to build and run the program (Inconclusive, not a pass)", cgoBuildEnv)
 	}
@@ -85,7 +125,7 @@ func TestCgoPhase4APreambleDefinedFunctionConvertsAndRunsAsGoDoes(t *testing.T) 
 	// go's own build, with this host's compiler, in the same environment the conversion read.
 	module := t.TempDir()
 	writeCgoFixture(t, module, "go.mod", "module example.com/cgop4\n\ngo 1.26\n")
-	writeCgoFixture(t, module, "main.go", cgoPhase4Program)
+	writeCgoFixture(t, module, "main.go", program)
 
 	binaries := t.TempDir()
 	goProgram := filepath.Join(binaries, "p4go")

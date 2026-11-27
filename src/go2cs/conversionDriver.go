@@ -790,6 +790,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						log.Fatalf("Failed to create the bindings file's folder \"%s\": %s\n", filepath.Dir(outputFileName), err)
 					}
 
+					// The side build of the C its preambles define, beside the bindings (cgo Phase 4).
+					if route.side != nil {
+						if err := route.side.write(cgoSideBuildFolder(packageOutputPath, route.folder)); err != nil {
+							log.Fatalf("Refusing to convert: cgo: package %s's side-built library could not be written: %s\n", pkg.PkgPath, err)
+						}
+					}
+
 					completed := route.bindingsText(visitor.outputBuilder.String())
 					visitor.outputBuilder.Reset()
 					visitor.outputBuilder.WriteString(completed)

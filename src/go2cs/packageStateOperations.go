@@ -50,6 +50,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoDynamicImports = nil
 	cgoDynamicImportPragmas = nil
 	cgoRouteActive = false
+	cgoRouteSideLibrary = ""
 	cgoBindingsWritten = false
 	cgoRouteFunctions = nil
 	cgoRouteVariables = nil

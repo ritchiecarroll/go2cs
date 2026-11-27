@@ -94,6 +94,10 @@ var (
 
 	// cgoBindingsWritten is set when this conversion wrote the package's bindings file.
 	cgoBindingsWritten bool
+
+	// cgoRouteSideLibrary is the file name of the library side-built from the package's preambles (cgo Phase 4), which
+	// its project copies beside the assembly, or "" when nothing is side-built.
+	cgoRouteSideLibrary string
 )
 
 // cgoCheckClosure is one call through cmd/cgo's pointer-check closure, unwrapped: the call the closure makes, and what
@@ -117,6 +121,7 @@ type cgoRoute struct {
 	folder    string             // the bindings file's folder: its one target's, `<goos>-<arch>` (§11.20, S3)
 	header    string             // the bindings file's header (§4.1, §11.20)
 	members   string             // the bindings: the pseudo-package's wrappers, mirrors and registration
+	side      *cgoSideBuild      // the side build of the C the preambles define (cgo Phase 4), or nil
 }
 
 // cgoUseRefusal is one C use the route refuses, at the source position that wrote it.
@@ -1182,15 +1187,49 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	// bindings' header beside its --version line (INC 2 shape read, MUST 1).
 	var triple string
 
+	// cgo Phase 4: a name no shared library exports is side-built when its file's preamble defines it, and only the
+	// names a library exports are captured, and held to cmd/cgo's imports, below.
+	var side *cgoSideBuild
+
 	if cgoCaptureOverride != nil {
 		captured, toolchain, err = cgoCaptureOverride(symbols)
 	} else {
-		var undefined []cgoUseRefusal
+		var unbound []string
 		triple, _ = cgoCompilerTriple(load, options.targetPlatform)
-		captured, toolchain, undefined, err = cgoCapture(load, goos, goarch, flags, symbols, symbolUses)
+		captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
 
-		if len(undefined) > 0 {
-			return nil, refuseCgoRoute(pkg, undefined)
+		if err == nil && len(unbound) > 0 {
+			sourcePaths := map[string]string{}
+
+			for _, source := range sources {
+				if source.output != "" {
+					path := pkg.Fset.PositionFor(source.file.Package, true).Filename
+					sourcePaths[filepath.Base(path)] = path
+				}
+			}
+
+			var unbuilt []cgoUseRefusal
+
+			if side, unbuilt, err = planCgoSideBuild(pkg, options, load, goos, goarch, flags, unbound, symbolUses, sourcePaths); err == nil && len(unbuilt) > 0 {
+				return nil, refuseCgoRoute(pkg, unbuilt)
+			}
+
+			if err == nil {
+				slots := side.slots()
+				symbols = slices.DeleteFunc(symbols, func(symbol string) bool { _, built := slots[symbol]; return built })
+				captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
+
+				// The names left were bound by the first capture, so a second that binds fewer is not one go2cs reads.
+				if err == nil && len(unbound) > 0 {
+					var refusals []cgoUseRefusal
+
+					for _, symbol := range unbound {
+						refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: cgoUnboundRefusal(symbol)})
+					}
+
+					return nil, refuseCgoRoute(pkg, refusals)
+				}
+			}
 		}
 	}
 
@@ -1211,6 +1250,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	set := newCgoWrapperSet(target, sizes)
 	set.class = cgoPseudoPackageClass(pkg.Name)
 	set.libraries = map[string]string{}
+	set.side = side.slots()
 
 	for _, entry := range captured {
 		set.libraries[entry.symbol] = entry.name
@@ -1224,6 +1264,15 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 		}
 
 		members[declaration.cName+cgoKindMemberLabel(declaration.kind)] = text
+	}
+
+	// The C runtime's errno binding serves a bound errno form; a side-built one reads its own table's slot 0.
+	errnoForm = false
+
+	for _, declaration := range used {
+		if _, built := set.side[declaration.cName]; declaration.kind == cgoErrnoFunc && !built {
+			errnoForm = true
+		}
 	}
 
 	if errnoForm && target.crt != "" {
@@ -1241,8 +1290,9 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	route := &cgoRoute{
 		typesFile: reduced,
 		folder:    goos + "-" + goarch,
-		header:    cgoBindingsHeader(pkg, sources, reduced, options.targetPlatform, toolchain, triple),
+		header:    cgoBindingsHeader(pkg, sources, reduced, options.targetPlatform, toolchain, triple, side),
 		members:   cgoPseudoPackageText(pkg.Name, members),
+		side:      side,
 	}
 
 	for _, source := range sources {
@@ -1262,6 +1312,12 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	}
 
 	cgoRouteActive = true
+	cgoRouteSideLibrary = ""
+
+	if side != nil {
+		cgoRouteSideLibrary = side.library
+	}
+
 	cgoRouteFunctions = functions
 	cgoRouteVariables = variables
 	cgoCheckClosures = closures
@@ -1333,7 +1389,7 @@ func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) error {
 // first --version line, never its path, and a sha256 over the package's import "C" sources and the C type and
 // constant declarations cmd/cgo gave them, each normalised, so that two bindings files are told apart by provenance and
 // the same package converted anywhere hashes the same. No path, link flag or host library version reaches the hash.
-func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduced *ast.File, targetPlatform, toolchain, triple string) string {
+func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduced *ast.File, targetPlatform, toolchain, triple string, side *cgoSideBuild) string {
 	hash := sha256.New()
 	var names []string
 	paths := map[string]string{}
@@ -1382,6 +1438,17 @@ func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduce
 	if triple != "" {
 		fmt.Fprintf(&header, "// C target triple: %s\n", cgoToolchainLine(triple))
 	}
+
+	if side != nil {
+		var files []string
+
+		for _, unit := range side.units {
+			files = append(files, unit.file)
+		}
+
+		fmt.Fprintf(&header, "// side-built (cgo Phase 4): %s, from the preambles of %s\n", side.library, strings.Join(files, ", "))
+	}
+
 	fmt.Fprintf(&header, "// sha256: %s (the import \"C\" sources and the C declarations cmd/cgo gave them)\n\n", hex.EncodeToString(hash.Sum(nil)))
 
 	return header.String()
@@ -1748,25 +1815,23 @@ func cgoTripleTarget(triple string) (goos, goarch, abi string) {
 	return goos, goarch, abi
 }
 
-// cgoCapture answers each symbol's library through the C compiler the load used (go env CC, split as cmd/go splits it),
-// and the first line that compiler prints for --version, which the bindings' header records: never the CC value,
-// whose path would name the converting machine (§11.20, M4). A symbol no library defines, a function the preamble
-// itself defines among them, is refused by name at its use, as Phase 4's: the probe links each symbol alone to name them.
-func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols []string, usedAt map[string]token.Position) ([]cgoSymbolLibrary, string, []cgoUseRefusal, error) {
+// cgoResolveToolchain resolves the C compiler the load used (go env CC, split as cmd/go splits it) once, so its
+// --version, the probe's link and the side build are one program, and reads the first line it prints for --version,
+// which the bindings' header records: never the CC value, whose path would name the converting machine (§11.20, M4). A
+// relative CC is the package directory's, as it is cmd/go's, and a bare name is PATH's.
+func cgoResolveToolchain(load cgoLoad, goos, goarch string) (cgoToolchain, string, error) {
 	values, err := cgoGoEnv(load, "CC")
 
 	if err != nil {
-		return nil, "", nil, err
+		return cgoToolchain{}, "", err
 	}
 
 	command, err := splitCgoCommand(values[0])
 
 	if err != nil {
-		return nil, "", nil, err
+		return cgoToolchain{}, "", err
 	}
 
-	// The compiler is resolved once, so its --version (run here) and the probe's link (run in a temporary directory)
-	// are one program: a relative CC is the package directory's, as it is cmd/go's, and a bare name is PATH's.
 	if strings.ContainsAny(command[0], `/\`) {
 		if !filepath.IsAbs(command[0]) {
 			command[0] = filepath.Join(load.dir, command[0])
@@ -1781,10 +1846,40 @@ func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols [
 	version, err := versionCommand.Output()
 
 	if err != nil {
-		return nil, "", nil, fmt.Errorf("cgo: the C compiler cmd/cgo used does not report its version (--version): %w", err)
+		return cgoToolchain{}, "", fmt.Errorf("cgo: the C compiler cmd/cgo used does not report its version (--version): %w", err)
 	}
 
-	toolchainLine := cgoToolchainLine(string(version))
+	return toolchain, cgoToolchainLine(string(version)), nil
+}
+
+// cgoCapture answers each symbol's library through the C compiler the load used, and that compiler's toolchain line
+// (cgoResolveToolchain). A symbol no library defines is refused by name at its use: cgoCaptureUnbound names them.
+func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols []string, usedAt map[string]token.Position) ([]cgoSymbolLibrary, string, []cgoUseRefusal, error) {
+	captured, toolchainLine, unbound, err := cgoCaptureUnbound(load, goos, goarch, flags, symbols)
+
+	if err != nil || len(unbound) == 0 {
+		return captured, toolchainLine, nil, err
+	}
+
+	var refusals []cgoUseRefusal
+
+	for _, symbol := range unbound {
+		refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: cgoUnboundRefusal(symbol)})
+	}
+
+	return nil, "", refusals, nil
+}
+
+// cgoCaptureUnbound answers each symbol's library and the toolchain line, or, when some symbol resolves to no shared
+// library, those symbols in symbol order: a function the preamble itself defines among them, which the side build takes
+// (cgo Phase 4). The probe links each symbol alone to name them.
+func cgoCaptureUnbound(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols []string) ([]cgoSymbolLibrary, string, []string, error) {
+	toolchain, toolchainLine, err := cgoResolveToolchain(load, goos, goarch)
+
+	if err != nil {
+		return nil, "", nil, err
+	}
+
 	workDir, err := os.MkdirTemp("", "go2cs-cgo-capture-")
 
 	if err != nil {
@@ -1799,9 +1894,9 @@ func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols [
 		return captured, toolchainLine, nil, nil
 	}
 
-	// Each symbol no shared library exports is refused at its use. A shared probe may link with the symbol left undefined
-	// (ELF allows it) and resolve it nowhere, and a probe that does not link names no symbol at all, so there each symbol
-	// is linked alone to name the ones no library defines.
+	// Each symbol no shared library exports is named. A shared probe may link with the symbol left undefined (ELF allows
+	// it) and resolve it nowhere, and a probe that does not link names no symbol at all, so there each symbol is linked
+	// alone to name the ones no library defines.
 	unbound := map[string]bool{}
 	var named *cgoUnboundSymbols
 
@@ -1826,16 +1921,16 @@ func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols [
 		}
 	}
 
-	var refusals []cgoUseRefusal
+	var names []string
 
 	for _, symbol := range symbols {
 		if unbound[symbol] {
-			refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: no shared library the package links exports it (it resolved statically, or nowhere), and go2cs binds only a shared library's export; a function the preamble defines is compiled C, and go2cs does not compile C yet", symbol)})
+			names = append(names, symbol)
 		}
 	}
 
-	if len(refusals) > 0 {
-		return nil, "", refusals, nil
+	if len(names) > 0 {
+		return nil, toolchainLine, names, nil
 	}
 
 	return nil, "", nil, err

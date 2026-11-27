@@ -34,6 +34,9 @@ func cgoPseudoPackageClass(packageName string) string {
 // the C runtime that library uses, whose errno the two-result form reads (§11.3).
 type cgoBindingTarget struct {
 	goos, library, crt string
+
+	// side is the function's slot in a side-built table when its file's preamble defines it (cgo Phase 4), or nil.
+	side *cgoSideSlot
 }
 
 // cgoErrnoFormSuffix ends the C# name of a two-result binding. cmd/cgo declares C.f's plain form beside its errno form,
@@ -234,10 +237,7 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 		setLastError = ", SetLastError = true"
 	}
 
-	fmt.Fprintf(&text, "    // C.%s, bound to %s.\n", function, library)
-	fmt.Fprintf(&text, "    [%sLibraryImport(%q, EntryPoint = %q%s)]\n", interop, library, function, setLastError)
-	fmt.Fprintf(&text, "    [%sUnmanagedCallConv(CallConvs = new[] { typeof(%sCallConvCdecl) })]\n", interop, compiler)
-	fmt.Fprintf(&text, "    private static partial %s %s(%s);\n\n", externResult, native, strings.Join(externParams, ", "))
+	text.WriteString(cgoNativeMember(function, native, externResult, externParams, library, setLastError, target.side))
 	fmt.Fprintf(&text, "    internal static %s %s(%s)\n    {\n", wrapperResult, name, strings.Join(wrapperParams, ", "))
 
 	call := fmt.Sprintf("%s(%s)", native, strings.Join(arguments, ", "))
@@ -255,7 +255,7 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 	// native-call seam once (§11.4).
 	fmt.Fprintf(&text, "        %ssyscallEntersyscall();\n\n        try\n        {\n", runtime)
 
-	text.WriteString(cgoErrnoCall(call, errnoForm, target.goos))
+	text.WriteString(cgoErrnoCall(call, errnoForm, target.goos, target.errnoLocation()))
 	fmt.Fprintf(&text, "        }\n        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
 
 	returned := "default"
@@ -273,12 +273,42 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 	return text.String(), nil
 }
 
+// cgoNativeMember writes the native entry a wrapper calls: the [LibraryImport] extern of a function a library exports,
+// or, for one its file's preamble defines (side, cgo Phase 4), a call through its slot in the side-built table.
+func cgoNativeMember(function, native, externResult string, externParams []string, library, setLastError string, side *cgoSideSlot) string {
+	const interop = "global::System.Runtime.InteropServices."
+	const compiler = "global::System.Runtime.CompilerServices."
+
+	if side != nil {
+		return cgoSideNative(function, native, externResult, externParams, setLastError != "", *side)
+	}
+
+	var text strings.Builder
+
+	fmt.Fprintf(&text, "    // C.%s, bound to %s.\n", function, library)
+	fmt.Fprintf(&text, "    [%sLibraryImport(%q, EntryPoint = %q%s)]\n", interop, library, function, setLastError)
+	fmt.Fprintf(&text, "    [%sUnmanagedCallConv(CallConvs = new[] { typeof(%sCallConvCdecl) })]\n", interop, compiler)
+	fmt.Fprintf(&text, "    private static partial %s %s(%s);\n\n", externResult, native, strings.Join(externParams, ", "))
+
+	return text.String()
+}
+
+// errnoLocation is the C# call that answers the calling thread's errno slot for a windows errno form: the bound C
+// runtime's _errno, or a side-built function's own table slot 0 (cgo Phase 4).
+func (target cgoBindingTarget) errnoLocation() string {
+	if target.side != nil {
+		return target.side.errnoLocation()
+	}
+
+	return cgoErrnoLocation + "()"
+}
+
 // cgoErrnoCall writes the native call's statements inside the transition, with the errno form's read of errno (§11.3).
 // On linux and darwin the binding captures errno itself (SetLastError): its stub clears errno before the call and saves
 // it after, so the read sees this call's errno and nothing the GC transition did since. On windows SetLastError captures
 // GetLastError, not errno, which is the C RUNTIME's own slot, so the wrapper reads that through the library's C runtime
 // instead (cgoErrnoLocationBinding).
-func cgoErrnoCall(call string, errnoForm bool, goos string) string {
+func cgoErrnoCall(call string, errnoForm bool, goos, location string) string {
 	const interop = "global::System.Runtime.InteropServices."
 
 	var text strings.Builder
@@ -289,7 +319,7 @@ func cgoErrnoCall(call string, errnoForm bool, goos string) string {
 		// calling thread's, and one synchronous wrapper does not change threads. What remains: runtime code on this
 		// thread between the stub's return and the read could still touch the C runtime's errno; Phase 4's native shim
 		// closes that.
-		fmt.Fprintf(&text, "            nint errnoAddress = %s();\n", cgoErrnoLocation)
+		fmt.Fprintf(&text, "            nint errnoAddress = %s;\n", location)
 		fmt.Fprintf(&text, "            %sMarshal.WriteInt32(errnoAddress, 0);\n", interop)
 		fmt.Fprintf(&text, "            %s;\n", call)
 		fmt.Fprintf(&text, "            errno = %sMarshal.ReadInt32(errnoAddress);\n", interop)

@@ -363,4 +363,56 @@ public class CgoLibrariesTests
             }
         }
     }
+
+    // cgo Phase 4 (docs/phase4/DESIGN-cgo-phase4-sidebuild.md §2.6): the side-built library loads by an absolute path in
+    // the assembly's own directory and is read through its exported table. A planted copy of a system library stands
+    // in for the side library. Its export is a function, which is enough to prove the door reads an address by name.
+    private static string SideExport =>
+        OperatingSystem.IsWindows() ? "malloc" :
+        OperatingSystem.IsMacOS() ? "go2cs_probe_pair_sum" :
+        "cos";
+
+    [TestMethod]
+    public void TheSideTableLoadsFromTheAssemblyDirectoryAndReadsTheTableByName()
+    {
+        string name = ProbeFileName($"go2cssideprobe{Environment.ProcessId}");
+        string planted = Path.Combine(Path.GetDirectoryName(s_assembly.Location)!, name);
+
+        File.Copy(SystemLibraryFile(), planted, overwrite: true);
+
+        nint table = GoCgoLibraries.SideTable(s_assembly, name, SideExport);
+
+        Assert.AreNotEqual((nint)0, table, $"{name} in the assembly's directory exports {SideExport}");
+        nint expected = NativeLibrary.GetExport(NativeLibrary.Load(planted), SideExport);
+        Assert.AreEqual(expected, table, "the door answers the export's own address");
+    }
+
+    [TestMethod]
+    public void AMissingSideLibraryIsRefusedNamingIt()
+    {
+        string name = ProbeFileName("go2cssidemissing");
+
+        DllNotFoundException thrown = Assert.ThrowsException<DllNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, name, "go2cs_cgo_table_0"));
+
+        StringAssert.Contains(thrown.Message, name);
+        StringAssert.Contains(thrown.Message, "the current directory is never searched");
+    }
+
+    [TestMethod]
+    public void AMissingSideTableIsRefusedNamingIt()
+    {
+        string name = ProbeFileName($"go2cssidenotable{Environment.ProcessId}");
+
+        File.Copy(SystemLibraryFile(), Path.Combine(Path.GetDirectoryName(s_assembly.Location)!, name), overwrite: true);
+
+        EntryPointNotFoundException thrown = Assert.ThrowsException<EntryPointNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, name, "go2cs_cgo_table_none"));
+
+        StringAssert.Contains(thrown.Message, "go2cs_cgo_table_none");
+    }
+
+    [TestMethod]
+    public void ASideTableOfAnAssemblyWithNoBindingsIsRefused()
+    {
+        Assert.ThrowsException<InvalidOperationException>(() => GoCgoLibraries.SideTable(typeof(object).Assembly, ProbeFileName("go2cssidex"), "go2cs_cgo_table_0"));
+    }
 }

@@ -94,6 +94,50 @@ namespace go.golib;
         return new NativeBox<T>((nuint)address);
     }
 
+    /// <summary>
+    /// The address of the table <paramref name="symbol"/> that the side-built library <paramref name="file"/> exports, for
+    /// <paramref name="assembly"/>'s bindings (cgo Phase 4, docs/phase4/DESIGN-cgo-phase4-sidebuild.md §2.6): the
+    /// converter compiled the C a preamble defines into that library, and each slot of the table holds the address of
+    /// one name it defines. The library loads by an absolute path in the assembly's own directory, so the current
+    /// directory is never searched, and a missing file or table is refused by name. The bindings' target is held first,
+    /// as for every binding the assembly makes.
+    /// </summary>
+    public static nint SideTable(Assembly assembly, string file, string symbol)
+    {
+        if (!s_registered.TryGetValue(assembly, out Registration? registration))
+            throw new InvalidOperationException($"cgo: {assembly.GetName().Name} registered no C bindings, so its side-built library {file} is not loaded");
+
+        if (Refusal(registration.Target) is { } mismatch)
+            throw new GoCgoTargetMismatchException(mismatch);
+
+        // A single-file host has no assembly location (OQ-B, UNMEASURED): the application's base directory stands in.
+        string directory = assembly.Location.Length > 0 ? Path.GetDirectoryName(assembly.Location)! : AppContext.BaseDirectory;
+        string path = Path.GetFullPath(Path.Combine(directory, file));
+
+        if (!NativeLibrary.TryLoad(path, out nint handle))
+            throw new DllNotFoundException($"cgo: the side-built library {file}, which holds the C that {assembly.GetName().Name}'s cgo preambles define, was not found or did not load at {path}; it is a build output beside the assembly, and the current directory is never searched (docs/Limitations.md#cgo)");
+
+        if (!NativeLibrary.TryGetExport(handle, symbol, out nint table) || table == 0)
+            throw new EntryPointNotFoundException($"cgo: the side-built library {file} exports no table {symbol} (docs/Limitations.md#cgo)");
+
+        return table;
+    }
+
+    /// <summary>
+    /// A box over the C variable <paramref name="name"/> that a preamble defines, whose address is slot
+    /// <paramref name="slot"/> of the side-built table <paramref name="symbol"/> in <paramref name="file"/> (cgo Phase 4,
+    /// OQ-A): as <see cref="Variable{T}"/> does for an export, the box aliases the variable's address and owns no storage.
+    /// </summary>
+    public static unsafe ж<T> SideVariable<T>(Assembly assembly, string file, string symbol, int slot, string name)
+    {
+        nint address = ((nint*)SideTable(assembly, file, symbol))[slot];
+
+        if (address == 0)
+            throw new EntryPointNotFoundException($"cgo: C.{name}: slot {slot} of the side-built table {symbol} in {file} holds no address (docs/Limitations.md#cgo)");
+
+        return new NativeBox<T>((nuint)address);
+    }
+
     /// <summary>The running process's target, as Go names it: <c>GOOS/GOARCH</c>.</summary>
     internal static string RunningTarget => $"{GoHostOfRecord.HostGOOS()}/{GoHostOfRecord.GoArchOf(RuntimeInformation.ProcessArchitecture)}";
 
