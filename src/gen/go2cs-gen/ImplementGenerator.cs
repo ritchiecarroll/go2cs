@@ -335,7 +335,9 @@ public class ImplementGenerator : ISourceGenerator
                         GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
                         TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray()),
                         IsInaccessibleMarker = GetStampedScope(info.method) == "internal" &&
-                            !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly)
+                            !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly),
+                        // The forward goes to the wrapped interface's own member.
+                        ForwardTargetReachable = AssemblyReachable(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly)
                     })
                     .Distinct()
                     .ToList();
@@ -532,6 +534,60 @@ public class ImplementGenerator : ISourceGenerator
             Dictionary<string, string> multiEmbedHopPaths = embedHops.Count > 1
                 ? GetMultiEmbedHopPaths(context, syntaxContext.SemanticModel.Compilation, structType, embedHops)
                 : [];
+
+            // Each member internal to another assembly's interface (IsInaccessibleMarker) is promoted to the struct along
+            // one embed path. Record whether this assembly can reach the end of that path (ForwardTargetReachable): a stub
+            // stands in only where it cannot. The path is followed through this assembly's own structs, one embed per
+            // level, and ends at an embedded INTERFACE field (whose member is public in C# and dispatches to the value Go
+            // calls), or at a type from another assembly, reachable only when that assembly grants this one internals access
+            // (an internal, white-box test assembly through InternalsVisibleTo). A FOREIGN struct is itself the end of the
+            // path. Where a level has several embeds and none is known to provide the member, the answer is null (unknown).
+            {
+                IAssemblySymbol currentAssembly = syntaxContext.SemanticModel.Compilation.Assembly;
+                bool foreignWrapped = structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, currentAssembly);
+
+                bool? pathReachable(ITypeSymbol type, StructDeclarationSyntax? decl, Compilation? declCompilation, string member, int depth)
+                {
+                    if (GetEmbeddedInterfaceFieldMembers(type).Any(field => field.Members.Contains(member)))
+                        return true;
+
+                    List<(string Name, INamedTypeSymbol Type)> pointerEmbeds = StructDeclarationSyntaxExtensions.GetPointerEmbeds(type);
+                    List<INamedTypeSymbol> embeds = [.. pointerEmbeds.Select(embed => embed.Type)];
+
+                    if (decl is not null)
+                    {
+                        embeds.AddRange(decl.GetEmbeddedValueHopNames(declCompilation!)
+                            .Select(hop => ResolveValueEmbedType(type, hop.Name))
+                            .OfType<INamedTypeSymbol>());
+                    }
+
+                    INamedTypeSymbol? embed = null;
+
+                    if (depth == 0 && multiEmbedHopPaths.TryGetValue(member, out string? hopPath))
+                        embed = pointerEmbeds.FirstOrDefault(pointerEmbed => pointerEmbed.Name == hopPath.Split('.')[0]).Type;
+                    else if (embeds.Count == 1)
+                        embed = embeds[0];
+
+                    if (embed is null)
+                        return null;
+
+                    // Another assembly's struct: its own embedded interface field (lib's `T2 struct{ I }`) is public and
+                    // dispatches to the dynamic value, so it stays a forward (loud if it does not bind, never a stub).
+                    if (!SymbolEqualityComparer.Default.Equals(embed.ContainingAssembly, currentAssembly) || depth >= 4)
+                        return AssemblyReachable(embed.ContainingAssembly, currentAssembly) || GetEmbeddedInterfaceFieldMembers(embed).Any(field => field.Members.Contains(member));
+
+                    (StructDeclarationSyntax? embedDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embed.ToDisplayString());
+
+                    return pathReachable(embed, embedDecl, embedCompilation, member, depth + 1);
+                }
+
+                methods = methods.Select(method => !method.IsInaccessibleMarker ? method : method with
+                {
+                    ForwardTargetReachable = foreignWrapped
+                        ? AssemblyReachable(structType.ContainingAssembly, currentAssembly)
+                        : pathReachable(structType, structDecl, compilation, GetSimpleName(method.Name), 0)
+                }).ToList();
+            }
 
             // Hop-target methods that are direct-ж primaries bind on the box FIELD itself
             // (`this.File.Read(p)`) — deref'ing first strands the extension receiver (CS1929).
@@ -2354,6 +2410,10 @@ public class ImplementGenerator : ISourceGenerator
 
         return classes;
     }
+
+    // Whether code compiled into current can reach an internal member of assembly: its own, or one granting it access.
+    private static bool AssemblyReachable(IAssemblySymbol? assembly, IAssemblySymbol current) =>
+        assembly is not null && (SymbolEqualityComparer.Default.Equals(assembly, current) || assembly.GivesAccessTo(current));
 
     private static INamedTypeSymbol? ResolveValueEmbedType(ITypeSymbol structType, string embedName) =>
         structType.GetMembers(embedName)

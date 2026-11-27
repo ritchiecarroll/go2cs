@@ -164,7 +164,9 @@ internal class AdapterImplTemplate : TemplateBase
                 // from outside its package — satisfy the required member with a no-op / default stub.
                 // Not when the member is bound through an embedded interface FIELD: the field's own
                 // value implements it, and the stub would answer a zero value where Go calls that method.
-                if (method.IsInaccessibleMarker && InterfaceFieldForwards?.Contains(forwardName) != true)
+                // Nor when the member's embed path ends at a type this assembly can reach (ForwardTargetReachable):
+                // an internal test assembly reaches production's internals, and a forward exists there.
+                if (method.IsInaccessibleMarker && method.ForwardTargetReachable != true && InterfaceFieldForwards?.Contains(forwardName) != true)
                 {
                     result.Append($"{method.ReturnType} {method.GetSignature()}{(method.ReturnType == "void" ? " { }" : " => default!;")}");
                     continue;
