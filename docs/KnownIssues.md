@@ -720,6 +720,39 @@ Under Native AOT, `runtime.Caller` reports line 0 instead of the call's line, me
 name it reports matches Go. Neither route above applies to a Native AOT program, so for Go's lines run the program
 under the JIT with one of them.
 
+## Another package's unexported interface method, met through an embedded struct, is refused {#another-packages-unexported-interface-method-met-through-an-embedded-struct-is-refused}
+
+**Symptom.** Converting a package stops with error `GO2CS2016` at a conversion such as `lib.CallM(u)` or
+`var j J = U{}`, where `U` embeds a struct from another package (`type U struct{ lib.T }`) and the interface declares
+an unexported method of that package (`lib.I` with `m()`).
+
+**Cause.** Go names an unexported method by its package, so `U` can hold two methods `m`: `lib.T`'s, promoted, and one
+`U` declares itself. `lib.I` is met by `lib.T`'s. A converted interface adapter maps a method by its name alone, so it
+would call `U`'s own `m` (the program would print `main.m` where Go prints `lib.m`), and without one it cannot call
+`lib.T`'s, which is internal to `lib`'s assembly. go2cs refuses the conversion rather than produce either. It cannot be
+downgraded with `-warn`. Promotion through an embedded interface field (`type U struct{ lib.I }`) converts and calls
+the right method, and so does any interface whose methods are all exported.
+
+**Workaround.** Give the type a method of its own that forwards to the embedded value through an exported method of
+`lib`, or pass the embedded value itself (`lib.CallM(u.T)`).
+
+The same mix-up reaches a type assertion, which the refusal cannot see because it is decided when the program runs:
+a value that meets another package's unexported method only through an embedded struct reads false where Go reads
+true. `net.Buffers.WriteTo`'s `w.(buffersWriter)` is one: for a type that embeds `*net.TCPConn`, Go uses the
+connection's vectored write and the converted program takes the plain write loop. The bytes written are the same.
+
+The refusal is new on the master branch. go2cs 1.26.11.1 converts the conversion and calls the wrong method, or fails
+to build with CS1929.
+<!-- 2026-11-27 (P4, .5 seat, COORD 041242Z, ruled 042410Z). Census before the cut (go/types, every named type whose
+     method set meets an interface's unexported method through a method of another package): std production + tests on
+     linux, windows and darwin, 4 pairs, of which the one RECORDED conversion is crypto/internal/rand's reader ->
+     drbg.DefaultReader through an INTERFACE field (correct, not refused); the behavioral corpus, 14 pairs, 0 recorded
+     through a struct embed. The refusal: src/go2cs/foreignUnexportedPromotionRefusal.go. The full fix (the promotion
+     path in the GoImplement record and a hidden accessor in lib) is post-.5 and G's. The bytes-written claim for
+     net.Buffers.WriteTo: its fallback loop writes each buffer in order (net.go). The false assertion is read from the
+     emission (no adapter for the pair implements buffersWriter; the test package records only testMockTCPConn -> net.Conn),
+     not from a run. -->
+
 ## Issues in older versions {#issues-in-older-versions}
 
 These issues affect only go2cs and `go.*` releases before 1.26.11.1. Each entry names the release that fixed it.
