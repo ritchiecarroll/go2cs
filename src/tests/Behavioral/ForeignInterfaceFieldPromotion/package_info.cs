@@ -36,11 +36,14 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<D, go.ForeignInterfaceFieldPromotion.lib_package.I>(Pointer = true)]
+[assembly: GoImplement<D, go.ForeignInterfaceFieldPromotion.lib_package.I>]
 [assembly: GoImplement<R, go.ForeignInterfaceFieldPromotion.lib_package.Sentinel>(Promoted = true)]
 [assembly: GoImplement<R, go.ForeignInterfaceFieldPromotion.lib_package.Sentinel>]
 [assembly: GoImplement<S, go.ForeignInterfaceFieldPromotion.lib_package.I>(Pointer = true)]
 [assembly: GoImplement<S, go.ForeignInterfaceFieldPromotion.lib_package.I>(Promoted = true)]
 [assembly: GoImplement<S, go.ForeignInterfaceFieldPromotion.lib_package.I>]
+[assembly: GoImplement<W, go.ForeignInterfaceFieldPromotion.lib_package.I>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -54,7 +57,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABEwgoKUgpSCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABk8goKUgpSClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -70,8 +73,10 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial struct D {}
     public partial struct R {}
     public partial struct S {}
+    public partial struct W {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

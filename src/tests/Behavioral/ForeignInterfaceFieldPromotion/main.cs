@@ -11,6 +11,14 @@ partial struct S {
     internal @string label;
 }
 
+partial struct W {
+    /*embed*/ public ForeignInterfaceFieldPromotion.lib_package.I I;
+}
+
+partial struct D {
+    /*embed*/ public W W;
+}
+
 partial struct R {
     /*embed*/ public ForeignInterfaceFieldPromotion.lib_package.Sentinel Sentinel;
 }
@@ -21,6 +29,9 @@ internal static void main() {
 
     lib.I p = new SжI(Ꮡ(new S(I: lib.New("p"))));
     fmt.Println(lib.CallM(p), p.Name());
+
+    fmt.Println(lib.CallM(new D(new W(lib.New("d")))));
+    fmt.Println(lib.CallM(new DжI(Ꮡ(new D(new W(lib.New("pd")))))));
 
     lib.Sentinel sentinel = new R(lib.Mark);
     fmt.Println(sentinel != nil, lib.IsMarked(sentinel));
