@@ -31,6 +31,8 @@ import (
 //     SetProcessValidCallTargets for offset 0 only.
 //   - invalid:    VirtualAlloc(PAGE_EXECUTE_READ | PAGE_TARGETS_INVALID), VirtualProtect(PAGE_READWRITE), write,
 //     VirtualProtect(PAGE_EXECUTE_READ | PAGE_TARGETS_NO_UPDATE), then SetProcessValidCallTargets for offset 0 only.
+//   - both:       rw-narrow with offsets 0 and 16 marked. Recorded, not asserted: whether SetProcessValidCallTargets
+//     takes effect at all.
 //
 // In every arm page+0 must be callable. In a narrowed arm a call to page+16 must end the process with the CFG fast
 // fail (STATUS_STACK_BUFFER_OVERRUN). The row reads NOT MEASURED where the C compiler cannot build with CFG
@@ -61,7 +63,8 @@ int main(int argc, char **argv) {
 
     if (get_policy == NULL || !get_policy(GetCurrentProcess(), 7 /* ProcessControlFlowGuardPolicy */, &policy, sizeof policy)) fail("GetProcessMitigationPolicy");
     printf("cfg: %lu\n", policy & 1);
-    if ((policy & 1) == 0) { fflush(stdout); return 2; }
+    fflush(stdout);
+    if ((policy & 1) == 0) return 2;
 
     GetSystemInfo(&si);
 
@@ -80,10 +83,16 @@ int main(int argc, char **argv) {
 
     if (!VirtualProtect(page, si.dwPageSize, PAGE_EXECUTE_READ | (narrow ? GO2CS_TARGETS : 0), &old)) fail("VirtualProtect-rx");
     FlushInstructionCache(GetCurrentProcess(), page, si.dwPageSize);
+    printf("protected: %p\n", (void *)page);
+    fflush(stdout);
 
     if (narrow) {
-        go2cs_cfg_target target = { 0, 1 /* CFG_CALL_TARGET_VALID */ };
-        if (set_targets == NULL || !set_targets(GetCurrentProcess(), page, si.dwPageSize, 1, &target)) fail("SetProcessValidCallTargets");
+        /* "both" marks offset 16 too: the instrument's check that SetProcessValidCallTargets takes effect */
+        go2cs_cfg_target targets[2] = { { 0, 1 /* CFG_CALL_TARGET_VALID */ }, { 16, 1 } };
+        ULONG count = strcmp(arm, "both") == 0 ? 2 : 1;
+        if (set_targets == NULL || !set_targets(GetCurrentProcess(), page, si.dwPageSize, count, targets)) fail("SetProcessValidCallTargets");
+        printf("targets: %lu, flags %llu\n", count, (unsigned long long)targets[0].Flags);
+        fflush(stdout);
     }
 
     entry = (go2cs_entry)page;
