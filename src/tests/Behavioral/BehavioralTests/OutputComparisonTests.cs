@@ -1529,6 +1529,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
+    public void CheckMnWaitGroup() => CheckTarget("MnWaitGroup");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
