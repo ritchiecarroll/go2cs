@@ -1090,7 +1090,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		return err
 	}
 
-	writeTestsHostBuildFiles(outputPath, options)
+	writeTestsHostBuildFiles(inputPath, outputPath, options)
 
 	sources, err := classifyTestSources(inputPath, includedSources, compileExcluded, handOwnHostExcluded, external)
 	if err != nil {
@@ -8232,7 +8232,10 @@ func testHostDeadlineEnv(options Options) string {
 // testHostModuleEnv hands a NON-standard-library package's host the root of the module it belongs to,
 // as GO2CS_MODULE_ROOT (PackageAncestry.ModuleRootEnvironmentVariable): the host stages a COPY of that
 // module tree so a test reads ../test/key.pem or ../go.mod as `go test` lets it. Through the
-// environment, never the emitted host, so no machine path lands in emitted output. A standard-library
+// environment, never the emitted host, so no machine path lands in emitted output; the build files
+// beside a host converted outside a go2cs root also record these values for a by-hand run, but only
+// as paths relative to that file, and only when testsHostRecordableModulePath finds no machine path
+// in them (the T17 seat, P3 194127Z). A standard-library
 // package gets nothing -- it sits under $GOROOT/src/go.mod (`module std`), which the GOROOT ancestry
 // already mirrors -- and so does a directory with no go.mod above it. A module-cache release that ships
 // no go.mod also hands over the go.mod `go` reads for it (goModFile), as GO2CS_MODULE_GOMOD

@@ -289,10 +289,12 @@ public static class TestHost
                 // with no root it refuses, through the infrastructure-error path below, and a copy that
                 // fails part-way throws from TryStageModule the same way. GO2CS_MODULE_ROOT=none runs
                 // unstaged on purpose, and says so.
+                string? stagingRoot = ModuleRootForStaging(registry, out bool rootRecorded);
+
                 bool moduleStaged = PackageAncestry.TryStageModule(
-                    ModuleRootForStaging(registry),
+                    stagingRoot,
                     registry.ModulePath, registry.Package, runRoot, workingDirectory,
-                    Environment.GetEnvironmentVariable(PackageAncestry.ModuleGoModEnvironmentVariable));
+                    PackageAncestry.ResolveModuleGoMod(rootRecorded));
 
                 if (moduleStaged)
                     RegisterModuleSourceRemap(runRoot, registry.ModulePath);
@@ -667,7 +669,7 @@ public static class TestHost
     // answers the cache path, as every host did before.
     private static void RegisterModuleSourceRemap(string runRoot, string modulePath)
     {
-        string? moduleRoot = Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable);
+        string? moduleRoot = PackageAncestry.ResolveModuleRoot(out _);
 
         if (string.IsNullOrWhiteSpace(moduleRoot) || PackageAncestry.IsModuleRootNone(moduleRoot) || string.IsNullOrEmpty(modulePath))
             return;
@@ -687,9 +689,13 @@ public static class TestHost
     // pipeline never passes `none`, since that stderr line is part of what the comparison reads. With a root set, a
     // package outside the module or a root that is not a module refuses as well, naming which (ModuleStagingRefusal).
     // A standard-library host has no module and is unchanged.
-    private static string? ModuleRootForStaging(TestRegistry registry)
+    //
+    // A by-hand run of a host converted outside a go2cs root needs no variable: the conversion records the module's
+    // directory in the build files beside the host, the SDK carries it into the runtimeconfig, and it is read only when
+    // the variable is unset (PackageAncestry.ResolveModuleRoot). A refusal on a recorded root says where it came from.
+    private static string? ModuleRootForStaging(TestRegistry registry, out bool recorded)
     {
-        string? moduleRoot = Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable);
+        string? moduleRoot = PackageAncestry.ResolveModuleRoot(out recorded);
 
         if (string.IsNullOrEmpty(registry.ModulePath))
             return moduleRoot;
@@ -711,10 +717,13 @@ public static class TestHost
 
         // With a root set, TryStageModule's "nothing to stage" answers are refusals too, naming the precondition.
         string? refusal = PackageAncestry.ModuleStagingRefusal(moduleRoot, registry.ModulePath, registry.Package,
-            Environment.GetEnvironmentVariable(PackageAncestry.ModuleGoModEnvironmentVariable));
+            PackageAncestry.ResolveModuleGoMod(recorded));
 
         if (refusal is not null)
-            throw new InvalidOperationException(refusal);
+            throw new InvalidOperationException(recorded
+                ? $"{refusal} (the module root was recorded when the host was converted; set {PackageAncestry.ModuleRootEnvironmentVariable} " +
+                  $"to the module's directory to override it)"
+                : refusal);
 
         return moduleRoot;
     }
