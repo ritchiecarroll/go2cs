@@ -12,7 +12,8 @@
 
       rids       the -Cgo RID map is the release's whole map, osx-arm64 included, and no RID is excluded
       compilers  each flavor's C compiler is the pinned zig with that flavor's target, and the pin is .github's
-      statement  the pack's statement names the packed RIDs, the exclusion and the remedy (-r)
+      statement  the pack's statement names the packed RIDs and the remedy (-r); with a non-empty exclusion map (a
+                 self-test one) the map, the statement and the guard's message all leave that RID out, with its reason
       guard      a consumer of a probe pack: -r <unpacked RID> and a portable build on an unpacked host both fail with
                  NUGETGOCGO001 by name; -r <packed RID> builds; a pack that carries the host's RID builds portably
                  with the SAME guard (it reads the set from the pack). Needs dotnet.
@@ -73,6 +74,18 @@ $statement = Get-NugetgoCgoStatement -PackageId 'nugetgo.example.cgo'
 foreach ($rid in @($cgo.Keys) + @($excluded.Keys) + @('NUGETGOCGO001', '-r ', 'reference assemblies', 'linux-musl', 'run-time target check')) {
     Check "the statement names $rid" ($statement.Contains($rid)) $statement
 }
+
+Check 'with no exclusion the statement says no RID is not packed' (-not $statement.Contains('is not packed')) $statement
+# The exclusion paths, read with a self-test map since the module's own is empty (P3's read of the cgo arm, NIT 3). Not
+# reached by any suite: nugetgo-pack.ps1's refusal of a -RecurseRoot converted for an excluded RID.
+$fake = [ordered]@{ 'osx-arm64' = 'a self-test reason' }
+$fakeMap = Get-NugetgoCgoRidFlavors -Excluded $fake
+Check 'an excluded RID leaves the -Cgo map, and only it' ((@($fakeMap.Keys) -join ',') -ceq 'win-x64,linux-x64,osx-x64,linux-arm64') "got $(@($fakeMap.Keys) -join ',')"
+$fakeStatement = Get-NugetgoCgoStatement -PackageId 'nugetgo.example.cgo' -Excluded $fake
+Check 'the statement names the excluded RID with its reason, and packs only the rest' ($fakeStatement.Contains('osx-arm64 is not packed: a self-test reason.') -and $fakeStatement.Contains('for win-x64, linux-x64, osx-x64 and linux-arm64 only')) $fakeStatement
+$fakeGuard = New-NugetgoCgoRidGuard -PackageId 'nugetgo.example.cgo' -Excluded $fake
+Check 'the guard''s message names the excluded RID with its reason' ($fakeGuard.Contains('osx-arm64 is not packed: a self-test reason.')) $fakeGuard
+Check 'and with no exclusion it names none' (-not (New-NugetgoCgoRidGuard -PackageId 'nugetgo.example.cgo').Contains('is not packed')) 'the guard names an exclusion'
 
 Write-Host 'A6''s floor: the push lift (COORD''s ruling (a))'
 $treeTargets = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/core/golib/buildTransitive/go.lib.targets'))

@@ -20,9 +20,9 @@ import (
 
 // THE -Cgo PACK'S SUITE ON A HOSTED RUNNER (cgo against go.*, INC 2b; COORD's ruling on condition 2: "Read both on a
 // hosted osx-arm64 leg"). src/tools/nugetgo/Test-NugetgoCgo.ps1 builds a probe pack that never carries the host's RID
-// and reads the RID guard and the reference-only lib/ against it. On osx-arm64, which a -Cgo pack leaves out by name,
-// its arms ARE condition 2: a consumer build fails with NUGETGOCGO001, and a portable build made for a packed host fails
-// at load there. The converter-cgo stage runs this package's tests only, on every runner of a GOOS (macos-15 is
+// and reads the RID guard and the reference-only lib/ against it, the host standing in for an unpacked RID: a consumer
+// build fails with NUGETGOCGO001, and a portable build made for a packed host fails at load there. Until the cgo arm
+// (2026-11-28) a -Cgo pack left osx-arm64 out by name, so on that leg the arms WERE condition 2. The converter-cgo stage runs this package's tests only, on every runner of a GOOS (macos-15 is
 // osx-arm64), so the suite is run from here on a leg that sets GO2CS_REQUIRE_DOTNET=1. Everywhere else the plain
 // `go test ./...` already runs it, with every nugetgo suite (internal/repoguard TestNugetgoSuitesPass).
 func TestNugetgoCgoPackSuiteOnThisHost(t *testing.T) {

@@ -23,7 +23,8 @@
 #     and, since D6 of DESIGN-darwin-arm64-flavour.md, darwin/arm64, never its x64 twin's). The release's
 #     own comment block above $ridFlavors says why lib/ and not ref/, and why both Mac folders ship explicitly.
 #
-# A pack that ships a subset of the RIDs (a -Cgo pack leaves osx-arm64 out by name, NugetgoCgo.psm1) passes its own
+# A pack that ships a subset of the RIDs (a -Cgo pack leaves out the RIDs NugetgoCgo.psm1 excludes; none since the cgo
+# arm, when osx-arm64 joined) passes its own
 # map as -RidFlavors to every function here, so it converts, measures and describes exactly the flavors it ships.
 #
 # The RID map is the release's, and Test-NugetgoFlavors.ps1 reads push-nuget.ps1 to hold it so.

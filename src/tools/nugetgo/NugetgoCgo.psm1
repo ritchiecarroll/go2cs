@@ -55,9 +55,11 @@ function Get-NugetgoCgoExcludedRids {
     [ordered]@{}
 }
 
-# The release's RID map less the exclusions, in its order: the RIDs a -Cgo pack carries.
+# The release's RID map less the exclusions, in its order: the RIDs a -Cgo pack carries. -Excluded is for the self-test,
+# which reads the exclusion paths with a non-empty map; the pack always takes the module's own.
 function Get-NugetgoCgoRidFlavors {
-    $excluded = Get-NugetgoCgoExcludedRids
+    param($Excluded = (Get-NugetgoCgoExcludedRids))
+    $excluded = $Excluded
     $all = Get-NugetgoRidFlavors
     $map = [ordered]@{}
     foreach ($rid in $all.Keys) { if (-not $excluded.Contains($rid)) { $map[$rid] = $all[$rid] } }
@@ -93,9 +95,9 @@ function Join-NugetgoCgoList([string[]]$Items) {
 
 # What the pack states about its RIDs: VALIDATION.md carries it as a quoted paragraph, and the self-description as
 # comment lines.
-function Get-NugetgoCgoStatement([Parameter(Mandatory)][string]$PackageId) {
-    $excluded = Get-NugetgoCgoExcludedRids
-    $packed = @((Get-NugetgoCgoRidFlavors).Keys)
+function Get-NugetgoCgoStatement([Parameter(Mandatory)][string]$PackageId, $Excluded = (Get-NugetgoCgoExcludedRids)) {
+    $excluded = $Excluded
+    $packed = @((Get-NugetgoCgoRidFlavors -Excluded $excluded).Keys)
     $out = "Cgo: $PackageId converts a Go cgo package, whose C binding is per target. It carries assemblies for $(Join-NugetgoCgoList $packed) only."
     foreach ($rid in $excluded.Keys) { $out += " $rid is not packed: $($excluded[$rid])." }
     $out += " A build for any other RID fails with NUGETGOCGO001. A portable build (no -r) is checked against the .NET SDK's own RID, so on a host the package does not carry it is refused even when it will run elsewhere: build with -r and one of the packed RIDs."
@@ -105,9 +107,9 @@ function Get-NugetgoCgoStatement([Parameter(Mandatory)][string]$PackageId) {
 }
 
 # build/<id>.targets. Every name is suffixed with the package id, so two -Cgo packages in one build keep their own target.
-function New-NugetgoCgoRidGuard([Parameter(Mandatory)][string]$PackageId) {
+function New-NugetgoCgoRidGuard([Parameter(Mandatory)][string]$PackageId, $Excluded = (Get-NugetgoCgoExcludedRids)) {
     $key = $PackageId -replace '[^A-Za-z0-9_]', '_'
-    $excluded = Get-NugetgoCgoExcludedRids
+    $excluded = $Excluded
     $note = (@($excluded.Keys | ForEach-Object { "$_ is not packed: $($excluded[$_])." }) -join ' ')
     # MSBuild's escapes first, then XML's: an XML entity's ';' must reach the parser as written.
     $esc = { param($s) [System.Security.SecurityElement]::Escape(($s -replace '%', '%25' -replace '\$', '%24' -replace '@', '%40' -replace ';', '%3B')) }

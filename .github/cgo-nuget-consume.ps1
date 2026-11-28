@@ -153,7 +153,8 @@ if ($Rid -ceq 'osx-arm64') {
     # refusal (NU3xxx) would be the restore failing first.
     $line = @($build -split "`n" | Where-Object { $_.Contains('NUGETGOCGO001') } | Select-Object -First 1)
     $line = if ($line.Count) { $line[0].Trim() } else { '' }
-    if ($refused.Exit -ne 0 -and $line -and $line.Contains('osx-arm64') -and $build -notmatch '\bNU3\d{3}\b') {
+    # The guard's own wording (NugetgoCgo.psm1): the line also carries file paths, so a bare RID match could pass on them.
+    if ($refused.Exit -ne 0 -and $line -and $line.Contains('this build is for osx-arm64') -and $build -notmatch '\bNU3\d{3}\b') {
         Reading "R-b PASS: the copy without runtimes/osx-arm64 restored and its build is refused: $line"
     }
     else { Failure "R-b: the copy without runtimes/osx-arm64 was not refused with NUGETGOCGO001 naming osx-arm64 (row exit $($refused.Exit), refusal line '$line'; see $($refused.Log))" }

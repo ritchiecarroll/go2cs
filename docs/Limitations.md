@@ -378,10 +378,7 @@ package refuses its C bindings on any other: when the package loads, before any 
 conversion builds against a go2cs clone (`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's
 cgo packages convert with the module, and under `-recurse=nuget -cgo` they reference the `go.*` packages. A module
 with a cgo package packs for publishing as a package for each of `win-x64`, `linux-x64`, `osx-x64`, `linux-arm64`
-and `osx-arm64`, each with its own C binding.
-<!-- 2026-11-28 (P5, the cgo arm on claude/p5-cgo-osx-arm64, stacked on D6 of DESIGN-darwin-arm64-flavour.md): osx-arm64
-     joins the -Cgo pack with its own darwin/arm64 flavor (zig aarch64-macos), read by cgo-nuget-e2e's J3 osx-arm64 leg.
-     Before it: "`osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64` build." --> Such a package is
+and `osx-arm64`, each with its own C binding. Such a package is
 published only against a `go.lib` that carries the load-time target check, which the go.* 1.26.11.1 packages do not.
 The standard library itself is converted with `CGO_ENABLED=0`, and a module converted with `-recurse -cgo` uses it as
 it is. So a package that imports `net` or `os/user` gets their builds without cgo, the ones Go itself uses with

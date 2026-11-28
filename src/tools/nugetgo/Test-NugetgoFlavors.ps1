@@ -66,7 +66,7 @@ $noFlavor = $null
 try { Get-NugetgoFlavorDecision -Assemblies ([ordered]@{ 'windows/amd64' = @{ 'App.dll' = $alpha }; 'linux/amd64' = @{ 'App.dll' = $alpha }; 'darwin/amd64' = @{ 'App.dll' = $alpha }; 'linux/arm64' = @{ 'App.dll' = $alpha } }) -ProofFlavor 'linux/amd64' | Out-Null }
 catch { $noFlavor = $_.Exception.Message }
 Check 'a missing flavor is refused, never read as neutral' ($noFlavor -like '*darwin/arm64*') "got: $noFlavor"
-# A pack that ships a subset of the RIDs (a -Cgo pack leaves osx-arm64 out by name) measures the subset's flavors and no
+# A pack that ships a subset of the RIDs (a -Cgo pack with an exclusion; osx-arm64 was one until the cgo arm) measures the subset's flavors and no
 # others: every flavor function takes the pack's own -RidFlavors, so a flavor the pack does not ship is never converted.
 $subset = [ordered]@{}; foreach ($rid in $rids.Keys) { if ($rid -cne 'osx-arm64') { $subset[$rid] = $rids[$rid] } }
 Check 'a subset map''s flavors are its own, in its order' ((@(Get-NugetgoFlavors -RidFlavors $subset) -join ',') -ceq 'windows/amd64,linux/amd64,darwin/amd64,linux/arm64') "got $(@(Get-NugetgoFlavors -RidFlavors $subset) -join ',')"
