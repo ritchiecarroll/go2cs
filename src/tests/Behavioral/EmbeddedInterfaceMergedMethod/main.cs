@@ -71,7 +71,7 @@ partial interface OwnHost :
     PrinterHost,
     SpecifierHost
 {
-    @string Ref(Path p);
+    new @string Ref(Path p);
 }
 
 partial interface Big {

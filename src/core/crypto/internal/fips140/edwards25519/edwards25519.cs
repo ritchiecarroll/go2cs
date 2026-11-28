@@ -65,7 +65,6 @@ internal static ж<projP2> Zero⁔(/*this*/ ж<projP2> Ꮡv) {
 
 // identity is the point at infinity.
 internal static ж<Point> identity;
-internal static error _ᴛ1ʗ;
 internal static void initᴛidentity() { identity = @new<Point>().SetBytes([
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).Item1; }
@@ -78,7 +77,6 @@ public static ж<Point> NewIdentityPoint() {
 // generator is the canonical curve basepoint. See TestGenerator for the
 // correspondence of this encoding with the values in RFC 8032.
 internal static ж<Point> generator;
-internal static error _ᴛ2ʗ;
 internal static void initᴛgenerator() { generator = @new<Point>().SetBytes([
     0x58, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66,
     0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66,
@@ -247,7 +245,6 @@ internal static ж<field.Element> d = @new<field.Element>().SetBytes([
     0xab, 0xd8, 0x41, 0x41, 0x4d, 0x0a, 0x70, 0x00,
     0x98, 0xe8, 0x79, 0x77, 0x79, 0x40, 0xc7, 0x8c,
     0x73, 0xfe, 0x6f, 0x2b, 0xee, 0x6c, 0x03, 0x52]).Item1;
-internal static error _ᴛ3ʗ;
 internal static ж<field.Element> d2 = @new<field.Element>().Add(d, d);
 
 internal static ж<projCached> FromP3⁔(/*this*/ ж<projCached> Ꮡv, ж<Point> p) {

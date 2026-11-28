@@ -95,11 +95,11 @@ internal static (uintptr declared, uintptr assigned, uintptr highByte) nativeWid
     uintptr assigned = default;
     uintptr highByte = default;
 
-    uintptr word = (nuint)0x0102030405060708UL;
+    uintptr word = unchecked((nuint)0x0102030405060708UL);
     declared = word;
     highByte = word >> 56;
 
-    word = (nuint)0x7fedcba987654321UL;
+    word = unchecked((nuint)0x7fedcba987654321UL);
     assigned = word;
 
     return (declared, assigned, highByte);

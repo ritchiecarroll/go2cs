@@ -456,7 +456,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 	// root's treatment in convBinaryExpr, and the ONLY place the cast can go: go/types types just
 	// the unary node and leaves its constant operand untyped (see widenedConstExprCastType).
 	if castType := v.widenedConstExprCastType(unaryExpr); castType != "" && !wholeExprIsCastOfType(core, castType) {
-		return "(" + castType + ")(" + core + ")"
+		return uncheckedIfBeyond32Bit(castType, core, nativeIntCastBeyond32Bit(castType, v.info.Types[unaryExpr].Value))
 	}
 
 	// A NON-constant narrow-integer result whose consumer is not wrap-invariant narrows itself back
@@ -1381,7 +1381,8 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 								}
 
 								if basic.Kind() == types.Int {
-									return fmt.Sprintf("((nint)(%sL))", negated)
+									// Beyond int32 by construction, so unchecked (CS8778).
+									return fmt.Sprintf("unchecked((nint)(%sL))", negated)
 								}
 							}
 						}

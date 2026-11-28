@@ -90,7 +90,7 @@ partial interface certificate :
     CrossPkgLib.Rated,
     CrossPkgLib.Sealed
 {
-    @string Label();
+    new @string Label();
     nint Serial();
 }
 

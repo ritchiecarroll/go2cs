@@ -63,6 +63,9 @@ var label = "lbl"
 
 // Control: no dependency on any package var, so the inline holder emission stays.
 var whole, rest = splitPair()
+
+// Inline (order-safe) spec with a blank: the blank gets no field either.
+var gamma, _ = splitPair()
 `)
 
 	goRoot := build.Default.GOROOT
@@ -126,13 +129,13 @@ var whole, rest = splitPair()
 	tupleLocal := "tuple" + TempVarMarker + "1" + CapturedVarMarker
 	blankOne := "_" + TempVarMarker + "1" + CapturedVarMarker
 	blankTwo := "_" + TempVarMarker + "2" + CapturedVarMarker
+	blankThree := "_" + TempVarMarker + "3" + CapturedVarMarker
 	controlHolder := "tuple" + TempVarMarker + "2" + CapturedVarMarker
 
-	// Sub-shape 1 — one non-blank name: every field bare (the blank keeps its uninitialized
-	// field), the init method assigns the component directly from the once-run call.
+	// Sub-shape 1 — one non-blank name: every non-blank field bare, the init method assigns the
+	// component directly from the once-run call.
 	for _, want := range []string{
 		"internal static nint alpha;",
-		"internal static error " + blankOne + ";",
 		"internal static void " + initAlpha + "() { alpha = makePair().Item1; }",
 	} {
 		if !strings.Contains(varsCs, want) {
@@ -145,7 +148,6 @@ var whole, rest = splitPair()
 	for _, want := range []string{
 		"internal static nint left;",
 		"internal static @string right;",
-		"internal static error " + blankTwo + ";",
 		"internal static void " + initLeft + "() { var " + tupleLocal + " = makeTriple(); left = " + tupleLocal + ".Item1; right = " + tupleLocal + ".Item2; }",
 	} {
 		if !strings.Contains(varsCs, want) {
@@ -163,6 +165,19 @@ var whole, rest = splitPair()
 		if strings.Contains(varsCs, reject) {
 			t.Errorf("moved tuple spec still emits an inline field initializer %q:\n%s", reject, varsCs)
 		}
+	}
+
+	// A blank tuple component has no storage in Go and nothing in the C# reads or writes it, so no
+	// field is emitted for it on either path: an uninitialized, never-assigned field is exactly
+	// what C# reports as CS0649. The temp counter still advances, so later names do not shift.
+	for _, blank := range []string{blankOne, blankTwo, blankThree} {
+		if strings.Contains(varsCs, blank) {
+			t.Errorf("a blank tuple component still emits a field %q:\n%s", blank, varsCs)
+		}
+	}
+
+	if want := "internal static nint gamma = splitPair().Item1;"; !strings.Contains(varsCs, want) {
+		t.Errorf("inline tuple spec with a blank lost %q:\n%s", want, varsCs)
 	}
 
 	// Control: the order-safe spec keeps the existing inline emission — a hidden once-evaluated

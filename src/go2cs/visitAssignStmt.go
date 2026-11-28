@@ -1946,6 +1946,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				result.WriteString(fmt.Sprintf("(%s)(", binaryTypeName))
 			}
 
+			// A native-int constant cast beyond 32 bits goes in unchecked(...) (CS8778).
+			narrowUnchecked := len(narrowCastType) > 0 && nativeIntCastBeyond32Bit(narrowCastType, v.info.Types[rhs].Value)
+
+			if narrowUnchecked {
+				result.WriteString("unchecked(")
+			}
+
 			if len(narrowCastType) > 0 {
 				result.WriteString(fmt.Sprintf("(%s)(", narrowCastType))
 			}
@@ -1957,6 +1964,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			if len(narrowCastType) > 0 {
+				result.WriteRune(')')
+			}
+
+			if narrowUnchecked {
 				result.WriteRune(')')
 			}
 

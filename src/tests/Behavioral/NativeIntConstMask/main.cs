@@ -10,7 +10,7 @@ internal static uintptr blockSize => 16;
 internal static uintptr low(uintptr i) { return (uintptr)(i & (uintptr)((1 << (int)(shift)) - 1)); }
 internal static uintptr align(uintptr i) { return (uintptr)(i & ~(uintptr)(blockSize - 1)); }
 
-internal static uintptr maskAddr(uintptr i) { return (uintptr)(i & (uintptr)(nuint)0x00ffffffffffUL); }
+internal static uintptr maskAddr(uintptr i) { return (uintptr)(i & (uintptr)unchecked((nuint)0x00ffffffffffUL)); }
 
 internal static uintptr alignSmall(uintptr i) { return (uintptr)(i & ~(uintptr)15); }
 

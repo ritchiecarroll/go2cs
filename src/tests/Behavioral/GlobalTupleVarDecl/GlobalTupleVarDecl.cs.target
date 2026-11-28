@@ -18,7 +18,6 @@ internal static (nint, @string) pair() {
 }
 
 internal static ж<box> defaultBox = makeBox(7).Item1;
-internal static error _ᴛ1ʗ;
 
 internal static (nint, @string) tupleᴛ1ʗ = pair();
 internal static nint n = tupleᴛ1ʗ.Item1;

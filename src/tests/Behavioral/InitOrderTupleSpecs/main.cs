@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static @string single;
-internal static error _ᴛ1ʗ;
 internal static void initᴛsingle() { single = makeGreeting().Item1; }
 
 internal static @string cwd;
@@ -13,7 +12,6 @@ internal static error cwdErr;
 internal static void initᴛcwd() { var tupleᴛ1ʗ = fakeGetwd(); cwd = tupleᴛ1ʗ.Item1; cwdErr = tupleᴛ1ʗ.Item2; }
 
 internal static @string head;
-internal static nint _ᴛ2ʗ;
 internal static @string tail;
 internal static void initᴛhead() { var tupleᴛ2ʗ = makeTrio(); head = tupleᴛ2ʗ.Item1; tail = tupleᴛ2ʗ.Item3; }
 
@@ -22,7 +20,6 @@ internal static void initᴛchained() { chained = single + "?"u8; }
 
 internal static readonly ж<@string> Ꮡboxed = new StaticBox<@string>(default(@string));
 internal static ref @string boxed => ref ((StaticBox<@string>)Ꮡboxed).ValueSlot;
-internal static error _ᴛ3ʗ;
 internal static void initᴛboxed() { boxed = makeGreeting().Item1; }
 
 internal static @string prefix = "go";

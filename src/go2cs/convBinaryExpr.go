@@ -1251,6 +1251,34 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 // either way — wholeExprIsCastOfType peels an `unchecked(` wrapper, so the enclosing redundancy
 // guards still recognize the cast and do not re-wrap it — and an in-range fold stays
 // byte-identical to the pre-fix emission.
+// nativeIntCastBeyond32Bit reports whether a constant cast to the C# native integer csType falls
+// outside what that type holds on a 32-bit host. C# checks a constant conversion to nint/nuint as
+// if the host could be 32-bit and reports CS8778; go2cs targets are 64-bit, so the value is exact
+// and the cast goes in unchecked(...) (uncheckedIfBeyond32Bit). Only `nint` and `nuint`: golib's
+// `uintptr` is a struct, its conversion is user-defined, and it draws no such warning.
+func nativeIntCastBeyond32Bit(csType string, value constant.Value) bool {
+	if value == nil {
+		return false
+	}
+
+	switch csType {
+	case "nint":
+		i, exact := constant.Int64Val(constant.ToInt(value))
+		return !exact || i < math.MinInt32 || i > math.MaxInt32
+	case "nuint":
+		folded := constant.ToInt(value)
+
+		if constant.Sign(folded) < 0 {
+			return true
+		}
+
+		u, exact := constant.Uint64Val(folded)
+		return !exact || u > math.MaxUint32
+	}
+
+	return false
+}
+
 func uncheckedIfBeyond32Bit(csType, lit string, beyond32Bit bool) string {
 	cast := "(" + csType + ")(" + lit + ")"
 
@@ -1681,7 +1709,7 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	// widenedConstExprCastType. The BITWISE path already returns its result wrapped in exactly
 	// this cast, so skip when the whole rendering is one (the shared wholeExprIsCastOfType test).
 	if castType := v.widenedConstExprCastType(binaryExpr); castType != "" && !wholeExprIsCastOfType(core, castType) {
-		return "(" + castType + ")(" + core + ")"
+		return uncheckedIfBeyond32Bit(castType, core, nativeIntCastBeyond32Bit(castType, v.info.Types[binaryExpr].Value))
 	}
 
 	// A NON-constant narrow-integer result whose consumer is not wrap-invariant narrows itself back

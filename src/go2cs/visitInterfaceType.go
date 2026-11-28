@@ -314,6 +314,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	var structuralBases []string
 	var canonicalStructuralBases []string
 	structuralCovered := map[string]string{}
+	var structuralSupplied map[string]bool
 
 	// Structural (non-embedded) satisfaction of an imported interface is emitted as C#
 	// interface inheritance: Go converts fs.File to io.Reader implicitly because the method
@@ -335,7 +336,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		}
 
 		if !hasConstraint {
-			structuralBases, canonicalStructuralBases, structuralCovered = v.getStructuralInterfaceBases(interfaceType, identType)
+			structuralBases, canonicalStructuralBases, structuralCovered, structuralSupplied = v.getStructuralInterfaceBases(interfaceType, identType)
 		}
 	}
 
@@ -371,6 +372,16 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	v.indentLevel++
 	innerIndent := v.indent(v.indentLevel)
+
+	// The methods the emitted C# bases supply: a Go EMBED's full method set, and every structural
+	// base's. A member the interface also declares is re-declared below and HIDES the inherited
+	// slot, so it takes `new` (CS0108 without it). Go allows the duplicate when the signatures
+	// match, which they must for the program to type-check.
+	baseSupplied := v.embeddedInterfaceMethodNames(interfaceType)
+
+	for name := range structuralSupplied {
+		baseSupplied[name] = true
+	}
 
 	for _, method := range interfaceType.Methods.List {
 		if len(method.Names) == 1 {
@@ -416,6 +427,8 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 			if lifted && len(capturedTypeParams) == 0 {
 				memberModifier = dynamicNewMarker(interfaceTypeName)
+			} else if !lifted && baseSupplied[goMethodName] {
+				memberModifier = "new "
 			}
 
 			// A method whose Go name starts with Δ keeps it for golib's method-set matching in a [GoName] stamp.
@@ -689,19 +702,20 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 // covered members. The strict-subset guard also rules out inheritance cycles (equal method
 // sets can never inherit each other). Candidates already covered by a declared EMBED are
 // skipped (the embed emission handles those, and a second differently-rendered base of the
-// same type would be a duplicate-interface error). Returns the rendered base type names and
-// the covered method names.
-func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, []string, map[string]string) {
+// same type would be a duplicate-interface error). Returns the rendered base type names, the
+// covered method names (each supplied by exactly one base, so not re-declared), and every method
+// name any listed base supplies (a re-declared one of those hides the inherited slot: `new`).
+func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, []string, map[string]string, map[string]bool) {
 	named, ok := identType.(*types.Named)
 
 	if !ok {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 
 	iface, ok := named.Underlying().(*types.Interface)
 
 	if !ok || iface.NumMethods() == 0 {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 
 	var embeddedTypes []types.Type
@@ -761,7 +775,7 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	}
 
 	if len(bases) == 0 {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 
 	// Keep the minimal covering set: drop a base another chosen base already implements
@@ -828,14 +842,48 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	// RE-DECLARED instead: the redeclaration hides both inherited slots, so a call through
 	// this interface stays unambiguous (CS0121) — Go needs only one method to satisfy all.
 	covered := map[string]string{}
+	supplied := map[string]bool{}
 
 	for name, count := range coveredCounts {
+		supplied[name] = true
+
 		if count == 1 {
 			covered[name] = coveredBy[name]
 		}
 	}
 
-	return baseNames, canonicalBaseNames, covered
+	return baseNames, canonicalBaseNames, covered, supplied
+}
+
+// embeddedInterfaceMethodNames returns the full method set of every method-set interface the
+// declared interface embeds: the methods its emitted C# embed bases supply.
+func (v *Visitor) embeddedInterfaceMethodNames(interfaceType *ast.InterfaceType) map[string]bool {
+	names := map[string]bool{}
+	ifaceType := v.getType(interfaceType, false)
+
+	if ifaceType == nil {
+		return names
+	}
+
+	iface, isInterface := ifaceType.Underlying().(*types.Interface)
+
+	if !isInterface {
+		return names
+	}
+
+	for i := 0; i < iface.NumEmbeddeds(); i++ {
+		embedded, isInterface := iface.EmbeddedType(i).Underlying().(*types.Interface)
+
+		if !isInterface || !embedded.IsMethodSet() {
+			continue
+		}
+
+		for k := 0; k < embedded.NumMethods(); k++ {
+			names[embedded.Method(k).Name()] = true
+		}
+	}
+
+	return names
 }
 
 // writeMergedEmbeddedMethods redeclares, as `new` members of the interface being written, each method the interface
