@@ -2570,3 +2570,156 @@ P3 cleared the seat (2026-11-21 17:41Z) with two SHOULD rows and one NIT. COORD 
 - **NIT, `visitReturnStmt.go`.** The tuple form names its temps from `namedReturnNames` by target index, so the
   in-place condition now also requires `len(v.namedReturnNames) == len(assignTargets)`. Where they differ, the return
   keeps the plain assignment instead of indexing past the names.
+
+## 23. Amendment 2026-11-28 (P5): an element that holds a pointer word, over C memory (design note, before code)
+
+COORD asked (050241Z) whether door B can serve a C-memory struct element whose fields include an `unsafe.Pointer` or a
+pointer member, read and write, with the pointer minted as C memory on read, as H's go-sqlite3 slice does for one record,
+and what it costs. The shape is go-sqlite3 v1.14.53's row read (sqlite3.go:3105):
+`(*[(math.MaxInt32-1)/unsafe.Sizeof(C.sqlite3_go_col{})]C.sqlite3_go_col)(unsafe.Pointer(rc.colvals))[:n:n]`. 16.1 refuses
+"an element that holds a reference" by name, at every door. This section is a design note: no code is cut.
+
+**Answer.** Not as door B stands, and not by widening it: no `ref E` can alias C bytes when `E` holds a reference. Yes by
+a different element: a native box at the element's address whose word members are read and written at the access, with
+no managed copy kept. The read half is mostly in golib already. The write half needs one converter emission. The whole
+thing is one seat of about a day and a half, stacked on H's slice, with a corpus footprint of zero by construction (23.6).
+
+<!-- Provenance. Ask: claude/mailbox docs/phase4/inbox/P5/20261128T050241Z-COORD.md. H's slice: claude/h-cgo-sqlite-slice
+     bc383e49c9, docs/phase4/DESIGN-cgo-sqlite-marshalling.md 2 (shape A) and 6 (rulings, COORD 031803Z). Readings: one
+     cloud linux/amd64 VM, Go 1.26.11, gcc, .NET SDK 10.0, Release; H's converter built from bc383e49c9's src/go2cs; the p3
+     fixture of testdata/cgo/p3 with one arm added (slicecolsview), converted -cgo against libgo2csprobe built from H's
+     probe.c. golib read at bc383e49c9: ж.cs FromNumber, ж.NativeBox.cs FieldRef and ReadGoValue, ж.ShadowArrayBox.cs,
+     slice.cs (native mode), runtime/GoCgoArgs.cs. -->
+
+### 23.1 The readings
+
+Go prints the same three lines for both arms below: `1 10 0.5 alpha`, `2 20 1 beta`, `3 30 1.5 gamma`.
+
+- **slicecolsc**, H's red arm, is door C's shape and not door B's: `cols := (*[3]C.struct_go2cs_probe_col)(C.malloc(3 *
+  size))`, then `C.go2cs_probe_col_fill(&cols[0], 3)` and a read of `cols[i].typ`, `.i64`, `.f64`, `.ptr` and `.n`. It is
+  emitted `@unsafe.Pointer.To<array<C.struct_go2cs_probe_col>>(C.malloc(3 * size))` and dies there: "cannot view native
+  memory as array<struct_go2cs_probe_col>: the address has no managed element storage behind it" (ж.cs, FromNumber's
+  array floor). The read loop is emitted `cols.Value[i].typ`.
+- **slicecolsview** is go-sqlite3's own shape, added to the fixture for this note. A typed pointer to C memory is filled
+  by C, cut as the open slice of a huge array, and read through `col := &colvals[i]`. It is emitted
+  `array<C.struct_go2cs_probe_col>.AliasPointer(p, 53687091).slice(0, 3, 3)` (door A's open slice, 16.10), then
+  `Ꮡ(colvals, i)`. The call before it crosses: `C.go2cs_probe_col_fill(p, 3)` passes the native box's address. It dies at
+  the slice: ShadowArrayBox refuses a `*[N]T` over memory the Go runtime did not allocate, for an element type that holds
+  references.
+- **Door B's own form**, `(*A)(p)[i]` over such an element, is declined at conversion by `arrayPointerViewOfBase`
+  (16.1), so it is emitted as before the doors. The refusal is the same refusal at three doors.
+- **slicecolsgo** (the same records in a Go array) is also red at H's tip: "pointer handed to C.go2cs_probe_col_fill is an
+  element of a Go array or slice ... refuses the call". That is H's own arm and H's defect, not a door's. It is named here
+  so that nobody reads it as one.
+
+go-sqlite3 uses the view **read-only**. C fills `rc.colvals` (`_sqlite3_column_values` or `_sqlite3_step_values`) before
+the view is cut, and the loop reads `col.typ`, `col.i64`, `col.f64`, `col.ptr` and `col.n` (sqlite3.go:3103-3175). The
+records Go writes are `cargs`, a `[]C.sqlite3_go_col` in Go memory (`marshalFusedArgs`, `a := &cargs[i]`), which H's
+image door already carries. No Go store lands in a C-memory `sqlite3_go_col` anywhere in the package.
+
+### 23.2 Why no `ref E`
+
+`C.struct_go2cs_probe_col` is `{ int typ; long long i64; double f64; const void *ptr; int n; }`, 40 bytes. Go lays it out as C
+does (cmd/cgo's contract: `unsafe.Sizeof(C.struct_X{})` is C's `sizeof`, with explicit padding where the alignments
+differ; go-sqlite3 mallocs `n * unsafe.Sizeof(...)` on it). The converted C# struct holds `@unsafe.Pointer ptr`, and golib's
+`unsafe.Pointer` is a number plus `object? m_retainedSource`. So the struct holds a managed reference, the CLR gives it
+auto layout, and its managed size and field order are not C's. A `ref E` into the C bytes would read the reference out of
+C's `i64` or `ptr` word. That is the class-1 layout root (golib-gen rules), and why every door refuses it.
+
+### 23.3 What golib already has
+
+- **The element as a native box.** `ж<E>.FromNumber` over C memory mints `NativeBox<E>`. Its `FieldRef<TF>` reads a field
+  at its **Go offset** in the native bytes, so `col.typ`, `col.i64`, `col.f64` and `col.n` through `&colvals[i]` are refs
+  into C memory today, live in both directions. A field whose type holds a reference is refused there by name ("a managed
+  reference where Go stores the value inline"). That refusal is the only reason `col.ptr` cannot be read.
+- **A value decode.** `NativeBox<E>.ReadGoValue` (B2) decodes a reference-bearing struct out of the bytes at Go's offsets
+  into a fresh `E`. It decodes array members only and refuses any other reference by name, "since memory holds no image
+  of one".
+- **The word rules.** H's mirror helpers (`ᴍin`/`ᴍout`, emitted per struct in `<os>/main.cgo.cs`) apply cgo's rules to a
+  pointer word: `GoCgoArgs.VoidPointerMember` encodes nil as 0, a native pointer as its address, and refuses a Go pointer
+  with cgo's own message. Coming back, any non-zero word is C memory, minted `new @unsafe.Pointer((uintptr)w)`, and a
+  typed member goes through `PointerMemberBack`. COORD's OQ-2 ruling (031803Z) holds for C memory as it does for a copy
+  back: by cgo's rules, a pointer word in C memory is never a Go pointer.
+
+So a pointer word **does** have an image in C memory: the address it holds. B2's "no image" is right for a string, a
+slice, a map, an interface or a func, and wrong for a pointer word.
+
+### 23.4 The design
+
+**The class.** A struct type declared by cmd/cgo (`_Ctype_struct_*`, or a typedef of one) whose references are all
+pointer words: typed pointers and `unsafe.Pointer`, directly or in nested structs and arrays of such words. This is the
+class H's mirror already carries a pointer member for. A cgo struct holding anything else stays refused by name.
+
+**Read (golib).**
+1. `NativeBox<E>.FieldRef<TF>` gains a word arm. A pointer-word `TF` at a native root is decoded from the word at its Go
+   offset on each access: 0 is nil, and any other value is a native pointer that carries nothing (the rule of 23.3). The
+   decoded value lives in a slot on the box, and the accessor returns a ref to that slot. Each access decodes again, so a
+   read after C rewrites the word sees the new value.
+2. `NativeStructMarshal.DecodeValue` decodes pointer words with the same rule, so a whole-element read (`v := s[i]`,
+   `*p` read for its value, door B's load) is a fresh, exact `E`.
+3. **Doors A, B and C**, at their V3 arm (C memory, an address no Go value owns), answer a **native struct window** for
+   an `E` in the class, instead of the shadow or the array floor:
+   - `Element<E>(p, i, N)`, `&s[i]` and the box `at<E>(i)` are a `NativeBox<E>` at `p + i * sizeof(E)`, with Go's
+     size as the stride. Field access goes through 1, and the box's address crosses to C as it does today.
+   - The window's indexer cannot hand out a `ref E` into C bytes. It returns a ref to a fresh decode (2), good for a
+     read.
+   - The window covers `[lo, max)` of the view, never `N`: 53,687,091 is a bound, as it is for every door.
+
+**Write (converter, then golib).** A box cannot observe a write made through a ref it has already handed out (golib-gen
+rules, native boundary class 2: "the remedy for a pointer-typed destination is a converter EMISSION change"). So:
+4. A store to a scalar member reached through an index of a class `E` (`s[i].n = 5`, `cols.Value[i].n = 5`, `(*A)(p)[i].n =
+   5`, compound and `++` included) is emitted through the element's box (`Ꮡ(s, i).n = 5`), whose field ref is live (1).
+   Over Go memory this is the same storage, one element box later.
+5. A store to a pointer-word member of a class `E`, through any box or index, is emitted as one explicit store call
+   naming the field. A managed box assigns. A native box encodes: nil is 0, a native pointer is its address, and a Go
+   pointer is refused by name. Go forbids a Go pointer in C memory (the cgocheck2 experiment reports it), and C bytes cannot hold a
+   managed reference.
+6. A whole-element store of a class `E` into C memory (`s[i] = v`, `*p = v`) stays refused by name: `NativeBox<E>.Value`
+   already refuses the whole-value ref for a reference-bearing struct. Encoding it from H's per-member rules is a
+   follow-up row if a consumer appears. go-sqlite3 has none.
+
+**Coherence.** None is needed, and that is the reason for this shape. Every scalar access is a ref into the C bytes, every
+pointer-word read decodes at the access, and every pointer-word store encodes at the store. No managed copy outlives an
+expression, so nothing has to be flushed before a cgo call or refreshed after one, and a `C.free` leaves nothing behind
+that a later call would read.
+
+### 23.5 The shapes not taken
+
+- **A decoded shadow window** (ShadowArrayBox with a codec over foreign memory). It needs a flush of Go's writes before
+  every cgo call and a refresh after every call. It needs an invalidation on `C.free`, or a refresh reads freed memory.
+  A read through one alias after a write through another, with no call in between, is stale. ShadowArrayBox works because
+  only Go writes the runtime's own blocks, and C writes these.
+- **A snapshot, read-only by contract.** It is the smallest change and right for go-sqlite3 alone. But a write through it
+  is lost silently, and nothing can detect the write (the same class-2 rule), so it would ship a silent lost write.
+- **Per-type mirror codecs in golib** (a static-abstract interface the converter implements on each `_Ctype_struct_*ᴍ`).
+  It is not needed: since cmd/cgo gives Go's layout as C's, the Go-offset shape golib already computes is the C layout.
+  The mirror's `CheckLayoutᴍ` stays the cross-check, and a guard arm compares the two offsets for the fixture structs.
+
+### 23.6 Cost
+
+| Part | Where | Size (estimate) |
+|:--|:--|:--|
+| word arm of `FieldRef`, word decode in `DecodeValue` | golib `ж.NativeBox.cs`, `NativeStructMarshal` | ~70 lines |
+| store call: assign on the managed kinds, encode on `NativeBox` | golib `ж.cs` and the box kinds | ~80 lines, virtual with an assigning default; the binary-compat check owed |
+| native struct window at the V3 arm of doors A, B and C | golib `unsafe.cs`, `slice.cs` (a store kind beside the native mode) | ~120 lines |
+| admission of the class in `arrayPointerViewOfBase`; 4 and 5 | converter `arrayPointerElementDoor.go`, `convIndexExpr.go`, `visitAssignStmt.go` | ~150 lines |
+| guards | GolibTests ~25 arms; converter test arms; p3 e2e arms (slicecolsc, slicecolsview, a scalar store, a pointer-word store, a Go pointer stored and refused, a read after C rewrites a word) | ~1 day with the above |
+
+- **Corpus footprint: zero by construction.** The class is cmd/cgo's types, and the corpus is emitted at
+  `CGO_ENABLED=0`, where none exists. The two-seeded diff on four targets is still owed, as the proof of that.
+- **Run-time cost** is on cgo code only. One element box per indexed store of a class `E` (4). One decode, plus one
+  pointer object for a non-nil word, per pointer-word read. go-sqlite3 reads `col.ptr` once per text or blob column.
+- **Order.** It stacks on H's slice (the `void *` member class, `VoidPointerMember`) and lands after it.
+- **Limits.**
+  - Generic code converted without rule 4, such as a `slices` function instantiated on a class `E` and handed a C-memory
+    slice, stores through the indexer's fresh decode and loses the write. It is the one silent shape left. go-sqlite3 has
+    no instance; the guard names it.
+  - Pointer arithmetic over the window (`unsafe.Add` inside an element) reads C bytes, as Go does; that is not a door
+    question.
+
+### 23.7 For COORD
+
+**Recommended:** one seat on this design, red first, with the six p3 arms of 23.6. It stacks on H's slice and is sized
+from the table. If the seat is to be smaller, cut the read half alone (1 to 3, and the admission): go-sqlite3 needs only
+that. But rule 5 must then be cut as a refusal by name, because a pointer-word store through a native box would
+otherwise land in the read slot and be lost silently. P3 reads this note.
