@@ -43216,4 +43216,16 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — P4 (2026-11-27)
 
+## 2026-11-28 — P1 (NewCallback AOT design, P3 NIT 7): a two-result callback passes the size check (OPEN)
+
+- **`syscall.NewCallback` takes a func with two `uint32` results that Go refuses.** `func() (uint32, uint32)` converts
+  to `Func<(uint32, uint32)>`; the tuple is 8 bytes, so `goCallbackCheckResult<T>`
+  (`syscall/windows/syscall_windows_callback_impl.cs:110-113`) accepts it as one uintptr-sized result under both
+  runtimes, where Go's `compileCallback` refuses any result count but one. The fix is a result-count check (a
+  `ValueTuple` result refuses with Go's text) before the size check. Not the Native AOT seat's: that seat keeps the
+  check as it is. Read, not run.
+- Owner: unrouted.
+
+— P1 (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
