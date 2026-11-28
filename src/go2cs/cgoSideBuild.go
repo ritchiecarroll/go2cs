@@ -990,6 +990,26 @@ func cgoSideOwnRefusal(symbol string, refused []string) string {
 	return fmt.Sprintf("C.%s: no shared library the package links exports it, and the package has source files of its own go2cs does not build (%s): the side build compiles C and assembly only (cgo Phase 4b)", symbol, strings.Join(refused, ", "))
 }
 
+// cgoSideUnlinkedWarning is GO2CS2017's text: files of the package's own that go's build links and the conversion does
+// not (P3's MUST 2). built says why: C or assembly the side build compiled and left out because nothing Go uses needs
+// it, or a kind it never compiles. A constructor in such a file runs under go and not under go2cs. Even a linked file's
+// constructor would run at the side library's first table read, later than Go's (BOARD, 2026-11-28).
+func cgoSideUnlinkedWarning(files []string, built bool) string {
+	names := make([]string, len(files))
+
+	for i, file := range files {
+		names[i] = filepath.Base(file)
+	}
+
+	why := "the side build does not compile C++, Objective-C, Fortran or .syso files"
+
+	if built {
+		why = "nothing Go uses needs the side library, so the side build does not link it"
+	}
+
+	return fmt.Sprintf("cgo: the package's own %s %s not in the conversion: %s. go's build links it, so code in it that runs on its own (a constructor) runs under go and not here", strings.Join(names, ", "), map[bool]string{true: "are", false: "is"}[len(names) > 1], why)
+}
+
 // cgoSideDuplicateRefusal is the refusal of a name two of the package's objects define as a global symbol (cgo Phase
 // 4b, OQ-1): C's link and go's both reject it, and a named refusal reads better than a linker error.
 func cgoSideDuplicateRefusal(symbol string, objects []string) string {

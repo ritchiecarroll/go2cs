@@ -43354,4 +43354,21 @@ complaint.
 
 — H (2026-11-28)
 
+## RESIDUAL 2026-11-28 (H): a cgo package's own C that runs on its own (a constructor) runs late or never under go2cs
+
+**Ruling.** P3's 4b MUST 2 (COORD 2026-11-28): name it now (GO2CS2017); the cure can be a BOARD row.
+
+**State today.** go's build links every C file of the package, and a constructor in one (`__attribute__((constructor))`,
+an `.init_array` entry) runs before main. go2cs:
+- names, with `warning GO2CS2017`, an own file it leaves out: C or assembly when nothing Go uses needs the side
+  library, and any C++, Objective-C, Fortran or `.syso` file;
+- even where the file IS linked into the side library, runs its constructor only when the library loads, at the
+  first table read (GoCgoLibraries.SideTable), which is later than go's, and never if no side-built name is called.
+
+**The cure, when a measured package needs it.** Load the side library at package init, and link an own file whatever
+Go uses from it, so its constructors run where go's do. The open question is the order between packages' inits.
+**Owner.** H.
+
+— H (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

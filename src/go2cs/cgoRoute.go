@@ -1242,6 +1242,20 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 			return nil, refuseCgoRoute(pkg, refusals)
 		}
+
+		// A file of the package's own that go's build links and this conversion does not is named, never dropped
+		// without a word (P3's MUST 2).
+		if err == nil {
+			position := pkg.Fset.PositionFor(typesFile.Package, false).String()
+
+			if side == nil && len(builtOwn) > 0 {
+				reportWarningDiagnostic(position, diagnosticCgoOwnFileUnlinked, cgoSideUnlinkedWarning(builtOwn, true))
+			}
+
+			if len(refusedOwn) > 0 {
+				reportWarningDiagnostic(position, diagnosticCgoOwnFileUnlinked, cgoSideUnlinkedWarning(refusedOwn, false))
+			}
+		}
 	}
 
 	if err != nil {

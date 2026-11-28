@@ -419,8 +419,10 @@ check runs at the package's first C call rather than when it loads.
   package is converted: move the call into a function that takes the pointer as a parameter;
 - a `#define` that is not a constant. A function or variable the preamble defines, or a C or assembly file of the
   package's own defines, is compiled into a side library beside the bindings (cgo Phase 4 and 4b), except in a package
-  that names `#cgo pkg-config`. C++, Objective-C, Fortran and `.syso` files of the package's own are refused by name,
-  and so is a name two of the package's files define as a global symbol, which C's link and Go's both reject;
+  that names `#cgo pkg-config`. A name a C++, Objective-C, Fortran or `.syso` file of the package's own could define
+  is refused by name, and so is a name two of the package's files define as a global symbol, which C's link and Go's
+  both reject. A file of the package's own that nothing the package's Go uses needs is left out of the conversion,
+  and named (`warning GO2CS2017`): a constructor in it runs under go and not here;
 - `//export`;
 - a C variable whose type is not a C scalar or struct (an array, a pointer, a function pointer or a union);
   `C.x` of a scalar or struct type reads and writes the variable in place, as Go does, once a library the
