@@ -2917,6 +2917,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckThisRefReceiverTC0() => CheckTarget("ThisRefReceiverTC0");
 
     [TestMethod]
+    public void CheckTlsClientSuiteOrder() => CheckTarget("TlsClientSuiteOrder");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]
