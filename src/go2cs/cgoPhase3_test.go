@@ -418,7 +418,7 @@ func cgoP3Arms() []cgoG1Arm {
 		// in that member, which cgo's own check refuses on both sides; and a typedef'd const char * result.
 		{name: "slicecolsgo"},
 		{name: "slicecolsc"},
-		{name: "slicecolgoptr", goFails: "Go pointer to unpinned Go pointer", csFails: "Go pointer to unpinned Go pointer"},
+		{name: "slicecolgoptr", goFails: "Go pointer to unpinned Go unsafe pointer", csFails: "Go pointer to unpinned Go unsafe pointer"},
 		{name: "slicefname"},
 		// The S4 cure's near misses (P3, F1): a typedef of a typedef (uint64_t) and a typedef'd enum, each a constant
 		// cmd/cgo's check closure declares at the typedef.

@@ -342,7 +342,8 @@ namespace go.golib;
     /// A <c>void *</c> member's value as it is copied into a mirror (DESIGN-cgo-sqlite-marshalling.md §2): nil is 0 and C
     /// memory is its number. A pointer into Go memory, in any form the void door recognises (a pointer that carries its
     /// box, a token, a number the registry knows), panics with cgo's own message, as cgocheck does for a Go pointer stored
-    /// in memory handed to C.
+    /// in memory handed to C. The runtime names the member's kind (cgoFormatErr): an unsafe.Pointer member is "unsafe
+    /// pointer", where a typed pointer member is "pointer".
     /// </summary>
     public static nuint VoidPointerMember(ж<uintptr>? member)
     {
@@ -350,7 +351,7 @@ namespace go.golib;
             return 0;
 
         if (ManagedPointerTokens.IsTaggedToken(member.Value.Value) || GoMemory(member, out nuint address) is not null)
-            throw GoPointerToUnpinnedGoPointer();
+            throw RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go unsafe pointer");
 
         return address;
     }
