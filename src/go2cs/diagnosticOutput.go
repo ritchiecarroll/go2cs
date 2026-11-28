@@ -197,6 +197,12 @@ const (
 	// bare name, so the adapter would call the type's own method of that name, or one internal to another assembly
 	// (foreignUnexportedPromotionRefusal.go).
 	diagnosticForeignUnexportedPromotionRefused = "GO2CS2016"
+
+	// diagnosticCgoOwnFileUnlinked: a WARNING. A source file of the package's own that go's build links is not in the
+	// conversion: a C or assembly file when nothing Go uses needs the side library, or a C++, Objective-C, Fortran or
+	// .syso file, which the side build never compiles. Code in it that runs on its own (a constructor) does not run
+	// (cgo Phase 4b, P3's MUST 2; cgoSideBuild.go, cgoSideUnlinkedWarning).
+	diagnosticCgoOwnFileUnlinked = "GO2CS2017"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

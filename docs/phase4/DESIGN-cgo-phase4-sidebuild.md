@@ -70,6 +70,14 @@ address (§2.5).
 
 The TU is deterministic text: the preamble's bytes, in the order cmd/cgo reads them, plus the table.
 
+> **Amended 2026-11-27 (review of 823978ff1a, #2): the preamble's `#line` name.** cmd/cgo names the preamble by the
+> source's absolute path (cmd/cgo/ast.go, ParseGo), and the prefix map cmd/go hands CC trims it to
+> `/_/<module path>/<file>` under -trimpath, and for a GOROOT package always. The TU writes that trimmed name wherever
+> the trim maps the source (`cgoSideTrim.lineName`), so the preamble's own `__FILE__` is go's. Untrimmed, go bakes the
+> absolute path, and the TU keeps the base name instead. The TU is written beside the bindings, and a machine path does
+> not go into an emitted file. That one difference from go is deliberate. Row I's untrimmed arm reads the header's
+> `__FILE__` only, and its trimmed arm reads both.
+
 ### 2.3 The build
 
 The side build uses the compiler and flags cmd/cgo used:
@@ -298,6 +306,21 @@ own unit defines is side-built without asking the probe. TestCgoPhase4F then bec
 - **The windows load failure** names "or one of its dependencies".
 - **R1** asserts no debug section in the library.
 
+## 7. Amendment, 2026-11-27: the final reading at 823978ff1a, and a known gap 4b closes
+
+**Known gap (COORD's RULING (a), 2026-11-27): on darwin, untrimmed, a header's `__FILE__` names the package directory
+by the loader's spelling.** At 823978ff1a, row I untrimmed is red on both darwin arches and every other row is green
+on every leg (cgo-e2e default 46065874032, zig 46059610587). go prints `/private/var/folders/.../go2cs_file.h`, and
+go2cs prints `/var/folders/.../go2cs_file.h`. On macOS `/var` is a symlink to `/private/var`. cmd/go compiles in, and
+hands CC with `-I`, the package directory it resolves itself; the side compile used the loader's spelling (`pkg.Dir`).
+Trimmed, go2cs's default, matches on every leg, because both sides map the directory to `/_/<module path>`.
+
+The cure is 4b's first commits, on claude/h-cgo-p4b-own-sources:
+- d5485d03f6 takes the trim's module directory from go list's Module (the reviewer's #1).
+- 2a6bf89442 makes the side compile's `-I`, its working directory and the preamble's `#line` path take go list's Dir.
+Both land together, because a map from go list's `/private/var` and a `-I` left on `/var` would break the trimmed arm
+too. darwin's hosted legs are the discriminating reading. BOARD entry of 2026-11-27.
+
 ## 8. Amendment, 2026-11-28: #cgo flag security (COORD's ruling)
 
 **The converter must not rely on the loader for flag safety.** A package's own `#cgo` CPPFLAGS, CFLAGS, CXXFLAGS, FFLAGS
@@ -310,3 +333,10 @@ fails a package with a refused flag, and the route then found no cmd/cgo output.
 (-fplugin, --sysroot, a -L directory holding a GNU ld script; probe 00bdeaf554), but only by accident of the loader's
 mode. An offline conversion, which reads cmd/cgo's trees and runs no such load, shows the route now refuses on its own
 (TestCgoTheRouteRefusesAFlagCmdGoRefusesWithoutTheLoad).
+
+> **Corrected 2026-11-28 (P3's NIT 5):** the loader stopped the three measured shapes by CONSTRUCTION, not by accident:
+> cmd/cgo's output exists only after cmd/go's own check has passed. The offline route is test-only. And since 4b the
+> route lists the package ONCE, by import path in the load's directory, and that listing is both checked and compiled with
+> (P3's MUST on 4b): a second listing from the package's own directory could answer with other flags, and fails for a
+> package with no go.mod above it.
+

@@ -43476,6 +43476,73 @@ exposure in shipped cgo bindings on windows.
 
 — H (2026-11-27)
 
+## GAP 2026-11-27 (H): cgo Phase 4 row I untrimmed on darwin, /var against /private/var (READY with it; 4b closes)
+
+**Ruling.** COORD's RULING (a), inbox H 20261127T212126Z: Phase 4 is READY at 823978ff1a with this gap named.
+
+**Measured.** At 823978ff1a, on darwin (osx-arm64 and osx-x64), cgo-e2e default 46065874032 and `;cc=zig`
+46059610587:
+- Rows A to H and I/trimmed PASS.
+- I/untrimmed fails. go prints `/private/var/folders/.../go2cs_file.h` and go2cs `/var/folders/.../go2cs_file.h`.
+- windows and linux match on both arms.
+
+**Root.** `/var` is a symlink to `/private/var`. cmd/go compiles in, and hands CC with `-I`, the package directory it
+resolves itself (go list's Dir); the side compile used the loader's spelling (`pkg.Dir`). Trimmed, go2cs's default,
+both sides map the directory to `/_/<module path>`, so it matches.
+
+**Closes on** claude/h-cgo-p4b-own-sources: d5485d03f6 (the trim's module from go list's Module) and 2a6bf89442 (`-I`,
+the compile directory and the preamble `#line` from go list's Dir), read on darwin's hosted legs. The design's §7
+records it.
+**Owner.** H.
+
+— H (2026-11-27)
+
+## OPTION 2026-11-28 (H): a content-hash cache for a side build's own C (cgo Phase 4b, OQ-2), measured before deciding
+
+**Ruling.** COORD (inbox H 20261127T205842Z): no cache in 4b's first cut. Measure the amalgamation's compile cost,
+prediction first, and record a cache here as an option.
+
+**Measured.** go-sqlite3 v1.14.53's sqlite3-binding.c (9,582,672 bytes, 271,136 lines) was compiled by the side build's
+own path (cgoSideCompileOwn: go list's flags, -O2 -g from go's default CGO_CFLAGS, the trim and the prefix maps), once
+per conversion, on 4b at d1239a7146 (converter-cgo, TestSqlite3ReadingOnTheSideBuild):
+
+| Leg | Compiler | Wall time | Object |
+|---|---|---|---|
+| linux-x64, 46086298515 | gcc 15.2.0 | 30.0 s | 10,839,960 bytes |
+| win-x64, 46086295982 | MinGW-Builds gcc 15.2.0 | 33.0 s | 8,375,377 bytes |
+| osx-x64, 46086300912 | Apple clang 17.0.0 | 38.4 s | 5,918,824 bytes |
+| osx-arm64, 46086300912 | Apple clang 17.0.0 | 14.3 s | 5,787,408 bytes |
+
+My prediction (60-150 s linux, 90-200 s windows, 40-120 s darwin) MISSED LOW on every leg.
+
+**The option.** Key a cache by the source's content hash, the compiler's identity (its --version line) and the exact
+flags, and keep it beside go2cs's own build cache. A reconversion would then pay 14-38 s once instead of once per
+conversion. It is not worth taking yet:
+- go-sqlite3 does not convert today. The same reading refuses it for 38 Phase 2/3 marshalling limits before any side
+  build question (16 C function addresses used as values, 14 pointer parameters to non-struct types, 6 non-scalar
+  struct fields, 2 non-scalar results), identically on every target.
+- A cache adds invalidation that has to be right (flags, compiler, headers the file includes).
+
+**Reopens when** a package with a large own C file converts end to end, and its reconversion time is the measured
+complaint.
+**Owner.** H.
+
+— H (2026-11-28)
+
+## RESIDUAL 2026-11-28 (H): a cgo package's own C that runs on its own (a constructor) runs late or never under go2cs
+
+**Ruling.** P3's 4b MUST 2 (COORD 2026-11-28): name it now (GO2CS2017); the cure can be a BOARD row.
+
+**State today.** go's build links every C file of the package, and a constructor in one (`__attribute__((constructor))`,
+an `.init_array` entry) runs before main. go2cs:
+- names, with `warning GO2CS2017`, an own file it leaves out: C or assembly when nothing Go uses needs the side
+  library, and any C++, Objective-C, Fortran or `.syso` file;
+- even where the file IS linked into the side library, runs its constructor only when the library loads, at the
+  first table read (GoCgoLibraries.SideTable), which is later than go's, and never if no side-built name is called.
+
+**The cure, when a measured package needs it.** Load the side library at package init, and link an own file whatever
+Go uses from it, so its constructors run where go's do. The open question is the order between packages' inits.
+
 ## CLOSED 2026-11-28 (H): SECURITY, a cgo package's #cgo flags against cmd/go's allowlist (no live exposure; ported)
 
 **Question.** COORD, inbox H 20261128T015318Z: do the Phase 2 capture and the Phase 4 side build pass #cgo flags to the

@@ -121,18 +121,35 @@ namespace go.golib;
         // dependent only in the current directory loaded (TestCgoPhase4H, 3748d05f94, 46054089826). On darwin the
         // converter refused any dependency named by anything but an absolute install name when it linked the library.
         nint handle = 0;
+        string reason = "";
 
         bool loaded = OperatingSystem.IsWindows() ?
-            (handle = LoadLibraryExW(path, 0, LoadLibrarySearchDllLoadDir | LoadLibrarySearchDefaultDirs)) != 0 :
+            (handle = LoadLibraryExW(ExtendedLengthPath(path), 0, LoadLibrarySearchDllLoadDir | LoadLibrarySearchDefaultDirs)) != 0 :
             NativeLibrary.TryLoad(path, out handle);
 
+        // windows' own error tells a missing dependency (126, ERROR_MOD_NOT_FOUND) from a file that is not a loadable
+        // image (193, ERROR_BAD_EXE_FORMAT) (review of 823978ff1a, #4).
+        if (!loaded && OperatingSystem.IsWindows())
+            reason = $" (windows error {Marshal.GetLastPInvokeError()})";
+
         if (!loaded)
-            throw new DllNotFoundException($"cgo: the side-built library {file}, which holds the C that {assembly.GetName().Name}'s cgo preambles define, or one of its dependencies was not found or did not load at {path}; it is a build output beside the assembly, and the current directory is never searched (docs/Limitations.md#cgo)");
+            throw new DllNotFoundException($"cgo: the side-built library {file}, which holds the C that {assembly.GetName().Name}'s cgo preambles define, or one of its dependencies was not found or did not load at {path}{reason}; it is a build output beside the assembly, and the current directory is never searched (docs/Limitations.md#cgo)");
 
         if (!NativeLibrary.TryGetExport(handle, symbol, out nint table) || table == 0)
             throw new EntryPointNotFoundException($"cgo: the side-built library {file} exports no table {symbol} (docs/Limitations.md#cgo)");
 
         return table;
+    }
+
+    // ExtendedLengthPath names a fully qualified windows path of MAX_PATH (260) characters or more with the \\?\ prefix
+    // (\\?\UNC\ for a share), which LoadLibraryExW takes at any length whatever the machine's long-path policy
+    // (review of 823978ff1a, #5). A shorter path, or one already prefixed, is passed as it is.
+    private static string ExtendedLengthPath(string path)
+    {
+        if (path.Length < 260 || path.StartsWith(@"\\?\", StringComparison.Ordinal))
+            return path;
+
+        return path.StartsWith(@"\\", StringComparison.Ordinal) ? @"\\?\UNC\" + path[2..] : @"\\?\" + path;
     }
 
     // LoadLibraryExW's search flags (libloaderapi.h): the loaded library's own directory, and the application directory,

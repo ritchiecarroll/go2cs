@@ -15,7 +15,9 @@ import (
 	"go/token"
 	"go/types"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -119,7 +121,7 @@ func cgoSideFixtureUnit(t *testing.T) cgoSideUnit {
 		t.Fatal(err)
 	}
 
-	preamble, err := cgoSidePreamble(path)
+	preamble, err := cgoSidePreamble(path, filepath.Base(path))
 
 	if err != nil {
 		t.Fatal(err)
@@ -176,7 +178,7 @@ func TestCgoSidePreambleIsReadAsCmdCgoReadsIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := cgoSidePreamble(path)
+	got, err := cgoSidePreamble(path, filepath.Base(path))
 
 	if err != nil {
 		t.Fatal(err)
@@ -243,16 +245,64 @@ func TestCgoSideLibraryItemCopiesTheLibraryBesideTheAssembly(t *testing.T) {
 	}
 }
 
-// A package with C, C++, Objective-C or assembly files of its own is named (§2.7); headers are not sources.
-func TestCgoSideOwnSourcesNamesWhatCmdGoCompiles(t *testing.T) {
-	pkg := &packages.Package{OtherFiles: []string{filepath.Join("d", "z.h"), filepath.Join("d", "b.c"), filepath.Join("d", "a.S"), filepath.Join("d", "README.md")}}
+// A package's own C and assembly files are the side build's to compile, and its C++, Objective-C, Fortran and prebuilt
+// objects are named as refused (cgo Phase 4b, row 3 and §3); headers and other files are neither.
+func TestCgoSideOwnSourcesSplitsWhatTheSideBuildCompiles(t *testing.T) {
+	pkg := &packages.Package{OtherFiles: []string{
+		filepath.Join("d", "z.h"), filepath.Join("d", "b.c"), filepath.Join("d", "a.S"), filepath.Join("d", "README.md"),
+		filepath.Join("d", "c.cc"), filepath.Join("d", "m.m"), filepath.Join("d", "x.syso"),
+	}}
+	built, refused := cgoSideOwnSources(pkg)
 
-	if got, want := strings.Join(cgoSideOwnSources(pkg), ","), "a.S,b.c"; got != want {
-		t.Errorf("own sources %q, want %q", got, want)
+	if got, want := strings.Join(built, ","), strings.Join([]string{filepath.Join("d", "a.S"), filepath.Join("d", "b.c")}, ","); got != want {
+		t.Errorf("built %q, want %q", got, want)
 	}
 
-	if got := cgoSideOwnSources(&packages.Package{}); got != nil {
-		t.Errorf("a package with no other files has own sources %v", got)
+	if got, want := strings.Join(refused, ","), "c.cc,m.m,x.syso"; got != want {
+		t.Errorf("refused %q, want %q", got, want)
+	}
+
+	if built, refused := cgoSideOwnSources(&packages.Package{}); built != nil || refused != nil {
+		t.Errorf("a package with no other files has own sources %v, %v", built, refused)
+	}
+}
+
+// The classification order (cgo Phase 4b, §2), over synthesized symbol tables: a name its hosting unit defines, static or
+// not, is side-built; else one other object's global definition side-builds it; two global definitions are a
+// duplicate; and a name no object defines is left for the probe.
+func TestCgoSideClassifyFollowsTheDesignsOrder(t *testing.T) {
+	local := cgoSymbolBinding{defined: true}
+	global := cgoSymbolBinding{defined: true, global: true}
+	weak := cgoSymbolBinding{defined: true, global: true, weak: true}
+
+	objects := []cgoSideObject{
+		{name: "a.go", unit: 0, symbols: map[string]cgoSymbolBinding{"own_static": local, "own_global": global, "dup": global, "static_beside_global": local}},
+		{name: "b.go", unit: 1, symbols: map[string]cgoSymbolBinding{"cross": global, "static_elsewhere": local, "weak_default": weak}},
+		{name: "own.c", unit: -1, symbols: map[string]cgoSymbolBinding{"from_c": global, "dup": global, "static_beside_global": global, "weak_default": global}},
+	}
+
+	hosts := map[string]int{
+		"own_static": 0, "own_global": 0, "cross": 0, "from_c": 0, "dup": 0, "library": 0,
+		"static_elsewhere": 0, "static_beside_global": 0, "weak_default": 0,
+	}
+
+	side, duplicates := cgoSideClassify(hosts, objects)
+
+	for name, want := range map[string]bool{
+		"own_static": true, "own_global": true, "cross": true, "from_c": true, "static_beside_global": true,
+		"dup": false, "library": false, "static_elsewhere": false, "weak_default": true,
+	} {
+		if side[name] != want {
+			t.Errorf("%s: side-built %v, want %v", name, side[name], want)
+		}
+	}
+
+	if got := strings.Join(duplicates["dup"], ","); got != "a.go,own.c" {
+		t.Errorf("dup: duplicates %q, want a.go,own.c", got)
+	}
+
+	if len(duplicates) != 1 {
+		t.Errorf("duplicates %v, want dup alone", duplicates)
 	}
 }
 
@@ -287,15 +337,15 @@ func TestCgoSideFormIsTheSideBuiltNamesAlone(t *testing.T) {
 func TestCgoSideFailureNamesTheFileAndTheFirstDiagnostic(t *testing.T) {
 	output := "In file included from main.go:3:\nmain.go:5:3: error: unknown type name 'flot'\nmain.go:9:1: error: second\n"
 
-	if got, want := cgoSideFailure("compile", "main.go", output).Error(), "cgo: the side build of main.go's preamble did not compile: main.go:5:3: error: unknown type name 'flot'"; got != want {
+	if got, want := cgoSideFailure("compile", "main.go's preamble", output).Error(), "cgo: the side build of main.go's preamble did not compile: main.go:5:3: error: unknown type name 'flot'"; got != want {
 		t.Errorf("compile failure %q, want %q", got, want)
 	}
 
-	if got, want := cgoSideFailure("link", "libgo2cs-cgo-main-a9d3bf20.so", "ld: cannot find -lnone\r\ncollect2: ld returned 1 exit status\r\n").Error(), "cgo: the side build of libgo2cs-cgo-main-a9d3bf20.so's preamble did not link: ld: cannot find -lnone"; got != want {
+	if got, want := cgoSideFailure("link", "libgo2cs-cgo-main-a9d3bf20.so", "ld: cannot find -lnone\r\ncollect2: ld returned 1 exit status\r\n").Error(), "cgo: the side build of libgo2cs-cgo-main-a9d3bf20.so did not link: ld: cannot find -lnone"; got != want {
 		t.Errorf("link failure %q, want %q", got, want)
 	}
 
-	if got := cgoSideFailure("link", "x", "no diagnostic word\nsecond line\n").Error(); got != "cgo: the side build of x's preamble did not link: no diagnostic word" {
+	if got := cgoSideFailure("link", "x", "no diagnostic word\nsecond line\n").Error(); got != "cgo: the side build of x did not link: no diagnostic word" {
 		t.Errorf("a failure with no error line reads %q", got)
 	}
 
@@ -387,27 +437,16 @@ func TestCgoDarwinInstallNameRefusesWhatDyldWouldSearch(t *testing.T) {
 	}
 }
 
-// The side compile's -trimpath mapping is cmd/go's (review of ef369204c9, #2): a module's directory to /_/<module path>,
-// a module-cache directory with its version, GOROOT to /_/GOROOT whatever the setting, and nothing else untrimmed.
+// The side compile's -trimpath mapping is cmd/go's (review of ef369204c9, #2; work/exec.go, ccompile), read from the
+// fields go list reports (review of 823978ff1a, #1): a module's directory to /_/<module path>[@version], GOROOT to
+// /_/GOROOT whatever the setting, a GOPATH root to /_/GOPATH, a rootless package's directory to its import path, and
+// nothing else untrimmed.
 func TestCgoSideTrimMapsAsCmdGoDoes(t *testing.T) {
 	root := t.TempDir()
 	module := filepath.Join(root, "mod")
 	cached := filepath.Join(root, "cache", "example.com", "dep@v1.2.3")
 	goRoot := filepath.Join(root, "goroot")
-
-	for dir, goMod := range map[string]string{module: "module example.com/mod\n", cached: "module example.com/dep\n"} {
-		if err := os.MkdirAll(filepath.Join(dir, "sub"), 0o755); err != nil {
-			t.Fatal(err)
-		}
-
-		if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0o644); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := os.MkdirAll(filepath.Join(goRoot, "src", "net"), 0o755); err != nil {
-		t.Fatal(err)
-	}
+	goPath := filepath.Join(root, "gopath")
 
 	slash := func(goos, path string) string {
 		if goos == "windows" {
@@ -423,20 +462,217 @@ func TestCgoSideTrimMapsAsCmdGoDoes(t *testing.T) {
 			trim     cgoSideTrim
 			from, to string
 		}{
-			{"module", cgoSideTrim{trimmed: true, packageDir: filepath.Join(module, "sub")}, module, slash(goos, "example.com/mod")},
-			{"module cache", cgoSideTrim{trimmed: true, packageDir: filepath.Join(cached, "sub")}, cached, slash(goos, "example.com/dep@v1.2.3")},
-			{"GOROOT, untrimmed", cgoSideTrim{goRoot: goRoot, packageDir: filepath.Join(goRoot, "src", "net")}, goRoot, slash(goos, "GOROOT")},
-			{"module, untrimmed", cgoSideTrim{packageDir: filepath.Join(module, "sub")}, "", ""},
+			{"module", cgoSideTrim{trimmed: true, root: module, packageDir: filepath.Join(module, "sub"), module: &cgoListedModule{Path: "example.com/mod", Dir: module}}, module, slash(goos, "example.com/mod")},
+			{"module cache", cgoSideTrim{trimmed: true, root: cached, packageDir: filepath.Join(cached, "sub"), module: &cgoListedModule{Path: "example.com/dep", Version: "v1.2.3", Dir: cached}}, cached, slash(goos, "example.com/dep@v1.2.3")},
+			{"GOROOT, untrimmed", cgoSideTrim{goroot: true, root: goRoot, packageDir: filepath.Join(goRoot, "src", "net")}, goRoot, slash(goos, "GOROOT")},
+			{"GOPATH", cgoSideTrim{trimmed: true, root: goPath, packageDir: filepath.Join(goPath, "src", "x")}, goPath, slash(goos, "GOPATH")},
+			{"no root", cgoSideTrim{trimmed: true, packageDir: filepath.Join(root, "loose"), importPath: "command-line-arguments"}, filepath.Join(root, "loose"), slash(goos, "command-line-arguments")},
+			{"module, untrimmed", cgoSideTrim{root: module, packageDir: filepath.Join(module, "sub"), module: &cgoListedModule{Path: "example.com/mod", Dir: module}}, "", ""},
 		} {
 			row.trim.goos = goos
-
-			if row.trim.goRoot == "" {
-				row.trim.goRoot = goRoot
-			}
 
 			if from, to := row.trim.mapping(); from != row.from || to != row.to {
 				t.Errorf("%s/%s: maps %q to %q, want %q to %q", goos, row.name, from, to, row.from, row.to)
 			}
 		}
+	}
+}
+
+// cgoSideTrimFixture writes three module shapes under root that a trim re-derived from a directory's name and go.mod
+// maps wrongly (review of 823978ff1a, #1): a module replaced by a local directory, whose go list Version is the
+// required one; a main module in a directory whose name holds an "@"; and a vendored module, whose go list Dir is
+// empty.
+func cgoSideTrimFixture(t *testing.T, root string) {
+	t.Helper()
+
+	replaced := "module example.com/main\n\ngo 1.26\n\nrequire example.com/dep v0.0.0\n\nreplace example.com/dep => ../dep\n"
+	imports := "package main\n\nimport _ \"example.com/dep\"\n\nfunc main() {}\n"
+
+	for path, contents := range map[string]string{
+		"dep/go.mod":    "module example.com/dep\n\ngo 1.26\n",
+		"dep/dep.go":    "package dep\n",
+		"main/go.mod":   replaced,
+		"main/main.go":  imports,
+		"at@dir/go.mod": "module example.com/at\n\ngo 1.26\n",
+		"at@dir/at.go":  "package at\n",
+		"vend/go.mod":   strings.Replace(replaced, "example.com/main", "example.com/vend", 1),
+		"vend/main.go":  imports,
+	} {
+		full := filepath.Join(root, filepath.FromSlash(path))
+
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(full, []byte(contents), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	vendor := exec.Command("go", "mod", "vendor")
+	vendor.Dir = filepath.Join(root, "vend")
+	vendor.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local")
+
+	if out, err := vendor.CombinedOutput(); err != nil {
+		t.Fatalf("go mod vendor: %v\n%s", err, out)
+	}
+}
+
+// The trim maps from the module go list reports, as cmd/go does (work/exec.go, ccompile: m.Dir to m.Path@m.Version,
+// and a vendored module's vendor directory to "vendor"), never from a module re-derived from the package directory's
+// name and go.mod (review of 823978ff1a, #1). Each expected mapping is written from exec.go's rule, not computed.
+func TestCgoSideTrimTakesTheModuleGoListReports(t *testing.T) {
+	// The expected directories are go list's, which resolves symlinks: on darwin the temporary directory is under
+	// /var, a symlink to /private/var, and go list reports /private/var (converter-cgo darwin, 46071733990).
+	root, err := filepath.EvalSymlinks(t.TempDir())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cgoSideTrimFixture(t, root)
+
+	slash := func(goos, path string) string {
+		if goos == "windows" {
+			return filepath.Join(`\\_\_`, path)
+		}
+
+		return filepath.Join("/_", path)
+	}
+
+	for _, goos := range []string{"linux", "windows"} {
+		for _, row := range []struct {
+			name, loadDir, pattern string
+			from, to               string
+		}{
+			{"replaced by a local directory", "main", "example.com/dep", filepath.Join(root, "dep"), slash(goos, "example.com/dep@v0.0.0")},
+			{"an @ in the main module's directory", "at@dir", ".", filepath.Join(root, "at@dir"), slash(goos, "example.com/at")},
+			{"vendored", "vend", "example.com/dep", filepath.Join(root, "vend", "vendor"), slash(goos, "vendor")},
+		} {
+			load := cgoLoad{env: append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local"), dir: filepath.Join(root, row.loadDir)}
+			trim := cgoSideTrimForTest(t, load, row.pattern, goos)
+
+			if from, to := trim.mapping(); from != row.from || to != row.to {
+				t.Errorf("%s/%s: maps %q to %q, want %q to %q", goos, row.name, from, to, row.from, row.to)
+			}
+		}
+	}
+}
+
+// cgoSideTrimForTest builds the trim for one package as the conversion builds it (cgoSideList, cgoSideTrimOf).
+func cgoSideTrimForTest(t *testing.T, load cgoLoad, pattern, goos string) cgoSideTrim {
+	t.Helper()
+
+	listed, err := cgoSideList(load, Options{}, &packages.Package{PkgPath: pattern})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	trim, err := cgoSideTrimOf(load, listed, true, goos)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return trim
+}
+
+// A side unit's #line names the Go source as go's build bakes it (review of 823978ff1a, #2): the absolute path with
+// the trim's from replaced by its to, textually, as the prefix map cmd/go hands CC does; the base name where the trim
+// maps nothing; and never a sibling directory that only shares the module directory's prefix.
+func TestCgoSideTrimLineNameIsTheMappedSource(t *testing.T) {
+	root := t.TempDir()
+	module := filepath.Join(root, "mod")
+	goRoot := filepath.Join(root, "goroot")
+	listed := &cgoListedModule{Path: "example.com/cgoreal", Dir: module}
+
+	for _, goos := range []string{"linux", "windows"} {
+		prefix := "/_"
+
+		if goos == "windows" {
+			prefix = `\\_\_`
+		}
+
+		for _, row := range []struct {
+			name, path, want string
+			trim             cgoSideTrim
+		}{
+			{"trimmed module", filepath.Join(module, "main.go"), filepath.Join(prefix, "example.com/cgoreal", "main.go"), cgoSideTrim{trimmed: true, root: module, module: listed}},
+			{"untrimmed module", filepath.Join(module, "main.go"), "main.go", cgoSideTrim{root: module, module: listed}},
+			{"GOROOT, untrimmed", filepath.Join(goRoot, "src", "net", "cgo_unix.go"), filepath.Join(prefix, "GOROOT", "src", "net", "cgo_unix.go"), cgoSideTrim{goroot: true, root: goRoot}},
+			{"a sibling sharing the prefix", filepath.Join(root, "mod2", "main.go"), "main.go", cgoSideTrim{trimmed: true, root: module, module: listed}},
+		} {
+			row.trim.goos = goos
+
+			if got := row.trim.lineName(row.path); got != row.want {
+				t.Errorf("%s/%s: names %q, want %q", goos, row.name, got, row.want)
+			}
+		}
+	}
+}
+
+// cgoNoNulCompiler is a compiler stand-in that cannot write the null device: given -o NUL it fails, as a compiler that
+// cannot open NUL for output does, and given any other -o it writes that file and succeeds.
+const cgoNoNulCompiler = `package main
+
+import (
+	"fmt"
+	"os"
+	"strings"
+)
+
+func main() {
+	for i, arg := range os.Args {
+		if arg == "-o" && i+1 < len(os.Args) {
+			out := os.Args[i+1]
+
+			if strings.EqualFold(out, os.DevNull) {
+				fmt.Fprintln(os.Stderr, "error: cannot open output file "+out)
+				os.Exit(1)
+			}
+
+			if err := os.WriteFile(out, nil, 0o644); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+		}
+	}
+}
+`
+
+// On a windows host the flag probe writes to a file in the side build's work directory, as cmd/go's does
+// (work/exec.go, gccSupportsFlag: os.CreateTemp on windows and ios), not to NUL. A compiler that cannot write NUL would
+// otherwise fail both prefix-map probes, take no map, and bake absolute paths with no word said (review of 823978ff1a,
+// #3). The probe's file does not outlive the probe.
+func TestCgoSideFlagProbeWritesAFileOnWindowsAsCmdGoDoes(t *testing.T) {
+	if runtime.GOOS != "windows" && runtime.GOOS != "ios" {
+		t.Skipf("on %s cmd/go probes into %s too: NOT MEASURED here", runtime.GOOS, os.DevNull)
+	}
+
+	tools := t.TempDir()
+	source := filepath.Join(tools, "cc.go")
+	compiler := filepath.Join(tools, "cc.exe")
+
+	if err := os.WriteFile(source, []byte(cgoNoNulCompiler), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	build := exec.Command("go", "build", "-o", compiler, source)
+	build.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local", "CGO_ENABLED=0")
+
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("the stand-in compiler did not build: %v\n%s", err, out)
+	}
+
+	workDir := t.TempDir()
+	maps := cgoSidePrefixMaps(cgoToolchain{cc: []string{compiler}}, workDir, cgoSideTrim{})
+
+	if len(maps) == 0 || !strings.HasPrefix(maps[0], "-ffile-prefix-map=") {
+		t.Errorf("a compiler that cannot write %s took no prefix map: %q", os.DevNull, maps)
+	}
+
+	if left, _ := os.ReadDir(workDir); len(left) > 0 {
+		t.Errorf("the probe left %d file(s) in the work directory", len(left))
 	}
 }

@@ -454,4 +454,69 @@ public class CgoLibrariesTests
 
         Assert.AreEqual(directories.Count, directories.Distinct(StringComparer.OrdinalIgnoreCase).Count(), "no directory is searched twice");
     }
+
+    // On windows a side library that does not load is refused with the loader's own error, so a missing dependency
+    // (126, ERROR_MOD_NOT_FOUND) reads apart from a file that is not a loadable image (193, ERROR_BAD_EXE_FORMAT)
+    // (review of 823978ff1a, #4).
+    [TestMethod]
+    public void ASideLibraryThatDoesNotLoadIsRefusedWithTheLoadersErrorOnWindows()
+    {
+        if (!OperatingSystem.IsWindows())
+            Assert.Inconclusive("the loader's error code is windows' (LoadLibraryExW): NOT MEASURED on this host");
+
+        string missing = ProbeFileName("go2cssidemissingcode");
+        DllNotFoundException notFound = Assert.ThrowsException<DllNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, missing, "go2cs_cgo_table_0"));
+        StringAssert.Contains(notFound.Message, "windows error 126");
+
+        string bad = ProbeFileName($"go2cssidebadimage{Environment.ProcessId}");
+        string planted = Path.Combine(Path.GetDirectoryName(s_assembly.Location)!, bad);
+        File.WriteAllBytes(planted, "not a portable executable"u8.ToArray());
+
+        try
+        {
+            DllNotFoundException badImage = Assert.ThrowsException<DllNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, bad, "go2cs_cgo_table_0"));
+            StringAssert.Contains(badImage.Message, "windows error 193");
+        }
+        finally
+        {
+            File.Delete(planted);
+        }
+    }
+
+    // A side library whose absolute path is longer than MAX_PATH (260) loads on windows: the load names it with the \\?\
+    // prefix, which LoadLibraryExW takes for a fully qualified path of any length (review of 823978ff1a, #5).
+    [TestMethod]
+    public void ASideLibraryPastMaxPathLoadsOnWindows()
+    {
+        if (!OperatingSystem.IsWindows())
+            Assert.Inconclusive("MAX_PATH is windows': NOT MEASURED on this host");
+
+        string directory = Path.GetDirectoryName(s_assembly.Location)!;
+        string nested = $"go2csside-longpath-{Environment.ProcessId}";
+
+        while (Path.Combine(directory, nested).Length < 280)
+            nested = Path.Combine(nested, "a-directory-segment-that-lengthens-the-path");
+
+        string name = Path.Combine(nested, ProbeFileName("go2csside-long"));
+        string planted = Path.Combine(directory, name);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(@"\\?\" + planted)!);
+        File.Copy(SystemLibraryFile(), @"\\?\" + planted, overwrite: true);
+
+        nint table = GoCgoLibraries.SideTable(s_assembly, name, SideExport);
+
+        Assert.IsTrue(planted.Length > 260, $"the planted path is {planted.Length} characters");
+        Assert.AreNotEqual((nint)0, table, $"the side library at a {planted.Length}-character path loads and exports {SideExport}");
+
+        // The library stays mapped for the process (SideTable never frees its handle), so the planted tree goes with the
+        // build output if it cannot be removed now.
+        try
+        {
+            Directory.Delete(@"\\?\" + Path.Combine(directory, nested.Split(Path.DirectorySeparatorChar)[0]), recursive: true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Still mapped: removed with the build output.
+        }
+    }
 }

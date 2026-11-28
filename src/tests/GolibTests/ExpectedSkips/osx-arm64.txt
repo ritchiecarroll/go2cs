@@ -21,6 +21,8 @@ ARearmOnARetiredRecordPanicsByName  # the overlapped records bind a socket to th
 ARecordWithAMissingSymbolThrowsRatherThanReportingNoRecord  # the missing-symbol record names libc.so.6; run this arm on Linux
 ARefusedDereferenceIsNotCounted  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
 ARowSaysWhetherTheBoxKeepsASource  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+ASideLibraryPastMaxPathLoadsOnWindows  # MAX_PATH is windows': NOT MEASURED on this host
+ASideLibraryThatDoesNotLoadIsRefusedWithTheLoadersErrorOnWindows  # the loader's error code is windows' (LoadLibraryExW): NOT MEASURED on this host
 AStructThatHoldsAReferenceAndWasNotRefusedIsB2b  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
 AThreadsSamplesAddUpToTheCpuTimeItUsed  # the per-thread on-CPU reading here is linux's /proc/thread-self/schedstat
 ATimedOutChildIsDescribedWithItsParkedFrameBeforeItIsKilled  # the parked-frame assertion is measured on Linux only

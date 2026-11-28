@@ -708,11 +708,10 @@ func TestTheCgoCompilerProbeRunsOncePerCompilerAndTarget(t *testing.T) {
 
 // A route refusal under -recurse -cgo skips its package and names it; the rest of the module converts (COORD's ruling on
 // C2's 193007Z: the plan says skip, and a module with one Phase 4 package must still convert the rest). bad's C function
-// is defined in a C source file of its own (bad.c), which cgo Phase 4's preamble-only slice refuses by name (its §2.7),
-// and both tests hold that text. A function the preamble defines is side-built since Phase 4, so the fixture no longer
-// uses one. MOVE THIS FIXTURE AGAIN when a later slice compiles a package's own C files (the plan's static-link gap,
-// go-sqlite3's sqlite3.c): it must keep reaching a refusal that slice does not retire. Single-package -cgo keeps the
-// fatal refusal.
+// is defined in a C++ source file of its own (bad.cc), which the side build refuses by name (cgo Phase 4b, §3), and both
+// tests hold that text. It moved from bad.c when 4b began compiling a package's own C files (COORD's condition: the
+// fixture keeps reaching a refusal, and keeps holding its text). MOVE IT AGAIN if a later slice builds C++. Single-package
+// -cgo keeps the fatal refusal.
 const cgoRecurseBad = `package bad
 
 /*
@@ -724,16 +723,16 @@ import "C"
 func Two() int { return int(C.two()) }
 `
 
-// cgoRecurseBadC is bad's C source file of its own.
-const cgoRecurseBadC = "int two(void) { return 2; }\n"
+// cgoRecurseBadCC is bad's C++ source file of its own, whose function C reaches by its C name.
+const cgoRecurseBadCC = "extern \"C\" int two(void) { return 2; }\n"
 
 // cgoRecurseBadRefusal is the refusal both tests hold bad to, by its text: not merely refused, refused for this reason.
-const cgoRecurseBadRefusal = "C.two: no shared library the package links exports it, and the package has C source files of its own (bad.c): go2cs side-builds the preamble only"
+const cgoRecurseBadRefusal = "C.two: no shared library the package links exports it, and the package has source files of its own go2cs does not build (bad.cc): the side build compiles C and assembly only"
 
 func TestARecurseCgoConversionSkipsARouteRefusedPackageAndConvertsTheRest(t *testing.T) {
 	requireHostCC(t)
 
-	combined, output, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "bad/bad.go": cgoRecurseBad, "bad/bad.c": cgoRecurseBadC, "main.go": cgoRecurseMain},
+	combined, output, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "bad/bad.go": cgoRecurseBad, "bad/bad.cc": cgoRecurseBadCC, "main.go": cgoRecurseMain},
 		"-recurse=nuget", "-cgo=true")
 
 	for _, want := range []string{"GO2CS2001", "Refused 1 package", "example.com/cgorecurse/bad", cgoRecurseBadRefusal} {
@@ -761,7 +760,7 @@ func TestASinglePackageCgoConversionKeepsTheFatalRouteRefusal(t *testing.T) {
 	dir := t.TempDir()
 	writeCgoFixture(t, dir, "go.mod", "module example.com/bad\n\ngo 1.26\n")
 	writeCgoFixture(t, dir, "bad.go", cgoRecurseBad)
-	writeCgoFixture(t, dir, "bad.c", cgoRecurseBadC)
+	writeCgoFixture(t, dir, "bad.cc", cgoRecurseBadCC)
 	output := t.TempDir()
 	cmd := exec.Command(driverBinary(t), "-cgo=true", "-go2cspath", treeSrc, dir, output)
 	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=")
