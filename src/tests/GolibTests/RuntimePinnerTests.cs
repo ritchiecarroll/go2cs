@@ -8,9 +8,11 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.golib;
 using Δruntime = go.runtime_package;
 using @unsafe = go.unsafe_package;
 
@@ -378,40 +380,118 @@ public class RuntimePinnerTests
             "StandardBox<T> gained instance state");
     }
 
+    // The pins a cost row measures after its warm-up. Odd, so the median is one of them.
+    private const int PinsMeasured = 31;
+
     [TestMethod]
     public void TheCostPerPinIsMeasured()
     {
         Δruntime.Pinner pinner = new(nil);
-        var boxes = Enumerable.Range(0, 12).Select(i => new StandardBox<Leaf>(new Leaf { x = i })).ToArray();
+        var boxes = Enumerable.Range(0, 10 + PinsMeasured).Select(i => new StandardBox<Leaf>(new Leaf { x = i })).ToArray();
 
         // The first pin allocates the pinner box, its list and the finalizer registration.
         long before = GC.GetAllocatedBytesForCurrentThread();
         pinner.Pin(boxes[0]);
         long firstPin = GC.GetAllocatedBytesForCurrentThread() - before;
 
-        // Warm past the list's and the table's growth points, then measure one distinct pin and
-        // one repeat pin with nothing left to grow.
+        // Warm with nine more pins, then measure a run of distinct pins (DistinctPinCost says how one cost is read off
+        // the run) and one repeat pin.
         for (int i = 1; i < 10; i++)
             pinner.Pin(boxes[i]);
 
-        before = GC.GetAllocatedBytesForCurrentThread();
-        pinner.Pin(boxes[10]);
-        long distinctPin = GC.GetAllocatedBytesForCurrentThread() - before;
+        long[] costs = PinCosts(ref pinner, boxes[10..]);
+        long distinctPin = DistinctPinCost(costs);
 
         before = GC.GetAllocatedBytesForCurrentThread();
         pinner.Pin(boxes[10]);
         long repeatPin = GC.GetAllocatedBytesForCurrentThread() - before;
 
-        Console.WriteLine($"runtime.Pinner cost: first pin {firstPin} B (pinner box + list + finalizer registration); distinct object {distinctPin} B (table entry + record + pinned buffer + storage count + list slot); repeat pin {repeatPin} B");
+        Console.WriteLine($"runtime.Pinner cost: first pin {firstPin} B (pinner box + list + finalizer registration); distinct object {distinctPin} B (table entry + record + pinned buffer + storage count + list slot; of {costs.Length} pins, least {costs.Min()} B, most {costs.Max()} B); repeat pin {repeatPin} B");
 
         // cgo S6 (DESIGN-cgo-phase3-marshaling 21): a distinct pin now HOLDS its allocation still, so it adds a PinnedBuffer
         // (a finalizable GCHandle owner), the record's one-element array and a storage count beside the table entry.
         // Measured at Debug: 24 B before S6 (8a7a6d3690), 216 B after, for a reference-free value (one allocation, the fast
-        // path). The GCHandle's table slot is not on the GC heap, so this figure does not include it (golib-gen.md).
+        // path). Of the 216 B, 96 B are the pin index's (8 B more of pinned buffer, a weak reference and a node), so a
+        // process that links no cgo package reads 120 B. The GCHandle's table slot is not on the GC heap, so this figure
+        // does not include it (golib-gen.md).
         Assert.AreEqual(0L, repeatPin, "a repeat pin is a counter increment and allocates nothing");
         Assert.IsTrue(distinctPin > 0 && distinctPin <= 256, $"a distinct pin costs one table entry, one record, one pinned buffer and one storage count, measured {distinctPin} B");
 
         pinner.Unpin();
         GC.KeepAlive(boxes);
+    }
+
+    // The cost above must not depend on where the allocator puts a box. This row puts the first of its measured boxes on
+    // a page that holds no live pin, which is the case that read 304 B, on every run: the boxes come after four pages of
+    // bytes, and the index itself is asked whether their first page is empty.
+    [TestMethod]
+    public void TheCostPerPinIsTheSameWhenAPinIsTheFirstOnItsPage()
+    {
+        Assert.IsNotNull(PinExtents.Current, "GolibTests is a cgo process: the pin index is on");
+
+        const int attempts = 8;
+
+        for (int attempt = 1; attempt <= attempts; attempt++)
+        {
+            Δruntime.Pinner pinner = new(nil);
+            var warm = Enumerable.Range(0, 10).Select(i => new StandardBox<Leaf>(new Leaf { x = i })).ToArray();
+
+            foreach (StandardBox<Leaf> box in warm)
+                pinner.Pin(box);
+
+            byte[] spacer = new byte[4 * 4096];
+            var measured = Enumerable.Range(0, PinsMeasured).Select(i => new StandardBox<Leaf>(new Leaf { x = i })).ToArray();
+
+            // The page is read before the pin and again after it. A box that a collection moved in between, or a page
+            // that already held a live pin (another test's), is not the premise: go round with new boxes.
+            nuint page = PageOf(measured[0]);
+            int liveBefore = PinExtents.EntriesOver(page << 12, (page + 1) << 12);
+            long[] costs = PinCosts(ref pinner, measured);
+            bool firstOnItsPage = liveBefore == 0 && PageOf(measured[0]) == page;
+            long distinctPin = DistinctPinCost(costs);
+
+            pinner.Unpin();
+            GC.KeepAlive(warm);
+            GC.KeepAlive(spacer);
+            GC.KeepAlive(measured);
+
+            if (!firstOnItsPage)
+                continue;
+
+            Console.WriteLine($"runtime.Pinner cost, first pin on a page: that pin {costs[0]} B; distinct object {distinctPin} B (of {costs.Length} pins, least {costs.Min()} B, most {costs.Max()} B); the pin index's page entry {costs[0] - distinctPin} B; attempt {attempt}");
+
+            Assert.IsTrue(distinctPin > 0 && distinctPin <= 256, $"a distinct pin costs the same when one of the pins is the first on its page, measured {distinctPin} B");
+            Assert.IsTrue(costs[0] > distinctPin, $"the first live pin on a page pays the pin index that page's entry: {costs[0]} B against {distinctPin} B");
+            return;
+        }
+
+        Assert.Fail($"the premise: in {attempts} attempts no box after four pages of bytes was the first live pin on its page");
+    }
+
+    // Pins each box once and answers what each pin allocated on this thread.
+    private static long[] PinCosts(ref Δruntime.Pinner pinner, StandardBox<Leaf>[] boxes)
+    {
+        long[] costs = new long[boxes.Length];
+
+        for (int i = 0; i < boxes.Length; i++)
+        {
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            pinner.Pin(boxes[i]);
+            costs[i] = GC.GetAllocatedBytesForCurrentThread() - before;
+        }
+
+        return costs;
+    }
+
+    // What one distinct pin costs, off the costs of a run of them. As this file measured it before: the first pin after
+    // the warm-up, alone.
+    private static long DistinctPinCost(long[] costs) => costs[0];
+
+    // The 4 KiB page a box's value slot lies on, which is the page the pin index files its pin under. It holds still only
+    // while the box is pinned.
+    private static unsafe nuint PageOf(StandardBox<Leaf> box)
+    {
+        Array slot = (Array)((INilPointer)box).PinnableStorage!;
+        return (nuint)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(slot)) >> 12;
     }
 }
