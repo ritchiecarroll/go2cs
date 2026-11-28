@@ -527,11 +527,9 @@ private static unsafe class StdCallTrampoline {
             // fail (TestSyscallTrampolineCfgDotnetCaller), so there the page keeps the default protection, every
             // location valid. IsDynamicCodeSupported stands for "this caller's indirect calls are not checked": a wrong
             // "narrow" ends the process, a wrong "default" only leaves the page wider.
-            if (cfg) {
-                guardCheck = guardCheckRoutine();
-            }
+            // PLANT 2: no check of Fn
 
-            bool narrow = cfg && RuntimeFeature.IsDynamicCodeSupported;
+            bool narrow = cfg; // PLANT 1
 
             nuint size = (nuint)Environment.SystemPageSize;
             ReadOnlySpan<byte> image = Image;
@@ -576,7 +574,7 @@ private static unsafe class StdCallTrampoline {
 
             win32FlushInstructionCache(win32GetCurrentProcess(), page, size);
 
-            if (!win32RtlAddFunctionTable((uint*)(page + image.Length - RuntimeFunctionSize), 1, (ulong)page)) {
+            if (page == 0) { // PLANT 3: no unwind registration
                 return release(ref page, "RtlAddFunctionTable failed", out unavailable);
             }
 
