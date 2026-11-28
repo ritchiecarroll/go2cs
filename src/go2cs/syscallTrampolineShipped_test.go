@@ -45,7 +45,12 @@ import (
 //
 // A fifth run, under the JIT, enters the stub the same way with a block in native heap memory, Fn GetCurrentProcessId
 // (a valid CFG target) and N 0: the stub must end it with __fastfail (0xc0000409) because the block is not on the
-// calling thread's stack (DESIGN section 6, revision 5). On revision 4 it printed "heap: the process id".
+// calling thread's stack (DESIGN section 6, revision 5). On revision 4 it prints "heap: the process id".
+//
+// A sixth run, under the JIT, does the same with a block in stack memory a returned helper left (below the stub's
+// frame, above StackLimit): the stub must end it with the fast fail, because a block there can be overwritten by the
+// stub's own copy of the arguments between the CFG check of Fn and the call (P3's read of revision 5). On revision
+// 5, whose lower bound is StackLimit, it prints "stale: the process id".
 //
 // Made to fail (DESIGN section 9): with `narrow = cfg` the aot-cfg caller ends at its first syscall with the fast
 // fail; without the stub's check the CFG callers' unmarked run prints 7.
@@ -91,6 +96,18 @@ public static unsafe class Program
         }
 
         return stub;
+    }
+
+    // A block in stack memory the caller has left: 16 KB of this frame, Fn and N 0 at its low end. Once this returns,
+    // the block lies below the next frame's stack pointer but above StackLimit.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static nuint* staleBlock(nuint fn)
+    {
+        nuint* frame = stackalloc nuint[2048];
+        frame[0] = fn;
+        frame[1] = 0;
+        frame[2] = 0;
+        return frame;
     }
 
     private static string run(string name, Func<string> body)
@@ -170,6 +187,27 @@ public static unsafe class Program
             ((delegate* unmanaged<nuint*, void>)stub)(block);
             bool pid = block[3] == (nuint)Environment.ProcessId;
             Console.WriteLine("heap: " + (pid ? "the process id" : block[3].ToString()));
+            return 0;
+        }
+
+        if (args.Length > 0 && args[0] == "stale")
+        {
+            nint stub = stubPointer("stale");
+
+            if (stub == 0)
+            {
+                return 0;
+            }
+
+            // StdCallInfo in the dead stack below this frame, Fn a valid target, N 0: the stub's own frame lands on
+            // memory like it, so it takes only a block above its frame. Nothing runs between the helper and the call.
+            nuint fn = (nuint)syscall.NewLazyDLL("kernel32.dll").NewProc("GetCurrentProcessId").Addr();
+            Console.WriteLine("stale: calling");
+            Console.Out.Flush();
+            nuint* block = staleBlock(fn);
+            ((delegate* unmanaged<nuint*, void>)stub)(block);
+            nuint r1 = block[3];
+            Console.WriteLine("stale: " + (r1 == (nuint)Environment.ProcessId ? "the process id" : r1.ToString()));
             return 0;
         }
 
@@ -366,6 +404,13 @@ func shippedTrampolineRow(t *testing.T, cfgArm bool) {
 			if strings.Contains(text, "heap: the process id") {
 				t.Errorf("%s heap: a block off the thread's stack reached its target; the stub did not check where it lies",
 					arm)
+			}
+
+			text, code = run(arm+" stale", nil, name, append(args, "stale")...)
+			expect(arm+" stale", text, code, fastFail, "stale: calling")
+
+			if strings.Contains(text, "stale: the process id") {
+				t.Errorf("%s stale: a block below the stub's frame reached its target; the lower bound is not the frame", arm)
 			}
 		}
 	}
