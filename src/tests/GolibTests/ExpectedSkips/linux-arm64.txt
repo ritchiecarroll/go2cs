@@ -15,6 +15,8 @@ APollCloseSnapshotWaitsForTheRetirement  # the overlapped records bind a socket 
 ARearmOnARetiredRecordPanicsByName  # the overlapped records bind a socket to the CLR's completion port, a windows facility
 ARefusedDereferenceIsNotCounted  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
 ARowSaysWhetherTheBoxKeepsASource  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+ASideLibraryPastMaxPathLoadsOnWindows  # MAX_PATH is windows': NOT MEASURED on this host
+ASideLibraryThatDoesNotLoadIsRefusedWithTheLoadersErrorOnWindows  # the loader's error code is windows' (LoadLibraryExW): NOT MEASURED on this host
 AStructThatHoldsAReferenceAndWasNotRefusedIsB2b  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
 AToolchainChildThatSetsItsOwnGodebugKeepsTheJunctionSetting  # the junction fallback exists only on Windows
 AUnionInAStructCrossesAsItsBytes  # the cgo probe library is built only on the hosted golib-tests legs (GO2CS_CGO_PROBE_DIR is not set): NOT MEASURED

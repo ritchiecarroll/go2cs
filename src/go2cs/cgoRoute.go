@@ -1168,8 +1168,21 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	// The package's own #cgo flags are held to cmd/go's allowlist at the pinned GOROOT before the capture links or the
 	// side build compiles with any of them (cgoFlagSecurity.go; COORD's ruling, 2026-11-28). The load's go list
 	// -compiled runs the same check today and fails the package, but the route does not rest on that.
+	//
+	// The package is listed ONCE, by import path in the load's directory, and that listing is both checked and, below,
+	// compiled with (P3's MUST on 4b): a second listing could answer with other flags than the ones checked.
+	var listed cgoSideListing
+
 	if err == nil {
-		err = cgoFlagsAllowed(load, options, pkg, goos)
+		if listed, err = cgoSideList(load, options, pkg); err == nil {
+			err = cgoFlagsAllowed(load, listed, goos)
+		}
+	}
+
+	// The record's -L directories that are not the environment's (pkg-config's share among them) are scanned as cmd/go
+	// 1.26.11 scans a linker search directory.
+	if err == nil {
+		err = cgoLinkDirsAllowed(load, flags, goos)
 	}
 
 	if err != nil {
@@ -1203,9 +1216,14 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	} else {
 		var unbound []string
 		triple, _ = cgoCompilerTriple(load, options.targetPlatform)
-		captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
 
-		if err == nil && len(unbound) > 0 {
+		// cgo Phase 4b (docs/phase4/DESIGN-cgo-phase4b-own-sources.md §2): the side build classifies every name before the
+		// probe is asked, so a name the package defines is never bound to a library that also exports it. A package with
+		// source files of its own the side build does not compile is not classified: any of them could define a name.
+		builtOwn, refusedOwn := cgoSideOwnSources(pkg)
+		plan := cgoSidePlan{probe: symbols}
+
+		if len(refusedOwn) == 0 {
 			sourcePaths := map[string]string{}
 
 			for _, source := range sources {
@@ -1215,27 +1233,47 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 				}
 			}
 
-			var unbuilt []cgoUseRefusal
+			if plan, err = planCgoSideBuild(pkg, options, load, listed, goos, goarch, flags, symbols, symbolUses, sourcePaths, builtOwn); err == nil && len(plan.refusals) > 0 {
+				return nil, refuseCgoRoute(pkg, plan.refusals)
+			}
+		}
 
-			if side, unbuilt, err = planCgoSideBuild(pkg, options, load, goos, goarch, flags, unbound, symbolUses, sourcePaths); err == nil && len(unbuilt) > 0 {
-				return nil, refuseCgoRoute(pkg, unbuilt)
+		if err == nil {
+			side = plan.build
+			symbols = plan.probe
+			captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
+		}
+
+		if err == nil && len(unbound) > 0 {
+			var refusals []cgoUseRefusal
+
+			for _, symbol := range unbound {
+				text := cgoUnboundRefusal(symbol)
+
+				switch {
+				case len(refusedOwn) > 0:
+					text = cgoSideOwnRefusal(symbol, refusedOwn)
+				case len(plan.pkgConfig) > 0:
+					text = cgoSidePkgConfigRefusal(symbol, plan.pkgConfig)
+				}
+
+				refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: text})
 			}
 
-			if err == nil {
-				slots := side.slots()
-				symbols = slices.DeleteFunc(symbols, func(symbol string) bool { _, built := slots[symbol]; return built })
-				captured, toolchain, unbound, err = cgoCaptureUnbound(load, goos, goarch, flags, symbols)
+			return nil, refuseCgoRoute(pkg, refusals)
+		}
 
-				// The names left were bound by the first capture, so a second that binds fewer is not one go2cs reads.
-				if err == nil && len(unbound) > 0 {
-					var refusals []cgoUseRefusal
+		// A file of the package's own that go's build links and this conversion does not is named, never dropped
+		// without a word (P3's MUST 2).
+		if err == nil {
+			position := pkg.Fset.PositionFor(typesFile.Package, false).String()
 
-					for _, symbol := range unbound {
-						refusals = append(refusals, cgoUseRefusal{position: symbolUses[symbol], text: cgoUnboundRefusal(symbol)})
-					}
+			if side == nil && len(builtOwn) > 0 {
+				reportWarningDiagnostic(position, diagnosticCgoOwnFileUnlinked, cgoSideUnlinkedWarning(builtOwn, true))
+			}
 
-					return nil, refuseCgoRoute(pkg, refusals)
-				}
+			if len(refusedOwn) > 0 {
+				reportWarningDiagnostic(position, diagnosticCgoOwnFileUnlinked, cgoSideUnlinkedWarning(refusedOwn, false))
 			}
 		}
 	}

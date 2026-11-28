@@ -12,6 +12,7 @@ import (
 	"debug/elf"
 	"debug/macho"
 	"debug/pe"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,6 +21,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // cgo Phase 4, the preamble-only slice (docs/phase4/DESIGN-cgo-phase4-sidebuild.md §3): a function the preamble
@@ -170,25 +173,63 @@ func TestCgoPhase4EASideBuildUnderPkgConfigIsRefusedByName(t *testing.T) {
 	}
 }
 
-// A name the preamble defines and a library the package links also exports is refused by name, never bound to the
-// library's (review of 500b0855c7, #5): cmd/cgo compiles the preamble's own, so the library's is not what C calls.
-func TestCgoPhase4FAPreambleDefinitionALibraryAlsoExportsIsRefusedByName(t *testing.T) {
-	probeDir := cgoRealProbeDir(t)
-
+// A name the preamble defines and a library the package links also exports runs the preamble's own, as go's build does
+// (cgo Phase 4b, row 1; docs/phase4/DESIGN-cgo-phase4b-own-sources.md): cmd/cgo compiles the preamble, so its
+// definition is what C calls, and the side build classifies a name the hosting unit defines before it asks the probe.
+// At Phase 4 the probe was asked first and the name was refused by name (review of 500b0855c7, #5).
+func TestCgoPhase4FAPreambleDefinitionALibraryAlsoExportsRunsAsGoDoes(t *testing.T) {
 	// A name the target's C runtime exports from a shared library: the UCRT exports _isatty, not isatty (mingw's isatty
-	// is a static alias, so on windows a preamble isatty collides with nothing and is side-built; f3b092c978's windows
-	// leg, 46029370800).
+	// is a static alias; f3b092c978's windows leg, 46029370800).
 	name := "isatty"
 
 	if runtime.GOOS == "windows" {
 		name = "_isatty"
 	}
 
-	program := "package main\n\n/*\nstatic int " + name + "(int fd) { return 42; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"tty\", C." + name + "(0)) }\n"
-	combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{"main.go": program})
+	runCgoPhase4(t, "package main\n\n/*\nstatic int "+name+"(int fd) { return 42; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"tty\", C."+name+"(0)) }\n")
+}
+
+// A non-static function one file's preamble defines and another file calls runs as go's build runs it (cgo Phase 4b,
+// row 2): any of the package's objects that defines the name globally side-builds it. go-sqlite3's callback.go calls
+// _sqlite3_result_text, which sqlite3.go's preamble defines. At Phase 4 it was refused by name (the cross-file gap).
+func TestCgoPhase4JAFunctionAnotherFilesPreambleDefinesRunsAsGoDoes(t *testing.T) {
+	runCgoPhase4With(t, cgoPhase4Case{sideUnits: 2, files: map[string]string{
+		"main.go":   "package main\n\n/*\nint go2cs_p4_helper(void);\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"helper\", C.go2cs_p4_helper()) }\n",
+		"helper.go": "package main\n\n/*\nint go2cs_p4_helper(void) { return 9; }\n*/\nimport \"C\"\n",
+	}})
+}
+
+// The package's own C file is compiled and linked into the side library, with one copy of its global, as in go's
+// binary (cgo Phase 4b, row 3). At Phase 4 it was refused by name (design §2.7, "C source files of its own").
+func TestCgoPhase4COwnCFileConvertsAndRunsAsGoDoes(t *testing.T) {
+	runCgoPhase4Files(t, map[string]string{
+		"main.go": "package main\n\n/*\nextern int go2cs_p4_own_count;\nint go2cs_p4_own_bump(int n);\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() {\n\tC.go2cs_p4_own_bump(3)\n\tfmt.Println(\"own\", C.go2cs_p4_own_bump(4), C.go2cs_p4_own_count)\n}\n",
+		"own.c":   "int go2cs_p4_own_count = 1;\n\nint go2cs_p4_own_bump(int n) { go2cs_p4_own_count += n; return go2cs_p4_own_count; }\n",
+	})
+}
+
+// A C file of the package's own that preprocesses to nothing compiles to an empty object and takes nothing from the
+// side library (cgo Phase 4b, row 4): go-sqlite3's sqlite3-binding.c under libsqlite3. At Phase 4 it was refused with
+// row 3's text.
+func TestCgoPhase4KAnOwnCFileThatPreprocessesToNothingConvertsAndRunsAsGoDoes(t *testing.T) {
+	runCgoPhase4Files(t, map[string]string{
+		"main.go": "package main\n\n/*\nstatic int four(void) { return 4; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"four\", C.four()) }\n",
+		"empty.c": "#ifdef GO2CS_NEVER\nint go2cs_p4_never(void) { return 0; }\n#endif\n",
+	})
+}
+
+// A name two of the package's objects define globally is refused by name before the side link (cgo Phase 4b, OQ-1,
+// COORD's ruling): C's link and go's both reject the duplicate, and a named refusal reads better than a linker error.
+// At Phase 4 the name was side-built from the hosting unit's object alone, and the other definition was never compiled.
+func TestCgoPhase4LANameTwoObjectsDefineGloballyIsRefusedByName(t *testing.T) {
+	probeDir := cgoRealProbeDir(t)
+	combined, _, output, err := convertCgoReal(t, probeDir, map[string]string{
+		"main.go":  "package main\n\n/*\nint go2cs_p4_dup(void) { return 1; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"dup\", C.go2cs_p4_dup()) }\n",
+		"other.go": "package main\n\n/*\nint go2cs_p4_dup(void) { return 2; }\n*/\nimport \"C\"\n",
+	})
+	t.Logf("READING %s/%s: exit %v; the conversion's output ends:\n%s", runtime.GOOS, runtime.GOARCH, err, lastLines(combined, 12))
 	requireNothingWritten(t, output, err, combined)
-	t.Logf("READING %s/%s: the conversion's output ends:\n%s", runtime.GOOS, runtime.GOARCH, lastLines(combined, 12))
-	requireCgoUseRefused(t, cgoRefusalLinesIn(combined, "main.go"), "main.go(", "C."+name+":")
+	requireCgoUseRefused(t, cgoRefusalLinesIn(combined, "main.go"), "main.go(", "C.go2cs_p4_dup", "other.go")
 }
 
 // A relative #cgo CFLAGS include directory is the package directory's, as cmd/go runs each cgo compile there (review
@@ -251,6 +292,10 @@ type cgoPhase4Case struct {
 	// refusedAtRun, when set, is text go2cs's run must fail with, where go's runs to its end: a load go2cs refuses on
 	// purpose (review of ef369204c9, #1).
 	refusedAtRun []string
+
+	// sideUnits is the number of side translation units the conversion writes; 0 means 1 (cgo Phase 4b: a package whose
+	// other file defines a name compiles that file's unit too).
+	sideUnits int
 }
 
 // runCgoPhase4With converts one case, checks the side library, and where the build tests are on, builds the program
@@ -286,8 +331,14 @@ func runCgoPhase4With(t *testing.T, c cgoPhase4Case) {
 	// The side library and its translation unit, beside the bindings (design §2.4).
 	sideDir := filepath.Join(cgoBuildDir(t, output), "cgo", strings.ReplaceAll(target, "/", "-"))
 
-	if units, _ := filepath.Glob(filepath.Join(sideDir, "*.side.c")); len(units) != 1 {
-		t.Errorf("the conversion wrote %d side translation units in %s, want 1", len(units), sideDir)
+	wantUnits := c.sideUnits
+
+	if wantUnits == 0 {
+		wantUnits = 1
+	}
+
+	if units, _ := filepath.Glob(filepath.Join(sideDir, "*.side.c")); len(units) != wantUnits {
+		t.Errorf("the conversion wrote %d side translation units in %s, want %d", len(units), sideDir, wantUnits)
 	}
 
 	if library := filepath.Join(sideDir, cgoSideLibraryFile(runtime.GOOS, "main", "example.com/cgoreal")); !fileExists(library) {
@@ -466,10 +517,20 @@ var cgoPhase4FileProgram = map[string]string{
 	"go2cs_file.h": "static char *go2cs_file(void) { return __FILE__; }\n",
 }
 
+// cgoPhase4OwnFileProgram is cgoPhase4FileProgram with the preamble's own __FILE__ beside the header's. cmd/cgo names
+// the preamble by its absolute path (cmd/cgo/ast.go, ParseGo: #line <n> "<abspath>"), which -trimpath's map turns into
+// /_/<module path>/main.go (review of 823978ff1a, #2). Untrimmed, go prints the absolute path, and go2cs keeps the
+// base name there, so as not to write a machine path into the side unit (the design, §2.2): the untrimmed arm reads
+// the header only.
+var cgoPhase4OwnFileProgram = map[string]string{
+	"main.go":      "package main\n\n/*\n#include \"go2cs_file.h\"\nstatic char *go2cs_own_file(void) { return __FILE__; }\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"file\", C.GoString(C.go2cs_file()), C.GoString(C.go2cs_own_file())) }\n",
+	"go2cs_file.h": cgoPhase4FileProgram["go2cs_file.h"],
+}
+
 // A header's __FILE__ is go's under each path mode: trimmed (go2cs's default, against go build -trimpath) and
-// untrimmed (-trimpath=false, against a plain go build).
+// untrimmed (-trimpath=false, against a plain go build). Trimmed, so is the preamble's own.
 func TestCgoPhase4IAHeadersFileNameIsGosUnderEachPathMode(t *testing.T) {
-	t.Run("trimmed", func(t *testing.T) { runCgoPhase4With(t, cgoPhase4Case{files: cgoPhase4FileProgram}) })
+	t.Run("trimmed", func(t *testing.T) { runCgoPhase4With(t, cgoPhase4Case{files: cgoPhase4OwnFileProgram}) })
 	t.Run("untrimmed", func(t *testing.T) { runCgoPhase4With(t, cgoPhase4Case{files: cgoPhase4FileProgram, untrimmed: true}) })
 }
 
@@ -537,4 +598,122 @@ func TestCgoPhase4HASideLibrarysDependentsLoadOnlyFromSafePlaces(t *testing.T) {
 	default:
 		t.Skipf("on %s the side library's dependents load by the dynamic loader's own search, as a go binary's do: NOT MEASURED here", runtime.GOOS)
 	}
+}
+
+// A file of the package's own that go's build links and go2cs's does not is named, never dropped without a word (P3's
+// 4b MUST 2): when nothing Go uses needs the side library, an own C file is compiled and left unlinked, and a C++ file
+// is never compiled. Go would link either, and code in it that runs on its own (a constructor) would run. The package
+// still converts: the warning is the reading.
+func TestCgoPhase4MAnOwnFileNothingLinksIsNamed(t *testing.T) {
+	probeDir := cgoRealProbeDir(t)
+
+	for _, row := range []struct{ name, file, contents string }{
+		{"c", "own.c", "int go2cs_p4_unused(void) { return 3; }\n"},
+		{"cc", "unused.cc", "extern \"C\" int go2cs_p4_unused(void) { return 3; }\n"},
+	} {
+		t.Run(row.name, func(t *testing.T) {
+			combined, _, _, err := convertCgoReal(t, probeDir, map[string]string{"main.go": cgoPhase4BoundOnlyProgram, row.file: row.contents})
+			t.Logf("READING %s/%s %s: exit %v; the conversion's output ends:\n%s", runtime.GOOS, runtime.GOARCH, row.name, err, lastLines(combined, 12))
+
+			if err != nil {
+				t.Fatalf("a package whose names all bind did not convert: %v", err)
+			}
+
+			for _, want := range []string{"warning GO2CS2017", row.file} {
+				if !strings.Contains(combined, want) {
+					t.Errorf("the conversion does not name %q", want)
+				}
+			}
+		})
+	}
+}
+
+// cgoPhase4BoundOnlyProgram calls only a function a library exports (libm's cos), so nothing is side-built.
+const cgoPhase4BoundOnlyProgram = "package main\n\n/*\n#cgo LDFLAGS: -lm\n#include <math.h>\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"cos\", C.cos(0)) }\n"
+
+// TestSqlite3ReadingOnTheSideBuild is cgo Phase 4b's go-sqlite3 reading (docs/phase4/DESIGN-cgo-phase4b-own-sources.md
+// §5.3; OQ-2, COORD: measure the amalgamation's compile cost, prediction first). It is a reading, not a gate: run it by
+// name on a hosted leg (converter-cgo, filter ^TestSqlite3Reading). It downloads github.com/mattn/go-sqlite3 v1.14.53
+// through the module proxy and logs two READING lines: where a -cgo conversion of the package stops, and how long the
+// side build's own compile of sqlite3-binding.c takes with go list's flags for it. It fails only when it cannot set up.
+func TestSqlite3ReadingOnTheSideBuild(t *testing.T) {
+	requireHostCC(t)
+
+	env := append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local", "CGO_ENABLED=1")
+	download := exec.Command("go", "mod", "download", "-json", "github.com/mattn/go-sqlite3@v1.14.53")
+	download.Dir = t.TempDir()
+	download.Env = env
+	out, err := download.Output()
+
+	if err != nil {
+		t.Fatalf("go mod download of go-sqlite3: %v\n%s", err, out)
+	}
+
+	var module struct{ Dir string }
+
+	if err := json.Unmarshal(out, &module); err != nil || module.Dir == "" {
+		t.Fatalf("go mod download answered no directory: %v\n%s", err, out)
+	}
+
+	target := runtime.GOOS + "/" + runtime.GOARCH
+
+	// Where a -cgo conversion of the package stops.
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	output := t.TempDir()
+	convert := exec.Command(driverBinary(t), "-cgo=true", "-go2cspath", treeSrc, module.Dir, output)
+	convert.Env = env
+	started := time.Now()
+	combined, convertErr := convert.CombinedOutput()
+	t.Logf("READING %s go-sqlite3 conversion: exit %v in %s", target, convertErr, time.Since(started).Round(time.Second))
+
+	for _, line := range cgoRefusalLinesIn(string(combined), "") {
+		t.Logf("READING %s go-sqlite3 refused: %s", target, line[strings.Index(line, "error "):])
+	}
+
+	t.Logf("READING %s go-sqlite3 conversion's output ends:\n%s", target, lastLines(string(combined), 15))
+
+	// The side build's own compile of the amalgamation, with go list's flags for the package (OQ-2).
+	load := cgoLoad{env: env, dir: module.Dir}
+	toolchain, toolchainLine, err := cgoResolveToolchain(load, runtime.GOOS, runtime.GOARCH)
+
+	if err != nil {
+		t.Fatalf("the toolchain: %v", err)
+	}
+
+	pkg := &packages.Package{PkgPath: "github.com/mattn/go-sqlite3", Dir: module.Dir}
+	listed, err := cgoSideList(load, Options{}, pkg)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	compileFlags, _, err := cgoSideCompileFlags(load, listed, pkg)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	trim, err := cgoSideTrimOf(load, listed, true, runtime.GOOS)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	workDir := t.TempDir()
+	object := filepath.Join(workDir, "sqlite3-binding.o")
+	started = time.Now()
+	_, compileErr := cgoSideCompileOwn(toolchain, runtime.GOOS, compileFlags, filepath.Join(listed.dir(pkg), "sqlite3-binding.c"), object, listed.dir(pkg), cgoSidePrefixMaps(toolchain, workDir, trim))
+	elapsed := time.Since(started)
+	size := int64(0)
+
+	if info, statErr := os.Stat(object); statErr == nil {
+		size = info.Size()
+	}
+
+	t.Logf("READING %s go-sqlite3 amalgamation compile: %v in %.1f s, object %d bytes; %s; flags %q", target, compileErr, elapsed.Seconds(), size, toolchainLine, compileFlags)
 }
