@@ -867,8 +867,9 @@ func cgoLinesContaining(text, substr string) string {
 
 // The go-sqlite3 marshalling slice (docs/phase4/DESIGN-cgo-sqlite-marshalling.md), offline over cmd/cgo's shapes:
 // A, a struct whose member is `void *` (go-sqlite3's sqlite3_go_col) crosses by pointer, its member copied as cgo checks
-// a pointer member (GoCgoArgs.PointerMember); B, a typedef of `char *`, which cmd/cgo declares as an alias, is a pointer
-// result and a pointer parameter, not a refused scalar.
+// a pointer member (GoCgoArgs.PointerMember); B, a typedef of `char *`, which cmd/cgo declares as a defined type over the
+// pointer (`type _Ctype_T *_Ctype_char`: cmd/cgo writes `=` only where the printed type is itself a _Ctype_ name), is a
+// pointer result and a pointer parameter, not a refused scalar.
 func TestCgoSliceAVoidPointerMemberAndATypedefdPointerCross(t *testing.T) {
 	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
 
@@ -910,7 +911,7 @@ type _Ctype_struct_go2cs_col struct {
 	_	[4]byte
 }
 
-type _Ctype_go2cs_fname = *_Ctype_char
+type _Ctype_go2cs_fname *_Ctype_char
 ` + stub("go2cs_col_fill", "p0 *_Ctype_struct_go2cs_col", "_Ctype_int", "p0") +
 		stub("go2cs_fname", "", "_Ctype_go2cs_fname", "r1") +
 		stub("go2cs_fname_len", "p0 _Ctype_go2cs_fname", "_Ctype_int", "p0")

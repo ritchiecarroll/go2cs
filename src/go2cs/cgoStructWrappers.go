@@ -339,8 +339,9 @@ func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoSt
 		return cgoStructParam{void: true}, nil
 	}
 
-	// A C typedef of a pointer is an alias, read as the pointer it names (DESIGN-cgo-sqlite-marshalling.md §3).
-	if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
+	// A C typedef of a pointer is a defined type over that pointer (`type _Ctype_T *_Ctype_char`), read as the pointer it
+	// names (DESIGN-cgo-sqlite-marshalling.md §3); the named type and the box convert implicitly both ways in C#.
+	if pointer, ok := t.Underlying().(*types.Pointer); ok {
 		// A pointer to one C pointer is the out-parameter (shape (i), design 18.12 item 4): one stack word, copied in and
 		// back by the pointer-member rules. Its pointee is a C struct or one C scalar, as a pointer parameter's is.
 		if inner, ok := types.Unalias(pointer.Elem()).(*types.Pointer); ok {
@@ -462,9 +463,10 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	resultType := signature.Results().At(0).Type()
 	resultStruct := cgoStructOf(resultType)
-	// A C typedef of a pointer is an alias (`type _Ctype_sqlite3_filename = *_Ctype_char`), read as the pointer it names
+	// A C typedef of a pointer is a defined type over that pointer (`type _Ctype_sqlite3_filename *_Ctype_char`: cmd/cgo
+	// writes an alias only where the printed type is itself a _Ctype_ name), read as the pointer it names
 	// (DESIGN-cgo-sqlite-marshalling.md §3).
-	resultPointer, pointerResult := types.Unalias(resultType).(*types.Pointer)
+	resultPointer, pointerResult := resultType.Underlying().(*types.Pointer)
 	voidResult := cgoIsVoidPointer(resultType)
 
 	if scalarsOnly && resultStruct == nil && !pointerResult && !voidResult {

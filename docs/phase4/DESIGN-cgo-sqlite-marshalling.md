@@ -51,13 +51,20 @@ silently wrong.
 
 ## 3. Shape B: a typedef'd pointer result (and parameter)
 
-`resultType.(*types.Pointer)` (cgoStructWrappers.go, the result read) does not unwrap an alias. cmd/cgo declares a C
-pointer typedef as an alias (`type _Ctype_sqlite3_filename = *_Ctype_char`), so `sqlite3_filename` reaches the scalar
-wrapper and is refused. `param()` reads a parameter with the same `t.(*types.Pointer)`, so a typedef'd pointer
-PARAMETER is refused as well (go-sqlite3: `sqlite3_filename` is also the parameter of `sqlite3_uri_parameter` and
-friends, which the package does not call today).
+`resultType.(*types.Pointer)` (cgoStructWrappers.go, the result read) sees only a pointer type literal. cmd/cgo
+declares a C pointer typedef as a DEFINED type over the pointer (`type _Ctype_sqlite3_filename *_Ctype_char`; out.go
+writes `=` only where the printed type is itself a `_Ctype_` name, or an enum or union), so `sqlite3_filename` reaches
+the scalar wrapper and is refused. `param()` reads a parameter with the same `t.(*types.Pointer)`, so a typedef'd
+pointer PARAMETER is refused as well (go-sqlite3: `sqlite3_filename` is also the parameter of `sqlite3_uri_parameter`
+and friends, which the package does not call today).
 
-**The cure.** `types.Unalias` at both reads. A typedef'd pointer is then the pointer it names, with no new behaviour.
+**The cure.** Read the pointer from `Underlying()` at both reads. A typedef'd pointer is then the pointer it names, with
+no new behaviour: go2cs renders the defined type as a wrapper class with implicit conversions to and from `ж<T>` both
+ways, so the wrapper's `ж<_Ctype_char>` result and parameter meet the Go code's named type without a cast.
+
+*Correction (2026-11-27).* The first cure applied `types.Unalias`, on the reading that cmd/cgo declares the typedef as
+an alias; the offline row's hand-written shape carried that reading and passed, and the hosted cgo-e2e with real
+cmd/cgo refused `C.go2cs_probe_fname` on every OS. The row now carries cmd/cgo's real shape.
 
 ## 4. Red first, then the gates
 
