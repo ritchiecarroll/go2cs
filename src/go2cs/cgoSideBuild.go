@@ -5,6 +5,18 @@
 // Use of this source code is governed by the GNU Affero General Public License
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
+//
+// This file is derived from Go, whose notice it carries (license of record: LICENSES/BSD-3-Clause.txt):
+//
+// Copyright 2011 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+// PROVENANCE:
+// - cgoSideTrim.mapping: DERIVED FROM src/cmd/go/internal/work/exec.go, Go 1.26.11, func (b *Builder) ccompile (the
+//   -ffile-prefix-map chain from the package's module, vendor directory, GOROOT or GOPATH root).
+// - cgoSideFlagSupported: DERIVED FROM src/cmd/go/internal/work/exec.go, Go 1.26.11, func (b *Builder) gccSupportsFlag
+//   (the empty compile, and its output file on a windows or ios host).
 
 package main
 
@@ -472,9 +484,10 @@ func cgoSideThreadFlag(goos string) string {
 	return "-pthread"
 }
 
-// cgoSideFailure names a side compile or link that failed (§2.7): the file, and the compiler's first diagnostic line,
-// printable ASCII only and capped as the toolchain line is.
-func cgoSideFailure(step, file, output string) error {
+// cgoSideFailure names a side compile or link that failed (§2.7): what failed (a unit's preamble, a C file of the
+// package's own, or the library), and the compiler's first diagnostic line, printable ASCII only and capped as the
+// toolchain line is.
+func cgoSideFailure(step, subject, output string) error {
 	line := ""
 
 	for _, candidate := range strings.Split(strings.ReplaceAll(output, "\r\n", "\n"), "\n") {
@@ -488,7 +501,7 @@ func cgoSideFailure(step, file, output string) error {
 		line = output
 	}
 
-	return fmt.Errorf("cgo: the side build of %s's preamble did not %s: %s", file, step, cgoToolchainLine(line))
+	return fmt.Errorf("cgo: the side build of %s did not %s: %s", subject, step, cgoToolchainLine(line))
 }
 
 // cgoSideCompile compiles one unit's text to an object file. It runs in the package directory, which matches the
@@ -516,7 +529,7 @@ func cgoSideCompile(toolchain cgoToolchain, goos string, flags []string, unit cg
 	cmd.Env = append(os.Environ(), toolchain.env...)
 
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return "", cgoSideFailure("compile", unit.file, string(out)+err.Error())
+		return "", cgoSideFailure("compile", unit.file+"'s preamble", string(out)+err.Error())
 	}
 
 	return object, nil
@@ -564,9 +577,10 @@ func cgoObjectDefines(path, goos string, names []string) (map[string]bool, error
 	return defined, nil
 }
 
-// cgoSymbolBinding is how an object binds a name: whether it defines it, and whether that definition is global (visible
-// to the link) rather than local (a static).
-type cgoSymbolBinding struct{ defined, global bool }
+// cgoSymbolBinding is how an object binds a name: whether it defines it, whether that definition is global (visible to
+// the link) rather than local (a static), and whether a global one is weak, which a strong definition elsewhere
+// overrides at the link without a duplicate (P3's NIT 6).
+type cgoSymbolBinding struct{ defined, global, weak bool }
 
 // cgoObjectSymbols answers how an object file binds each of names (cgo Phase 4b, §2): a definition, local or global, or
 // nothing (an undefined reference, or absent). A common (tentative) definition is a global one.
@@ -609,14 +623,14 @@ func cgoObjectSymbols(path, goos string, names []string) (map[string]cgoSymbolBi
 			return defined, nil
 		}
 
-		const stab, typeMask, section, external = 0xe0, 0x0e, 0x0e, 0x01 // N_STAB, N_TYPE, N_SECT, N_EXT
+		const stab, typeMask, section, external, weakDef = 0xe0, 0x0e, 0x0e, 0x01, 0x0080 // N_STAB, N_TYPE, N_SECT, N_EXT, N_WEAK_DEF
 
 		for _, symbol := range file.Symtab.Syms {
 			name := strings.TrimPrefix(symbol.Name, "_")
 
 			// N_SECT is a definition; N_UNDF with a value is a common one.
 			if symbol.Type&stab == 0 && wanted[name] && (symbol.Type&typeMask == section || (symbol.Type&typeMask == 0 && symbol.Value > 0)) {
-				defined[name] = cgoSymbolBinding{defined: true, global: symbol.Type&external != 0}
+				defined[name] = cgoSymbolBinding{defined: true, global: symbol.Type&external != 0, weak: symbol.Desc&weakDef != 0}
 			}
 		}
 	default:
@@ -637,7 +651,7 @@ func cgoObjectSymbols(path, goos string, names []string) (map[string]cgoSymbolBi
 		for _, symbol := range symbols {
 			if wanted[symbol.Name] && symbol.Section != elf.SHN_UNDEF {
 				bind := elf.ST_BIND(symbol.Info)
-				defined[symbol.Name] = cgoSymbolBinding{defined: true, global: bind == elf.STB_GLOBAL || bind == elf.STB_WEAK}
+				defined[symbol.Name] = cgoSymbolBinding{defined: true, global: bind == elf.STB_GLOBAL || bind == elf.STB_WEAK, weak: bind == elf.STB_WEAK}
 			}
 		}
 	}
@@ -819,22 +833,24 @@ type cgoSideObject struct {
 }
 
 // cgoSideClassify answers which names are side-built and which are defined globally more than once (cgo Phase 4b, §2).
-// hosts maps each name to the table of the unit that hosts it. A name two objects define globally is a duplicate, as
-// at a C link. Else a name its hosting unit defines, locally or globally, is side-built. Else a name one other object
-// defines globally is. Anything else is left for the probe.
+// hosts maps each name to the table of the unit that hosts it. A name two objects define with a STRONG global
+// definition is a duplicate, as at a C link; a weak one beside a strong one is not (P3's NIT 6). Else a name its
+// hosting unit defines, locally or globally, is side-built. Else a name another object defines globally is. Anything
+// else is left for the probe.
 func cgoSideClassify(hosts map[string]int, objects []cgoSideObject) (map[string]bool, map[string][]string) {
 	side := map[string]bool{}
 	duplicates := map[string][]string{}
 
 	for name, host := range hosts {
-		var global []string
-		hosted := false
+		var strong []string
+		global, hosted := false, false
 
 		for _, object := range objects {
 			binding := object.symbols[name]
+			global = global || binding.global
 
-			if binding.global {
-				global = append(global, object.name)
+			if binding.global && !binding.weak {
+				strong = append(strong, object.name)
 			}
 
 			if object.unit == host && binding.defined {
@@ -843,10 +859,10 @@ func cgoSideClassify(hosts map[string]int, objects []cgoSideObject) (map[string]
 		}
 
 		switch {
-		case len(global) > 1:
-			sort.Strings(global)
-			duplicates[name] = global
-		case hosted, len(global) == 1:
+		case len(strong) > 1:
+			sort.Strings(strong)
+			duplicates[name] = strong
+		case hosted, global:
 			side[name] = true
 		}
 	}

@@ -273,23 +273,24 @@ func TestCgoSideOwnSourcesSplitsWhatTheSideBuildCompiles(t *testing.T) {
 func TestCgoSideClassifyFollowsTheDesignsOrder(t *testing.T) {
 	local := cgoSymbolBinding{defined: true}
 	global := cgoSymbolBinding{defined: true, global: true}
+	weak := cgoSymbolBinding{defined: true, global: true, weak: true}
 
 	objects := []cgoSideObject{
 		{name: "a.go", unit: 0, symbols: map[string]cgoSymbolBinding{"own_static": local, "own_global": global, "dup": global, "static_beside_global": local}},
-		{name: "b.go", unit: 1, symbols: map[string]cgoSymbolBinding{"cross": global, "static_elsewhere": local}},
-		{name: "own.c", unit: -1, symbols: map[string]cgoSymbolBinding{"from_c": global, "dup": global, "static_beside_global": global}},
+		{name: "b.go", unit: 1, symbols: map[string]cgoSymbolBinding{"cross": global, "static_elsewhere": local, "weak_default": weak}},
+		{name: "own.c", unit: -1, symbols: map[string]cgoSymbolBinding{"from_c": global, "dup": global, "static_beside_global": global, "weak_default": global}},
 	}
 
 	hosts := map[string]int{
 		"own_static": 0, "own_global": 0, "cross": 0, "from_c": 0, "dup": 0, "library": 0,
-		"static_elsewhere": 0, "static_beside_global": 0,
+		"static_elsewhere": 0, "static_beside_global": 0, "weak_default": 0,
 	}
 
 	side, duplicates := cgoSideClassify(hosts, objects)
 
 	for name, want := range map[string]bool{
 		"own_static": true, "own_global": true, "cross": true, "from_c": true, "static_beside_global": true,
-		"dup": false, "library": false, "static_elsewhere": false,
+		"dup": false, "library": false, "static_elsewhere": false, "weak_default": true,
 	} {
 		if side[name] != want {
 			t.Errorf("%s: side-built %v, want %v", name, side[name], want)
@@ -336,15 +337,15 @@ func TestCgoSideFormIsTheSideBuiltNamesAlone(t *testing.T) {
 func TestCgoSideFailureNamesTheFileAndTheFirstDiagnostic(t *testing.T) {
 	output := "In file included from main.go:3:\nmain.go:5:3: error: unknown type name 'flot'\nmain.go:9:1: error: second\n"
 
-	if got, want := cgoSideFailure("compile", "main.go", output).Error(), "cgo: the side build of main.go's preamble did not compile: main.go:5:3: error: unknown type name 'flot'"; got != want {
+	if got, want := cgoSideFailure("compile", "main.go's preamble", output).Error(), "cgo: the side build of main.go's preamble did not compile: main.go:5:3: error: unknown type name 'flot'"; got != want {
 		t.Errorf("compile failure %q, want %q", got, want)
 	}
 
-	if got, want := cgoSideFailure("link", "libgo2cs-cgo-main-a9d3bf20.so", "ld: cannot find -lnone\r\ncollect2: ld returned 1 exit status\r\n").Error(), "cgo: the side build of libgo2cs-cgo-main-a9d3bf20.so's preamble did not link: ld: cannot find -lnone"; got != want {
+	if got, want := cgoSideFailure("link", "libgo2cs-cgo-main-a9d3bf20.so", "ld: cannot find -lnone\r\ncollect2: ld returned 1 exit status\r\n").Error(), "cgo: the side build of libgo2cs-cgo-main-a9d3bf20.so did not link: ld: cannot find -lnone"; got != want {
 		t.Errorf("link failure %q, want %q", got, want)
 	}
 
-	if got := cgoSideFailure("link", "x", "no diagnostic word\nsecond line\n").Error(); got != "cgo: the side build of x's preamble did not link: no diagnostic word" {
+	if got := cgoSideFailure("link", "x", "no diagnostic word\nsecond line\n").Error(); got != "cgo: the side build of x did not link: no diagnostic word" {
 		t.Errorf("a failure with no error line reads %q", got)
 	}
 

@@ -430,9 +430,18 @@ public class CgoLibrariesTests
         StringAssert.Contains(notFound.Message, "windows error 126");
 
         string bad = ProbeFileName($"go2cssidebadimage{Environment.ProcessId}");
-        File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(s_assembly.Location)!, bad), "not a portable executable"u8.ToArray());
-        DllNotFoundException badImage = Assert.ThrowsException<DllNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, bad, "go2cs_cgo_table_0"));
-        StringAssert.Contains(badImage.Message, "windows error 193");
+        string planted = Path.Combine(Path.GetDirectoryName(s_assembly.Location)!, bad);
+        File.WriteAllBytes(planted, "not a portable executable"u8.ToArray());
+
+        try
+        {
+            DllNotFoundException badImage = Assert.ThrowsException<DllNotFoundException>(() => GoCgoLibraries.SideTable(s_assembly, bad, "go2cs_cgo_table_0"));
+            StringAssert.Contains(badImage.Message, "windows error 193");
+        }
+        finally
+        {
+            File.Delete(planted);
+        }
     }
 
     // A side library whose absolute path is longer than MAX_PATH (260) loads on windows: the load names it with the \\?\
@@ -459,5 +468,16 @@ public class CgoLibrariesTests
 
         Assert.IsTrue(planted.Length > 260, $"the planted path is {planted.Length} characters");
         Assert.AreNotEqual((nint)0, table, $"the side library at a {planted.Length}-character path loads and exports {SideExport}");
+
+        // The library stays mapped for the process (SideTable never frees its handle), so the planted tree goes with the
+        // build output if it cannot be removed now.
+        try
+        {
+            Directory.Delete(@"\\?\" + Path.Combine(directory, nested.Split(Path.DirectorySeparatorChar)[0]), recursive: true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Still mapped: removed with the build output.
+        }
     }
 }
