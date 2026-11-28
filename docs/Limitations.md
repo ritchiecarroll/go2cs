@@ -329,6 +329,13 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
        2026-10-26 (R's docs follow-up) until the fix lands. -->
   * In a cgo package, a pointer into Go memory rebuilt from a number can reach C unchecked in three narrow
     cases ([cgo](#cgo)).
+  * Under Native AOT on Windows, `syscall.NewCallback` refuses a func that reaches it only as an `any` value (one
+    stored in an interface before the call, as the runtime's own callback tests do), or whose func type names a type
+    parameter: the call panics with "no native code for callback type". Pass the func itself, of its own func type.
+  <!-- docs/phase4/DESIGN-newcallback-native-aot.md: go2cs-gen registers each func type from the call site, which
+       closes the callback binder where Native AOT can see it; a type no call site shows (or one a module initializer
+       cannot name) has no closed binder, and the JIT's reflective path is not available under Native AOT. Measured by
+       TestSyscallNewCallbackNativeAot's "through any" line (2026-11-28). -->
 
 ## cgo
 

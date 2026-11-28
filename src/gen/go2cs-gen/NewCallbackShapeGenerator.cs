@@ -122,7 +122,12 @@ public class NewCallbackShapeGenerator : ISourceGenerator
                 if (!models.TryGetValue(tree, out SemanticModel? model))
                     models[tree] = model = compilation.GetSemanticModel(tree);
 
-                if (model.GetSymbolInfo(call).Symbol is not IMethodSymbol method)
+                // A call whose argument binds only through another generator's output (a pointer method value)
+                // does not resolve here; its one candidate is the method.
+                SymbolInfo target = model.GetSymbolInfo(call);
+
+                if ((target.Symbol ?? (target.CandidateSymbols.Length == 1 ? target.CandidateSymbols[0] : null))
+                    is not IMethodSymbol method)
                     continue;
 
                 int index;
@@ -201,8 +206,14 @@ public class NewCallbackShapeGenerator : ISourceGenerator
         _ => null
     };
 
+    // `index` counts the parameters of the method's declared (static) form. A Go method converts to an extension
+    // method whose receiver is its first parameter, and a call `p.NewCallback(f)` binds the REDUCED method, whose
+    // parameters leave the receiver out, so the index moves down by one there.
     private static ExpressionSyntax? ArgumentAt(InvocationExpressionSyntax call, IMethodSymbol method, int index)
     {
+        if (method.ReducedFrom is not null)
+            index--;
+
         if (index < 0 || index >= method.Parameters.Length)
             return null;
 
@@ -262,21 +273,58 @@ public class NewCallbackShapeGenerator : ISourceGenerator
 
         SymbolInfo info = model.GetSymbolInfo(expression);
 
-        if ((info.Symbol ?? (info.CandidateSymbols.Length == 1 ? info.CandidateSymbols[0] : null)) is not IMethodSymbol method)
+        if ((info.Symbol ?? (info.CandidateSymbols.Length == 1 ? info.CandidateSymbols[0] : null)) is IMethodSymbol method)
+            return NaturalType(method, compilation);
+
+        return expression is MemberAccessExpressionSyntax access ? PointerMethodValueType(access, model, compilation) : null;
+    }
+
+    // A method value on a pointer box, `w.wndProc` with `w` a `ж<window>`: the converter declares the method on
+    // `this ref window` and go2cs-gen's RecvGenerator adds the `this ж<window>` overload the call binds. Generators
+    // do not see each other's output, so here the method group does not resolve. The method is found where the
+    // converter declares it, among the extension methods of the receiver type's package class, and its natural
+    // type is the one the overload has: its parameters after the receiver.
+    private static INamedTypeSymbol? PointerMethodValueType(MemberAccessExpressionSyntax access, SemanticModel model,
+        Compilation compilation)
+    {
+        if (model.GetTypeInfo(access.Expression).Type is not INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } box ||
+            box.TypeArguments[0] is not INamedTypeSymbol receiver || receiver.ContainingType is not { } holder)
             return null;
 
-        return NaturalType(method, compilation);
+        string name = access.Name.Identifier.ValueText;
+        INamedTypeSymbol? found = null;
+
+        foreach (IMethodSymbol candidate in holder.GetMembers(name).OfType<IMethodSymbol>())
+        {
+            if (!candidate.IsExtensionMethod || candidate.Parameters.Length == 0 ||
+                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, receiver) &&
+                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, box))
+                continue;
+
+            if (NaturalType(candidate, compilation, skip: 1) is not { } type ||
+                found is not null && !SymbolEqualityComparer.Default.Equals(found, type))
+                return null;
+
+            found = type;
+        }
+
+        return found;
     }
 
     // The Func/Action C# gives a lambda or method group as its natural type; null where the compiler would make
-    // an anonymous delegate type instead (a ref parameter, more than 16 parameters), which cannot be named.
-    private static INamedTypeSymbol? NaturalType(IMethodSymbol method, Compilation compilation)
+    // an anonymous delegate type instead (a ref parameter, more than 16 parameters), which cannot be named. A
+    // variadic (`params`) or optional-parameter method group also gets a compiler-made type, so the Func built here
+    // never matches its runtime type: a missed registration (the reflective path, or the named refusal under
+    // Native AOT), never a broken build.
+    private static INamedTypeSymbol? NaturalType(IMethodSymbol method, Compilation compilation, int skip = 0)
     {
-        if (method.Parameters.Length > 16 || method.Parameters.Any(parameter => parameter.RefKind != RefKind.None) ||
+        IParameterSymbol[] parameters = [.. method.Parameters.Skip(skip)];
+
+        if (parameters.Length > 16 || parameters.Any(parameter => parameter.RefKind != RefKind.None) ||
             method.ReturnsByRef || method.ReturnsByRefReadonly || method.IsVararg)
             return null;
 
-        List<ITypeSymbol> arguments = [.. method.Parameters.Select(parameter => parameter.Type)];
+        List<ITypeSymbol> arguments = [.. parameters.Select(parameter => parameter.Type)];
 
         if (!method.ReturnsVoid)
             arguments.Add(method.ReturnType);
@@ -292,7 +340,8 @@ public class NewCallbackShapeGenerator : ISourceGenerator
     internal static string? Registration(INamedTypeSymbol type, Compilation compilation)
     {
         if (type.DelegateInvokeMethod is not { } invoke || IsCompilerMade(type) || MentionsTypeParameter(type) ||
-            !IsAccessible(type, compilation) ||
+            !IsAccessible(type, compilation) || !CanBeTypeArgument(invoke.ReturnType) ||
+            invoke.Parameters.Any(parameter => !CanBeTypeArgument(parameter.Type)) ||
             invoke.Parameters.Any(parameter => parameter.RefKind != RefKind.None) || invoke.ReturnsByRef ||
             invoke.ReturnsByRefReadonly)
             return null;
@@ -329,6 +378,18 @@ public class NewCallbackShapeGenerator : ISourceGenerator
         return "global::go.syscall_package.GoNewCallbackShapes.Register<" + string.Join(", ", typeArguments) +
                ">(typeof(" + typeName + "), " + adapter + ");";
     }
+
+    // A pointer, a function pointer, a ref struct or a file-local type cannot be a type argument of the
+    // registration (CS0306, CS9244) or be named from the generated file. Hand-written C# can pass one
+    // (`static nuint cb(void* p)` in an *_impl.cs companion); it stays on the reflective path.
+    private static bool CanBeTypeArgument(ITypeSymbol type) => type switch
+    {
+        IPointerTypeSymbol or IFunctionPointerTypeSymbol => false,
+        { IsRefLikeType: true } => false,
+        INamedTypeSymbol named => !named.IsFileLocal && named.TypeArguments.All(CanBeTypeArgument),
+        IArrayTypeSymbol array => CanBeTypeArgument(array.ElementType),
+        _ => true
+    };
 
     private static string Bool(bool value) => value ? "true" : "false";
 

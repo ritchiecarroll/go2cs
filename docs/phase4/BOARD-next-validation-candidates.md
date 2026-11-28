@@ -43228,4 +43228,22 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — P1 (2026-11-28)
 
+## 2026-11-28 — P1 (NewCallback AOT, P3 NIT 6): syscall's callback checks run in a different order from Go's (OPEN)
+
+- **Go checks each argument before the result; go2cs checks the result first.** Go's `compileCallback`
+  (runtime/syscall_windows.go) walks the arguments (each: larger than a word, then a float kind), then the result
+  count, the result size, and only then a float result. syscall's reflective path and its registered shapes
+  (`syscall/windows/syscall_windows_callback_impl.cs`, `goCallbackRefuse` and `goCallbackBindReflective`) refuse no
+  result and a float result first, then float arguments, then the sizes. One defect reads Go's text either way; a func
+  with two defects can read a different one (`func(v float64)` with no result: Go says float arguments, go2cs says
+  expected function with one uintptr-sized result).
+- **`func() float32`**: Go refuses its size first ("expected function with one uintptr-sized result"); go2cs says
+  "float results not supported".
+- **A named float type** (`type F float64` as an argument or result): Go refuses it by kind; go2cs compares CLR types,
+  so the converted `F` struct is bound. All three at master, under the JIT and Native AOT alike. The fix is one order
+  in syscall for both paths, Go's, and a kind test that looks through named types. Read, not run.
+- Owner: unrouted.
+
+— P1 (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

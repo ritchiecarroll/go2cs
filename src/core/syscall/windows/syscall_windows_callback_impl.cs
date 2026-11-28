@@ -332,6 +332,10 @@ partial class syscall_package
 
         if (arity is not (0 or 1 or 2 or 4))
             throw goCallbackArityRefusal(arity);
+
+        // Facts that refuse nothing describe a shape a binder takes; the generator registers those with Register,
+        // so reaching here is a registration that cannot bind, never a callback to build.
+        throw panic("compileCallback: a refusal was registered for a shape that refuses nothing");
     }
 
     // §12: arities 0/1/2/4 are everything the consumers reach without gcc; the 2..10 range is a bounded,

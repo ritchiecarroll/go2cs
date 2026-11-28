@@ -28,8 +28,9 @@ import (
 //   - one callback per arity syscall implements, through a real native caller (user32's CallWindowProcW for four
 //     words, SyscallN for none, one and two), and the identity of two NewCallback calls on one func;
 //   - one line per argument shape the converter emits (a literal, a local variable, a field of a named func type, a
-//     func returned by another package, a func through a package that takes any as x/sys/windows does), each with a
-//     word type no other line names, so each line proves its own registration;
+//     func returned by another package, a func through a package that takes any as x/sys/windows does, a method
+//     value), each with a word type no other line names, so each line proves its own registration, and one func type
+//     registered by two packages;
 //   - a func already in an any: the JIT binds it by reflection, Native AOT refuses it by name;
 //   - Go's refusals, which must read the same under both runtimes.
 // Go and the JIT print the same lines but arity 3, which go2cs refuses as its own limit; Native AOT prints what the
@@ -57,6 +58,7 @@ type (
 	litW uintptr
 	locW uintptr
 	fwdW uintptr
+	winW uintptr
 	anyW uintptr
 )
 
@@ -65,6 +67,10 @@ type cbT func(p uintptr) uintptr
 type holder struct{ fn cbT }
 
 type big struct{ a, b uint64 }
+
+type window struct{ base uintptr }
+
+func (w *window) wndProc(p winW) uintptr { return w.base + uintptr(p) }
 
 func none() uintptr                                  { return 7 }
 func one(a uintptr) uintptr                          { return a + 1 }
@@ -110,6 +116,9 @@ func main() {
 	line("through a forwarder", func() string {
 		return call1(fwd.NewCallback(func(p fwdW) uintptr { return uintptr(p) + 6 }))
 	})
+	w := &window{base: 9}
+	line("method value", func() string { return call1(syscall.NewCallback(w.wndProc)) })
+	line("registered by two packages", func() string { return call1(cbpkg.Pointer()) })
 	var x any = func(p anyW) uintptr { return uintptr(p) + 7 }
 	line("through any", func() string { return call1(syscall.NewCallback(x)) })
 
@@ -125,11 +134,16 @@ func main() {
 
 const callbackAotCbpkg = `package cbpkg
 
+import "syscall"
+
 // Word is a word type only this package's func names, so its shape is registered by no other site.
 type Word uintptr
 
 // Make returns a func the caller passes to NewCallback as a value of another package's func type.
 func Make() func(p Word) uintptr { return func(p Word) uintptr { return uintptr(p) + 5 } }
+
+// Pointer makes its own callback of a func type main also passes, so two assemblies register one type.
+func Pointer() uintptr { return syscall.NewCallback(func(p uintptr) uintptr { return p + 8 }) }
 `
 
 const callbackAotFwd = `package fwd
@@ -152,6 +166,8 @@ var callbackAotCommon = []string{
 	"named func type field = 45",
 	"returned by another package = 46",
 	"through a forwarder = 47",
+	"method value = 50",
+	"registered by two packages = 49",
 	"no result panics: compileCallback: expected function with one uintptr-sized result",
 	"float argument panics: compileCallback: float arguments not supported",
 	"float result panics: compileCallback: float results not supported",
@@ -161,6 +177,7 @@ var callbackAotCommon = []string{
 }
 
 const (
+	callbackAotAnyAt    = 12 // the through-any line follows the common lines before it
 	callbackAotAnyJit   = "through any = 48"
 	callbackAotAnyAot   = "through any panics: compileCallback: no native code for callback type "
 	callbackAotArity3Go = "arity 3 = "
@@ -174,10 +191,17 @@ func TestSyscallNewCallbackNativeAot(t *testing.T) {
 			runtime.GOARCH)
 	}
 
+	// A conversion, a Release build and a Native AOT publish of the converted closure: about 22 minutes on a hosted
+	// windows runner, past a plain go test's budget, so it runs where the cgo-e2e stage turns it on.
+	if os.Getenv(testsE2EEnv) != "1" {
+		t.Skipf("opt-in (%s=1, the cgo-e2e stage): converts, builds and publishes the row's module with Native AOT",
+			testsE2EEnv)
+	}
+
 	dotnet, err := exec.LookPath("dotnet")
 
 	if err != nil {
-		t.Skip("NOT MEASURED: no dotnet SDK on PATH")
+		t.Fatalf("%s=1 needs the .NET SDK on PATH: %v", testsE2EEnv, err)
 	}
 
 	src, err := filepath.Abs("..")
@@ -251,8 +275,8 @@ func TestSyscallNewCallbackNativeAot(t *testing.T) {
 	// check compares one run's lines against the common lines, in order, with the any and arity 3 lines held to
 	// what that runtime must print.
 	check := func(arm string, lines []string, anyLine, arity3 string, anyPrefix bool) {
-		want := append(append([]string{}, callbackAotCommon[:10]...), anyLine)
-		want = append(append(want, callbackAotCommon[10:]...), arity3)
+		want := append(append([]string{}, callbackAotCommon[:callbackAotAnyAt]...), anyLine)
+		want = append(append(want, callbackAotCommon[callbackAotAnyAt:]...), arity3)
 
 		if len(lines) != len(want) {
 			t.Errorf("%s: %d lines, want %d:\n%s", arm, len(lines), len(want), strings.Join(lines, "\n"))
@@ -260,7 +284,7 @@ func TestSyscallNewCallbackNativeAot(t *testing.T) {
 		}
 
 		for i, line := range lines {
-			prefix := (i == 10 && anyPrefix) || (i == len(want)-1 && arity3 == callbackAotArity3Go)
+			prefix := (i == callbackAotAnyAt && anyPrefix) || (i == len(want)-1 && arity3 == callbackAotArity3Go)
 
 			if prefix && !strings.HasPrefix(line, want[i]) || !prefix && line != want[i] {
 				t.Errorf("%s line %d: read %q, want %q", arm, i+1, line, want[i])

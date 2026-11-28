@@ -130,18 +130,25 @@ list of common word types: a named Go type (`type HWND uintptr`) is its own CLR 
 
 ## 4. Gates
 
-- **The row, converted from Go** (cgo-e2e windows), its probe project referencing the go2cs-gen analyzer as a
-  converted project does, under the JIT and under Native AOT. One line each:
+- **The row, converted from Go** (cgo-e2e windows; opt-in on `GO2CS_TESTS_E2E=1`, since a conversion, a Release
+  build and a Native AOT publish take about 22 minutes hosted), its projects referencing the go2cs-gen analyzer as a
+  converted project does, run under Go (the reference), the JIT and Native AOT. One line each:
   - arities 0, 1, 2 (through `SyscallN`) and 4 (through `user32!CallWindowProcW`), and one func giving one pointer;
-  - the shapes of section 2: literal, top-level func, local variable, field of a named func type, func returned by
-    another package, and a func through a forwarder package (the x/sys shape), each equal under both runtimes;
+  - the shapes of section 2: literal, local variable, field of a named func type, func returned by another package,
+    a func through a forwarder package (the x/sys shape) and a method value, each with its own word type, and one
+    func type registered by two packages;
   - a func through `any`: equal under the JIT, the named refusal under Native AOT;
   - Go's refusals, equal under both runtimes: no result, float argument, float result, oversized argument,
-    wrong-size result, non-function, arity 3.
+    wrong-size result, non-function, arity 3 (Go builds an arity-3 callback; go2cs refuses it as its own limit).
 - Made to fail: with the generator's output removed, the Native AOT run reads the named refusal on every shape line.
 - `WindowsNewCallback` (behavioral-smoke windows), unchanged under the JIT.
-- GenTests rows for the generator's output: lambda, method group, `OrTypedNilFunc` through parentheses and a cast,
-  named delegate type, arities 0/1/2/4, refusal entries (no result, arity 3), a forwarder marked and a marked call
-  seen across assemblies, a duplicate type from two assemblies, and the four left-unregistered cases.
+- The converted runtime tests on windows (`src/core/runtime/syscall_windows_test.cs`): six sites now register and
+  bind through the closed path under the JIT too (:185, :222, :355, :745, :949, :1497); the two that pass an `any`
+  field (:695, :701) stay reflective. The banked windows runtime row is the reading.
+- GenTests rows for the generator's output: lambda, method group, method value (a reduced extension method),
+  `OrTypedNilFunc` through parentheses and a cast, named delegate type, arities 0/1/2/4, refusal entries (no result,
+  arity 3), a forwarder marked and a marked call seen across assemblies, a Go-method forwarder called through its
+  receiver, and the left-unregistered cases (type parameter, compiler-made, inaccessible, pointer and function
+  pointer, older syscall).
 - GolibTests R/D, `go test ./...`, repoguard. No converter change, so no CNR. No production package in `src/core`
   calls `NewCallback` (census below), so the generator emits nothing in the corpus build.

@@ -239,6 +239,140 @@ public class NewCallbackShapeGeneratorTests
     }
 
     [TestMethod]
+    public void AGoMethodForwarderMatchesWhenCalledThroughItsReceiver()
+    {
+        // A Go method converts to an extension method whose receiver is parameter 0; its call binds the reduced
+        // method, whose parameters leave the receiver out.
+        const string forwarder =
+            """
+            namespace go;
+
+            public partial struct Proc { }
+
+            public static partial class fwd_package
+            {
+                public static uintptr NewCallback(this ref Proc p, object fn) => syscall_package.NewCallback(fn);
+            }
+            """;
+
+        (string? marked, _) = Run(forwarder);
+
+        Assert.IsNotNull(marked);
+        StringAssert.Contains(marked,
+            "[assembly: global::go.syscall_package.GoNewCallbackForwarder(typeof(global::go.fwd_package), \"NewCallback\", 1)]");
+
+        (string? generated, string[] errors) = Run(
+            """
+            namespace go;
+
+            public static partial class main_package
+            {
+                private static uintptr add1(uintptr p) => p;
+
+                internal static void main()
+                {
+                    Proc p = default;
+                    p.NewCallback(add1);
+                }
+            }
+            """, SyscallStub, ("fwd", forwarder, true));
+
+        Assert.IsNotNull(generated, "a receiver call of a marked Go method is a site");
+        AssertCompiles(errors);
+        StringAssert.Contains(generated, $"Register<{U}, {U}>(typeof(global::System.Func<{U}, {U}>)");
+    }
+
+    [TestMethod]
+    public void AMethodValueRegistersItsType()
+    {
+        // `syscall.NewCallback(w.wndProc)`: the converter passes a Go method value as a bare method group of the
+        // reduced extension method, its receiver a pointer box (`p.pointerMethod`, MethodValueFuncNames).
+        (string? generated, string[] errors) = Run(
+            """
+            namespace go;
+
+            public sealed class window { }
+
+            public readonly struct msgW { }
+
+            public static partial class main_package
+            {
+                internal static uintptr wndProc(this window w, msgW m) => default;
+
+                internal static void main()
+                {
+                    window w = new();
+                    syscall_package.NewCallback(w.wndProc);
+                }
+            }
+            """);
+
+        Assert.IsNotNull(generated);
+        AssertCompiles(errors);
+        StringAssert.Contains(generated, $"Register<global::go.msgW, {U}>(typeof(global::System.Func<global::go.msgW, {U}>)");
+    }
+
+    [TestMethod]
+    public void APointerMethodValueRegistersItsType()
+    {
+        // `w.wndProc` with `w` a `*window`: the converter declares wndProc on `this ref window` and RecvGenerator
+        // adds the `this ж<window>` overload the call binds. That overload is another generator's output, which
+        // this one cannot see, so here the call does not bind; the registration is still the overload's type, and
+        // the generated file itself must compile.
+        (string? generated, string[] errors) = Run(
+            """
+            namespace go;
+
+            public readonly struct msgW { }
+
+            public static partial class main_package
+            {
+                public partial struct window { }
+
+                internal static uintptr wndProc(this ref window w, msgW m) => default;
+
+                internal static void main()
+                {
+                    ж<window> w = null!;
+                    syscall_package.NewCallback(w.wndProc);
+                }
+            }
+            """);
+
+        Assert.IsNotNull(generated);
+        StringAssert.Contains(generated, $"Register<global::go.msgW, {U}>(typeof(global::System.Func<global::go.msgW, {U}>)");
+        Assert.IsFalse(errors.Any(error => error.Contains("newcallback-shapes", StringComparison.Ordinal)),
+            "the generated registrations must compile: " + string.Join("; ", errors));
+    }
+
+    [TestMethod]
+    public void APointerInTheSignatureIsLeftUnregistered()
+    {
+        (string? generated, string[] errors) = Run(
+            """
+            namespace go;
+
+            public static unsafe partial class main_package
+            {
+                private static nuint raw(void* p) => default;
+                private static nuint byFunction(delegate* unmanaged<void> p) => default;
+
+                internal static void main()
+                {
+                    syscall_package.NewCallback((System.Func<nint, nuint>)(p => default));
+                    syscall_package.NewCallback(raw);
+                    syscall_package.NewCallback(byFunction);
+                }
+            }
+            """);
+
+        AssertCompiles(errors);
+        Assert.IsNotNull(generated, "the nint shape still registers");
+        Assert.IsFalse(generated.Contains("void*", StringComparison.Ordinal) || generated.Contains("delegate*", StringComparison.Ordinal),
+            "a pointer or function-pointer type is never a registration's type argument: " + generated);
+    }
+
+    [TestMethod]
     public void ShapesThatCannotBeNamedAreLeftUnregistered()
     {
         (string? generated, string[] errors) = Run(
