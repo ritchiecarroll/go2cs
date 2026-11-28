@@ -43367,6 +43367,29 @@ an `.init_array` entry) runs before main. go2cs:
 
 **The cure, when a measured package needs it.** Load the side library at package init, and link an own file whatever
 Go uses from it, so its constructors run where go's do. The open question is the order between packages' inits.
+
+## CLOSED 2026-11-28 (H): SECURITY, a cgo package's #cgo flags against cmd/go's allowlist (no live exposure; ported)
+
+**Question.** COORD, inbox H 20261128T015318Z: do the Phase 2 capture and the Phase 4 side build pass #cgo flags to the
+C toolchain unvalidated, as cmd/go/internal/work/security.go would refuse them?
+
+**Measured** (probe claude/h-probe-secflags 00bdeaf554, TestSecurityFlagReading, converter-cgo at go1.26.11: linux
+46096043805, darwin 46096046155 both arches, windows 46096048379). Every row exited 1 and wrote nothing:
+- `#cgo CFLAGS: -fplugin=./evil.so`: refused at load by cmd/go, "invalid flag in #cgo CFLAGS".
+- `#cgo CFLAGS: --sysroot=/tmp` (new in 1.26.11): refused at load by cmd/go, "invalid flag in #cgo CFLAGS".
+- `#cgo LDFLAGS: -L${SRCDIR}/evil -levil`, the directory holding GNU ld scripts named as libraries: refused at load by
+  cmd/go's NEW 1.26.11 -L scan, "invalid linker input file in #cgo LDFLAGS: .../libevil.a (unrecognized binary
+  format)". CORRECTION: the probe's own log line labels this row "stopped by a go2cs refusal", because the instrument
+  matched only "invalid flag". The text is cmd/go's. A go2cs GO2CS2001 follows it only because cmd/cgo wrote nothing.
+
+**Why it was not live, and why that was not enough.** go/packages loads with `go list -compiled`, whose cgo action runs
+cmd/go's checks and fails the package; go2cs then converts best-effort and the cgo route refuses for lack of cmd/cgo's
+output. The safety rested on the loader's mode and on a missing-output refusal.
+
+**Closed by** claude/h-cgo-p4-sidebuild 32e24727d5 and the commit after it. security.go at go1.26.11 is ported whole
+(cgoFlagSecurity.go), and its checks run in planCgoRoute before the capture and the side build, offline conversions
+included. Go's own flag tables pass on the port. The design's §8 says the converter must not rely on the loader for flag
+safety.
 **Owner.** H.
 
 — H (2026-11-28)
