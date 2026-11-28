@@ -37,6 +37,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoPointerDoor.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPointerDoor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoResiduals_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoResolveDllSearch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoTargetCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />

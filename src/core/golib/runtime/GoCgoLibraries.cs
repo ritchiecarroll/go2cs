@@ -63,7 +63,7 @@ namespace go.golib;
 
         List<GoCgoLibrary> owned = [.. libraries];
         s_registered.AddOrUpdate(assembly, new Registration(owned, target));
-        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target));
+        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target) is var handle and not 0 ? handle : ResolveUnowned(name, importing));
     }
 
     // What each cgo assembly registered, for a C variable's lookup (Variable), which loads its library by the same rules.
@@ -247,8 +247,8 @@ namespace go.golib;
         "the dynamic loader's search (LD_LIBRARY_PATH, the executable's run path, the loader cache and the system directories)";
 
     /// <summary>
-    /// The handle for a library the table owns, or 0 for a name it does not own, which keeps the runtime's own resolution
-    /// for any hand-owned import in the same assembly (§11.11). An owned library loads from where a Go binary's loader
+    /// The handle for a library the table owns, or 0 for a name it does not own, which the resolver then hands to
+    /// <see cref="ResolveUnowned"/> (§11.11). An owned library loads from where a Go binary's loader
     /// would find it: on windows the safe directories and the assembly's own, and elsewhere the system loader, with the
     /// captured SONAME or absolute install name. A miss throws, naming the -l flag, the captured name and the places
     /// tried, and never falls back to the runtime's probing, whose windows search includes the current directory.
@@ -272,18 +272,134 @@ namespace go.golib;
             if (OperatingSystem.IsMacOS() && !name.StartsWith('/'))
                 throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which is not an absolute install name: darwin loads a captured library only by its absolute path, since dyld's search for a bare name reaches the current directory; the current directory is never searched (docs/Limitations.md#cgo)");
 
-            nint handle;
+            int error = 0;
+            nint handle = OperatingSystem.IsWindows() ? LoadOnWindows(name, [AssemblyDirectory(assembly)], out _, out error) : NativeLibrary.TryLoad(name, out nint loaded) ? loaded : 0;
 
-            bool loaded = OperatingSystem.IsWindows() ?
-                NativeLibrary.TryLoad(name, assembly, DllImportSearchPath.SafeDirectories | DllImportSearchPath.AssemblyDirectory, out handle) :
-                NativeLibrary.TryLoad(name, out handle);
-
-            if (loaded)
+            if (handle != 0)
                 return handle;
 
-            throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}; the current directory is never searched (docs/Limitations.md#cgo)");
+            throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}{WindowsDependents(error)}; the current directory is never searched (docs/Limitations.md#cgo)");
         }
 
         return 0;
     }
+
+    // On windows a library loads only with every library it imports found in the same places, so a miss may be a dependent.
+    private static string WindowsDependents(int error) =>
+        OperatingSystem.IsWindows() ? $" (it, or a library it imports, is not in those places; LoadLibraryExW error {error})" : "";
+
+    /// <summary>
+    /// The handle for a name the table does not own, a hand-owned import in the same assembly, or 0, which keeps the
+    /// runtime's own resolution. On windows the name loads from the directories the runtime's probing would load it
+    /// from by absolute path (<see cref="UnownedDirectories"/>), in its order, but with its dependents held to the same
+    /// places as an owned library's: the runtime's load would take them from the current directory or PATH. A file
+    /// found there that does not load that way is refused. A name in none of them is the runtime's, as before.
+    /// Elsewhere the runtime resolves it, as a Go binary's loader would.
+    /// </summary>
+    internal static nint ResolveUnowned(string name, Assembly assembly)
+    {
+        if (!OperatingSystem.IsWindows())
+            return 0;
+
+        nint handle = LoadOnWindows(name, UnownedDirectories(assembly), out string? found, out int error);
+
+        if (handle != 0 || found is null)
+            return handle;
+
+        throw new DllNotFoundException($"cgo: {name}, at {found}, did not load from {Places}{WindowsDependents(error)}; the current directory is never searched (docs/Limitations.md#cgo)");
+    }
+
+    /// <summary>
+    /// The directories the runtime's probing loads a relative name from by absolute path, in its order: the host's
+    /// NATIVE_DLL_SEARCH_DIRECTORIES (the application directory, the framework's and, in a framework-dependent
+    /// application, each package's native folder), then the assembly's directory, then the application's base directory
+    /// for a host that sets no list.
+    /// </summary>
+    internal static List<string> UnownedDirectories(Assembly assembly)
+    {
+        List<string> directories = [];
+
+        if (AppContext.GetData("NATIVE_DLL_SEARCH_DIRECTORIES") is string list)
+        {
+            foreach (string directory in list.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                Add(directory);
+        }
+
+        Add(AssemblyDirectory(assembly));
+        Add(AppContext.BaseDirectory);
+
+        return directories;
+
+        void Add(string directory)
+        {
+            string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
+
+            if (!directories.Exists(known => string.Equals(known, full, StringComparison.OrdinalIgnoreCase)))
+                directories.Add(full);
+        }
+    }
+
+    private static string AssemblyDirectory(Assembly assembly) =>
+        assembly.Location.Length > 0 ? Path.GetDirectoryName(assembly.Location)! : AppContext.BaseDirectory;
+
+    /// <summary>
+    /// The file names a library name loads as on windows, in the runtime's order: the name itself when it ends in .dll
+    /// or .exe, and otherwise the name with .dll added, then the name. A name with a dot and no .dll, the usual .NET
+    /// spelling of a native library (<c>Vendor.Native</c>), loads as <c>Vendor.Native.dll</c>.
+    /// </summary>
+    internal static string[] WindowsCandidates(string name) =>
+        name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? [name] : [name + ".dll", name];
+
+    // On windows a bound library loads from the assembly's directory, then the application directory, System32 and the
+    // AddDllDirectory directories, and its DEPENDENTS are held to the same places: LoadLibraryExW's LOAD_LIBRARY_SEARCH
+    // flags apply to the library and every dependency it loads. NativeLibrary.TryLoad with DllImportSearchPath flags did
+    // not hold the dependents: a dependent only in the current directory loaded
+    // (TestCgoResolveHoldsABoundLibrarysDependentsOutOfTheCurrentDirectory, b927d8e4fb, cgo-e2e 46064580544 and
+    // 46064584096), the shape Phase 4's side library measured first (TestCgoPhase4H, 46054089826).
+    // The loader takes a path of MAX_PATH (260) characters or more only in its \\?\ form, so a deep assembly directory is
+    // handed over that way, and LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR still reads the library's directory from it.
+    // The first file found in directories is the load: one that exists and fails is not retried by its bare name, which
+    // could load a different library of that name from System32. found names it, and error is the loader's last error.
+    private static nint LoadOnWindows(string name, IEnumerable<string> directories, out string? found, out int error)
+    {
+        string[] candidates = WindowsCandidates(name);
+
+        foreach (string directory in directories)
+        {
+            foreach (string candidate in candidates)
+            {
+                string path = Path.GetFullPath(Path.Combine(directory, candidate));
+
+                if (path.Length >= MaxPath && !path.StartsWith(@"\\?\", StringComparison.Ordinal))
+                    path = path.StartsWith(@"\\", StringComparison.Ordinal) ? @"\\?\UNC\" + path[2..] : @"\\?\" + path;
+
+                if (!File.Exists(path))
+                    continue;
+
+                found = path;
+                nint handle = LoadLibraryExW(path, 0, LoadLibrarySearchDllLoadDir | LoadLibrarySearchDefaultDirs);
+                error = handle != 0 ? 0 : Marshal.GetLastPInvokeError();
+
+                return handle;
+            }
+        }
+
+        found = null;
+        error = 0;
+
+        foreach (string candidate in candidates)
+        {
+            nint handle = LoadLibraryExW(candidate, 0, LoadLibrarySearchDefaultDirs);
+
+            if (handle != 0)
+                return handle;
+
+            error = Marshal.GetLastPInvokeError();
+        }
+
+        return 0;
+    }
+
+    // The extended-length prefix is needed past MAX_PATH (P1's Resolve; LoadLibraryExW above, H's Phase 4 SideTable).
+    private const int MaxPath = 260;
 }
