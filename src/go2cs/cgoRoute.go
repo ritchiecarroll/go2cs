@@ -1179,6 +1179,12 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 		}
 	}
 
+	// The record's -L directories that are not the environment's (pkg-config's share among them) are scanned as cmd/go
+	// 1.26.11 scans a linker search directory.
+	if err == nil {
+		err = cgoLinkDirsAllowed(load, flags, goos)
+	}
+
 	if err != nil {
 		return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
 	}

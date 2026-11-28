@@ -16,6 +16,8 @@
 // - The whole file below cgoSecWith: DERIVED FROM src/cmd/go/internal/work/security.go, Go 1.26.11, every rule and check
 //   as there, its top-level names prefixed cgoSec. cmd/go state comes from the conversion's load through cgoSecWith,
 //   and an XCOFF linker input is refused, where cmd/go reads it with internal/xcoff.
+//   cgoSecCheckPkgConfigFlags and cgoSecCheckCompilerFlagsForInternalLink are carried whole and unused in production: go2cs
+//   never runs pkg-config (its #cgo pkg-config names need no check here) and has no internal link. Their ported tests run.
 // - cgoSecHasFilePathPrefix: DERIVED FROM src/cmd/go/internal/str/path.go, Go 1.26.11, func HasFilePathPrefix.
 // - cgoSecSafeArg: DERIVED FROM src/cmd/go/internal/load/pkg.go, Go 1.26.11, func SafeArg.
 
@@ -149,6 +151,58 @@ func cgoFlagsAllowed(load cgoLoad, listed cgoSideListing, goos string) error {
 			}
 
 			if err := verify(check.name, "#cgo "+check.name, check.list); err != nil {
+				return fmt.Errorf("cgo: %w", err)
+			}
+		}
+
+		return nil
+	})
+}
+
+// cgoLinkDirsAllowed scans the -L directories of cmd/cgo's //go:cgo_ldflag record that did not come from the
+// environment, with cmd/go's 1.26.11 linker search-directory scan (checkLinkerLibDir: no GCC .spec file, and no
+// "library" that is a GNU ld script or an object carrying linker options or LTO sections). The record holds the
+// environment's CGO_LDFLAGS (exempt, as in cmd/go), the package's #cgo LDFLAGS (which cgoFlagsAllowed checks), and
+// pkg-config --libs output, which cmd/go checks as "pkg-config --libs" before cmd/cgo runs and which go2cs never
+// produces itself. Scanning every directory not from the environment covers that last share without resting on the
+// loader (P3's SHOULD 4 on 4b, 2026-11-28).
+func cgoLinkDirsAllowed(load cgoLoad, flags cgoLinkFlags, goos string) error {
+	values, err := cgoGoEnv(load, "CGO_LDFLAGS", "GOMODCACHE")
+
+	if err != nil {
+		return err
+	}
+
+	fromEnv := map[string]bool{}
+
+	if fields, err := cgoQuotedSplit(values[0]); err == nil {
+		for i := 0; i < len(fields); i++ {
+			dir, found := strings.CutPrefix(fields[i], "-L")
+
+			if found && dir == "" && i+1 < len(fields) {
+				i++
+				dir = fields[i]
+			}
+
+			if !found || dir == "" {
+				continue
+			}
+
+			if !filepath.IsAbs(dir) {
+				dir = filepath.Join(load.dir, dir)
+			}
+
+			fromEnv[filepath.Clean(dir)] = true
+		}
+	}
+
+	return cgoSecWith(func(string) string { return "" }, goos, values[1], load.dir, func() error {
+		for _, dir := range flags.dirs {
+			if fromEnv[filepath.Clean(dir)] {
+				continue
+			}
+
+			if err := cgoSecCheckLinkerLibDir("//go:cgo_ldflag", dir); err != nil {
 				return fmt.Errorf("cgo: %w", err)
 			}
 		}
