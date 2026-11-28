@@ -21,23 +21,25 @@ func lookup(i any) Compressor {
 	return nil
 }
 
-// Named is exported and declared in this package; hidden is unexported. Handler is a func type with
-// methods, so it implements both and error, and is the only kind of func type a non-empty interface can
-// assert to.
+// Named is exported and declared in this package; hidden is unexported; fmt.Stringer is exported from
+// another package. Handler is a func type with methods, so it implements all three and error, and is the
+// only kind of func type a non-empty interface can assert to.
 type Named interface{ Name() string }
 type hidden interface{ name() string }
 
 type Handler func(int) int
 
-func (Handler) Name() string  { return "handler" }
-func (Handler) name() string  { return "handler" }
-func (Handler) Error() string { return "handler" }
+func (Handler) Name() string   { return "handler" }
+func (Handler) name() string   { return "handler" }
+func (Handler) Error() string  { return "handler" }
+func (Handler) String() string { return "handler" }
 
 type tag struct{}
 
-func (tag) Name() string  { return "tag" }
-func (tag) name() string  { return "tag" }
-func (tag) Error() string { return "tag" }
+func (tag) Name() string   { return "tag" }
+func (tag) name() string   { return "tag" }
+func (tag) Error() string  { return "tag" }
+func (tag) String() string { return "tag" }
 
 // panicText runs f and prints what it panicked with.
 func panicText(f func()) {
@@ -58,6 +60,7 @@ func main() {
 	var n Named = tag{}
 	var h hidden = tag{}
 	var e error = tag{}
+	var s fmt.Stringer = tag{}
 	var nilNamed Named
 	var nilAny any
 
@@ -65,6 +68,7 @@ func main() {
 	panicText(func() { _ = n.(Handler) })         // main.Named is main.tag, not main.Handler
 	panicText(func() { _ = h.(Handler) })         // main.hidden is main.tag, not main.Handler
 	panicText(func() { _ = e.(Handler) })         // error is main.tag, not main.Handler
+	panicText(func() { _ = s.(Handler) })         // fmt.Stringer is main.tag, not main.Handler
 	panicText(func() { _ = nilNamed.(Handler) })  // main.Named is nil, not main.Handler
 	panicText(func() { _ = nilAny.(Compressor) }) // interface {} is nil, not main.Compressor
 	panicText(func() { _ = i.(func(w int) int) }) // interface {} is main.Compressor, not func(int) int
@@ -72,6 +76,6 @@ func main() {
 
 	// The same assertions succeed on a Handler, through each source.
 	double := Handler(func(w int) int { return w * 2 })
-	n, h, e = double, double, double
-	fmt.Println(n.(Handler)(1), h.(Handler)(2), e.(Handler)(3))
+	n, h, e, s = double, double, double, double
+	fmt.Println(n.(Handler)(1), h.(Handler)(2), e.(Handler)(3), s.(Handler)(4))
 }

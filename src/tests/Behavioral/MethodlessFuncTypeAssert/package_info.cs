@@ -38,9 +38,11 @@ using static go.main_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<Handler, Named>]
 [assembly: GoImplement<Handler, error>]
+[assembly: GoImplement<Handler, fmt_package.Stringer>]
 [assembly: GoImplement<Handler, hidden>]
 [assembly: GoImplement<tag, Named>]
 [assembly: GoImplement<tag, error>]
+[assembly: GoImplement<tag, fmt_package.Stringer>]
 [assembly: GoImplement<tag, hidden>]
 // </InterfaceImplementations>
 
@@ -55,7 +57,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("MethodlessFuncTypeAssert.go", "MethodlessFuncTypeAssert.cs", "AAgghIKUAAsWgoLIgoKWooCSoqSCgoKWgpaioqKClJCSgJKAkoCSkJKQkpCSloKC", "44-44:1;49-49:1;64-64:2;65-65:3;66-66:4;67-67:5;68-68:6;69-69:7;70-70:8;74-74:9", "", "", "", "39:49,40:13")]
+[assembly: GoPositionMap("MethodlessFuncTypeAssert.go", "MethodlessFuncTypeAssert.cs", "AAgghIKUAAsWgoKCyIKCgpaigJKipIKCgpaClqKioqKClJCSgJKAkoCSgJKQkpCSkJKWgoI=", "46-46:1;51-51:1;67-67:2;68-68:3;69-69:4;70-70:5;71-71:6;72-72:7;73-73:8;74-74:9;78-78:10", "", "", "", "41:49,42:13")]
 // </GoSourcePositionMaps>
 
 namespace go;

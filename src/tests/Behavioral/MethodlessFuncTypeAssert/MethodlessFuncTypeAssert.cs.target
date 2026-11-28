@@ -25,6 +25,7 @@ public delegate nint Handler(nint _);
 public static @string Name(this Handler _) { return "handler"; }
 internal static @string name(this Handler _) { return "handler"; }
 public static @string Error(this Handler _) { return "handler"; }
+public static @string String(this Handler _) { return "handler"; }
 
 partial struct tag {
 }
@@ -32,6 +33,7 @@ partial struct tag {
 internal static @string Name(this tag _) { return "tag"; }
 internal static @string name(this tag _) { return "tag"; }
 internal static @string Error(this tag _) { return "tag"; }
+internal static @string String(this tag _) { return "tag"; }
 
 internal static void panicText(Action f) {
     GoFrame ᒐ = default;
@@ -62,6 +64,9 @@ internal static void main() {
     ref var e = ref heap<error>(out var Ꮡe);
 
     e = new tag();
+    ref var s = ref heap<fmt.Stringer>(out var Ꮡs);
+
+    s = new tag();
     Named nilNamed = default;
     any nilAny = default;
 
@@ -78,23 +83,26 @@ internal static void main() {
     panicText([GoFunc("main.func5")] () => {
         _ = Ꮡe.ValueSlot._ᶠ<error, Handler>();
     });
-    var nilNamedʗ1 = nilNamed;
     panicText([GoFunc("main.func6")] () => {
+        _ = Ꮡs.ValueSlot._ᶠ<fmt.Stringer, Handler>();
+    });
+    var nilNamedʗ1 = nilNamed;
+    panicText([GoFunc("main.func7")] () => {
         _ = nilNamedʗ1._ᶠ<Named, Handler>();
     });
     var nilAnyʗ1 = nilAny;
-    panicText([GoFunc("main.func7")] () => {
+    panicText([GoFunc("main.func8")] () => {
         _ = nilAnyʗ1._ᶠ<Compressor>();
     });
     var iʗ1 = i;
-    panicText([GoFunc("main.func8")] () => {
+    panicText([GoFunc("main.func9")] () => {
         _ = iʗ1._ᶠ<Func<nint, nint>>();
     });
     fmt.Println(i._ᶠ<Compressor>()(4));
 
-    var @double = new Handler([GoFunc("main.func9")] (nint w) => w * 2);
-    (n, h, e) = (new HandlerᴠNamed(@double), new Handlerᴠhidden(@double), new Handlerᴠerror(@double));
-    fmt.Println(n._ᶠ<Named, Handler>()(1), h._ᶠ<hidden, Handler>()(2), e._ᶠ<error, Handler>()(3));
+    var @double = new Handler([GoFunc("main.func10")] (nint w) => w * 2);
+    (n, h, e, s) = (new HandlerᴠNamed(@double), new Handlerᴠhidden(@double), new Handlerᴠerror(@double), new HandlerᴠStringer(@double));
+    fmt.Println(n._ᶠ<Named, Handler>()(1), h._ᶠ<hidden, Handler>()(2), e._ᶠ<error, Handler>()(3), s._ᶠ<fmt.Stringer, Handler>()(4));
 }
 
 } // end main_package
