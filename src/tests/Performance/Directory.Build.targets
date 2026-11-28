@@ -18,4 +18,11 @@
     <TrimMode>partial</TrimMode>
   </PropertyGroup>
 
+  <!-- The M:N twin switch (GoTwinsFor and the rest) is golib's consumer targets file. src/Directory.Build.targets
+       imports it for every other in-tree project, but this file shadows that one and must not import it whole (its
+       symbols targets would touch the AOT publish above), so GoTwinsFor=<Perf project> reached nothing and was
+       silently inert. Import the one file, with the same guard src/Directory.Build.targets uses. -->
+  <Import Project="$(MSBuildThisFileDirectory)../../core/golib/buildTransitive/go.lib.twins.targets"
+          Condition="'$(GoLibTwinsTargetsImported)' != 'true' and Exists('$(MSBuildThisFileDirectory)../../core/golib/buildTransitive/go.lib.twins.targets')" />
+
 </Project>
