@@ -123,11 +123,13 @@ public class NewCallbackShapeGenerator : ISourceGenerator
                     models[tree] = model = compilation.GetSemanticModel(tree);
 
                 // A call whose argument binds only through another generator's output (a pointer method value)
-                // does not resolve here; its one candidate is the method.
+                // does not resolve here; its one candidate is the method. A call ON a pointer box (`p.NewCallback(f)`
+                // with `p` a `ж<Proc>`) binds RecvGenerator's overload and has no candidate here at all; the method is
+                // found where the converter declares it, reduced on its receiver.
                 SymbolInfo target = model.GetSymbolInfo(call);
 
-                if ((target.Symbol ?? (target.CandidateSymbols.Length == 1 ? target.CandidateSymbols[0] : null))
-                    is not IMethodSymbol method)
+                if ((target.Symbol ?? (target.CandidateSymbols.Length == 1 ? target.CandidateSymbols[0] : null) ??
+                     BoxReceiverMethod(call, model)) is not IMethodSymbol method)
                     continue;
 
                 int index;
@@ -279,6 +281,35 @@ public class NewCallbackShapeGenerator : ISourceGenerator
         return expression is MemberAccessExpressionSyntax access ? PointerMethodValueType(access, model, compilation) : null;
     }
 
+    // A call on a pointer box, `p.NewCallback(f)` with `p` a `ж<Proc>`: the one extension method of that name the
+    // converter declares on `this ref Proc` (or on the box) that takes the call's arguments, reduced on its receiver,
+    // so its parameters leave the receiver out as the overload's do.
+    private static IMethodSymbol? BoxReceiverMethod(InvocationExpressionSyntax call, SemanticModel model)
+    {
+        if (call.Expression is not MemberAccessExpressionSyntax access ||
+            model.GetTypeInfo(access.Expression).Type is not
+                INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } box ||
+            box.TypeArguments[0] is not INamedTypeSymbol receiver || receiver.ContainingType is not { } holder)
+            return null;
+
+        IMethodSymbol? found = null;
+
+        foreach (IMethodSymbol candidate in holder.GetMembers(access.Name.Identifier.ValueText).OfType<IMethodSymbol>())
+        {
+            if (!candidate.IsExtensionMethod || candidate.Parameters.Length != call.ArgumentList.Arguments.Count + 1 ||
+                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, receiver) &&
+                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, box))
+                continue;
+
+            if (found is not null)
+                return null;
+
+            found = candidate.ReduceExtensionMethod(candidate.Parameters[0].Type) ?? candidate;
+        }
+
+        return found;
+    }
+
     // A method value on a pointer box, `w.wndProc` with `w` a `ж<window>`: the converter declares the method on
     // `this ref window` and go2cs-gen's RecvGenerator adds the `this ж<window>` overload the call binds. Generators
     // do not see each other's output, so here the method group does not resolve. The method is found where the
@@ -340,7 +371,7 @@ public class NewCallbackShapeGenerator : ISourceGenerator
     internal static string? Registration(INamedTypeSymbol type, Compilation compilation)
     {
         if (type.DelegateInvokeMethod is not { } invoke || IsCompilerMade(type) || MentionsTypeParameter(type) ||
-            !IsAccessible(type, compilation) || !CanBeTypeArgument(invoke.ReturnType) ||
+            !IsAccessible(type, compilation) || !CanBeTypeArgument(type) || !CanBeTypeArgument(invoke.ReturnType) ||
             invoke.Parameters.Any(parameter => !CanBeTypeArgument(parameter.Type)) ||
             invoke.Parameters.Any(parameter => parameter.RefKind != RefKind.None) || invoke.ReturnsByRef ||
             invoke.ReturnsByRefReadonly)
@@ -380,7 +411,8 @@ public class NewCallbackShapeGenerator : ISourceGenerator
     }
 
     // A pointer, a function pointer, a ref struct or a file-local type cannot be a type argument of the
-    // registration (CS0306, CS9244) or be named from the generated file. Hand-written C# can pass one
+    // registration (CS0306, CS9244) or be named from the generated file; the delegate type itself is checked too,
+    // since the registration names it in typeof. Hand-written C# can pass one
     // (`static nuint cb(void* p)` in an *_impl.cs companion); it stays on the reflective path.
     private static bool CanBeTypeArgument(ITypeSymbol type) => type switch
     {
