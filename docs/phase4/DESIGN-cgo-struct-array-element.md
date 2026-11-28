@@ -1,6 +1,7 @@
 # Door 1: an element of a Go array or slice of C structs, handed to C
 
-Status: REVISION 2, for P3's re-read. Owner: H. Branch `claude/h-cgo-door1-struct-element`, cut from the go-sqlite3
+Status: REVISION 3, reds started (COORD inbox H 20261128T054307Z; P3's delta review, inbox COORD
+20261128T054244Z, folded here and checked at the seat read). Owner: H. Branch `claude/h-cgo-door1-struct-element`, cut from the go-sqlite3
 slice (`claude/h-cgo-sqlite-slice` at 0db617eaf9), whose `void *` member crossing it builds on.
 
 BOARD row: 2026-11-28, "an element of a Go slice of C structs handed to C is refused". COORD's rulings of that day:
@@ -9,6 +10,8 @@ BOARD row: 2026-11-28, "an element of a Go slice of C structs handed to C is ref
 - P3's review (APPROVE WITH CHANGES, inbox COORD 20261128T051829Z) folds in before code (inbox H 20261128T051934Z).
 
 Revision 2 folds P3's F1 to F4, NITs 5 and 6, and COORD's p[-1] arm. Each change is marked [F1] and so on.
+Revision 3 folds P3's delta: [d1] the copy-back compares pointer words with the snapshot first; [d2] the check window
+travels beside the pointer, and ElemRefBox<T> stays sealed; [d3]-[d6] the NITs.
 
 ## 1. The site and the refusal
 
@@ -58,7 +61,9 @@ door:
 one root both pass, so `C.f(&cols[0], &cols[2])` would get two mirrors and two copy-backs, the last winning. Elements
 is a THIRD claim kind in `GoCgoImages`, keyed by the backing array. It is refused by name against any other claim on
 the same keys: an image, a mirror (Other), a pinned argument, or a second Elements claim. There is one golib unit row per
-pair. Go accepts every one of these calls, so Limitations names each refusal.
+pair. Go accepts every one of these calls, so Limitations names each refusal. Two element pointers into one
+array (`swap(&a[i], &a[j])`) are a common C shape and are refused here; the later cure is ONE shared mirror per
+backing array, as the image door shares one buffer per root [d6].
 
 **Mirror (wrapper).** The struct's mirror type and its copy functions are the wrapper file's (`ᴍin_M`, `ᴍout_M`,
 generated per struct), so the array loop is emitted in the wrapper:
@@ -67,14 +72,28 @@ generated per struct), so the array loop is emitted in the wrapper:
     if (k0 == Elements)
     {
         e0 = new M[b0.Length];
-        for (nint i = 0; i < b0.Length; i++) ᴍin_M(ref e0[i], b0[i]);    // the member rules, per element
+        for (nint i = 0; i < b0.Length; i++)
+            ᴍin_M(ref e0[i], b0[i], w0.Check(i));                     // the window decides each element's check [d5]
         s0 = (M[])e0.Clone();                                          // the copied-in snapshot [F1]
     }
     fixed (M* f0 = e0) { if (k0 == Elements) a0 = (nint)(f0 + x0); ... call ... pin checks ... }
     if (k0 == Elements)
         for (nint i = 0; i < b0.Length; i++)
             if (!MirrorBytesEqual(e0[i], s0[i]))                         // only elements C changed [F1]
-                ᴍout_M(ref b0[i], e0[i] /*, copies, function when pointer-bearing */);
+                ᴍout_M(ref b0[i], e0[i], s0[i] /*, copies, function when pointer-bearing */);
+
+`w0.Check(i)` is the element's check under section 4's window [d5]:
+- `InWindow`: a Go pointer in a pointer member panics with the member's kind in the text, "unsafe pointer" for a
+  `void *` member and "pointer" for a typed one (the literal form).
+- `Whole`: the same panic with the text "pointer" (the variable form, no window).
+- `OutsideWindow`: a Go pointer crosses as 0 (an element before the literal form's slice).
+
+`ᴍout_M(ref v, in m, in s)` takes the snapshot element `s` [d1]. For each pointer member it compares the mirror's word
+with the snapshot's word BEFORE running any member function: an equal word keeps the original member, whatever it
+holds, and no member function runs again on the original. Only a word C changed goes through the member's copy-back
+rule. So `p[-1].n = 7`, legal for C, comes back as 7 while the element's Go pointer stays intact. Without this, a
+`void *` member whose word crossed as 0 would come back nil, and a typed pointer member would panic after the call,
+recomputing its copied-in word.
 
 - **Copy-back only what C changed [F1].** Copying back every element would write a stale value over another
   goroutine's write made during the call. Examples: one goroutine calls C on `&pool[0]` while another writes
@@ -92,7 +111,9 @@ generated per struct), so the array loop is emitted in the wrapper:
 **Identity of results [F4].** An element box's identity is the pair (backing array, absolute index) (ж.ElemRefBox.cs:
 318-343, 494-499). So a pointer result that lands on ANY element boundary inside the mirror, element k and not only
 the passed element, maps back to a box over (b0, k), which equals the program's `&cols[k]`. Only an interior word of
-an element, or the address one past the end, is refused by name.
+an element, or the address one past the end, is refused by name. Every mapped result is a PLAIN element box, the
+passed element's included [d3]: the window describes one call and never outlives it, so a later `C.g(p)` checks as
+the variable form, as Go does.
 
 ## 4. The check: Go's range and text, per call form [F3]
 
@@ -101,10 +122,12 @@ The converter already folds cmd/cgo's check closure (cgoRoute.go:455-456 recogni
 Go checks.
 
 **PROPOSED (P3's preferred path).** Size: one golib type, one emission change at the fold, the rows below.
-- For the literal form, the fold hands the wrapper the element through a golib constructor that records Go's check
-  window: `GoCgoArgs.Indexed(a, i)` returns an `ElemRefBox<T>` subtype carrying the slice's start in its backing and
-  its capacity. Its identity is the plain element box's, (backing, absolute index), so `==` against `&a[i]` and every
-  door that reads an element box are unchanged.
+- For the literal form, the fold passes Go's check window BESIDE the pointer [d2]. Each struct-pointer parameter
+  of a wrapper gains an optional `GoCgoWindow` parameter, defaulting to none (the variable form). The fold fills it
+  with `GoCgoWindow.Of(a)`: the slice's start in its backing array and its capacity. `ElemRefBox<T>` stays sealed. It
+  is on every element pointer in every program, and a subtype would turn each exact type test there into a hierarchy
+  cast for a window only cgo's literal form reads (COORD's ruling). The element box the wrapper receives is the
+  program's own `&a[i]`, so equality and every door are unchanged.
 - `StructPointer` reads the window when present:
   - The copy-in member check panics only for a Go pointer in an element inside the window, with the member's kind:
     "unsafe pointer" for `void *`, "pointer" for a typed member, as cgoFormatErr names it.
@@ -112,7 +135,10 @@ Go checks.
     one of its pointer words crosses as 0, never as a Go address, because a mirror cannot carry a Go pointer.
     Copy-back leaves the element untouched unless C changed its bytes (F1).
 - For the variable form (no window), the whole backing array is checked, with the text "pointer", as
-  cgoCheckUnknownPointer says it.
+  cgoCheckUnknownPointer says it. That equals Go's check only when the backing array is its own heap object [d4]. For
+  an array field, Go checks the whole enclosing object (cgocall.go:752-760). For a package-level variable holding
+  pointers, Go panics outright (cgocall.go:771-776), where go2cs runs. Limitations carries both, and slicecolsfield's
+  comment keeps go run's variable-form result.
 
 **Fallback, if the fold change is not small in practice.** The whole backing array is checked for both forms, with
 the member's kind in the text. Section 5 and Limitations then state both differences:
@@ -129,6 +155,9 @@ I will measure which path holds when the fold is written, and say which one I to
   argument per step.
 - **Refusals Go does not make:** the double claims of section 3 (F2), and an interior or one-past-the-end result (F4).
   Each is named in Limitations.
+- **An element before the literal form's window** [d1]: C reads NULL in a pointer member that holds a Go pointer in Go,
+  and a NULL that C stores there is not seen (the word equals the snapshot's, so the original pointer is kept).
+- **The variable form's check range** for an array field and a package-level variable [d4].
 - **Under the fallback only:** the two check differences of section 4.
 - A struct the mirror cannot pass by pointer today (a union, a float or an inline array member it refuses) is refused
   as it is for one record.
@@ -139,7 +168,9 @@ I will measure which path holds when the fold is written, and say which one I to
    - `slicecolsgo` flips from a known refusal to an equal run.
    - `slicecolsgoptr2`, in BOTH forms: a Go pointer in element 2's `void *` member, as `C.f(&cols[0])` (Go: "unsafe
      pointer") and as `p := &cols[0]; C.f(p)` (Go: "pointer").
-   - `slicecolsreslice`: the literal form over `cols[1:]` with a Go pointer in `cols[0]`. Go runs it to its end.
+   - `slicecolsreslice`: the literal form over `cols[1:]` with a Go pointer in `cols[0]`. Go runs it to its end. C
+     also writes a scalar of `cols[0]` (`p[-1].n`); Go then reads that scalar changed and the pointer member intact
+     [d1].
    - `slicecolsmid`: `&cols[1]` with ncol 2; C fills elements 1 and 2, element 0 is untouched.
    - `slicecolsback` (COORD): `&cols[1]`, and C reads `p[-1]`, to pin the from-index-0 mirror.
    - `slicecolsresult` [F4]: C returns `p + 1`, and Go compares it with `&cols[2]` (true under go run).
@@ -150,8 +181,8 @@ I will measure which path holds when the fold is written, and say which one I to
    - golib unit rows: `StructPointer` over an element box answers Elements with the backing and index; over a native
      window's element it answers Native; one row per refused claim pair [F2]; and the result mapping, for a boundary,
      an interior word and one past the end [F4].
-2. **The cure**: golib's classification and claim kind, the window-carrying element box, the fold's emission for the
-   literal form, the wrapper's loop, snapshot and copy-back, and the Limitations lines.
+2. **The cure**: golib's classification, claim kind and `GoCgoWindow`; the wrapper's window parameter, loop,
+   snapshot and snapshot-compared copy-back; the fold's window for the literal form; and the Limitations lines.
 3. **Gates**: go test; GolibTests R and D; CNR; hosted cgo-e2e x3; and TestSqlite3Reading x3, which stays at 15 ways (all
    E2), since door 1 changes run time only.
 
