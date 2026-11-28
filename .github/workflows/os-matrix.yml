@@ -651,7 +651,9 @@ jobs:
           # the three agree. Without the folder the leg carries no arch and builds darwin/amd64, a correct build on Apple
           # silicon, which is why this is not refused the way linux's calibration was. The stages below are not bound: they
           # are the flavour probe's skip list, and TestProbedStagesBindTheArchPathsGives (repoguard) holds the two lists equal.
-          # The four packed stages consume darwin/amd64 bytes until D6's RID map; reconvert-footprint takes its TARGET arch
+          # The four packed stages build nothing from src/core: they consume packed bytes, which since D6's RID map are
+          # darwin/arm64 on osx-arm64 (push-nuget.ps1 $ridFlavors; pack-flavour-guard.ps1 holds the pair at the pack, so a
+          # probe of the source here would read a build the stage never uses); reconvert-footprint takes its TARGET arch
           # from GoTargetArch, so binding it would move darwin's footprint to darwin/arm64 (a darwin/arm64 arm is COORD's call).
           $darwinArchUnbound = '["release-smoke","aot-smoke","nugetgo-behavior","cgo-nuget-e2e","reconvert-footprint"]' | ConvertFrom-Json
           $darwinArmFlavour = @(Get-ChildItem -Path 'src/core' -Directory -Recurse -Filter 'darwin-arm64' -ErrorAction SilentlyContinue).Count -gt 0

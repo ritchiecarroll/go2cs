@@ -10,7 +10,7 @@
 # A converted module can differ by platform: mousetrap's StartedByExplorer has a Windows body and an "others" body, and
 # cobra's command_win.go is Windows-only. A -recurse conversion emits ONE target, so nugetgo-pack.ps1 converts and
 # builds the module once per flavor -- a target of the converted standard library's universe, the pairs the release's
-# RID map ships (windows/amd64, linux/amd64, darwin/amd64, linux/arm64) -- and asks the go.* release's own question of
+# RID map ships (windows/amd64, linux/amd64, darwin/amd64, linux/arm64, darwin/arm64) -- and asks the go.* release's own question of
 # them: do the flavors' assemblies differ in MEANING? The answer is a measurement, made with the release's material check
 # (src/tools/pushnuget/GoAssemblyMaterial.psm1: each assembly hashed with Roslyn's deterministic identity fields zeroed),
 # never a list and never the module author's word.
@@ -19,9 +19,12 @@
 #     a neutral package is byte for byte what the single-flavor pack produced.
 #   * They do: the package takes push-nuget.ps1's RID-specific layout exactly. lib/<tfm>/ carries the REFERENCE flavor
 #     (windows, the release's first RID) as the compile-time asset, and runtimes/<rid>/lib/<tfm>/ carries each shipped
-#     RID's flavor (win-x64, linux-x64, osx-x64, osx-arm64 and linux-arm64; the two Mac RIDs the same darwin bytes,
-#     and linux-arm64 its own linux/arm64 flavor, never linux-x64's). The release's
+#     RID's flavor (win-x64, linux-x64, osx-x64, linux-arm64 and osx-arm64; each arm64 RID its own flavor, linux/arm64
+#     and, since D6 of DESIGN-darwin-arm64-flavour.md, darwin/arm64, never its x64 twin's). The release's
 #     own comment block above $ridFlavors says why lib/ and not ref/, and why both Mac folders ship explicitly.
+#
+# A pack that ships a subset of the RIDs (a -Cgo pack leaves osx-arm64 out by name, NugetgoCgo.psm1) passes its own
+# map as -RidFlavors to every function here, so it converts, measures and describes exactly the flavors it ships.
 #
 # The RID map is the release's, and Test-NugetgoFlavors.ps1 reads push-nuget.ps1 to hold it so.
 
@@ -34,18 +37,19 @@ function Get-NugetgoRidFlavors {
         'win-x64'     = 'windows/amd64'
         'linux-x64'   = 'linux/amd64'
         'osx-x64'     = 'darwin/amd64'
-        'osx-arm64'   = 'darwin/amd64'
         'linux-arm64' = 'linux/arm64'
+        'osx-arm64'   = 'darwin/arm64'
     }
 }
 
 function Get-NugetgoReferenceFlavor { @((Get-NugetgoRidFlavors).Values)[0] }
 
-# The distinct flavors, in map order: one conversion and one build each.
-function Get-NugetgoFlavors { @((Get-NugetgoRidFlavors).Values | Select-Object -Unique) }
+# The distinct flavors of a RID map (the release's by default), in map order: one conversion and one build each.
+function Get-NugetgoFlavors { param($RidFlavors = (Get-NugetgoRidFlavors)) @($RidFlavors.Values | Select-Object -Unique) }
 
-# The GOOS of a flavor, and the target a RID's own host converts for by default (x64 is amd64): osx-arm64 ships the
-# darwin/amd64 flavor but a Mac arm64 host converts for darwin/arm64.
+# The GOOS of a flavor, and the target a RID's own host converts for by default (x64 is amd64). Since D6 every RID's
+# host target is its flavor; before it, osx-arm64 shipped the darwin/amd64 flavor while a Mac arm64 host converted for
+# darwin/arm64.
 function Get-NugetgoFlavorGoos([Parameter(Mandatory)][string]$Flavor) { ($Flavor -split '/', 2)[0] }
 function Get-NugetgoRidTarget([Parameter(Mandatory)][string]$Rid) {
     "$(Get-NugetgoFlavorGoos (Get-NugetgoRidFlavors)[$Rid])/$(if ($Rid -like '*-arm64') { 'arm64' } else { 'amd64' })"
@@ -63,16 +67,17 @@ function Get-NugetgoFlavorFolder([Parameter(Mandatory)][string]$Flavor) { $Flavo
 # read as neutral: the decision is only a measurement when every flavor was measured.
 function Get-NugetgoFlavorDecision {
     [CmdletBinding()]
-    param([Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$ProofFlavor)
+    param([Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$ProofFlavor, $RidFlavors = (Get-NugetgoRidFlavors))
 
-    foreach ($each in Get-NugetgoFlavors) {
-        if (-not $Assemblies.Contains($each)) { throw "no $each flavor was built: every flavor ($((Get-NugetgoFlavors) -join ', ')) is measured before a package is called neutral" }
+    $flavors = @(Get-NugetgoFlavors -RidFlavors $RidFlavors)
+    foreach ($each in $flavors) {
+        if (-not $Assemblies.Contains($each)) { throw "no $each flavor was built: every flavor ($($flavors -join ', ')) is measured before a package is called neutral" }
     }
-    if (-not $Assemblies.Contains($ProofFlavor)) { throw "the proof's flavor $ProofFlavor is not one of $((Get-NugetgoFlavors) -join ', ')" }
+    if ($flavors -cnotcontains $ProofFlavor) { throw "the proof's flavor $ProofFlavor is not one of $($flavors -join ', ')" }
 
     $proof = $Assemblies[$ProofFlavor]
     $reasons = New-Object System.Collections.Generic.List[string]
-    foreach ($each in Get-NugetgoFlavors) {
+    foreach ($each in $flavors) {
         if ($each -ceq $ProofFlavor) { continue }
         $flavor = $Assemblies[$each]
         $onlyProof = @($proof.Keys | Where-Object { -not $flavor.ContainsKey($_) } | Sort-Object)
@@ -161,7 +166,7 @@ function Test-NugetgoRidLayout {
             if (-not (& $same $entries["$folder$name"] $Assemblies[$rids[$rid]][$name])) { $reasons.Add("$folder$name is not the $($rids[$rid]) flavor") }
         }
     }
-    foreach ($each in Get-NugetgoFlavors) {
+    foreach ($each in Get-NugetgoFlavors -RidFlavors $rids) {
         $twins = @($rids.Keys | Where-Object { $rids[$_] -ceq $each })
         foreach ($rid in $twins | Select-Object -Skip 1) {
             foreach ($name in $names) {
@@ -199,10 +204,10 @@ function Test-NugetgoPackedLayout {
 # -ThirdPartyPackage must name a module SOME flavor references (each flavor was asked with -AllowUnreferenced).
 function Merge-NugetgoFlavorRequires {
     [CmdletBinding()]
-    param([Parameter(Mandatory)]$Requires, [string[]]$ThirdPartyPackage = @())
+    param([Parameter(Mandatory)]$Requires, [string[]]$ThirdPartyPackage = @(), $RidFlavors = (Get-NugetgoRidFlavors))
 
     $byModule = [ordered]@{}
-    foreach ($each in Get-NugetgoFlavors) {
+    foreach ($each in Get-NugetgoFlavors -RidFlavors $RidFlavors) {
         foreach ($r in @($Requires[$each])) {
             if ($null -eq $r) { continue }
             if (-not $byModule.Contains($r.Module)) { $byModule[$r.Module] = $r; continue }
@@ -224,10 +229,10 @@ function Merge-NugetgoFlavorRequires {
 # package, whose flavors agree.
 function Get-NugetgoFlavorDisclosure {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$ProofFlavor, [switch]$RidSpecific)
+    param([Parameter(Mandatory)][string]$ProofFlavor, [switch]$RidSpecific, $RidFlavors = (Get-NugetgoRidFlavors))
 
     if (-not $RidSpecific) { return $null }
-    $others = @(Get-NugetgoFlavors | Where-Object { $_ -cne $ProofFlavor })
+    $others = @(Get-NugetgoFlavors -RidFlavors $RidFlavors | Where-Object { $_ -cne $ProofFlavor })
     $named = if ($others.Count -gt 1) { ($others[0..($others.Count - 2)] -join ', ') + ' and ' + $others[-1] } else { $others[0] }
     "Flavors: this package carries RID-specific assemblies; its go2cs/source-metadata.txt describes the $ProofFlavor flavor's package metadata, and the $named flavors' metadata is not described."
 }

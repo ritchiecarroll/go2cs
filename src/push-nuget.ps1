@@ -14,7 +14,7 @@
     $(GoTargetOS) and $(GoTargetArch), so the solution is built and packed ONCE PER FLAVOR (a universe target)
     and the flavors are merged into a single nupkg per package: lib\<tfm> carries the reference (Windows)
     flavor as the compile-time asset, and runtimes\<rid>\lib\<tfm> carries each shipped RID's runtime assembly
-    (win-x64, linux-x64, osx-x64, osx-arm64 and linux-arm64; the two Mac RIDs ship the same darwin build). Package IDs, and everything a
+    (win-x64, linux-x64, osx-x64, linux-arm64 and osx-arm64; each RID its own flavor, osx-arm64 darwin/arm64 since D6). Package IDs, and everything a
     consumer writes, are unchanged. Platform-neutral packages -- the large majority -- are copied
     verbatim from the reference pass and are byte-for-byte what a single-pass release produced.
 
@@ -1590,8 +1590,8 @@ Write-Step "Verified $sourceVerified C# Source badge(s) pin $fullVersion and its
 #     runtimes/win-x64/lib/<tfm>/go.os.dll    runtime asset, selected on win-x64
 #     runtimes/linux-x64/lib/<tfm>/go.os.dll  runtime asset, selected on linux-x64
 #     runtimes/osx-x64/lib/<tfm>/go.os.dll    runtime asset, selected on osx-x64
-#     runtimes/osx-arm64/lib/<tfm>/go.os.dll  runtime asset, selected on osx-arm64 (the SAME bytes as osx-x64)
 #     runtimes/linux-arm64/lib/<tfm>/go.os.dll runtime asset, selected on linux-arm64 (its own linux/arm64 pass)
+#     runtimes/osx-arm64/lib/<tfm>/go.os.dll  runtime asset, selected on osx-arm64 (its own darwin/arm64 pass)
 #
 # WHY lib/ RATHER THAN ref/, against NuGet's documented asset selection. NuGet gives `lib/{tfm}/` both
 # the `compile` and the `runtime` asset roles; `ref/{tfm}/` gives only `compile`; and
@@ -1745,15 +1745,15 @@ function Merge-GoNuspecDependencies([string]$BaseText, [string]$FlavorText, [str
 # $(GoTargetArch)). ORDER IS SIGNIFICANT: the first entry is the reference flavor (see above), and the distinct
 # flavors in map order are the universe (TestRidFlavorMapsShipTheUniverse pins both maps that pack go.* packages).
 #
-# TWO RIDS, ONE FLAVOR: macOS (increment 5). The corpus is emitted for darwin/amd64 alone, so the darwin
-# assemblies are AnyCPU IL that is identical for both Mac RIDs, and the build is deterministic. A second darwin
-# pass would therefore compile the same bytes again and test nothing. So the BUILD runs once per distinct
-# flavor, under the first RID that names it (its "build RID"), and the merge below writes that one flavor into
-# every RID that shares it.
-#
-# linux-arm64 is NOT a twin of linux-x64 (S6 of docs/phase4/DESIGN-linux-arm64-flavour.md): linux/arm64 is a
-# flavor of its own, with its own syscall numbers and layouts, so it gets a pass of its own at
-# -p:GoTargetArch=arm64. That pass is a cross-compile of AnyCPU IL; nothing in it runs on this box.
+# The BUILD runs once per distinct flavor, under the first RID that names it (its "build RID"), and the merge
+# below writes that one flavor into every RID that shares it. Since D6 no two RIDs share one: macOS shipped one
+# darwin/amd64 flavor in both Mac folders (increment 5) until D6 of docs/phase4/DESIGN-darwin-arm64-flavour.md
+# gave osx-arm64 the darwin/arm64 flavor (section 3), as S6 of docs/phase4/DESIGN-linux-arm64-flavour.md gave
+# linux-arm64 linux/arm64. Each arm64 flavor has its own syscall numbers, layouts and arch-only files, so it gets a
+# pass of its own at -p:GoTargetArch=arm64. That pass is a cross-compile of AnyCPU IL; nothing in it runs on this
+# box. The twin machinery stays: a later RID that ships another RID's flavor takes it with no other change.
+# osx-arm64 sits last because the distinct flavors in map order are the universe's order, where darwin/arm64 is
+# the fifth target.
 #
 # Both Mac folders are shipped EXPLICITLY rather than as one portable runtimes/osx/: go.lib's
 # buildTransitive targets (src/core/golib/buildTransitive/go.lib.targets) build the compile twin's path
@@ -1764,8 +1764,8 @@ $ridFlavors = [ordered]@{
     'win-x64'     = 'windows/amd64'
     'linux-x64'   = 'linux/amd64'
     'osx-x64'     = 'darwin/amd64'
-    'osx-arm64'   = 'darwin/amd64'
     'linux-arm64' = 'linux/arm64'
+    'osx-arm64'   = 'darwin/arm64'
 }
 $referenceRid = @($ridFlavors.Keys)[0]
 
@@ -2107,8 +2107,8 @@ foreach ($id in @($refFacts.Keys | Sort-Object)) {
                     $s = $e.Open()
                     try { $s.CopyTo($ms) } finally { $s.Dispose() }
                     $bytes = $ms.ToArray()
-                    # Every RID that shares this flavor gets the same bytes (osx-x64 and osx-arm64 from
-                    # the one darwin/amd64 pack).
+                    # Every RID that shares this flavor gets the same bytes (none since D6, where osx-arm64
+                    # took its own darwin/arm64 pack).
                     foreach ($shipRid in @($ridFlavors.Keys | Where-Object { $buildRidOf[$_] -eq $rid })) {
                         Add-GoZipEntry $zip ("runtimes/$shipRid/" + $e.FullName) $bytes
                     }
@@ -2131,10 +2131,9 @@ Write-Step "Merged $merged RID-specific package(s); copied $copied platform-neut
 
 # --- Shipped-shape assert, read back off the MERGED packages --------------------------------------
 # Every RID-specific package must carry a runtimes/<rid>/ folder for EVERY shipped RID, and the RIDs that
-# share a flavor must carry the same entry set with the same bytes. The second half is true by
-# construction today (one pack feeds both Mac folders); it is asserted on the artifacts anyway, so a
-# later edit that gives osx-arm64 a pass or a source of its own cannot ship two different Mac flavors
-# unnoticed.
+# share a flavor must carry the same entry set with the same bytes. Since D6 no two RIDs share a flavor
+# (osx-arm64 ships darwin/arm64), so the second half checks nothing today; it stays so that a later map
+# row giving one RID another's flavor cannot ship two different copies of it unnoticed.
 $twinChecked = 0
 foreach ($id in @($ridSplitIds | Sort-Object)) {
     if (-not $refFacts.ContainsKey($id)) { continue }

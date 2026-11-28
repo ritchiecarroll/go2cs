@@ -436,6 +436,36 @@ try {
             $fcgiRead.Count -eq 1 -and $fcgiRead[0].DiagnosticId -ceq 'CP0001' -and $fcgiRead[0].Target -ceq $fcgiTarget -and
             $fcgiText.Contains('shadowing.md')) "$($fcgiRead.Count) entries: $(@($fcgiRead | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" }) -join '; ')"
     }
+    # D6 (docs/phase4/DESIGN-darwin-arm64-flavour.md section 3): osx-arm64 ships the darwin/arm64 flavour, where it
+    # shipped the darwin/amd64 flavour's bytes, so every public member darwin/amd64 declares and darwin/arm64 does not
+    # leaves the osx-arm64 asset. The D6 census (P5, 2026-11-27, at 4a56f17a3a: the 20 packages with an arch folder built
+    # at both arches and compared, a negative control of os, net and time at zero) read 33 such breaks in 5 packages; P2,
+    # the floor's owner, ruled them suppressed one per break, CP0001 for the two whole-type removals (P2 inbox reply
+    # 2026-11-27T20:49:08Z). Each entry names the osx-arm64 asset and no other, and each file says it goes once the
+    # release that ships D6 is published. go.syscall also carries wall E's entries, so its cap is the two counts added.
+    Write-Host 'the tree carries at most the D6 census''s osx-arm64 entries'
+    $darwinArmCaps = [ordered]@{
+        'go.internal.cpu' = 3; 'go.internal.runtime.gc.scan' = 4; 'go.internal.runtime.startlinetest' = 1;
+        'go.runtime.race.internal.amd64v1' = 1; 'go.syscall' = 24
+    }
+    $capTotal = 0
+    foreach ($cap in $darwinArmCaps.Values) { $capTotal += $cap }
+    Check 'the caps are the D6 census''s 33 entries in 5 files' ($capTotal -eq 33 -and $darwinArmCaps.Count -eq 5) "$capTotal in $($darwinArmCaps.Count)"
+    $known += @($darwinArmCaps.Keys | Where-Object { $known -cnotcontains $_ })
+    $darwinArmAsset = { param($id) "runtimes/osx-arm64/lib/net10.0/$id.dll" }
+    $darwinArmOver = New-Object System.Collections.Generic.List[string]
+    foreach ($id in @($darwinArmCaps.Keys)) {
+        if (-not $real.Contains($id)) { $darwinArmOver.Add("$id carries no suppression file"); continue }
+        $read = @(Read-GoApiCompatSuppressions $real[$id])
+        $mine = @($read | Where-Object { $_.Asset -ceq (& $darwinArmAsset $id) -and $_.Target -notmatch 'System\.Span\{' })
+        if ($mine.Count -ne $darwinArmCaps[$id]) { $darwinArmOver.Add("$id has $($mine.Count) osx-arm64 entries outside wall E, not its $($darwinArmCaps[$id])") }
+        $kinds = @($mine | ForEach-Object { $_.DiagnosticId } | Sort-Object -Unique)
+        if (@($kinds | Where-Object { $_ -cnotin @('CP0001', 'CP0002') }).Count) { $darwinArmOver.Add("$id has an osx-arm64 entry of kind $($kinds -join ', ')") }
+        if (-not $variadicCaps.Contains($id) -and $read.Count -ne $mine.Count) { $darwinArmOver.Add("$id has $($read.Count - $mine.Count) entries that are not D6's") }
+        $text = [System.IO.File]::ReadAllText($real[$id])
+        if (-not ($text.Contains('DESIGN-darwin-arm64-flavour.md') -and $text.Contains('2026-11-27T20:49:08Z'))) { $darwinArmOver.Add("$id does not cite D6's section and P2's ruling") }
+    }
+    Check 'each D6 file holds exactly its census count of osx-arm64 entries, CP0001 or CP0002 only, and cites D6 and its ruling' ($darwinArmOver.Count -eq 0) ($darwinArmOver -join '; ')
     $other = @($real.Keys | Where-Object { $known -cnotcontains $_ } | Sort-Object)
     Check 'no other package carries a suppression file' ($other.Count -eq 0) ($other -join ', ')
     $kinds = @('CP0002', 'CP0006')
@@ -444,6 +474,7 @@ try {
         $cap = 0
         if ($variadicCaps.Contains($id)) { $cap += $variadicCaps[$id] }
         if ($retypeCaps.Contains($id)) { $cap += $retypeCaps[$id] }
+        if ($darwinArmCaps.Contains($id)) { $cap += $darwinArmCaps[$id] }
         $read = @(Read-GoApiCompatSuppressions $real[$id])
         if ($read.Count -gt $cap) { $over.Add("$id has $($read.Count) entries, over its $cap") }
         $foreign = @($read | Where-Object { $kinds -cnotcontains $_.DiagnosticId } | ForEach-Object { $_.DiagnosticId } | Sort-Object -Unique)

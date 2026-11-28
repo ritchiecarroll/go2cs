@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
     The os-matrix pack job's flavour guard: each flavour push-nuget.ps1 packs builds at the architecture of its
-    GOOS/GOARCH pair, linux-arm64 at linux/arm64 and every other RID at amd64 (seat S6, DESIGN-linux-arm64-flavour.md
-    section 3; COORD ruling 2026-11-10).
+    GOOS/GOARCH pair, each arm64 RID at arm64 and each x64 RID at amd64 (seat S6, DESIGN-linux-arm64-flavour.md
+    section 3, COORD ruling 2026-11-10, for linux-arm64; D6 of DESIGN-darwin-arm64-flavour.md for osx-arm64).
 
 .DESCRIPTION
     push-nuget.ps1 builds one flavour per pair of its $ridFlavors map, passing -p:GoTargetOS and -p:GoTargetArch, so a
@@ -10,8 +10,10 @@
     flavour's x64 system calls under linux-arm64. This guard reads the map from push-nuget.ps1 itself and refuses:
     - a value that is not a GOOS/GOARCH pair (the map before S6 named a GOOS alone, and its builds took the
       architecture from the environment);
-    - no linux-arm64 entry, or linux-arm64 at any pair but linux/arm64;
-    - any other RID at an architecture other than amd64 (both Mac RIDs ship the darwin/amd64 bytes).
+    - no linux-arm64 entry;
+    - a RID at an architecture other than its own: an <os>-arm64 RID at anything but arm64 (linux-arm64 at
+      linux/arm64, osx-arm64 at darwin/arm64 since D6, where it shipped the darwin/amd64 bytes), an <os>-x64 RID at
+      anything but amd64.
     Then, for each distinct pair, .github/flavour-probe.ps1 reads from MSBuild's own evaluation that internal/goarch
     compiles at that pair's architecture when given the same -p:GoTargetOS and -p:GoTargetArch the pack passes.
     -NoProbe stops after the map (the suite src/tools/pushnuget/Test-PackFlavourGuard.ps1 runs it that way).
@@ -37,8 +39,8 @@ foreach ($rid in $map.Keys) {
     if ($flavour -notmatch '^(?<goos>[a-z0-9]+)/(?<arch>[a-z0-9]+)$') {
         throw "pack flavour guard: $rid maps to '$flavour', not a GOOS/GOARCH pair, so its build would take the architecture from the environment"
     }
-    $want = if ($rid -ceq 'linux-arm64') { 'linux/arm64' } else { "$($Matches['goos'])/amd64" }
-    if ($flavour -cne $want) { throw "pack flavour guard: $rid packs at $flavour, not ${want}: linux-arm64 packs at linux/arm64 and every other RID at amd64" }
+    $want = "$($Matches['goos'])/$(if ($rid -like '*-arm64') { 'arm64' } else { 'amd64' })"
+    if ($flavour -cne $want) { throw "pack flavour guard: $rid packs at $flavour, not ${want}: each arm64 RID packs at arm64 and each x64 RID at amd64" }
 }
 foreach ($rid in $map.Keys) { Write-Host "==> pack flavour guard: $rid packs at $($map[$rid])" }
 

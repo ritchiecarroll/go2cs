@@ -166,6 +166,24 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-25 (i9): owner ruling COORD 020915Z ("Δrecord, as ruled"); the seat claude/i9-alias-keyword-escape
        bf4cc3a23d; release-smoke's binary-compatibility guard read the holder's CP0001 on the train 12 union (417fd87146,
        run 45583774592), suppressed in src/core/net/http/fcgi/CompatibilitySuppressions.xml (COORD 2026-11-25T12:24:43Z). -->
+- **[QUEUED claude/p5-darwin-arm64-d6 (tip in its READY post)]** **On Apple silicon the packages carry the `arm64`
+  standard library.** The `osx-arm64` assets of every package that differs by platform are now the `darwin/arm64`
+  build, where they were the `darwin/amd64` build that `osx-x64` also carries. On an Apple-silicon Mac,
+  `internal/goarch` reports `arm64` and Go's `_arm64.go` files are in the packages, as `runtime.GOARCH` already
+  reported. Go declares 24 of `syscall`'s `darwin/amd64` constants for no other Mac, among them `F_MARKDEPENDENCY`,
+  `SYS_PROFIL` and the `SIOC…` and `SO_RESTRICT…` sets, so they are gone from the `osx-arm64` asset, as they are from
+  Go on that Mac. An assembly built for `osx-arm64` against an earlier package that reads one of them fails with
+  `MissingMethodException`. Take every `go.*` package from this release or later; go2cs's build check stops a build
+  that mixes them.
+  <!-- P5 D6 (docs/phase4/DESIGN-darwin-arm64-flavour.md section 3), branch claude/p5-darwin-arm64-d6. The breaks: the D6
+       census (2026-11-27, at 4a56f17a3a, the 20 packages with an arch folder built at both arches, os/net/time control at
+       zero) read 33 in 5 packages, of which only syscall is reachable (internal/cpu 3, internal/runtime/gc/scan 4,
+       internal/runtime/startlinetest and runtime/race/internal/amd64v1 one whole-type removal each); a second read against
+       the published 1.26.11.1 osx-arm64 assets reads the same 33 and nothing else. P2's floor ruling
+       (2026-11-27T20:49:08Z): suppress all 33, the floor is the release D6 ships in, and this line names osx-arm64
+       consumers, the 24 constants and the go.* release. The "build check" is GoBreakFloor (go.lib.targets). On release day
+       docs/KnownIssues.md "On Apple silicon, the standard library is the amd64 build" is rewritten with this entry: until
+       then it describes the published packages. -->
 
 **What changed.**
 
