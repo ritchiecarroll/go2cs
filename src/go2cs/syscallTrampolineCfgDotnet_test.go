@@ -33,6 +33,13 @@ import (
 //   - aot-cfg:     Native AOT with <ControlFlowGuard>Guard</ControlFlowGuard>; CFG on, so GetProcessMitigationPolicy
 //     returned in that process, and not narrowed.
 //
+// Option (c) of COORD 002011Z, recorded: "apiset" marks through the export's API-set name (aot-cfg-apiset, and
+// jit-apiset as its JIT control), and aot-cfg-direct is published with an explicit DirectPInvoke of kernelbase's
+// export, linked from mincore.lib, and marks.
+//
+// Option (d), recorded: aot-cfg-guardcheck calls the image's own CFG check routine (GuardCFCheckFunctionPointer) on a
+// valid export, then on an executable page with no valid target.
+//
 // Recorded, not asserted, on aot-cfg's binary: "mark" narrows anyway (reading 1, 46084158304: the marking call ends
 // the process with a fast fail), and "nomark" maps PAGE_TARGETS_INVALID without the call (reading 2, 46084609091:
 // page+0 ends the process, so skipping the call alone is not a choice). The row reads NOT MEASURED where no dotnet SDK
@@ -63,8 +70,11 @@ internal static unsafe partial class Probe
         bool cfg = (policy & 1) != 0;
         Console.WriteLine("cfg: " + (cfg ? 1 : 0));
 
+        if (mode == "guardcheck")
+            return guardCheck();
+
         // syscall's choice: narrow under CFG with the JIT; "mark" and "nomark" narrow under CFG whatever the runtime
-        bool narrow = mode == "mark" || mode == "nomark" ? cfg : cfg && RuntimeFeature.IsDynamicCodeSupported;
+        bool narrow = mode == "mark" || mode == "nomark" || mode == "apiset" ? cfg : cfg && RuntimeFeature.IsDynamicCodeSupported;
         Console.WriteLine("narrow: " + (narrow ? 1 : 0));
 
         nint page = narrow
@@ -90,7 +100,10 @@ internal static unsafe partial class Probe
             target[0] = 0; // offset 0
             target[1] = 1; // CFG_CALL_TARGET_VALID
             Console.WriteLine("calling SetProcessValidCallTargets");
-            if (!win32SetProcessValidCallTargets(win32GetCurrentProcess(), page, 4096, 1, target)) { Console.WriteLine("step-failed: SetProcessValidCallTargets " + Marshal.GetLastPInvokeError()); return 3; }
+            bool marked = mode == "apiset"
+                ? win32SetProcessValidCallTargetsApiSet(win32GetCurrentProcess(), page, 4096, 1, target)
+                : win32SetProcessValidCallTargets(win32GetCurrentProcess(), page, 4096, 1, target);
+            if (!marked) { Console.WriteLine("step-failed: SetProcessValidCallTargets " + Marshal.GetLastPInvokeError()); return 3; }
             Console.WriteLine("targets: 1, flags " + target[1]);
         }
 
@@ -102,6 +115,40 @@ internal static unsafe partial class Probe
 
         return 0;
     }
+
+    // Option (d), recorded: the image's own CFG check routine (IMAGE_LOAD_CONFIG_DIRECTORY64.GuardCFCheckFunctionPointer,
+    // which the loader fills), called on a valid export and then on an executable page with no valid target. A stub
+    // that called it on Fn before forwarding would check Fn as the process's own indirect calls do.
+    private static int guardCheck()
+    {
+        byte* image = (byte*)win32GetModuleHandle(0);
+        byte* nt = image + *(int*)(image + 0x3C);
+        uint configRva = *(uint*)(nt + 24 + 112 + 10 * 8); // OptionalHeader64.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG]
+        if (configRva == 0) { Console.WriteLine("check-function: no load config"); return 4; }
+        nint slot = *(nint*)(image + configRva + 0x70);
+        nint check = slot == 0 ? 0 : *(nint*)slot;
+        Console.WriteLine("check-function: " + (check == 0 ? "none" : "present"));
+        if (check == 0) return 4;
+
+        nint valid = win32GetProcAddress(win32GetModuleHandleW("kernel32.dll"), "GetTickCount");
+        ((delegate* unmanaged<nint, void>)check)(valid);
+        Console.WriteLine("check(GetTickCount): returned");
+
+        nint page = win32VirtualAlloc(0, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READ | PAGE_TARGETS);
+        Console.WriteLine("checking an unmarked page");
+        ((delegate* unmanaged<nint, void>)check)(page);
+        Console.WriteLine("check(unmarked page): returned");
+        return 0;
+    }
+
+    [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW")]
+    private static partial nint win32GetModuleHandle(nint name);
+
+    [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial nint win32GetModuleHandleW(string name);
+
+    [LibraryImport("kernel32.dll", EntryPoint = "GetProcAddress", StringMarshalling = StringMarshalling.Utf8)]
+    private static partial nint win32GetProcAddress(nint module, string name);
 
     [LibraryImport("kernel32.dll", EntryPoint = "VirtualAlloc", SetLastError = true)]
     private static partial nint win32VirtualAlloc(nint address, nuint size, uint allocationType, uint protect);
@@ -124,6 +171,12 @@ internal static unsafe partial class Probe
     [LibraryImport("kernelbase.dll", EntryPoint = "SetProcessValidCallTargets", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static unsafe partial bool win32SetProcessValidCallTargets(nint process, nint virtualAddress, nuint regionSize, uint numberOfOffsets, void* offsetInformation);
+
+    // The same export named by its API set, which Native AOT's default direct-call list may bind through the import
+    // table (COORD 002011Z, option c); "apiset" uses it.
+    [LibraryImport("api-ms-win-core-memory-l1-1-3.dll", EntryPoint = "SetProcessValidCallTargets", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static unsafe partial bool win32SetProcessValidCallTargetsApiSet(nint process, nint virtualAddress, nuint regionSize, uint numberOfOffsets, void* offsetInformation);
 }
 `
 
@@ -137,6 +190,11 @@ const cfgDotnetProject = `<Project Sdk="Microsoft.NET.Sdk">
     <AssemblyName>probe</AssemblyName>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
+  <!-- -p:ProbeDirect=true: an explicit direct import of kernelbase's export, linked from mincore.lib (option c) -->
+  <ItemGroup Condition="'$(ProbeDirect)'=='true'">
+    <DirectPInvoke Include="kernelbase.dll!SetProcessValidCallTargets" />
+    <NativeLibrary Include="mincore.lib" />
+  </ItemGroup>
 </Project>
 `
 
@@ -227,5 +285,16 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 		expect("aot-cfg", text, code, "runtime: aot", "cfg: 1", "narrow: 0")
 		run("aot-cfg-mark", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "mark")
 		run("aot-cfg-nomark", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "nomark")
+		run("aot-cfg-apiset", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "apiset")
+		run("aot-cfg-guardcheck", filepath.Join(dir, "aotcfg", "probe.exe"), "16", "guardcheck")
+	}
+
+	run("jit-apiset", filepath.Join(dir, "jit", "probe.exe"), "16", "apiset")
+
+	if sdk("aot-cfg-direct publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
+		"-p:ControlFlowGuard=Guard", "-p:ProbeDirect=true",
+		"-p:IntermediateOutputPath="+filepath.Join(dir, "objdirect")+string(filepath.Separator),
+		"-o", filepath.Join(dir, "aotdirect")) {
+		run("aot-cfg-direct", filepath.Join(dir, "aotdirect", "probe.exe"), "16", "mark")
 	}
 }
