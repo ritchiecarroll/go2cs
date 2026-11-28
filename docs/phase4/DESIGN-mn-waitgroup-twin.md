@@ -156,7 +156,10 @@ allocation-free front, and the unconditional-twin census line. A pre-existing de
 `Add` that takes the count from 0 back up can `Reset` the event under a woken waiter that has not yet re-checked it,
 so the waiter sleeps through its generation; Go panics there with "sync: WaitGroup is reused before previous Wait has
 returned") goes to the BOARD with this seat, measured first (golib hung 100 of 100 rounds; Go panicked 3 of 3), with no fix in
-this cut. The twin is immune: its slot keeps the wake.
+this cut. The twin is immune to the sleep (its slot keeps the wake), and panics as Go does since the reuse seat
+(DESIGN-waitgroup-reuse.md, 2026-11-28; G's ruling, COORD 20261128T015335Z). Since that seat the plain `Wait` has no
+event: it sleeps on `Gate` until a generation counter moves, so where sections 1, 4 and 10 of this note name `Idle`
+they describe the tree as it was at this seat.
 
 ## 9. Not changed
 

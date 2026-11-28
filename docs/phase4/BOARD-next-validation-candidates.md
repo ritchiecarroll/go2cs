@@ -43238,4 +43238,31 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — P4 (2026-11-27)
 
+## 2026-11-28 — P4 (reuse seat, COORD 20261127T234312Z and 20261128T015335Z, design read by G): the plain sync.WaitGroup.Wait no longer hangs where Go panics; a reused WaitGroup panics as Go does (CLOSES the 2026-11-27 row above)
+
+- **Closed by.** src/core/sync/waitgroup.cs (hand-owned). The event the plain waiters shared is gone. A plain waiter
+  records a generation counter under `Gate` and sleeps on `Gate` until the counter has moved; the `Add` that reaches
+  zero steps it and pulses. Nothing is reset, so an `Add` from zero back up cannot put a released waiter back to
+  sleep. Released, the waiter re-reads the state as Go's does (waitgroup.go:207-213: the counter, the waiter count and
+  the bubble flag) and a non-zero state is `panic("sync: WaitGroup is reused before previous Wait has returned")`.
+  Design and readings: docs/phase4/DESIGN-waitgroup-reuse.md.
+- **Amends the 2026-11-27 row's twin line (G's ruling).** "The twin is immune to the sleep" stands. "It does not panic
+  either" does not: immune to the sleep; panics as Go does since this seat. `Waitꞏtwin` makes the same read after its
+  await and throws the same panic.
+- **Measured (linux/amd64, Release, 2026-11-28).** The 2026-11-27 sequence as a standing row: 100 of 100 rounds end,
+  all 100 by the panic (before: 0 of 100 ended inside 2 s). Rows: GolibTests WaitGroupReuseTests (five, one inside a
+  synctest bubble), two rows in the scheduler child of WaitGroupTwinTests (twins; twins and a plain waiter together),
+  and Behavioral WaitGroupReuse against `go run`, plain and `--mn`. Three neuters, each restored byte-identical.
+- **Cost, default mode (G's required reading; the note's section 8 has every run).** As first designed the plain
+  `Wait` was 7 to 9 times slower where `Done` follows the registration closely: `ManualResetEventSlim.Wait` spins
+  before it sleeps and `Monitor.Wait` does not. The cut spins for the event's own count before it sleeps and reads
+  level with before on four of five shapes. 64 waiters all asleep before `Done` read 8 percent slower (about 2.3 us
+  per waiter per generation): each woken waiter re-takes `Gate` for Go's re-read.
+- **Two named limits, both in the note's section 6.** Go's two `Add`-side misuse panics ("Add called concurrently with
+  Wait") stay unreachable: their window is inside one hold of `Gate` here, and the same misuse shows at the waiter's
+  read. The panic's frame is the C# one (waitgroup.cs and its line), because a hand-kept position record may map `go`
+  statements only.
+
+— P4 (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

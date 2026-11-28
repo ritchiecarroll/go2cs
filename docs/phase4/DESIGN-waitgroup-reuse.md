@@ -140,3 +140,90 @@ No frozen surface moves: `WaitGroupState` is internal.
 2. The twin panics too (section 2b). The twin seat's note and BOARD row say "immune"; that stays true of the sleep
    only, and this note says so.
 3. The position limit of section 6: accepted, or is the ruling to be asked?
+
+## 8. After G's read: the answers, the cost reading, and one addition
+
+**G (COORD 20261128T015335Z): APPROVED, with one required reading.** Confirmed: no lost pulse (the generation is
+re-tested under `Gate` around `Monitor.Wait`), the lock order, that the twin never shares `Generation`, and the bubble
+flag (U4). The answers to section 7: (1) the counter on `Gate`; (2) yes, the twin panics too, and the twin note and the
+BOARD row now say "immune to the sleep; panics as Go does since this seat"; (3) the position limit of section 6 is
+accepted as named.
+
+**The required reading: the default-mode cost of the plain `Wait`.** linux/amd64, 4 processors, Release, `GO2CS_MN`
+unset. A generation is `Add(1)`, the waiters in the plain `Wait`, `Done()`. Each number is the median of 5 repetitions
+in one process, in ns per generation; every run is listed. "Before" is the Wait twin's tip 6204ef9c12f with the same
+harness on the same box. The harness is `ChildWaitGroupCostReading` in GolibTests WaitGroupReuseTests.cs, which does
+nothing unless `GO2CS_TEST_WGREUSE_COST=1`.
+
+Where `Done` follows the registration at once:
+
+| shape | before | section 2 as written | with the spin (the cut) |
+|---|---|---|---|
+| 1 waiter, 100,000 generations, the goroutines kept | 2312 1880 1897 2049 1966 2133 | 18856 18679 | 1851 1807 1951 2147 1968 1883 |
+| 1 waiter, 100,000 generations, a goroutine per generation | 8963 8396 9071 8401 7761 8401 | 30131 31002 | 8579 8884 9334 9038 8458 8420 |
+| 64 waiters on one group, 10,000 generations | 296819 290370 246285 256576 248324 259973 | 1994641 2110708 | 252200 271183 243642 272299 249945 247588 |
+
+Where every waiter is asleep before `Done` (the test holds 1 ms before `Done`; the 1 ms is subtracted), run in both
+orders:
+
+| shape | before | with the spin (the cut) | the spin, sleeping on a second lock (not adopted) |
+|---|---|---|---|
+| 1 waiter, 5,000 generations | 87300 87348 81738 81733 | 91021 88234 84177 79914 | 78618 85055 79624 83242 |
+| 64 waiters, 1,000 generations | 1819257 1778908 1809697 1809166 | 1991009 1986897 1987510 1841767 | 1776361 1859044 1914829 1937388 |
+
+**Section 2 as written was 7 to 9 times slower** where `Done` follows closely. `ManualResetEventSlim.Wait` spins before
+it sleeps (its `SpinCount` read 35 on this box; it is 1 on a single processor), and in those shapes the `Done` arrives
+inside the spin. `Monitor.Wait(Gate)` does not spin, so every generation paid a thread sleep and wake and then a queue
+for `Gate`.
+
+**The addition: the same spin, written out.** After the waiter has registered and left `Gate`, and before it takes
+`Gate` again to sleep:
+
+```
+int spins = Environment.ProcessorCount == 1 ? 1 : 35;       // ManualResetEventSlim's own defaults
+SpinWait spinner = default;
+
+while (spinner.Count < spins && Volatile.Read(ref s.Generation) == generation) {
+    spinner.SpinOnce(sleep1Threshold: -1);
+}
+
+Monitor.Enter(s.Gate, ref locked);
+
+while (s.Generation == generation) {
+    Monitor.Wait(s.Gate);
+}
+```
+
+The spin's read is a hint. The test that decides is still the one under `Gate` before every `Monitor.Wait`, so the
+no-lost-pulse argument G confirmed is unchanged. With it the three close shapes read level with before (means -5, +3
+and -4 percent, inside the spread of the runs), and so does one sleeping waiter (+1.5 percent).
+
+**`Add` advances the generation and pulses only when a plain waiter was registered** (an entry whose slot is null). A
+WaitGroup whose waiters are all twins takes no pulse.
+
+**The recorded cost: 64 sleeping waiters read 8 percent slower** (mean 1,951,796 against 1,804,257 ns; the four runs
+are +1 to +12 percent against the before runs). That is about 2.3 us per waiter per generation, against a wake that
+costs about 28 us per waiter in both versions. By read it is the cost section 2 named: each woken waiter re-takes
+`Gate`, one after another, where the event's waiters queued on the event's private lock; here they queue behind the
+next generation's `Add` and registrations. The other side is the event, which is no longer allocated for a WaitGroup.
+
+Tried and not adopted: `Generation` written and tested under a lock of its own, taken inside `Gate` by `Add` only, with
+Go's re-read under `Gate` alone. Four runs read -2 to +9 percent against before (mean +4): this box cannot separate it
+from the `Gate` form, and it would move the confirmed argument onto a second lock. Not built: the three parts of the
+state kept in one atomic word, as Go's state is, which would take the re-read off `Gate` at the price of a write at
+every site that changes the state.
+
+**Red first, as run.** At the twin's tip: U1 red in round 1 (still parked 2000 ms after the `Done`), U2 red (7 of 8
+waiters returned normally, 1 still parked), U4 red (returned normally), U6 red (16 of 16 twins returned normally), U8
+red in both modes (`a waiter panicked: false`; the plain run took 10.8 s through the program's fallback). U3 and U5
+green, as section 4 predicted. U7 was not reached at that commit: it follows U6 in the same child, and the child stops
+at its first failed row. With the fix U1 prints `hang rounds=100 returned=0 panicked=100` and U6 prints
+`panicked=16 handoffs=0`.
+
+**The three neuters, as run (each restored byte-identical by sha256; 20 of 20 rows green after the restore).**
+(1) `Add` from zero back up steps the generation back: U1 red in round 1 and U2 red (0 of 8 ended), both by their
+deadlines, as section 4 said. Also red, and not named in section 4: U3 (0 of 8 ended: the second `Done` finds no waiter
+listed, so it does not step the generation forward again) and U7 (the plain waiter still parked). U6 green. (2)
+`reused` forced false in the plain path: U2 red by name ("waiter 0 panicked: it returned normally"), U4 red by name,
+U7 red by name ("the plain waiter panicked: it returned normally"), U6 green, and U1 reads `returned=100 panicked=0`.
+(3) The same in the twin's read: U6 red by name ("16 of 16 returned normally"), U2 and every in-process row green.

@@ -364,7 +364,7 @@ public class WaitGroupTwinTests
         // The refusal reaches the caller. The goroutine's wait reason is cleared, so it no longer reads as waiting on the
         // WaitGroup. And the WaitGroup does not keep the entry: nothing will ever wake that slot, and the Done below
         // would ready a goroutine that does not wait here, which panics in Goroutine.Ready before Add clears its list and
-        // sets Idle, so every other waiter would stay blocked.
+        // releases the plain waiters, so every other waiter would stay blocked.
         {
             ж<Δsync.WaitGroup> wg = NewWaitGroup();
             wg.Add(1);

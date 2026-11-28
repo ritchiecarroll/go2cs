@@ -4265,7 +4265,7 @@ statement it replaces, and maps no other line, so a traceback's `created by` lin
 The guard `TestHandOwnedGoStatementsMapToGo` checks every tracked hand-owned file under `src/core` against the pinned
 GOROOT: one record per file, each `goǃ(` line mapped to a Go `go` statement, and every other line left unmapped.
 <!-- src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283 `func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`;
-     examples: src/core/sync/waitgroup.cs:40 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIwC3AMAANsD")]`),
+     examples: src/core/sync/waitgroup.cs:40 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AMQC3AMAANsD")]`),
      src/core/net/windows/lookup_windows.cs:64 (`[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs",`). -->
 
 **The path is SPELLED Go's way, whichever file it names.** Which source a frame's path points

@@ -14,8 +14,8 @@
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted waitgroup.go output). Go's WaitGroup
 // packs a counter and a waiter count into one atomic uint64 and parks waiters on the runtime sleeping
 // semaphore — the same primitive that cannot be faithfully emulated (see mutex.cs / runtime_impl.cs).
-// Reimplemented natively: a guarded counter plus a latch event that is set whenever the counter is
-// zero. Wait blocks on the latch; the Add that drives the counter to zero releases every waiter.
+// Reimplemented natively: a counter and a waiter list guarded by one lock. Wait sleeps on that lock
+// until the Add that drives the counter to zero ends its generation, which releases every waiter.
 using System.Collections.Generic;
 using System.Threading;
 // Aliased rather than imported wholesale: this file needs a handful of golib types, and a blanket
@@ -37,7 +37,7 @@ using WaitReason = go.golib.WaitReason;
 // hand-owned file. One table entry per statement, each followed by a zero entry, so every other
 // line of the file still reports its own C# position. repoguard's TestHandOwnedGoStatementsMapToGo
 // checks it.
-[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIwC3AMAANsD")]
+[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AMQC3AMAANsD")]
 
 namespace go;
 
@@ -52,15 +52,22 @@ partial class sync_package {
     internal WaitGroupState? st;
 }
 
-// WaitGroupState is the native backing for a WaitGroup: a counter guarded by Gate, and an event that
-// is signaled exactly while the counter is zero (so a fresh/zero WaitGroup lets Wait return at once).
+// WaitGroupState is the native backing for a WaitGroup: a counter, a waiter list and a generation
+// number, all guarded by Gate. A zero counter lets Wait return at once.
 //
 // Parked lists the goroutines blocked in Wait for the current count to drain -- Go's semaphore
-// queue for wg.sema, reduced to what the event cannot say: WHOM the Add that reaches zero wakes. The
-// event releases every waiter at once and cannot name them, so without this the zero-reaching Add
-// could not ready them (golib's Goroutine.Ready, on the waker's side), and a waiter would read parked
-// until its own thread resumed. Each entry pairs the goroutine with the GoParkSlot a twin waiter awaits
-// (Waitꞏtwin), or null for a plain waiter, which the event releases. Guarded by Gate.
+// queue for wg.sema: WHOM the Add that reaches zero wakes. That Add readies each of them (golib's
+// Goroutine.Ready, on the waker's side), so no waiter reads parked until its own thread resumes. Each
+// entry pairs the goroutine with the GoParkSlot a twin waiter awaits (Waitꞏtwin), or null for a plain
+// waiter, which sleeps on Gate.
+//
+// Generation counts the zero-reaching Adds that released a plain waiter. A plain waiter records it
+// under the hold of Gate in which it registers and sleeps in Monitor.Wait(Gate) until it has moved; the
+// Add advances it and pulses Gate. It only counts up and is tested under the lock that writes it, so an
+// Add from zero back up cannot put a released waiter back to sleep. (Until the reuse seat the plain
+// waiters shared one event, set at zero and reset at any other count: an Add from zero reset it under
+// a waiter that was signalled and had not looked yet, and that waiter slept through its own
+// generation. docs/phase4/DESIGN-waitgroup-reuse.md.)
 //
 // Bubble and Bubbled are Go 1.26's synctest association (waitgroup.go:86-105): Bubble is the
 // _KindSpecialBubble record runtime/synctest.go keeps on the WaitGroup's heap object, and Bubbled is
@@ -75,7 +82,7 @@ partial class sync_package {
 // declaration), so wgBubbleOf answers the same; a field of a global reads through its view's source.
 internal sealed class WaitGroupState {
     internal int Counter;
-    internal readonly ManualResetEventSlim Idle = new(true);
+    internal long Generation;
     internal readonly object Gate = new();
     internal readonly List<(Goroutine? Goroutine, GoParkSlot? Slot)> Parked = new();
     internal SyncTestBubble? Bubble;
@@ -137,17 +144,27 @@ public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
                 }
 
                 // Go's Add at zero: semrelease for every waiter, each readied (goready) before it is
-                // signalled -- here, readied, a twin waiter's slot woken (the channel waiter's order), then
-                // the one event that releases every plain waiter.
+                // signalled -- here, readied, then a twin waiter's slot woken (the channel waiter's order).
+                // The plain waiters sleep on Gate: their generation ends here, and one pulse releases them
+                // all. A count that drains with no plain waiter moves nothing and pulses nobody.
+                bool plain = false;
+
                 foreach ((Goroutine? parked, GoParkSlot? slot) in s.Parked) {
                     Goroutine.Ready(parked);
-                    slot?.Wake();
+
+                    if (slot is null) {
+                        plain = true;
+                    } else {
+                        slot.Wake();
+                    }
                 }
 
                 s.Parked.Clear();
-                s.Idle.Set();
-            } else {
-                s.Idle.Reset();
+
+                if (plain) {
+                    s.Generation++;
+                    Monitor.PulseAll(s.Gate);
+                }
             }
         }
     }
@@ -215,11 +232,29 @@ public static void Done(this ж<WaitGroup> Ꮡwg) => Ꮡwg.Add(-1);
 // A zero counter returns at once without parking, as Go's does (`if v == 0 { return }`); since Go 1.25
 // a zero-count Wait with no waiter left also disassociates a WaitGroup bubbled to the caller's bubble,
 // so it can be reused from another. Otherwise the goroutine registers itself and parks in Go's commit
-// order -- under Gate, the lock that publishes it to Add, then unlocks, then waits -- so the Add that
-// reaches zero can only ever find it parked.
+// order -- under Gate, the lock that publishes it to Add, which Monitor.Wait releases as it sleeps -- so
+// the Add that reaches zero can only ever find it parked.
+//
+// Released, the waiter does what Go's does after its semaphore returns (waitgroup.go:207-213): it reads
+// the state, and a state that is not zero is a WaitGroup reused before this Wait returned, which panics.
+// Go's state word is the counter, the waiter count and the bubble flag; the read here is of the same
+// three, under the hold of Gate the wake returns with. The Add that released this waiter left all three
+// zero, so only a later Add or Wait makes the read non-zero. A waiter that reads before that Add returns
+// normally, in Go and here: the misuse is a race, and both outcomes are Go's.
+//
+// Gate is released before the park scope ends: leaving a plain park on the M:N scheduler re-takes a P,
+// which can block, and the goroutines that hold the Ps may want Gate.
+//
+// The waiter SPINS before it sleeps, outside Gate, for as long as ManualResetEventSlim spins before its
+// own wait: the event the plain waiters shared until the reuse seat did that, and a Done that follows
+// the registration closely ends most waits inside the spin. Measured without it (the reuse note,
+// section 8): 9 times the cost per generation for one waiter and 7 times for 64, the price of a thread
+// that sleeps and wakes and then queues for Gate. The spin's read of Generation is a hint. The test that
+// decides is the one under Gate, before every Monitor.Wait, so a pulse cannot be missed.
 public static void Wait(this ж<WaitGroup> Ꮡwg) {
     WaitGroupState s = wgStateOf(Ꮡwg);
     bool locked = false;
+    bool reused;
 
     try {
         Monitor.Enter(s.Gate, ref locked);
@@ -240,17 +275,38 @@ public static void Wait(this ж<WaitGroup> Ꮡwg) {
 
         bool synctestDurable = s.Bubbled && associated;
         s.Parked.Add((Goroutine.Current, null));
+        long generation = s.Generation;
 
         using (Goroutine.Park(synctestDurable ? WaitReason.SynctestWaitGroupWait : WaitReason.SyncWaitGroupWait)) {
             Monitor.Exit(s.Gate);
             locked = false;
-            s.Idle.Wait();
+
+            int spins = Environment.ProcessorCount == 1 ? 1 : 35;       // ManualResetEventSlim's own defaults
+            SpinWait spinner = default;
+
+            while (spinner.Count < spins && Volatile.Read(ref s.Generation) == generation) {
+                spinner.SpinOnce(sleep1Threshold: -1);
+            }
+
+            Monitor.Enter(s.Gate, ref locked);
+
+            while (s.Generation == generation) {
+                Monitor.Wait(s.Gate);
+            }
+
+            reused = s.Counter != 0 || s.Parked.Count != 0 || s.Bubbled;
+            Monitor.Exit(s.Gate);
+            locked = false;
         }
     }
     finally {
         if (locked) {
             Monitor.Exit(s.Gate);
         }
+    }
+
+    if (reused) {
+        throw panic("sync: WaitGroup is reused before previous Wait has returned");
     }
 }
 
@@ -283,7 +339,7 @@ public static void Go(this ж<WaitGroup> Ꮡwg, Action f) {
 // inert otherwise). FROZEN SURFACE from .5 (the owner's ruling of 2026-11-27, docs/phase4/FREEZE-mn-surface.md;
 // docs/phase4/DESIGN-mn-waitgroup-twin.md): generated code in user assemblies names it, so its signature holds.
 //
-// A Wait with a non-zero count PARKS here instead of blocking its carrier on Idle. The protocol is Wait's, under the same
+// A Wait with a non-zero count PARKS here instead of blocking its carrier on Gate. The protocol is Wait's, under the same
 // Gate: the zero-count return with Go 1.25's disassociation, then the goroutine registers itself, now with a GoParkSlot,
 // and parks with Wait's reason (the synctest-durable one included, so a bubble counts a twin waiter as it counts a plain
 // one). The Add that reaches zero readies it and wakes the slot; a wake that lands before the await commits is kept by
@@ -338,6 +394,11 @@ public static GoTask Waitꞏtwin(this ж<WaitGroup> Ꮡwg) {
 // after the await, never in a finally, and the catch calls a method that is not async for the work under Gate.
 // Measured: with `finally { scope.Dispose(); }` the scope stayed open, and with `lock (s.Gate)` written in the catch
 // Gate stayed held. WaitGroupTwinTests' refused-park row holds both.
+//
+// Woken, the twin does what Wait does and what Go does: it reads the state, and panics on a state that is not zero
+// (Wait's comment). The slot kept the twin from the sleep a plain waiter fell into, and until the reuse seat the twin
+// returned from a reused WaitGroup as if nothing were wrong. The read takes Gate in waitReused, a method that is not
+// async, so the question of what a lock does in this state machine does not arise.
 private static async GoTask waitParkedAsync(WaitGroupState s, GoParkSlot slot, Goroutine.ParkScope scope) {
     try {
         await slot;
@@ -348,12 +409,24 @@ private static async GoTask waitParkedAsync(WaitGroupState s, GoParkSlot slot, G
     }
 
     scope.Dispose();
+
+    if (waitReused(s)) {
+        throw panic("sync: WaitGroup is reused before previous Wait has returned");
+    }
+}
+
+// Go's `wg.state.Load() != 0` for a woken twin waiter: the counter, the waiter count and the bubble flag, under one hold
+// of Gate. NOT async: see waitParkedAsync.
+private static bool waitReused(WaitGroupState s) {
+    lock (s.Gate) {
+        return s.Counter != 0 || s.Parked.Count != 0 || s.Bubbled;
+    }
 }
 
 // The waiter whose park was refused takes its entry off Parked and ends its park scope. An entry left behind makes
 // the next Add that reaches zero ready a goroutine that does not wait here, and Goroutine.Ready panics on that before
-// the Add clears the list and sets Idle: every other waiter stays blocked. If that Add already ran, it woke the slot
-// and cleared the list, and the loop finds nothing. NOT async: see waitParkedAsync.
+// the Add clears the list and ends the generation: every other waiter stays blocked. If that Add already ran, it woke
+// the slot and cleared the list, and the loop finds nothing. NOT async: see waitParkedAsync.
 private static void waitRefused(WaitGroupState s, GoParkSlot slot, Goroutine.ParkScope scope) {
     lock (s.Gate) {
         for (int i = 0; i < s.Parked.Count; i++) {

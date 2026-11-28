@@ -41,6 +41,7 @@ public class WaitGroupReuseTests
     private const int TimeoutMs = 30_000;
     private const int RoundDeadlineMs = 2_000;
     private const int Waiters = 8;
+    private const int AsleepMicroseconds = 1_000;
 
     private static ж<Δsync.WaitGroup> NewWaitGroup()
     {
@@ -318,14 +319,17 @@ public class WaitGroupReuseTests
     //
     //   GO2CS_TEST_WGREUSE_COST=1 dotnet test GolibTests.dll --filter FullyQualifiedName~ChildWaitGroupCostReading
     //
-    // Three shapes, five timed repetitions each after a warm-up, every repetition and the median printed:
+    // Five shapes, five timed repetitions each after a warm-up, every repetition and the median printed:
     //   one-waiter-handoff   1 waiter, 100,000 generations. The Done comes from a second thread the moment the waiter
-    //                        is registered, so every generation takes the blocking path.
+    //                        is registered, so the waiter is still in its spin when it is released.
     //   one-waiter-go        1 waiter, 100,000 generations, as a Go program writes it: Add(1); go Done(); Wait().
     //                        The Wait blocks or not as the two race.
     //   many-waiters         64 waiters on one WaitGroup, 10,000 generations. Each generation's Done comes once all 64
     //                        are registered. The waiters are started through a semaphore, whose cost is in the number
     //                        for both sides alike.
+    //   one-waiter-asleep    as one-waiter-handoff, 5,000 generations, with the Done held back 1 ms after the
+    //   many-waiters-asleep  registration (64 waiters: 1,000 generations, after the last one's), so every waiter has
+    //                        spun out and sleeps. The 1 ms is taken off the printed number.
     [TestMethod]
     public void ChildWaitGroupCostReading()
     {
@@ -334,9 +338,15 @@ public class WaitGroupReuseTests
 
         Assert.IsFalse(GoScheduler.Enabled, "the reading is of the default mode");
 
-        Cost("one-waiter-handoff", waiters: 1, generations: 100_000, OneWaiterHandOff);
+        // The plain Wait spins as long as this event does before it sleeps (waitgroup.cs); the line keeps the number honest.
+        using (ManualResetEventSlim slim = new(false))
+            Console.WriteLine($"WGREUSE COST processors={Environment.ProcessorCount} event-spin-count={slim.SpinCount}");
+
+        Cost("one-waiter-handoff", waiters: 1, generations: 100_000, static generations => OneWaiterHandOff(generations, 0));
         Cost("one-waiter-go", waiters: 1, generations: 100_000, OneWaiterGoShaped);
-        Cost("many-waiters", waiters: 64, generations: 10_000, generations => ManyWaiters(64, generations));
+        Cost("many-waiters", waiters: 64, generations: 10_000, static generations => ManyWaiters(64, generations, 0));
+        Cost("one-waiter-asleep", waiters: 1, generations: 5_000, static generations => OneWaiterHandOff(generations, AsleepMicroseconds) - AsleepMicroseconds * 1e3);
+        Cost("many-waiters-asleep", waiters: 64, generations: 1_000, static generations => ManyWaiters(64, generations, AsleepMicroseconds) - AsleepMicroseconds * 1e3);
     }
 
     private static void Cost(string shape, int waiters, int generations, Func<int, double> run)
@@ -365,6 +375,18 @@ public class WaitGroupReuseTests
             if ((i & 0xFFFF) == 0 && Stopwatch.GetTimestamp() > deadline)
                 throw new TimeoutException($"the cost reading waited 60 s for {what}");
         }
+    }
+
+    // Holds the calling thread for the given time without giving it up (a sleep would add its own wake to the reading).
+    private static void Hold(int microseconds)
+    {
+        if (microseconds == 0)
+            return;
+
+        long until = Stopwatch.GetTimestamp() + Stopwatch.Frequency * microseconds / 1_000_000;
+
+        while (Stopwatch.GetTimestamp() < until)
+            Thread.SpinWait(4);
     }
 
     // Runs the timed body on a goroutine and returns its nanoseconds per generation.
@@ -397,7 +419,7 @@ public class WaitGroupReuseTests
         return ticks * (1e9 / Stopwatch.Frequency) / generations;
     }
 
-    private static double OneWaiterHandOff(int generations)
+    private static double OneWaiterHandOff(int generations, int holdMicroseconds)
     {
         ж<Δsync.WaitGroup> wg = NewWaitGroup();
         wg.Add(1);
@@ -411,6 +433,7 @@ public class WaitGroupReuseTests
             {
                 int wanted = generation;
                 SpinUntil(() => Volatile.Read(ref kicked) == wanted && parked.Count == 1, "the waiter to register");
+                Hold(holdMicroseconds);
                 wg.Done();
             }
         })
@@ -447,7 +470,7 @@ public class WaitGroupReuseTests
         });
     }
 
-    private static double ManyWaiters(int waiters, int generations)
+    private static double ManyWaiters(int waiters, int generations, int holdMicroseconds)
     {
         ж<Δsync.WaitGroup> wg = NewWaitGroup();
         wg.Add(1);
@@ -492,6 +515,7 @@ public class WaitGroupReuseTests
             wg.Add(1);
             start.Release(waiters);
             SpinUntil(() => parked.Count == waiters || Volatile.Read(ref thrown) is not null, "every waiter to register");
+            Hold(holdMicroseconds);
             wg.Done();
             SpinUntil(() => Interlocked.Read(ref finished) == target || Volatile.Read(ref thrown) is not null, "every waiter to return");
             Assert.IsNull(Volatile.Read(ref thrown), thrown?.ToString());
