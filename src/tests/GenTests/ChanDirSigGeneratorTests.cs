@@ -78,7 +78,7 @@ public class ChanDirSigGeneratorTests
     }
 
     private static string Entry(string method, string[] parameterTypes, string[] parameterDirs, string[] resultDirs) =>
-        $"[global::go.GoSigChanDir(\"{method}\", new global::System.Type[] {{ {string.Join(", ", parameterTypes)} }}, " +
+        $"[global::go.GoSigChanDir(\"{method}\", new global::System.Type?[] {{ {string.Join(", ", parameterTypes)} }}, " +
         $"new global::go.GoChanDir[] {{ {string.Join(", ", parameterDirs)} }}, " +
         $"new global::go.GoChanDir[] {{ {string.Join(", ", resultDirs)} }})]";
 

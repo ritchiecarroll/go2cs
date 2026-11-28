@@ -209,12 +209,12 @@ public unsafe class SyncMutexQueueTests
 
             SemaphoreSlim? gate = QueueOf(Sema(m));
             Assert.IsNotNull(gate, "a mutex with blocked waiters holds its queue's handle");
-            object monitor = s_semaphoreLock.GetValue(gate)!;
+            object monitor = s_semaphoreLock!.GetValue(gate)!;
             int afterWakeup, afterUnlock;
 
             lock (monitor)
             {
-                gate.Release();
+                gate!.Release();
                 afterWakeup = gate.CurrentCount;
                 m->Unlock();
                 afterUnlock = gate.CurrentCount;
@@ -244,7 +244,7 @@ public unsafe class SyncMutexQueueTests
     {
         Assert.IsNotNull(s_stripeOf, "the hand-own's stripeOf(uint32)");
         Assert.IsNotNull(s_stripeBits, "the hand-own's StripeBits");
-        int stripeBits = (int)s_stripeBits.GetRawConstantValue()!;
+        int stripeBits = (int)s_stripeBits!.GetRawConstantValue()!;
         sync.Mutex* block = (sync.Mutex*)NativeMemory.AllocZeroed((nuint)(2 * sizeof(sync.Mutex)));
         sync.Mutex* first = block, second = block + 1;
 
@@ -255,12 +255,12 @@ public unsafe class SyncMutexQueueTests
             Assert.AreNotEqual(0u, firstHandle, "gateOf installs the first mutex's queue");
 
             // The stripe is about to produce firstHandle again, as it does after a wrap.
-            object stripe = s_stripeOf.Invoke(null, [firstHandle])!;
+            object stripe = s_stripeOf!.Invoke(null, [firstHandle])!;
             FieldInfo? sequence = stripe.GetType().GetField("m_sequence", BindingFlags.NonPublic | BindingFlags.Instance);
             Assert.IsNotNull(sequence, "the stripe's m_sequence");
 
             lock (stripe)
-                sequence.SetValue(stripe, (firstHandle >> stripeBits) - 1);
+                sequence!.SetValue(stripe, (firstHandle >> stripeBits) - 1);
 
             SemaphoreSlim secondGate = GateOf(second);
             uint secondHandle = Sema(second);
@@ -541,7 +541,7 @@ public unsafe class SyncMutexQueueTests
     private static SemaphoreSlim? QueueOf(uint handle)
     {
         Assert.IsNotNull(s_queueOf, "the hand-own's queueOf(uint32)");
-        return (SemaphoreSlim?)s_queueOf.Invoke(null, [handle]);
+        return (SemaphoreSlim?)s_queueOf!.Invoke(null, [handle]);
     }
 
     // The mutex's wait queue, installed if the mutex has none, and held as a waiter holds it. No other thread
@@ -550,7 +550,7 @@ public unsafe class SyncMutexQueueTests
     {
         Assert.IsNotNull(s_gateOf, "the hand-own's gateOf(ref Mutex)");
         object?[] args = [*m];
-        object? gate = s_gateOf.Invoke(null, args);
+        object? gate = s_gateOf!.Invoke(null, args);
         *m = (sync.Mutex)args[0]!;
         Assert.IsTrue(gate is SemaphoreSlim, "gateOf returns the mutex's wait queue");
         return (SemaphoreSlim)gate!;
@@ -561,7 +561,7 @@ public unsafe class SyncMutexQueueTests
     {
         Assert.IsNotNull(s_leave, "the hand-own's leave(ref Mutex, WaitQueue)");
         object?[] args = [*m, gate];
-        s_leave.Invoke(null, args);
+        s_leave!.Invoke(null, args);
         *m = (sync.Mutex)args[0]!;
     }
 

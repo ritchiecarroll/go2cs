@@ -33,7 +33,7 @@ public class SynctestTestHookTests
 
     private static TestReporter Run(TestRegistry registry)
     {
-        TestReporter reporter = new("synctestguard", json: false, verbose: false);
+        TestReporter reporter = new("synctestguard", json: false);
         new TestRunner(registry, new TestOptions(), reporter, ".", Path.GetTempPath()).RunAll();
         return reporter;
     }

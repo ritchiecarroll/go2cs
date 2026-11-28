@@ -15,10 +15,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
-using PerformanceRunner;
-
-return Runner.Main(args);
-
 namespace PerformanceRunner
 {
     internal enum Phase { Transpile, Build, Verify, Measure }

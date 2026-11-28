@@ -179,7 +179,6 @@ namespace ChannelTests
             sut.Send(2);
             sut.Close();
             Exception exception = null;
-            int result;
             try
             {
                 Assert.AreEqual(1, sut.Receive());

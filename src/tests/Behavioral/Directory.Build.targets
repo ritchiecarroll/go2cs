@@ -1,0 +1,31 @@
+<Project>
+
+  <!-- MSBuild stops at the first Directory.Build.targets walking up, so the repository-wide targets
+       (src/Directory.Build.targets) are imported explicitly, as Directory.Build.props here does for its parent. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!--
+    A behavioral package marked [GoPlatformExclusive(...)] in its package_info.cs is native to the GOOS names it lists:
+    its Go source calls syscall API that exists only there (FindFirstFile and the WSA surface, or Socketpair and
+    UnixRights). Built for any other target its converted code cannot compile. The harnesses already skip such a
+    package by name (tests/PlatformExclusive.cs); a solution build did not, so `dotnet build go2cs.slnx
+    -p:GoTargetOS=linux` failed in the windows-only members with dozens of errors that say nothing about the tree.
+
+    This reads the same line-anchored marker and, when GoTargetOS names a target the package is not native to, replaces
+    the build with one high-importance message naming the package, its targets and the requested one. It is not a
+    warning: the skip is the correct result, and a solution build should stay clean. An unset GoTargetOS builds every
+    member as before (the csproj default compiles the windows corpus, which every marked package builds against today),
+    so the guard removes only builds that cannot succeed.
+  -->
+  <PropertyGroup Condition="'$(GoTargetOS)' != '' and Exists('$(MSBuildProjectDirectory)/package_info.cs')">
+    <_GoPlatformExclusive>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/package_info.cs')), '(?m)^\s*\[(?:go\.)?GoPlatformExclusive\s*\(([^)]*)\)\]').Groups[1].Value)</_GoPlatformExclusive>
+    <_GoPlatformExclusive>$(_GoPlatformExclusive.Replace('"', '').Replace(' ', '').Replace(',', ';'))</_GoPlatformExclusive>
+    <_GoPlatformExclusiveSkip Condition="'$(_GoPlatformExclusive)' != '' and !$([System.String]::Copy(';$(_GoPlatformExclusive);').Contains(';$(GoTargetOS.Trim().ToLowerInvariant());'))">true</_GoPlatformExclusiveSkip>
+    <BuildDependsOn Condition="'$(_GoPlatformExclusiveSkip)' == 'true'">_GoPlatformExclusiveSkip</BuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_GoPlatformExclusiveSkip">
+    <Message Importance="high" Text="$(MSBuildProjectName): skipped, native to $(_GoPlatformExclusive.Replace(';', ', ')) and GoTargetOS is $(GoTargetOS)" />
+  </Target>
+
+</Project>

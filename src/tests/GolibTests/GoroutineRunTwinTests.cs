@@ -160,7 +160,7 @@ public class GoroutineRunTwinTests
         {
             TestRegistry registry = new("runtwin", []);
             registry.Add(nameof(LockHost.TestLockThenPanic), LockHost.TestLockThenPanic, "runtwin_test.go", 1);
-            TestReporter reporter = new("runtwin", json: false, verbose: false);
+            TestReporter reporter = new("runtwin", json: false);
             TestRunner runner = new(registry, TestOptions.Parse([]), reporter, ".", ".");
 
             Assert.IsTrue(Task.Run(runner.RunAll).Wait(TimeSpan.FromSeconds(60)), "RunAll did not return within 60 s");

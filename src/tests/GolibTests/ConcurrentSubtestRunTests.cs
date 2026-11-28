@@ -37,7 +37,7 @@ public class ConcurrentSubtestRunTests
 
     private static TestRunner NewRunner() =>
         new(new TestRegistry("guard", []), new TestOptions(),
-            new TestReporter("guard", json: false, verbose: false), ".", ".");
+            new TestReporter("guard", json: false), ".", ".");
 
     // Long enough that a healthy run never reaches it, short enough that a REGRESSION reports a
     // failure instead of hanging the suite. A deadlock is the failure mode being guarded against, so

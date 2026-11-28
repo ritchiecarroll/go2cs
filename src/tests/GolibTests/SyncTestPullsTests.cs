@@ -248,7 +248,7 @@ public class SyncTestPullsTests
 
     private static TestExecution NewExecution(string name)
     {
-        TestReporter reporter = new("guard", json: false, verbose: false);
+        TestReporter reporter = new("guard", json: false);
         TestRunner runner = new(new TestRegistry("guard", []), new TestOptions(), reporter, ".", ".");
 
         return new TestExecution(runner, name, null, "guard.go", 1);

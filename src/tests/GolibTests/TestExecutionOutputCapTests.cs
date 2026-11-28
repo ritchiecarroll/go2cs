@@ -33,7 +33,7 @@ public class TestExecutionOutputCapTests
 
     private static (TestRunner Runner, TestReporter Reporter) NewRunner()
     {
-        TestReporter reporter = new("guard", json: false, verbose: false);
+        TestReporter reporter = new("guard", json: false);
         TestRunner runner = new(new TestRegistry("guard", []), new TestOptions(), reporter, ".", ".");
 
         return (runner, reporter);

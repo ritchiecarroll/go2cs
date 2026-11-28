@@ -165,7 +165,7 @@ public class NamedNumericBasicConversionTests
         Assert.AreEqual((nint)(-1), Call("AddrToNint", nuint.MaxValue));
         Assert.AreEqual(42UL, Call("AddrToUint64", (nuint)42));
         Assert.AreEqual(42.0, Call("AddrToFloat64", (nuint)42));
-        Assert.AreEqual(unchecked((int)0x1_0000_0002UL), Call("AddrToInt32", (nuint)0x1_0000_0002UL));
+        Assert.AreEqual(unchecked((int)0x1_0000_0002UL), Call("AddrToInt32", unchecked((nuint)0x1_0000_0002UL)));
         Assert.AreEqual((nint)250, Call("KindToNint", (byte)250));
         Assert.AreEqual(250.0, Call("KindToFloat64", (byte)250));
         Assert.AreEqual(250L, Call("KindToInt64", (byte)250));

@@ -70,6 +70,30 @@ public unsafe partial class GoCgoArgsTests
         Assert.IsFalse(GoPinTable.IsPinned(box));
     }
 
+    // A nil pointer crosses as nil while some OTHER value is pinned. The pin table is global, so a Pinner held anywhere
+    // sends every scalar pointer through the Pinner arm; a nil there must not reach TryPinnerHeld, which reads the
+    // pointer (StructPointer's door already guards it). Near-miss: the same nil with nothing pinned.
+    [TestMethod]
+    public void S6_ANilScalarPointerIsNilWhileAnotherValueIsPinned()
+    {
+        Assert.AreEqual(GoCgoStructPointer.Nil, GoCgoArgs.ScalarPointer<int32>(null, "keep", out nuint address, out _), "nothing pinned: nil");
+        Assert.AreEqual((nuint)0, address);
+
+        ж<int32> other = new StandardBox<int32>(3);
+        runtime_package.Pinner pinner = default;
+        pinner.Pin(other);
+
+        try
+        {
+            Assert.AreEqual(GoCgoStructPointer.Nil, GoCgoArgs.ScalarPointer<int32>(null, "keep", out address, out _), "another value pinned: still nil");
+            Assert.AreEqual((nuint)0, address);
+        }
+        finally
+        {
+            pinner.Unpin();
+        }
+    }
+
     // 21.7 MUST 1: pinning a value pins every allocation inside it. An element pointer into the value's inline array is
     // then held by the value's pin, and its address survives compaction.
     [TestMethod]

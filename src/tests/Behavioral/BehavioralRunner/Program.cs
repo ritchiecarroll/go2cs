@@ -12,10 +12,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using BehavioralRunner;
-
-return Runner.Main(args);
-
 namespace BehavioralRunner
 {
     internal enum Phase { Transpile, Compile, Target, Output }

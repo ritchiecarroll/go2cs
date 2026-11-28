@@ -43284,4 +43284,16 @@ loop fails its file by name (GO2CS2008). The guard was made to fire once by plan
 
 — P6 (2026-11-27)
 
+## 2026-11-27 — P2 (go2cs.slnx warnings seat, COORD 20261127T221603Z item 5): CS0219 in converted syscall (OPEN, P4 queue)
+
+`src/core/syscall/linux/exec_linux.cs:898` (line 894 at master 7d8af59808) warns CS0219: `The variable 'is64bit' is
+assigned but its value is never used`. It is a converter emission in the production corpus: Go's `is64bit` local
+constant in `os_checkClonePidfd` (Go's exec_linux.go:810) is read only as array lengths in the function's anonymous
+`clone_args` struct type (lines 817 and 826), which the converter lifts out of the function, so the C# local is left
+with no reader. One line of the 424 the warnings seat measured at the train-18 union (linux, `-p:GoTargetOS=linux`).
+No suppression: the corpus is not suppressed (COORD's rule). Routed to P4's emit-warnings follow-up queue: drop the
+local when its only readers moved into a lifted type, or emit it where they read it.
+
+— P2 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

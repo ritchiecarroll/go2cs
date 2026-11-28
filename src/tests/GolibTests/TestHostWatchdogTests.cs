@@ -38,7 +38,7 @@ public class TestHostWatchdogTests
         registry.Add("TestAHangs", _ => release.Wait(), "a_test.go", 1);
         registry.Add("TestBPasses", _ => { }, "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         TestRunner runner = new(registry, OptionsWithDeadline("300ms"), reporter, ".", ".");
 
         Task<nint> run = Task.Run(runner.RunAll);
@@ -64,7 +64,7 @@ public class TestHostWatchdogTests
         registry.Add("TestAHangs", _ => release.Wait(), "a_test.go", 1);
         registry.Add("TestBPasses", _ => { }, "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         TestRunner runner = new(registry, OptionsWithDeadline("300ms"), reporter, ".", ".");
 
         Task<nint> run = Task.Run(runner.RunAll);
@@ -90,7 +90,7 @@ public class TestHostWatchdogTests
     [TestMethod]
     public void AbandonAfterTheTestReportedIsANoOp()
     {
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         TestRunner runner = new(new TestRegistry("watchdog", []), new TestOptions(), reporter, ".", ".");
         TestExecution execution = new(runner, "TestFinishedFirst", null, "a_test.go", 1);
 
@@ -105,7 +105,7 @@ public class TestHostWatchdogTests
     [TestMethod]
     public void ALateTerminalReportAfterAbandonIsDropped()
     {
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         TestRunner runner = new(new TestRegistry("watchdog", []), new TestOptions(), reporter, ".", ".");
         TestExecution parent = new(runner, "TestAbandonedFirst", null, "a_test.go", 1);
         TestExecution child = new(runner, "TestAbandonedFirst/inFlight", parent, "a_test.go", 2);
@@ -146,7 +146,7 @@ public class TestHostWatchdogTests
         }, "a_test.go", 1);
         registry.Add("TestZParallel", t => t.Value.Parallel(), "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "300ms");
         TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
 
@@ -205,7 +205,7 @@ public class TestHostWatchdogTests
         }, "a_test.go", 1);
         registry.Add("TestBPasses", _ => { mayLower.Set(); hasLowered.Wait(TimeSpan.FromSeconds(10)); }, "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         TestRunner runner = new(registry, OptionsWithDeadline("300ms"), reporter, ".", ".");
 
         System.IO.TextWriter stderr = Console.Error;
@@ -272,7 +272,7 @@ public class TestHostWatchdogTests
         }, "a_test.go", 1);
         registry.Add("TestZParallel", t => t.Value.Parallel(), "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "0");
         TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
 
@@ -414,7 +414,7 @@ public class TestHostWatchdogTests
             bStarted.Set();
         }, "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "0");
         TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
 
@@ -463,7 +463,7 @@ public class TestHostWatchdogTests
             zRan = true;
         }, "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "0");
         TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
 
@@ -517,7 +517,7 @@ public class TestHostWatchdogTests
             zRan.Set();
         }, "a_test.go", 2);
 
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "0");
         TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
 
@@ -546,7 +546,7 @@ public class TestHostWatchdogTests
     // slot) for 900ms: three deadlines, the time a subtest waits for a slot behind other tests' long bodies.
     private static TestReporter RunQueued(TestRegistry registry, string parallel, string queued)
     {
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "300ms");
         TestRunner runner = new(registry, TestOptions.Parse([parallel]), reporter, ".", ".");
 
@@ -570,7 +570,7 @@ public class TestHostWatchdogTests
 
     private static void AssertAbandonedAndRunGoesOn(TestRegistry registry, ManualResetEventSlim release, string hung)
     {
-        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestReporter reporter = new("watchdog", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "300ms");
         TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
 

@@ -131,7 +131,7 @@ public class TestDeadlinePerTestTests
         TestRegistry registry = new("deadline", []);
         registry.Add("TestDeadline", body, "a_test.go", 1);
 
-        TestReporter reporter = new("deadline", json: false, verbose: false);
+        TestReporter reporter = new("deadline", json: false);
         Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", perTestDeadline);
         TestRunner runner = new(registry, TestOptions.Parse([]), reporter, ".", ".");
 

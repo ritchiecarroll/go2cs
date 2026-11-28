@@ -77,7 +77,7 @@ public class DeepTreeRemovalTests
     }
 
     private static TestRunner NewRunner(string runRoot) =>
-        new(new TestRegistry("guard", []), new TestOptions(), new TestReporter("guard", json: false, verbose: false), ".", runRoot);
+        new(new TestRegistry("guard", []), new TestOptions(), new TestReporter("guard", json: false), ".", runRoot);
 
     private static string NewRoot(string prefix)
     {

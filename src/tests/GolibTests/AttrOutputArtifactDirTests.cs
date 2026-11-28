@@ -38,7 +38,7 @@ public class AttrOutputArtifactDirTests
     private static (TestReporter reporter, TestRunner runner) Run(TestRegistry registry, params string[] args)
     {
         TestOptions options = TestOptions.Parse(args);
-        TestReporter reporter = new("attrguard", json: false, verbose: options.Verbose);
+        TestReporter reporter = new("attrguard", json: false);
         TestRunner runner = new(registry, options, reporter, ".", Path.GetTempPath());
         runner.RunAll();
         return (reporter, runner);

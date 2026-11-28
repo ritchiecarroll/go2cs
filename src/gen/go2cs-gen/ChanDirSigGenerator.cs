@@ -177,7 +177,7 @@ public class ChanDirSigGenerator : ISourceGenerator
     }
 
     private static string Entry(string name, string[] parameterTypes, byte[] parameterDirs, byte[] resultDirs) =>
-        $"[global::go.GoSigChanDir(\"{name}\", new global::System.Type[] {{ {string.Join(", ", parameterTypes)} }}, " +
+        $"[global::go.GoSigChanDir(\"{name}\", new global::System.Type?[] {{ {string.Join(", ", parameterTypes)} }}, " +
         $"new global::go.GoChanDir[] {{ {string.Join(", ", parameterDirs.Select(DirName))} }}, " +
         $"new global::go.GoChanDir[] {{ {string.Join(", ", resultDirs.Select(DirName))} }})]";
 

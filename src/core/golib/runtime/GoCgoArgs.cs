@@ -231,7 +231,9 @@ namespace go.golib;
                 throw Refused(function, typeof(T), $"a reinterpret view of a {rootSize}-byte Go value whose storage go2cs cannot hold still, and C may write past one {typeof(T).Name} into it");
 
             default:
-                if (GoPinTable.Any && TryPinnerHeld(pointer, function, out pin))
+                // A nil pointer crosses as nil (StructPointer below): the pin table is global, so it reaches here whenever any
+                // Pinner holds a pin anywhere, and TryPinnerHeld reads the pointer.
+                if (pointer is not null && GoPinTable.Any && TryPinnerHeld(pointer, function, out pin))
                 {
                     address = 0;
                     return GoCgoStructPointer.Pinned;
