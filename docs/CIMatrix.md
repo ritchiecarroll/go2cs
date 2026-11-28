@@ -327,7 +327,11 @@ OPT-IN: no schedule starts it, and it never runs as part of another stage. `goos
 - **J1** is `release-smoke`'s own `pack` job, unchanged: every go.* package of this tree, packed on windows with the
   run's rehearsal suffix `ci.<run id>`.
 - **J2** (`cgo-nuget-pack`, linux, the pinned zig) runs `.github/cgo-nuget-pack.ps1`.
-  - **R-c**, the before reading: `master`'s converter refuses go-pointer by name.
+  - **R-c**, a reading of `master`: its converter, without `-cgo`, converts go-pointer the way Go builds it with
+    `CGO_ENABLED=0` (`pointer.go` left out, `doc.cs` alone). Any other outcome fails.
+    <!-- 2026-11-28 (COORD's ruling after run 46105005290): until INC 4 increment 1 (dfe8bdf189, the go.mod-less copy)
+         reached master, R-c was "the before reading: master's converter refuses go-pointer by name". That refusal was
+         the go.mod-less release's preflight, and the increment took it away. -->
   - It converts the module with `-recurse=nuget -cgo`.
   - It packs it with `nugetgo-pack.ps1 -Cgo -LocalClosure <J1's feed>`. The package records `local-closure:`, so
     `src/_nugetpush.ps1` refuses it.

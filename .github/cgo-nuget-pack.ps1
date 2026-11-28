@@ -7,9 +7,13 @@
     COORD's ruling (1), 2026-11-22: a rehearsal-only local closure, hosted, before .5. Nothing leaves the run's
     artifacts, and every package is named with the run's rehearsal suffix.
 
-    R-c, the BEFORE reading. The same chain on master, with no -Cgo, refuses go-pointer by name. master's converter,
-    built from origin/master, converts go-pointer's module-cache release with -recurse=nuget. The arm passes only when
-    that conversion exits non-zero and its output names github.com/mattn/go-pointer.
+    R-c, a READING of master without -cgo. master's converter, built from origin/master, converts go-pointer's
+    module-cache release with -recurse=nuget and no -cgo. It converts the package the way Go builds it under
+    CGO_ENABLED=0: pointer.go imports "C" and is left out, so the converted sources are doc.cs alone, exit 0. Any other
+    outcome fails (more files, fewer files, a non-zero exit), and a refusal by name still passes. Until INC 4 increment 1
+    (dfe8bdf189, the go.mod-less copy) reached master, R-c was the BEFORE reading "master refuses go-pointer by name":
+    that refusal was the go.mod-less release's preflight, the only thing R-c ever measured, and the increment took it
+    away (COORD's ruling, 2026-11-28, after run 46105005290).
 
     J2 itself:
     - -RecurseRoot is the module converted on this linux host with -recurse=nuget -cgo, its CC the pinned zig for
@@ -80,7 +84,7 @@ if ($LASTEXITCODE -ne 0) { Failure "go mod download $ModulePath@$GoVersion exite
 $moduleDir = (Get-Content -Raw (Join-Path $work 'download.json') | ConvertFrom-Json).Dir
 Reading "module: $ModulePath@$GoVersion at <GOMODCACHE>/$((Split-Path -Leaf $moduleDir))"
 
-# ---- R-c: master's chain, without -Cgo, refuses go-pointer by name -----------------------------------------------------
+# ---- R-c: master's chain, without -cgo, converts go-pointer's CGO_ENABLED=0 view (doc.cs alone) ------------------------
 $master = Join-Path $work 'master'
 & git -C $repo fetch --no-tags --depth=1 origin master 2>&1 | Out-Null
 & git -C $repo worktree add --detach $master $MasterRef 2>&1 | Out-Null
@@ -101,17 +105,16 @@ else {
     $named = $refusal.Count -gt 0
     if ($rcExit -ne 0 -and $named) { Reading "R-c PASS: master $masterSha refuses $ModulePath (exit $rcExit): $($refusal[0] -replace [regex]::Escape($moduleDir), '<module dir>')" }
     elseif ($rcExit -eq 0) {
-        # Since INC 4 increment 1 (dfe8bdf189, the go.mod-less copy) is on master, the refusal R-c read is gone: it was the
-        # release's go.mod-less preflight, before any cgo rule. Without -cgo, master converts the package's cgo-OFF view,
-        # as go builds it under CGO_ENABLED=0: pointer.go imports "C" and is excluded, so only doc.go converts. That is no
-        # longer a before-reading of the -Cgo pack, so R-c reads it and does not fail (P5, 2026-11-28, run 46105005290;
-        # pending COORD's ruling). Any other outcome still fails.
+        # 2026-11-28 (COORD's ruling after run 46105005290): INC 4 increment 1 (dfe8bdf189, the go.mod-less copy) took
+        # away the go.mod-less preflight refusal, the only thing R-c ever measured. Without -cgo, master converts the
+        # package as go builds it under CGO_ENABLED=0: pointer.go imports "C" and is left out, so only doc.go converts.
+        # R-c reads exactly that, and any other set of sources fails.
         $rcProject = Join-Path $rcOut "src/$ModulePath"
         $rcFiles = @(Get-ChildItem -LiteralPath $rcProject -File -Filter '*.cs' -ErrorAction SilentlyContinue | Where-Object { $_.Name -cne 'package_info.cs' } | ForEach-Object { $_.Name } | Sort-Object)
-        if (($rcFiles -join ',') -ceq 'doc.cs') { Reading "R-c READING (not a refusal since INC 4 is on master): master $masterSha converts only $ModulePath's cgo-off view without -cgo (exit 0; source files: $($rcFiles -join ', '))" }
-        else { Failure "R-c: master $masterSha converted $ModulePath without -cgo (exit 0) into [$($rcFiles -join ', ')], not the cgo-off view [doc.cs]" }
+        if (($rcFiles -join ',') -ceq 'doc.cs') { Reading "R-c READING: master $masterSha, without -cgo, converts $ModulePath as go builds it under CGO_ENABLED=0 (exit 0; source files: $($rcFiles -join ', '))" }
+        else { Failure "R-c: master $masterSha converted $ModulePath without -cgo (exit 0) into [$($rcFiles -join ', ')], not its CGO_ENABLED=0 view [doc.cs]" }
     }
-    else { Failure "R-c: master $masterSha did not refuse $ModulePath by name (exit $rcExit, named $named)" }
+    else { Failure "R-c: master $masterSha exited $rcExit converting $ModulePath without -cgo, and no line names the module as refused (named $named)" }
     & git -C $repo worktree remove --force $master 2>&1 | Out-Null
 }
 
