@@ -12,6 +12,7 @@ import (
 	"debug/elf"
 	"debug/macho"
 	"debug/pe"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,6 +21,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // cgo Phase 4, the preamble-only slice (docs/phase4/DESIGN-cgo-phase4-sidebuild.md §3): a function the preamble
@@ -595,4 +598,91 @@ func TestCgoPhase4HASideLibrarysDependentsLoadOnlyFromSafePlaces(t *testing.T) {
 	default:
 		t.Skipf("on %s the side library's dependents load by the dynamic loader's own search, as a go binary's do: NOT MEASURED here", runtime.GOOS)
 	}
+}
+
+// TestSqlite3ReadingOnTheSideBuild is cgo Phase 4b's go-sqlite3 reading (docs/phase4/DESIGN-cgo-phase4b-own-sources.md
+// §5.3; OQ-2, COORD: measure the amalgamation's compile cost, prediction first). It is a reading, not a gate: run it by
+// name on a hosted leg (converter-cgo, filter ^TestSqlite3Reading). It downloads github.com/mattn/go-sqlite3 v1.14.53
+// through the module proxy and logs two READING lines: where a -cgo conversion of the package stops, and how long the
+// side build's own compile of sqlite3-binding.c takes with go list's flags for it. It fails only when it cannot set up.
+func TestSqlite3ReadingOnTheSideBuild(t *testing.T) {
+	requireHostCC(t)
+
+	env := append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local", "CGO_ENABLED=1")
+	download := exec.Command("go", "mod", "download", "-json", "github.com/mattn/go-sqlite3@v1.14.53")
+	download.Dir = t.TempDir()
+	download.Env = env
+	out, err := download.Output()
+
+	if err != nil {
+		t.Fatalf("go mod download of go-sqlite3: %v\n%s", err, out)
+	}
+
+	var module struct{ Dir string }
+
+	if err := json.Unmarshal(out, &module); err != nil || module.Dir == "" {
+		t.Fatalf("go mod download answered no directory: %v\n%s", err, out)
+	}
+
+	target := runtime.GOOS + "/" + runtime.GOARCH
+
+	// Where a -cgo conversion of the package stops.
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	output := t.TempDir()
+	convert := exec.Command(driverBinary(t), "-cgo=true", "-go2cspath", treeSrc, module.Dir, output)
+	convert.Env = env
+	started := time.Now()
+	combined, convertErr := convert.CombinedOutput()
+	t.Logf("READING %s go-sqlite3 conversion: exit %v in %s", target, convertErr, time.Since(started).Round(time.Second))
+
+	for _, line := range cgoRefusalLinesIn(string(combined), "") {
+		t.Logf("READING %s go-sqlite3 refused: %s", target, line[strings.Index(line, "error "):])
+	}
+
+	t.Logf("READING %s go-sqlite3 conversion's output ends:\n%s", target, lastLines(string(combined), 15))
+
+	// The side build's own compile of the amalgamation, with go list's flags for the package (OQ-2).
+	load := cgoLoad{env: env, dir: module.Dir}
+	toolchain, toolchainLine, err := cgoResolveToolchain(load, runtime.GOOS, runtime.GOARCH)
+
+	if err != nil {
+		t.Fatalf("the toolchain: %v", err)
+	}
+
+	pkg := &packages.Package{PkgPath: "github.com/mattn/go-sqlite3", Dir: module.Dir}
+	listed, err := cgoSideList(load, Options{}, pkg)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	compileFlags, _, err := cgoSideCompileFlags(load, listed, pkg)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	trim, err := cgoSideTrimOf(load, listed, true, runtime.GOOS)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	workDir := t.TempDir()
+	object := filepath.Join(workDir, "sqlite3-binding.o")
+	started = time.Now()
+	_, compileErr := cgoSideCompileOwn(toolchain, runtime.GOOS, compileFlags, filepath.Join(listed.dir(pkg), "sqlite3-binding.c"), object, listed.dir(pkg), cgoSidePrefixMaps(toolchain, workDir, trim))
+	elapsed := time.Since(started)
+	size := int64(0)
+
+	if info, statErr := os.Stat(object); statErr == nil {
+		size = info.Size()
+	}
+
+	t.Logf("READING %s go-sqlite3 amalgamation compile: %v in %.1f s, object %d bytes; %s; flags %q", target, compileErr, elapsed.Seconds(), size, toolchainLine, compileFlags)
 }
