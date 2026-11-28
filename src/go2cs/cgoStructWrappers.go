@@ -852,6 +852,20 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	var text strings.Builder
 
 	text.WriteString(cgoNativeMember(function, native, externResult, externParams, library, setLastError, scalarTarget.side))
+	// A wrapper with check windows keeps its exact Go signature too: a method-group use (a deferred call, a go
+	// statement, a func value) binds a delegate of the Go parameters, which never fills an optional parameter. It forwards
+	// with the first window named, which only the full overload has, so it cannot bind itself.
+	if len(windowParams) > 0 {
+		forward := make([]string, 0, len(params)+1)
+
+		for i := range params {
+			forward = append(forward, fmt.Sprintf("p%d", i))
+		}
+
+		forward = append(forward, fmt.Sprintf("ᴍwindow%d: default", elementParams[0]))
+		fmt.Fprintf(&text, "    internal static %s %s(%s) =>\n        %s(%s);\n\n", wrapperResult, name, strings.Join(wrapperParams[:len(wrapperParams)-len(windowParams)], ", "), name, strings.Join(forward, ", "))
+	}
+
 	fmt.Fprintf(&text, "    internal static %s %s(%s)\n    {\n", wrapperResult, name, strings.Join(wrapperParams, ", "))
 	text.WriteString(strings.TrimPrefix(before.String(), "\n"))
 

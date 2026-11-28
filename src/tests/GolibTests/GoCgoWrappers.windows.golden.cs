@@ -20,6 +20,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial void GetSystemTimeᴍnative(nint p0);
 
+    internal static @void GetSystemTime(ж<SYSTEMTIME> p0) =>
+        GetSystemTime(p0, ᴍwindow0: default);
+
     internal static @void GetSystemTime(ж<SYSTEMTIME> p0, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
         _Ctype_SYSTEMTIMEᴍ.CheckLayoutᴍ();
@@ -81,6 +84,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "PtInRect")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int PtInRectᴍnative(nint p0, _Ctype_POINTᴍ p1);
+
+    internal static @int PtInRect(ж<RECT> p0, POINT p1) =>
+        PtInRect(p0, p1, ᴍwindow0: default);
 
     internal static @int PtInRect(ж<RECT> p0, POINT p1, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
@@ -149,6 +155,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "UnionRect")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int UnionRectᴍnative(nint p0, nint p1, nint p2);
+
+    internal static @int UnionRect(ж<RECT> p0, ж<RECT> p1, ж<RECT> p2) =>
+        UnionRect(p0, p1, p2, ᴍwindow0: default);
 
     internal static @int UnionRect(ж<RECT> p0, ж<RECT> p1, ж<RECT> p2, global::go.golib.GoCgoWindow ᴍwindow0 = default, global::go.golib.GoCgoWindow ᴍwindow1 = default, global::go.golib.GoCgoWindow ᴍwindow2 = default)
     {
@@ -292,6 +301,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "_gmtime64_s")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int _gmtime64_sᴍnative(nint p0, nint p1);
+
+    internal static @int _gmtime64_s(ж<struct_tm> p0, ж<longlong> p1) =>
+        _gmtime64_s(p0, p1, ᴍwindow0: default);
 
     internal static @int _gmtime64_s(ж<struct_tm> p0, ж<longlong> p1, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
@@ -495,6 +507,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_add_into")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int go2cs_probe_add_intoᴍnative(nint p0, nint p1, nint p2);
+
+    internal static @int go2cs_probe_add_into(ж<struct_go2cs_probe_pair> p0, ж<struct_go2cs_probe_pair> p1, ж<struct_go2cs_probe_pair> p2) =>
+        go2cs_probe_add_into(p0, p1, p2, ᴍwindow0: default);
 
     internal static @int go2cs_probe_add_into(ж<struct_go2cs_probe_pair> p0, ж<struct_go2cs_probe_pair> p1, ж<struct_go2cs_probe_pair> p2, global::go.golib.GoCgoWindow ᴍwindow0 = default, global::go.golib.GoCgoWindow ᴍwindow1 = default, global::go.golib.GoCgoWindow ᴍwindow2 = default)
     {
@@ -850,6 +865,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int go2cs_probe_cursor_setᴍnative(nint p0, nint p1, int p2);
 
+    internal static @int go2cs_probe_cursor_set(ж<struct_go2cs_probe_cursor> p0, ж<@char> p1, @int p2) =>
+        go2cs_probe_cursor_set(p0, p1, p2, ᴍwindow0: default);
+
     internal static @int go2cs_probe_cursor_set(ж<struct_go2cs_probe_cursor> p0, ж<@char> p1, @int p2, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
         _Ctype_struct_go2cs_probe_cursorᴍ.CheckLayoutᴍ();
@@ -939,6 +957,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial double go2cs_probe_hfa_scaleᴍnative(nint p0, double p1);
 
+    internal static @double go2cs_probe_hfa_scale(ж<struct_go2cs_probe_hfa> p0, @double p1) =>
+        go2cs_probe_hfa_scale(p0, p1, ᴍwindow0: default);
+
     internal static @double go2cs_probe_hfa_scale(ж<struct_go2cs_probe_hfa> p0, @double p1, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
         _Ctype_struct_go2cs_probe_hfaᴍ.CheckLayoutᴍ();
@@ -1002,6 +1023,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_node_ring")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial void go2cs_probe_node_ringᴍnative(nint p0);
+
+    internal static @void go2cs_probe_node_ring(ж<struct_go2cs_probe_node> p0) =>
+        go2cs_probe_node_ring(p0, ᴍwindow0: default);
 
     internal static @void go2cs_probe_node_ring(ж<struct_go2cs_probe_node> p0, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
@@ -1269,6 +1293,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int go2cs_probe_pick_bᴍnative(nint p0, nint p1);
 
+    internal static @int go2cs_probe_pick_b(ж<struct_go2cs_probe_pair> p0, ж<ж<@int>> p1) =>
+        go2cs_probe_pick_b(p0, p1, ᴍwindow0: default);
+
     internal static @int go2cs_probe_pick_b(ж<struct_go2cs_probe_pair> p0, ж<ж<@int>> p1, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
         _Ctype_struct_go2cs_probe_pairᴍ.CheckLayoutᴍ();
@@ -1450,6 +1477,9 @@ static unsafe partial class cgotestꓸC_package
     [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_tagged_double")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int go2cs_probe_tagged_doubleᴍnative(nint p0);
+
+    internal static @int go2cs_probe_tagged_double(ж<struct_go2cs_probe_tagged> p0) =>
+        go2cs_probe_tagged_double(p0, ᴍwindow0: default);
 
     internal static @int go2cs_probe_tagged_double(ж<struct_go2cs_probe_tagged> p0, global::go.golib.GoCgoWindow ᴍwindow0 = default)
     {
