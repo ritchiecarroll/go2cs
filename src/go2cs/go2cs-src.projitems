@@ -27,9 +27,12 @@
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bridgeTypeAccess_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoBuild_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoFlagSecurity.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoFlagSecurity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoG1_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPhase3_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoPhase4_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoTests_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPointerDoor.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPointerDoor_test.go" />
@@ -141,6 +144,9 @@
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSelectedRefusal_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoSideBuild.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoSideBuild_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoSidePreamble.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSourceIdentity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoStructWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift.go" />

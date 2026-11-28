@@ -38,7 +38,7 @@ namespace go.golib;
 /// The resolver a converted cgo package registers for its own assembly (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §6.2).
 /// The converter emits only the data: the package's libraries, and a module initializer that registers them.
 /// </summary>
-[EditorBrowsable(EditorBrowsableState.Never)] public static class GoCgoLibraries
+[EditorBrowsable(EditorBrowsableState.Never)] public static partial class GoCgoLibraries
 {
     /// <summary>Registers the resolver for <paramref name="assembly"/>'s own <c>[LibraryImport]</c> bindings.</summary>
     public static void Register(Assembly assembly, params GoCgoLibrary[] libraries) => Register(assembly, "", libraries);
@@ -90,6 +90,70 @@ namespace go.golib;
 
         if (!NativeLibrary.TryGetExport(handle, symbol, out nint address) || address == 0)
             throw new EntryPointNotFoundException($"cgo: C.{symbol}: {library} exports no variable of that name (docs/Limitations.md#cgo)");
+
+        return new NativeBox<T>((nuint)address);
+    }
+
+    /// <summary>
+    /// The address of the table <paramref name="symbol"/> that the side-built library <paramref name="file"/> exports, for
+    /// <paramref name="assembly"/>'s bindings (cgo Phase 4, docs/phase4/DESIGN-cgo-phase4-sidebuild.md §2.6): the
+    /// converter compiled the C a preamble defines into that library, and each slot of the table holds the address of
+    /// one name it defines. The library loads by an absolute path in the assembly's own directory, so the current
+    /// directory is never searched, and a missing file or table is refused by name. The bindings' target is held first,
+    /// as for every binding the assembly makes.
+    /// </summary>
+    public static nint SideTable(Assembly assembly, string file, string symbol)
+    {
+        if (!s_registered.TryGetValue(assembly, out Registration? registration))
+            throw new InvalidOperationException($"cgo: {assembly.GetName().Name} registered no C bindings, so its side-built library {file} is not loaded");
+
+        if (Refusal(registration.Target) is { } mismatch)
+            throw new GoCgoTargetMismatchException(mismatch);
+
+        // A single-file host has no assembly location (OQ-B, UNMEASURED): the application's base directory stands in.
+        string directory = assembly.Location.Length > 0 ? Path.GetDirectoryName(assembly.Location)! : AppContext.BaseDirectory;
+        string path = Path.GetFullPath(Path.Combine(directory, file));
+
+        // On windows the side library's own dependencies are held to Phase 2's places too (review of 500b0855c7, #3): its
+        // own directory, the application directory, System32 and the AddDllDirectory directories, never the current
+        // directory or PATH. LoadLibraryExW's LOAD_LIBRARY_SEARCH flags apply to the library AND its dependencies.
+        // NativeLibrary.TryLoad with DllImportSearchPath flags did not hold an absolute path's dependents to them: a
+        // dependent only in the current directory loaded (TestCgoPhase4H, 3748d05f94, 46054089826). On darwin the
+        // converter refused any dependency named by anything but an absolute install name when it linked the library.
+        nint handle = 0;
+
+        bool loaded = OperatingSystem.IsWindows() ?
+            (handle = LoadLibraryExW(path, 0, LoadLibrarySearchDllLoadDir | LoadLibrarySearchDefaultDirs)) != 0 :
+            NativeLibrary.TryLoad(path, out handle);
+
+        if (!loaded)
+            throw new DllNotFoundException($"cgo: the side-built library {file}, which holds the C that {assembly.GetName().Name}'s cgo preambles define, or one of its dependencies was not found or did not load at {path}; it is a build output beside the assembly, and the current directory is never searched (docs/Limitations.md#cgo)");
+
+        if (!NativeLibrary.TryGetExport(handle, symbol, out nint table) || table == 0)
+            throw new EntryPointNotFoundException($"cgo: the side-built library {file} exports no table {symbol} (docs/Limitations.md#cgo)");
+
+        return table;
+    }
+
+    // LoadLibraryExW's search flags (libloaderapi.h): the loaded library's own directory, and the application directory,
+    // System32 and the AddDllDirectory directories, for the library and every dependency it loads.
+    private const uint LoadLibrarySearchDllLoadDir = 0x00000100;
+    private const uint LoadLibrarySearchDefaultDirs = 0x00001000;
+
+    [LibraryImport("kernel32.dll", EntryPoint = "LoadLibraryExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
+    private static partial nint LoadLibraryExW(string fileName, nint file, uint flags);
+
+    /// <summary>
+    /// A box over the C variable <paramref name="name"/> that a preamble defines, whose address is slot
+    /// <paramref name="slot"/> of the side-built table <paramref name="symbol"/> in <paramref name="file"/> (cgo Phase 4,
+    /// OQ-A): as <see cref="Variable{T}"/> does for an export, the box aliases the variable's address and owns no storage.
+    /// </summary>
+    public static unsafe ж<T> SideVariable<T>(Assembly assembly, string file, string symbol, int slot, string name)
+    {
+        nint address = ((nint*)SideTable(assembly, file, symbol))[slot];
+
+        if (address == 0)
+            throw new EntryPointNotFoundException($"cgo: C.{name}: slot {slot} of the side-built table {symbol} in {file} holds no address (docs/Limitations.md#cgo)");
 
         return new NativeBox<T>((nuint)address);
     }

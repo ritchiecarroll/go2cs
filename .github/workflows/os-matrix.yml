@@ -1965,7 +1965,8 @@ jobs:
           # 30m: zig on darwin overran 10m with no test hung, at master and on every branch (BOARD, 2026-11-27).
           $testTimeout = if ($env:CGO_CC_PINNED) { '30m' } else { '10m' }
           if ($env:STAGE -eq 'cgo-e2e') {
-              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program' }
+              # cgo Phase 4's exit gate (TestCgoPhase4*: preamble-defined C, side-built, run against go) rides here too.
+              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program|^TestCgoPhase4' }
               $testTimeout = '40m'
           }
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }

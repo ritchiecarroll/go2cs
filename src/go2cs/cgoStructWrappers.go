@@ -41,10 +41,22 @@ type cgoWrapperSet struct {
 	pointerBearing map[string]bool
 	allocates      bool   // a helper or C.malloc allocates, so the pseudo-package binds the package's own malloc
 	class          string // the pseudo-package class, whose assembly a C variable's lookup names (cgo item 3)
+
+	// side maps each name its file's preamble defines to its slot in the side-built table (cgo Phase 4).
+	side map[string]cgoSideSlot
 }
 
 func newCgoWrapperSet(target cgoBindingTarget, sizes types.Sizes) *cgoWrapperSet {
 	return &cgoWrapperSet{target: target, mirrors: newCgoMirrorBuilder(sizes), copies: map[string]string{}, pointerBearing: map[string]bool{}}
+}
+
+// sideOf is a name's side-built slot, or nil when a library exports it.
+func (set *cgoWrapperSet) sideOf(name string) *cgoSideSlot {
+	if slot, found := set.side[name]; found {
+		return &slot
+	}
+
+	return nil
 }
 
 func (set *cgoWrapperSet) libraryOf(symbol string) string {
@@ -377,7 +389,7 @@ func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoSt
 // (cgoScalarWrapper), so increment 3b1's text is unchanged by this one.
 func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	function := declaration.cName
-	scalarTarget := cgoBindingTarget{goos: set.target.goos, library: set.libraryOf(function), crt: set.target.crt}
+	scalarTarget := cgoBindingTarget{goos: set.target.goos, library: set.libraryOf(function), crt: set.target.crt, side: set.sideOf(function)}
 
 	errnoForm := declaration.kind == cgoErrnoFunc
 
@@ -757,10 +769,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	var text strings.Builder
 
-	fmt.Fprintf(&text, "    // C.%s, bound to %s.\n", function, library)
-	fmt.Fprintf(&text, "    [%sLibraryImport(%q, EntryPoint = %q%s)]\n", interop, library, function, setLastError)
-	fmt.Fprintf(&text, "    [%sUnmanagedCallConv(CallConvs = new[] { typeof(%sCallConvCdecl) })]\n", interop, compiler)
-	fmt.Fprintf(&text, "    private static partial %s %s(%s);\n\n", externResult, native, strings.Join(externParams, ", "))
+	text.WriteString(cgoNativeMember(function, native, externResult, externParams, library, setLastError, scalarTarget.side))
 	fmt.Fprintf(&text, "    internal static %s %s(%s)\n    {\n", wrapperResult, name, strings.Join(wrapperParams, ", "))
 	text.WriteString(strings.TrimPrefix(before.String(), "\n"))
 
@@ -779,7 +788,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	var bracket strings.Builder
 
-	fmt.Fprintf(&bracket, "        %ssyscallEntersyscall();\n\n        try\n        {\n%s        }\n", runtime, cgoErrnoCall(call, errnoForm, set.target.goos))
+	fmt.Fprintf(&bracket, "        %ssyscallEntersyscall();\n\n        try\n        {\n%s        }\n", runtime, cgoErrnoCall(call, errnoForm, set.target.goos, scalarTarget.errnoLocation()))
 	fmt.Fprintf(&bracket, "        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
 
 	if len(pinned) == 0 && len(pinnedScalars) == 0 {
@@ -908,6 +917,11 @@ func (set *cgoWrapperSet) support() map[string]string {
 
 	if set.allocates {
 		members[cgoMirrorSuffix+"3 allocator"] = cgoAllocatorBinding(set.libraryOf(cgoAllocator))
+	}
+
+	// Each side-built table, read once (cgo Phase 4).
+	for _, slot := range set.side {
+		members[fmt.Sprintf("%s4 side %04d", cgoMirrorSuffix, slot.table)] = cgoSideTableMember(slot, set.class)
 	}
 
 	return members
@@ -1170,6 +1184,17 @@ func (set *cgoWrapperSet) variable(declaration cgoDeclaration) (string, error) {
 	box := AddressPrefix + member
 
 	var text strings.Builder
+
+	if slot := set.sideOf(name); slot != nil {
+		// OQ-A: a variable the preamble defines is boxed over its slot of the side-built table (cgo Phase 4).
+		fmt.Fprintf(&text, "    // C.%s, a C variable %s's preamble defines: side-built, slot %d of its table (cgo Phase 4), read and written\n", name, slot.file, slot.slot)
+		text.WriteString("    // in place through a box over its address.\n")
+		fmt.Fprintf(&text, "    private static ж<%s>? %sᴍvariable;\n\n", goSide, member)
+		fmt.Fprintf(&text, "    internal static ж<%s> %s => %sᴍvariable ??= global::go.golib.GoCgoLibraries.SideVariable<%s>(typeof(%s).Assembly, %q, %q, %d, %q);\n\n", goSide, box, member, goSide, set.class, slot.library, slot.tableSymbol(), slot.slot, name)
+		fmt.Fprintf(&text, "    internal static ref %s %s => ref %s.Value;\n", goSide, member, box)
+
+		return text.String(), nil
+	}
 
 	fmt.Fprintf(&text, "    // C.%s, a C variable in %s, read and written in place through a box over its address.\n", name, library)
 	fmt.Fprintf(&text, "    private static ж<%s>? %sᴍvariable;\n\n", goSide, member)

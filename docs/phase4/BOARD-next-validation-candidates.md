@@ -43390,4 +43390,116 @@ is a workflow change of its own, for COORD to place.
 
 — H (2026-11-27)
 
+
+## OPEN 2026-11-27 (H): cgo Phase 4, a non-static function one preamble defines and another file calls is refused (loud, by name)
+
+**Finding.** Found in the go-sqlite3 v1.14.53 census (read only, 2026-11-27). callback.go calls
+`C._sqlite3_result_text` and `C._sqlite3_result_blob`, which callback.go's preamble only declares; sqlite3.go's preamble
+DEFINES them, not static. cmd/cgo resolves such a call at the link. Phase 4 (claude/h-cgo-p4-sidebuild) puts each name
+in the translation unit of the first file that uses it, and classifies it by that unit's object alone. There the name is
+undefined, so the route refuses it with today's text ("... go2cs does not compile C yet"), at its use, by name.
+
+**Severity.** The refusal is loud and named, so nothing is silently wrong. A package that relies on the shape does not
+convert.
+
+**Ruling.** COORD, 2026-11-27: the cure lands in Phase 4b (a package's own C files). 4b classifies a name by ANY of the
+package's objects that defines it as a GLOBAL symbol, its other preamble units included, and the side link resolves the
+table entry inside the library. The gap is recorded in DESIGN-cgo-phase4-sidebuild.md §6.
+
+**Owner.** H, in 4b.
+
+— H (2026-11-27)
+
+## OPEN 2026-11-27 (H): cgo Phase 4, a preamble definition colliding with a linked library's export is refused; Go uses the preamble's
+
+**Finding.**
+- Measured at ef0f9a89e2, on hosted darwin/amd64 (converter-cgo 46041721404). A preamble defines `double gamma(double)`.
+  darwin/amd64's libSystem, which every link includes, carries libm and exports `gamma`.
+- Phase 4 asks the probe first. The probe binds `gamma` to libSystem, and the cmd/cgo-imports check then refuses it by
+  name, since cmd/cgo compiled the preamble's own and imports nothing ("C.gamma: cmd/cgo's own binary does not import
+  a symbol named gamma ...").
+- Go compiles the preamble's `gamma` and calls it. So the refusal is LOUD but not Go-faithful.
+- TestCgoPhase4F (isatty, `_isatty` on windows) holds the same refusal as a guard: the shape converts under Go and is
+  refused under go2cs.
+- libSystem, libm and libc export many common names, so preamble helpers that shadow them hit this.
+
+**Severity.** Loud and named; never a silent binding to the library's function. A package with such a helper does not
+convert.
+
+**Ruling.** COORD, 2026-11-27: the cure is Phase 4b's ROW 1, classification order.
+- When the file's own translation unit DEFINES the name, static or not, side-build it and never ask the probe.
+- Nothing binds silently to libc, and nothing Go accepts is refused.
+- TestCgoPhase4F becomes a parity row there: it matches go run with the preamble's own function on every OS.
+- The Phase 4 seat ships the loud refusal unless the reviewer objects on the re-read.
+
+**Owner.** H, in 4b.
+
+— H (2026-11-27)
+
+## RULE 2026-11-27 (H, from the review of ef369204c9): anything go2cs PUBLISHES with cgo builds trimmed
+
+**Rule.** A side-built library bakes the paths go's own build bakes under the same trimpath setting.
+- Trimmed: cmd/go's -trimpath mapping, `/_/<module path>[@version]`.
+- Untrimmed: absolute package paths wherever a header spells `__FILE__`, as a plain go build does.
+
+So anything published (a cgo NuGet pack, a release artifact) is converted with go2cs's -trimpath, its default, and
+never with `-trimpath=false`. Otherwise the converting machine's directories ship inside the library. The
+untrimmed mode is for local parity runs only.
+
+**Owner.** Whoever cuts a cgo pack: nugetgo-pack -Cgo, and the release legs.
+
+— H (2026-11-27)
+
+## OPEN 2026-11-27 (H) SECURITY: windows, a Phase 2 bound library's own dependents may load from the current directory
+
+**What is measured.**
+- cgo Phase 4's side library (claude/h-cgo-p4-sidebuild, TestCgoPhase4H, win-x64 cgo-e2e 46054089826 at 3748d05f94)
+  was loaded with `NativeLibrary.TryLoad(<absolute path>, assembly, SafeDirectories | UseDllDirectoryForDependencies)`.
+- Its dependent `dep.dll`, present ONLY in the process's current directory, loaded anyway: go2cs printed "via 42".
+- The mechanism is inferred, not read: .NET may load an absolute path with LOAD_WITH_ALTERED_SEARCH_PATH, whose
+  dependent search includes the current directory.
+- The side library's cure loads through kernel32 `LoadLibraryExW` with LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR |
+  LOAD_LIBRARY_SEARCH_DEFAULT_DIRS, which apply to the library AND its dependents.
+
+**What is NOT measured.** Phase 2's resolver (`GoCgoLibraries.Resolve`) loads a captured library by NAME with
+`NativeLibrary.TryLoad(name, assembly, SafeDirectories | AssemblyDirectory)`. The library itself is held to safe
+places. Whether ITS dependents can come from the current directory is unknown. If they can, it is a DLL-planting
+exposure in shipped cgo bindings on windows.
+
+**Ruling.** COORD, 2026-11-27, two steps.
+1. Right after the Phase 4 seat posts READY, and before 4b: a measurement seat, with an H-style row against a Phase 2
+   bound library whose dependent sits only in the current directory. The measurement is posted before any fix.
+2. If it reproduces: the same LoadLibraryExW cure in Resolve, as its own seat, red first. COORD is told at once, for
+   the .5 release notes.
+
+**Owner.** H.
+
+— H (2026-11-27)
+
+## CLOSED 2026-11-28 (H): SECURITY, a cgo package's #cgo flags against cmd/go's allowlist (no live exposure; ported)
+
+**Question.** COORD, inbox H 20261128T015318Z: do the Phase 2 capture and the Phase 4 side build pass #cgo flags to the
+C toolchain unvalidated, as cmd/go/internal/work/security.go would refuse them?
+
+**Measured** (probe claude/h-probe-secflags 00bdeaf554, TestSecurityFlagReading, converter-cgo at go1.26.11: linux
+46096043805, darwin 46096046155 both arches, windows 46096048379). Every row exited 1 and wrote nothing:
+- `#cgo CFLAGS: -fplugin=./evil.so`: refused at load by cmd/go, "invalid flag in #cgo CFLAGS".
+- `#cgo CFLAGS: --sysroot=/tmp` (new in 1.26.11): refused at load by cmd/go, "invalid flag in #cgo CFLAGS".
+- `#cgo LDFLAGS: -L${SRCDIR}/evil -levil`, the directory holding GNU ld scripts named as libraries: refused at load by
+  cmd/go's NEW 1.26.11 -L scan, "invalid linker input file in #cgo LDFLAGS: .../libevil.a (unrecognized binary
+  format)". CORRECTION: the probe's own log line labels this row "stopped by a go2cs refusal", because the instrument
+  matched only "invalid flag". The text is cmd/go's. A go2cs GO2CS2001 follows it only because cmd/cgo wrote nothing.
+
+**Why it was not live, and why that was not enough.** go/packages loads with `go list -compiled`, whose cgo action runs
+cmd/go's checks and fails the package; go2cs then converts best-effort and the cgo route refuses for lack of cmd/cgo's
+output. The safety rested on the loader's mode and on a missing-output refusal.
+
+**Closed by** claude/h-cgo-p4-sidebuild 32e24727d5 and the commit after it. security.go at go1.26.11 is ported whole
+(cgoFlagSecurity.go), and its checks run in planCgoRoute before the capture and the side build, offline conversions
+included. Go's own flag tables pass on the port. The design's §8 says the converter must not rely on the loader for flag
+safety.
+**Owner.** H.
+
+— H (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

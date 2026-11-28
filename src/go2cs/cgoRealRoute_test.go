@@ -106,6 +106,14 @@ func cgoRealToolchainLine(t *testing.T) (string, []string) {
 func convertCgoReal(t *testing.T, probeDir string, files map[string]string, args ...string) (string, string, string, error) {
 	t.Helper()
 
+	return convertCgoRealSetup(t, probeDir, files, nil, args...)
+}
+
+// convertCgoRealSetup is convertCgoReal, with setup run on the module directory before the conversion (a library the
+// package links, built by the test).
+func convertCgoRealSetup(t *testing.T, probeDir string, files map[string]string, setup func(dir string), args ...string) (string, string, string, error) {
+	t.Helper()
+
 	treeSrc, err := filepath.Abs("..")
 
 	if err != nil {
@@ -117,6 +125,10 @@ func convertCgoReal(t *testing.T, probeDir string, files map[string]string, args
 
 	for name, contents := range files {
 		writeCgoFixture(t, dir, name, contents)
+	}
+
+	if setup != nil {
+		setup(dir)
 	}
 
 	output := t.TempDir()
@@ -392,14 +404,9 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 		t.Logf("READING %s: go list handed back cmd/cgo's _cgo_import.go with the probe linked: %t", target, dynamic)
 	})
 
-	t.Run("a function the preamble defines is refused as compiled C", func(t *testing.T) {
-		stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"add.go": "package cgoreal\n\n/*\nstatic int add(int a, int b) { return a + b; }\n*/\nimport \"C\"\n\nfunc Add() int { return int(C.add(1, 2)) }\n"})
-		requireNothingWritten(t, output, err, stderr)
-
-		if !strings.Contains(stderr, "C.add") || !strings.Contains(stderr, "does not compile C yet") {
-			t.Errorf("the refusal does not name C.add as compiled C go2cs does not compile\n%s", stderr)
-		}
-	})
+	// The subtest "a function the preamble defines is refused as compiled C" is retired: cgo Phase 4 side-builds that
+	// function (cgoPhase4_test.go, whose program carries its static). A name only DECLARED keeps the refusal word for
+	// word, held on windows by the statically resolved mktime above.
 
 	t.Run("another target is refused naming it and the host", func(t *testing.T) {
 		other := "linux/amd64"

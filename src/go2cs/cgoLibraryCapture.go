@@ -368,23 +368,10 @@ func machoImportedLibraries(path string) (map[string]string, error) {
 		return nil, errors.New("cgo: the load-name probe was linked with a flat namespace, so its symbols name no library")
 	}
 
-	var dylibs []string
+	dylibs := machoDylibLoadNames(file)
 
-	for _, load := range file.Loads {
-		raw := load.Raw()
-
-		if len(raw) < 12 || !machoDylibCommands[file.ByteOrder.Uint32(raw[0:4])] {
-			continue
-		}
-
-		offset := file.ByteOrder.Uint32(raw[8:12])
-
-		if int(offset) >= len(raw) {
-			return nil, errors.New("cgo: a dylib load command in the load-name probe is malformed")
-		}
-
-		name, _, _ := bytes.Cut(raw[offset:], []byte{0})
-		dylibs = append(dylibs, string(name))
+	if dylibs == nil && machoHasMalformedDylibCommand(file) {
+		return nil, errors.New("cgo: a dylib load command in the load-name probe is malformed")
 	}
 
 	resolved := map[string]string{}
@@ -418,6 +405,44 @@ func machoImportedLibraries(path string) (map[string]string, error) {
 	}
 
 	return resolved, nil
+}
+
+// machoDylibLoadNames is each name a Mach-O file's dylib load commands carry, in load order (the order a two-level
+// library ordinal indexes), or nil when one of them is malformed.
+func machoDylibLoadNames(file *macho.File) []string {
+	var dylibs []string
+
+	for _, load := range file.Loads {
+		raw := load.Raw()
+
+		if len(raw) < 12 || !machoDylibCommands[file.ByteOrder.Uint32(raw[0:4])] {
+			continue
+		}
+
+		offset := file.ByteOrder.Uint32(raw[8:12])
+
+		if int(offset) >= len(raw) {
+			return nil
+		}
+
+		name, _, _ := bytes.Cut(raw[offset:], []byte{0})
+		dylibs = append(dylibs, string(name))
+	}
+
+	return dylibs
+}
+
+// machoHasMalformedDylibCommand reports whether a dylib load command's name offset runs past the command.
+func machoHasMalformedDylibCommand(file *macho.File) bool {
+	for _, load := range file.Loads {
+		raw := load.Raw()
+
+		if len(raw) >= 12 && machoDylibCommands[file.ByteOrder.Uint32(raw[0:4])] && int(file.ByteOrder.Uint32(raw[8:12])) >= len(raw) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // cgoDarwinInstallName refuses, by name, an install name a converted package must not load by (§11.12, mandatory since

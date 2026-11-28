@@ -597,6 +597,12 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		// default, where the corpus's is windows/amd64.
 		if cgoRouteActive {
 			newContents = []byte(cgoTargetDefaults(string(newContents), options.targetPlatform))
+
+			// The library side-built from its preambles (cgo Phase 4) is copied beside the assembly.
+			if cgoRouteSideLibrary != "" {
+				goos, goarch, _ := strings.Cut(options.targetPlatform, "/")
+				newContents = []byte(cgoSideLibraryItem(string(newContents), goos+"-"+goarch, cgoRouteSideLibrary))
+			}
 		}
 	}
 

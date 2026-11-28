@@ -797,6 +797,20 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						log.Fatalf("Failed to create the bindings file's folder \"%s\": %s\n", filepath.Dir(outputFileName), err)
 					}
 
+					// The side build of the C its preambles define, beside the bindings (cgo Phase 4), and nothing an
+					// earlier conversion side-built that this one does not.
+					sideFolder := cgoSideBuildFolder(packageOutputPath, route.folder)
+
+					if err := cgoSideBuildClean(sideFolder, route.side); err != nil {
+						log.Fatalf("Refusing to convert: cgo: package %s's earlier side build could not be removed: %s\n", pkg.PkgPath, err)
+					}
+
+					if route.side != nil {
+						if err := route.side.write(sideFolder); err != nil {
+							log.Fatalf("Refusing to convert: cgo: package %s's side-built library could not be written: %s\n", pkg.PkgPath, err)
+						}
+					}
+
 					completed := route.bindingsText(visitor.outputBuilder.String())
 					visitor.outputBuilder.Reset()
 					visitor.outputBuilder.WriteString(completed)
