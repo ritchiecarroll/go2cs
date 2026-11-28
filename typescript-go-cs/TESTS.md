@@ -62,7 +62,7 @@ Release build. It is not re-run at master `4a56f17a3a`.
 | Differences from native | | **0** |
 | Wall time | 85 s | 2,644 s |
 
-The wall times are test time and exclude the build: the native run takes 208 s with its compile. No configuration
+The wall times are test time and exclude the build. No configuration
 runs out of memory in the converted run.
 
 **One change to TypeScript's source, on both sides.** The test finds its baselines by walking up from its own source
@@ -71,4 +71,6 @@ file, which `runtime.Caller` names. In converted code `runtime.Caller` reports a
 `internal/repo/paths.go`: before that panic, it returns `os.Getenv("TSC_REPO_ROOT")` when the variable is set. That
 package is converted again, and the converted run sets `TSC_REPO_ROOT` to the TypeScript checkout. The native run
 uses the same patched copy with the variable unset, so it takes its usual path.
+The conversion published in this repository does not carry this patch, so
+[MODIFICATIONS.md](MODIFICATIONS.md) does not list it.
 <!-- Source: docs/phase4/DATA-ts-conformance-scout.md section 3.3 on go2cs master. -->

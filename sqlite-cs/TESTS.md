@@ -26,7 +26,7 @@ go2cs 1.26.11.1, and the release itself is not measured here. They are measured 
 | `modernc.org/sqlite/vfs` | 9 pass | 9 pass | **matches** |
 
 The native column counts the tests both sides run. A plain native `go test` of the root package also reports the
-41 seed inputs of the fuzz target `FuzzSingleStatement` and the disclosed test.
+seed inputs of the fuzz target `FuzzSingleStatement` and the disclosed test.
 
 The same tests skip on both sides on linux/amd64.
 
