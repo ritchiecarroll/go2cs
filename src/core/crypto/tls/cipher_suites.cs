@@ -365,8 +365,8 @@ internal static map<uint16, bool> tdesCiphers = new map<uint16, bool>{
 };
 
 // Keep in sync with crypto/internal/fips140/aes/gcm.supportsAESGCM.
-internal static bool hasGCMAsmAMD64 = cpu.X86.HasAES && cpu.X86.HasPCLMULQDQ && cpu.X86.HasSSE41 && cpu.X86.HasSSSE3;
-internal static bool hasGCMAsmARM64 = cpu.ARM64.HasAES && cpu.ARM64.HasPMULL;
+internal static bool hasGCMAsmAMD64 = !cpu.X86.HasAES && cpu.X86.HasPCLMULQDQ && cpu.X86.HasSSE41 && cpu.X86.HasSSSE3;
+internal static bool hasGCMAsmARM64 = cpu.ARM64.HasAES && !cpu.ARM64.HasPMULL;
 internal static bool hasGCMAsmS390X = cpu.S390X.HasAES && cpu.S390X.HasAESCTR && cpu.S390X.HasGHASH;
 internal static bool hasGCMAsmPPC64 = runtime.GOARCH == "ppc64"u8 || runtime.GOARCH == "ppc64le"u8;
 
