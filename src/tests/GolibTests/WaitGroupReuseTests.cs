@@ -338,6 +338,11 @@ public class WaitGroupReuseTests
         const int rounds = 200, controlRounds = 20;
         int notAsleep = 0, asleep = 0, panicked = 0;
 
+        // waitgroup.cs writes the waiter's spin count out as a number: ManualResetEventSlim's default at .NET 10 (35, or 1
+        // on one processor). Nothing else compares the two, so a runtime that moves the default fails here by name.
+        using (ManualResetEventSlim slim = new(false))
+            Assert.AreEqual(Environment.ProcessorCount == 1 ? 1 : 35, slim.SpinCount, "ManualResetEventSlim's default spin count is the count the plain Wait in waitgroup.cs spins for");
+
         for (int round = 1; round <= rounds; round++)
         {
             if (LandBeforeTheSleep(round, waitUntilAsleep: false))
@@ -436,8 +441,10 @@ public class WaitGroupReuseTests
 
     // ---- The default-mode cost reading (G's required reading; reported, never asserted) ------------------------------
 
-    // Every program's plain Wait runs through the changed path, so the seat reads its cost before and after on one box.
-    // The row does nothing unless GO2CS_TEST_WGREUSE_COST=1 (it is a measurement, and takes minutes):
+    // NOT A GATE: in every gate run this method returns at once and counts as passed. It measures only when
+    // GO2CS_TEST_WGREUSE_COST=1 is set, and takes minutes then.
+    //
+    // Every program's plain Wait runs through the changed path, so the seat reads its cost before and after on one box:
     //
     //   GO2CS_TEST_WGREUSE_COST=1 dotnet test GolibTests.dll --filter FullyQualifiedName~ChildWaitGroupCostReading
     //

@@ -153,6 +153,7 @@ public class WaitGroupTwinTests
             {
                 ж<Δsync.WaitGroup> wg = NewWaitGroup();
                 wg.Add(1);
+                AwaitMonitorStill();
                 long startedBefore = GoScheduler.CarriersStarted;
                 Counts before = Counts.Read();
 
@@ -553,6 +554,28 @@ public class WaitGroupTwinTests
 
     // The scheduler's counters a carrier row reads, off one READING line. Monitor is every P the monitor gave out on
     // its own: an injection past a long step, and a retake from a carrier it read or sensed as blocked.
+    // The start snapshot of a round must not split one act of the monitor: the monitor counts a P it gives out first and
+    // starts the carrier after, a release of a P and a thread start apart, so a snapshot taken between the two would read
+    // the count as before the round and the carrier as inside it (P3's read of the twin fold, 2026-11-28). This waits
+    // until the counters and the carrier count read the same across 40 ms, which is more than two of the monitor's 2 ms
+    // sleeps even under Windows' 15.6 ms timer. Bounded at 2 s: a host that never holds still starts the round anyway,
+    // and the round's own rule (assert the carriers only when the monitor gave no P out) still decides. The caller is the
+    // test's own thread, not a carrier, so the sleep here is not a wait the monitor senses.
+    private static void AwaitMonitorStill()
+    {
+        long deadline = Stopwatch.GetTimestamp() + 2 * Stopwatch.Frequency;
+
+        while (Stopwatch.GetTimestamp() < deadline)
+        {
+            long started = GoScheduler.CarriersStarted;
+            Counts counts = Counts.Read();
+            Thread.Sleep(40);
+
+            if (GoScheduler.CarriersStarted == started && Counts.Read() == counts)
+                return;
+        }
+    }
+
     private readonly record struct Counts(long Handoffs, long Injections, long Retakes, long Sensed)
     {
         internal long Monitor => Injections + Retakes + Sensed;

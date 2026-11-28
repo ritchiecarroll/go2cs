@@ -44,6 +44,9 @@ using (Goroutine.Park(reason)) {
 }
 ```
 
+(This block is the design as G first read it. The cut adds a spin before the sleep and pulses only when a plain waiter
+was registered: section 8.)
+
 `Add` at zero, under `Gate`, after it has readied every waiter and woken every twin slot: `s.Generation++` and
 `Monitor.PulseAll(s.Gate)`. Nothing resets anything: the generation only counts up, and a waiter tests it under the
 lock that writes it, so an `Add` from zero back up cannot put a released waiter back to sleep. `Add`'s non-zero arm
