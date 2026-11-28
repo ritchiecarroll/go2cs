@@ -434,6 +434,7 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "slicecolsconc"},
 		{name: "slicecolsc", csFails: cgoP3NativeStructView},
 		{name: "slicecolgoptr"},
+		{name: "slicecolgoptrvar"},
 		{name: "slicecolone"},
 		{name: "slicefnamelen"},
 		{name: "slicefname"},

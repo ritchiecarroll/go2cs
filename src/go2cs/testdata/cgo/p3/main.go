@@ -464,6 +464,17 @@ func main() {
 		// back to C at the typedef. go run prints:
 		//   slicefnamelen 7
 		fmt.Println("slicefnamelen", int(C.go2cs_probe_fname_len(C.go2cs_probe_fname())))
+	case "slicecolgoptrvar":
+		// slicecolgoptr's record through a VARIABLE (P3's NIT 4 on the slice): cmd/cgo's check is
+		// _cgoCheckPointer(_cgo0, nil), and the runtime checks the whole heap object and says "pointer", where the
+		// address form names the member's kind. Door 1's fold passes the variable form's window. go run panics:
+		//   panic: runtime error: argument of cgo function has Go pointer to unpinned Go pointer
+		var b [4]byte
+		var col C.struct_go2cs_probe_col
+		col.ptr = unsafe.Pointer(&b[0])
+		col.n = 4
+		p := &col
+		fmt.Println("slicecolgoptrvar", int(C.go2cs_probe_col_len(p)))
 	case "slicefname":
 		// The go-sqlite3 slice, B: a typedef of const char * as a result, as sqlite3_db_filename returns it.
 		fmt.Println("slicefname", C.GoString(C.go2cs_probe_fname()))
