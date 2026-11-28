@@ -38,11 +38,17 @@ import (
 // GO2CS_SYSCALL_TRAMPOLINE=off, takes the C# call: strtod reads 0, labs 7, one stderr line names the switch, and 19
 // words are refused by name.
 //
+// A fourth run, under the JIT, enters the stub directly with a block the program builds, Fn the same page and every
+// other word 0, so nothing the caller writes can carry or skip the check: under CFG it must also end with the fast
+// fail. (P3's re-read of revision 3: the stub then read its check routine from the caller's block, and this run
+// returned 7.) The stub's pointer is read by reflection, so the run is read under the JIT only.
+//
 // Made to fail (DESIGN section 9): with `narrow = cfg` the aot-cfg caller ends at its first syscall with the fast
 // fail; without the stub's check the CFG callers' unmarked run prints 7.
 const shippedTrampolineProgram = `namespace go;
 
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using syscall = syscall_package;
@@ -55,6 +61,17 @@ public static unsafe class Program
     [DllImport("kernel32.dll")] private static extern int VirtualProtect(nint address, nuint size, uint protect, out uint old);
 
     private static uintptr one(uintptr a) => (nuint)a + 1;
+
+    // mov eax, 7; ret, on a page whose every location is an invalid call target under CFG
+    private static nint unmarkedPage(bool cfg)
+    {
+        nint page = cfg ? VirtualAlloc(0, 4096, 0x3000, 0x20 | 0x40000000) : VirtualAlloc(0, 4096, 0x3000, 0x04);
+        VirtualProtect(page, 4096, 0x04, out _);
+        byte[] code = [0xB8, 0x07, 0x00, 0x00, 0x00, 0xC3];
+        Marshal.Copy(code, 0, page, code.Length);
+        VirtualProtect(page, 4096, cfg ? 0x20 | 0x40000000u : 0x20u, out _);
+        return page;
+    }
 
     private static string run(string name, Func<string> body)
     {
@@ -93,14 +110,36 @@ public static unsafe class Program
         Console.WriteLine("runtime: " + (RuntimeFeature.IsDynamicCodeSupported ? "jit" : "aot"));
         Console.WriteLine("cfg: " + (cfg ? 1 : 0));
 
+        if (args.Length > 0 && args[0] == "block")
+        {
+            nint page = unmarkedPage(cfg);
+            var field = typeof(syscall_package).GetNestedType("StdCallTrampoline", BindingFlags.NonPublic)
+                ?.GetField("Call", BindingFlags.NonPublic | BindingFlags.Static);
+            object value = field?.GetValue(null);
+            nint stub = value is Pointer p ? (nint)Pointer.Unbox(p) : value is nint n ? n : 0;
+
+            if (stub == 0)
+            {
+                Console.WriteLine("block: no stub (" + (value?.GetType().Name ?? "null") + ")");
+                return 0;
+            }
+
+            // StdCallInfo with Fn the page and N, Args and the rest 0
+            nuint* block = stackalloc nuint[7];
+
+            for (int i = 0; i < 7; i++) { block[i] = 0; }
+
+            block[0] = (nuint)page;
+            Console.WriteLine("block: calling");
+            Console.Out.Flush();
+            ((delegate* unmanaged<nuint*, void>)stub)(block);
+            Console.WriteLine("block: " + block[3]);
+            return 0;
+        }
+
         if (args.Length > 0 && args[0] == "unmarked")
         {
-            // mov eax, 7; ret, on a page whose every location is an invalid call target under CFG
-            nint page = cfg ? VirtualAlloc(0, 4096, 0x3000, 0x20 | 0x40000000) : VirtualAlloc(0, 4096, 0x3000, 0x04);
-            VirtualProtect(page, 4096, 0x04, out _);
-            byte[] code = [0xB8, 0x07, 0x00, 0x00, 0x00, 0xC3];
-            Marshal.Copy(code, 0, page, code.Length);
-            VirtualProtect(page, 4096, cfg ? 0x20 | 0x40000000u : 0x20u, out _);
+            nint page = unmarkedPage(cfg);
             Console.WriteLine("unmarked: calling");
             Console.Out.Flush();
             Console.WriteLine("unmarked: " + (nuint)syscall.SyscallN((nuint)page).Item1);
@@ -269,6 +308,15 @@ func shippedTrampolineRow(t *testing.T, cfgArm bool) {
 			}
 		} else {
 			expect(arm+" unmarked", text, code, 0, "unmarked: 7")
+		}
+
+		if strings.HasPrefix(arm, "jit") {
+			text, code = run(arm+" block", nil, name, append(args, "block")...)
+			expect(arm+" block", text, code, fastFail, "block: calling")
+
+			if strings.Contains(text, "block: 7") {
+				t.Errorf("%s block: a block the caller wrote reached an invalid CFG target; the check is the caller's", arm)
+			}
 		}
 	}
 
