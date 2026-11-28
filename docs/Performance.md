@@ -9,8 +9,8 @@
 > `win-x64` machine, and each names its own toolchain.
 
 > **The Native AOT column predates the Native AOT work** that shipped in 1.26.10.3 and 1.26.11.1
-> ([November 8](NEWS.md#november-8-2026--faster-native-aot-and-a-release-standard-library-from-source) and
-> [November 19](NEWS.md#november-19-2026--go-12611-cgo-conversion-linux-arm64-packages-and-typescripts-compiler-and-sqlite-in-c)).
+> ([November 8](https://github.com/ritchiecarroll/go2cs/blob/master/docs/NEWS.md#november-8-2026--faster-native-aot-and-a-release-standard-library-from-source) and
+> [November 19](https://github.com/ritchiecarroll/go2cs/blob/master/docs/NEWS.md#november-19-2026--go-12611-cgo-conversion-linux-arm64-packages-and-typescripts-compiler-and-sqlite-in-c)).
 > It is re-measured after 1.26.11.2.
 <!-- 2026-11-23 .5 docs pass (P1), UX-6, at master 97cca467a2: the tables were measured on the 1.26.10.2 packages
      (the "Measured on" note above; DATA-hop126-perf.md section 1); the Native AOT changes since are NEWS.md's

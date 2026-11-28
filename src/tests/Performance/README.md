@@ -8,6 +8,15 @@
 > ILC 10.0.14) and timed on G-LAPTOP. The tables under History were measured on the same
 > `win-x64` machine, and each names its own toolchain.
 
+> **The Native AOT column predates the Native AOT work** that shipped in 1.26.10.3 and 1.26.11.1
+> ([November 8](https://github.com/ritchiecarroll/go2cs/blob/master/docs/NEWS.md#november-8-2026--faster-native-aot-and-a-release-standard-library-from-source) and
+> [November 19](https://github.com/ritchiecarroll/go2cs/blob/master/docs/NEWS.md#november-19-2026--go-12611-cgo-conversion-linux-arm64-packages-and-typescripts-compiler-and-sqlite-in-c)).
+> It is re-measured after 1.26.11.2.
+<!-- 2026-11-23 .5 docs pass (P1), UX-6, at master 97cca467a2: the tables were measured on the 1.26.10.2 packages
+     (the "Measured on" note above; DATA-hop126-perf.md section 1); the Native AOT changes since are NEWS.md's
+     November 8 (1.26.10.3) and November 19 (1.26.11.1) entries. The re-measure is scheduled after .5 (owner's
+     release-readiness item UX-6, relayed by COORD 2026-11-22 083506Z). -->
+
 <!-- Source: docs/phase4/DATA-hop126-perf.md section 1 (host, toolchain, RID per line, the legs) and section 3 (the
      table). Runner 226cd9a25d (master ce5072e657). -->
 
@@ -118,7 +127,7 @@ cd src/tests/Performance
 ./run-performance.ps1 --runs 10 --update-readme   # refresh the results block below
 ```
 
-Requirements: Go 1.26.10 (the release go2cs converts), a .NET SDK matching the corpus target
+Requirements: the Go release go2cs converts (Go 1.26.11, the `<GoStdLibVersion>` in `src/version.props`), a .NET SDK matching the corpus target
 framework (`net10.0`, named by `src/Directory.Build.props`), and — for the AOT column — a native
 linker and toolchain, which differs by host:
 
@@ -144,7 +153,7 @@ silently report a benchmark that computes something different in C#.
 
 ## Results
 
-The table below has all 17 of the suite's programs, measured against the published `go.*` 1.26.10.2
+The table below has the 17 programs the suite held when it was measured (`PerfDeferPanic` joined after), measured against the published `go.*` 1.26.10.2
 packages. The same programs measured in the same session against `go.*` 1.24.13.7 are
 [under History](#go-124137-measured-in-the-same-session), with the older tables.
 
