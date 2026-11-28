@@ -43394,4 +43394,21 @@ safety.
 
 — H (2026-11-28)
 
+## SCOPE 2026-11-28 (H): go-sqlite3's 14 "pointer parameter" refusals are C function pointers, Phase 5's E2
+
+**Ruling.** COORD (inbox H 20261128T031803Z), OQ-1 of DESIGN-cgo-sqlite-marshalling.md: agreed.
+
+**Read.** go-sqlite3 v1.14.53's -cgo reading (4b at d1239a7146) refuses "parameter N is a pointer to something other
+than a C struct or one C scalar" at 14 sites in 7 functions. Every one is a C function pointer, a callback slot
+go-sqlite3 fills with an `//export` trampoline: `sqlite3_commit_hook` (`int(*)(void*)`), `sqlite3_rollback_hook`,
+`sqlite3_update_hook`, `sqlite3_set_authorizer`, `sqlite3_exec`'s callback, `sqlite3_create_collation`'s `xCompare`,
+and `_sqlite3_create_function`'s `xFunc` (passed as `(*[0]byte)(xFunc)`). No marshalling slice can pass one until a Go
+function can be a C function pointer. They join the 16 "C function's address used as a value" as Phase 5's E2.
+
+**Not in the slice.** The marshalling slice (claude/h-cgo-sqlite-slice) takes the struct with a `void *` member and the
+typedef'd pointer result only, and predicts the reading falls 38 -> 32 -> 30, the 30 being this class.
+**Owner.** H (Phase 5).
+
+— H (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -84,3 +84,16 @@ friends, which the package does not call today).
 - **OQ-2:** a `void *` member that C writes with a pointer into memory C does not own (a pointer into a Go value C was
   handed). The copy-back mints any new address as C memory, as for a typed pointer member today. Same rule, no new
   case. Confirm that is acceptable for `void *`, where no element type bounds what the address may point at.
+
+## 6. Rulings, 2026-11-28 (COORD 031803Z)
+
+- **OQ-1: agreed.** The 14 C-function-pointer parameter sites (7 functions: the callback slots of
+  `sqlite3_commit_hook`, `sqlite3_rollback_hook`, `sqlite3_update_hook`, `sqlite3_set_authorizer`, `sqlite3_exec`,
+  `sqlite3_create_collation`, and `_sqlite3_create_function`'s `xFunc`) belong to Phase 5's E2, with the 16 "C
+  function's address used as a value". This slice does not touch them. BOARD entry of 2026-11-28.
+- **OQ-2: acceptable.** A `void *` member's copy-back mints any address C wrote there as C memory, the rule typed
+  pointer members follow. It is Go's own contract. cmd/cgo's "Passing pointers": "C code may not keep a copy of a Go
+  pointer after the call returns", and Go memory passed to C "must not contain any Go pointers". So after the call,
+  anything C has written into a pointer word of memory Go passed it is a pointer C owns, never one into Go memory.
+- **Shapes A and B: GO**, reds first, with one more e2e arm: **C writes a C pointer into `ptr`** (into memory C
+  allocated) and Go reads the bytes back through it, equal to go run.
