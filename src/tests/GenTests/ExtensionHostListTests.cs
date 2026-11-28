@@ -380,6 +380,7 @@ public class ExtensionHostListTests
         ["StructTypeTemplate:FieldReferences"] = (1, "a holder nested in the struct: not top-level, and " + NoExtensionMethod),
         ["BoundedGoroutineInterceptorGenerator:Emit"] = (1, NoExtensionMethod),
         ["RuntimeInitHookGenerator:Source"] = (1, NoExtensionMethod),
+        ["NewCallbackShapeGenerator:Generate"] = (1, "a file-local class holding only the module initializer: " + NoExtensionMethod),
         ["FieldAccessGenerator:Source"] = (1, "C# 14 extension blocks of properties, which the scan's method filter does not read"),
     };
 
