@@ -25,6 +25,27 @@ internal sealed class funcAssertInterfaceAdapter(object? value) : IInterfaceAdap
     public object? Value => value;
 }
 
+// A value adapter over a NULL func: a nil named func converted to an interface. Its delegate type is the declared type of
+// the m_value field AdapterImplTemplate gives it, which is how golib finds the typed nil func it stands for.
+internal sealed class funcAssertNilValueAdapter : IValueAdapter
+{
+    private readonly Action? m_value = null;
+
+    public object? Value => m_value;
+}
+
+// go2cs-gen's generic runtime shell over a NULL func, closed over the delegate type: a nil func asserted to an interface.
+internal sealed class funcAssertNilShell<T>(T? value) : IInterfaceAdapter where T : Delegate
+{
+    public object? Value => value;
+}
+
+// A live error value, for the two-argument form's text with a dynamic type to name.
+internal sealed class funcAssertError : error
+{
+    public @string Error() => "funcAssertError";
+}
+
 /// <summary>
 /// A func-type assertion is emitted through <c>_ᶠ</c>, whose delegate type argument carries no trim annotation. It
 /// must answer exactly what the general <c>_&lt;T&gt;</c> answers for a delegate T, in every form: each value below is
@@ -53,6 +74,9 @@ public class FuncAssertionTests
             new funcAssertInterfaceAdapter(new funcAssertInterfaceAdapter(s_double)),
             new funcAssertValueAdapter(s_live),
             new funcAssertValueAdapter(s_double),
+            new funcAssertNilValueAdapter(),
+            new funcAssertNilShell<Action>(null),
+            new funcAssertInterfaceAdapter(new funcAssertNilShell<Func<nint, nint>>(null)),
             (@string)"go",
             (nint)5
         ];
@@ -76,6 +100,9 @@ public class FuncAssertionTests
 
         error? nilError = null;
         Assert.AreEqual(Single(() => nilError!._<error, T>()), Single(() => nilError!._ᶠ<error, T>()), $"named source, {label}");
+
+        error liveError = new funcAssertError();
+        Assert.AreEqual(Single(() => liveError._<error, T>()), Single(() => liveError._ᶠ<error, T>()), $"named live source, {label}");
     }
 
     private static string Single<T>(Func<T> assert)
@@ -109,6 +136,25 @@ public class FuncAssertionTests
         error? nilError = null;
         string errorSource = Single(() => nilError!._ᶠ<error, Action>());
         StringAssert.Contains(errorSource, "error is nil, not func()");
+
+        // A live value names its dynamic type between the source and the func type.
+        string liveSource = Single(() => ((error)new funcAssertError())._ᶠ<error, Action>());
+        StringAssert.Matches(liveSource, new System.Text.RegularExpressions.Regex(@"error is \S*funcAssertError, not func\(\)"));
+    }
+
+    [TestMethod]
+    public void AShellOverANullFuncStandsForItsTypedNilFunc()
+    {
+        // The value adapter's carrier: the nil Action it stands for asserts to Action alone, and fails to name it.
+        Assert.IsTrue(new funcAssertNilValueAdapter()._ᶠ<Action>(out Action? viaValue));
+        Assert.IsNull(viaValue);
+        StringAssert.Contains(Single(() => ((object)new funcAssertNilValueAdapter())._ᶠ<Func<nint, nint>>()), "is func(), not func(int) int");
+
+        // The interface shell's, through a second shell, on the one-argument form's panic path too.
+        object shell = new funcAssertInterfaceAdapter(new funcAssertNilShell<Action>(null));
+        Assert.IsTrue(shell._ᶠ<Action>(out Action? viaShell));
+        Assert.IsNull(viaShell);
+        StringAssert.Contains(Single(() => shell._ᶠ<Func<nint, nint>>()), "interface {} is func(), not func(int) int");
     }
 
     [TestMethod]
