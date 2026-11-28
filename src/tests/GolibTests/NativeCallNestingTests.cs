@@ -34,7 +34,7 @@ namespace GolibTests;
 //   control-retaken-outer   a MayBlock outer the monitor RETOOK -> callback -> Blocks, K=8; retakes must rise
 //                           (G's trace: the inner Enter swaps Retaken 1 -> 0 with no second release)   green both sides
 //   liveness-p1             Blocks -> callback -> Blocks, K=64 at one P: the callback's ExitBlocked waits for the one
-//                           P, which another goroutine's native call holds 20 ms until the monitor retakes it (3b and
+//                           P, which another goroutine's native call holds 50 ms until the monitor retakes it (3b and
 //                           the fix compose; retakes must rise). It completes, and the counts return to base.
 //                           counts red before the fix
 //   (this process, scheduler off) the same crossings move neither blocked nor p-free nor handoffs
@@ -80,11 +80,13 @@ public class NativeCallNestingTests
             long retaken = Counter(GoScheduler.Reading(), "retakes") - retakes;
             Assert.IsTrue(retaken > 0, $"control-retaken-outer is vacuous: the monitor retook no outer call ({GoScheduler.Reading()})");
 
-            // P3's SHOULD: the hold after the callback is 20 ms, past several monitor ticks even where a 1 ms sleep and a
-            // 2 ms tick round to a 15.6 ms timer period, so the one P the callback took is held until the monitor
-            // RETAKES it, and the row asserts that it did: it proves 3b's retake and the fix compose, not luck.
+            // P3's SHOULDs: the hold after the callback is 50 ms, as control-retaken-outer's. The monitor retakes on its
+            // second round in a native call, and at Windows' default timer resolution its Thread.Sleep(2) round is one
+            // 15.6 ms tick, so a 20 ms hold was exactly two rounds and the second could land on the holder's own wake;
+            // 50 ms is four ticks, a whole tick to spare. The one P the callback took is held until the monitor RETAKES
+            // it, and the row asserts that it did: it proves 3b's retake and the fix compose, not luck.
             retakes = Counter(GoScheduler.Reading(), "retakes");
-            Balanced("liveness-p1", baseline, () => RunConcurrently(64, () => Nest(2, holdAfterMs: 20)));
+            Balanced("liveness-p1", baseline, () => RunConcurrently(64, () => Nest(2, holdAfterMs: 50)));
             retaken = Counter(GoScheduler.Reading(), "retakes") - retakes;
             Assert.IsTrue(retaken > 0, $"liveness-p1 is vacuous: the monitor retook no held P ({GoScheduler.Reading()})");
         }
