@@ -409,6 +409,14 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 		t.Fatalf("the mirrors did not build and run: %v\n%s", err, lastLines(string(output), 30))
 	}
 
+	// The mirrors program's raw output is logged on any failure below: an intermittent red (train 18, 2026-11-27) read
+	// every SIZE and OFFSET as missing while the PLANTED lines parsed, and nothing showed what the program printed.
+	defer func() {
+		if t.Failed() {
+			t.Logf("the mirrors program printed (quoted, last 60 lines):\n%q", lastLines(string(output), 60))
+		}
+	}()
+
 	readings := map[string]string{}
 
 	for _, line := range strings.Split(strings.ReplaceAll(string(output), "\r\n", "\n"), "\n") {

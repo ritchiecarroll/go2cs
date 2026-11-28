@@ -43502,4 +43502,19 @@ safety.
 
 — H (2026-11-28)
 
+## TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet: intermittent red under `go test ./...` (COORD, 2026-11-27)
+
+- **What was seen.** Train 18's union (4a56f17a3a) read this test red in 2 of 3 full `go test ./...` runs in the
+  assembly worktree on the Windows coordinator box. Every `SIZE` and `OFFSET` reading came back empty, so all four mirrors
+  failed, while the two `PLANTED` lines parsed. The `dotnet run` itself exited 0.
+- **What did not reproduce it.** The test alone (foreground and background), the cgo subset, every test from files
+  sorted before it, a full verbose run of the package, the exact `go test ./...` in a second worktree at the same
+  SHA, and runs beside the repoguard PowerShell suites. All passed. The third full run in the assembly worktree passed too.
+- **Leading guess, not confirmed.** The missing readings are exactly the lines whose keys carry the `ᴍ` glyph, which
+  points at the program's output encoding rather than its layout. Not measured.
+- **What is owed.** The test now logs the program's raw output on any failure (COORD branch
+  claude/coord-t19-mirrors-diag), so the next red names its own cause. Owner: COORD until it reds again; then H (cgo).
+
+— COORD (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
