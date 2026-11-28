@@ -182,13 +182,26 @@ public class TypeParamFloatConversionTests
         Assert.AreEqual((nint)0, builtin.ConvertToType<nint>(0));
     }
 
-    // A named integer type is a wrapper with a Value member, reached through TypeParamCaster: `type count int32` in the
-    // behavioral TypeParamFloatConversion. The float converts to the wrapper's underlying kind, then wraps.
-    private readonly struct Count
+    // A named integer type is a generated wrapper that implements IGoNumericWrapper<T>: `type count int32` in the
+    // behavioral TypeParamFloatConversion. This one is written the way go2cs-gen's NumericTypeTemplate writes it: the
+    // float converts to the wrapper's underlying kind, then wraps.
+    private readonly struct Count : go.golib.IGoNumericWrapper<Count>
     {
         public readonly int Value;
 
         public Count(int value) => Value = value;
+
+        Count go.golib.IGoNumericWrapper<Count>.FromUInt64(ulong value) => new(builtin.ConvertToType<int>(value));
+
+        Count go.golib.IGoNumericWrapper<Count>.FromInt64(long value) => new(builtin.ConvertToType<int>(value));
+
+        Count go.golib.IGoNumericWrapper<Count>.FromFloat64(double value) => new(builtin.ConvertToType<int>(value));
+
+        ulong go.golib.IGoNumericWrapper<Count>.ToUInt64(Count value) => builtin.ConvertToUInt64(value.Value);
+
+        double go.golib.IGoNumericWrapper<Count>.ToFloat64(Count value) => builtin.ConvertToFloat64(value.Value);
+
+        float go.golib.IGoNumericWrapper<Count>.ToFloat32(Count value) => builtin.ConvertToFloat32(value.Value);
     }
 
     [TestMethod]

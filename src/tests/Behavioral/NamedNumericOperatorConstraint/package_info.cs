@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("NamedNumericOperatorConstraint.go", "NamedNumericOperatorConstraint.cs", "AAkiooKCgoKCpoKCgpSCgpY=")]
+[assembly: GoPositionMap("NamedNumericOperatorConstraint.go", "NamedNumericOperatorConstraint.cs", "AA08ooKCgoKCppCUkJSQlJCUkJSQlIKCgpSCgpaWgpaWgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,7 +65,10 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct celsius {}
+    internal partial struct handle {}
     internal partial struct offset {}
+    internal partial struct small {}
     internal partial struct stringID {}
     // </TypeAccessibility>
 
@@ -77,5 +80,6 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     // </ImportInitializers>
 }
