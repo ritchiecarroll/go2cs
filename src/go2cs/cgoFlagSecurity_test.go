@@ -506,3 +506,23 @@ func TestCgoFlagsAllowedHoldsAPackagesFlagsToCmdGosAllowlist(t *testing.T) {
 		})
 	}
 }
+
+// The route refuses a #cgo flag cmd/go refuses on its own, not through the load (COORD's ruling, 2026-11-28: the
+// converter must not rely on the loader for flag safety). The offline conversion reads cmd/cgo's trees as written and
+// runs no go list -compiled, so no cgo action checks the flags first: the refusal can only be the route's.
+func TestCgoTheRouteRefusesAFlagCmdGoRefusesWithoutTheLoad(t *testing.T) {
+	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
+
+	if !strings.Contains(files["fixture.go"], "/*\n#include <stdlib.h>\n") {
+		t.Fatal("the fixture's preamble does not open as this row expects")
+	}
+
+	files["fixture.go"] = strings.Replace(files["fixture.go"], "/*\n#include <stdlib.h>\n", "/*\n#cgo CFLAGS: -fplugin=./evil.so\n#include <stdlib.h>\n", 1)
+	stderr, output, err := convertCgoOffline(t, files)
+
+	if err == nil || !strings.Contains(stderr, "invalid flag in #cgo CFLAGS: -fplugin=./evil.so") {
+		t.Errorf("the route did not refuse -fplugin in cmd/go's words (%v):\n%s", err, lastLines(stderr, 12))
+	}
+
+	requireNothingWritten(t, output, err, stderr)
+}

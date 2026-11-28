@@ -298,3 +298,15 @@ own unit defines is side-built without asking the probe. TestCgoPhase4F then bec
 - **The windows load failure** names "or one of its dependencies".
 - **R1** asserts no debug section in the library.
 
+## 8. Amendment, 2026-11-28: #cgo flag security (COORD's ruling)
+
+**The converter must not rely on the loader for flag safety.** A package's own `#cgo` CPPFLAGS, CFLAGS, CXXFLAGS, FFLAGS
+and LDFLAGS are held to cmd/go's allowlist (`cmd/go/internal/work/security.go` at the pinned GOROOT, ported whole as
+`src/go2cs/cgoFlagSecurity.go`). This happens in `planCgoRoute`, before the library capture links and before the side
+build compiles with any of them, as cmd/go's `buildFlags` checks them at build time. The environment's `CGO_*` flags are
+exempt, and `CGO_<NAME>_ALLOW` and `_DISALLOW` are honoured, as there. A refusal is in cmd/go's words ("invalid flag in
+#cgo CFLAGS: ..."). Before this, the only check was the loader's: go/packages runs `go list -compiled`, whose cgo action
+fails a package with a refused flag, and the route then found no cmd/cgo output. That stopped every measured shape
+(-fplugin, --sysroot, a -L directory holding a GNU ld script; probe 00bdeaf554), but only by accident of the loader's
+mode. An offline conversion, which reads cmd/cgo's trees and runs no such load, shows the route now refuses on its own
+(TestCgoTheRouteRefusesAFlagCmdGoRefusesWithoutTheLoad).
