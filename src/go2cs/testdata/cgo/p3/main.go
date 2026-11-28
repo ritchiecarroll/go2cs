@@ -35,6 +35,7 @@ long long go2cs_probe_col_back(const struct go2cs_probe_col *col);
 struct go2cs_probe_col *go2cs_probe_col_at(struct go2cs_probe_col *col, int k);
 void go2cs_probe_col_poke_prev(struct go2cs_probe_col *col);
 void go2cs_probe_col_slow(struct go2cs_probe_col *col, int micros);
+int go2cs_probe_fname_len(go2cs_probe_fname_t name);
 typedef enum { go2cs_probe_red = 1, go2cs_probe_green = 2, go2cs_probe_blue = 4 } go2cs_probe_color;
 uint64_t go2cs_probe_wide_into(void *dst, uint64_t value);
 int go2cs_probe_color_into(void *dst, go2cs_probe_color color);
@@ -442,6 +443,27 @@ func main() {
 		col.ptr = unsafe.Pointer(&b[0])
 		col.n = 4
 		fmt.Println("slicecolgoptr", int(C.go2cs_probe_col_len(&col)))
+	case "slicecolone":
+		// The go-sqlite3 slice, A, on ONE record in Go memory (P3's MUST on the slice): C writes a C string it owns into
+		// the void * member, and Go reads the bytes back through it (the copy-back's new-address path). Handed back with
+		// ptr now C memory, the member crosses as its number and comes back unchanged (the copy-back's unchanged-word
+		// path); handed back with ptr nil, it crosses as NULL and comes back nil. go run prints:
+		//   slicecolone 1 10 0.5 alpha 5
+		//   slicecolone 5 true
+		//   slicecolone 3 true
+		var col C.struct_go2cs_probe_col
+		C.go2cs_probe_col_fill(&col, 1)
+		fmt.Println("slicecolone", int(col.typ), int64(col.i64), float64(col.f64), C.GoStringN((*C.char)(col.ptr), col.n), int(col.n))
+		kept := col.ptr
+		fmt.Println("slicecolone", int(C.go2cs_probe_col_len(&col)), col.ptr == kept)
+		col.ptr = nil
+		col.n = 3
+		fmt.Println("slicecolone", int(C.go2cs_probe_col_len(&col)), col.ptr == nil)
+	case "slicefnamelen":
+		// The go-sqlite3 slice, B, as a PARAMETER (P3's SHOULD on the slice): the typedef'd pointer C returned is handed
+		// back to C at the typedef. go run prints:
+		//   slicefnamelen 7
+		fmt.Println("slicefnamelen", int(C.go2cs_probe_fname_len(C.go2cs_probe_fname())))
 	case "slicefname":
 		// The go-sqlite3 slice, B: a typedef of const char * as a result, as sqlite3_db_filename returns it.
 		fmt.Println("slicefname", C.GoString(C.go2cs_probe_fname()))
