@@ -64,6 +64,10 @@ public class NewCallbackShapeGenerator : ISourceGenerator
     // Separate from Execute so the shape of the output is testable without a driver.
     internal static string? Generate(Compilation compilation)
     {
+        // PLANT (measure only, never merged): the generator emits nothing, so every shape is unregistered.
+        if (compilation is not null)
+            return null;
+
         if (compilation.GetTypeByMetadataName(ShapesName) is not { } shapes ||
             !compilation.IsSymbolAccessibleWithin(shapes, compilation.Assembly) ||
             compilation.GetTypeByMetadataName(ForwarderName) is not { } forwarderAttribute)
