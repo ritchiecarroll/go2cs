@@ -81,16 +81,16 @@ internal static void main() {
     show("unnamed", (plain).OrTypedNilFunc());
 
     any i = (f).OrTypedNilFunc();
-    var (_, isF) = i._<F>(ᐧ);
-    var (_, isPlain) = i._<Func<@string, error>>(ᐧ);
+    var (_, isF) = i._ᶠ<F>(ᐧ);
+    var (_, isPlain) = i._ᶠ<Func<@string, error>>(ᐧ);
     fmt.Println("assert F", isF, "assert unnamed", isPlain);
 
     switch (i.type()) {
-    case {} ᴛ0 when ᴛ0._<Func<@string, error>>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<Func<@string, error>>(out var _): {
         fmt.Println("switch: unnamed");
         break;
     }
-    case {} ᴛ0 when ᴛ0._<F>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<F>(out var _): {
         fmt.Println("switch: F");
         break;
     }}

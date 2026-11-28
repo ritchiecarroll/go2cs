@@ -182,37 +182,37 @@ internal static @string which(any a) {
     case null: {
         return "nil";
     }
-    case {} Δv when Δv._<typelib.Step>(out var v): {
+    case {} Δv when Δv._ᶠ<typelib.Step>(out var v): {
         if (v != nil) {
             return "Step live "u8 + fmt.Sprint(v(1));
         }
         return "Step nil";
     }
-    case {} Δv when Δv._<typelib.StepE>(out var v): {
+    case {} Δv when Δv._ᶠ<typelib.StepE>(out var v): {
         if (v != nil) {
             return "StepE live "u8 + fmt.Sprint(v(1));
         }
         return "StepE nil";
     }
-    case {} Δv when Δv._<localStep>(out var v): {
+    case {} Δv when Δv._ᶠ<localStep>(out var v): {
         if (v != nil) {
             return "localStep live "u8 + fmt.Sprint(v(1));
         }
         return "localStep nil";
     }
-    case {} Δv when Δv._<localStepE>(out var v): {
+    case {} Δv when Δv._ᶠ<localStepE>(out var v): {
         if (v != nil) {
             return "localStepE live "u8 + fmt.Sprint(v(1));
         }
         return "localStepE nil";
     }
-    case {} Δv when Δv._<Func<nint, nint>>(out var v): {
+    case {} Δv when Δv._ᶠ<Func<nint, nint>>(out var v): {
         if (v != nil) {
             return "func live "u8 + fmt.Sprint(v(1));
         }
         return "func nil";
     }
-    case {} Δv when Δv._<hook>(out var v): {
+    case {} Δv when Δv._ᶠ<hook>(out var v): {
         if (v != nil) {
             return "hook live "u8 + fmt.Sprint(v("abc"));
         }
@@ -229,22 +229,22 @@ internal static @string unbound(any a) {
     case null: {
         return "nil";
     }
-    case {} ᴛ0 when ᴛ0._<typelib.Step>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<typelib.Step>(out var _): {
         return "Step";
     }
-    case {} ᴛ0 when ᴛ0._<typelib.StepE>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<typelib.StepE>(out var _): {
         return "StepE";
     }
-    case {} ᴛ0 when ᴛ0._<localStep>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<localStep>(out var _): {
         return "localStep";
     }
-    case {} ᴛ0 when ᴛ0._<localStepE>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<localStepE>(out var _): {
         return "localStepE";
     }
-    case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<Func<nint, nint>>(out var _): {
         return "func";
     }
-    case {} ᴛ0 when ᴛ0._<hook>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<hook>(out var _): {
         return "hook";
     }
     case ж<typelib.Box>: {
@@ -259,18 +259,18 @@ internal static @string multi(any a) {
     case null: {
         return "nil";
     }
-    case {} ᴛ0 when ᴛ0._<typelib.Step>(out var _):
-    case {} ᴛ1 when ᴛ1._<typelib.StepE>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<typelib.Step>(out var _):
+    case {} ᴛ1 when ᴛ1._ᶠ<typelib.StepE>(out var _): {
         var v = a;
         return "lib "u8 + fmt.Sprint(v == nil);
     }
-    case {} ᴛ0 when ᴛ0._<localStep>(out var _):
-    case {} ᴛ1 when ᴛ1._<localStepE>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<localStep>(out var _):
+    case {} ᴛ1 when ᴛ1._ᶠ<localStepE>(out var _): {
         var v = a;
         return "local "u8 + fmt.Sprint(v == nil);
     }
-    case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _):
-    case {} ᴛ1 when ᴛ1._<hook>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<Func<nint, nint>>(out var _):
+    case {} ᴛ1 when ᴛ1._ᶠ<hook>(out var _): {
         var v = a;
         return "plain "u8 + fmt.Sprint(v == nil);
     }
@@ -285,16 +285,16 @@ internal static @string mixed(any a) {
     case {} Δv when Δv._<error>(out var v): {
         return "error "u8 + v.Error();
     }
-    case {} Δv when Δv._<typelib.Step>(out var v): {
+    case {} Δv when Δv._ᶠ<typelib.Step>(out var v): {
         return "Step "u8 + fmt.Sprint(v == nil);
     }
-    case {} Δv when Δv._<Func<nint, nint>>(out var v): {
+    case {} Δv when Δv._ᶠ<Func<nint, nint>>(out var v): {
         return "func "u8 + fmt.Sprint(v == nil);
     }
     case {} Δv when Δv._<namer>(out var v): {
         return "namer "u8 + v.Name();
     }
-    case {} Δv when Δv._<hook>(out var v): {
+    case {} Δv when Δv._ᶠ<hook>(out var v): {
         return "hook "u8 + fmt.Sprint(v == nil);
     }}
     return "other";
@@ -314,13 +314,13 @@ internal static bool hookIsNil(ref hook p) {
 
 internal static @string escape(any a) {
     switch (a.type()) {
-    case {} Δv when Δv._<typelib.Step>(out var v): {
+    case {} Δv when Δv._ᶠ<typelib.Step>(out var v): {
         return "Step "u8 + fmt.Sprint(stepIsNil(ref v));
     }
-    case {} Δv when Δv._<Func<nint, nint>>(out var v): {
+    case {} Δv when Δv._ᶠ<Func<nint, nint>>(out var v): {
         return "func "u8 + fmt.Sprint(bareIsNil(ref v));
     }
-    case {} Δv when Δv._<hook>(out var v): {
+    case {} Δv when Δv._ᶠ<hook>(out var v): {
         return "hook "u8 + fmt.Sprint(hookIsNil(ref v));
     }}
     return "other";
@@ -328,10 +328,10 @@ internal static @string escape(any a) {
 
 internal static @string merged(any a) {
     switch (a.type()) {
-    case {} ᴛ0 when ᴛ0._<left>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<left>(out var _): {
         return "pred";
     }
-    case {} ᴛ0 when ᴛ0._<right>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<right>(out var _): {
         return "pred";
     }}
 

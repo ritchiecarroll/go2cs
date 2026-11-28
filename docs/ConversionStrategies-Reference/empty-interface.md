@@ -517,6 +517,29 @@ single binding, a multi-type clause, an interface case, `(nil)` and a switch tha
 Census of parenthesized case types: GOROOT 1 (internal/types/testdata/fixedbugs/issue48008.go, never converted),
 behavioral corpus 0. -->
 
+## An assertion to a func type takes golib's `_ᶠ`
+
+An assertion whose target is a Go func type, named or not, is emitted through golib's `_ᶠ` forms, `x._ᶠ<F>()`,
+`x._ᶠ<F>(ᐧ)` for the comma-ok form and `ᴛ._ᶠ<F>(out var f)` in a folded if-init or a type-switch guard (ᶠ marks a
+func value, as in an sstring twin's `Sprintfᶠ`). The general `_<T>` annotates T with
+`DynamicallyAccessedMembers(PublicMethods | …)`, which an interface or struct target needs. On a delegate T that
+annotation reaches `Delegate.CreateDelegate`'s public static overloads, which carry `RequiresUnreferencedCode`, so
+the trim analyzer reported every func-type assertion in a converted program: IL2026 and IL2111, three of each a
+site, at build, because a converted executable sets `PublishTrimmed`. `_ᶠ` takes a `Delegate`-constrained T with no
+annotation and answers exactly what `_<T>` answers for a delegate: a live delegate by its type, a typed nil func's
+carrier by its func type, and a value unwrapped from an interface adapter.
+
+No generated overload exists for `_ᶠ`, so the source interface is named in the call wherever the converter can
+name it, `reader._ᶠ<io.Reader, rw>()`, and a failure's text is Go's: `main.Named is main.tag, not main.Handler`.
+`error` is named too (`err._ᶠ<error, rw>()`). A source the converter cannot name, the empty interface included,
+takes the object form and the text `interface {}`, as `_<T>` gives it; no other `_ᶠ` overload exists for a bare
+call to bind, so the widened `((object)x)` form is never needed. Only a func type with methods can be the target
+of an assertion from a non-empty interface. (Guarded by the `MethodlessFuncTypeAssert` behavioral test, which
+prints each failure's panic text from `any`, an exported and an unexported interface of the package, `error` and
+two nil sources, output-compared vs `go run`, and by `TestFuncTypeAssertForms`.)
+<!-- 2026-11-28, P2: at master 4a56f17a3a a Debug linux build of go2cs.slnx read 183 IL2026 and 183 IL2111, all
+from func-type assertions in 15 behavioral projects; AtomicValueTypedNilFunc alone read 3 and 3. -->
+
 ---
 
 [← Nil and Zero Values](nil-and-zero-values.md) · [Index](README.md) · [Multi-Assignment and Evaluation Order →](multi-assignment.md)

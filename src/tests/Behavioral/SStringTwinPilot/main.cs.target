@@ -31,7 +31,7 @@ internal static void main() {
         Funcꓸꓸꓸ<@string, any, @string> f = fmt.Sprintfᶠ;
         fmt.Println(f("via local %s", (@string)"ok"));
         var table = new map<@string, any>{["printf"] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ))};
-        fmt.Println(table["printf"]._<Funcꓸꓸꓸ<@string, any, @string>>()("via table %d", (nint)4));
+        fmt.Println(table["printf"]._ᶠ<Funcꓸꓸꓸ<@string, any, @string>>()("via table %d", (nint)4));
         fmt.Println(apply(fmt.Sprintfᶠ, "via argument %s"));
 
         var p1 = reflect.ValueOf(fmt.Sprintfᶠ).Pointer();

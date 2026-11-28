@@ -21,21 +21,21 @@ internal static void main() {
     };
     any logf = (((Actionꓸꓸꓸ<@string, any>)(fn))).OrTypedNilFunc();
 
-    if (logf._<Actionꓸꓸꓸ<@string, any>>(out var fnΔ1)) {
+    if (logf._ᶠ<Actionꓸꓸꓸ<@string, any>>(out var fnΔ1)) {
         fnΔ1("value=%v flag=%v", (nint)42, true);
     } else {
         fmt.Println("no match");
     }
 
     any notFn = plainˢ;
-    if (notFn._<Actionꓸꓸꓸ<@string, any>>(out _)) {
+    if (notFn._ᶠ<Actionꓸꓸꓸ<@string, any>>(out _)) {
         fmt.Println("unexpected match");
     } else {
         fmt.Println("no match for string");
     }
 
     any plain = [GoFunc("main.func2")] @string (@string s) => s + "!"u8;
-    if (plain._<Func<@string, @string>>(out var fnΔ2)) {
+    if (plain._ᶠ<Func<@string, @string>>(out var fnΔ2)) {
         fmt.Println(fnΔ2("ok"));
     }
 
@@ -44,7 +44,7 @@ internal static void main() {
         return fmt.Sprint(args.ꓸꓸꓸ);
     }));
     {
-        var (f, ok) = direct._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
+        var (f, ok) = direct._ᶠ<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
             fmt.Println("direct:", f((nint)1, (nint)2));
         } else {
             fmt.Println("direct: no match");
@@ -53,7 +53,7 @@ internal static void main() {
 
     var funcMap = new map<@string, any>{["esc"] = ((Funcꓸꓸꓸ<any, @string>)(escaper))};
     {
-        var (f, ok) = funcMap["esc"]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
+        var (f, ok) = funcMap["esc"]._ᶠ<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
             fmt.Println("mapped:", f((@string)"a", (@string)"b"));
         } else {
             fmt.Println("mapped: no match");
@@ -62,7 +62,7 @@ internal static void main() {
 
     any assigned = ((Funcꓸꓸꓸ<any, @string>)(escaper));
     {
-        var (f, ok) = assigned._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
+        var (f, ok) = assigned._ᶠ<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
             fmt.Println("assigned:", f((@string)"x"));
         } else {
             fmt.Println("assigned: no match");
@@ -71,7 +71,7 @@ internal static void main() {
 
     var slots = slice<any>([(Funcꓸꓸꓸ<any, @string>)(escaper)]);
     {
-        var (f, ok) = slots[0]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
+        var (f, ok) = slots[0]._ᶠ<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok) {
             fmt.Println("element:", f((@string)"y"));
         } else {
             fmt.Println("element: no match");
@@ -80,7 +80,7 @@ internal static void main() {
 
     any directPlain = [GoFunc("main.func4")] @string (@string s) => s + "?"u8;
     {
-        var (f, ok) = directPlain._<Func<@string, @string>>(ᐧ); if (ok) {
+        var (f, ok) = directPlain._ᶠ<Func<@string, @string>>(ᐧ); if (ok) {
             fmt.Println("direct plain:", f("z"));
         } else {
             fmt.Println("direct plain: no match");

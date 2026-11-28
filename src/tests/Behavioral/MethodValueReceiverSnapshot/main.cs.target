@@ -57,7 +57,7 @@ internal static void main() {
 
     b.Name = "B";
 
-    fmt.Println("boxed   ", boxed[0]._<Func<@string>>()(), boxed[1]._<Func<bool>>()());
+    fmt.Println("boxed   ", boxed[0]._ᶠ<Func<@string>>()(), boxed[1]._ᶠ<Func<bool>>()());
 
     var c = new frame(Name: "p");
     

@@ -44,12 +44,12 @@ internal static any take(any h) { return h; }
 
 internal static @string call(any h) {
     switch (h.type()) {
-    case {} Δf when Δf._<Func<nint, (any, error)>>(out var f): {
+    case {} Δf when Δf._ᶠ<Func<nint, (any, error)>>(out var f): {
         var (@out, err) = f(5);
         var (_, negErr) = f(-1);
         return fmt.Sprint(@out, " ", err, " ", negErr);
     }
-    case {} Δf when Δf._<Func<int64>>(out var f): {
+    case {} Δf when Δf._ᶠ<Func<int64>>(out var f): {
         return fmt.Sprint(f());
     }}
     return "WRONG DYNAMIC TYPE";

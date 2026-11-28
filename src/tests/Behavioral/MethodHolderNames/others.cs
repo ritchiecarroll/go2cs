@@ -41,7 +41,7 @@ internal static void others() {
 
     var run = Run;
     any boxed = Run;
-    var (_, isFunc) = boxed._<Func<nint>>(ᐧ);
+    var (_, isFunc) = boxed._ᶠ<Func<nint>>(ᐧ);
 
     fmt.Println("others", w, w.cap(), cap(w), w.bits(), bits.Len64(w[0]), new gauge(n: 5).size(w), run(), isFunc, w.Run());
     fmt.Println("method expression", measure(5));

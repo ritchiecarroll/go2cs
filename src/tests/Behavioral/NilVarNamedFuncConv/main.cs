@@ -20,13 +20,13 @@ internal static Greetable wrap(Action<@string> handler) {
 
 internal static void main() {
     var nilGreetable = wrap(default);
-    var (nilGreeter, nilOk) = nilGreetable._<Greeter>(ᐧ);
+    var (nilGreeter, nilOk) = nilGreetable._ᶠ<Greeter>(ᐧ);
     fmt.Println(nilOk, nilGreeter == nil);
 
     var realGreetable = wrap([GoFunc("main.func1")] (@string name) => {
         fmt.Println("hello", name);
     });
-    var (realGreeter, realOk) = realGreetable._<Greeter>(ᐧ);
+    var (realGreeter, realOk) = realGreetable._ᶠ<Greeter>(ᐧ);
     fmt.Println(realOk, realGreeter == nil);
     realGreeter.Greet("world");
 }

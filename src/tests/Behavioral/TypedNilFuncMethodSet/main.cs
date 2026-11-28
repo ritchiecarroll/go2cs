@@ -39,7 +39,7 @@ internal static void main() {
         fmt.Println("string  ", s.String());
     }
 
-    (var f2, ok) = x._<Fn>(ᐧ);
+    (var f2, ok) = x._ᶠ<Fn>(ᐧ);
     fmt.Println("concrete", ok, f2 == nil);
 
     switch (x.type()) {

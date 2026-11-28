@@ -63,7 +63,7 @@ internal static void main() {
 
     ref var v6 = ref heap(new atomic.Value(), out var Ꮡv6);
     Ꮡv6.Store([GoFunc("main.func8")] nint (nint fd) => fd * 2);
-    var (f, ok) = Ꮡv6.Load()._<Func<nint, nint>>(ᐧ); if (ok) {
+    var (f, ok) = Ꮡv6.Load()._ᶠ<Func<nint, nint>>(ᐧ); if (ok) {
         fmt.Println("loaded and called:", f(21));
     }
 }

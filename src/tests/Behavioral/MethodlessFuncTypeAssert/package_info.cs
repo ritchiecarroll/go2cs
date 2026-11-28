@@ -36,6 +36,12 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Handler, Named>]
+[assembly: GoImplement<Handler, error>]
+[assembly: GoImplement<Handler, hidden>]
+[assembly: GoImplement<tag, Named>]
+[assembly: GoImplement<tag, error>]
+[assembly: GoImplement<tag, hidden>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -49,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("MethodlessFuncTypeAssert.go", "MethodlessFuncTypeAssert.cs", "AAgWhIKUpoKCgpaC", "20-20:1")]
+[assembly: GoPositionMap("MethodlessFuncTypeAssert.go", "MethodlessFuncTypeAssert.cs", "AAgghIKUAAsWgoLIgoKWooCSoqSCgoKWgpaioqKClJCSgJKAkoCSkJKQkpCSloKC", "44-44:1;49-49:1;64-64:2;65-65:3;66-66:4;67-67:5;68-68:6;69-69:7;70-70:8;74-74:9", "", "", "", "39:49,40:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,6 +71,9 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface hidden {}
+    internal partial struct tag {}
+    public partial interface Named {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

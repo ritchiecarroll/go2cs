@@ -12,16 +12,16 @@ public delegate (any, error) HookValue(reflect.Value from, reflect.Value to);
 
 internal static (any, error) exec(any raw, reflect.Value from, reflect.Value to) {
     switch (raw.type()) {
-    case {} Δf when Δf._<HookType>(out var f): {
+    case {} Δf when Δf._ᶠ<HookType>(out var f): {
         return f(from.Type(), to.Type(), from.Interface());
     }
-    case {} Δf when Δf._<HookKind>(out var f): {
+    case {} Δf when Δf._ᶠ<HookKind>(out var f): {
         return f(from.Kind(), to.Kind(), from.Interface());
     }
-    case {} Δf when Δf._<HookValue>(out var f): {
+    case {} Δf when Δf._ᶠ<HookValue>(out var f): {
         return f(from, to);
     }
-    case {} Δf when Δf._<Func<nint, nint>>(out var f): {
+    case {} Δf when Δf._ᶠ<Func<nint, nint>>(out var f): {
         return (f(from.Interface()._<nint>()), default);
     }
     default: {
@@ -32,11 +32,11 @@ internal static (any, error) exec(any raw, reflect.Value from, reflect.Value to)
 
 internal static @string kind(any raw) {
     switch (raw.type()) {
-    case {} ᴛ0 when ᴛ0._<HookType>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<HookType>(out var _): {
         return "type";
     }
-    case {} ᴛ0 when ᴛ0._<HookKind>(out var _):
-    case {} ᴛ1 when ᴛ1._<HookValue>(out var _): {
+    case {} ᴛ0 when ᴛ0._ᶠ<HookKind>(out var _):
+    case {} ᴛ1 when ᴛ1._ᶠ<HookValue>(out var _): {
         return "kind or value";
     }}
 
@@ -58,7 +58,7 @@ internal static void main() {
     }
 
     {
-        var (f, ok) = hooks[2]._<HookValue>(ᐧ); if (ok) {
+        var (f, ok) = hooks[2]._ᶠ<HookValue>(ᐧ); if (ok) {
             var (@out, _) = f(reflect.ValueOf((nint)5), to);
             fmt.Println("asserted", @out);
         }
