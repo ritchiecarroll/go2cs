@@ -26,6 +26,11 @@ int go2cs_probe_text_fill(char *buffer, int size);
 long go2cs_probe_sum(const void *bytes, int count);
 void *go2cs_probe_same(void *pointer);
 uintptr_t go2cs_probe_word(uintptr_t word);
+struct go2cs_probe_col { int typ; long long i64; double f64; const void *ptr; int n; };
+typedef const char *go2cs_probe_fname_t;
+void go2cs_probe_col_fill(struct go2cs_probe_col *cols, int ncol);
+int go2cs_probe_col_len(const struct go2cs_probe_col *col);
+go2cs_probe_fname_t go2cs_probe_fname(void);
 typedef enum { go2cs_probe_red = 1, go2cs_probe_green = 2, go2cs_probe_blue = 4 } go2cs_probe_color;
 uint64_t go2cs_probe_wide_into(void *dst, uint64_t value);
 int go2cs_probe_color_into(void *dst, go2cs_probe_color color);
@@ -310,6 +315,33 @@ func main() {
 		n := uintptr(unsafe.Pointer(&x))
 		C.memset(unsafe.Pointer(n+1), 7, 2)
 		fmt.Println("govoidnumberwrite", x)
+	case "slicecolsgo":
+		// The go-sqlite3 slice, A: three records in Go memory, each void * member written by C with a C string C owns,
+		// read back through the member, as go-sqlite3's _sqlite3_column_values and its caller do.
+		var cols [3]C.struct_go2cs_probe_col
+		C.go2cs_probe_col_fill(&cols[0], 3)
+		for i := range cols {
+			fmt.Println("slicecolsgo", int(cols[i].typ), int64(cols[i].i64), float64(cols[i].f64), C.GoStringN((*C.char)(cols[i].ptr), cols[i].n))
+		}
+	case "slicecolsc":
+		// The same three records in C memory.
+		size := C.size_t(unsafe.Sizeof(C.struct_go2cs_probe_col{}))
+		cols := (*[3]C.struct_go2cs_probe_col)(C.malloc(3 * size))
+		C.go2cs_probe_col_fill(&cols[0], 3)
+		for i := range cols {
+			fmt.Println("slicecolsc", int(cols[i].typ), int64(cols[i].i64), float64(cols[i].f64), C.GoStringN((*C.char)(cols[i].ptr), cols[i].n))
+		}
+		C.free(unsafe.Pointer(cols))
+	case "slicecolgoptr":
+		// A Go pointer in the void * member of a record in Go memory: cgo refuses it (cgocheck), and so does go2cs.
+		var b [4]byte
+		var col C.struct_go2cs_probe_col
+		col.ptr = unsafe.Pointer(&b[0])
+		col.n = 4
+		fmt.Println("slicecolgoptr", int(C.go2cs_probe_col_len(&col)))
+	case "slicefname":
+		// The go-sqlite3 slice, B: a typedef of const char * as a result, as sqlite3_db_filename returns it.
+		fmt.Println("slicefname", C.GoString(C.go2cs_probe_fname()))
 	case "typedefwide":
 		// The S4 cure's near miss (P3, F1): a uint64_t parameter, a typedef of a typedef on glibc, handed a constant above
 		// 2^32 beside a void pointer. The void pointer is what makes cmd/cgo write its check closure, which declares the

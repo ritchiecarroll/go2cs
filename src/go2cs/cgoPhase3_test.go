@@ -414,6 +414,12 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "govoidnumber"},
 		{name: "govoidexpr"},
 		{name: "govoidnumberwrite"},
+		// The go-sqlite3 marshalling slice: a void * member written by C, from Go memory and from C memory; a Go pointer
+		// in that member, which cgo's own check refuses on both sides; and a typedef'd const char * result.
+		{name: "slicecolsgo"},
+		{name: "slicecolsc"},
+		{name: "slicecolgoptr", goFails: "Go pointer to unpinned Go pointer", csFails: "Go pointer to unpinned Go pointer"},
+		{name: "slicefname"},
 		// The S4 cure's near misses (P3, F1): a typedef of a typedef (uint64_t) and a typedef'd enum, each a constant
 		// cmd/cgo's check closure declares at the typedef.
 		{name: "typedefwide"},
@@ -857,4 +863,73 @@ func cgoLinesContaining(text, substr string) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+// The go-sqlite3 marshalling slice (docs/phase4/DESIGN-cgo-sqlite-marshalling.md), offline over cmd/cgo's shapes:
+// A, a struct whose member is `void *` (go-sqlite3's sqlite3_go_col) crosses by pointer, its member copied as cgo checks
+// a pointer member (GoCgoArgs.PointerMember); B, a typedef of `char *`, which cmd/cgo declares as an alias, is a pointer
+// result and a pointer parameter, not a refused scalar.
+func TestCgoSliceAVoidPointerMemberAndATypedefdPointerCross(t *testing.T) {
+	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
+
+	for _, name := range []string{"go2cs_col_fill", "go2cs_fname", "go2cs_fname_len"} {
+		cgoPhase2Libraries[name] = "libgo2csprobe.so"
+		defer delete(cgoPhase2Libraries, name)
+	}
+
+	files["cgo_import.go"] = strings.Replace(cgoOfflineImportFile(cgoPhase2Libraries), "package cgophase2", "package cgophase3", 1)
+	files["fixture.cgo1.go"] += `
+func fillCol(c *_Ctype_struct_go2cs_col) _Ctype_int {
+	return func() _Ctype_int{ _cgo0 := c; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_col_fill(_cgo0); }()
+}
+
+func fileName() _Ctype_go2cs_fname {
+	return _Cfunc_go2cs_fname()
+}
+
+func fileNameLen(f _Ctype_go2cs_fname) _Ctype_int {
+	return func() _Ctype_int{ _cgo0 := f; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_fname_len(_cgo0); }()
+}
+`
+	stub := func(name, params, result, uses string) string {
+		return "\n//go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_" + name +
+			"\n//go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_" + name + " _cgo_55dd9c1e1280_Cfunc_" + name +
+			"\nvar __cgofn__cgo_55dd9c1e1280_Cfunc_" + name + " byte" +
+			"\nvar _cgo_55dd9c1e1280_Cfunc_" + name + " = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_" + name + ")\n" +
+			"\n//go:cgo_unsafe_args\nfunc _Cfunc_" + name + "(" + params + ") (r1 " + result + ") {" +
+			"\n\t_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_" + name + ", uintptr(unsafe.Pointer(&" + uses + ")))" +
+			"\n\treturn\n}\n"
+	}
+
+	files["cgo_gotypes.go"] += `
+type _Ctype_struct_go2cs_col struct {
+	typ	_Ctype_int
+	_	[4]byte
+	ptr	unsafe.Pointer
+	n	_Ctype_int
+	_	[4]byte
+}
+
+type _Ctype_go2cs_fname = *_Ctype_char
+` + stub("go2cs_col_fill", "p0 *_Ctype_struct_go2cs_col", "_Ctype_int", "p0") +
+		stub("go2cs_fname", "", "_Ctype_go2cs_fname", "r1") +
+		stub("go2cs_fname_len", "p0 _Ctype_go2cs_fname", "_Ctype_int", "p0")
+
+	stderr, output, err := convertCgoOffline(t, files)
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, lastLines(stderr, 12))
+	}
+
+	bindings := strings.ReplaceAll(readConverted(t, output, filepath.Join("linux-amd64", "cgophase3.cgo.cs")), "\r\n", "\n")
+
+	if !strings.Contains(bindings, "GoCgoArgs.PointerMember(v.ptr)") {
+		t.Errorf("the void * member ptr is not copied in as a pointer member:\n%s", cgoLinesContaining(bindings, "ptr"))
+	}
+
+	for _, want := range []string{"go2cs_fname(", "go2cs_fname_len("} {
+		if !strings.Contains(bindings, want) {
+			t.Errorf("the bindings have no wrapper for %s", want)
+		}
+	}
 }

@@ -212,6 +212,45 @@ GO2CS_PROBE_EXPORT uintptr_t go2cs_probe_word(uintptr_t word)
     return word;
 }
 
+// The go-sqlite3 marshalling slice (DESIGN-cgo-sqlite-marshalling.md): go-sqlite3's sqlite3_go_col shape, a record with
+// a void * member. go2cs_probe_col_fill writes ncol records, each ptr a C string C owns; go2cs_probe_col_len reads one
+// record Go filled. go2cs_probe_fname returns a typedef of const char *, as sqlite3_db_filename does.
+struct go2cs_probe_col
+{
+    int typ;
+    long long i64;
+    double f64;
+    const void *ptr;
+    int n;
+};
+
+typedef const char *go2cs_probe_fname_t;
+
+GO2CS_PROBE_EXPORT void go2cs_probe_col_fill(struct go2cs_probe_col *cols, int ncol)
+{
+    static const char *words[] = { "alpha", "beta", "gamma" };
+    static const int lengths[] = { 5, 4, 5 };
+
+    for (int i = 0; i < ncol; i++)
+    {
+        cols[i].typ = i + 1;
+        cols[i].i64 = 10 * (i + 1);
+        cols[i].f64 = 0.5 * (i + 1);
+        cols[i].ptr = words[i % 3];
+        cols[i].n = lengths[i % 3];
+    }
+}
+
+GO2CS_PROBE_EXPORT int go2cs_probe_col_len(const struct go2cs_probe_col *col)
+{
+    return col->n;
+}
+
+GO2CS_PROBE_EXPORT go2cs_probe_fname_t go2cs_probe_fname(void)
+{
+    return "main.db";
+}
+
 // The near misses of the S4 cure (P3's read, F1): a parameter cmd/cgo declares at a C typedef, beside a void pointer. A
 // void pointer is what makes cmd/cgo write its check closure, which declares the constant at that typedef; a typed
 // pointer to a C integer needs no check, takes no closure, and so never reaches the cast. uint64_t is a typedef of a
