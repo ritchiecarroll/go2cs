@@ -269,6 +269,7 @@ func cgoSideCompileFlags(load cgoLoad, listed cgoSideListing, pkg *packages.Pack
 // path mapping reads (Dir, ImportPath, Root, Goroot and Module; work/exec.go, ccompile).
 type cgoSideListing struct {
 	CgoCPPFLAGS, CgoCFLAGS, CgoPkgConfig []string
+	CgoCXXFLAGS, CgoFFLAGS, CgoLDFLAGS   []string
 	Dir, ImportPath, Root                string
 	Goroot                               bool
 	Module                               *cgoListedModule
@@ -293,7 +294,7 @@ type cgoListedModule struct{ Path, Version, Dir string }
 // cgoSideList lists the package in the load's own directory, by its import path, so a package of a replaced or
 // vendored module is listed in the main module's context, as cmd/go builds it.
 func cgoSideList(load cgoLoad, options Options, pkg *packages.Package) (cgoSideListing, error) {
-	fields := "-json=CgoCPPFLAGS,CgoCFLAGS,CgoPkgConfig,Dir,ImportPath,Root,Goroot,Module"
+	fields := "-json=CgoCPPFLAGS,CgoCFLAGS,CgoCXXFLAGS,CgoFFLAGS,CgoLDFLAGS,CgoPkgConfig,Dir,ImportPath,Root,Goroot,Module"
 	cmd := exec.Command("go", append(append([]string{"list", "-e", fields}, options.loaderBuildFlags()...), pkg.PkgPath)...)
 	cmd.Env = load.env
 	cmd.Dir = load.dir
@@ -1046,7 +1047,7 @@ type cgoSidePlan struct {
 // one other object of the package (another file's preamble, or a C file of its own) defines globally is side-built;
 // a name two objects define globally is refused by name; and the rest are left for the probe. ownSources are the paths
 // of the package's own C files (cgoSideOwnSources).
-func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols []string, symbolUses map[string]token.Position, sourcePaths map[string]string, ownSources []string) (cgoSidePlan, error) {
+func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, listed cgoSideListing, goos, goarch string, flags cgoLinkFlags, symbols []string, symbolUses map[string]token.Position, sourcePaths map[string]string, ownSources []string) (cgoSidePlan, error) {
 	// The tables are numbered by each source's place among the package's import "C" sources, by name, so a table's
 	// name does not move when another file's names change.
 	files := make([]string, 0, len(sourcePaths))
@@ -1090,12 +1091,8 @@ func planCgoSideBuild(pkg *packages.Package, options Options, load cgoLoad, goos
 		return cgoSidePlan{}, err
 	}
 
-	listed, err := cgoSideList(load, options, pkg)
-
-	if err != nil {
-		return cgoSidePlan{}, err
-	}
-
+	// listed is the route's one listing, the one cgoFlagsAllowed checked, so the side build compiles with exactly the
+	// flags held to cmd/go's allowlist (P3's MUST on 4b, 2026-11-28).
 	compileFlags, pkgConfig, err := cgoSideCompileFlags(load, listed, pkg)
 
 	if err != nil {

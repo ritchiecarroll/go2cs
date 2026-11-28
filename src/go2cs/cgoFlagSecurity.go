@@ -28,11 +28,9 @@ import (
 	"debug/pe"
 	"debug/plan9obj"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -41,8 +39,6 @@ import (
 	"sync"
 	"unicode"
 	"unicode/utf8"
-
-	"golang.org/x/tools/go/packages"
 )
 
 // cgo flag security (COORD's ruling, 2026-11-28): a package's #cgo flags reach the C compiler and linker in a -cgo
@@ -103,22 +99,13 @@ func cgoSecWith(getenv func(string) string, goos, modCache, cwd string, check fu
 // LDFLAGS through checkLinkerFlags, each named "#cgo <NAME>". The environment's CGO_<NAME> flags are cmd/go's defaults
 // and are exempt, as there. CGO_<NAME>_ALLOW and _DISALLOW are read through go env in the load's environment, so a go
 // env -w setting counts, as it does for cmd/go. cmd/go's working directory is the load's.
-func cgoFlagsAllowed(load cgoLoad, options Options, pkg *packages.Package, goos string) error {
-	cmd := exec.Command("go", append(append([]string{"list", "-e", "-json=CgoCPPFLAGS,CgoCFLAGS,CgoCXXFLAGS,CgoFFLAGS,CgoLDFLAGS"}, options.loaderBuildFlags()...), ".")...)
-	cmd.Env = load.env
-	cmd.Dir = pkg.Dir
-	out, err := cmd.Output()
-
-	if err != nil {
-		return fmt.Errorf("cgo: go list of the package's #cgo flags: %w", err)
-	}
-
-	var listed struct{ CgoCPPFLAGS, CgoCFLAGS, CgoCXXFLAGS, CgoFFLAGS, CgoLDFLAGS []string }
-
-	if err := json.Unmarshal(out, &listed); err != nil {
-		return fmt.Errorf("cgo: go list of the package's #cgo flags: %w", err)
-	}
-
+//
+// listed is the route's ONE listing of the package (cgoSideList: by import path, in the load's directory, the context
+// cmd/go builds it in), the same one the side build compiles with, so the flags checked are the flags compiled (P3's
+// MUST on 4b, 2026-11-28). A second listing from the package's own directory could answer differently (a dependency
+// is its own main module there, so its go.mod picks the toolchain), and fails outright for a package with no go.mod
+// above it.
+func cgoFlagsAllowed(load cgoLoad, listed cgoSideListing, goos string) error {
 	checks := []struct {
 		name   string
 		list   []string

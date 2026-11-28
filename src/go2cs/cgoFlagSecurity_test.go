@@ -20,9 +20,13 @@
 package main
 
 import (
+	"archive/zip"
+	"bytes"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 
@@ -495,7 +499,14 @@ func TestCgoFlagsAllowedHoldsAPackagesFlagsToCmdGosAllowlist(t *testing.T) {
 			}
 
 			env := append(append(os.Environ(), "GOWORK=off", "GOFLAGS=", "GOTOOLCHAIN=local", "CGO_ENABLED=1"), row.env...)
-			err := cgoFlagsAllowed(cgoLoad{env: env, dir: dir}, Options{}, &packages.Package{Dir: dir, PkgPath: "example.com/flags"}, runtime.GOOS)
+			load := cgoLoad{env: env, dir: dir}
+			listed, err := cgoSideList(load, Options{}, &packages.Package{Dir: dir, PkgPath: "example.com/flags"})
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = cgoFlagsAllowed(load, listed, runtime.GOOS)
 
 			switch {
 			case row.want == "" && err != nil:
@@ -525,4 +536,82 @@ func TestCgoTheRouteRefusesAFlagCmdGoRefusesWithoutTheLoad(t *testing.T) {
 	}
 
 	requireNothingWritten(t, output, err, stderr)
+}
+
+// The check reads the listing the side build compiles with (P3's MUST on 4b, 2026-11-28): the package listed once, by
+// import path, in the load's directory. A dependency fetched from a module proxy with no go.mod of its own sits in the
+// module cache with no go.mod above it; listed from there (`go list .` in its own directory, the old check's shape) it
+// is refused, "go.mod file not found", while the load's listing reads its #cgo flags, and so the check refuses its
+// -fplugin in cmd/go's words. The proxy is a local directory, so nothing is fetched from the network.
+func TestCgoFlagsAllowedChecksTheListingTheSideBuildCompilesWith(t *testing.T) {
+	root := t.TempDir()
+	proxy := filepath.Join(root, "proxy", "example.com", "dep", "@v")
+	main := filepath.Join(root, "main")
+
+	for _, dir := range []string{proxy, main} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var zipped bytes.Buffer
+	archive := zip.NewWriter(&zipped)
+	entry, err := archive.Create("example.com/dep@v1.0.0/dep.go")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := entry.Write([]byte("package dep\n\n/*\n#cgo CFLAGS: -fplugin=./evil.so\nstatic int x(void) { return 1; }\n*/\nimport \"C\"\n\nfunc X() int { return int(C.x()) }\n")); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := archive.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	for name, contents := range map[string][]byte{
+		filepath.Join(proxy, "list"):        []byte("v1.0.0\n"),
+		filepath.Join(proxy, "v1.0.0.info"): []byte(`{"Version":"v1.0.0"}`),
+		filepath.Join(proxy, "v1.0.0.mod"):  []byte("module example.com/dep\n"),
+		filepath.Join(proxy, "v1.0.0.zip"):  zipped.Bytes(),
+		filepath.Join(main, "go.mod"):       []byte("module example.com/main\n\ngo 1.26\n\nrequire example.com/dep v1.0.0\n"),
+		filepath.Join(main, "main.go"):      []byte("package main\n\nimport _ \"example.com/dep\"\n\nfunc main() {}\n"),
+	} {
+		if err := os.WriteFile(name, contents, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	proxyURL := "file://" + filepath.ToSlash(filepath.Join(root, "proxy"))
+
+	if !strings.HasPrefix(filepath.ToSlash(root), "/") {
+		proxyURL = "file:///" + filepath.ToSlash(filepath.Join(root, "proxy"))
+	}
+
+	env := append(os.Environ(), "GOWORK=off", "GOFLAGS=-mod=mod", "GOTOOLCHAIN=local", "CGO_ENABLED=1",
+		"GOPROXY="+proxyURL, "GOSUMDB=off", "GONOSUMCHECK=1", "GOMODCACHE="+filepath.Join(root, "modcache"))
+	load := cgoLoad{env: env, dir: main}
+	listed, err := cgoSideList(load, Options{}, &packages.Package{PkgPath: "example.com/dep"})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !slices.Contains(listed.CgoCFLAGS, "-fplugin=./evil.so") {
+		t.Fatalf("the load's listing does not carry the dependency's #cgo CFLAGS: %q (dir %s)", listed.CgoCFLAGS, listed.Dir)
+	}
+
+	// The old shape, a second listing from the package's own directory, answers nothing usable there.
+	own := exec.Command("go", "list", "-json=CgoCFLAGS", ".")
+	own.Env = env
+	own.Dir = listed.Dir
+
+	if out, ownErr := own.CombinedOutput(); ownErr == nil {
+		t.Errorf("a listing from the dependency's own directory succeeded, where it has no go.mod above it:\n%s", out)
+	}
+
+	if err := cgoFlagsAllowed(load, listed, runtime.GOOS); err == nil || !strings.Contains(err.Error(), "invalid flag in #cgo CFLAGS: -fplugin=./evil.so") {
+		t.Errorf("got %v, want the dependency's -fplugin refused in cmd/go's words", err)
+	}
 }

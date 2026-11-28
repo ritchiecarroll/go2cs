@@ -333,3 +333,10 @@ fails a package with a refused flag, and the route then found no cmd/cgo output.
 (-fplugin, --sysroot, a -L directory holding a GNU ld script; probe 00bdeaf554), but only by accident of the loader's
 mode. An offline conversion, which reads cmd/cgo's trees and runs no such load, shows the route now refuses on its own
 (TestCgoTheRouteRefusesAFlagCmdGoRefusesWithoutTheLoad).
+
+> **Corrected 2026-11-28 (P3's NIT 5):** the loader stopped the three measured shapes by CONSTRUCTION, not by accident:
+> cmd/cgo's output exists only after cmd/go's own check has passed. The offline route is test-only. And since 4b the
+> route lists the package ONCE, by import path in the load's directory, and that listing is both checked and compiled with
+> (P3's MUST on 4b): a second listing from the package's own directory could answer with other flags, and fails for a
+> package with no go.mod above it.
+

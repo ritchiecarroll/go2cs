@@ -1168,8 +1168,15 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	// The package's own #cgo flags are held to cmd/go's allowlist at the pinned GOROOT before the capture links or the
 	// side build compiles with any of them (cgoFlagSecurity.go; COORD's ruling, 2026-11-28). The load's go list
 	// -compiled runs the same check today and fails the package, but the route does not rest on that.
+	//
+	// The package is listed ONCE, by import path in the load's directory, and that listing is both checked and, below,
+	// compiled with (P3's MUST on 4b): a second listing could answer with other flags than the ones checked.
+	var listed cgoSideListing
+
 	if err == nil {
-		err = cgoFlagsAllowed(load, options, pkg, goos)
+		if listed, err = cgoSideList(load, options, pkg); err == nil {
+			err = cgoFlagsAllowed(load, listed, goos)
+		}
 	}
 
 	if err != nil {
@@ -1220,7 +1227,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 				}
 			}
 
-			if plan, err = planCgoSideBuild(pkg, options, load, goos, goarch, flags, symbols, symbolUses, sourcePaths, builtOwn); err == nil && len(plan.refusals) > 0 {
+			if plan, err = planCgoSideBuild(pkg, options, load, listed, goos, goarch, flags, symbols, symbolUses, sourcePaths, builtOwn); err == nil && len(plan.refusals) > 0 {
 				return nil, refuseCgoRoute(pkg, plan.refusals)
 			}
 		}
