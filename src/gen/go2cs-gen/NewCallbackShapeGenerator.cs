@@ -283,7 +283,9 @@ public class NewCallbackShapeGenerator : ISourceGenerator
 
     // A call on a pointer box, `p.NewCallback(f)` with `p` a `ж<Proc>`: the one extension method of that name the
     // converter declares on `this ref Proc` (or on the box) that takes the call's arguments, reduced on its receiver,
-    // so its parameters leave the receiver out as the overload's do.
+    // so its parameters leave the receiver out as the overload's do. A method of a generic type is itself generic
+    // (`NewCallback<T>(this ref Proc<T> p, ...)`), so the receiver is matched by definition and the reduction on
+    // the constructed type infers the type arguments; a reduction that fails is no match.
     private static IMethodSymbol? BoxReceiverMethod(InvocationExpressionSyntax call, SemanticModel model)
     {
         if (call.Expression is not MemberAccessExpressionSyntax access ||
@@ -296,15 +298,14 @@ public class NewCallbackShapeGenerator : ISourceGenerator
 
         foreach (IMethodSymbol candidate in holder.GetMembers(access.Name.Identifier.ValueText).OfType<IMethodSymbol>())
         {
-            if (!candidate.IsExtensionMethod || candidate.Parameters.Length != call.ArgumentList.Arguments.Count + 1 ||
-                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, receiver) &&
-                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, box))
+            if (candidate.Parameters.Length != call.ArgumentList.Arguments.Count + 1 ||
+                ReduceOnBox(candidate, receiver, box) is not { } reduced)
                 continue;
 
             if (found is not null)
                 return null;
 
-            found = candidate.ReduceExtensionMethod(candidate.Parameters[0].Type) ?? candidate;
+            found = reduced;
         }
 
         return found;
@@ -314,7 +315,8 @@ public class NewCallbackShapeGenerator : ISourceGenerator
     // `this ref window` and go2cs-gen's RecvGenerator adds the `this ж<window>` overload the call binds. Generators
     // do not see each other's output, so here the method group does not resolve. The method is found where the
     // converter declares it, among the extension methods of the receiver type's package class, and its natural
-    // type is the one the overload has: its parameters after the receiver.
+    // type is the one the overload has: its parameters after the receiver. A method of a generic type is reduced on
+    // the constructed type, as for a call on the box, so its natural type names no type parameter.
     private static INamedTypeSymbol? PointerMethodValueType(MemberAccessExpressionSyntax access, SemanticModel model,
         Compilation compilation)
     {
@@ -327,12 +329,10 @@ public class NewCallbackShapeGenerator : ISourceGenerator
 
         foreach (IMethodSymbol candidate in holder.GetMembers(name).OfType<IMethodSymbol>())
         {
-            if (!candidate.IsExtensionMethod || candidate.Parameters.Length == 0 ||
-                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, receiver) &&
-                !SymbolEqualityComparer.Default.Equals(candidate.Parameters[0].Type, box))
+            if (ReduceOnBox(candidate, receiver, box) is not { } reduced)
                 continue;
 
-            if (NaturalType(candidate, compilation, skip: 1) is not { } type ||
+            if (NaturalType(reduced, compilation) is not { } type ||
                 found is not null && !SymbolEqualityComparer.Default.Equals(found, type))
                 return null;
 
@@ -341,6 +341,27 @@ public class NewCallbackShapeGenerator : ISourceGenerator
 
         return found;
     }
+
+    // An extension method declared on the box's receiver (`this ref Proc`) or on the box itself (`this ж<Proc>`),
+    // reduced on whichever it names. Definitions are compared, so `this ref Proc<T>` matches a `ж<Proc<int>>`.
+    private static IMethodSymbol? ReduceOnBox(IMethodSymbol candidate, INamedTypeSymbol receiver, INamedTypeSymbol box)
+    {
+        if (!candidate.IsExtensionMethod || candidate.Parameters.Length == 0 ||
+            candidate.Parameters[0].Type is not INamedTypeSymbol declared)
+            return null;
+
+        if (SameDefinition(declared, receiver))
+            return candidate.ReduceExtensionMethod(receiver);
+
+        if (SameDefinition(declared, box) && declared.TypeArguments[0] is INamedTypeSymbol inner &&
+            SameDefinition(inner, receiver))
+            return candidate.ReduceExtensionMethod(box);
+
+        return null;
+    }
+
+    private static bool SameDefinition(INamedTypeSymbol left, INamedTypeSymbol right) =>
+        SymbolEqualityComparer.Default.Equals(left.OriginalDefinition, right.OriginalDefinition);
 
     // The Func/Action C# gives a lambda or method group as its natural type; null where the compiler would make
     // an anonymous delegate type instead (a ref parameter, more than 16 parameters), which cannot be named. A
@@ -410,18 +431,30 @@ public class NewCallbackShapeGenerator : ISourceGenerator
                ">(typeof(" + typeName + "), " + adapter + ");";
     }
 
-    // A pointer, a function pointer, a ref struct or a file-local type cannot be a type argument of the
-    // registration (CS0306, CS9244) or be named from the generated file; the delegate type itself is checked too,
-    // since the registration names it in typeof. Hand-written C# can pass one
+    // A pointer, a function pointer, a ref struct or a file-local type (or one nested in a file-local type) cannot
+    // be a type argument of the registration (CS0306, CS9244) or be named from the generated file; the delegate
+    // type itself is checked too, since the registration names it in typeof. Hand-written C# can pass one
     // (`static nuint cb(void* p)` in an *_impl.cs companion); it stays on the reflective path.
     private static bool CanBeTypeArgument(ITypeSymbol type) => type switch
     {
         IPointerTypeSymbol or IFunctionPointerTypeSymbol => false,
         { IsRefLikeType: true } => false,
-        INamedTypeSymbol named => !named.IsFileLocal && named.TypeArguments.All(CanBeTypeArgument),
+        INamedTypeSymbol named => !IsInFileLocal(named) && named.TypeArguments.All(CanBeTypeArgument),
         IArrayTypeSymbol array => CanBeTypeArgument(array.ElementType),
         _ => true
     };
+
+    // A type nested in a file-local type is not file-local by its own flag, and cannot be named either.
+    private static bool IsInFileLocal(INamedTypeSymbol type)
+    {
+        for (INamedTypeSymbol? current = type; current is not null; current = current.ContainingType)
+        {
+            if (current.IsFileLocal)
+                return true;
+        }
+
+        return false;
+    }
 
     private static string Bool(bool value) => value ? "true" : "false";
 
