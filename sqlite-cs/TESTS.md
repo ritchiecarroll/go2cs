@@ -58,7 +58,8 @@ each with Go 1.26.11, the .NET 10 SDK, a Release build, and modernc.org/sqlite v
 | `modernc.org/sqlite/pcache` | 19 pass | 19 pass | **matches** |
 | `modernc.org/sqlite/vfs` | 9 pass | 9 pass | **matches** |
 
-On Windows the converted root package takes longer than go2cs's default package deadline, so the Windows run passes
+On the Windows machine measured here, go2cs's default package deadline stops both sides of the root package, native
+`go test` included, and a 10-minute deadline still cuts the converted side short. The Windows run passes
 `-test-timeout 30m`.
 
 ## Notes
@@ -69,17 +70,18 @@ seed inputs of the fuzz target `FuzzSingleStatement`, and on Linux the disclosed
 The same tests skip on both sides on each platform. On Windows, `TestSEHTruncatedShm` skips itself on both sides,
 because a file that is mapped cannot be truncated there.
 
-The two platforms run slightly different tests: the root package's OFD-lock tests are Linux-only, and Windows runs
-one test of its own in their place.
+The two platforms run slightly different tests: the root package's OFD-lock tests are Linux-only, and other platforms
+run one test in their place.
 
 **`TestSEHTruncatedShm` is disclosed rather than run.** It needs a hardware memory fault to be recovered as a Go
 panic, which .NET cannot do: the fault ends the process. It is withdrawn from both sides of the comparison on Linux,
 and the reason is recorded with the conversion.
 
-**Known issue on Windows: `TestVec` fails.** A float returned by a C runtime call through syscall reads 0 on Windows;
-fix in progress. The sqlite-vec extension parses each number in a vector with the C runtime's `strtod`, so on Windows
-every vector reads as zeros, and the test's nearest-neighbour query returns its rows in the wrong order. On Linux the
-numbers are parsed without that call, and the test matches.
+**Known issue on Windows: `TestVec` fails.** In the converted program, a floating-point value that a C runtime function
+returns through Go's syscall package reads as 0 on Windows (native Go reads it correctly), so sqlite-vec's vector values
+are lost and TestVec fails. A fix is in progress. The sqlite-vec extension parses each number in a vector with the C
+runtime's `strtod`, so on Windows every vector reads as zeros, and the test's nearest-neighbour query returns its rows
+in the wrong order. On Linux the numbers are parsed without that call, and the test matches.
 
 **Not compared.** Benchmarks, in the root package and in `pcache`, run on neither side. Native `go test` runs the
 seed-corpus inputs of the fuzz target `FuzzSingleStatement`, and the tables leave them out: go2cs does not run
