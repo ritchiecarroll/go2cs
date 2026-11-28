@@ -1163,7 +1163,20 @@ through named types over both a signed (`~int32`) and an unsigned (`~uint64`) un
 output-compared against Go so the unsigned wrap is verified rather than merely compiled.
 
 ## `uintptr` as a generic numeric type argument
-The golib `uintptr` struct declares the full generic-math interface set the lifted numeric constraints demand (`IAdditionOperators` through `IComparisonOperators`, `IShiftOperators<uintptr, int, uintptr>` with a `>>>` operator, `IIncrementOperators`/`IDecrementOperators`) -- matching operators alone never satisfy a C# where-clause (CS0315 at reflect's `rangeNum<uintptr, uint64>`). At runtime, `ConvertToType`/`ConvertToUInt64` have `uintptr` fast paths, and the reflection-cached `TypeParamCaster` probes a public `Value` FIELD as well as the generated wrappers' `Value` property (hand-written wrappers keep a field for `Interlocked`/`Volatile` `ref x.Value` seams). Guarded by `GenericTypeInference` (`growShrink[U ~uint32 | ~uintptr]`).
+The golib `uintptr` struct declares the full generic-math interface set the lifted numeric constraints demand (`IAdditionOperators` through `IComparisonOperators`, `IShiftOperators<uintptr, int, uintptr>` with a `>>>` operator, `IIncrementOperators`/`IDecrementOperators`) -- matching operators alone never satisfy a C# where-clause (CS0315 at reflect's `rangeNum<uintptr, uint64>`). At runtime, `ConvertToType`/`ConvertToUInt64` have `uintptr` fast paths. Guarded by `GenericTypeInference` (`growShrink[U ~uint32 | ~uintptr]`).
+
+A NAMED numeric type argument (`type small uint8`, `type celsius float64`) matches no rung of golib's `typeof(T)` ladder, so `ConvertToType`, `ConvertToUInt64`, `ConvertToFloat64` and `ConvertToFloat32` end in `IGoNumericWrapper<T>`, which go2cs-gen implements explicitly on every real (not complex) `/*num:…*/` wrapper. Each member converts through the same ladder for the wrapper's own kind and wraps or unwraps the result, so `conv[small](300)` is 44 as Go's truncation gives:
+
+<!-- source (not checked): go2cs-gen build output for GenTests' NumericWrapperConversionTests wrapper `small` -->
+```csharp
+small global::go.golib.IGoNumericWrapper<small>.FromUInt64(ulong value) => new(global::go.builtin.ConvertToType<uint8>(value));
+
+ulong global::go.golib.IGoNumericWrapper<small>.ToUInt64(small value) => global::go.builtin.ConvertToUInt64(value.m_value);
+```
+
+Each member takes its operand as an argument, so golib calls it on one cached default of the wrapper and a conversion boxes nothing. A float kind converts an integer by the source's signedness, as Go's `float64(x)` does: `ConvertToType(long)` and `ConvertToType(ulong)` reach `FromInt64` and `FromUInt64`.
+
+The fallback used to be reflection over the wrapper's `Value` and one-argument constructor, through `System.Convert`, which is checked: an out-of-range named conversion threw `OverflowException`, a named `uintptr` had no conversion, and every converted type parameter flowing in raised IL2091 for the `DynamicallyAccessedMembers` annotation the reflection needed. Guarded by `NamedNumericOperatorConstraint`, GenTests' and GolibTests' `NumericWrapperConversionTests`.
 
 > Generated `/*num:**/` wrapper structs declare the generic-math interfaces (`InheritedTypeTemplate`'s `NumericInterfaces`, plus the integer-only three; see *An integer named-numeric wrapper implements the integer operator interfaces* above), so a NAMED numeric wrapper satisfies a union-generic constraint as a type argument. `NamedNumericOperatorConstraint` instantiates one with named `uint64` and `int32` types.
 <!-- earlier text recorded this as a latent banked gap (CS0315 for a named numeric wrapper as a union-generic type argument). -->

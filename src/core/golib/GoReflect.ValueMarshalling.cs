@@ -1021,7 +1021,8 @@ public static partial class GoReflect
     // SetMapIndex / Call / Convert — so the constructor scan was repeated per call too.
     //
     // THE BINDING FLAGS ARE LOAD-BEARING, and public-only was a latent bug the W3 accessibility arc
-    // made reachable — the same shape TypeParamCaster carried in builtin.TypeParamConversions.cs.
+    // made reachable — the shape builtin.TypeParamConversions.cs's reflective caster carried
+    // before IGoNumericWrapper replaced it.
     // A wrapper for a Go-UNEXPORTED named type is emitted with an `internal` underlying-value
     // constructor (`internal namedPlainBytes(slice<byte> value)`), so a public-only scan sees only
     // the two PUBLIC forms — the make ctor `(nint length, nint capacity, nint low)`, whose declared

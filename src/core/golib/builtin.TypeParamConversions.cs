@@ -7,15 +7,15 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using go.golib;
 
 namespace go;
 
 // ---------------------------------------------------------------------------------------------
 // TYPE-PARAMETER INTEGER CONVERSIONS — `ConvertToType<T>` / `ConvertToUInt64`, plus the
-// `TypeParamCaster<T>` reflection fallback behind them.
+// named-numeric fallback behind them (`IGoNumericWrapper<T>`, implemented by go2cs-gen).
 //
 // WHY THIS EXISTS
 //   Go lets a generic function convert through a constrained type parameter: `T(x)` where
@@ -33,8 +33,18 @@ namespace go;
 //
 //   The `(T)(object)` round trip does box on paths the JIT cannot fold (a reference-typed or
 //   unconstrained T), which is why the ladder is ordered with the common integer kinds first and
-//   `TypeParamCaster<T>` — genuinely reflective, genuinely slow — sits at the end as the fallback
-//   for named wrapper types that carry a numeric field.
+//   the named-numeric fallback sits at the end.
+//
+// NAMED NUMERIC TYPES (`type Celsius float64`, `type stringID uint64`)
+//   A named numeric type is a generated struct wrapper over one BCL kind, so no rung of the ladder
+//   matches it. The wrapper knows its own kind, and go2cs-gen implements IGoNumericWrapper<T> on it:
+//   each member converts through this same ladder for that kind and wraps or unwraps the result
+//   (go2cs-gen's NumericTypeTemplate). Reaching it through an interface is what keeps these
+//   conversions free of reflection. They were reflective once, through Value and a one-argument
+//   constructor, and that made every type parameter flowing in here carry a DynamicallyAccessedMembers
+//   annotation the converter never writes: 37 of the 42 IL2091 warnings across 10 behavioral projects
+//   at 4a56f17a3a, one per converted generic call site, and a trimmed program could lose the members
+//   the reflection read.
 //
 // SEMANTICS
 //   Signed kinds sign-extend and unsigned kinds zero-extend, matching Go integer conversion
@@ -53,15 +63,15 @@ public static partial class builtin
     // Go type-parameter conversions: `T(x)` / `uint64(n)` where a constrained type parameter is
     // involved cannot be a C# cast (CS0030 - no conversion to/from a type parameter). Runtime-typed
     // dispatch; the typeof checks JIT-fold to a single branch per instantiation. Signed kinds
-    // sign-extend, unsigned kinds zero-extend - exactly Go integer conversion semantics.
-    public static T ConvertToType<[DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.NonPublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields |
-        DynamicallyAccessedMemberTypes.NonPublicFields
-    )] T>(ulong value) where T : new()
+    // sign-extend, unsigned kinds zero-extend - exactly Go integer conversion semantics. A float kind
+    // converts the integer as Go's float64(x) does, so the SOURCE's signedness decides it: the two
+    // public overloads share one ladder and say which they were given.
+    public static T ConvertToType<T>(ulong value) where T : new() => IntegerToType<T>(value, signed: false);
+
+    public static T ConvertToType<T>(long value) where T : new() => IntegerToType<T>(unchecked((ulong)value), signed: true);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static T IntegerToType<T>(ulong value, bool signed) where T : new()
     {
         if (typeof(T) == typeof(nint)) return (T)(object)unchecked((nint)value);
         if (typeof(T) == typeof(long)) return (T)(object)unchecked((long)value);
@@ -74,18 +84,12 @@ public static partial class builtin
         if (typeof(T) == typeof(ushort)) return (T)(object)unchecked((ushort)value);
         if (typeof(T) == typeof(byte)) return (T)(object)unchecked((byte)value);
         if (typeof(T) == typeof(uintptr)) return (T)(object)new uintptr(unchecked((nuint)value));
+        if (typeof(T) == typeof(double)) return (T)(object)(signed ? (double)unchecked((long)value) : (double)value);
+        if (typeof(T) == typeof(float)) return (T)(object)(signed ? (float)unchecked((long)value) : (float)value);
 
-        return TypeParamCaster<T>.FromUInt64(value);
+        IGoNumericWrapper<T> wrapper = NumericWrapper<T>("ConvertToType");
+        return signed ? wrapper.FromInt64(unchecked((long)value)) : wrapper.FromUInt64(value);
     }
-
-    public static T ConvertToType<[DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.NonPublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields |
-        DynamicallyAccessedMemberTypes.NonPublicFields
-    )] T>(long value) where T : new() => ConvertToType<T>(unchecked((ulong)value));
 
     /// <summary>
     /// Go's <c>T(f)</c> of a float into an integer-constrained type parameter, <c>T(value.(float64))</c> with
@@ -105,14 +109,7 @@ public static partial class builtin
     /// are written out rather than left to the runtime's cast. A float32 argument widens to double exactly, so it
     /// converts the same.
     /// </summary>
-    public static T ConvertToType<[DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.NonPublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields |
-        DynamicallyAccessedMemberTypes.NonPublicFields
-    )] T>(double value) where T : new()
+    public static T ConvertToType<T>(double value) where T : new()
     {
         if (typeof(T) == typeof(nint)) return (T)(object)(nint)FloatToInt64(value, s_floatConversionSaturates);
         if (typeof(T) == typeof(long)) return (T)(object)FloatToInt64(value, s_floatConversionSaturates);
@@ -128,7 +125,7 @@ public static partial class builtin
         if (typeof(T) == typeof(double)) return (T)(object)value;
         if (typeof(T) == typeof(float)) return (T)(object)(float)value;
 
-        return TypeParamCaster<T>.FromFloat64(value);
+        return NumericWrapper<T>("ConvertToType").FromFloat64(value);
     }
 
     // Whether this process takes gc's arm64 answers. A static readonly flag folds to a constant in optimized code.
@@ -179,10 +176,8 @@ public static partial class builtin
         return value > 0 ? ulong.MaxValue : 0;
     }
 
-    // The same conversions keyed by a runtime type, for a named numeric wrapper's underlying kind (TypeParamCaster) and
-    // for tests of either architecture's table on any host. Each
-    // arm boxes its own kind: without the (object) casts the chain's natural type is double, and every arm would box a
-    // double that the wrapper's constructor refuses.
+    // The same conversions keyed by a runtime type, for tests of either architecture's table on any host. Each arm boxes
+    // its own kind: without the (object) casts the chain's natural type is double, and every arm would box a double.
     internal static object FloatToKind(double value, Type kind, bool arm64) =>
         kind == typeof(nint) ? (object)(nint)FloatToInt64(value, arm64) :
         kind == typeof(long) ? (object)FloatToInt64(value, arm64) :
@@ -199,14 +194,7 @@ public static partial class builtin
         kind == typeof(float) ? (object)(float)value :
         throw new NotSupportedException($"ConvertToType: no float conversion to a wrapper over {kind}");
 
-    public static ulong ConvertToUInt64<[DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.NonPublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields |
-        DynamicallyAccessedMemberTypes.NonPublicFields
-    )] T>(T value) where T : new()
+    public static ulong ConvertToUInt64<T>(T value) where T : new()
     {
         if (typeof(T) == typeof(nint)) return unchecked((ulong)(nint)(object)value!);
         if (typeof(T) == typeof(long)) return unchecked((ulong)(long)(object)value!);
@@ -219,8 +207,10 @@ public static partial class builtin
         if (typeof(T) == typeof(ushort)) return (ushort)(object)value!;
         if (typeof(T) == typeof(byte)) return (byte)(object)value!;
         if (typeof(T) == typeof(uintptr)) return ((uintptr)(object)value!).Value;
+        if (typeof(T) == typeof(double)) return FloatToUInt64((double)(object)value!, s_floatConversionSaturates);
+        if (typeof(T) == typeof(float)) return FloatToUInt64((float)(object)value!, s_floatConversionSaturates);
 
-        return TypeParamCaster<T>.ToUInt64(value);
+        return NumericWrapper<T>("ConvertToUInt64").ToUInt64(value);
     }
 
     /// <summary>
@@ -229,14 +219,7 @@ public static partial class builtin
     /// conversion, which rounds to nearest as Go's <c>float64(int)</c> does. The ladder folds per instantiation,
     /// as <see cref="ConvertToUInt64{T}"/>'s does.
     /// </summary>
-    public static double ConvertToFloat64<[DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.NonPublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields |
-        DynamicallyAccessedMemberTypes.NonPublicFields
-    )] T>(T value) where T : new()
+    public static double ConvertToFloat64<T>(T value) where T : new()
     {
         if (typeof(T) == typeof(double)) return (double)(object)value!;
         if (typeof(T) == typeof(float)) return (float)(object)value!;
@@ -252,21 +235,14 @@ public static partial class builtin
         if (typeof(T) == typeof(byte)) return (byte)(object)value!;
         if (typeof(T) == typeof(uintptr)) return ((uintptr)(object)value!).Value;
 
-        return TypeParamCaster<T>.ToFloat64(value);
+        return NumericWrapper<T>("ConvertToFloat64").ToFloat64(value);
     }
 
     /// <summary>
     /// Go's <c>float32(v)</c> of a type-parameter value whose type set holds a FLOAT member. An integer converts to
     /// float32 DIRECTLY, never through float64, so it rounds once as Go's does; a float64 rounds once to float32.
     /// </summary>
-    public static float ConvertToFloat32<[DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.NonPublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields |
-        DynamicallyAccessedMemberTypes.NonPublicFields
-    )] T>(T value) where T : new()
+    public static float ConvertToFloat32<T>(T value) where T : new()
     {
         if (typeof(T) == typeof(float)) return (float)(object)value!;
         if (typeof(T) == typeof(double)) return (float)(double)(object)value!;
@@ -282,126 +258,19 @@ public static partial class builtin
         if (typeof(T) == typeof(byte)) return (byte)(object)value!;
         if (typeof(T) == typeof(uintptr)) return ((uintptr)(object)value!).Value;
 
-        return TypeParamCaster<T>.ToFloat32(value);
+        return NumericWrapper<T>("ConvertToFloat32").ToFloat32(value);
     }
 
-    // Reflection-cached bridge for a numeric wrapper instantiation: reads/writes the wrapper
-    // through its Value member and single-argument constructor. A generated [GoType("num:*")]
-    // wrapper exposes Value as a PROPERTY; handwritten wrappers (golib uintptr, the
-    // managed-referent manual types) expose a FIELD so Interlocked/Volatile seams can take
-    // `ref x.Value` - probe both. Static per-T caches keep the reflection cost to first use.
-    //
-    // THE BINDING FLAGS ARE LOAD-BEARING, and public-only was a latent bug that the W3
-    // accessibility arc made reachable. A wrapper for a Go-UNEXPORTED named type is emitted with
-    // `internal` members — `internal stringID(uint64 value)` and `internal uint64 Value` — so a
-    // public-only probe reads them as ABSENT and the caster throws "no numeric wrapper surface",
-    // which names a missing member rather than an invisible one. Measured on
-    // NamedNumericOperatorConstraint (`type stringID uint64`; the NAME says string, the TYPE is a
-    // named unsigned).
-    //
-    // The fix is on the PROBE, not on the generated accessibility, and that direction is the whole
-    // point: `Value` and the single-argument constructor are golib MARSHALLING surface — Go has no
-    // such member, and ConvertToType is reached only from golib's own element conversion (the `copy`
-    // path between named types). Promoting them to public to satisfy a probe would widen the C#
-    // surface for something Go never asked for, which is the never-more-permissive-than-Go rule
-    // pointing the other way. A probe reading members it owns is not a permission question.
-    private static class TypeParamCaster<[DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors |
-        DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicProperties |
-        DynamicallyAccessedMemberTypes.NonPublicProperties |
-        DynamicallyAccessedMemberTypes.PublicFields |
-        DynamicallyAccessedMemberTypes.NonPublicFields
-    )] T>
+    // The named-numeric fallback: a go2cs-gen wrapper implements IGoNumericWrapper<T> (go2cs-gen's NumericTypeTemplate).
+    // Every member takes its operand as an argument and ignores its receiver, so one boxed default(T) per type serves
+    // every call, and a conversion allocates nothing. A type that is not such a wrapper (and a reference type, whose
+    // default is null) is refused by name, as the reflective probe refused it before.
+    private static IGoNumericWrapper<T> NumericWrapper<T>(string caller) =>
+        NumericWrapperOf<T>.Instance ?? throw new NotSupportedException($"{caller}: no numeric wrapper surface on {typeof(T)}");
+
+    private static class NumericWrapperOf<T>
     {
-        private const BindingFlags ValueSurface = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-        // A wrapper whose own type is NAMED Value declares the property as NamedWrapperValue instead
-        // (CS0542: a member may not share its type's name), so the probe tries that name second.
-        private static readonly PropertyInfo? s_valueProperty = typeof(T).GetProperty("Value", ValueSurface) ??
-            typeof(T).GetProperty(go2cs.Symbols.NamedWrapperValue, ValueSurface);
-        private static readonly FieldInfo? s_valueField = s_valueProperty is null ? typeof(T).GetField("Value", ValueSurface) : null;
-        private static readonly Type? s_valueType = s_valueProperty?.PropertyType ?? s_valueField?.FieldType;
-        private static readonly ConstructorInfo? s_valueCtor = s_valueType is null
-            ? null
-            : typeof(T).GetConstructor(ValueSurface, binder: null, [s_valueType], modifiers: null);
-
-        public static T FromUInt64(ulong value)
-        {
-            if (s_valueType is null || s_valueCtor is null)
-                throw new NotSupportedException($"ConvertToType: no numeric wrapper surface on {typeof(T)}");
-
-            // Convert.ChangeType cannot target the native-sized kinds (nint/nuint lack IConvertible)
-            object underlying =
-                s_valueType == typeof(nint) ? unchecked((nint)value) :
-                s_valueType == typeof(nuint) ? unchecked((nuint)value) :
-                Convert.ChangeType(unchecked((long)value), s_valueType);
-
-            return (T)s_valueCtor.Invoke([underlying]);
-        }
-
-        // A named numeric wrapper built from a float: the float converts to the wrapper's underlying kind exactly as
-        // ConvertToType<T>(double) converts to that kind directly.
-        public static T FromFloat64(double value)
-        {
-            if (s_valueType is null || s_valueCtor is null)
-                throw new NotSupportedException($"ConvertToType: no numeric wrapper surface on {typeof(T)}");
-
-            return (T)s_valueCtor.Invoke([FloatToKind(value, s_valueType, s_floatConversionSaturates)]);
-        }
-
-        public static ulong ToUInt64(T value)
-        {
-            object underlying;
-
-            if (s_valueProperty is not null)
-                underlying = s_valueProperty.GetValue(value)!;
-            else if (s_valueField is not null)
-                underlying = s_valueField.GetValue(value)!;
-            else
-                throw new NotSupportedException($"ConvertToUInt64: no numeric wrapper surface on {typeof(T)}");
-
-            return underlying switch
-            {
-                nint ni => unchecked((ulong)ni),
-                nuint nu => nu,
-                _ => unchecked((ulong)Convert.ToInt64(underlying))
-            };
-        }
-
-        // A named numeric wrapper's underlying value as Go's float64 conversion of it: a float widens, an integer
-        // rounds to nearest (nint/nuint lack IConvertible, so they are matched first).
-        public static double ToFloat64(T value) => Underlying(value, "ConvertToFloat64") switch
-        {
-            double d => d,
-            float f => f,
-            nint ni => ni,
-            nuint nu => nu,
-            ulong u => u,
-            object other => Convert.ToDouble(other)
-        };
-
-        // The float32 twin: an integer converts to float32 directly, so it rounds once as Go's does.
-        public static float ToFloat32(T value) => Underlying(value, "ConvertToFloat32") switch
-        {
-            float f => f,
-            double d => (float)d,
-            nint ni => ni,
-            nuint nu => nu,
-            ulong u => u,
-            object other => Convert.ToSingle(other)
-        };
-
-        private static object Underlying(T value, string caller)
-        {
-            if (s_valueProperty is not null)
-                return s_valueProperty.GetValue(value)!;
-
-            if (s_valueField is not null)
-                return s_valueField.GetValue(value)!;
-
-            throw new NotSupportedException($"{caller}: no numeric wrapper surface on {typeof(T)}");
-        }
+        internal static readonly IGoNumericWrapper<T>? Instance = default(T) as IGoNumericWrapper<T>;
     }
 
     #endregion

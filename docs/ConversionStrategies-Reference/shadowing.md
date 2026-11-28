@@ -1091,7 +1091,6 @@ Four places read the property by name, and all four apply the one rule:
 - the wrapper templates (InheritedTypeTemplate, IArrayTypeTemplate and the array-view template), through
   `Common.WrapperValueMember`;
 - the implicit-conversion records, whose operator reads `src.Value‿` on a source named `Value`;
-- golib's private TypeParamCaster probe, which tries `Value‿` when a type has no `Value` property;
 - the converter's unwrap sites, through `wrapperValueMember`. A named array's pointer receiver (or deref-aliased
   pointer parameter) that is indexed, ranged or sliced emits `v.Value‿[i]`, `range(v.Value‿)` and `v.Value‿[..2]`.
 

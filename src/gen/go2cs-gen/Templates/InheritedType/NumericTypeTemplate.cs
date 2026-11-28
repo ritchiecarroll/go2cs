@@ -44,8 +44,47 @@ internal static class NumericTypeTemplate
 
                 public static {{targetTypeName}} operator ++({{targetTypeName}} value) => ({{targetTypeName}})(value.m_value + ({{typeName}})1);
 
-                public static {{targetTypeName}} operator --({{targetTypeName}} value) => ({{targetTypeName}})(value.m_value - ({{typeName}})1);{{GetComplementOperator(typeName, targetTypeName)}}
+                public static {{targetTypeName}} operator --({{targetTypeName}} value) => ({{targetTypeName}})(value.m_value - ({{typeName}})1);{{GetComplementOperator(typeName, targetTypeName)}}{{GetNumericWrapperMembers(typeName, targetTypeName)}}
         """;
+
+    // Whether the wrapper implements golib's IGoNumericWrapper<T>, the conversions golib's ConvertToType, ConvertToUInt64,
+    // ConvertToFloat64 and ConvertToFloat32 take for a named numeric type argument (`T(x)` with T instantiated as
+    // `type stringID uint64`). Complex is left out: Go converts no integer or float to a complex type, and golib's
+    // ladder has no complex rung for the unnamed kinds either. InheritedTypeTemplate declares the interface on the
+    // same gate.
+    internal static bool ImplementsNumericWrapper(string typeName) => !typeName.StartsWith("complex");
+
+    // Each member converts through golib's ladder for the wrapper's own kind and wraps or unwraps the result, so a named
+    // type converts exactly as its underlying kind does, with no reflection (golib's IGoNumericWrapper). The members are
+    // explicit, so no Go method name is taken. Every member takes its operand as an argument and ignores its receiver:
+    // golib calls them on one cached default value of the wrapper.
+    //
+    // A FLOAT kind converts an integer with C#'s numeric conversion, which rounds to nearest as Go's float64(x) does;
+    // the source's signedness picks the overload (golib's ConvertToType(long) and ConvertToType(ulong) say which).
+    private static string GetNumericWrapperMembers(string typeName, string targetTypeName)
+    {
+        if (!ImplementsNumericWrapper(typeName))
+            return "";
+
+        string wrapper = $"global::go.golib.IGoNumericWrapper<{targetTypeName}>";
+        string fromInteger = typeName.StartsWith("float") ? $"new(({typeName})value)" : $"new(global::go.builtin.ConvertToType<{typeName}>(value))";
+
+        return $"""
+
+
+                {targetTypeName} {wrapper}.FromUInt64(ulong value) => {fromInteger};
+
+                {targetTypeName} {wrapper}.FromInt64(long value) => {fromInteger};
+
+                {targetTypeName} {wrapper}.FromFloat64(double value) => new(global::go.builtin.ConvertToType<{typeName}>(value));
+
+                ulong {wrapper}.ToUInt64({targetTypeName} value) => global::go.builtin.ConvertToUInt64(value.m_value);
+
+                double {wrapper}.ToFloat64({targetTypeName} value) => global::go.builtin.ConvertToFloat64(value.m_value);
+
+                float {wrapper}.ToFloat32({targetTypeName} value) => global::go.builtin.ConvertToFloat32(value.m_value);
+        """;
+    }
 
     // Go defines the ordered comparisons on every numeric kind EXCEPT complex (the spec limits
     // complex types to == / !=), and C#'s complex representations have no <//<=/>/>= either —

@@ -196,6 +196,11 @@ internal class InheritedTypeTemplate : TemplateBase
             if (IsIntegerNumeric)
                 interfaces += $", global::System.Numerics.IModulusOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.IBitwiseOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.IShiftOperators<{TargetTypeName}, int, {TargetTypeName}>";
 
+            // golib's type-parameter conversions reach a named numeric type through this interface, not reflection
+            // (NumericTypeTemplate.GetNumericWrapperMembers implements it, on the same gate).
+            if (NumericTypeTemplate.ImplementsNumericWrapper(TypeName))
+                interfaces += $", global::go.golib.IGoNumericWrapper<{TargetTypeName}>";
+
             return interfaces;
         }
     }
