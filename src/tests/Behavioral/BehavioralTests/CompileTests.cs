@@ -3256,6 +3256,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVersionedImport() => CheckTarget("VersionedImport");
 
     [TestMethod]
+    public void CheckWaitGroupReuse() => CheckTarget("WaitGroupReuse");
+
+    [TestMethod]
     public void CheckWindowsNewCallback() => CheckTarget("WindowsNewCallback");
 
     [TestMethod]

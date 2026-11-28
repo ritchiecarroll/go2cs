@@ -3188,6 +3188,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVersionedImport() => CheckTarget("VersionedImport");
 
     [TestMethod]
+    public void CheckWaitGroupReuse() => CheckTarget("WaitGroupReuse");
+
+    [TestMethod]
     public void CheckWindowsNewCallback() => CheckTarget("WindowsNewCallback");
 
     [TestMethod]

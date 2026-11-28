@@ -3256,6 +3256,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckVersionedImport() => CheckTarget("VersionedImport");
 
     [TestMethod]
+    public void CheckWaitGroupReuse() => CheckTarget("WaitGroupReuse");
+
+    [TestMethod]
     public void CheckWindowsNewCallback() => CheckTarget("WindowsNewCallback");
 
     [TestMethod]

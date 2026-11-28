@@ -38,7 +38,7 @@ public class WaitGroupTwinTests
     private const string ChildVariable = "GO2CS_TEST_WGTWIN_CHILD";
     private const int TimeoutMs = 30_000;
 
-    private static readonly string[] s_mnRows = ["twin-waiters-hold-no-carriers", "twin-waiters-in-a-bubble-are-durable", "control-plain-wait-holds-carriers", "twin-zero-count-on-a-carrier", "mixed-waiters-one-done-wakes-all", "twin-survives-a-done-race", "twin-refused-park-leaves-no-waiter"];
+    private static readonly string[] s_mnRows = ["twin-waiters-hold-no-carriers", "twin-waiters-in-a-bubble-are-durable", "control-plain-wait-holds-carriers", "twin-zero-count-on-a-carrier", "mixed-waiters-one-done-wakes-all", "twin-survives-a-done-race", "twin-refused-park-leaves-no-waiter", "reused-twins-panic-as-go-does", "reused-mixed-waiters-all-panic"];
 
     private static ж<Δsync.WaitGroup> NewWaitGroup()
     {
@@ -413,6 +413,93 @@ public class WaitGroupTwinTests
         }
 
         Row("twin-refused-park-leaves-no-waiter");
+
+        // REUSED, the twins (docs/phase4/DESIGN-waitgroup-reuse.md). Go's Wait re-reads the state after its wake and
+        // panics when it is not zero: the count was raised again before the waiter returned. K twinned waiters park;
+        // Done and Add(1) run under one hold of the WaitGroup's lock (WaitGroupReuseTests says why), so every waiter
+        // reads a count of 1. Each awaited twin throws Go's panic, and none hands a P off to do it.
+        {
+            ж<Δsync.WaitGroup> wg = NewWaitGroup();
+            wg.Add(1);
+            long handoffsBefore = Counter("handoffs");
+
+            Waiters run = StartWaiters(waiters, () => wg.Wait(), () => wg.Waitꞏtwin());
+            run.AwaitEntered();
+            run.AwaitParked(WaitReason.SyncWaitGroupWait);
+
+            lock (WaitGroupReuseTests.GateOf(wg))
+            {
+                wg.Done();
+                wg.Add(1);
+            }
+
+            IReadOnlyList<Exception> thrown = run.AwaitEnded();
+            long handoffs = Counter("handoffs") - handoffsBefore;
+            wg.Done();
+
+            Console.WriteLine($"WGTWIN READING reused-twins procs={procs} waiters={waiters} panicked={thrown.Count(static ex => ex is PanicException)} handoffs={handoffs}");
+            Assert.AreEqual(waiters, thrown.Count, $"every twinned waiter panicked: {waiters - thrown.Count} of {waiters} returned normally");
+
+            foreach (Exception ex in thrown)
+            {
+                Assert.IsTrue(ex is PanicException, $"a twinned waiter threw {ex}");
+                Assert.AreEqual(WaitGroupReuseTests.Reused, ex.Message, "a twinned waiter panicked with Go's text");
+            }
+
+            Assert.AreEqual(0, handoffs, $"the twinned waiters held carriers: {handoffs} handed their P off for {waiters} waiters");
+        }
+
+        Row("reused-twins-panic-as-go-does");
+
+        // REUSED, mixed: K twinned waiters and one goroutine in the plain Wait on one count, the same calls under the
+        // same hold. All K+1 panic: the slot wakes the twins, the lock's pulse wakes the plain waiter, and each reads
+        // the state for itself.
+        {
+            ж<Δsync.WaitGroup> wg = NewWaitGroup();
+            wg.Add(1);
+            Goroutine? plain = null;
+            Exception? plainThrew = null;
+            using ManualResetEventSlim plainDone = new(false);
+
+            Waiters run = StartWaiters(waiters, () => wg.Wait(), () => wg.Waitꞏtwin());
+
+            Goroutine.Start(() =>
+            {
+                Volatile.Write(ref plain, Goroutine.Current);
+
+                try
+                {
+                    wg.Wait();
+                }
+                catch (Exception ex)
+                {
+                    plainThrew = ex;
+                }
+
+                plainDone.Set();
+            });
+
+            run.AwaitEntered();
+            run.AwaitParked(WaitReason.SyncWaitGroupWait);
+            Assert.IsTrue(SpinWait.SpinUntil(() => Volatile.Read(ref plain) is { State: GoroutineState.Parked, Reason: WaitReason.SyncWaitGroupWait }, TimeoutMs), "the plain waiter parked");
+
+            lock (WaitGroupReuseTests.GateOf(wg))
+            {
+                wg.Done();
+                wg.Add(1);
+            }
+
+            IReadOnlyList<Exception> thrown = run.AwaitEnded();
+            bool plainEnded = plainDone.Wait(2_000);
+            wg.Done();      // the count back to zero: a plain waiter that slept through its generation is let go here
+
+            Assert.AreEqual(waiters, thrown.Count(static ex => ex is PanicException && ex.Message == WaitGroupReuseTests.Reused), $"every twinned waiter panicked as Go does: {string.Join("; ", thrown.Select(static ex => ex.Message))}");
+            Assert.IsTrue(plainEnded, "the plain waiter was still parked 2 s after the Done that reached zero");
+            Assert.IsTrue(plainThrew is PanicException, $"the plain waiter panicked: it {(plainThrew is null ? "returned normally" : $"threw {plainThrew}")}");
+            Assert.AreEqual(WaitGroupReuseTests.Reused, plainThrew!.Message, "the plain waiter panicked with Go's text");
+        }
+
+        Row("reused-mixed-waiters-all-panic");
     }
 
     [TestMethod]
@@ -530,6 +617,15 @@ public class WaitGroupTwinTests
             Assert.IsTrue(SpinWait.SpinUntil(() => m_goroutines.All(g => Volatile.Read(ref g) is { State: GoroutineState.Parked } parked && parked.Reason == reason), TimeoutMs),
                 $"{m_goroutines.Count(g => g is { State: GoroutineState.Parked } parked && parked.Reason == reason)} of {m_count} waiters parked with {reason}: " +
                 string.Join(", ", m_goroutines.Select(static g => g is null ? "unstarted" : $"{g.State}/{g.Reason}")));
+
+        // Every waiter finished; what each threw, for a row whose waiters are meant to throw.
+        internal IReadOnlyList<Exception> AwaitEnded()
+        {
+            Assert.IsTrue(SpinWait.SpinUntil(() => Volatile.Read(ref m_finished) == m_count, TimeoutMs), $"{Volatile.Read(ref m_finished)} of {m_count} waiters finished");
+
+            lock (m_failures)
+                return [.. m_failures];
+        }
 
         internal void AwaitFinished()
         {
