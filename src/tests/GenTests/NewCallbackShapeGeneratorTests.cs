@@ -283,6 +283,41 @@ public class NewCallbackShapeGeneratorTests
     }
 
     [TestMethod]
+    public void APointerReceiverForwarderCalledOnABoxInItsOwnAssemblyIsASite()
+    {
+        // `func (p *Proc) NewCallback(fn any) uintptr` called as `p.NewCallback(add1)` with `p` a `*Proc`, in the
+        // forwarder's own package: the converter declares the method on `this ref Proc`, and the call binds
+        // RecvGenerator's `this ж<Proc>` overload, which this generator cannot see (P3's delta read, SHOULD 1).
+        (string? generated, string[] errors) = Run(
+            """
+            namespace go;
+
+            public static partial class main_package
+            {
+                public partial struct Proc { }
+
+                public static uintptr NewCallback(this ref Proc p, object fn) => syscall_package.NewCallback(fn);
+
+                private static uintptr add1(uintptr p) => p;
+
+                internal static void main()
+                {
+                    ж<Proc> p = null!;
+                    p.NewCallback(add1);
+                }
+            }
+            """);
+
+        Assert.IsNotNull(generated);
+        StringAssert.Contains(generated,
+            "[assembly: global::go.syscall_package.GoNewCallbackForwarder(typeof(global::go.main_package), \"NewCallback\", 1)]");
+        StringAssert.Contains(generated, $"Register<{U}, {U}>(typeof(global::System.Func<{U}, {U}>)",
+            "the call on the box is a site: " + generated);
+        Assert.IsFalse(errors.Any(error => error.Contains("newcallback-shapes", StringComparison.Ordinal)),
+            "the generated registrations must compile: " + string.Join("; ", errors));
+    }
+
+    [TestMethod]
     public void AMethodValueRegistersItsType()
     {
         // `syscall.NewCallback(w.wndProc)`: the converter passes a Go method value as a bare method group of the
@@ -352,16 +387,23 @@ public class NewCallbackShapeGeneratorTests
             """
             namespace go;
 
+            public ref struct span { }
+
+            file delegate nuint fileLocal(nuint p);
+
             public static unsafe partial class main_package
             {
                 private static nuint raw(void* p) => default;
                 private static nuint byFunction(delegate* unmanaged<void> p) => default;
+                private static nuint bySpan(span s) => default;
 
                 internal static void main()
                 {
                     syscall_package.NewCallback((System.Func<nint, nuint>)(p => default));
                     syscall_package.NewCallback(raw);
                     syscall_package.NewCallback(byFunction);
+                    syscall_package.NewCallback(bySpan);
+                    syscall_package.NewCallback((fileLocal)(p => p));
                 }
             }
             """);
@@ -370,6 +412,9 @@ public class NewCallbackShapeGeneratorTests
         Assert.IsNotNull(generated, "the nint shape still registers");
         Assert.IsFalse(generated.Contains("void*", StringComparison.Ordinal) || generated.Contains("delegate*", StringComparison.Ordinal),
             "a pointer or function-pointer type is never a registration's type argument: " + generated);
+        Assert.IsFalse(
+            generated.Contains("span", StringComparison.Ordinal) || generated.Contains("fileLocal", StringComparison.Ordinal),
+            "a ref-like or file-local type is never a registration's type argument: " + generated);
     }
 
     [TestMethod]

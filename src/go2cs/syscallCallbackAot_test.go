@@ -59,6 +59,7 @@ type (
 	locW uintptr
 	fwdW uintptr
 	winW uintptr
+	prW  uintptr
 	anyW uintptr
 )
 
@@ -71,6 +72,11 @@ type big struct{ a, b uint64 }
 type window struct{ base uintptr }
 
 func (w *window) wndProc(p winW) uintptr { return w.base + uintptr(p) }
+
+// A forwarder that is a method on a pointer receiver, called on a pointer in its own package.
+type proc struct{}
+
+func (p *proc) NewCallback(fn any) uintptr { return syscall.NewCallback(fn) }
 
 func none() uintptr                                  { return 7 }
 func one(a uintptr) uintptr                          { return a + 1 }
@@ -119,6 +125,10 @@ func main() {
 	w := &window{base: 9}
 	line("method value", func() string { return call1(syscall.NewCallback(w.wndProc)) })
 	line("registered by two packages", func() string { return call1(cbpkg.Pointer()) })
+	pr := &proc{}
+	line("pointer-receiver forwarder", func() string {
+		return call1(pr.NewCallback(func(v prW) uintptr { return uintptr(v) + 10 }))
+	})
 	var x any = func(p anyW) uintptr { return uintptr(p) + 7 }
 	line("through any", func() string { return call1(syscall.NewCallback(x)) })
 
@@ -168,6 +178,7 @@ var callbackAotCommon = []string{
 	"through a forwarder = 47",
 	"method value = 50",
 	"registered by two packages = 49",
+	"pointer-receiver forwarder = 51",
 	"no result panics: compileCallback: expected function with one uintptr-sized result",
 	"float argument panics: compileCallback: float arguments not supported",
 	"float result panics: compileCallback: float results not supported",
@@ -177,7 +188,7 @@ var callbackAotCommon = []string{
 }
 
 const (
-	callbackAotAnyAt    = 12 // the through-any line follows the common lines before it
+	callbackAotAnyAt    = 13 // the through-any line follows the common lines before it
 	callbackAotAnyJit   = "through any = 48"
 	callbackAotAnyAot   = "through any panics: compileCallback: no native code for callback type "
 	callbackAotArity3Go = "arity 3 = "
