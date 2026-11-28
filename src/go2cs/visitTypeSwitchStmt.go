@@ -272,14 +272,22 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				}
 
 				if v.isInterfaceCaseLabel(expr) || (isFuncCase && !collidingFuncCases[funcKey]) {
+					// A func label asserts through golib's `_ᶠ`, whose delegate type argument carries no trim
+					// annotation (see funcAssertExpr).
+					assertName := "_"
+
+					if isFuncCase {
+						assertName += FuncValueMarker
+					}
+
 					if len(bindIdent) > 0 && bindIdent != "_" {
 						// case {} Δx when Δx._<caseType>(out var x):
 						tempTarget := fmt.Sprintf("%s%s", ShadowVarMarker, bindIdent)
-						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var %s)", tempTarget, tempTarget, caseExpr, bindIdent)
+						caseExpr = fmt.Sprintf("{} %s when %s.%s<%s>(out var %s)", tempTarget, tempTarget, assertName, caseExpr, bindIdent)
 					} else {
 						// case {} t1 when t1._<caseType>(out _):
 						tempTarget := fmt.Sprintf("%s%d", TempVarMarker, i)
-						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var _)", tempTarget, tempTarget, caseExpr)
+						caseExpr = fmt.Sprintf("{} %s when %s.%s<%s>(out var _)", tempTarget, tempTarget, assertName, caseExpr)
 					}
 				} else {
 					caseBinding := bindIdent

@@ -79,7 +79,7 @@ const HoistedLiteralMarker = "\u02E2"            // Suffix of a hoisted string-l
 const HoistedConstMarker = "\u1D9C"              // Suffix of a hoisted function-local constant field name: a big constant (maskᶜ) or a string constant (fnAtoiᶜ). Variants: ᶜ ᶜᶜ
 const StaticBackingFieldMarker = "\u1D47"        // Suffix of the private backing field behind a struct-typed static read through a same-named ref readonly accessor (trueˢᵇ, seat #53). Variants: ᵇ
 const StackBufferMarker = "\u1D37"               // Suffix of a stack-append buffer local: var xᴷ = new stackAppend<T>(); at a function's entry, passed at x's first qualifying append, x = append(xᴷ, x, v).
-const FuncValueMarker = "\u1DA0"                 // Suffix of an sstring twin's canonical value delegate (Sprintfᶠ). Variants: ᶠ ᶠᶠ
+const FuncValueMarker = "\u1DA0"                 // Marks a func value: an sstring twin's canonical value delegate (Sprintfᶠ), golib's func-type assertion (x._ᶠ<F>()). Variants: ᶠ ᶠᶠ
 const TrueMarker = "\u1427"                      // Variants: ᐧ true
 const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
 const ValueAdapterInfix = "\u1D20"               // ᴠ - value-form foreign adapter infix ({Struct}ᴠ{Iface})

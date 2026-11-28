@@ -511,7 +511,7 @@ func (v *Visitor) foldIfInit(ifStmt *ast.IfStmt, initText string, cond string, e
 			not = "not "
 		}
 
-		if facts.assert && strings.HasSuffix(rhs, "("+TrueMarker+")") && strings.Contains(rhs, "._<") {
+		if facts.assert && strings.HasSuffix(rhs, "("+TrueMarker+")") && (strings.Contains(rhs, "._<") || strings.Contains(rhs, "._"+FuncValueMarker+"<")) {
 			folded := strings.TrimSuffix(rhs, "("+TrueMarker+")") + "(out " + value + ")"
 
 			if facts.negated {

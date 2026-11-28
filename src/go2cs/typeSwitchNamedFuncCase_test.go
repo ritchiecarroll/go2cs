@@ -12,7 +12,8 @@
 // cases never collide: each keeps its label and its body, where collapsing both to the base delegate
 // merged identical bodies and made differing ones a CS8120 compile error.
 //
-// A func-type case takes the interface cases' guard form, `case {} Δf when Δf._<T>(out var f):`. A
+// A func-type case takes the interface cases' guard form through golib's func-type assertion,
+// `case {} Δf when Δf._ᶠ<T>(out var f):`, whose delegate type argument carries no trim annotation. A
 // typed nil func held in an interface is its func type's carrier, which no C# type pattern matches,
 // so the pattern form sent it to the default arm. Two unnamed delegates sharing a first type
 // argument stay apart: the duplicate-mapped-case merge once cut its key at the first space, which
@@ -136,9 +137,9 @@ func main() {
 
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "tscf", "main.cs"))
 
-	// A func-type case is a guard label: `case {} <temp> when <temp>._<delegate>(out var <binding>):`.
+	// A func-type case is a guard label: `case {} <temp> when <temp>._ᶠ<delegate>(out var <binding>):`.
 	guard := func(temp string, delegate string, binding string) string {
-		return "    case {} " + temp + " when " + temp + "._<" + delegate + ">(out var " + binding + "):"
+		return "    case {} " + temp + " when " + temp + "._" + FuncValueMarker + "<" + delegate + ">(out var " + binding + "):"
 	}
 
 	unbound := TempVarMarker + "0"

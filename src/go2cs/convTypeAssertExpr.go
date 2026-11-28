@@ -92,6 +92,10 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 
 	receiver := v.convExpr(typeAssertExpr.X, nil)
 
+	if isFuncAssertTarget(v.getExprType(typeAssertExpr.Type)) {
+		return v.funcAssertExpr(receiver, typeExpr, exprType, safeAssertDescriminator)
+	}
+
 	if safeAssertDescriminator != "" {
 		return fmt.Sprintf("%s._<%s>(%s)", receiver, typeExpr, safeAssertDescriminator)
 	}
@@ -107,6 +111,67 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 	}
 
 	return fmt.Sprintf("%s._<%s>()", receiver, typeExpr)
+}
+
+// isFuncAssertTarget reports whether an asserted type is a Go func type, named or not: one whose C# form is a
+// delegate.
+func isFuncAssertTarget(targetType types.Type) bool {
+	if targetType == nil {
+		return false
+	}
+
+	_, isFunc := types.Unalias(targetType).Underlying().(*types.Signature)
+	return isFunc
+}
+
+// funcAssertExpr renders an assertion to a func type through golib's `_ᶠ` forms, whose type argument is constrained
+// to Delegate and carries no DynamicallyAccessedMembers annotation. The general `_<T>` annotates T with
+// PublicMethods, which on a delegate reaches Delegate.CreateDelegate's RequiresUnreferencedCode overloads, so the
+// trim analyzer reported every func-type assertion in a converted program (IL2026 and IL2111).
+//
+// The source interface is named, `x._ᶠ<I, F>()`, wherever the converter can name it, so a failure's text is Go's
+// ("io.Reader is *os.File, not func()"): no generated overload exists for `_ᶠ`, so the bare form that names an
+// exported interface through one would name "interface {}" here. `error` is named as well. A source that cannot
+// be named takes the object form and the text "interface {}", as `_<T>` does for it; there is no other `_ᶠ`
+// overload a bare call could bind, so the widened form is not needed.
+func (v *Visitor) funcAssertExpr(receiver string, typeExpr string, sourceType types.Type, safeAssertDescriminator string) string {
+	if safeAssertDescriminator != "" {
+		return fmt.Sprintf("%s._%s<%s>(%s)", receiver, FuncValueMarker, typeExpr, safeAssertDescriminator)
+	}
+
+	if v.funcAssertSourceIsNameable(sourceType) {
+		return fmt.Sprintf("%s._%s<%s, %s>()", receiver, FuncValueMarker, v.getCSharpTypeName(sourceType), typeExpr)
+	}
+
+	return fmt.Sprintf("%s._%s<%s>()", receiver, FuncValueMarker, typeExpr)
+}
+
+// funcAssertSourceIsNameable reports whether a func-type assertion can name its source interface: the universe
+// `error`, or a named interface declared at package level that is of this package or exported. These are exactly
+// the sources assertSourceFormFor names, either explicitly or through a generated overload.
+func (v *Visitor) funcAssertSourceIsNameable(sourceType types.Type) bool {
+	if sourceType == nil {
+		return false
+	}
+
+	named, isNamed := types.Unalias(sourceType).(*types.Named)
+
+	if !isNamed {
+		return false
+	}
+
+	if _, isInterface := named.Underlying().(*types.Interface); !isInterface {
+		return false
+	}
+
+	obj := named.Obj()
+	pkg := obj.Pkg()
+
+	if pkg == nil {
+		return true
+	}
+
+	return obj.Parent() == pkg.Scope() && (pkg == v.pkg || obj.Exported())
 }
 
 // assertSourceForm is how a single-value assertion spells its source interface.

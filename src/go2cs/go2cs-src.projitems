@@ -321,6 +321,7 @@
     <None Include="$(MSBuildThisFileDirectory)funcLitGoNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcLitNamedNumericLiteralArm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)funcTypeAssert_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcWordOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)funcWordOperations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />

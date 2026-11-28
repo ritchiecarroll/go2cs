@@ -201,12 +201,13 @@
       "value": "\u1da0",
       "csharp": true,
       "goEscape": true,
-      "goTrailing": "Suffix of an sstring twin's canonical value delegate (Sprintf\u1da0). Variants: \u1da0 \u1da0\u1da0",
+      "goTrailing": "Marks a func value: an sstring twin's canonical value delegate (Sprintf\u1da0), golib's func-type assertion (x._\u1da0<F>()). Variants: \u1da0 \u1da0\u1da0",
       "csComment": [
-        "Suffixes the name of an sstring twin's canonical value delegate (`Sprintf\u1da0`) - the one",
-        "`static readonly` delegate every func-value site names, because a twinned function has no single",
+        "Marks a func value. It suffixes the name of an sstring twin's canonical value delegate (`Sprintf\u1da0`) - the",
+        "one `static readonly` delegate every func-value site names, because a twinned function has no single",
         "method group (see docs/phase4/DESIGN-sstring-twin-pilot.md). The converter names it; the",
-        "StrGenerator declares it."
+        "StrGenerator declares it. It also names golib's func-type assertion, `x._\u1da0<F>()`, whose delegate",
+        "type argument carries no trim annotation."
       ],
       "note": "U+1DA0 - sstring twin canonical value delegate suffix, in the family of HoistedLiteralMarker (U+02E2) and HoistedConstMarker (U+1D9C). Shared with go2cs-gen, which emits the field."
     },
