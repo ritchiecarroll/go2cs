@@ -600,6 +600,37 @@ func TestCgoPhase4HASideLibrarysDependentsLoadOnlyFromSafePlaces(t *testing.T) {
 	}
 }
 
+// A file of the package's own that go's build links and go2cs's does not is named, never dropped without a word (P3's
+// 4b MUST 2): when nothing Go uses needs the side library, an own C file is compiled and left unlinked, and a C++ file
+// is never compiled. Go would link either, and code in it that runs on its own (a constructor) would run. The package
+// still converts: the warning is the reading.
+func TestCgoPhase4MAnOwnFileNothingLinksIsNamed(t *testing.T) {
+	probeDir := cgoRealProbeDir(t)
+
+	for _, row := range []struct{ name, file, contents string }{
+		{"c", "own.c", "int go2cs_p4_unused(void) { return 3; }\n"},
+		{"cc", "unused.cc", "extern \"C\" int go2cs_p4_unused(void) { return 3; }\n"},
+	} {
+		t.Run(row.name, func(t *testing.T) {
+			combined, _, _, err := convertCgoReal(t, probeDir, map[string]string{"main.go": cgoPhase4BoundOnlyProgram, row.file: row.contents})
+			t.Logf("READING %s/%s %s: exit %v; the conversion's output ends:\n%s", runtime.GOOS, runtime.GOARCH, row.name, err, lastLines(combined, 12))
+
+			if err != nil {
+				t.Fatalf("a package whose names all bind did not convert: %v", err)
+			}
+
+			for _, want := range []string{"warning GO2CS2017", row.file} {
+				if !strings.Contains(combined, want) {
+					t.Errorf("the conversion does not name %q", want)
+				}
+			}
+		})
+	}
+}
+
+// cgoPhase4BoundOnlyProgram calls only a function a library exports (libm's cos), so nothing is side-built.
+const cgoPhase4BoundOnlyProgram = "package main\n\n/*\n#cgo LDFLAGS: -lm\n#include <math.h>\n*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"cos\", C.cos(0)) }\n"
+
 // TestSqlite3ReadingOnTheSideBuild is cgo Phase 4b's go-sqlite3 reading (docs/phase4/DESIGN-cgo-phase4b-own-sources.md
 // §5.3; OQ-2, COORD: measure the amalgamation's compile cost, prediction first). It is a reading, not a gate: run it by
 // name on a hosted leg (converter-cgo, filter ^TestSqlite3Reading). It downloads github.com/mattn/go-sqlite3 v1.14.53
