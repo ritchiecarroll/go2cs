@@ -43,6 +43,10 @@ import (
 // fail. (P3's re-read of revision 3: the stub then read its check routine from the caller's block, and this run
 // returned 7.) The stub's pointer is read by reflection, so the run is read under the JIT only.
 //
+// A fifth run, under the JIT, enters the stub the same way with a block in native heap memory, Fn GetCurrentProcessId
+// (a valid CFG target) and N 0: the stub must end it with __fastfail (0xc0000409) because the block is not on the
+// calling thread's stack (DESIGN section 6, revision 5). On revision 4 it printed "heap: the process id".
+//
 // Made to fail (DESIGN section 9): with `narrow = cfg` the aot-cfg caller ends at its first syscall with the fast
 // fail; without the stub's check the CFG callers' unmarked run prints 7.
 const shippedTrampolineProgram = `namespace go;
@@ -71,6 +75,22 @@ public static unsafe class Program
         Marshal.Copy(code, 0, page, code.Length);
         VirtualProtect(page, 4096, cfg ? 0x20 | 0x40000000u : 0x20u, out _);
         return page;
+    }
+
+    // The stub's pointer, read by reflection (JIT only), or 0 with a line saying why.
+    private static nint stubPointer(string run)
+    {
+        var field = typeof(syscall_package).GetNestedType("StdCallTrampoline", BindingFlags.NonPublic)
+            ?.GetField("Call", BindingFlags.NonPublic | BindingFlags.Static);
+        object value = field?.GetValue(null);
+        nint stub = value is Pointer p ? (nint)Pointer.Unbox(p) : value is nint n ? n : 0;
+
+        if (stub == 0)
+        {
+            Console.WriteLine(run + ": no stub (" + (value?.GetType().Name ?? "null") + ")");
+        }
+
+        return stub;
     }
 
     private static string run(string name, Func<string> body)
@@ -113,14 +133,10 @@ public static unsafe class Program
         if (args.Length > 0 && args[0] == "block")
         {
             nint page = unmarkedPage(cfg);
-            var field = typeof(syscall_package).GetNestedType("StdCallTrampoline", BindingFlags.NonPublic)
-                ?.GetField("Call", BindingFlags.NonPublic | BindingFlags.Static);
-            object value = field?.GetValue(null);
-            nint stub = value is Pointer p ? (nint)Pointer.Unbox(p) : value is nint n ? n : 0;
+            nint stub = stubPointer("block");
 
             if (stub == 0)
             {
-                Console.WriteLine("block: no stub (" + (value?.GetType().Name ?? "null") + ")");
                 return 0;
             }
 
@@ -134,6 +150,26 @@ public static unsafe class Program
             Console.Out.Flush();
             ((delegate* unmanaged<nuint*, void>)stub)(block);
             Console.WriteLine("block: " + block[3]);
+            return 0;
+        }
+
+        if (args.Length > 0 && args[0] == "heap")
+        {
+            nint stub = stubPointer("heap");
+
+            if (stub == 0)
+            {
+                return 0;
+            }
+
+            // StdCallInfo in native heap memory, Fn a valid target (an export), N 0: only where the block lies stops it
+            nuint* block = (nuint*)NativeMemory.AllocZeroed(7 * (nuint)sizeof(nuint));
+            block[0] = (nuint)syscall.NewLazyDLL("kernel32.dll").NewProc("GetCurrentProcessId").Addr();
+            Console.WriteLine("heap: calling");
+            Console.Out.Flush();
+            ((delegate* unmanaged<nuint*, void>)stub)(block);
+            bool pid = block[3] == (nuint)Environment.ProcessId;
+            Console.WriteLine("heap: " + (pid ? "the process id" : block[3].ToString()));
             return 0;
         }
 
@@ -322,6 +358,14 @@ func shippedTrampolineRow(t *testing.T, cfgArm bool) {
 
 			if strings.Contains(text, "block: 7") {
 				t.Errorf("%s block: a block the caller wrote reached an invalid CFG target; the check is the caller's", arm)
+			}
+
+			text, code = run(arm+" heap", nil, name, append(args, "heap")...)
+			expect(arm+" heap", text, code, fastFail, "heap: calling")
+
+			if strings.Contains(text, "heap: the process id") {
+				t.Errorf("%s heap: a block off the thread's stack reached its target; the stub did not check where it lies",
+					arm)
 			}
 		}
 	}
