@@ -339,6 +339,41 @@ namespace go.golib;
     }
 
     /// <summary>
+    /// A <c>void *</c> member's value as it is copied into a mirror (DESIGN-cgo-sqlite-marshalling.md §2): nil is 0 and C
+    /// memory is its number. A pointer into Go memory, in any form the void door recognises (a pointer that carries its
+    /// box, a token, a number the registry knows), panics with cgo's own message, as cgocheck does for a Go pointer stored
+    /// in memory handed to C.
+    /// </summary>
+    public static nuint VoidPointerMember(ж<uintptr>? member)
+    {
+        if (member is null || member.IsNilPointer)
+            return 0;
+
+        if (ManagedPointerTokens.IsTaggedToken(member.Value.Value) || GoMemory(member, out nuint address) is not null)
+            throw GoPointerToUnpinnedGoPointer();
+
+        return address;
+    }
+
+    /// <summary>
+    /// A <c>void *</c> member's word as it comes back from C, checked as a typed member's is (DESIGN-cgo-phase3-marshaling
+    /// 18.12.3): an address inside a stack copy the wrapper handed C names a stack slot that dies with the call, and is
+    /// refused by name. A <c>void *</c> names no pointee type, so no copy's own address is an identity it can take. Any
+    /// other word is returned for the wrapper, which keeps the original pointer for the word it went in as and mints any
+    /// other as C memory: cgo's rule that C keeps no Go pointer past the call makes that right.
+    /// </summary>
+    public static nuint VoidPointerMemberBack(nuint address, ReadOnlySpan<GoCgoStackCopy> copies, string function)
+    {
+        foreach (ref readonly GoCgoStackCopy copy in copies)
+        {
+            if (address != 0 && copy.Holds(address))
+                throw RuntimeErrorPanic.ErrorString($"cgo: C.{function} returned an address inside the stack copy of a Go argument as a void pointer, and go2cs cannot represent a pointer into that copy, so it refuses the result");
+        }
+
+        return address;
+    }
+
+    /// <summary>
     /// Called inside the wrapper's <c>fixed</c>, after the call, for each word C returned (a pointer result, an
     /// out-parameter's word) against each pinned argument: a word that lies in that argument's Go storage is refused by
     /// name (P3's review of 1b, item 4). Minted as a native box, it would name Go memory that moves once the <c>fixed</c>

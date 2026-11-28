@@ -257,6 +257,27 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 		}
 
 		return fmt.Sprintf("%s%s = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)%s, %s, global::go.golib.GoCgoArgs.PointerMember(%s), c, function);\n", indent, g, m, g, g), nil
+
+	case *types.Basic:
+		// A void * member (cmd/cgo's unsafe.Pointer, go-sqlite3's sqlite3_go_col.ptr: DESIGN-cgo-sqlite-marshalling.md §2)
+		// crosses as a typed pointer member does: nil is 0, C memory is its number, and a pointer into Go memory panics
+		// with cgo's own message before the call. Copied back, the word it went in as keeps the original pointer, an
+		// address inside a stack copy the wrapper handed C is refused, and any other is C memory, minted native here,
+		// where @unsafe.Pointer is in scope (golib cannot name it). cgo's rule makes that right: C may not keep a Go pointer
+		// past the call, so whatever C wrote into the member is C's (COORD's ruling on OQ-2).
+		if underlying.Kind() != types.UnsafePointer {
+			break
+		}
+
+		switch mode {
+		case cgoCopyIn:
+			return fmt.Sprintf("%s%s = (nint)global::go.golib.GoCgoArgs.VoidPointerMember(%s);\n", indent, m, g), nil
+		case cgoPinCheck:
+			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)%s, g, f, function);\n", indent, m), nil
+		}
+
+		return fmt.Sprintf("%s{\n%s    nuint ᴡ = global::go.golib.GoCgoArgs.VoidPointerMemberBack((nuint)%s, c, function);\n%s    %s = ᴡ == 0 ? default! : ᴡ == global::go.golib.GoCgoArgs.VoidPointerMember(%s) ? %s : new %s((uintptr)ᴡ);\n%s}\n",
+			indent, indent, m, indent, g, g, g, cgoVoidPointerType, indent), nil
 	}
 
 	if mode == cgoPinCheck {
@@ -318,7 +339,8 @@ func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoSt
 		return cgoStructParam{void: true}, nil
 	}
 
-	if pointer, ok := t.(*types.Pointer); ok {
+	// A C typedef of a pointer is an alias, read as the pointer it names (DESIGN-cgo-sqlite-marshalling.md §3).
+	if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
 		// A pointer to one C pointer is the out-parameter (shape (i), design 18.12 item 4): one stack word, copied in and
 		// back by the pointer-member rules. Its pointee is a C struct or one C scalar, as a pointer parameter's is.
 		if inner, ok := types.Unalias(pointer.Elem()).(*types.Pointer); ok {
@@ -440,7 +462,9 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	resultType := signature.Results().At(0).Type()
 	resultStruct := cgoStructOf(resultType)
-	resultPointer, pointerResult := resultType.(*types.Pointer)
+	// A C typedef of a pointer is an alias (`type _Ctype_sqlite3_filename = *_Ctype_char`), read as the pointer it names
+	// (DESIGN-cgo-sqlite-marshalling.md §3).
+	resultPointer, pointerResult := types.Unalias(resultType).(*types.Pointer)
 	voidResult := cgoIsVoidPointer(resultType)
 
 	if scalarsOnly && resultStruct == nil && !pointerResult && !voidResult {
