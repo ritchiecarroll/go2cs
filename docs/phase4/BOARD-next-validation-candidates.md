@@ -43322,4 +43322,36 @@ records it.
 
 — H (2026-11-27)
 
+## OPTION 2026-11-28 (H): a content-hash cache for a side build's own C (cgo Phase 4b, OQ-2), measured before deciding
+
+**Ruling.** COORD (inbox H 20261127T205842Z): no cache in 4b's first cut. Measure the amalgamation's compile cost,
+prediction first, and record a cache here as an option.
+
+**Measured.** go-sqlite3 v1.14.53's sqlite3-binding.c (9,582,672 bytes, 271,136 lines) was compiled by the side build's
+own path (cgoSideCompileOwn: go list's flags, -O2 -g from go's default CGO_CFLAGS, the trim and the prefix maps), once
+per conversion, on 4b at d1239a7146 (converter-cgo, TestSqlite3ReadingOnTheSideBuild):
+
+| Leg | Compiler | Wall time | Object |
+|---|---|---|---|
+| linux-x64, 46086298515 | gcc 15.2.0 | 30.0 s | 10,839,960 bytes |
+| win-x64, 46086295982 | MinGW-Builds gcc 15.2.0 | 33.0 s | 8,375,377 bytes |
+| osx-x64, 46086300912 | Apple clang 17.0.0 | 38.4 s | 5,918,824 bytes |
+| osx-arm64, 46086300912 | Apple clang 17.0.0 | 14.3 s | 5,787,408 bytes |
+
+My prediction (60-150 s linux, 90-200 s windows, 40-120 s darwin) MISSED LOW on every leg.
+
+**The option.** Key a cache by the source's content hash, the compiler's identity (its --version line) and the exact
+flags, and keep it beside go2cs's own build cache. A reconversion would then pay 14-38 s once instead of once per
+conversion. It is not worth taking yet:
+- go-sqlite3 does not convert today. The same reading refuses it for 38 Phase 2/3 marshalling limits before any side
+  build question (16 C function addresses used as values, 14 pointer parameters to non-struct types, 6 non-scalar
+  struct fields, 2 non-scalar results), identically on every target.
+- A cache adds invalidation that has to be right (flags, compiler, headers the file includes).
+
+**Reopens when** a package with a large own C file converts end to end, and its reconversion time is the measured
+complaint.
+**Owner.** H.
+
+— H (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
