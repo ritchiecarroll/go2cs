@@ -265,6 +265,7 @@ go.ᴀnone
 
 [builtin]
 _
+_ᶠ
 append
 appendꓸꓸꓸ
 AreEqual
@@ -502,6 +503,7 @@ go.builtin :: method static System.Boolean Implements<TInterface>(System.Object)
 go.builtin :: method static System.Boolean TryTypeAssert(System.Object, System.Type, out System.Object)
 go.builtin :: method static System.Boolean TypeImplements<TInterface>(System.Type)
 go.builtin :: method static System.Boolean _<T>(System.Object, out T)
+go.builtin :: method static System.Boolean _ᶠ<T>(System.Object, out T)
 go.builtin :: method static System.Byte LiteralByteAt(System.ReadOnlySpan<System.Byte>, System.IntPtr)
 go.builtin :: method static System.Byte LiteralByteAt(System.ReadOnlySpan<System.Byte>, System.UInt64)
 go.builtin :: method static System.Byte[] ToUTF8Bytes(in System.ReadOnlySpan<System.Int32>)
@@ -601,6 +603,7 @@ go.builtin :: method static System.String GetGoTypeName(System.Type)
 go.builtin :: method static System.String GetGoTypeName<T>()
 go.builtin :: method static System.UInt64 ConvertToUInt64<T>(T)
 go.builtin :: method static System.ValueTuple<T, System.Boolean> _<T>(System.Object, System.Boolean)
+go.builtin :: method static System.ValueTuple<T, System.Boolean> _ᶠ<T>(System.Object, System.Boolean)
 go.builtin :: method static System.ValueTuple<T, System.Boolean> ᐸꟷ<T>(go.channel<T>, System.Boolean)
 go.builtin :: method static System.Void QuoAssign(ref System.Int32, System.Int32)
 go.builtin :: method static System.Void QuoAssign(ref System.Int64, System.Int64)
@@ -734,6 +737,8 @@ go.builtin :: method static T GoZero<T>()
 go.builtin :: method static T GoZero<T>(T)
 go.builtin :: method static T _<T>(System.Object)
 go.builtin :: method static T _<TSource, T>(TSource)
+go.builtin :: method static T _ᶠ<T>(System.Object)
+go.builtin :: method static T _ᶠ<TSource, T>(TSource)
 go.builtin :: method static T make<T>(System.IntPtr = 0, System.IntPtr = -1)
 go.builtin :: method static T makeǃ<T>(System.IntPtr = 0, System.IntPtr = -1)
 go.builtin :: method static T max<T>(T, T)
