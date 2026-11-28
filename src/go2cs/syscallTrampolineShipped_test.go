@@ -152,7 +152,14 @@ const shippedTrampolineProjectHead = `<Project Sdk="Microsoft.NET.Sdk">
     <Using Include="go.builtin" Static="True" />
 `
 
-func TestSyscallTrampolineShipped(t *testing.T) {
+// TestSyscallTrampolineShipped reads the JIT callers, the off switch and plain Native AOT;
+// TestSyscallTrampolineShippedCfg reads Native AOT + CFG. One Native AOT publish of the golib + syscall closure takes
+// 15 to 25 minutes on the hosted windows runner, so each test makes one and fits cgo-e2e's 40-minute deadline.
+func TestSyscallTrampolineShipped(t *testing.T) { shippedTrampolineRow(t, false) }
+
+func TestSyscallTrampolineShippedCfg(t *testing.T) { shippedTrampolineRow(t, true) }
+
+func shippedTrampolineRow(t *testing.T, cfgArm bool) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skipf("the trampoline is windows/amd64 only: NOT MEASURED on %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
@@ -178,9 +185,6 @@ func TestSyscallTrampolineShipped(t *testing.T) {
 `
 
 	dir := t.TempDir()
-	// Intermediate output for the second publish lives outside the project directory, where the default compile
-	// items would pick up its generated attribute files.
-	objcfg := t.TempDir()
 	writeCgoFixture(t, dir, "shippedprobe.csproj", project)
 	writeCgoFixture(t, dir, "Program.cs", shippedTrampolineProgram)
 	env := append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
@@ -268,6 +272,13 @@ func TestSyscallTrampolineShipped(t *testing.T) {
 		}
 	}
 
+	if cfgArm {
+		sdk("Native AOT + CFG publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
+			"-p:ControlFlowGuard=Guard", "-o", filepath.Join(dir, "aotcfg"))
+		caller("aot-cfg", true, filepath.Join(dir, "aotcfg", "shippedprobe.exe"))
+		return
+	}
+
 	sdk("JIT build", "build", "-c", "Release", "-nologo", "-o", filepath.Join(dir, "jit"))
 	caller("jit-apphost", true, filepath.Join(dir, "jit", "shippedprobe.exe"))
 	caller("jit-dotnet", true, dotnet, filepath.Join(dir, "jit", "shippedprobe.dll"))
@@ -289,9 +300,4 @@ func TestSyscallTrampolineShipped(t *testing.T) {
 	sdk("Native AOT publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
 		"-o", filepath.Join(dir, "aot"))
 	caller("aot", false, filepath.Join(dir, "aot", "shippedprobe.exe"))
-
-	sdk("Native AOT + CFG publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
-		"-p:ControlFlowGuard=Guard", "-p:IntermediateOutputPath="+objcfg+string(filepath.Separator),
-		"-o", filepath.Join(dir, "aotcfg"))
-	caller("aot-cfg", true, filepath.Join(dir, "aotcfg", "shippedprobe.exe"))
 }

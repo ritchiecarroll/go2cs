@@ -231,8 +231,9 @@ dropping the branch; the fix branch never carries the skip.
   **The detector.** `RuntimeFeature.IsDynamicCodeSupported` stands in for "this caller's indirect calls are not
   checked", the condition under which the marking call is safe. The asymmetry is why: a wrong "narrow" ends the
   process at its first syscall, while a wrong "default" only leaves the page wider, and `Fn` is checked either way.
-  **The shipped class, measured** (P3 SHOULD 2). `TestSyscallTrampolineShipped` (cgo-e2e, windows) publishes a program
-  against the repository's own `golib` and `syscall`, not a copy of their choices, and runs it in the four callers.
+  **The shipped class, measured** (P3 SHOULD 2). `TestSyscallTrampolineShipped` and `TestSyscallTrampolineShippedCfg`
+  (cgo-e2e, windows; one Native AOT publish each, since one takes 15 to 25 minutes there) publish a program
+  against the repository's own `golib` and `syscall`, not a copy of their choices, and run it in the four callers.
   Each must print `strtod` 2.5 through `LazyProc.Call`, `labs` 7, 19 and 42 words through `_snprintf`, errno 2, and
   under the JIT a `NewCallback` pointer called through `SyscallN`; and a second run of each calls, through `SyscallN`,
   a function on a page whose every location is an invalid target: under CFG it must end with `0xC0000409` before the
