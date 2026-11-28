@@ -552,8 +552,6 @@ public class WaitGroupTwinTests
         return long.Parse(match.Groups[1].Value);
     }
 
-    // The scheduler's counters a carrier row reads, off one READING line. Monitor is every P the monitor gave out on
-    // its own: an injection past a long step, and a retake from a carrier it read or sensed as blocked.
     // The start snapshot of a round must not split one act of the monitor: the monitor counts a P it gives out first and
     // starts the carrier after, a release of a P and a thread start apart, so a snapshot taken between the two would read
     // the count as before the round and the carrier as inside it (P3's read of the twin fold, 2026-11-28). This waits
@@ -576,6 +574,8 @@ public class WaitGroupTwinTests
         }
     }
 
+    // The scheduler's counters a carrier row reads, off one READING line. Monitor is every P the monitor gave out on
+    // its own: an injection past a long step, and a retake from a carrier it read or sensed as blocked.
     private readonly record struct Counts(long Handoffs, long Injections, long Retakes, long Sensed)
     {
         internal long Monitor => Injections + Retakes + Sensed;

@@ -326,12 +326,19 @@ public class WaitGroupReuseTests
     //
     // The row prints how many rounds landed before the sleep beside the round count, and on a machine with more than
     // one processor it requires at least one. Two limits, both named: a waiter that has left its spin and is blocked
-    // taking the lock the test holds reads WaitSleepJoin too, so "asleep" is an upper bound and "not asleep" a lower one;
+    // taking the lock the test holds reads WaitSleepJoin too, and so does one inside a Thread.Sleep(0) of its spin, so
+    // "asleep" is an upper bound and "not asleep" a lower one;
     // and from outside the test cannot tell a spin ended by the generation it read from a spin that ran out, since both
     // go straight to the read under the lock.
     //
-    // The control rounds give the classifier its other answer: there the test waits until the waiter's thread reads
-    // WaitSleepJoin with the WaitGroup's reason, and the same read under the hold must say asleep.
+    // The control rounds give the classifier its other answer: there the calls land only under a hold in which the
+    // waiter reads asleep. The test waits until the waiter's thread reads WaitSleepJoin with the WaitGroup's reason and
+    // then takes the lock, but that first read is not proof of the sleep: SpinWait.SpinOnce calls Thread.Sleep(0) on
+    // some of its turns, and a thread inside Sleep(0) reads WaitSleepJoin too. A waiter caught there has left Sleep(0)
+    // by the time the test holds the lock and reads not asleep (hosted windows, 2026-11-28: 19 of 20; linux/amd64 under
+    // 8 busy loops on 4 processors: about 1,900 of 2,000). So a control round that reads not asleep under its hold lets
+    // go without a call and goes round: the waiter, left alone, reaches Monitor.Wait and stays there. The row prints
+    // how many holds came early.
     [TestMethod]
     public void AWaiterNotYetAsleepPanicsAsGoDoesWhenTheCountIsRaisedBeforeItSleeps()
     {
@@ -345,7 +352,7 @@ public class WaitGroupReuseTests
 
         for (int round = 1; round <= rounds; round++)
         {
-            if (LandBeforeTheSleep(round, waitUntilAsleep: false))
+            if (LandBeforeTheSleep(round, waitUntilAsleep: false, out _))
                 asleep++;
             else
                 notAsleep++;
@@ -353,25 +360,29 @@ public class WaitGroupReuseTests
             panicked++;
         }
 
-        int controlAsleep = 0;
+        int controlAsleep = 0, controlEarlyHolds = 0;
 
         for (int round = 1; round <= controlRounds; round++)
         {
-            if (LandBeforeTheSleep(round, waitUntilAsleep: true))
+            if (LandBeforeTheSleep(round, waitUntilAsleep: true, out int earlyHolds))
                 controlAsleep++;
+
+            controlEarlyHolds += earlyHolds;
         }
 
-        Console.WriteLine($"WGREUSE READING before-sleep processors={Environment.ProcessorCount} rounds={rounds} not-asleep={notAsleep} asleep={asleep} panicked={panicked} control-rounds={controlRounds} control-asleep={controlAsleep}");
+        Console.WriteLine($"WGREUSE READING before-sleep processors={Environment.ProcessorCount} rounds={rounds} not-asleep={notAsleep} asleep={asleep} panicked={panicked} control-rounds={controlRounds} control-asleep={controlAsleep} control-early-holds={controlEarlyHolds}");
 
-        Assert.AreEqual(controlRounds, controlAsleep, "the control rounds, whose waiter was asleep before the hold, read asleep under the hold");
+        Assert.AreEqual(controlRounds, controlAsleep, "every control round landed its calls under a hold in which the waiter read asleep");
 
         if (Environment.ProcessorCount > 1)
             Assert.IsTrue(notAsleep > 0, $"at least one of {rounds} rounds landed Done and Add before the waiter slept");
     }
 
     // One round on a fresh WaitGroup. Answers whether the waiter's thread read WaitSleepJoin under the hold in which
-    // Done and Add(1) ran, and fails by name unless the waiter then panicked with Go's text.
-    private static bool LandBeforeTheSleep(int round, bool waitUntilAsleep)
+    // Done and Add(1) ran, and fails by name unless the waiter then panicked with Go's text. A control round
+    // (waitUntilAsleep) makes the calls only under a hold in which that read says asleep, and counts in earlyHolds the
+    // holds it let go because the read said otherwise.
+    private static bool LandBeforeTheSleep(int round, bool waitUntilAsleep, out int earlyHolds)
     {
         string arm = waitUntilAsleep ? "control round" : "round";
         ж<Δsync.WaitGroup> wg = NewWaitGroup();
@@ -400,35 +411,48 @@ public class WaitGroupReuseTests
             Volatile.Write(ref ended, 1);
         });
 
-        if (waitUntilAsleep)
-        {
-            Assert.IsTrue(SpinWait.SpinUntil(() => Volatile.Read(ref goroutine) is { State: GoroutineState.Parked, Reason: WaitReason.SyncWaitGroupWait } &&
-                                                   (Volatile.Read(ref thread)!.ThreadState & System.Threading.ThreadState.WaitSleepJoin) != 0, TimeoutMs),
-                $"{arm} {round}: the waiter went to sleep in its Wait");
-        }
-
-        // The waiter publishes its park under the lock, just before it leaves the lock for its spin. This thread watches
-        // for that without the lock and without yielding: a thread that queued for the lock, or gave up its processor,
-        // would come back after the spin was over.
         long deadline = Stopwatch.GetTimestamp() + Stopwatch.Frequency * TimeoutMs / 1000;
-
-        while (Volatile.Read(ref goroutine) is not { State: GoroutineState.Parked } && Stopwatch.GetTimestamp() < deadline)
-            Thread.SpinWait(1);
-
         bool landed = false, sawAsleep = false;
+        earlyHolds = 0;
 
-        lock (gate)
+        // A round that is not a control goes through this loop once.
+        while (!landed && Stopwatch.GetTimestamp() < deadline)
         {
-            if (registered.Count == 1)
+            if (waitUntilAsleep)
             {
+                Assert.IsTrue(SpinWait.SpinUntil(() => Volatile.Read(ref goroutine) is { State: GoroutineState.Parked, Reason: WaitReason.SyncWaitGroupWait } &&
+                                                       (Volatile.Read(ref thread)!.ThreadState & System.Threading.ThreadState.WaitSleepJoin) != 0, TimeoutMs),
+                    $"{arm} {round}: the waiter's thread read WaitSleepJoin in its Wait ({earlyHolds} holds came early)");
+            }
+
+            // The waiter publishes its park under the lock, just before it leaves the lock for its spin. This thread
+            // watches for that without the lock and without yielding: a thread that queued for the lock, or gave up its
+            // processor, would come back after the spin was over.
+            while (Volatile.Read(ref goroutine) is not { State: GoroutineState.Parked } && Stopwatch.GetTimestamp() < deadline)
+                Thread.SpinWait(1);
+
+            lock (gate)
+            {
+                if (registered.Count != 1)
+                    break;
+
                 sawAsleep = (Volatile.Read(ref thread)!.ThreadState & System.Threading.ThreadState.WaitSleepJoin) != 0;
+
+                if (waitUntilAsleep && !sawAsleep)
+                {
+                    earlyHolds++;       // the first read caught the waiter's spin in Sleep(0): let go and go round
+                    continue;
+                }
+
                 wg.Done();
                 wg.Add(1);
                 landed = true;
             }
         }
 
-        Assert.IsTrue(landed, $"{arm} {round}: the waiter registered");
+        Assert.IsTrue(landed, waitUntilAsleep
+            ? $"{arm} {round}: the waiter registered and read asleep under a hold within {TimeoutMs} ms ({earlyHolds} holds came early)"
+            : $"{arm} {round}: the waiter registered");
 
         bool done = SpinWait.SpinUntil(() => Volatile.Read(ref ended) == 1, RoundDeadlineMs);
         wg.Done();      // the count back to zero

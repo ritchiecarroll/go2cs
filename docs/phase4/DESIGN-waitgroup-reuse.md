@@ -245,7 +245,7 @@ reads anything else is registered and not asleep, and it cannot go to sleep whil
 through the spin's exit, takes `Gate` after the `Add`, finds its generation moved and the count at 1, and never calls
 `Monitor.Wait`. Every round must end in Go's panic with Go's text, whichever side of the sleep the calls landed on.
 The row prints the hits beside the rounds and requires at least one hit on a machine with more than one processor.
-20 control rounds wait until the waiter is asleep first, and there the same read must say asleep (20 of 20).
+20 control rounds land the calls only under a hold in which the waiter reads asleep (see the 2026-11-28 block below).
 
 As run (linux/amd64, 4 processors, Release): `rounds=200 not-asleep=197 asleep=3 panicked=200` three times, then 196
 and 4 twice after the restore below. The same row on the cut WITHOUT its spin (a reading, not a gate): `not-asleep=17`
@@ -255,6 +255,23 @@ reads `WaitSleepJoin` too, so "asleep" is an upper bound and "not asleep" a lowe
 by the generation it read cannot be told from a spin that ran out, since both go straight to the read under `Gate`.
 Neuter: `reused` forced false in the plain path reds U9 by name in round 1 ("the waiter panicked (not asleep at the
 Done): it returned normally"), with U2 and U4; restored byte-identical.
+
+*2026-11-28, the control rounds after the hosted windows reading.* As first cut, a control round waited until the
+waiter's thread read `WaitSleepJoin` and required the read under the hold to say asleep too, 20 of 20. The hosted
+windows run at `e6df79ead86` (46135127024) read `control-asleep=19` and failed that assert; the other ten rows passed
+and the row's own reading held (`not-asleep=198 asleep=2 panicked=200`). Cause, measured: `SpinWait.SpinOnce` calls
+`Thread.Sleep(0)` on some of its turns, and a thread inside `Sleep(0)` reads `WaitSleepJoin`.
+A probe thread looping `SpinOnce(sleep1Threshold: -1)` read `WaitSleepJoin` on 5.8 percent of 20.8 million samples,
+one looping `Thread.Sleep(0)` on 92 percent, one looping `Thread.Yield()` or `Thread.SpinWait` on none (.NET 10,
+linux/amd64). So the first read could catch the waiter in its spin, and the hold then read it running. Red on
+linux/amd64 too once the processors are busy: the control at 2,000 rounds under 8 busy loops on 4 processors read
+`control-asleep=1895` and `1906` (0 misses of 2,000 twice with no load). With the waiter's spin planted as 35
+`Thread.Yield()` calls and no `Sleep(0)`, the same load read 2,000 of 2,000 twice (plant restored byte-identical).
+The fix is in the test only: a control round that reads not asleep under its hold lets go without a call and goes
+round, and the waiter, left alone, reaches `Monitor.Wait` and stays there. The row prints `control-early-holds`.
+Under the same load the fixed control read `control-asleep=2000` twice with `control-early-holds=50` and `48`. The
+limit above gains a third member: a waiter inside a `Sleep(0)` of its spin reads `WaitSleepJoin` under the hold as
+well, so "asleep" stays an upper bound.
 
 **The three neuters, as run (each restored byte-identical by sha256; 20 of 20 rows green after the restore).**
 (1) `Add` from zero back up steps the generation back: U1 red in round 1 and U2 red (0 of 8 ended), both by their
