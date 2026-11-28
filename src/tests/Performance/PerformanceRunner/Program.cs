@@ -723,7 +723,7 @@ namespace PerformanceRunner
                 string path = Path.Combine(s_srcRoot, relative);
 
                 if (File.Exists(path))
-                    refusals.AddRange(Headline.BuildFileRefusals($"src/{relative}", File.ReadAllText(path), allowed));
+                    refusals.AddRange(Headline.BuildFileRefusals(relative, File.ReadAllText(path), allowed));
             }
 
             foreach (string p in projects)

@@ -236,6 +236,16 @@ public class HeadlineGuardTests
 
         planted = targets.Replace("</Project>", "<ItemGroup><RuntimeHostConfigurationOption Include=\"System.GC.Server\" Value=\"true\" /></ItemGroup></Project>");
         AssertNames(Headline.BuildFileRefusals(Targets, planted, Headline.BuildFiles[Targets]), "<ItemGroup>");
+
+        // The twin switch is admitted at its one Project expression; its sibling, golib's whole consumer targets, is not.
+        StringAssert.Contains(targets, "Project=\"" + Headline.TwinsTargetsImport + "\"", "the targets still import the twin switch");
+        planted = targets.Replace("go.lib.twins.targets\"", "go.lib.targets\"");
+        Assert.AreNotEqual(targets, planted, "the plant did not land");
+        AssertNames(Headline.BuildFileRefusals(Targets, planted, Headline.BuildFiles[Targets]), "<Import>");
+
+        // ...and only in the file the allowance names.
+        string props2 = props.Replace("</Project>", "<Import Project=\"" + Headline.TwinsTargetsImport + "\" /></Project>");
+        AssertNames(Headline.BuildFileRefusals(Props, props2, Headline.BuildFiles[Props]), "<Import>");
     }
 
     // bc0f7ecf11 (2026-11-14) pinned go2csPath in the performance tree's props; the guard (1e3f492cdb, 2026-10-31)
@@ -301,7 +311,7 @@ public class HeadlineGuardTests
         Assert.AreEqual(0, Headline.EnvironmentRefusals(environment).Count);
         CollectionAssert.AreEqual(new[] { "DOTNET_CLI_TELEMETRY_OPTOUT", "DOTNET_NOLOGO", "DOTNET_ROOT" }, Headline.AdmittedHostVariables(environment).ToArray());
 
-        foreach (string knob in new[] { "DOTNET_TieredPGO", "DOTNET_TC_CallCountingDelayMs", "COMPlus_TieredCompilation", "DOTNET_gcServer", "GoCallCountingDelayMs", "TieredPGO", "IlcOptimizationPreference", "GOGC", "GOAMD64" })
+        foreach (string knob in new[] { "DOTNET_TieredPGO", "DOTNET_TC_CallCountingDelayMs", "COMPlus_TieredCompilation", "DOTNET_gcServer", "GoCallCountingDelayMs", "TieredPGO", "IlcOptimizationPreference", "GOGC", "GOAMD64", "GoTwinsFor", "GoTwinsIface", "GO2CS_MN", "GO2CS_MN_MAXTHREADS" })
             AssertNames(Headline.EnvironmentRefusals(new Dictionary<string, string?>(environment) { [knob] = "0" }), knob);
     }
 

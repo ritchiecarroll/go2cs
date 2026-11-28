@@ -83,7 +83,9 @@ separately by the Startup row.
   `GoReadyToRunUserCode` ([deployments](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#choosing-a-deployment)),
   or the tiered-compilation, dynamic PGO and quick-JIT-for-loops settings
   ([runtime settings](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#net-runtime-settings)). The
-  diagnostic runs with tiering off never appear in the table.
+  diagnostic runs with tiering off never appear in the table. The one import the shared build file adds, golib's
+  `go.lib.twins.targets`, is inert unless a twin switch (`GoTwins` or one of its siblings) is set, and the headline
+  guard refuses every twin switch, so it changes no headline build.
 - **The table is what a user gets.** Each program references the published `go.*` packages from nuget.org, as
   published, and is converted with that release's defaults: the program's own string literals stay plain, and calls
   are counted from the start (a call-counting delay of 0). The tables under History were converted with the defaults

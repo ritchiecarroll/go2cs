@@ -10,7 +10,9 @@
 // comes from one builder here and is checked against that command's allowlist before it runs. The build files, the
 // environment the runner inherits, an in-tree project file and the runtimeconfig.json a headline binary carries are
 // checked against what the template writes. Each refusal names what it found. Pure functions over text, so
-// PerformanceRunnerTests links this file and plants each opt-in without a build.
+// PerformanceRunnerTests links this file and plants each opt-in without a build. The one import a build file may carry
+// beyond the props chain is golib's M:N twin switch, inert without a twin property, which the environment check then
+// refuses by name: a headline table never measures a twinned build.
 
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -206,6 +208,17 @@ namespace PerformanceRunner
 
         internal const string RepositoryGo2csPath = "$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../..'))))";
 
+        /// <summary>The build file that may import <see cref="TwinsTargetsImport"/>.</summary>
+        internal const string TwinsTargetsImporter = "tests/Performance/Directory.Build.targets";
+
+        /// <summary>
+        /// golib's M:N twin switch, the one import the performance tree's targets may carry beside the props chain, at
+        /// exactly this Project expression: it lets GoTwinsFor name a Perf project for an M:N measurement, and it is inert
+        /// without a twin property (every property group in it is conditional on one, beside its own import flag). Every
+        /// twin property is a refused environment variable, so a headline build cannot carry one.
+        /// </summary>
+        internal const string TwinsTargetsImport = "$(MSBuildThisFileDirectory)../../core/golib/buildTransitive/go.lib.twins.targets";
+
         /// <summary>
         /// The properties each build file above the in-tree projects may set, keyed by its path under src/, with the
         /// value pinned where the documented set names one (null: any value). The Native AOT set is the
@@ -234,13 +247,15 @@ namespace PerformanceRunner
             };
 
         /// <summary>
-        /// Why the build file <paramref name="label"/> sets more than <paramref name="allowed"/>, one line per finding:
+        /// Why the build file <paramref name="relative"/> sets more than <paramref name="allowed"/>, one line per finding:
         /// a property outside the list, a pinned property at another value, or any item, target or import other than
-        /// the chain to the repository's Directory.Build.props.
+        /// the chain to the repository's Directory.Build.props and, in the one file that may carry it, golib's twin switch.
+        /// <paramref name="relative"/> is the file's <see cref="BuildFiles"/> key, so the runner and the tests name it alike.
         /// </summary>
-        internal static IReadOnlyList<HeadlineRefusal> BuildFileRefusals(string label, string xml, IReadOnlyDictionary<string, string?> allowed)
+        internal static IReadOnlyList<HeadlineRefusal> BuildFileRefusals(string relative, string xml, IReadOnlyDictionary<string, string?> allowed)
         {
             const string Column = "every C# column";
+            string label = $"src/{relative}";
             List<HeadlineRefusal> refusals = new();
             XElement root = XDocument.Parse(xml).Root!;
 
@@ -263,6 +278,9 @@ namespace PerformanceRunner
                         break;
 
                     case "Import" when (element.Attribute("Project")?.Value ?? "").Contains("GetPathOfFileAbove('Directory.Build.props'", StringComparison.Ordinal):
+                        break;
+
+                    case "Import" when relative == TwinsTargetsImporter && element.Attribute("Project")?.Value == TwinsTargetsImport:
                         break;
 
                     default:
@@ -328,7 +346,9 @@ namespace PerformanceRunner
         ];
 
         // MSBuild reads every environment variable as a property, so a variable with a knob's name sets the knob in
-        // every build the runner starts. The Go runtime and toolchain read theirs at build or run time.
+        // every build the runner starts. The Go runtime and toolchain read theirs at build or run time. The GoTwins*
+        // names are golib's M:N twin switch (go.lib.twins.targets' inputs and the properties it makes visible to
+        // go2cs-gen); GO2CS_MN turns the M:N scheduler on for a run, and every GO2CS_MN_ variable tunes it.
         private static readonly HashSet<string> s_knobVariables = new(StringComparer.OrdinalIgnoreCase)
         {
             "TieredCompilation", "TieredPGO", "TieredCompilationQuickJit", "TieredCompilationQuickJitForLoops",
@@ -336,6 +356,8 @@ namespace PerformanceRunner
             "OptimizationPreference", "IlcOptimizationPreference", "IlcInstructionSet", "IlcFoldIdenticalMethodBodies",
             "PublishAot", "PublishReadyToRun", "PublishTrimmed", "TrimMode", "SelfContained", "Optimize", "Configuration",
             "GOGC", "GOMEMLIMIT", "GOMAXPROCS", "GODEBUG", "GOAMD64", "GOFLAGS", "GOEXPERIMENT",
+            "GoTwins", "GoTwinsFor", "GoTwinsForIface", "GoTwinsForIfaceAll", "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsTestHost",
+            "GoTwinsSiblings", "GoTwinsTiming", "GoTwinsWeak", "GoTwinsCut", "GO2CS_MN",
         };
 
         /// <summary>
@@ -356,7 +378,8 @@ namespace PerformanceRunner
             name.StartsWith("COMPlus_", StringComparison.OrdinalIgnoreCase)
             || (name.StartsWith("DOTNET_", StringComparison.OrdinalIgnoreCase)
                 && !s_hostVariablePrefixes.Any(p => name.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
-            || s_knobVariables.Contains(name);
+            || s_knobVariables.Contains(name)
+            || name.StartsWith("GO2CS_MN_", StringComparison.OrdinalIgnoreCase);
 
         // ---- what reaches the runtime ----
 
