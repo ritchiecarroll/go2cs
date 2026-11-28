@@ -38,7 +38,7 @@ public class WaitGroupTwinTests
     private const string ChildVariable = "GO2CS_TEST_WGTWIN_CHILD";
     private const int TimeoutMs = 30_000;
 
-    private static readonly string[] s_mnRows = ["twin-waiters-hold-no-carriers", "twin-waiters-in-a-bubble-are-durable", "control-plain-wait-holds-carriers", "twin-zero-count-on-a-carrier", "mixed-waiters-one-done-wakes-all", "twin-survives-a-done-race"];
+    private static readonly string[] s_mnRows = ["twin-waiters-hold-no-carriers", "twin-waiters-in-a-bubble-are-durable", "control-plain-wait-holds-carriers", "twin-zero-count-on-a-carrier", "mixed-waiters-one-done-wakes-all", "twin-survives-a-done-race", "twin-refused-park-leaves-no-waiter"];
 
     private static ж<Δsync.WaitGroup> NewWaitGroup()
     {
@@ -115,36 +115,68 @@ public class WaitGroupTwinTests
         // nothing; that gate has a deadline that fails the row by name. The twin rows run first, before the control has
         // started any carrier past the P count, so their carriers-started is a reading too.
 
-        // WARM-UP, not read: one full round of K twinned waiters. A first step that compiles the twin's state machine
-        // runs long enough for the monitor to inject a carrier past it, which would count as a carrier started in the
-        // twin row below though no waiter holds one (measured cold: 10 to 17 started with 0 handoffs).
+        // WARM-UP, REPORTED and not asserted (G): one full round of K twinned waiters, printed as `twin-cold` so the cold
+        // reading stays in the record beside the warm one. Measured cold: 6 to 17 carriers started with 0 handoffs. That
+        // cost is the scheduler's first start, not this twin's: no waiter hands a P off. The first twin start makes the
+        // pool's own P carriers (GoScheduler.Start). Any carrier past those is the monitor's, which gives a P out on its
+        // own in two ways, and the line prints both counts for the round: `injections` past a step that runs over its
+        // threshold with work queued, and `retakes` and `sensed` from a carrier it reads as blocked. A first step that
+        // compiles can do either (the JIT finding of row 16a); which one a host shows is on the line, not assumed here.
         {
             ж<Δsync.WaitGroup> wg = NewWaitGroup();
             wg.Add(1);
+            long startedBefore = GoScheduler.CarriersStarted;
+            Counts before = Counts.Read();
+
             Waiters run = StartWaiters(waiters, () => wg.Wait(), () => wg.Waitꞏtwin());
             run.AwaitEntered();
             run.AwaitParked(WaitReason.SyncWaitGroupWait);
+            long started = GoScheduler.CarriersStarted - startedBefore;
+            Counts round = Counts.Read() - before;
+
             wg.Done();
             run.AwaitFinished();
+
+            Console.WriteLine($"WGTWIN READING twin-cold procs={procs} waiters={waiters} {round} carriers-started={started}");
         }
 
-        // TWIN: every waiter parks through ParkTwin and gives its carrier back.
+        // TWIN: every waiter parks through ParkTwin and gives its carrier back. `handoffs` is the claim, asserted in every
+        // round: a waiter that holds a carrier hands its P off. `carriers-started` is asserted only in a round the
+        // monitor gave no P out in, because a P the monitor gives out can start a carrier that no waiter holds (on a
+        // loaded host, a carrier descheduled past the threshold while waiters queue). A round the monitor acted in is
+        // printed and repeated, three rounds at most. `started` is read BEFORE the counters: the monitor counts first and
+        // starts the carrier after, so a carrier in `started` has its cause in the later read.
         {
-            ж<Δsync.WaitGroup> wg = NewWaitGroup();
-            wg.Add(1);
-            long startedBefore = GoScheduler.CarriersStarted, handoffsBefore = Counter("handoffs");
+            bool carriersAsserted = false;
 
-            Waiters run = StartWaiters(waiters, () => wg.Wait(), () => wg.Waitꞏtwin());
-            run.AwaitEntered();
-            run.AwaitParked(WaitReason.SyncWaitGroupWait);
-            long started = GoScheduler.CarriersStarted - startedBefore, handoffs = Counter("handoffs") - handoffsBefore;
+            for (int attempt = 1; attempt <= 3 && !carriersAsserted; attempt++)
+            {
+                ж<Δsync.WaitGroup> wg = NewWaitGroup();
+                wg.Add(1);
+                long startedBefore = GoScheduler.CarriersStarted;
+                Counts before = Counts.Read();
 
-            wg.Done();
-            run.AwaitFinished();
+                Waiters run = StartWaiters(waiters, () => wg.Wait(), () => wg.Waitꞏtwin());
+                run.AwaitEntered();
+                run.AwaitParked(WaitReason.SyncWaitGroupWait);
+                long started = GoScheduler.CarriersStarted - startedBefore;
+                Counts round = Counts.Read() - before;
 
-            Console.WriteLine($"WGTWIN READING twin procs={procs} waiters={waiters} handoffs={handoffs} carriers-started={started}");
-            Assert.AreEqual(0, handoffs, $"the twinned waiters held carriers: {handoffs} handed their P off for {waiters} waiters");
-            Assert.AreEqual(0, started, $"the twinned waiters held carriers: {started} started for {waiters} waiters on {procs} Ps");
+                wg.Done();
+                run.AwaitFinished();
+
+                Console.WriteLine($"WGTWIN READING twin attempt={attempt} procs={procs} waiters={waiters} {round} carriers-started={started}");
+                Assert.AreEqual(0, round.Handoffs, $"the twinned waiters held carriers: {round.Handoffs} handed their P off for {waiters} waiters");
+
+                if (round.Monitor != 0)
+                    continue;
+
+                Assert.AreEqual(0, started, $"the twinned waiters held carriers: {started} started for {waiters} waiters on {procs} Ps");
+                carriersAsserted = true;
+            }
+
+            if (!carriersAsserted)
+                Console.WriteLine("WGTWIN READING twin carriers-started NOT ASSERTED: the monitor gave a P out in each of three rounds");
         }
 
         Row("twin-waiters-hold-no-carriers");
@@ -206,6 +238,9 @@ public class WaitGroupTwinTests
             Waiters run = StartWaiters(waiters, () => wg.Wait(), async () => wg.Wait());
             run.AwaitEntered();
             run.AwaitParked(WaitReason.SyncWaitGroupWait);
+
+            // A waiter publishes its wait reason before its hand-off is counted, so the count is waited for, not read once.
+            SpinWait.SpinUntil(() => Counter("handoffs") - handoffsBefore >= waiters, TimeoutMs);
             long started = GoScheduler.CarriersStarted - startedBefore, handoffs = Counter("handoffs") - handoffsBefore;
 
             wg.Done();
@@ -272,30 +307,112 @@ public class WaitGroupTwinTests
         // Add writes the count under. So a Done that reaches zero runs either before the read (the twin returns at once)
         // or after the waiter is registered (it wakes the slot); a twin that read the count, let the lock go and
         // registered later would sleep through a Done in between, and this row would stop at its deadline.
+        //
+        // The row must put the Done on BOTH sides of the registration, or it shows nothing. Each round records whether
+        // the twin's task was incomplete at return (it registered and its park is pending: the Done came after) or
+        // complete (the Done came first, or inside the few instructions between the registration and the await). The
+        // delay before the Done follows the last outcome, longer after a Done that came first and shorter after one that
+        // came second, so the rounds settle at the crossing on any host. Both counts are printed and both must be above
+        // zero.
         {
             const int rounds = 20_000;
+            int doneFirst = 0, twinFirst = 0, spin = 0, maxSpin = 0;
 
             for (int round = 0; round < rounds; round++)
             {
                 ж<Δsync.WaitGroup> wg = NewWaitGroup();
                 wg.Add(1);
+                int pending = -1;
                 using ManualResetEventSlim finished = new(false);
 
                 goǃtwin(() => finished.Set(), async () =>
                 {
-                    await wg.Waitꞏtwin();
+                    GoTask task = wg.Waitꞏtwin();
+                    Volatile.Write(ref pending, task.GetAwaiter().IsCompleted ? 0 : 1);
+                    await task;
                     finished.Set();
                 });
 
-                if ((round & 3) != 0)
-                    Thread.SpinWait(round & 255);       // move the Done across the twin's entry
-
+                Thread.SpinWait(spin);
                 wg.Done();
                 Assert.IsTrue(finished.Wait(TimeoutMs), $"round {round}: the waiter slept through the Done that reached zero");
+
+                if (Volatile.Read(ref pending) == 1)
+                {
+                    twinFirst++;
+                    spin -= Math.Max(1, spin / 8);
+                    spin = Math.Max(0, spin);
+                }
+                else
+                {
+                    doneFirst++;
+                    spin = Math.Min(1 << 20, spin + Math.Max(1, spin / 8));
+                }
+
+                maxSpin = Math.Max(maxSpin, spin);
             }
+
+            Console.WriteLine($"WGTWIN READING done-race rounds={rounds} done-first={doneFirst} twin-first={twinFirst} last-spin={spin} max-spin={maxSpin}");
+            Assert.IsTrue(doneFirst > 0 && twinFirst > 0, $"the Done landed on one side of the twin's registration only: done-first={doneFirst} twin-first={twinFirst}");
         }
 
         Row("twin-survives-a-done-race");
+
+        // REFUSED PARK: a twin records one park in a step and the scheduler refuses a second (GoScheduler.ParkPending
+        // throws). The body here keeps a park on a slot of its own pending and calls Waitꞏtwin in the same step, so the
+        // twin's park is refused AFTER it registered its waiter and published its wait reason. Three things must hold.
+        // The refusal reaches the caller. The goroutine's wait reason is cleared, so it no longer reads as waiting on the
+        // WaitGroup. And the WaitGroup does not keep the entry: nothing will ever wake that slot, and the Done below
+        // would ready a goroutine that does not wait here, which panics in Goroutine.Ready before Add clears its list and
+        // sets Idle, so every other waiter would stay blocked.
+        {
+            ж<Δsync.WaitGroup> wg = NewWaitGroup();
+            wg.Add(1);
+            GoParkSlot held = new();
+            Exception? refusal = null, failure = null;
+            WaitReason reasonAfter = WaitReason.SyncWaitGroupWait;
+            int refused = 0;
+            using ManualResetEventSlim done = new(false);
+
+            goǃtwin(() => done.Set(), async () =>
+            {
+                try
+                {
+                    GoTask pending = ParkOn(held);                  // this step's park, kept pending
+
+                    try
+                    {
+                        wg.Waitꞏtwin().GetAwaiter().GetResult();     // a second park in the same step
+                    }
+                    catch (Exception ex)
+                    {
+                        refusal = ex;
+                    }
+
+                    reasonAfter = Goroutine.Current!.Reason;
+                    Volatile.Write(ref refused, 1);
+                    await pending;
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                }
+
+                done.Set();
+            });
+
+            Assert.IsTrue(SpinWait.SpinUntil(() => Volatile.Read(ref refused) == 1, TimeoutMs), "the body reached its second park");
+            Assert.IsTrue(refusal is InvalidOperationException, $"the second park in one step is refused to its caller: {refusal}");
+            StringAssert.Contains(refusal!.Message, "parked twice in one step");
+            Assert.AreEqual(WaitReason.Zero, reasonAfter, "the refused park's scope ended: the goroutine does not read as waiting on the WaitGroup");
+
+            wg.Done();          // nobody waits here: it readies nobody
+            held.Wake();
+            Assert.IsTrue(done.Wait(TimeoutMs), "the body finished on its own slot's wake");
+            Assert.IsNull(failure, failure?.ToString());
+        }
+
+        Row("twin-refused-park-leaves-no-waiter");
     }
 
     [TestMethod]
@@ -336,12 +453,39 @@ public class WaitGroupTwinTests
     }
 
     // One counter off the scheduler's READING line, the counters GO2CS_MN_READING=1 prints at exit.
-    private static long Counter(string name)
+    private static long Counter(string name) =>
+        Counter(GoScheduler.Reading(), name);
+
+    // A counter's name is matched whole: `handoffs` is not the tail of `idle-handoffs`.
+    private static long Counter(string reading, string name)
     {
-        System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(GoScheduler.Reading(), $@"\b{name}=(\d+)");
+        System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(reading, $@"(?<![\w-]){name}=(\d+)");
         Assert.IsTrue(match.Success, $"the scheduler's reading carries {name}");
         return long.Parse(match.Groups[1].Value);
     }
+
+    // The scheduler's counters a carrier row reads, off one READING line. Monitor is every P the monitor gave out on
+    // its own: an injection past a long step, and a retake from a carrier it read or sensed as blocked.
+    private readonly record struct Counts(long Handoffs, long Injections, long Retakes, long Sensed)
+    {
+        internal long Monitor => Injections + Retakes + Sensed;
+
+        internal static Counts Read()
+        {
+            string reading = GoScheduler.Reading();
+            return new Counts(Counter(reading, "handoffs"), Counter(reading, "injections"), Counter(reading, "retakes"), Counter(reading, "sensed"));
+        }
+
+        public static Counts operator -(Counts after, Counts before) =>
+            new(after.Handoffs - before.Handoffs, after.Injections - before.Injections, after.Retakes - before.Retakes, after.Sensed - before.Sensed);
+
+        public override string ToString() =>
+            $"handoffs={Handoffs} injections={Injections} retakes={Retakes} sensed={Sensed}";
+    }
+
+    // A park on a caller's own slot, with no wait reason: the refused-park row's first park of the step.
+    private static async GoTask ParkOn(GoParkSlot slot) =>
+        await slot;
 
     private static void Row(string name) =>
         Console.WriteLine($"WGTWIN ROW {name} ok");

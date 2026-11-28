@@ -39,7 +39,9 @@ note said the record would not move; that was wrong.
 ## 3. The body
 
 1. **Off a carrier** (`!GoScheduler.OnCarrier`): call the plain `Wait()` and return a completed task. The scheduler off,
-   a foreign thread, a goroutine locked to its thread: all take the path they take today.
+   a foreign thread, a goroutine that runs on a thread of its own: all take the path they take today. `OnCarrier` reads
+   the MOUNT, not the lock: a goroutine locked to its thread while it is mounted on a carrier is on a carrier and takes
+   the twin path. (An earlier draft listed "a goroutine locked to its thread" among the off-carrier cases; P3's NIT.)
 2. **On a carrier**, under `s.Gate`, in `Wait`'s own order:
    - read the caller's bubble and `associated` exactly as `Wait` does;
    - **zero count**: return a completed task, after the Go 1.25 disassociation (`Parked` empty, `Bubbled`, `associated`
@@ -47,7 +49,8 @@ note said the record would not move; that was wrong.
    - **non-zero count**: `synctestDurable = s.Bubbled && associated`; register the goroutine AND a new `GoParkSlot` in
      the waiter list; enter `Goroutine.ParkTwin(synctestDurable ? SynctestWaitGroupWait : SyncWaitGroupWait)` while
      still holding the lock (the lock that publishes the waiter to `Add`); release the lock; `await slot`; dispose the
-     park scope. The same reasons as `Wait`, so a bubble's `IsIdle` counts a twinned waiter as durably blocked exactly as
+     park scope. If the scheduler refuses the park, the waiter takes its entry back off the list and ends its scope
+     before the refusal reaches its caller (section 10.1). The same reasons as `Wait`, so a bubble's `IsIdle` counts a twinned waiter as durably blocked exactly as
      it counts a plain one, and a traceback prints the same wait reason.
 
 The front is not async: the off-carrier path and the zero-count return take no state machine and allocate nothing, as
@@ -81,12 +84,14 @@ disassociation, the reset of `Bubbled`), so the synctest arms are unchanged.
 |---|---|---|
 | R1 carriers | GolibTests, a `GO2CS_MN=1` child (GoroutineRunTwinTests' pattern: the scheduler is read once per process). K = 4P twinned goroutines (`goǃtwin`) wait on one WaitGroup. The reading is the scheduler's `handoffs` counter (a carrier that blocks in a plain park hands its P off first) and its carriers started, taken ONLY once all K waiters are parked with the WaitGroup wait reason; that gate has a deadline that fails the row by name, so a read taken before the waiters park cannot pass. TWIN arm (run first, before any carrier past P exists): the body awaits `Waitꞏtwin()`, 0 handoffs and 0 carriers started, and every waiter completes. CONTROL arm: the body calls the plain `Wait()`, handoffs at least K (the hole, measured; the instrument's positive control) | the twin arm does not compile at master (no member) |
 | R1b mixed | The same child (P3's SHOULD): K twinned waiters and one goroutine in the plain `Wait` on one WaitGroup; one `Done` finishes all K+1 within the deadline, so a defect in either half of the (goroutine, slot) waker fails by name | no member |
-| R1c race | The same child: 20,000 rounds of one twinned waiter against a `Done` moved across its entry by a varying spin; a waiter that slept through the `Done` stops the row at its deadline, naming the round | no member |
+| R1c race | The same child: 20,000 rounds of one twinned waiter against a `Done`. Each round records whether the twin's task was incomplete at return (the `Done` came after the registration) or complete (it came first); the delay before the `Done` follows the last outcome, so the rounds settle at the crossing on any host. Both counts are printed and both must be above zero. A waiter that slept through the `Done` stops the row at its deadline, naming the round (section 10.2) | no member |
+| R1d refused park | The same child: a twin body keeps a park on its own slot pending and calls `Waitꞏtwin` in the same step, so the scheduler refuses the twin's park after it registered. The refusal reaches the caller, the goroutine's wait reason is cleared, and the WaitGroup's next `Done` readies nobody (section 10.1) | red at a6959f3f53f: the wait reason stays `SyncWaitGroupWait` |
 | R2 zero count | GolibTests, in-process (off a carrier): a zero-count `Waitꞏtwin` returns a completed task; a non-zero one off a carrier blocks on the plain path and completes after `Done` | no member |
 | R3 bubble | GolibTests: the zero-count return disassociates a WaitGroup bubbled to the caller's bubble (the 1.25 rule), on the twin as on `Wait` | no member |
 | R3b durable | GolibTests, the same child: K twinned waiters inside a synctest bubble, on a WaitGroup added there. `synctest.Wait` returns (the bubble is durably idle), every waiter is parked with `SynctestWaitGroupWait`, and none handed a P off. A goroutine inside a bubble CAN be multiplexed: the test host offers no twin to a synctest test, but `Goroutine.StartTwin` (Goroutine.Multiplexed.cs:77) takes the creator's bubble, so a `goǃtwin` inside one starts a multiplexed member | no member |
 | R4 behavioral | `MnWaitGroup`, `[GoTestMatchingConsoleOutput]`, compared with `go run`: K goroutines park in `wg.Wait()` behind a gate, a releaser drains the count, all K report; deterministic output. Under the runner's `--mn` the stderr READING line carries peak-carriers (read, not compared) | Output equal at master too (the plain Wait is correct, only costly); the READING is the red |
 | R5 selection | the twin report (`go2cs.twins.report.g.cs`) of R4's `--mn` build lists the function that parks ONLY through `wg.Wait()` as twinned | at master that function is not a candidate |
+| R5b selection, standing | GenTests `WaitGroupTwinSelectionTests`: over a model of go.sync's two members under their real names, a function whose only park is `wg.Wait()` gets a twin that awaits `Waitꞏtwin()`; with the member marked weak, and with it absent, the function stays plain (section 10.4) | no row |
 | R6 surface | StdlibTwinSurfaceTests: `syncᴛWaitGroup.Waitꞏtwin` frozen (public static, returns GoTask, EditorBrowsable Never, a twin member); the list of public twins in go.sync and go.time gains it | no member |
 
 ## 6. Frozen surface, gates and the census
@@ -108,9 +113,9 @@ disassociation, the reset of `Bubbled`), so the synctest arms are unchanged.
 - **R1, five child runs:** twin arm `handoffs=0 carriers-started=0` in 5 of 5; bubble arm the same, every waiter
   parked with `SynctestWaitGroupWait`; control arm `handoffs=16` in 5 of 5 (its carriers started read 0 to 8, because
   carriers the cold start injected are still there to block: the handoff count is the reading, not that one).
-- **A warm-up round precedes the read.** Cold, the twin arm read 10 to 17 carriers started with 0 handoffs: the first
-  step compiles the twin's state machine and runs long enough for the monitor to inject a carrier past it. After one
-  unread round of K waiters the arm reads 0.
+- **A warm-up round precedes the read.** Cold, the twin arm read 10 to 17 carriers started with 0 handoffs. After one
+  round of K waiters the arm reads 0. The cause this bullet first gave (the monitor injects a carrier past a long first
+  step) was inferred and is mostly wrong: section 10.3 has the counters.
 - **Neuter:** `Waitꞏtwin` made to take the plain `Wait` on a carrier reds the twin arm by name ("16 handed their P off
   for 16 waiters"); restored byte-identical.
 - **R4:** `MnWaitGroup` passes all four phases plain and under `--mn`, Output compared with `go run`.
@@ -156,3 +161,107 @@ this cut. The twin is immune: its slot keeps the wake.
 ## 9. Not changed
 
 `Wait`'s plain body, `Add`'s counter and panics, the bubble fatals, `Go`, and every caller that is not on a carrier.
+
+## 10. After P3's code read (2026-11-28)
+
+P3 read the code at a6959f3f53f: CLEAR WITH NITS, four SHOULDs and three NITs. G approved the seat for the train and asked
+for the cold round as a READING line. Everything below is folded on top of the posted tip. Readings: linux/amd64, 4 Ps,
+K = 16, Release.
+
+### 10.1 A refused park (P3 SHOULD 1; P3's design SHOULD 3, not answered before)
+
+The twin registers its waiter and enters its park scope under `Gate`, then awaits its slot outside the lock. The
+scheduler can refuse that await: `GoScheduler.ParkPending` throws when the step has already recorded a park.
+
+Measured at a6959f3f53f, before any change:
+
+- **The compiler runs no `finally` of the method once an await has thrown out of the awaiter's `OnCompleted`.** The
+  state machine has marked itself suspended by then, and every `finally` body is guarded by that mark. A probe method
+  (`try { await slot; } catch { ... throw; } finally { ... }`) whose park was refused read `catch=True finally=False`. So
+  the twin's `finally { scope.Dispose(); }` did not run: the scope stayed open AND the entry stayed in `Parked`. (P3
+  read the scope as disposed; the entry half of the finding is as P3 wrote it.)
+- **The damage, two forms.** With a first WaitGroup's park pending and a second WaitGroup's park refused, the second's
+  `Done` marks the goroutine readied while it waits on the first, and the first's `Done` then throws `golib: Ready of
+  goroutine N, which is already readied (sync.WaitGroup.Wait)` out of `Add`, before `Parked.Clear` and `Idle.Set`. With
+  a park on a plain slot pending, the goroutine keeps the wait reason `SyncWaitGroupWait` while it waits elsewhere.
+- **A `lock` written inside the catch does not release.** Its exit is a `finally`, guarded the same way. The first form
+  of the fix removed the entry under `lock (s.Gate)` in the catch; the child then stopped in the next `Done`, waiting
+  for `Gate` (traced to that line).
+
+The fix: the catch calls `waitRefused`, a method that is NOT async, which removes the waiter's entry under `Gate` and
+ends the park scope; then the catch rethrows. The normal path ends the scope after the await. No `finally` is left in
+the method.
+
+Row R1d holds it. Plants, each restored (the file byte-identical by sha256 after the last one):
+
+| plant | the row reads |
+|---|---|
+| the entry is kept | `golib: Ready of goroutine N, which is not parked`, thrown out of the `Done` (P3's scenario) |
+| the scope is kept open | `Expected:<Zero>. Actual:<SyncWaitGroupWait>. the refused park's scope ended` |
+
+NOT in this seat: the compiler rule is general. Five other hand-written twins await a park slot: `Lockꞏtwin`
+(sync/mutex.cs, inside two `finally` blocks: the park scope and `leave`), three sites in golib's channel.cs and one in
+time/time_impl.cs. None is read here beyond `Lockꞏtwin`'s shape; reported to COORD for G.
+
+### 10.2 The race row (P3 SHOULD 2)
+
+The row showed nothing about WHERE its `Done` landed: a spin of at most 255 iterations can leave every round on one
+side. It now counts the rounds whose task was incomplete at return, moves the delay toward the crossing after each
+round, prints the split and requires both sides. Nine runs of 20,000 rounds: `done-first` 10573 to 10625, `twin-first`
+9375 to 9427.
+
+Shown red by a plant: the twin made to read the count under one hold of `Gate` and register under a second (the bubble
+arms kept, so the earlier rows pass). First run: `round 143: the waiter slept through the Done that reached zero`.
+Restored byte-identical.
+
+### 10.3 The cold round (P3 SHOULD 3, G's READING line)
+
+The warm-up round is printed as `WGTWIN READING twin-cold ...`, reported and not asserted. Both carrier lines now carry
+the monitor's counters for the round. Eleven cold rounds, one per child process (`handoffs` and `retakes` read 0 in
+every one):
+
+| injections | sensed | carriers-started |
+|---|---|---|
+| 1 | 3 | 7 |
+| 2 | 8 | 13 |
+| 1 | 8 | 11 |
+| 2 | 7 | 12 |
+| 4 | 3 | 10 |
+| 2 | 9 | 14 |
+| 2 | 9 | 14 |
+| 2 | 9 | 14 |
+| 1 | 6 | 10 |
+| 2 | 11 | 16 |
+| 2 | 6 | 11 |
+
+- No waiter hands a P off, cold or warm: the cold cost is not waiters holding carriers.
+- carriers-started is below P + injections + sensed in 11 of 11: one below in 10, two below in 1. So the count is the
+  pool's own P carriers, made at the first twin start (`GoScheduler.Start`), plus carriers the monitor started.
+- The monitor's share is mostly `sensed`, not `injections`: a carrier in a step whose thread sat in a managed wait for
+  two monitor ticks with work queued, whose P the monitor takes back. The design's first account (injection past a
+  long step) and P3's by-read account both named injection.
+- NOT measured: what those carriers wait on. Inferred by read: before its park, a waiter's step reaches one managed
+  wait, `Gate`. Cold, the first holder compiles under it while the others wait. A warm round reads 0 for all three
+  counters, which fits.
+
+The twin round asserts `handoffs == 0` in every round, and `carriers-started == 0` only in a round where the three
+monitor counters read 0; a round the monitor acted in is printed and repeated, three at most, and if all three were
+such rounds the line says the carrier count was not asserted. The carrier count is read before the counters (the
+monitor counts first and starts the carrier after). Eleven warm rounds: every counter and the carrier count read 0 on
+the first attempt.
+
+### 10.4 The selection, standing (P3 SHOULD 4)
+
+R5 was a one-time reading of the twin report. R5b is the standing row. It is a model, not go.sync itself (GenTests
+references no converted package): the real member's shape and its missing weak mark are frozen by R6, and R5b holds
+what the generator does with a member of that shape. Its two controls (weak, absent) read the other outcome.
+
+### 10.5 NITs
+
+- 5: the control arm waits for the hand-off count to reach K before it reads it (the reason is published before the
+  hand-off is counted).
+- 6: section 3, item 1 corrected.
+- 7: the durable reason shown red by a plant (the twin's reason made non-durable): `synctest.Wait never returned: the
+  bubble did not count the twinned waiters as durably blocked`. Restored byte-identical.
+- Also: the rows' counter reader matched `handoffs` inside `idle-handoffs` by pattern. It read the right one because
+  that one comes first on the line; the pattern now matches a whole name.

@@ -325,16 +325,46 @@ public static GoTask Waitꞏtwin(this ж<WaitGroup> Ꮡwg) {
         s.Parked.Add((Goroutine.Current, slot));
     }
 
-    return waitParkedAsync(slot, scope);
+    return waitParkedAsync(s, slot, scope);
 }
 
-private static async GoTask waitParkedAsync(GoParkSlot slot, Goroutine.ParkScope scope) {
+// The await is the park, and the scheduler can REFUSE it: GoScheduler.ParkPending throws when the step has already
+// recorded a park (and when the goroutine is off its carrier, which the front rules out). A refused park wakes
+// nobody, so waitRefused undoes the registration before the refusal reaches the caller.
+//
+// The shape is forced by the compiler. When an await throws out of the awaiter's OnCompleted, the state machine has
+// already marked itself suspended, and it runs NO finally of the method from then on: not one around the await, and
+// not one inside a catch, which includes the exit of a `lock`. A catch does run. So the scope ends in the catch and
+// after the await, never in a finally, and the catch calls a method that is not async for the work under Gate.
+// Measured: with `finally { scope.Dispose(); }` the scope stayed open, and with `lock (s.Gate)` written in the catch
+// Gate stayed held. WaitGroupTwinTests' refused-park row holds both.
+private static async GoTask waitParkedAsync(WaitGroupState s, GoParkSlot slot, Goroutine.ParkScope scope) {
     try {
         await slot;
     }
-    finally {
-        scope.Dispose();
+    catch {
+        waitRefused(s, slot, scope);
+        throw;
     }
+
+    scope.Dispose();
+}
+
+// The waiter whose park was refused takes its entry off Parked and ends its park scope. An entry left behind makes
+// the next Add that reaches zero ready a goroutine that does not wait here, and Goroutine.Ready panics on that before
+// the Add clears the list and sets Idle: every other waiter stays blocked. If that Add already ran, it woke the slot
+// and cleared the list, and the loop finds nothing. NOT async: see waitParkedAsync.
+private static void waitRefused(WaitGroupState s, GoParkSlot slot, Goroutine.ParkScope scope) {
+    lock (s.Gate) {
+        for (int i = 0; i < s.Parked.Count; i++) {
+            if (ReferenceEquals(s.Parked[i].Slot, slot)) {
+                s.Parked.RemoveAt(i);
+                break;
+            }
+        }
+    }
+
+    scope.Dispose();
 }
 
 } partial class sync_package {
