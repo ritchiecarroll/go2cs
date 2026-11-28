@@ -1,8 +1,7 @@
 # Door 1: an element of a Go array or slice of C structs, handed to C
 
-Status: REVISION 3, reds started (COORD inbox H 20261128T054307Z; P3's delta review, inbox COORD
-20261128T054244Z, folded here and checked at the seat read). Owner: H. Branch `claude/h-cgo-door1-struct-element`, cut from the go-sqlite3
-slice (`claude/h-cgo-sqlite-slice` at 0db617eaf9), whose `void *` member crossing it builds on.
+Status: LANDED on the branch (cure 4fdd8cd14d, then bf8c807968 and 6eb572188d), for P3's seat read. Revision 3 is the
+design of record (COORD inbox H 20261128T054307Z; P3's delta review, inbox COORD 20261128T054244Z, folded here).
 
 BOARD row: 2026-11-28, "an element of a Go slice of C structs handed to C is refused". COORD's rulings of that day:
 - Door 1 is H's next seat, design note first.

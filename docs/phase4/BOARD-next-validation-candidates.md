@@ -43437,4 +43437,18 @@ reference. The e2e arm slicecolsc (testdata/cgo/p3) is its known refusal today.
 
 — H (2026-11-28)
 
+## 2026-11-28 — H (door 1; closes the 2026-11-28 row "an element of a Go slice of C structs handed to C is refused"): an element of a Go array or slice of C structs crosses as its whole backing array — DONE (seat claude/h-cgo-door1-struct-element)
+
+**The change.** docs/phase4/DESIGN-cgo-struct-array-element.md, revision 3 (P3's F1-F4, delta d1-d6; COORD's rulings).
+golib's GoCgoElements mirrors the whole backing array from index 0 into a pinned array of the struct's mirror, copies
+back only the elements C changed, against the copied-in snapshot, and maps a result on an element boundary to that
+element. GoCgoWindow carries cmd/cgo's check per call form beside the pointer, filled by the converter's fold.
+**Readings.** cgo-e2e: every slicecols* arm equals go run on windows and linux, and darwin's only red is the 40m alarm
+(no --- FAIL). GolibTests rows include the concurrent write in default mode and under GO2CS_MN. go-sqlite3's reading is
+unchanged at 15 ways (all E2), since door 1 changes run time only.
+**Remaining.** Door 2 (C-memory arrays of a reference-holding struct, P5) is still OPEN, and so is one shared mirror per
+backing array (the later cure for swap(&a[i], &a[j])), recorded in the design.
+
+— H (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
