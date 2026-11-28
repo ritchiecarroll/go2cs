@@ -382,6 +382,14 @@ const cgoP3WideReinterpret = "C may write past one"
 // (GoCgoImages; the struct image door's B5).
 const cgoP3ImageTwoDoors = "name the same Go value"
 
+// The go-sqlite3 slice's two array forms, KNOWN REFUSALS (COORD's ruling of 2026-11-28 on the slice): an element of a Go
+// array of C structs handed to C (door 1, BOARD 2026-11-28, H's next seat), and a C-memory array of a C struct whose Go
+// side holds a reference, viewed through (*[N]T)(p) (door 2, BOARD 2026-11-28, routed to P5).
+const (
+	cgoP3SliceElement     = "an element of a Go array or slice: cgo lets C touch the whole array"
+	cgoP3NativeStructView = "cannot view native memory as array<struct_go2cs_probe_col>"
+)
+
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
 // 0 both ways. Since increment 3.2 seat 1b (18.12, P-2) an arm that hands C or a helper a pointer into Go memory whose
 // box names its storage prints as Go does: the wrapper pins the storage for the call. govoidnumber and govoidexpr hand
@@ -416,8 +424,8 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "govoidnumberwrite"},
 		// The go-sqlite3 marshalling slice: a void * member written by C, from Go memory and from C memory; a Go pointer
 		// in that member, which cgo's own check refuses on both sides; and a typedef'd const char * result.
-		{name: "slicecolsgo"},
-		{name: "slicecolsc"},
+		{name: "slicecolsgo", csFails: cgoP3SliceElement},
+		{name: "slicecolsc", csFails: cgoP3NativeStructView},
 		{name: "slicecolgoptr", goFails: "Go pointer to unpinned Go unsafe pointer", csFails: "Go pointer to unpinned Go unsafe pointer"},
 		{name: "slicefname"},
 		// The S4 cure's near misses (P3, F1): a typedef of a typedef (uint64_t) and a typedef'd enum, each a constant

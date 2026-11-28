@@ -49,6 +49,22 @@ The struct image door (DESIGN-cgo-phase3-marshaling 19.7, 19.9) images a view's 
 every element, and copies it back. A row reads that with ncol > 1 in both memories, since a one-record copy would be
 silently wrong.
 
+*Correction (2026-11-28; COORD's ruling on H's finding, inbox H 20261128T050225Z).* The paragraph above is wrong on
+both counts, and the hosted cgo-e2e at adcad2f879 showed it on every OS:
+- From Go memory, `&cargs[0]` is an element of a Go slice of structs. GoCgoArgs.StructPointer refuses that by design:
+  "an element of a Go array or slice: cgo lets C touch the whole array, which one struct's mirror cannot hold
+  (Phase 3)". The struct image door images only a reinterpret view (a native box over an order token), never an
+  element box.
+- From C memory, go-sqlite3 reads `colvals` as `(*[(math.MaxInt32-1)/unsafe.Sizeof(C.sqlite3_go_col{})]C.sqlite3_go_col)(unsafe.Pointer(rc.colvals))[:n:n]`.
+  The whole-array box over native memory is refused ("cannot view native memory as array<...>",
+  DESIGN-native-array-view), and door B (DESIGN-array-pointer-doors §16) refuses by name an element that holds a
+  reference, which this record's `unsafe.Pointer` member is.
+
+Neither is the `void *` member's crossing, which works for one record (arm slicecolgoptr, and the C-writes row). The
+slice seats at its conversion goal. Arms slicecolsgo and slicecolsc are KNOWN REFUSALS, asserting go2cs's refusal text
+by name, with go run's output kept in the arm's comment. The two doors are BOARD rows of 2026-11-28: door 1 (H, next
+seat) and door 2 (P5). The go-sqlite3 reading stays at 15 ways, all E2, until they land.
+
 ## 3. Shape B: a typedef'd pointer result (and parameter)
 
 `resultType.(*types.Pointer)` (cgoStructWrappers.go, the result read) sees only a pointer type literal. cmd/cgo

@@ -317,14 +317,21 @@ func main() {
 		fmt.Println("govoidnumberwrite", x)
 	case "slicecolsgo":
 		// The go-sqlite3 slice, A: three records in Go memory, each void * member written by C with a C string C owns,
-		// read back through the member, as go-sqlite3's _sqlite3_column_values and its caller do.
+		// read back through the member, as go-sqlite3's _sqlite3_column_values and its caller do. A KNOWN REFUSAL under
+		// go2cs until door 1 (an element of a Go array of C structs handed to C; BOARD 2026-11-28): &cols[0] is refused by
+		// name. go run prints, the reference for door 1:
+		//   slicecolsgo 1 10 0.5 alpha
+		//   slicecolsgo 2 20 1 beta
+		//   slicecolsgo 3 30 1.5 gamma
 		var cols [3]C.struct_go2cs_probe_col
 		C.go2cs_probe_col_fill(&cols[0], 3)
 		for i := range cols {
 			fmt.Println("slicecolsgo", int(cols[i].typ), int64(cols[i].i64), float64(cols[i].f64), C.GoStringN((*C.char)(cols[i].ptr), cols[i].n))
 		}
 	case "slicecolsc":
-		// The same three records in C memory.
+		// The same three records in C memory. A KNOWN REFUSAL under go2cs until door 2 (a C-memory array of a C struct
+		// whose Go side holds a reference; BOARD 2026-11-28, P5): the whole-array view is refused by name. go run prints
+		// the same three lines as slicecolsgo, with "slicecolsc".
 		size := C.size_t(unsafe.Sizeof(C.struct_go2cs_probe_col{}))
 		cols := (*[3]C.struct_go2cs_probe_col)(C.malloc(3 * size))
 		C.go2cs_probe_col_fill(&cols[0], 3)

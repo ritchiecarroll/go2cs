@@ -43411,4 +43411,30 @@ typedef'd pointer result only, and predicts the reading falls 38 -> 32 -> 30, th
 
 — H (2026-11-28)
 
+## 2026-11-28 — H (go-sqlite3 slice; COORD's ruling, inbox H 20261128T050225Z): an element of a Go slice of C structs handed to C is refused — OPEN, owner H, the next seat
+
+**Site.** go-sqlite3 v1.14.53, sqlite3.go:3027: `argp = &cargs[0]` over `cargs []C.sqlite3_go_col`, handed to
+`_sqlite3_bind_step_columns` with `C.int(len(cargs))`. cgo lets C touch the whole array behind the pointer. go2cs
+refuses the element box by design (GoCgoArgs.StructPointer: "an element of a Go array or slice: cgo lets C touch the
+whole array, which one struct's mirror cannot hold (Phase 3)").
+
+**Scope.** Phase 3's pin scope: mirror the backing from the element to its end, hand C the mirror's address, then copy
+every mirrored element back, with the pointer-member rules for pointer-bearing structs. Design note first. The e2e arm
+slicecolsgo (testdata/cgo/p3) is its known refusal today, with go run's output kept in its comment as the reference.
+**Order.** Before Phase 5's code if F1 is not yet on master; after Phase 5 if it is.
+
+— H (2026-11-28)
+
+## 2026-11-28 — H (go-sqlite3 slice; COORD's ruling, inbox H 20261128T050225Z): a C-memory array of a C struct whose Go side holds a reference cannot be viewed through `(*[N]T)(p)` — OPEN, routed to P5 (door B)
+
+**Site.** go-sqlite3 v1.14.53, sqlite3.go:3105:
+`colvals := (*[(math.MaxInt32 - 1) / unsafe.Sizeof(C.sqlite3_go_col{})]C.sqlite3_go_col)(unsafe.Pointer(rc.colvals))[:len(dest):len(dest)]`,
+over memory from `C.malloc` (sqlite3.go:3067), then `col := &colvals[i]`. The record's Go side holds a reference (its
+`unsafe.Pointer` member `ptr`). The whole-array box over native memory is refused ("cannot view native memory as
+array<...>", DESIGN-native-array-view), and door B's limits row (2026-11-15) refuses by name an element that holds a
+reference. The e2e arm slicecolsc (testdata/cgo/p3) is its known refusal today.
+**Owner.** P5, design first (COORD's routing).
+
+— H (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
