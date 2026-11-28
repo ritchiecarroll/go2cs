@@ -43216,4 +43216,40 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — P4 (2026-11-27)
 
+## 2026-11-27 — P5 (proof pages, COORD 20261127T193850Z): proof pages name host-fatal tests in a generated section; two committed pages owe it
+
+**OPEN until the next windows re-validation of `runtime` and `runtime/pprof`.** A host-fatal test is withdrawn from
+both sides, so it has no verdict row, and the totals line counts disclosed-divergent tests only (the roster's
+2026-10-26 ruling). Before this seat the generated page named such a test nowhere: the modernc.org/sqlite module page
+at master 4a56f17a3a read "399 matched · 0 disclosed" and never mentioned `TestSEHTruncatedShm`. The renderer now
+writes a "Withdrawn from both sides" section naming each in-scope host-fatal entry with its class and reason, and a
+pointer line under the totals; the totals line is unchanged (`TestProofPageNamesHostFatalWithdrawals`).
+
+**Owed:** the committed windows pages `docs/validation/current/runtime.md` (host-fatal entries in scope on windows:
+`TestEmptySlice`, `TestEmptyString`, `TestMkmalloc`, `TestProfBufWakeup`, `TestSetPanicOnFault`) and
+`docs/validation/current/runtime.pprof.md` (its six, all platforms) gain the section at their next re-validation.
+They are not hand-edited (COORD ruling a1). `runtime/debug` and `internal/synctest` have no host-fatal entry in scope
+on windows, so their committed pages do not move. Owner: whoever next re-validates those two rows on windows.
+
+— P5 (2026-11-27)
+
+## 2026-11-27 — P5 (F3 again, COORD 20261127T193402Z item 3): the TypeScript unit-test `-tests -recurse` convert grows the escape-probe cache to 7.6 GB
+
+**OPEN, measured once (linux/amd64 cloud box, master 4a56f17a3a).** `go2cs -tests -recurse -test-action all` over
+the trimmed TypeScript module (91 packages converted, the four test packages scanner, parser, ast and checker) filled
+the box on the first attempt: the conversion phase finished, then writes of the parser test package failed with no
+space left. The default probe cache (`go2cs/probe-cache` under the user cache directory) held 7.3 GB after that run,
+partly from an earlier sqlite run on the same box. A clean second run, started with the cache deleted, measured
+7.6 GB of probe cache at the end of the convert phase alone.
+
+**Workaround used:** the same command in two phases on one output root: `-test-action convert`, then delete the probe
+cache, then `-test-action compare` (it reconverts nothing). The compare phase's test-host builds then took a further
+7.6 GB in the output root's `.artifacts/bin`. On this box such a run wants about 20 GB free.
+
+**The cache has no cap and no cleanup of its own.** Its only bound is Go's age rule (entries unused for five days).
+Neither cure in P4's 2026-11-24 entry above (cap or trim per package; clear at the end of a `-recurse` run) has
+landed. Owner: unassigned; COORD routes.
+
+— P5 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
