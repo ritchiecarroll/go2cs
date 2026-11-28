@@ -29,7 +29,7 @@
 param(
     [string] $Filter = '^TestCgoPhase3ProgramRunsAsGoDoes$',
     [string] $Test = 'TestCgoPhase3ProgramRunsAsGoDoes',
-    [string] $Timeout = '40m'
+    [string] $Timeout = '60m'
 )
 
 $ErrorActionPreference = 'Continue'

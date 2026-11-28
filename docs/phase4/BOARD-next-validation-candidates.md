@@ -43517,4 +43517,26 @@ safety.
 
 — COORD (2026-11-27)
 
+## OPEN 2026-11-28 (P2, from H's finding): cgo-e2e builds the converted gate program once per test
+
+- **Row.** cgo-e2e builds the converted gate program once per test. A shared build, or a split, is the durable cure
+  when the darwin job nears 60m.
+- **Measured (H, os-matrix stage=cgo-e2e, goos=darwin, osx-x64).** The stage's 40-minute `go test` deadline was crossed:
+  - 46105758929, at fdb1bb8556: the first attempt crossed it, with the gate program's build taking 12m34s. The rerun
+    was green.
+  - 46123382509, at bf8c807968: crossed, with a gate build of 13m38s, plus a real slicecolgoptr miss (since fixed).
+  - 46127155163, at a6275523ae: crossed, and nothing else; there was no `--- FAIL`. windows 46127136610 and linux
+    46127145874 were green at the same SHA.
+- **Why it grows.** Every cgo seat adds arms to the gate program (door 1 alone adds 11), and the darwin runner builds
+  the converted program in 12 to 14 minutes.
+- **Done for now (COORD 20261128T094317Z, P2's claude/p2-cgo-e2e-deadline).**
+  - cgo-e2e's `go test` deadline is 60m on every GOOS, and its job is 75 minutes (113 on the mac legs).
+  - The release-smoke cgo job runs the same test under the same 60m (`.github/release-smoke-cgo.ps1`), with 80
+    minutes for the job.
+- **Until the cure.** A darwin cgo-e2e red still owes a read of its log for `--- FAIL` before it counts. A run that
+  crosses 60m is the signal to share the build across the tests or to split the stage.
+- **Owner.** Whoever owns os-matrix.yml's cgo stages (H for the cgo tests), when ruled in.
+
+— P2 (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

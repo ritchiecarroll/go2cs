@@ -367,7 +367,7 @@ func checkRefusedPackageReasons(t *testing.T, output string) {
 
 // testsE2EEnv turns on the -tests -recurse arms that build and run a converted test project. It is opt-in, since the
 // build takes the fixture's whole closure of the converted standard library, which takes minutes. The hosted
-// cgo-e2e stage sets it (os-matrix.yml) because that stage's 40-minute test budget fits the cold build; this is not a
+// cgo-e2e stage sets it (os-matrix.yml) because that stage's 60-minute test budget fits the cold build; this is not a
 // cgo test.
 const testsE2EEnv = "GO2CS_TESTS_E2E"
 

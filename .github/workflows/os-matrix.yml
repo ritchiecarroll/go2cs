@@ -708,11 +708,13 @@ jobs:
               'converter-cgo'    = 15    # the converter's go test filtered to its cgo tests: one cold module download and
                                          # build, plus one converter go build for the driver-level arms. About 15 s of
                                          # tests on H with no compiler. PROVISIONAL until the first run (H, 2026-11-09).
-              'cgo-e2e'          = 45    # cgo Phase 2's exit gate: one conversion of the gate program, one go build of
+              'cgo-e2e'          = 75    # cgo Phase 2's exit gate: one conversion of the gate program, one go build of
                                          # it, and one cold dotnet build of it with its closure of the converted
                                          # standard library, then about forty short runs. The closure build alone was
                                          # 249 s on H for a three-package closure. PROVISIONAL until the first run
-                                         # (H, 2026-11-12).
+                                         # (H, 2026-11-12). 45 until 2026-11-28: the go test deadline rose from 40m to
+                                         # 60m when darwin crossed 40m as a pattern, the gate program's build alone
+                                         # taking 12-14 min on osx-x64 (H; 46105758929, 46123382509, 46127155163).
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
@@ -969,8 +971,10 @@ jobs:
     if: needs.plan.outputs.stage == 'release-smoke'
     name: release-smoke cgo (${{ matrix.goos }} / ${{ matrix.rid }})
     runs-on: ${{ matrix.runner }}
-    # The test's own deadline is 40 min (cgo-e2e's); the slowest cgo-e2e JOB, which runs four more tests, read 22 min.
-    timeout-minutes: 60
+    # The test's own deadline is 60 min (cgo-e2e's, .github/release-smoke-cgo.ps1's -Timeout). The job had 60 against
+    # 40 until 2026-11-28, when cgo-e2e's darwin runs crossed 40 min as a pattern (H: the gate program's build alone
+    # takes 12-14 min on osx-x64); 80 keeps the same 20 minutes for the probe build and the steps around the test.
+    timeout-minutes: 80
     strategy:
       # Every RID's reading is wanted, whatever another reads.
       fail-fast: false
@@ -1939,7 +1943,7 @@ jobs:
           CGO_CC_PINNED: ${{ needs.plan.outputs.cgo-cc }}
           GO2CS_CGO_BUILD: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
           # The -tests -recurse arms that build and run a converted test project (TestTestsRecurseRuns*). Not cgo tests:
-          # they run in this stage because its budget (40-minute go test, 45-minute job) fits a cold build of the fixture's
+          # they run in this stage because its budget (60-minute go test, 75-minute job) fits a cold build of the fixture's
           # converted standard library closure, and converter-cgo's (10/15) does not.
           GO2CS_TESTS_E2E: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
           # A6's musl arms (TestACgoPackageIsRefusedByNameInAProcessItWasNotConvertedFor) run in docker, which every hosted
@@ -1967,7 +1971,9 @@ jobs:
           if ($env:STAGE -eq 'cgo-e2e') {
               # cgo Phase 4's exit gate (TestCgoPhase4*: preamble-defined C, side-built, run against go) rides here too.
               if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program|^TestCgoPhase4' }
-              $testTimeout = '40m'
+              # 60m on every GOOS: darwin crossed 40m as a pattern, the gate program's build alone taking 12-14 min on
+              # osx-x64 (H, 2026-11-28; BOARD). One value, not a darwin special case.
+              $testTimeout = '60m'
           }
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }
 
