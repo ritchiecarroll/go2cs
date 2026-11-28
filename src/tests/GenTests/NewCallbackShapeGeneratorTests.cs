@@ -318,6 +318,41 @@ public class NewCallbackShapeGeneratorTests
     }
 
     [TestMethod]
+    public void AGenericPointerReceiverForwarderCalledOnABoxIsASite()
+    {
+        // `func (p *Proc[T]) NewCallback(fn any) uintptr` called on a `*Proc[int]`: the converter declares the
+        // method generic, `NewCallback<T>(this ref Proc<T> p, ...)`, so its receiver is matched by definition and
+        // the method is reduced on the constructed box (P3's delta read, NIT 1).
+        (string? generated, string[] errors) = Run(
+            """
+            namespace go;
+
+            public static partial class main_package
+            {
+                public partial struct Proc<T> { }
+
+                public static uintptr NewCallback<T>(this ref Proc<T> p, object fn) => syscall_package.NewCallback(fn);
+
+                private static uintptr add1(uintptr p) => p;
+
+                internal static void main()
+                {
+                    ж<Proc<int>> p = null!;
+                    p.NewCallback(add1);
+                }
+            }
+            """);
+
+        Assert.IsNotNull(generated);
+        StringAssert.Contains(generated,
+            "[assembly: global::go.syscall_package.GoNewCallbackForwarder(typeof(global::go.main_package), \"NewCallback\", 1)]");
+        StringAssert.Contains(generated, $"Register<{U}, {U}>(typeof(global::System.Func<{U}, {U}>)",
+            "the call on the generic box is a site: " + generated);
+        Assert.IsFalse(errors.Any(error => error.Contains("newcallback-shapes", StringComparison.Ordinal)),
+            "the generated registrations must compile: " + string.Join("; ", errors));
+    }
+
+    [TestMethod]
     public void AMethodValueRegistersItsType()
     {
         // `syscall.NewCallback(w.wndProc)`: the converter passes a Go method value as a bare method group of the
@@ -381,6 +416,37 @@ public class NewCallbackShapeGeneratorTests
     }
 
     [TestMethod]
+    public void AGenericPointerMethodValueRegistersItsType()
+    {
+        // `w.wndProc` with `w` a `*window[int]`: the method is declared `wndProc<T>(this ref window<T> w, ...)`,
+        // so it is matched by definition and reduced on the constructed box, leaving no type parameter in its type.
+        (string? generated, string[] errors) = Run(
+            """
+            namespace go;
+
+            public readonly struct msgW { }
+
+            public static partial class main_package
+            {
+                public partial struct window<T> { }
+
+                internal static uintptr wndProc<T>(this ref window<T> w, msgW m) => default;
+
+                internal static void main()
+                {
+                    ж<window<int>> w = null!;
+                    syscall_package.NewCallback(w.wndProc);
+                }
+            }
+            """);
+
+        Assert.IsNotNull(generated);
+        StringAssert.Contains(generated, $"Register<global::go.msgW, {U}>(typeof(global::System.Func<global::go.msgW, {U}>)");
+        Assert.IsFalse(errors.Any(error => error.Contains("newcallback-shapes", StringComparison.Ordinal)),
+            "the generated registrations must compile: " + string.Join("; ", errors));
+    }
+
+    [TestMethod]
     public void APointerInTheSignatureIsLeftUnregistered()
     {
         (string? generated, string[] errors) = Run(
@@ -390,6 +456,11 @@ public class NewCallbackShapeGeneratorTests
             public ref struct span { }
 
             file delegate nuint fileLocal(nuint p);
+
+            file static class holder
+            {
+                public delegate nuint nested(nuint p);
+            }
 
             public static unsafe partial class main_package
             {
@@ -404,6 +475,7 @@ public class NewCallbackShapeGeneratorTests
                     syscall_package.NewCallback(byFunction);
                     syscall_package.NewCallback(bySpan);
                     syscall_package.NewCallback((fileLocal)(p => p));
+                    syscall_package.NewCallback((holder.nested)(p => p));
                 }
             }
             """);
@@ -413,8 +485,9 @@ public class NewCallbackShapeGeneratorTests
         Assert.IsFalse(generated.Contains("void*", StringComparison.Ordinal) || generated.Contains("delegate*", StringComparison.Ordinal),
             "a pointer or function-pointer type is never a registration's type argument: " + generated);
         Assert.IsFalse(
-            generated.Contains("span", StringComparison.Ordinal) || generated.Contains("fileLocal", StringComparison.Ordinal),
-            "a ref-like or file-local type is never a registration's type argument: " + generated);
+            generated.Contains("span", StringComparison.Ordinal) || generated.Contains("fileLocal", StringComparison.Ordinal) ||
+            generated.Contains("nested", StringComparison.Ordinal),
+            "a ref-like or file-local type, or one nested in a file-local type, is never named: " + generated);
     }
 
     [TestMethod]

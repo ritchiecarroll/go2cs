@@ -60,6 +60,8 @@ type (
 	fwdW uintptr
 	winW uintptr
 	prW  uintptr
+	gpW  uintptr
+	gvW  uintptr
 	anyW uintptr
 )
 
@@ -77,6 +79,15 @@ func (w *window) wndProc(p winW) uintptr { return w.base + uintptr(p) }
 type proc struct{}
 
 func (p *proc) NewCallback(fn any) uintptr { return syscall.NewCallback(fn) }
+
+// The same two shapes on a generic type: the converter makes each method generic over the type's parameters.
+type gproc[T any] struct{}
+
+func (p *gproc[T]) NewCallback(fn any) uintptr { return syscall.NewCallback(fn) }
+
+type gwindow[T any] struct{ base uintptr }
+
+func (w *gwindow[T]) wndProc(p gvW) uintptr { return w.base + uintptr(p) }
 
 func none() uintptr                                  { return 7 }
 func one(a uintptr) uintptr                          { return a + 1 }
@@ -129,6 +140,12 @@ func main() {
 	line("pointer-receiver forwarder", func() string {
 		return call1(pr.NewCallback(func(v prW) uintptr { return uintptr(v) + 10 }))
 	})
+	gp := &gproc[int]{}
+	line("generic pointer-receiver forwarder", func() string {
+		return call1(gp.NewCallback(func(v gpW) uintptr { return uintptr(v) + 11 }))
+	})
+	gw := &gwindow[int]{base: 12}
+	line("generic method value", func() string { return call1(syscall.NewCallback(gw.wndProc)) })
 	var x any = func(p anyW) uintptr { return uintptr(p) + 7 }
 	line("through any", func() string { return call1(syscall.NewCallback(x)) })
 
@@ -179,6 +196,8 @@ var callbackAotCommon = []string{
 	"method value = 50",
 	"registered by two packages = 49",
 	"pointer-receiver forwarder = 51",
+	"generic pointer-receiver forwarder = 52",
+	"generic method value = 53",
 	"no result panics: compileCallback: expected function with one uintptr-sized result",
 	"float argument panics: compileCallback: float arguments not supported",
 	"float result panics: compileCallback: float results not supported",
@@ -188,7 +207,7 @@ var callbackAotCommon = []string{
 }
 
 const (
-	callbackAotAnyAt    = 13 // the through-any line follows the common lines before it
+	callbackAotAnyAt    = 15 // the through-any line follows the common lines before it
 	callbackAotAnyJit   = "through any = 48"
 	callbackAotAnyAot   = "through any panics: compileCallback: no native code for callback type "
 	callbackAotArity3Go = "arity 3 = "
