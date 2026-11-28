@@ -717,3 +717,49 @@ func TestSqlite3ReadingOnTheSideBuild(t *testing.T) {
 
 	t.Logf("READING %s go-sqlite3 amalgamation compile: %v in %.1f s, object %d bytes; %s; flags %q", target, compileErr, elapsed.Seconds(), size, toolchainLine, compileFlags)
 }
+
+// TestSecurityFlagReading is a READING for COORD's security question (2026-11-28T01:53Z), not a gate: run it by name on
+// a hosted leg. It converts with -cgo three packages whose #cgo flags cmd/go's allowlist refuses at the pinned GOROOT
+// (cmd/go/internal/work/security.go), and logs, for each, the conversion's exit and which text stopped it: cmd/go's
+// own "invalid flag in #cgo" (the load's go list -compiled ran the check), a go2cs refusal, or none.
+func TestSecurityFlagReading(t *testing.T) {
+	requireHostCC(t)
+	probeDir := cgoRealProbeDir(t)
+	target := runtime.GOOS + "/" + runtime.GOARCH
+
+	for _, row := range []struct{ name, preamble string }{
+		{"fplugin", "#cgo CFLAGS: -fplugin=./evil.so\nstatic int x(void) { return 1; }\n"},
+		{"sysroot", "#cgo CFLAGS: --sysroot=/tmp\nstatic int x(void) { return 1; }\n"},
+		{"ldscript", "#cgo LDFLAGS: -L${SRCDIR}/evil -levil\nstatic int x(void) { return 1; }\n"},
+	} {
+		t.Run(row.name, func(t *testing.T) {
+			files := map[string]string{"main.go": "package main\n\n/*\n" + row.preamble + "*/\nimport \"C\"\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"x\", C.x()) }\n"}
+
+			if row.name == "ldscript" {
+				files["evil/libevil.so"] = "/* a GNU ld script, not an object */\nINPUT(-lc)\n"
+				files["evil/libevil.a"] = "/* a GNU ld script, not an archive */\nINPUT(-lc)\n"
+			}
+
+			combined, _, output, err := convertCgoReal(t, probeDir, files)
+			wrote := false
+
+			if entries, _ := os.ReadDir(output); len(entries) > 0 {
+				wrote = true
+			}
+
+			stoppedBy := "none"
+
+			switch {
+			case strings.Contains(combined, "invalid flag in #cgo"):
+				stoppedBy = "cmd/go's allowlist (go list -compiled)"
+			case strings.Contains(combined, "GO2CS2001"):
+				stoppedBy = "a go2cs refusal"
+			case err != nil:
+				stoppedBy = "another failure"
+			}
+
+			t.Logf("READING %s security %s: exit %v; stopped by %s; wrote output %v", target, row.name, err, stoppedBy, wrote)
+			t.Logf("READING %s security %s: the conversion's output ends:\n%s", target, row.name, lastLines(combined, 10))
+		})
+	}
+}
