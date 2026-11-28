@@ -359,6 +359,11 @@ private struct StdCallInfo {
 // push rbx
 // sub rsp, 336
 // mov rbx, rcx
+// cmp rbx, qword ptr gs:[0x10]
+// jb bad_block
+// lea rcx, [rbx+48]
+// cmp rcx, qword ptr gs:[0x08]
+// ja bad_block
 // mov rcx, [rbx+8]
 // cmp rcx, 42
 // ja too_many
@@ -397,6 +402,9 @@ private struct StdCallInfo {
 // ret
 // too_many:
 // int3
+// bad_block:
+// mov ecx, 5
+// int 0x29
 // stub_end:
 // .balign 4, 0xcc
 // unwind_info:
@@ -415,7 +423,11 @@ private struct StdCallInfo {
 // ASM-END
 //
 // The prolog saves rsi, rdi and rbx and reserves 336 bytes, Go's MaxArgs (42) words, leaving RSP 16-byte aligned at
-// the call; a count above 42 reaches int3, as Go's asm crashes (syscalln refuses it before the stub, with Go's text).
+// the call. The StdCallInfo must lie whole on the calling thread's own stack, between the TEB's StackLimit
+// (gs:[0x10]) and StackBase (gs:[0x08]); syscalln's is a local, so it always does. A block anywhere else ends the
+// process with __fastfail(FAST_FAIL_INVALID_ARG), 0xc0000409, which no handler in the process can catch, so a caller
+// that can write heap or global memory but not this thread's stack cannot hand the stub a Fn and its arguments. A
+// count above 42 reaches int3, as Go's asm crashes (syscalln refuses it before the stub, with Go's text).
 // guard_check is the page's last 8 bytes: 0 in the image, and under Control Flow Guard the process image's own check
 // routine, written once before the page is made executable and compared with the rest. When it is not 0 the stub
 // calls it with Fn in RCX before anything else: the routine returns for a valid call target and ends the process
@@ -429,8 +441,8 @@ private struct StdCallInfo {
 //
 // UNWIND_INFO (version 1, no handler, no frame register): a 10-byte prolog and five code slots padded to six. In
 // reverse prolog order: at 10 UWOP_ALLOC_LARGE with a slot of 42 (336 / 8); at 3, 2 and 1 UWOP_PUSH_NONVOL of rbx
-// (3), rdi (7) and rsi (6). The RUNTIME_FUNCTION record is at 176: begin 0, end 158, unwind info 160, relative to
-// the page; guard_check is at 192.
+// (3), rdi (7) and rsi (6). The RUNTIME_FUNCTION record is at 216: begin 0, end 199, unwind info 200, relative to
+// the page; guard_check is at 232.
 //
 // The page is written while it is not executable, made read-execute (never both at once), compared with the image,
 // and registered with RtlAddFunctionTable, so an exception raised in a callback the native function makes
@@ -462,10 +474,12 @@ private static unsafe class StdCallTrampoline {
     internal static ReadOnlySpan<byte> Image => [
         // stub: the prolog
         0x56, 0x57, 0x53, 0x48, 0x81, 0xEC, 0x50, 0x01, 0x00, 0x00,
-        // the StdCallInfo, and Go's argument-count check
-        0x48, 0x89, 0xCB, 0x48, 0x8B, 0x4B, 0x08, 0x48, 0x83, 0xF9, 0x2A, 0x0F, 0x87, 0x82, 0x00, 0x00, 0x00,
+        // the StdCallInfo, whole on this thread's stack (TEB StackLimit, StackBase), then Go's argument-count check
+        0x48, 0x89, 0xCB, 0x65, 0x48, 0x3B, 0x1C, 0x25, 0x10, 0x00, 0x00, 0x00, 0x0F, 0x82, 0xA4, 0x00, 0x00, 0x00,
+        0x48, 0x8D, 0x4B, 0x30, 0x65, 0x48, 0x3B, 0x0C, 0x25, 0x08, 0x00, 0x00, 0x00, 0x0F, 0x87, 0x91, 0x00, 0x00, 0x00,
+        0x48, 0x8B, 0x4B, 0x08, 0x48, 0x83, 0xF9, 0x2A, 0x0F, 0x87, 0x82, 0x00, 0x00, 0x00,
         // the CFG check of Fn, when guard_check is not 0
-        0x48, 0x8B, 0x05, 0x9E, 0x00, 0x00, 0x00, 0x48, 0x85, 0xC0, 0x74, 0x09,
+        0x48, 0x8B, 0x05, 0xA4, 0x00, 0x00, 0x00, 0x48, 0x85, 0xC0, 0x74, 0x09,
         0x48, 0x8B, 0x0B, 0xFF, 0xD0, 0x48, 0x8B, 0x4B, 0x08,
         // the N words to the stack
         0x48, 0x8B, 0x73, 0x10, 0x48, 0x89, 0xE7, 0xFC, 0xF3, 0x48, 0xA5,
@@ -483,21 +497,23 @@ private static unsafe class StdCallTrampoline {
         0x65, 0x4C, 0x8B, 0x14, 0x25, 0x30, 0x00, 0x00, 0x00, 0x41, 0x8B, 0x42, 0x68, 0x48, 0x89, 0x43, 0x28,
         // the epilog, then too_many
         0x48, 0x81, 0xC4, 0x50, 0x01, 0x00, 0x00, 0x5B, 0x5F, 0x5E, 0xC3, 0xCC,
+        // bad_block: __fastfail(FAST_FAIL_INVALID_ARG)
+        0xB9, 0x05, 0x00, 0x00, 0x00, 0xCD, 0x29,
         // .balign 4, padding with int3
-        0xCC, 0xCC,
-        // unwind_info, at 160
+        0xCC,
+        // unwind_info, at 200
         0x01, 0x0A, 0x05, 0x00, 0x0A, 0x01, 0x2A, 0x00, 0x03, 0x30, 0x02, 0x70, 0x01, 0x60, 0x00, 0x00,
-        // runtime_function, at 176: begin 0, end 158, unwind info 160
-        0x00, 0x00, 0x00, 0x00, 0x9E, 0x00, 0x00, 0x00, 0xA0, 0x00, 0x00, 0x00,
+        // runtime_function, at 216: begin 0, end 199, unwind info 200
+        0x00, 0x00, 0x00, 0x00, 0xC7, 0x00, 0x00, 0x00, 0xC8, 0x00, 0x00, 0x00,
         // .balign 8, padding with int3
         0xCC, 0xCC, 0xCC, 0xCC,
-        // guard_check, at 192: 0 here, the CFG check routine on the page
+        // guard_check, at 232: 0 here, the CFG check routine on the page
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
     // Where the RUNTIME_FUNCTION record and the guard_check slot sit in Image (the ASM block's layout).
-    private const int RuntimeFunctionOffset = 176;
-    private const int GuardCheckOffset = 192;
+    private const int RuntimeFunctionOffset = 216;
+    private const int GuardCheckOffset = 232;
 
     // The test switch that takes the fallback on any host, so its loud line and its integer calls are read where the
     // trampoline would build (DESIGN §6).

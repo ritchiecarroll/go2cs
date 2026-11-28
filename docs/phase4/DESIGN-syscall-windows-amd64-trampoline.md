@@ -1,6 +1,8 @@
 # DESIGN — the windows/amd64 syscall trampoline: Go's register shape, and `r2` as XMM0
 
-> **Status: PROPOSED (2026-11-28), revision 4, for P3's re-read.** P3's design read of revision 2 (`5e3cef4e76`) was
+> **Status: PROPOSED (2026-11-28), revision 5, for P3's read.** Revision 5 adds the thread-stack check on the
+> caller's block, which COORD 031517Z took (Q1) after revision 4 was read CLEAR WITH NITS; section 13 lists it.
+> Revision 4 history follows. P3's design read of revision 2 (`5e3cef4e76`) was
 > APPROVE WITH CHANGES: one MUST on the Native AOT + CFG arm, two SHOULDs, three NITs. COORD 002011Z and 002455Z ruled
 > the MUST: option (d), the stub checks `Fn` with the process's own CFG routine. P3's re-read of revision 3 found the
 > stub took that routine from the caller's block (MUST); revision 4 keeps it on the stub's own read-only page.
@@ -39,7 +41,7 @@ This design changes amd64 only. (windows/386, where Go's `r2` is `EDX`, is not a
 
 ## 2. The remedy
 
-Run Go's call shape, in machine code: a 158-byte transcription of `asmstdcall` for the Windows x64 convention,
+Run Go's call shape, in machine code: a 199-byte transcription of `asmstdcall` for the Windows x64 convention,
 called through `delegate* unmanaged<StdCallInfo*, void>`. `StdCallInfo` is Go's struct of the same name, in the same
 order (`Fn`, `N`, `Args`, `R1`, `R2`, `Err`, 8 bytes each). The page also holds `guard_check`, the process's CFG check
 routine or 0, written once before the page is made executable (section 6).
@@ -47,6 +49,8 @@ routine or 0, written once before the page is made executable (section 6).
 ```
 push rsi; push rdi; push rbx; sub rsp, 336          ; prolog: 336 = Go's MaxArgs (42) words, RSP 16-aligned at the call
 mov rbx, rcx                                        ; rbx = the StdCallInfo
+cmp rbx, gs:[0x10]; jb bad_block                    ; the block lies whole on this thread's stack (section 6):
+lea rcx, [rbx+48]; cmp rcx, gs:[0x08]; ja bad_block ;   StackLimit <= rbx and rbx + 48 <= StackBase, from the TEB
 mov rcx, [rbx+8]; cmp rcx, 42; ja too_many          ; Go's argument-count check, in the stub
 mov rax, [rip+guard_check]; test rax, rax; jz checked ; under CFG (section 6): the check routine on Fn,
 mov rcx, [rbx]; call rax; mov rcx, [rbx+8]          ;   which returns for a valid target and fast-fails otherwise
@@ -59,6 +63,7 @@ mov [rbx+24], rax; movq [rbx+32], xmm0              ; r1, r2
 mov r10, gs:[0x30]; mov eax, [r10+0x68]; mov [rbx+40], rax           ; GetLastError()
 add rsp, 336; pop rbx; pop rdi; pop rsi; ret        ; the epilog the unwinder recognizes
 too_many: int3                                      ; Go's `INT $3`: not enough room -> crash
+bad_block: mov ecx, 5; int 0x29                     ; __fastfail(FAST_FAIL_INVALID_ARG): 0xc0000409, uncatchable
 ```
 
 Differences from Go's asm, each forced by the convention rather than chosen: Go's frame is ABI0 (it saves the old
@@ -112,9 +117,9 @@ result type widens to carry `r2`).
   file's comment between `ASM-BEGIN` and `ASM-END`: the code, `.balign 4, 0xcc`, the `UNWIND_INFO` as `.byte` and
   `.short` directives, and the `RUNTIME_FUNCTION` as `.long stub - stub, stub_end - stub, unwind_info - stub`, so the
   assembler computes every offset. The array beside it, a `ReadOnlySpan<byte>` property (`Image`, data in the image's
-  read-only section, never a writable `byte[]` field), holds exactly the bytes that source assembles to: 200 bytes,
-  the code at 0-157, `int3` padding at 158-159, `UNWIND_INFO` at 160-175, the `RUNTIME_FUNCTION` at 176-187, `int3`
-  padding at 188-191, and `guard_check` at 192-199, 0 in the image (so the pin and the re-assembly see 0) and written
+  read-only section, never a writable `byte[]` field), holds exactly the bytes that source assembles to: 240 bytes,
+  the code at 0-198, `int3` padding at 199, `UNWIND_INFO` at 200-215, the `RUNTIME_FUNCTION` at 216-227, `int3`
+  padding at 228-231, and `guard_check` at 232-239, 0 in the image (so the pin and the re-assembly see 0) and written
   on the page before it is made executable; the post-protect compare covers it.
   `RtlAddFunctionTable` takes a pointer to that last record.
 - **The check**, a repoguard test under the plain `go test ./...` (`syscallTrampolineBytes_test.go`):
@@ -125,17 +130,18 @@ result type widens to carry `r2`).
      that is not GNU x86-64, or none), the re-assembly half logs NOT RUN (Inconclusive, never a pass) and the pin
      still holds. Otherwise it assembles the comment and compares `.text` with the array, and a failure there is red.
   4. Made to fail: one byte flipped in the array fails both halves, restored byte-identical.
-  The bytes in this revision were produced exactly that way (`as --64` then `objcopy -O binary`), 200 bytes, SHA-256
-  `83f78a2b893abcc9762ea0ca793290afd0d7bff3f93fe1b70efd5d9717cef554`. The `rip`-relative load resolves inside the
+  The bytes in this revision were produced exactly that way (`as --64` then `objcopy -O binary`), 240 bytes, SHA-256
+  `793e5ccf3bc9781ae7916f6936441e4ca5e940e8dde87eaeb4b34508de6080ef`. The `rip`-relative load resolves inside the
   section (no relocation).
 
 ## 5. Unwind data (COORD point 4)
 
 `UNWIND_INFO` version 1, no handler, no frame register, prolog size 10, five code slots padded to six. In reverse
 prolog order: at offset 10, `UWOP_ALLOC_LARGE` with op info 0 and a slot of 42 (336 / 8); at 3, 2 and 1,
-`UWOP_PUSH_NONVOL` of `rbx` (3), `rdi` (7) and `rsi` (6). The `RUNTIME_FUNCTION` record, at page offset 176, is
-(begin 0, end 158, unwind info 160), each relative to the page base given to `RtlAddFunctionTable`. The `int3` at 157
-lies after the prolog, inside the described range, so a crash there unwinds like any other body instruction. The CFG
+`UWOP_PUSH_NONVOL` of `rbx` (3), `rdi` (7) and `rsi` (6). The `RUNTIME_FUNCTION` record, at page offset 216, is
+(begin 0, end 199, unwind info 200), each relative to the page base given to `RtlAddFunctionTable`. The `int3` at 191
+and the fast fail at 192-198 lie after the prolog, inside the described range, so a crash there unwinds like any
+other body instruction (the fast fail itself does not unwind). The CFG
 check is an ordinary call from the body; its fast fail ends the process without unwinding.
 
 Why it is needed: a native function called through the stub may call back into managed code
@@ -238,12 +244,16 @@ dropping the branch; the fix branch never carries the skip.
   **What stays after the check (stated, P3 SHOULD 2).** Two residuals remain where an attacker already controls an
   indirect call target and `RCX`:
   - Past the check: where the page is not narrowed (Native AOT + CFG, COORD 235045Z), the stub's own `mov rax, [rbx];
-    call rax` at offset 115 is a valid call target that follows the check. Reaching it usefully needs `RBX` on attacker memory as
-    well. This is the cost of keeping the default protection there; narrowing (option (c)) would remove it.
+    call rax` at offset 149 is a valid call target that follows both checks. Reaching it usefully needs `RBX` on
+    attacker memory as well. This is the cost of keeping the default protection there; narrowing (option (c)) would
+    remove it.
   - Argument control: the checked entry lets a hijacked call that controls `RCX` alone choose every argument word, in
     both register files, of any VALID target (`VirtualProtect` is one). Master's Native AOT + CFG process has no such
-    target. A cheap narrowing, proposed for COORD to rule: the stub refuses a block outside the current thread's stack
-    (`gs:[0x08]` and `gs:[0x10]` in the TEB); `syscalln`'s block is always a local.
+    target. **Revision 5 narrows it** (COORD 031517Z took P3's Q1 answer): the stub refuses a block that does not lie
+    whole between the TEB's `StackLimit` (`gs:[0x10]`) and `StackBase` (`gs:[0x08]`) with
+    `__fastfail(FAST_FAIL_INVALID_ARG)`, before the count check and the CFG check. `syscalln`'s block is always a local,
+    so no call it makes is refused. "RCX on any memory the attacker wrote" becomes "RCX on the calling thread's own
+    stack". A fast fail rather than `int3`: no handler in the process can catch it and resume past the check.
   Measured before the code (`46087694121`, `aot-cfg-guardcheck` on the .NET caller row, Native AOT + CFG): the slot is
   present, the check of `GetTickCount` returns, and the check of an address on a `PAGE_TARGETS_INVALID` page ends the
   process with `0xC0000409`.
@@ -354,3 +364,18 @@ are the same in every arm, so the JIT reading covers the check those bytes make.
 | SHOULD 3. Under the JIT a call to a target CFG calls invalid now fast-fails where Go and master call it | docs/Limitations.md, one entry |
 | NIT 4. CFG on with no routine leaves the stub unchecked | §6: the loud fallback |
 | Layout | §4, §5: 200 bytes, `RUNTIME_FUNCTION` at 176, `guard_check` at 192 |
+
+## 13. Revision 5: the thread-stack check (COORD 031517Z, Q1)
+
+| Point | Where it landed |
+|---|---|
+| Q1. Refuse a block outside the calling thread's stack (P3 025538Z: take it, this seat or the next) | §2 listing; §6 "What stays after the check", argument control; the row's `heap` run |
+| The refusal: `__fastfail(FAST_FAIL_INVALID_ARG)`, not `int3` | §2, §6: uncatchable, the same exit code as the CFG check |
+| Layout | §4, §5: 240 bytes, `RUNTIME_FUNCTION` at 216, `guard_check` at 232; the second call at 149 |
+
+The shipped row gains a fifth run under the JIT, `heap`: the program enters the stub, found by reflection as the
+`block` run finds it, with a block in native heap memory (`NativeMemory.AllocZeroed`), `Fn` = `GetCurrentProcessId`
+from `GetProcAddress` (a valid CFG target) and `N` 0. On revision 4 it returns the process id ("heap: <id>", exit 0),
+so it reads red first; on revision 5 it must end with `0xC0000409` after "heap: calling". The `block` run's block is
+`stackalloc`, so it still reaches the CFG check and still ends with `0xC0000409`. Every other line is unchanged: every
+call through `syscalln` passes its local block.
