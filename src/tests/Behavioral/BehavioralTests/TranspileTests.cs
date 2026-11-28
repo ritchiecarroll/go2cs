@@ -1573,6 +1573,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
+    public void CheckMnWaitGroup() => CheckTarget("MnWaitGroup");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]

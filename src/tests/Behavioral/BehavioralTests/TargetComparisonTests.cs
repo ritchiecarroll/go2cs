@@ -1576,6 +1576,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
+    public void CheckMnWaitGroup() => CheckTarget("MnWaitGroup");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]

@@ -548,7 +548,8 @@ internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Se
 //
 // WEAK (N1, DESIGN-mn-nopark.md 3.2): a call to Lock never makes its caller a twin. A caller that is a twin for another
 // reason awaits this twin as above; a caller with no other park stays plain, and a contended Lock there blocks its
-// thread. sync is hand-owned and no generator runs over it, so the mark is written here by hand.
+// thread. The twin is hand-written, so the mark is written here by hand. (The generator does run over sync in a twin
+// build: the hand-owned mark is on sync's FILES, not on the assembly. It emits no twin of its own for Lock.)
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 [global::go.golib.GoParkWeak]
 public static global::go.golib.GoTask Lockꞏtwin(this ж<Mutex> Ꮡm) {

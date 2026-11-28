@@ -43340,4 +43340,26 @@ Owner: unrouted (R proposes).
 — R (2026-11-27)
 
 
+## 2026-11-27 — P4 (Wait-twin seat, COORD 20261127T195751Z, named by G): a plain sync.WaitGroup.Wait HANGS where Go panics, when the count is raised again before the woken waiter returns (OPEN, pre-existing)
+
+- **What.** The hand-owned plain `Wait` (src/core/sync/waitgroup.cs) sleeps on `WaitGroupState.Idle`, a
+  `ManualResetEventSlim` that `Add` sets at zero and resets at any non-zero count. A waiter the zero-reaching `Add` has
+  signalled re-checks the event when its thread resumes. An `Add` that raises the count before then resets the event
+  under it, and the waiter goes back to sleep: it sleeps through its own generation and returns only when a LATER
+  generation drains.
+- **Go.** `Wait` panics there: "sync: WaitGroup is reused before previous Wait has returned" (waitgroup.go, the
+  re-read of the state after the semaphore). So the program is misusing the WaitGroup, and Go says so loudly.
+- **Measured (linux/amd64, Release, 2026-11-27).** One goroutine in `Wait` on a count of 1; the main thread calls
+  `Done()` and then `Add(1)` at once. golib: the waiter had not returned 2 s later in 100 of 100 rounds, and returned
+  in every round once a second `Done` drained the count. Go 1.26.11, the same sequence: the panic above in 3 of 3 runs.
+  The probe was a temporary GolibTests method and is not in the tree.
+- **Reach.** A correct Go program never does this, so no banked row can depend on it. What is lost is the
+  diagnosis: a converted program with this bug hangs silently where the Go original dies by name.
+- **The twin is immune to the sleep** (docs/phase4/DESIGN-mn-waitgroup-twin.md): its `GoParkSlot` keeps the wake, so
+  a twinned waiter returns. It does not panic either.
+- **What closes it.** A generation the waiter checks instead of the event's current state (a per-waiter signal, as
+  the twin's slot is), with Go's panic when the count is non-zero at the waiter's return. Owner: unrouted.
+
+— P4 (2026-11-27)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

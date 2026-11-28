@@ -12387,8 +12387,8 @@ statement it replaces and no other line. A traceback's `created by` line then na
 Go's does.
 <!-- the converter's record: src/go2cs/positionMapOperations.go:673 (`Go source positions are recorded here, one`)
      and :678 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
-     A hand-kept record: src/core/sync/waitgroup.cs:37 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIYC3AMAANsD")]`),
-     for its goǃ( at :263 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
+     A hand-kept record: src/core/sync/waitgroup.cs:40 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AIwC3AMAANsD")]`),
+     for its goǃ( at :269 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per
      tracked hand-owned src/core file with a goǃ( and maps every other line to no Go line. -->
 

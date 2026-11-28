@@ -1573,6 +1573,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
+    public void CheckMnWaitGroup() => CheckTarget("MnWaitGroup");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
