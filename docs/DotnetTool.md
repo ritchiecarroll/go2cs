@@ -23,8 +23,10 @@ A single-package `-cgo` conversion builds against a go2cs clone (`dotnet build -
 `-recurse=nuget -cgo`, a module's cgo packages convert with it and reference the `go.*` packages, for the machine's
 own operating system and architecture, or for another target when `CC` names that target's C compiler (see `-cgo` in
 [Command line](CommandLine.md)). A module's cgo package is packed for publishing for `win-x64`,
-`linux-x64`, `osx-x64` and `linux-arm64`; `osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64`
-build.
+`linux-x64`, `osx-x64`, `linux-arm64` and `osx-arm64`.
+<!-- 2026-11-28 (P5, the cgo arm on claude/p5-cgo-osx-arm64, stacked on D6 of DESIGN-darwin-arm64-flavour.md): osx-arm64
+     joins the -Cgo pack with its own darwin/arm64 flavor (zig aarch64-macos), read by cgo-nuget-e2e's J3 osx-arm64 leg.
+     Before it: "`osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64` build." -->
 <!-- 2026-11-23 .5 docs pass (P1), UX-8, at master 97cca467a2 (owner: resolve each "next release" in present tense, as
      true at .5): "planned for the next release" described the pack before it landed. It landed in train 3
      (claude/c2-cgo-nuget-pack, claude/c2-cgo-pack-2b, merge ef9be9bd32) and its push gate, the run-time target check

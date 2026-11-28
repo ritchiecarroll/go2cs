@@ -12,11 +12,13 @@
 # from that target's compiler, and refuses to call C anywhere else. So nugetgo-pack.ps1 -Cgo converts every flavor with
 # `-recurse=nuget -cgo`, each with the pinned zig for that flavor's target as CC, and the package is always RID-specific:
 #
-#   * runtimes/<rid>/lib/<tfm>/ carries each packed RID's own flavor, for the RIDs whose go.* bytes are TRUE for it.
-#     osx-arm64 is OUT BY NAME. Until D6 of DESIGN-darwin-arm64-flavour.md the go.* packages shipped it the darwin/amd64
-#     flavor, so a cgo flavor would have bound a C layout to go.* bytes built for another architecture. Since D6 they
-#     ship it darwin/arm64, and osx-arm64 joins with its own cgo flavor (zig's aarch64-macos target and a consume leg),
-#     a seat of its own; the guard below needs no change then. nugetgo-pack.ps1 converts the -Cgo map's flavors only.
+#   * runtimes/<rid>/lib/<tfm>/ carries each packed RID's own flavor, for the RIDs whose go.* bytes are TRUE for it:
+#     every RID the release ships. osx-arm64 was OUT BY NAME until the cgo arm (2026-11-28): before D6 of
+#     DESIGN-darwin-arm64-flavour.md the go.* packages shipped it the darwin/amd64 flavor, so a cgo flavor would have
+#     bound a C layout to go.* bytes built for another architecture. Since D6 they ship it darwin/arm64, and osx-arm64
+#     packs its own cgo flavor with zig's aarch64-macos target, read by cgo-nuget-e2e's J3 osx-arm64 leg. The exclusion
+#     map below stays, empty: a RID it names again is left out of the map, the flavors, the statement and the guard's
+#     note at once. nugetgo-pack.ps1 converts the -Cgo map's flavors only.
 #   * lib/<tfm>/ carries REFERENCE assemblies only (the reference flavor's), never an implementation another RID could
 #     fall back to: NuGet takes lib/ for any RID with no runtimes/ folder of its own, and a reference assembly refuses to
 #     load (BadImageFormatException), where an implementation would bind another target's C.
@@ -43,13 +45,14 @@ $script:Triples = [ordered]@{
     'linux/amd64'   = 'x86_64-linux-gnu'
     'darwin/amd64'  = 'x86_64-macos'
     'linux/arm64'   = 'aarch64-linux-gnu'
+    'darwin/arm64'  = 'aarch64-macos'
 }
 
-# The RIDs a -Cgo pack leaves out, each with the reason its README, VALIDATION.md and self-description state.
+# The RIDs a -Cgo pack leaves out, each with the reason its README, VALIDATION.md and self-description state. EMPTY
+# since the cgo arm (2026-11-28). It held 'osx-arm64' = 'a cgo package''s C binding is per target, and the darwin/arm64
+# C target (zig aarch64-macos) is not yet built or consumed, so osx-arm64 waits for its own darwin/arm64 cgo flavor'.
 function Get-NugetgoCgoExcludedRids {
-    [ordered]@{
-        'osx-arm64' = 'a cgo package''s C binding is per target, and the darwin/arm64 C target (zig aarch64-macos) is not yet built or consumed, so osx-arm64 waits for its own darwin/arm64 cgo flavor'
-    }
+    [ordered]@{}
 }
 
 # The release's RID map less the exclusions, in its order: the RIDs a -Cgo pack carries.

@@ -5,11 +5,12 @@
 
 .DESCRIPTION
     A cgo package's C binding is per target, so a -Cgo pack carries a true flavor for each RID it ships and nothing for
-    a RID it does not: osx-arm64 is out by name until true darwin/arm64 go.* assets exist. Its lib/<tfm>/ is reference
+    a RID it does not. Every RID the release ships is packed: osx-arm64 joined with its own darwin/arm64 cgo flavor (zig's
+    aarch64-macos target) once the go.* assets for it were darwin/arm64 (D6). Its lib/<tfm>/ is reference
     assemblies only, and its build/<id>.targets fails a consumer build by name for a RID the pack does not carry, read
     from the pack's own runtimes/ folders.
 
-      rids       the -Cgo RID map is the release's map less the named exclusion, and the exclusion names osx-arm64
+      rids       the -Cgo RID map is the release's whole map, osx-arm64 included, and no RID is excluded
       compilers  each flavor's C compiler is the pinned zig with that flavor's target, and the pin is .github's
       statement  the pack's statement names the packed RIDs, the exclusion and the remedy (-r)
       guard      a consumer of a probe pack: -r <unpacked RID> and a portable build on an unpacked host both fail with
@@ -34,27 +35,27 @@ function Check([string]$name, [bool]$ok, [string]$detail) {
 }
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
 
-Write-Host 'rids: the release''s map less the named exclusion'
+Write-Host 'rids: the release''s whole map, osx-arm64 included'
 $all = Get-NugetgoRidFlavors
 $cgo = Get-NugetgoCgoRidFlavors
 $excluded = Get-NugetgoCgoExcludedRids
-Check 'the -Cgo map ships win-x64, linux-x64, osx-x64 and linux-arm64, in the release''s order' ((@($cgo.Keys) -join ',') -ceq 'win-x64,linux-x64,osx-x64,linux-arm64') "got $(@($cgo.Keys) -join ',')"
+Check 'the -Cgo map ships win-x64, linux-x64, osx-x64, linux-arm64 and osx-arm64, in the release''s order' ((@($cgo.Keys) -join ',') -ceq 'win-x64,linux-x64,osx-x64,linux-arm64,osx-arm64') "got $(@($cgo.Keys) -join ',')"
 Check 'each packed RID ships the release''s own flavor for it' (@($cgo.Keys | Where-Object { $cgo[$_] -cne $all[$_] }).Count -eq 0) "got $(@($cgo.Keys | ForEach-Object { "$_=$($cgo[$_])" }) -join ',')"
-Check 'osx-arm64 is excluded by name, with the reason' ($excluded.Contains('osx-arm64') -and "$($excluded['osx-arm64'])" -match 'darwin/arm64') "got $(@($excluded.Keys | ForEach-Object { "$_=$($excluded[$_])" }) -join '; ')"
+Check 'no RID is excluded (osx-arm64 packs its own darwin/arm64 flavor since the cgo arm)' ($excluded.Count -eq 0) "got $(@($excluded.Keys | ForEach-Object { "$_=$($excluded[$_])" }) -join '; ')"
 Check 'packed and excluded together are the release''s RIDs, once each' ((@(@($cgo.Keys) + @($excluded.Keys) | Sort-Object) -join ',') -ceq (@($all.Keys | Sort-Object) -join ',')) "packed $(@($cgo.Keys) -join ',') + excluded $(@($excluded.Keys) -join ',') vs $(@($all.Keys) -join ',')"
 Check 'the reference flavor is packed (lib/ is its reference assemblies)' ($cgo.Values -contains (Get-NugetgoReferenceFlavor)) "reference $(Get-NugetgoReferenceFlavor)"
 
 Write-Host 'compilers: the pinned zig, one target per flavor'
-$want = [ordered]@{ 'windows/amd64' = 'x86_64-windows-gnu'; 'linux/amd64' = 'x86_64-linux-gnu'; 'darwin/amd64' = 'x86_64-macos'; 'linux/arm64' = 'aarch64-linux-gnu' }
+$want = [ordered]@{ 'windows/amd64' = 'x86_64-windows-gnu'; 'linux/amd64' = 'x86_64-linux-gnu'; 'darwin/amd64' = 'x86_64-macos'; 'linux/arm64' = 'aarch64-linux-gnu'; 'darwin/arm64' = 'aarch64-macos' }
 foreach ($flavor in $want.Keys) {
     $triple = $null; try { $triple = Get-NugetgoCgoTriple -Flavor $flavor } catch { $triple = "threw: $($_.Exception.Message)" }
     Check "$flavor compiles for $($want[$flavor])" ($triple -ceq $want[$flavor]) "got $triple"
 }
 Check 'every packed flavor has a target' (@(Get-NugetgoFlavors -RidFlavors $cgo | Where-Object { -not $want.Contains($_) }).Count -eq 0) "flavors $((Get-NugetgoFlavors -RidFlavors $cgo) -join ',')"
-Check 'the -Cgo flavors leave out the excluded RIDs'' own flavors (darwin/arm64 since D6)' ((@(Get-NugetgoFlavors -RidFlavors $cgo) -join ',') -ceq 'windows/amd64,linux/amd64,darwin/amd64,linux/arm64') "flavors $((Get-NugetgoFlavors -RidFlavors $cgo) -join ',')"
-# nugetgo-pack.ps1 measures the flavors of the map it packs: a -Cgo pack's map leaves osx-arm64 out, and since D6 that
-# RID's flavor (darwin/arm64) is its own, so a flavor loop over the release's whole map would convert a flavor with no
-# C target and refuse every -Cgo pack. Every flavor call in the pack names the pack's map.
+Check 'the -Cgo flavors are the release''s five, darwin/arm64 its own (not darwin/amd64''s)' ((@(Get-NugetgoFlavors -RidFlavors $cgo) -join ',') -ceq 'windows/amd64,linux/amd64,darwin/amd64,linux/arm64,darwin/arm64') "flavors $((Get-NugetgoFlavors -RidFlavors $cgo) -join ',')"
+# nugetgo-pack.ps1 measures the flavors of the map it packs. Until the cgo arm a -Cgo pack's map left osx-arm64 out, so a
+# flavor loop over the release's whole map would have converted a flavor with no C target; the maps are equal now, and
+# every flavor call in the pack still names the pack's map, so a RID excluded again is excluded everywhere.
 $packText = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
 $flavorCalls = @([regex]::Matches($packText, '(Get-NugetgoFlavors|Get-NugetgoFlavorDecision|Merge-NugetgoFlavorRequires|Get-NugetgoFlavorDisclosure)\b[^\r\n]*') | ForEach-Object { $_.Value })
 $unscoped = @($flavorCalls | Where-Object { $_ -notmatch '-RidFlavors \$ridFlavors' })
@@ -135,15 +136,24 @@ try {
     $zip = [System.IO.Compression.ZipFile]::OpenRead($layoutPack)
     try { $names = @($zip.Entries | ForEach-Object { $_.FullName }); $libEntry = $zip.GetEntry('lib/net10.0/Probe.dll'); $ms = New-Object System.IO.MemoryStream; $st = $libEntry.Open(); try { $st.CopyTo($ms) } finally { $st.Dispose() } }
     finally { $zip.Dispose() }
-    Check 'no runtimes/osx-arm64 entry' (@($names | Where-Object { $_ -like 'runtimes/osx-arm64/*' }).Count -eq 0) "entries: $($names -join ', ')"
+    Check 'runtimes/osx-arm64 carries its own entry' (@($names | Where-Object { $_ -ceq 'runtimes/osx-arm64/lib/net10.0/Probe.dll' }).Count -eq 1) "entries: $($names -join ', ')"
     Check 'lib/ is the reference assembly' (Test-NugetgoReferenceAssembly $ms.ToArray()) 'lib/net10.0/Probe.dll is an implementation'
     $default = @(Test-NugetgoRidLayout -Package $layoutPack -Assemblies $flavorSets -TargetFramework 'net10.0')
-    Check 'the release''s own layout check refuses it (control: no osx-arm64, lib/ not the implementation)' (@($default | Where-Object { $_ -like '*osx-arm64*' }).Count -ge 1 -and @($default | Where-Object { $_ -like 'lib/*' }).Count -ge 1) "reasons: $($default -join ' | ')"
+    Check 'the release''s own layout check refuses it (control: lib/ is not the implementation)' (@($default | Where-Object { $_ -like 'lib/*' }).Count -ge 1) "reasons: $($default -join ' | ')"
+    # The red the cgo arm turns on: a -Cgo pack that leaves runtimes/osx-arm64 out (the layout before it) is refused by
+    # the -Cgo map's own check, naming osx-arm64.
+    $noArm = [ordered]@{}; foreach ($rid in $cgo.Keys) { if ($rid -cne 'osx-arm64') { $noArm[$rid] = $cgo[$rid] } }
+    $noArmPack = Join-Path $work 'layout-no-osx-arm64.nupkg'
+    $zip = [System.IO.Compression.ZipFile]::Open($noArmPack, 'Create')
+    try { [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $same.Impl, 'lib/net10.0/Probe.dll') } finally { $zip.Dispose() }
+    Set-NugetgoRidAssets -Package $noArmPack -Assemblies $flavorSets -TargetFramework 'net10.0' -RidFlavors $noArm -LibAssemblies $libSet
+    $noArmWhy = @(Test-NugetgoRidLayout -Package $noArmPack -Assemblies $flavorSets -TargetFramework 'net10.0' -RidFlavors $cgo -LibAssemblies $libSet)
+    Check 'a -Cgo layout without runtimes/osx-arm64 is refused, naming it, and nothing else' ($noArmWhy.Count -ge 1 -and @($noArmWhy | Where-Object { $_ -notlike 'runtimes/osx-arm64/*' }).Count -eq 0) "reasons: $($noArmWhy -join ' | ')"
 
     Write-Host 'guard: a consumer build of a pack outside its RIDs fails by name'
-    # The probe pack never carries this host's RID, so every host reads condition 2's arms: on osx-arm64, which a -Cgo
-    # pack leaves out by name, they ARE condition 2 (COORD's ruling, read on a hosted osx-arm64 leg); elsewhere the host
-    # stands in for it. The second pack adds the host's RID with the same guard: the RID joining later.
+    # The probe pack never carries this host's RID, so every host reads condition 2's arms with the host standing in for
+    # an unpacked RID (until the cgo arm, osx-arm64 read them as the RID a -Cgo pack left out by name). The second pack
+    # adds the host's RID with the same guard: the RID joining later.
     $hostRid = [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
     Write-Host "  host $hostRid$(if ($excluded.Contains($hostRid)) { ', a RID a -Cgo pack leaves out by name' } else { ', standing in for an unpacked RID' })"
     $feed = Join-Path $work 'feed'

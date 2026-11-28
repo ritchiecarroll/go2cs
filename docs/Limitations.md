@@ -377,8 +377,11 @@ named with `-platforms` when `CC` names that target's C compiler (for example `z
 package refuses its C bindings on any other: when the package loads, before any of its code runs. A single-package
 conversion builds against a go2cs clone (`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's
 cgo packages convert with the module, and under `-recurse=nuget -cgo` they reference the `go.*` packages. A module
-with a cgo package packs for publishing as a package for each of `win-x64`, `linux-x64`, `osx-x64` and
-`linux-arm64`; `osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64` build. Such a package is
+with a cgo package packs for publishing as a package for each of `win-x64`, `linux-x64`, `osx-x64`, `linux-arm64`
+and `osx-arm64`, each with its own C binding.
+<!-- 2026-11-28 (P5, the cgo arm on claude/p5-cgo-osx-arm64, stacked on D6 of DESIGN-darwin-arm64-flavour.md): osx-arm64
+     joins the -Cgo pack with its own darwin/arm64 flavor (zig aarch64-macos), read by cgo-nuget-e2e's J3 osx-arm64 leg.
+     Before it: "`osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64` build." --> Such a package is
 published only against a `go.lib` that carries the load-time target check, which the go.* 1.26.11.1 packages do not.
 The standard library itself is converted with `CGO_ENABLED=0`, and a module converted with `-recurse -cgo` uses it as
 it is. So a package that imports `net` or `os/user` gets their builds without cgo, the ones Go itself uses with
@@ -397,7 +400,8 @@ check runs at the package's first C call rather than when it loads.
      - Another target with CC naming its compiler: INC 2a (commit 07378119f9; R3 steps aside without a CC, 78e369a4a9,
        merge 640d45c9eb).
      - The per-RID pack: claude/c2-cgo-pack-2b (merge ef9be9bd32): win-x64, linux-x64, osx-x64 and linux-arm64, osx-arm64
-       left out by name (docs/NugetgoPublish.md, "Cgo"; an internal runbook, so not linked).
+       left out by name (docs/NugetgoPublish.md, "Cgo"; an internal runbook, so not linked). osx-arm64 joined in the cgo
+       arm (2026-11-28, claude/p5-cgo-osx-arm64).
      - The load-time target check (A6): train 4, claude/c2-cgo-a6 (merge c9143ae615, commit 77e91b3c0c):
        GoCgoLibraries.Register refuses in the cgo package's module initializer; before it, Resolve refused at the
        first C call. nugetgo-pack -Cgo refuses a restored go.lib without it ("the published 1.26.11.1 is refused by

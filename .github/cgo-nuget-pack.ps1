@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     cgo-nuget-e2e's J2 (cgo against go.* INC 4): R-c, then pack github.com/mattn/go-pointer v0.0.1 -Cgo against J1's
-    go.* feed as a LOCAL closure, and leave the package, a doctored copy for R-a, and every reading in -OutDir.
+    go.* feed as a LOCAL closure, and leave the package, doctored copies for R-a and R-b, and every reading in -OutDir.
 
 .DESCRIPTION
     COORD's ruling (1), 2026-11-22: a rehearsal-only local closure, hosted, before .5. Nothing leaves the run's
@@ -23,9 +23,16 @@
     and version, in its own folder. J3's win-x64 leg consumes it and expects A6 to refuse it at load, naming
     linux/amd64 and windows/amd64. No earlier check can refuse it: the consumer reads no digest or self-description.
 
+    R-b's input. A copy of the package with no runtimes/osx-arm64/ entry, under the same id and version, in its own
+    folder: the layout a -Cgo pack had before osx-arm64 joined with its own darwin/arm64 flavor. J3's osx-arm64 leg
+    consumes it and expects NUGETGOCGO001 naming osx-arm64, beside the undoctored package building and running on the
+    same leg (H's conditions, 2026-11-28). The package is unsigned, so removing entries breaks no signature, and a folder
+    feed checks no hash: the restore succeeds and the guard is what refuses. A signed copy is refused here.
+
 .OUTPUTS
     -OutDir/feed/                the package, beside nothing else
     -OutDir/feed-doctored/       R-a's package
+    -OutDir/feed-doctored-r-b/   R-b's package
     -OutDir/cgo-nuget-pack.md    the readings, one line each, and the verdict
 #>
 [CmdletBinding()]
@@ -170,9 +177,27 @@ else {
     finally { $zip.Dispose() }
     if ($swapped -eq 0) { Failure "R-a's input: no runtimes/win-x64 assembly had a linux-x64 twin to swap in" }
     else { Reading "R-a input: $swapped runtimes/win-x64 assembl$(if ($swapped -eq 1) { 'y' } else { 'ies' }) replaced by the linux-x64 flavor's, $((Get-FileHash -Algorithm SHA256 -LiteralPath $copy).Hash.ToLowerInvariant())" }
+
+    # ---- R-b's input: the package without runtimes/osx-arm64 -------------------------------------------------------------
+    $doctoredRb = Join-Path $OutDir 'feed-doctored-r-b'
+    New-Item -ItemType Directory -Force -Path $doctoredRb | Out-Null
+    $copyRb = Join-Path $doctoredRb $nupkg[0].Name
+    Copy-Item -LiteralPath $nupkg[0].FullName -Destination $copyRb
+    $zip = [System.IO.Compression.ZipFile]::Open($copyRb, 'Update')
+    try {
+        $signed = @($zip.Entries | Where-Object { $_.FullName -ceq '.signature.p7s' }).Count
+        $arm = @($zip.Entries | Where-Object { $_.FullName -like 'runtimes/osx-arm64/*' })
+        $removed = $arm.Count
+        foreach ($entry in $arm) { $entry.Delete() }
+        $left = @($zip.Entries | Where-Object { $_.FullName -like 'runtimes/*' } | ForEach-Object { ($_.FullName -split '/')[1] } | Sort-Object -Unique)
+    }
+    finally { $zip.Dispose() }
+    if ($signed) { Failure "R-b's input: the package is signed, so removing runtimes/osx-arm64 would break its signature and the restore could fail before the guard" }
+    elseif ($removed -eq 0) { Failure "R-b's input: the package has no runtimes/osx-arm64 entry to remove (the pack should carry osx-arm64)" }
+    else { Reading "R-b input: $removed runtimes/osx-arm64 entr$(if ($removed -eq 1) { 'y' } else { 'ies' }) removed, unsigned, runtimes left $($left -join ', '), $((Get-FileHash -Algorithm SHA256 -LiteralPath $copyRb).Hash.ToLowerInvariant())" }
 }
 
-$verdict = if ($failures.Count) { "FAIL: $($failures -join ' | ')" } else { 'PASS: R-c read, the package packed against the local closure, and R-a''s input written' }
+$verdict = if ($failures.Count) { "FAIL: $($failures -join ' | ')" } else { 'PASS: R-c read, the package packed against the local closure, and R-a''s and R-b''s inputs written' }
 $report = @("## cgo-nuget-e2e J2 -- $ModulePath@$GoVersion, linux", '', $verdict, '', '```') + $readings + @('```')
 [System.IO.File]::WriteAllLines((Join-Path $OutDir 'cgo-nuget-pack.md'), $report)
 if ($env:GITHUB_STEP_SUMMARY) {

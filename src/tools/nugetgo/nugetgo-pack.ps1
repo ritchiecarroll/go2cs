@@ -89,9 +89,9 @@
     Cgo (-Cgo, the cgo-against-go.* item's INC 2b; COORD's ruling (a), 2026-11-21): a module with a cgo package. Each
     flavor converts with `-recurse=nuget -cgo`, its CC the pinned zig (-Zig) for that flavor's target
     (NugetgoCgo.psm1), and the package is RID-specific whatever the material check says, since a cgo package's C binding
-    is per target. It ships win-x64, linux-x64, osx-x64 and linux-arm64, and converts only their flavors (every flavor
-    call takes the pack's own map). osx-arm64 stays out by name: its go.* assets are darwin/arm64 since D6, and its cgo
-    flavor (zig's aarch64-macos target) is its own seat. lib/<tfm>/ carries the reference
+    is per target. It ships every RID the release ships, osx-arm64 with its own darwin/arm64 flavor (zig's aarch64-macos
+    target) since the cgo arm, and converts only its own map's flavors (every flavor call takes the pack's own map, so a
+    RID NugetgoCgo.psm1 excludes again is left out everywhere). lib/<tfm>/ carries the reference
     flavor's REFERENCE assemblies, never an implementation another RID could fall back to; build/<id>.targets fails a
     consumer build for a RID the package does not carry with NUGETGOCGO001, reading the set from the package's own
     runtimes/ folders. VALIDATION.md and the self-description state both. The read-back adds R7: each RID's assembly has
@@ -465,7 +465,8 @@ foreach ($page in $pages) {
 # that flavor, at the target -RecurseRoot's RID converts for (since D6 always the RID's own flavor), must reproduce
 # every packed project's GoInputDigest, so the other flavors are known to be the same input, options and converter.
 # Every other flavor converts at its own pair: linux/arm64 and darwin/arm64 are flavors of their own, never their x64
-# twins'. The flavors are the pack's own map's ($ridFlavors): a -Cgo pack leaves osx-arm64, and so darwin/arm64, out.
+# twins'. The flavors are the pack's own map's ($ridFlavors): a -Cgo pack's map is the release's less NugetgoCgo.psm1's
+# exclusions, empty since the cgo arm (until it, osx-arm64 and so darwin/arm64 were left out).
 $flavorDir = Join-Path $Scratch 'flavors'
 if (Test-Path $flavorDir) { Remove-Item -Recurse -Force $flavorDir }
 New-Item -ItemType Directory -Force $flavorDir | Out-Null
@@ -481,7 +482,7 @@ if ($Cgo) {
     $Zig = [System.IO.Path]::GetFullPath($Zig)
     $cgoExcluded = Get-NugetgoCgoExcludedRids
     if ($cgoExcluded.Contains($proofRid)) { Refuse "-RecurseRoot was converted for $proofRid, which a -Cgo pack does not carry: $($cgoExcluded[$proofRid]). Convert it for one of $(@($ridFlavors.Keys) -join ', ')" }
-    Write-Host "  cgo: RIDs $(@($ridFlavors.Keys) -join ', '); $(@($cgoExcluded.Keys | ForEach-Object { "$_ out by name" }) -join ', '); C compiler zig $(Get-NugetgoCgoZigVersion) ($Zig)"
+    Write-Host "  cgo: RIDs $(@($ridFlavors.Keys) -join ', '); $(if ($cgoExcluded.Count) { @($cgoExcluded.Keys | ForEach-Object { "$_ out by name" }) -join ', ' } else { 'none out' }); C compiler zig $(Get-NugetgoCgoZigVersion) ($Zig)"
 }
 elseif ($Zig) { Refuse '-Zig is for -Cgo' }
 if (-not $ridFlavors.Contains($proofRid)) { Refuse "-RecurseRoot was converted for $proofRid, a RID the go.* release does not ship ($(@($ridFlavors.Keys) -join ', '))" }

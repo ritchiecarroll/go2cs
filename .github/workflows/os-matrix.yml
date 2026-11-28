@@ -114,7 +114,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here), cgo-nuget-e2e (OPT-IN: cgo against go.* INC 4''s hosted proof, never scheduled -- J1 is release-smoke''s own windows pack of every go.* package; J2 packs github.com/mattn/go-pointer v0.0.1 with nugetgo-pack -Cgo -LocalClosure against that pack on linux and reads R-c, master refusing it; J3 consumes it on all five shipped RIDs, each against go run on its own OS, with R-b (osx-arm64 refused NUGETGOCGO001) and R-a (win-x64 refusing a doctored runtime at load, A6). Nothing leaves the run''s artifacts, each named with the run''s rehearsal suffix. goos and filter are ignored), reconvert-footprint (a converter change''s corpus footprint on this GOOS: two -stdlib reconverts, by the converter at base= and at changed=, both seeded from base, diffed against each other; filter is ;base=SHA;changed=SHA, both 40 hex digits; one leg per GOOS, and on linux arch arm64 measures linux/arm64, both the two), mn-platform (the M:N platform read: src/tools/mnspike2/run-q1-kit.sh, the Q1 kit''s twin, plain and ifhall builds with each twin run compared to its plain run, then run-mn-closure.sh, MnHttpClosure built with twins and compared with go run; one leg per GOOS, darwin on osx-arm64; filter is extra MSBuild properties for the closure build, -p:Name=value separated by spaces, which is how a dispatch twins the standard library under it: no tracked file may turn that switch on)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here), cgo-nuget-e2e (OPT-IN: cgo against go.* INC 4''s hosted proof, never scheduled -- J1 is release-smoke''s own windows pack of every go.* package; J2 packs github.com/mattn/go-pointer v0.0.1 with nugetgo-pack -Cgo -LocalClosure against that pack on linux and reads R-c, master refusing it; J3 consumes it on all five shipped RIDs, each against go run on its own OS, with R-b (on osx-arm64 a doctored copy without runtimes/osx-arm64 refused NUGETGOCGO001) and R-a (win-x64 refusing a doctored runtime at load, A6). Nothing leaves the run''s artifacts, each named with the run''s rehearsal suffix. goos and filter are ignored), reconvert-footprint (a converter change''s corpus footprint on this GOOS: two -stdlib reconverts, by the converter at base= and at changed=, both seeded from base, diffed against each other; filter is ;base=SHA;changed=SHA, both 40 hex digits; one leg per GOOS, and on linux arch arm64 measures linux/arm64, both the two), mn-platform (the M:N platform read: src/tools/mnspike2/run-q1-kit.sh, the Q1 kit''s twin, plain and ifhall builds with each twin run compared to its plain run, then run-mn-closure.sh, MnHttpClosure built with twins and compared with go run; one leg per GOOS, darwin on osx-arm64; filter is extra MSBuild properties for the closure build, -p:Name=value separated by spaces, which is how a dispatch twins the standard library under it: no tracked file may turn that switch on)'
         type: choice
         required: true
         default: census
@@ -615,7 +615,8 @@ jobs:
           # two equal: S6 shipped linux-arm64 while this list kept four legs, so no hosted leg consumed that flavour until
           # seat S5c added its leg (DESIGN-linux-arm64-flavour.md section 6). The arm leg carries arch = arm64, which the run
           # job binds as GoTargetArch beside GoTargetOS, as the arch input's arm leg does above.
-          # cgo-nuget-e2e's J3 reads every shipped RID too: four consume the -Cgo package, and osx-arm64 reads R-b, its refusal.
+          # cgo-nuget-e2e's J3 reads every shipped RID too: all five consume the -Cgo package (osx-arm64 since the cgo arm,
+          # 2026-11-28), and osx-arm64 also reads R-b, the refusal of a copy without runtimes/osx-arm64.
           if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior', 'cgo-nuget-e2e') {
               $targets = @(
                   @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
@@ -748,7 +749,9 @@ jobs:
               'cgo-nuget-e2e'    = 90    # J3's leg: the nugetgo-behavior row's shape (converter go build, go run, one
                                          # conversion, one cold restore and build of the sample with its go.* closure),
                                          # plus the pinned C toolchain's download, and on win-x64 a second row for R-a.
-                                         # PROVISIONAL until the first run (C2, 2026-11-22).
+                                         # PROVISIONAL until the first run (C2, 2026-11-22). Measured 45033824268: 1 to
+                                         # 5 min a leg. Since the cgo arm osx-arm64 runs J3 and R-b's row, with zig on
+                                         # darwin (about 3x Apple clang, H): the mac 1.5x leaves 135, ample.
               'nugetgo-behavior' = 90    # release-smoke's leg is the closest shape (C1, 2026-10-12): converter go build,
                                          # one `go run`, one conversion against the feed, and one restore, build and
                                          # run of the sample with its go.* closure restored cold. PROVISIONAL until
@@ -1030,8 +1033,8 @@ jobs:
   # ---------------------------------------------------------------------------------------------
   # cgo-nuget-pack -- cgo-nuget-e2e's J2 (cgo against go.* INC 4, COORD's ruling (1), 2026-11-22). OPT-IN: no schedule or
   # other stage starts it. On linux, with the pinned zig: R-c (master's converter refuses go-pointer by name), then
-  # github.com/mattn/go-pointer v0.0.1 packed with nugetgo-pack -Cgo -LocalClosure against J1's feed, and R-a's doctored
-  # copy. .github/cgo-nuget-pack.ps1 holds every step and its readings. The package records "local-closure:", which
+  # github.com/mattn/go-pointer v0.0.1 packed with nugetgo-pack -Cgo -LocalClosure against J1's feed, and R-a's and
+  # R-b's doctored copies. .github/cgo-nuget-pack.ps1 holds every step and its readings. The package records "local-closure:", which
   # src/_nugetpush.ps1 refuses, and it leaves the run only as this run's artifact.
   # ---------------------------------------------------------------------------------------------
   cgo-nuget-pack:
@@ -1039,8 +1042,8 @@ jobs:
     if: ${{ !cancelled() && needs.plan.outputs.stage == 'cgo-nuget-e2e' && (needs.pack.result == 'success' || (needs.pack.result == 'skipped' && needs.plan.outputs.feed-run != '')) }}
     name: cgo-nuget-e2e J2 (linux / go-pointer -Cgo pack)
     runs-on: ubuntu-latest
-    # The pack converts four flavors with zig and builds each against the go.* closure from cold. PROVISIONAL until the
-    # first run (C2, 2026-11-22).
+    # The pack converts five flavors with zig (darwin/arm64 since the cgo arm) and builds each against the go.* closure
+    # from cold. PROVISIONAL until the first run (C2, 2026-11-22); 45033824268 read 4 min for four flavors.
     timeout-minutes: 90
     steps:
       - name: Checkout
@@ -3454,7 +3457,7 @@ jobs:
 
       # -------------------------------------------------------------------------------------
       # cgo-nuget-e2e's J3 -- the go-pointer sample against J2's -Cgo package and J1's go.* closure on this RID, compared
-      # with go run on this RID (.github/cgo-nuget-consume.ps1). osx-arm64 reads R-b, win-x64 also R-a. The OS's default
+      # with go run on this RID (.github/cgo-nuget-consume.ps1). osx-arm64 also reads R-b, win-x64 also R-a. The OS's default
       # pinned C toolchain serves go run and the sample's cgo-on conversion; the built program needs none.
       # -------------------------------------------------------------------------------------
       - name: cgo-nuget-e2e J3 -- download J1's go.* feed
@@ -3494,6 +3497,7 @@ jobs:
           $env:CC = $toolchain.Cc
           $env:CGO_ENABLED = '1'
           & ./.github/cgo-nuget-consume.ps1 -Feed (Join-Path $PWD 'gopointer/feed') -DoctoredFeed (Join-Path $PWD 'gopointer/feed-doctored') `
+              -DoctoredRbFeed (Join-Path $PWD 'gopointer/feed-doctored-r-b') `
               -ClosureFeed (Join-Path $PWD 'go-feed') -Suffix "ci.${{ github.run_id }}" -Rid $env:RID -OutDir (Join-Path $PWD 'artifacts/cgo-nuget-e2e')
           exit $LASTEXITCODE
 

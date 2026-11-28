@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
     cgo-nuget-e2e's J3 (cgo against go.* INC 4), one leg per shipped RID: the go-pointer sample consumes J2's -Cgo
-    package with J1's go.* closure on this host, and is compared with `go run` on the same host. On osx-arm64 the build
-    must refuse (R-b); on win-x64 a doctored copy must be refused at load (R-a).
+    package with J1's go.* closure on this host, and is compared with `go run` on the same host. On osx-arm64 a doctored
+    copy without runtimes/osx-arm64 must refuse to build (R-b); on win-x64 a doctored copy must be refused at load (R-a).
 
 .DESCRIPTION
     The consumer is src/tools/nugetgo/Invoke-NugetgoBehaviorRow.ps1, the nugetgo-behavior row, with -ClosureFeed,
@@ -18,8 +18,12 @@
     user's global packages folder: a directory with an unloadable assembly. After the row, the go.lib the private
     restore holds must be J1's nupkg byte for byte (its .nupkg.sha512 against J1's file).
 
-    R-b, osx-arm64. The package carries no osx-arm64 runtime, by name. The consumer's dotnet build must fail with
-    NUGETGOCGO001.
+    R-b, osx-arm64. Since the cgo arm the package carries osx-arm64's own darwin/arm64 flavor (zig aarch64-macos), and
+    this leg's J3 row consumes it like every other RID's: that row is R-b's negative control, the undoctored package
+    building and running on the same leg. R-b itself consumes J2's copy with no runtimes/osx-arm64/ entry, the layout
+    before the cgo arm. Its restore must succeed (the copy is unsigned and a folder feed checks no hash) and its dotnet
+    build must fail with NUGETGOCGO001, the refusal naming osx-arm64 (H's conditions, 2026-11-28). Before the cgo arm
+    R-b consumed the package itself, which left osx-arm64 out by name.
 
     R-a, win-x64. A copy of the package whose runtimes/win-x64/ holds the linux flavor (J2). It must build, and its run
     must be refused by A6 at load, and the refusal must name both targets: "converted for linux/amd64" and "runs as
@@ -33,6 +37,8 @@ param(
     [Parameter(Mandatory)] [string] $Feed,
     # J2's doctored folder (R-a's input).
     [Parameter(Mandatory)] [string] $DoctoredFeed,
+    # J2's folder without runtimes/osx-arm64 (R-b's input).
+    [Parameter(Mandatory)] [string] $DoctoredRbFeed,
     # J1's go.* feed.
     [Parameter(Mandatory)] [string] $ClosureFeed,
     [Parameter(Mandatory)] [string] $Suffix,
@@ -105,50 +111,52 @@ function Invoke-Row([string]$label, [string]$feed) {
 }
 function Read-Text([string]$path) { if (Test-Path -LiteralPath $path) { [System.IO.File]::ReadAllText($path) } else { '' } }
 
-if ($Rid -ceq 'osx-arm64') {
-    # ---- R-b ------------------------------------------------------------------------------------------------------------
-    $row = Invoke-Row 'r-b' $Feed
-    $build = Read-Text (Join-Path $row.Work 'build.log')
-    if ($row.Exit -ne 0 -and $build.Contains('NUGETGOCGO001')) {
-        $line = @($build -split "`n" | Where-Object { $_.Contains('NUGETGOCGO001') } | Select-Object -First 1)[0].Trim()
-        Reading "R-b PASS: the osx-arm64 consumer build is refused: $line"
-    }
-    else { Failure "R-b: the osx-arm64 consumer was not refused with NUGETGOCGO001 (row exit $($row.Exit); see $($row.Log))" }
+# ---- J3 -------------------------------------------------------------------------------------------------------------
+$row = Invoke-Row 'j3' $Feed
+$rowFile = Join-Path $OutDir "rows-j3/$Rid.md"
+if ($row.Exit -eq 0 -and (Test-Path -LiteralPath $rowFile) -and [System.IO.File]::ReadAllText($rowFile).Contains('outputs-equal: true')) {
+    Reading "J3 PASS on ${Rid}: the converted program printed what go run printed"
+    $readings.AddRange([string[]]@([System.IO.File]::ReadAllLines($rowFile) | Where-Object { $_ -match '^(rid|runtime-rid|goos|go-output|dotnet-output|outputs-equal|assembly):' } | ForEach-Object { "  $_" }))
 }
 else {
-    # ---- J3 -------------------------------------------------------------------------------------------------------------
-    $row = Invoke-Row 'j3' $Feed
-    $rowFile = Join-Path $OutDir "rows-j3/$Rid.md"
-    if ($row.Exit -eq 0 -and (Test-Path -LiteralPath $rowFile) -and [System.IO.File]::ReadAllText($rowFile).Contains('outputs-equal: true')) {
-        Reading "J3 PASS on ${Rid}: the converted program printed what go run printed"
-        $readings.AddRange([string[]]@([System.IO.File]::ReadAllLines($rowFile) | Where-Object { $_ -match '^(rid|runtime-rid|goos|go-output|dotnet-output|outputs-equal|assembly):' } | ForEach-Object { "  $_" }))
-    }
-    else {
-        $tail = @($row.Text -split "`n" | Where-Object { $_.Trim() } | Select-Object -Last 3) -join ' / '
-        Failure "J3 on ${Rid}: the row did not read equal (exit $($row.Exit)): $tail"
-    }
+    $tail = @($row.Text -split "`n" | Where-Object { $_.Trim() } | Select-Object -Last 3) -join ' / '
+    Failure "J3 on ${Rid}: the row did not read equal (exit $($row.Exit)): $tail"
+}
 
-    # The private restore holds J1's go.lib, never the planted one.
-    $restoredSha = Join-Path $row.Work "packages/go.lib/$($closureVersion.ToLowerInvariant())/go.lib.$($closureVersion.ToLowerInvariant()).nupkg.sha512"
-    if (Test-Path -LiteralPath $restoredSha) {
-        $sha512 = [System.Security.Cryptography.SHA512]::Create()
-        try { $j1 = [System.Convert]::ToBase64String($sha512.ComputeHash([System.IO.File]::ReadAllBytes($goLib[0].FullName))) } finally { $sha512.Dispose() }
-        if ([System.IO.File]::ReadAllText($restoredSha).Trim() -ceq $j1) { Reading "isolation PASS: the restored go.lib is J1's nupkg byte for byte, not the planted one" }
-        else { Failure 'isolation: the restored go.lib is not J1''s nupkg' }
-    }
-    else { Failure "isolation: the row's private restore holds no go.lib $closureVersion" }
+# The private restore holds J1's go.lib, never the planted one.
+$restoredSha = Join-Path $row.Work "packages/go.lib/$($closureVersion.ToLowerInvariant())/go.lib.$($closureVersion.ToLowerInvariant()).nupkg.sha512"
+if (Test-Path -LiteralPath $restoredSha) {
+    $sha512 = [System.Security.Cryptography.SHA512]::Create()
+    try { $j1 = [System.Convert]::ToBase64String($sha512.ComputeHash([System.IO.File]::ReadAllBytes($goLib[0].FullName))) } finally { $sha512.Dispose() }
+    if ([System.IO.File]::ReadAllText($restoredSha).Trim() -ceq $j1) { Reading "isolation PASS: the restored go.lib is J1's nupkg byte for byte, not the planted one" }
+    else { Failure 'isolation: the restored go.lib is not J1''s nupkg' }
+}
+else { Failure "isolation: the row's private restore holds no go.lib $closureVersion" }
 
-    if ($Rid -ceq 'win-x64') {
-        # ---- R-a --------------------------------------------------------------------------------------------------------
-        $doctored = Invoke-Row 'r-a' $DoctoredFeed
-        $err = Read-Text (Join-Path $doctored.Work 'dotnet-run.err')
-        $built = Test-Path -LiteralPath (Join-Path $doctored.Work 'dotnet-run.out')
-        if ($doctored.Exit -ne 0 -and $built -and $err.Contains('converted for linux/amd64') -and $err.Contains('runs as windows/amd64')) {
-            $line = @($err -split "`n" | Where-Object { $_.Contains('converted for linux/amd64') } | Select-Object -First 1)[0].Trim()
-            Reading "R-a PASS: the doctored win-x64 runtime built and A6 refused it at load: $line"
-        }
-        else { Failure "R-a: the doctored package was not refused at load naming linux/amd64 and windows/amd64 (row exit $($doctored.Exit), built $built; see $($doctored.Log))" }
+if ($Rid -ceq 'win-x64') {
+    # ---- R-a --------------------------------------------------------------------------------------------------------
+    $doctored = Invoke-Row 'r-a' $DoctoredFeed
+    $err = Read-Text (Join-Path $doctored.Work 'dotnet-run.err')
+    $built = Test-Path -LiteralPath (Join-Path $doctored.Work 'dotnet-run.out')
+    if ($doctored.Exit -ne 0 -and $built -and $err.Contains('converted for linux/amd64') -and $err.Contains('runs as windows/amd64')) {
+        $line = @($err -split "`n" | Where-Object { $_.Contains('converted for linux/amd64') } | Select-Object -First 1)[0].Trim()
+        Reading "R-a PASS: the doctored win-x64 runtime built and A6 refused it at load: $line"
     }
+    else { Failure "R-a: the doctored package was not refused at load naming linux/amd64 and windows/amd64 (row exit $($doctored.Exit), built $built; see $($doctored.Log))" }
+}
+
+if ($Rid -ceq 'osx-arm64') {
+    # ---- R-b --------------------------------------------------------------------------------------------------------
+    $refused = Invoke-Row 'r-b' $DoctoredRbFeed
+    $build = Read-Text (Join-Path $refused.Work 'build.log')
+    # NUGETGOCGO001 is the package's own build/ target, so its line proves the restore succeeded; a signature or hash
+    # refusal (NU3xxx) would be the restore failing first.
+    $line = @($build -split "`n" | Where-Object { $_.Contains('NUGETGOCGO001') } | Select-Object -First 1)
+    $line = if ($line.Count) { $line[0].Trim() } else { '' }
+    if ($refused.Exit -ne 0 -and $line -and $line.Contains('osx-arm64') -and $build -notmatch '\bNU3\d{3}\b') {
+        Reading "R-b PASS: the copy without runtimes/osx-arm64 restored and its build is refused: $line"
+    }
+    else { Failure "R-b: the copy without runtimes/osx-arm64 was not refused with NUGETGOCGO001 naming osx-arm64 (row exit $($refused.Exit), refusal line '$line'; see $($refused.Log))" }
 }
 
 # The restored packages and build output are large and say nothing the logs and rows do not.

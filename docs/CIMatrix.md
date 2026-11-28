@@ -336,7 +336,12 @@ OPT-IN: no schedule starts it, and it never runs as part of another stage. `goos
   `src/tests/CgoNugetE2E/` is run with `go run`, converted against J2's package, and built and run against J1's go.*
   closure through `Invoke-NugetgoBehaviorRow.ps1 -ClosureFeed -ClosureVersion`.
   - The restore is private, and a stale `go.lib` planted in the global packages folder must not reach it.
-  - **R-b**: osx-arm64, which the package leaves out by name, must be refused `NUGETGOCGO001`.
+  - **R-b**: on osx-arm64, beside its J3 row, a copy of the package without `runtimes/osx-arm64/` must restore and
+    be refused `NUGETGOCGO001`, naming osx-arm64. The leg's J3 row, the same package with it, is the negative control.
+    J2 writes the copy (`feed-doctored-r-b/`) and refuses a signed package, whose signature the removal would break.
+    <!-- 2026-11-28 (P5, the cgo arm): before it osx-arm64 was left out of the package by name and R-b was the package
+         itself refused. H's conditions for the doctored form: assert the refusal text, the restore must not fail first,
+         and the undoctored copy builds on the same leg. -->
   - **R-a**: on win-x64 the doctored package must build and be refused at load by A6, naming `linux/amd64` and
     `windows/amd64`.
 

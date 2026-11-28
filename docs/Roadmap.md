@@ -472,9 +472,15 @@ The standard library is converted with `CGO_ENABLED=0`.
 - With `-recurse -cgo`, a module's cgo packages convert with the module, and with `-recurse=nuget -cgo` they build
   against the `go.*` packages. A conversion is for the machine's own operating system and architecture, or for
   another `-platforms` target when `CC` names that target's C compiler.
-- A cgo module packs as one NuGet package for `win-x64`, `linux-x64`, `osx-x64` and `linux-arm64`, each with its own
-  C binding, and a build or a run on any other platform is refused by name. A real third-party cgo module was packed
-  this way, printed what Go printed on each of those four, and was refused by name on `osx-arm64`.
+- A cgo module packs as one NuGet package for `win-x64`, `linux-x64`, `osx-x64`, `linux-arm64` and `osx-arm64`, each
+  with its own C binding, and a build or a run on any other platform is refused by name. A real third-party cgo module
+  was packed this way and printed what Go printed on `win-x64`, `linux-x64`, `osx-x64` and `linux-arm64`, before
+  `osx-arm64` joined.
+  <!-- 2026-11-28 (P5, the cgo arm on claude/p5-cgo-osx-arm64, stacked on D6 of DESIGN-darwin-arm64-flavour.md): osx-arm64
+       joins with its own darwin/arm64 flavor (zig aarch64-macos); its reading is cgo-nuget-e2e's J3 osx-arm64 leg at the
+       cgo arm. Before it: "for win-x64, linux-x64, osx-x64 and linux-arm64 ... printed what Go printed on each of those
+       four, and was refused by name on osx-arm64", and the bullet ended "osx-arm64 waits for a standard-library build of
+       its own for Apple silicon." -->
   <!-- docs/phase4/REHEARSAL-cgo-nuget-e2e-go-pointer.md: github.com/mattn/go-pointer v0.0.1, final reading run
        45016867041 and the re-read 45033824268, J3 PASS on win-x64, linux-x64, osx-x64, linux-arm64; R-b NUGETGOCGO001 on
        osx-arm64; R-a, the load-time target check on win-x64. Publishing it is after the release that follows
@@ -482,7 +488,7 @@ The standard library is converted with `CGO_ENABLED=0`.
      2026-11-23 (P1, P3 nit 3 relayed by COORD 224946Z): the next release's number is ruled, 1.26.11.2; the page names it
      and keeps "no date yet". --> Such a package is published only against a `go.lib` that checks, when
   the package loads, that its C binding is for the platform it runs on: `go.lib` 1.26.11.1 does not, and
-  1.26.11.2 does. `osx-arm64` waits for a standard-library build of its own for Apple silicon.
+  1.26.11.2 does.
 - C memory can be read and written through a C struct's pointer field and through a pointer to a C pointer
   (`**C.T`), as code that walks a list C allocated does.
 

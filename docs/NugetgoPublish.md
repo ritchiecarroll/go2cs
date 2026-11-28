@@ -146,20 +146,24 @@ the same toolchain.
 **Cgo** (COORD's ruling (a), 2026-11-21; *not yet publishable*). A module with a cgo package packs with
 `-Cgo -Zig <zig>`, where `<zig>` is the pinned zig of `.github/cgo-toolchain.ps1` (0.17.0), and `PR` converted with
 `-recurse=nuget -cgo`. Each flavor converts with `-cgo`, and its `CC` is that zig with the flavor's target
-(`x86_64-windows-gnu`, `x86_64-linux-gnu`, `x86_64-macos`, `aarch64-linux-gnu`). A cgo package's C binding is per
+(`x86_64-windows-gnu`, `x86_64-linux-gnu`, `x86_64-macos`, `aarch64-linux-gnu`, `aarch64-macos`). A cgo package's C binding is per
 target, so the package is always RID-specific, and differs from the layout above in three ways:
-- It carries win-x64, linux-x64, osx-x64 and linux-arm64. **osx-arm64 is left out by name**: the `go.*` packages ship
-  it their darwin/amd64 flavor, so it waits for true darwin/arm64 `go.*` assets. This amends the cgo plan's R3, which
-  refused to pack a cgo package for fewer RIDs than the release ships, for this one exclusion only. It is stated in
-  VALIDATION.md and in `go2cs/source-metadata.txt`.
+- It carries every RID the release ships: win-x64, linux-x64, osx-x64, linux-arm64 and osx-arm64, each its own
+  flavor. NugetgoCgo.psm1 keeps an exclusion map, empty: a RID it names is left out of the pack, its flavors, VALIDATION.md,
+  `go2cs/source-metadata.txt` and the guard's message at once.
+  <!-- 2026-11-28 (P5, the cgo arm, claude/p5-cgo-osx-arm64): until it, "osx-arm64 is left out by name: the go.*
+       packages ship it their darwin/amd64 flavor, so it waits for true darwin/arm64 go.* assets. This amends the cgo
+       plan's R3, which refused to pack a cgo package for fewer RIDs than the release ships, for this one exclusion
+       only." D6 made the go.* osx-arm64 assets darwin/arm64, and the cgo arm packs osx-arm64 with zig aarch64-macos, so
+       R3 holds again unamended. -->
 - `lib/<tfm>/` holds the windows flavor's **reference** assemblies, never an implementation. NuGet falls back to
   `lib/` for a RID with no `runtimes/` folder of its own, and a reference assembly refuses to load there, where an
   implementation would bind another target's C.
 - `build/<id>.targets`, and the same file under `buildTransitive/` for a consumer that reaches the package through a
   project reference, fails a consumer build with `NUGETGOCGO001` when the build's RID has no `runtimes/<rid>/lib/`
   folder in the package. That RID is `-r`'s, or the .NET SDK's own for a portable build, so a portable build on an
-  osx-arm64 host is refused even when it will run elsewhere: build with `-r` and a packed RID. The guard reads the set
-  from the package's folders, so osx-arm64 joins by being packed, with no change to the guard. A portable build made
+  unpacked host is refused even when it will run elsewhere: build with `-r` and a packed RID. The guard reads the set
+  from the package's folders, so osx-arm64 joined by being packed, with no change to the guard. A portable build made
   on a packed host and run on linux-musl takes `runtimes/linux-x64` by .NET's RID fallback, whose C binding is glibc's.
   There the package's `go.lib` refuses those bindings at load, before any C call: its run-time target check.
 
