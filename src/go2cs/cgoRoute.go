@@ -105,6 +105,10 @@ var (
 type cgoCheckClosure struct {
 	call      *ast.CallExpr
 	arguments map[types.Object]cgoClosureArgument
+	// windows holds, per argument index, the check window cmd/cgo's check gives a struct pointer (door 1,
+	// DESIGN-cgo-struct-array-element.md section 4): the indexed operand for the element form (`_cgoIndexN`'s
+	// definition), or nil for the variable form. The address form takes the wrapper's default and has no entry.
+	windows map[int]ast.Expr
 }
 
 // cgoClosureArgument is what one of a check closure's variables stands for: an expression, which for
@@ -470,7 +474,7 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 		formSlice
 	)
 
-	closure := &cgoCheckClosure{arguments: map[types.Object]cgoClosureArgument{}}
+	closure := &cgoCheckClosure{arguments: map[types.Object]cgoClosureArgument{}, windows: map[int]ast.Expr{}}
 	forms := map[int]int{}
 	argumentObjects := map[int]types.Object{}
 	baseValues := map[int]ast.Expr{}
@@ -555,6 +559,14 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 			forms[index] = form
 			argumentObjects[index] = info.Defs[lhs]
 			closure.arguments[info.Defs[lhs]] = cgoClosureArgument{value: statement.Rhs[0]}
+
+			switch form {
+			case formVariable:
+				closure.windows[index] = nil
+			case formIndex:
+				closure.windows[index] = indexValues[index]
+			}
+
 			continue
 		case *ast.DeclStmt:
 			genDecl, ok := statement.Decl.(*ast.GenDecl)
@@ -1538,7 +1550,46 @@ func (v *Visitor) convCgoCheckClosure(closure *cgoCheckClosure, context LambdaCo
 		}
 	}()
 
-	return v.convCallExpr(closure.call, context)
+	call := v.convCallExpr(closure.call, context)
+
+	// Door 1 (DESIGN-cgo-struct-array-element.md section 4): a C struct pointer argument carries cmd/cgo's check window
+	// beside it, as the wrapper's optional ᴍwindowN parameter, so the wrapper checks Go's range with Go's text for the
+	// call's form. Every wrapper parameter that is a pointer to a C struct has one; the address form keeps the default.
+	var windows []string
+
+	for index, arg := range closure.call.Args {
+		window, found := closure.windows[index]
+
+		if !found {
+			continue
+		}
+
+		pointer, ok := v.info.TypeOf(arg).(*types.Pointer)
+
+		if !ok || cgoStructOf(pointer.Elem()) == nil {
+			continue
+		}
+
+		if window == nil {
+			windows = append(windows, fmt.Sprintf("ᴍwindow%d: global::go.golib.GoCgoWindow.Variable", index))
+			continue
+		}
+
+		// cmd/cgo defines `_cgoIndexN := &a` for a variable a and `_cgoIndexN := a` otherwise; the window is of a.
+		operand := ast.Unparen(window)
+
+		if unary, ok := operand.(*ast.UnaryExpr); ok && unary.Op == token.AND {
+			operand = ast.Unparen(unary.X)
+		}
+
+		windows = append(windows, fmt.Sprintf("ᴍwindow%d: global::go.golib.GoCgoWindow.Of(%s)", index, v.convExpr(operand, nil)))
+	}
+
+	if len(windows) > 0 && strings.HasSuffix(call, ")") {
+		call = strings.TrimSuffix(call, ")") + ", " + strings.Join(windows, ", ") + ")"
+	}
+
+	return call
 }
 
 // convCgoClosureArgument renders what a check closure's variable stands for, in the context the variable was met in (a

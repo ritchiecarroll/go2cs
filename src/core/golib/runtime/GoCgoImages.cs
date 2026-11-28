@@ -36,7 +36,7 @@ namespace go.golib;
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)] public struct GoCgoImages
 {
-    private enum Door { Image, Other }
+    private enum Door { Image, Other, Elements }
 
     private sealed class Root
     {
@@ -83,12 +83,35 @@ namespace go.golib;
     private static PanicException BothDoors(string function) =>
         RuntimeErrorPanic.ErrorString($"cgo: two pointers handed to C.{function} name the same Go value, one as an image (a struct view no door can pin) and one through another door; go2cs would hand C two copies of one Go value, so it refuses the call");
 
+    private static PanicException ElementsAndAnother(string function) =>
+        RuntimeErrorPanic.ErrorString($"cgo: two pointers handed to C.{function} name the same Go array, one an element whose whole backing array go2cs mirrors for the call and one through another door or as a second element; go2cs would hand C two copies of one Go array, so it refuses the call (one shared mirror per backing array is the later cure)");
+
+    // Door 1 (DESIGN-cgo-struct-array-element.md, P3's F2): an element of a Go array or slice of C structs claims its
+    // backing array, refused by name against ANY other claim on it: an image, a mirror, a pinned argument, or a second
+    // element. Go accepts each of those calls; Limitations names the refusal.
+    internal void ClaimElements(object[] keys, string function)
+    {
+        if (m_roots is not null)
+        {
+            foreach (Root root in m_roots)
+            {
+                if (root.Overlaps(keys))
+                    throw ElementsAndAnother(function);
+            }
+        }
+
+        (m_roots ??= []).Add(new Root { Keys = keys, Door = Door.Elements });
+    }
+
     // A pointer the mirror, the scalar door or a pin hands C: refused when it names an allocation an image already holds
     // (the image's root, or an array inside it: `&sa.Addr[0]` beside a view of sa).
     internal void ClaimOther(object[] keys, string function)
     {
         if (Find(keys, Door.Image) is not null)
             throw BothDoors(function);
+
+        if (Find(keys, Door.Elements) is not null)
+            throw ElementsAndAnother(function);
 
         (m_roots ??= []).Add(new Root { Keys = keys, Door = Door.Other });
     }
@@ -99,6 +122,9 @@ namespace go.golib;
     {
         if (Find(keys, Door.Other) is not null)
             throw BothDoors(function);
+
+        if (Find(keys, Door.Elements) is not null)
+            throw ElementsAndAnother(function);
 
         int length = (int)Math.Max(rootSize, size);
 

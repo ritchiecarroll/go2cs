@@ -335,7 +335,8 @@ func main() {
 	case "slicecolsgoptr2lit":
 		// Door 1, the literal form: a Go pointer in element 2's void * member of a Go slice, the slice's first element
 		// handed as &cols[0]. cmd/cgo checks the slice from its start through its capacity, before any C runs, and
-		// names the member's kind: "Go pointer to unpinned Go unsafe pointer".
+		// names the member's kind. go run (hosted red at 816b5ffe75) panics:
+		//   panic: runtime error: argument of cgo function has Go pointer to unpinned Go unsafe pointer
 		var b [4]byte
 		cols := make([]C.struct_go2cs_probe_col, 3)
 		cols[2].ptr = unsafe.Pointer(&b[0])
@@ -343,7 +344,8 @@ func main() {
 		fmt.Println("slicecolsgoptr2lit", int(cols[0].typ))
 	case "slicecolsgoptr2var":
 		// Door 1, the variable form, go-sqlite3's (argp := &cargs[0]; C.f(argp)): cmd/cgo checks the whole heap object
-		// and says "Go pointer to unpinned Go pointer".
+		// and says "pointer" whatever the member's kind. go run panics:
+		//   panic: runtime error: argument of cgo function has Go pointer to unpinned Go pointer
 		var b [4]byte
 		cols := make([]C.struct_go2cs_probe_col, 3)
 		cols[2].ptr = unsafe.Pointer(&b[0])
@@ -353,7 +355,8 @@ func main() {
 	case "slicecolsreslice":
 		// Door 1, the literal form over a re-slice: a Go pointer in cols[0], BEFORE the slice cmd/cgo checks, so Go runs
 		// the call. C writes a scalar of that record (p[-1].n = 7) and fills the record it is handed. Go then reads the
-		// scalar changed and the pointer member intact.
+		// scalar changed and the pointer member intact. go run prints:
+		//   slicecolsreslice 7 true 1 alpha
 		var b [4]byte
 		cols := make([]C.struct_go2cs_probe_col, 3)
 		cols[0].ptr = unsafe.Pointer(&b[0])
@@ -362,30 +365,35 @@ func main() {
 		C.go2cs_probe_col_poke_prev(&rest[0])
 		fmt.Println("slicecolsreslice", int(cols[0].n), cols[0].ptr == unsafe.Pointer(&b[0]), int(cols[1].typ), C.GoStringN((*C.char)(cols[1].ptr), cols[1].n))
 	case "slicecolsmid":
-		// Door 1: &cols[1] with ncol 2. C fills records 1 and 2; record 0 is untouched.
+		// Door 1: &cols[1] with ncol 2. C fills records 1 and 2; record 0 is untouched. go run prints:
+		//   slicecolsmid 0 42 1 2 beta
 		cols := make([]C.struct_go2cs_probe_col, 3)
 		cols[0].n = 42
 		C.go2cs_probe_col_fill(&cols[1], 2)
 		fmt.Println("slicecolsmid", int(cols[0].typ), int(cols[0].n), int(cols[1].typ), int(cols[2].typ), C.GoStringN((*C.char)(cols[2].ptr), cols[2].n))
 	case "slicecolsback":
 		// Door 1: &cols[1], and C reads p[-1]. The Go memory C may touch is the whole backing array, so record 0 is
-		// there for C to read.
+		// there for C to read. go run prints:
+		//   slicecolsback 77
 		cols := make([]C.struct_go2cs_probe_col, 3)
 		cols[0].i64 = 77
 		fmt.Println("slicecolsback", int64(C.go2cs_probe_col_back(&cols[1])))
 	case "slicecolsresult":
-		// Door 1: C returns the record two past the one it is handed. It is &cols[2], as Go compares it.
+		// Door 1: C returns the record two past the one it is handed. It is &cols[2], as Go compares it. go run prints:
+		//   slicecolsresult true false
 		cols := make([]C.struct_go2cs_probe_col, 3)
 		got := C.go2cs_probe_col_at(&cols[0], 2)
 		fmt.Println("slicecolsresult", got == &cols[2], got == &cols[1])
 	case "slicecolsarray":
-		// Door 1 over a Go ARRAY: &arr[1] with ncol 2.
+		// Door 1 over a Go ARRAY: &arr[1] with ncol 2. go run prints:
+		//   slicecolsarray 0 1 2 beta
 		var arr [3]C.struct_go2cs_probe_col
 		C.go2cs_probe_col_fill(&arr[1], 2)
 		fmt.Println("slicecolsarray", int(arr[0].typ), int(arr[1].typ), int(arr[2].typ), C.GoStringN((*C.char)(arr[2].ptr), arr[2].n))
 	case "slicecolsfield":
 		// Door 1 over an ARRAY FIELD: &h.cols[0]. The literal form checks the field's array; the variable form would
-		// check the whole enclosing object.
+		// check the whole enclosing object (cgocall.go:752-760), which go2cs does not (Limitations). go run prints:
+		//   slicecolsfield 9 3 gamma
 		var h struct {
 			k    int
 			cols [3]C.struct_go2cs_probe_col
@@ -395,7 +403,8 @@ func main() {
 		fmt.Println("slicecolsfield", h.k, int(h.cols[2].typ), C.GoStringN((*C.char)(h.cols[2].ptr), h.cols[2].n))
 	case "slicecolscap":
 		// Door 1: a Go pointer in a record between len and cap (a re-used cargs[:0]-shaped buffer). cmd/cgo checks the
-		// slice through its capacity, so Go panics before any C runs.
+		// slice through its capacity, so Go panics before any C runs. go run panics:
+		//   panic: runtime error: argument of cgo function has Go pointer to unpinned Go unsafe pointer
 		var b [4]byte
 		cols := make([]C.struct_go2cs_probe_col, 3, 4)
 		cols[:4][3].ptr = unsafe.Pointer(&b[0])
@@ -403,7 +412,8 @@ func main() {
 		fmt.Println("slicecolscap", int(cols[0].typ))
 	case "slicecolsconc":
 		// Door 1: another goroutine writes record 2 while C, handed &cols[0], pauses and then writes only record 0. Both
-		// writes survive.
+		// writes survive. go run prints:
+		//   slicecolsconc 5 99
 		cols := make([]C.struct_go2cs_probe_col, 3)
 		done := make(chan bool)
 		go func() {

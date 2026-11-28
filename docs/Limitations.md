@@ -521,6 +521,27 @@ lives in C memory crosses by its own address, with no copy.
      mirror): GoCgoWordMirror in golib, emitted for the out-parameter door and the void door. Rows: GolibTests
      CgoArgvTests and the cgo-e2e argv arms. -->
 
+**A Go array or slice of C structs costs its whole length on every call.** `C.f(&cols[0])` lets C read or write
+every struct in the array, before the one it is handed included, as in Go. go2cs holds such structs in a layout C
+cannot read, so for the call it copies every element of the backing array into an array of C structs, hands C the
+element's copy, and after the call copies back each element whose bytes C changed. So a goroutine's write to an
+element C did not touch survives the call. The copy covers the whole backing array, from its first element, whatever
+part C uses. Where go2cs differs from Go:
+- C's writes land in the Go array when the call returns, not while C runs;
+- two pointers into one Go array in one call (`swap(&a[i], &a[j])`), or one such pointer beside another pointer to
+  the same array, are refused by name, where Go hands C the one array;
+- a pointer C returns, or writes into a struct, that points inside an element (not at an element's start), or one
+  past the array's end, is refused by name, and so is a pointer member C sets to another element;
+- for an element before the slice Go checks (`&s[0]` where `s` is `cols[1:]`), a Go pointer in a pointer member
+  crosses as NULL, and a NULL C stores there is not seen; Go checks nothing there either;
+- for `p := &x.cols[0]; C.f(p)`, Go checks the whole object that holds the array, and for a package-level variable
+  holding Go pointers it panics; go2cs checks the array itself.
+An element of an array in C memory crosses by its own address, with no copy.
+<!-- Door 1: docs/phase4/DESIGN-cgo-struct-array-element.md (P3's F1-F4 and delta d1-d6; COORD's rulings 2026-11-28).
+     GoCgoElements and GoCgoWindow in golib, GoCgoStructPointer.Elements; rows: GolibTests GoCgoElementsTests,
+     GoCgoElementsSchedulerTests (default and GO2CS_MN), CgoStructWrapperTests.AnElementOfAGoArrayCrossesAsTheWholeArray,
+     and the cgo-e2e slicecols* arms. -->
+
 **Platforms.** A converted cgo program was built and run against the Go build of the same program on
 linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64, and printed what Go printed apart from the
 differences above.

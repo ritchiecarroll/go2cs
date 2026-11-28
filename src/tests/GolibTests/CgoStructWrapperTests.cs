@@ -176,20 +176,22 @@ public unsafe class CgoStructWrapperTests
         Assert.AreEqual(-1, OnAGoroutine(() => (int32)C.uname(null!)), "uname(NULL) fails");
 #endif
 
-    // §11.1: an ELEMENT of a Go array is refused before the call (cgo lets C touch the whole array).
+    // Door 1 (docs/phase4/DESIGN-cgo-struct-array-element.md): an ELEMENT of a Go array crosses as the whole array, the
+    // element's mirror handed to C inside the mirrored backing array. C writes the element; its neighbours, which C left
+    // alone, are not copied back. (Before door 1, §11.1 refused the element before the call.)
     [TestMethod]
-    public void AnElementOfAGoArrayIsRefusedBeforeTheCall()
+    public void AnElementOfAGoArrayCrossesAsTheWholeArray()
     {
         array<C.struct_utsname> names = new(3);
 
         for (int i = 0; i < 3; i++)
             names[i] = new C.struct_utsname();
 
-        string message = RefusalOf(() => C.uname(new ElemRefBox<C.struct_utsname>(names, 1)));
+        Assert.AreEqual(0, OnAGoroutine(() => (int32)C.uname(new ElemRefBox<C.struct_utsname>(names, 1))), "uname succeeds");
 
-        StringAssert.Contains(message, "C.uname");
-        StringAssert.Contains(message, "an element of a Go array or slice");
-        Assert.AreEqual("", CString(names[1].sysname), "C never ran: the element is unwritten");
+        Assert.AreNotEqual("", CString(names[1].sysname), "C wrote the element it was handed");
+        Assert.AreEqual("", CString(names[0].sysname), "the element before it is untouched");
+        Assert.AreEqual("", CString(names[2].sysname), "the element after it is untouched");
     }
 
     // §11.1: a native box minted from managed storage is refused before the call (C must not write through it).
@@ -301,16 +303,23 @@ public unsafe class CgoStructWrapperTests
         Assert.AreEqual((0, 0, 20, 20), ((int32)union.left, (int32)union.top, (int32)union.right, (int32)union.bottom), "r is the union");
     }
 
-    // §11.1: an ELEMENT of a Go array is refused before the call (cgo lets C touch the whole array).
+    // Door 1 (docs/phase4/DESIGN-cgo-struct-array-element.md): an ELEMENT of a Go array crosses as the whole array, the
+    // element's mirror handed to C inside the mirrored backing array. C writes the element; its neighbours, which C left
+    // alone, are not copied back. (Before door 1, §11.1 refused the element before the call.)
     [TestMethod]
-    public void AnElementOfAGoArrayIsRefusedBeforeTheCall()
+    public void AnElementOfAGoArrayCrossesAsTheWholeArray()
     {
         array<C.SYSTEMTIME> times = new(3);
-        string message = RefusalOf(() => C.GetSystemTime(new ElemRefBox<C.SYSTEMTIME>(times, 1)));
 
-        StringAssert.Contains(message, "C.GetSystemTime");
-        StringAssert.Contains(message, "an element of a Go array or slice");
-        Assert.AreEqual(0, (int32)(uint16)times[1].wYear, "C never ran: the element is unwritten");
+        OnAGoroutine(() =>
+        {
+            C.GetSystemTime(new ElemRefBox<C.SYSTEMTIME>(times, 1));
+            return 0;
+        });
+
+        Assert.IsTrue((int32)(uint16)times[1].wYear >= 2026, "C wrote the element it was handed");
+        Assert.AreEqual(0, (int32)(uint16)times[0].wYear, "the element before it is untouched");
+        Assert.AreEqual(0, (int32)(uint16)times[2].wYear, "the element after it is untouched");
     }
 
     // §11.1: a native box minted from managed storage is refused before the call (C must not write through it).

@@ -939,7 +939,7 @@ type _Ctype_go2cs_fname *_Ctype_char
 
 	bindings := strings.ReplaceAll(readConverted(t, output, filepath.Join("linux-amd64", "cgophase3.cgo.cs")), "\r\n", "\n")
 
-	if !strings.Contains(bindings, "m.ptr = (nint)global::go.golib.GoCgoArgs.VoidPointerMember(v.ptr);") || !strings.Contains(bindings, "GoCgoArgs.VoidPointerMemberBack((nuint)m.ptr, c, function)") {
+	if !strings.Contains(bindings, "m.ptr = (nint)global::go.golib.GoCgoArgs.VoidPointerMember(v.ptr, k);") || !strings.Contains(bindings, "GoCgoArgs.VoidPointerMemberBack((nuint)m.ptr, c, function)") {
 		t.Errorf("the void * member ptr is not copied in and back as a pointer member:\n%s", cgoLinesContaining(bindings, "ptr"))
 	}
 

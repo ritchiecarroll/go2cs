@@ -118,7 +118,7 @@ func (set *cgoWrapperSet) copyFunctions(function string, named *types.Named, mir
 	structType := named.Underlying().(*types.Struct)
 	goSide := cgoGoSideName(named)
 
-	var copyIn, copyOut, pinCheck strings.Builder
+	var copyIn, copyOut, copyOutSnapshot, pinCheck strings.Builder
 
 	for i := 0; i < structType.NumFields(); i++ {
 		field := structType.Field(i)
@@ -147,8 +147,15 @@ func (set *cgoWrapperSet) copyFunctions(function string, named *types.Named, mir
 			return "", err
 		}
 
+		snapshot, err := set.copyMember(function, named.Obj().Name()+"."+field.Name(), 0, "m."+member, "v."+member, field.Type(), cgoCopyOutSnapshot)
+
+		if err != nil {
+			return "", err
+		}
+
 		copyIn.WriteString(in)
 		copyOut.WriteString(out)
+		copyOutSnapshot.WriteString(snapshot)
 		pinCheck.WriteString(pin)
 	}
 
@@ -166,8 +173,15 @@ func (set *cgoWrapperSet) copyFunctions(function string, named *types.Named, mir
 	var text strings.Builder
 
 	fmt.Fprintf(&text, "    // %s's copy-in and copy-out, member by member.\n", named.Obj().Name())
-	fmt.Fprintf(&text, "    private static void ᴍin_%s(ref %s m, in %s v)\n    {\n%s    }\n\n", mirror.name, mirror.name, goSide, copyIn.String())
+	fmt.Fprintf(&text, "    private static void ᴍin_%s(ref %s m, in %s v, global::go.golib.GoCgoCheck k = default)\n    {\n%s    }\n\n", mirror.name, mirror.name, goSide, copyIn.String())
 	fmt.Fprintf(&text, "    private static void ᴍout_%s(ref %s v, in %s m%s)\n    {\n%s    }\n", mirror.name, goSide, mirror.name, outExtra, copyOut.String())
+
+	// Door 1 (DESIGN-cgo-struct-array-element.md, P3's delta d1): the copy-out of one element of a mirrored Go array,
+	// against the snapshot s of what went in. A pointer word equal to the snapshot's keeps the original member, whatever
+	// it holds (an element before the element form's slice carried its Go pointer across as 0), and no member function
+	// runs again on the original.
+	fmt.Fprintf(&text, "\n    // %s's copy-out against the snapshot of its copy-in (an element of a mirrored Go array).\n", named.Obj().Name())
+	fmt.Fprintf(&text, "    private static void ᴍout_%s(ref %s v, in %s m, in %s s, %s c, string function)\n    {\n%s    }\n", mirror.name, goSide, mirror.name, mirror.name, cgoStackCopiesParam, copyOutSnapshot.String())
 
 	if bearing {
 		fmt.Fprintf(&text, "\n    // %s's pointer members, each checked against one pinned argument inside the wrapper's `fixed`.\n", named.Obj().Name())
@@ -185,6 +199,7 @@ const (
 	cgoCopyIn cgoCopyMode = iota
 	cgoCopyOut
 	cgoPinCheck
+	cgoCopyOutSnapshot // the copy-out against the snapshot s of what went in (door 1)
 )
 
 // cgoStackCopiesParam is the C# type of a wrapper's stack copies (GoCgoStackCopy), as the copy-out of a pointer-bearing
@@ -196,6 +211,8 @@ const cgoStackCopiesParam = "global::System.ReadOnlySpan<global::go.golib.GoCgoS
 func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g string, t types.Type, mode cgoCopyMode) (string, error) {
 	indent := strings.Repeat("    ", depth+2)
 	in := mode == cgoCopyIn
+	// The snapshot's expression beside the mirror's: m is always "m.<member>…", so s is "s.<member>…".
+	s := "s" + strings.TrimPrefix(m, "m")
 
 	if nested := cgoStructOf(t); nested != nil {
 		mirror, err := set.mirrorOf(function, nested)
@@ -206,7 +223,9 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 
 		switch {
 		case in:
-			return fmt.Sprintf("%sᴍin_%s(ref %s, %s);\n", indent, mirror.name, m, g), nil
+			return fmt.Sprintf("%sᴍin_%s(ref %s, %s, k);\n", indent, mirror.name, m, g), nil
+		case mode == cgoCopyOutSnapshot:
+			return fmt.Sprintf("%sᴍout_%s(ref %s, %s, %s, c, function);\n", indent, mirror.name, g, m, s), nil
 		case mode == cgoPinCheck && set.pointerBearing[mirror.name]:
 			return fmt.Sprintf("%sᴍpin_%s(in %s, g, f, function);\n", indent, mirror.name, m), nil
 		case mode == cgoPinCheck:
@@ -251,9 +270,11 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 		// ORIGINAL pointer, so a member C left alone keeps its identity, and any other is C memory, minted native.
 		switch mode {
 		case cgoCopyIn:
-			return fmt.Sprintf("%s%s = (nint)global::go.golib.GoCgoArgs.PointerMember(%s);\n", indent, m, g), nil
+			return fmt.Sprintf("%s%s = (nint)global::go.golib.GoCgoArgs.PointerMember(%s, k);\n", indent, m, g), nil
 		case cgoPinCheck:
 			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)%s, g, f, function);\n", indent, m), nil
+		case cgoCopyOutSnapshot:
+			return fmt.Sprintf("%s%s = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)%s, %s, (nuint)%s, c, function);\n", indent, g, m, g, s), nil
 		}
 
 		return fmt.Sprintf("%s%s = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)%s, %s, global::go.golib.GoCgoArgs.PointerMember(%s), c, function);\n", indent, g, m, g, g), nil
@@ -271,9 +292,12 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 
 		switch mode {
 		case cgoCopyIn:
-			return fmt.Sprintf("%s%s = (nint)global::go.golib.GoCgoArgs.VoidPointerMember(%s);\n", indent, m, g), nil
+			return fmt.Sprintf("%s%s = (nint)global::go.golib.GoCgoArgs.VoidPointerMember(%s, k);\n", indent, m, g), nil
 		case cgoPinCheck:
 			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)%s, g, f, function);\n", indent, m), nil
+		case cgoCopyOutSnapshot:
+			return fmt.Sprintf("%s{\n%s    nuint ᴍword = global::go.golib.GoCgoArgs.VoidPointerMemberBack((nuint)%s, c, function);\n%s    %s = ᴍword == (nuint)%s ? %s : ᴍword == 0 ? default! : new %s((uintptr)ᴍword);\n%s}\n",
+				indent, indent, m, indent, g, s, g, cgoVoidPointerType, indent), nil
 		}
 
 		return fmt.Sprintf("%s{\n%s    nuint ᴍword = global::go.golib.GoCgoArgs.VoidPointerMemberBack((nuint)%s, c, function);\n%s    %s = ᴍword == 0 ? default! : ᴍword == global::go.golib.GoCgoArgs.VoidPointerMember(%s) ? %s : new %s((uintptr)ᴍword);\n%s}\n",
@@ -566,6 +590,12 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	// `fixed`, the mirror's own pin included, and the words are copied back after it.
 	var wordMirrors []int
 
+	// The struct pointer arguments that can cross through door 1 (an element of a Go array or slice of C structs,
+	// DESIGN-cgo-struct-array-element.md): each has an optional check window beside it, filled by the fold for cmd/cgo's
+	// element and variable forms, and an element door eN when its kind is Elements.
+	var elementParams []int
+	var windowParams []string
+
 	checked := map[string]bool{}
 
 	for i, param := range params {
@@ -584,6 +614,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			externParams = append(externParams, fmt.Sprintf("nint p%d", i))
 			wrapperParams = append(wrapperParams, fmt.Sprintf("ж<%s> p%d", param.goSide, i))
 			arguments = append(arguments, fmt.Sprintf("a%d", i))
+
+			if param.mirror != nil {
+				elementParams = append(elementParams, i)
+				windowParams = append(windowParams, fmt.Sprintf("global::go.golib.GoCgoWindow ᴍwindow%d = default", i))
+			}
 
 		case param.mirror != nil:
 			externParams = append(externParams, fmt.Sprintf("%s p%d", param.mirror.name, i))
@@ -667,7 +702,12 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			if param.mirror == nil {
 				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sScalarPointer(p%d, %q, %sout nuint n%d, out global::go.golib.GoCgoPin g%d);\n", i, args, i, function, images, i, i)
 			} else {
-				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, ref images, out nuint n%d, out global::go.golib.GoCgoPin g%d);\n", i, args, i, function, i, i)
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, ref images, out nuint n%d, out global::go.golib.GoCgoPin g%d, out %s[]? b%d, out nint x%d);\n", i, args, i, function, i, i, param.goSide, i, i)
+
+				// Door 1: an element of managed storage mirrors its whole backing array, each element under the window's
+				// check, and C receives the element's mirror inside the pinned mirror array, held as a Pinned argument.
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoElements<%s, %s>? e%d = null;\n\n", param.goSide, param.mirror.name, i)
+				fmt.Fprintf(&before, "        if (k%d == global::go.golib.GoCgoStructPointer.Elements)\n        {\n            e%d = new(b%d!, x%d, ᴍwindow%d, ᴍin_%s);\n            g%d = e%d.Pin;\n            k%d = global::go.golib.GoCgoStructPointer.Pinned;\n        }\n\n", i, i, i, i, i, param.mirror.name, i, i, i)
 			}
 
 			pinnedScalars = append(pinnedScalars, i)
@@ -688,7 +728,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			var copyIn, copyOut string
 
 			if param.mirror != nil {
-				copyIn = fmt.Sprintf("ᴍin_%s(ref m%d, p%d.Value);\n%[4]sa%[2]d = (nint)(&m%[2]d);\n", param.mirror.name, i, i, "            ")
+				copyIn = fmt.Sprintf("ᴍin_%s(ref m%d, p%d.Value, ᴍwindow%[2]d.Single);\n%[4]sa%[2]d = (nint)(&m%[2]d);\n", param.mirror.name, i, i, "            ")
 				copyOut = fmt.Sprintf("ᴍout_%s(ref p%d.Value, m%d);", param.mirror.name, i, i)
 
 				if set.pointerBearing[param.mirror.name] {
@@ -728,6 +768,12 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 				bearingCopies = append(bearingCopies, bearingCopy{index: i, mirrored: mirrored, mirror: param.mirror.name})
 			}
 
+			// Door 1's copy-back: each element whose mirror bytes C changed, against the snapshot (P3's F1 and d1).
+			if param.mirror != nil {
+				fmt.Fprintf(&after, "\n        e%d?.CopyBack(ᴍout_%s, copies, %q);\n", i, param.mirror.name, function)
+				needCopies = true
+			}
+
 		case param.mirror != nil:
 			fmt.Fprintf(&before, "\n        %s v%d = default;\n        ᴍin_%s(ref v%d, p%d);\n", param.mirror.name, i, param.mirror.name, i, i)
 		}
@@ -755,6 +801,13 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 		for i, param := range params {
 			if param.pointer && param.goSide == pointee {
+				// Door 1 (P3's F4): a result inside the mirror array is the element on whose boundary it lands, the
+				// program's own &a[k]; an interior word, or one past the end, is refused by name.
+				if param.mirror != nil {
+					fmt.Fprintf(&identity, "\n        if (e%d is not null && e%d.Contains((nuint)r))\n            return e%d.ElementAt((nuint)r, %q);\n", i, i, i, function)
+					notIdentity = append(notIdentity, fmt.Sprintf("(e%d is null || !e%d.Contains((nuint)r))", i, i))
+				}
+
 				fmt.Fprintf(&identity, "\n        if (r != 0 && r == a%d)\n            return p%d;\n", i, i)
 				notIdentity = append(notIdentity, fmt.Sprintf("r != a%d", i))
 			}
@@ -792,6 +845,9 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			setLastError = ", SetLastError = true"
 		}
 	}
+
+	// The check windows go last, each optional: a call the fold did not give one is the address form.
+	wrapperParams = append(wrapperParams, windowParams...)
 
 	var text strings.Builder
 
@@ -870,6 +926,15 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 				if returned.guard != "" {
 					text.WriteString("            }\n")
+				}
+			}
+		}
+
+		// Door 1: every element's pointer members, against every pin (the mirror array's own included, NIT 6).
+		for _, e := range elementParams {
+			if set.pointerBearing[params[e].mirror.name] {
+				for _, i := range all {
+					fmt.Fprintf(&text, "            e%d?.RequirePointersOutsidePin(ᴍpin_%s, g%d, f%d, %q);\n", e, params[e].mirror.name, i, i, function)
 				}
 			}
 		}

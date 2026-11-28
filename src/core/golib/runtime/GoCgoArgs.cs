@@ -33,7 +33,14 @@ namespace go.golib;
     /// design 18.12), uncopied, so what C writes is what Go reads. Only a scalar pointee takes it: its layout is one
     /// value, the same in C and in the CLR.
     /// </summary>
-    Pinned
+    Pinned,
+
+    /// <summary>
+    /// An element of a Go array or slice of C structs (door 1, docs/phase4/DESIGN-cgo-struct-array-element.md): cgo lets
+    /// C touch the whole backing array, so the wrapper mirrors it whole through <see cref="GoCgoElements{V, M}"/>, hands
+    /// C the element's mirror inside the pinned mirror array, and copies back the elements C changed.
+    /// </summary>
+    Elements
 }
 
 /// <summary>
@@ -123,6 +130,49 @@ namespace go.golib;
             images.ClaimOther(OtherKeys(pointer, pin), function);
 
         return kind;
+    }
+
+    /// <summary>
+    /// <see cref="StructPointer{T}(ж{T}, string, ref GoCgoImages, out nuint, out GoCgoPin)"/> with door 1 (an element of
+    /// a Go array or slice of C structs, docs/phase4/DESIGN-cgo-struct-array-element.md). A Pinner-held element keeps its
+    /// in-place answer (S6). An element of a native window crosses by its own address (<see cref="GoCgoStructPointer.Native"/>).
+    /// An element of managed storage answers <see cref="GoCgoStructPointer.Elements"/> with its backing array and absolute
+    /// index, and the backing array is claimed in the call's set as Elements, refused by name against any other claim on
+    /// it (P3's F2). Every other pointer answers as the overload without door 1 does.
+    /// </summary>
+    public static GoCgoStructPointer StructPointer<T>(ж<T>? pointer, string function, ref GoCgoImages images, out nuint address, out GoCgoPin pin, out T[]? backing, out nint index)
+    {
+        backing = null;
+        index = 0;
+
+        if (pointer is ElemRefBox<T> element)
+        {
+            if (GoPinTable.Any && TryPinnerHeld(pointer, function, out pin))
+            {
+                address = 0;
+                images.ClaimOther(OtherKeys(pointer, pin), function);
+                return GoCgoStructPointer.Pinned;
+            }
+
+            pin = default;
+
+            if (element.NativeElementAddress is var native and not 0)
+            {
+                address = native;
+                return GoCgoStructPointer.Native;
+            }
+
+            if (element.TryGetElementStorage(out T[]? storage, out nint at) && at < storage.Length)
+            {
+                images.ClaimElements([storage], function);
+                address = 0;
+                backing = storage;
+                index = at;
+                return GoCgoStructPointer.Elements;
+            }
+        }
+
+        return StructPointer(pointer, function, ref images, out address, out pin);
     }
 
     /// <summary>
@@ -327,13 +377,23 @@ namespace go.golib;
     /// A pointer into Go memory panics with cgo's own message: Go's cgocheck makes the same refusal at run time, and
     /// here it is always on. (Go prefixes the message with the caller's file and line, which a wrapper cannot know.)
     /// </summary>
-    public static nuint PointerMember<U>(ж<U>? member)
+    public static nuint PointerMember<U>(ж<U>? member) => PointerMember(member, GoCgoCheck.Kind);
+
+    /// <summary>
+    /// <see cref="PointerMember{U}(ж{U})"/> under a check (door 1, DESIGN-cgo-struct-array-element.md section 4): a typed
+    /// member's kind is "pointer" whatever the form, and an element before the element form's slice carries a Go
+    /// pointer across as 0, since Go checks nothing there and a mirror cannot carry a Go address.
+    /// </summary>
+    public static nuint PointerMember<U>(ж<U>? member, GoCgoCheck check)
     {
         if (member is null || member.IsNilPointer)
             return 0;
 
         if (member is NativeBox<U> native && IsGenuinelyNative(native))
             return native.NativeAddress;
+
+        if (check == GoCgoCheck.Outside)
+            return 0;
 
         throw RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go pointer");
     }
@@ -345,13 +405,27 @@ namespace go.golib;
     /// in memory handed to C. The runtime names the member's kind (cgoFormatErr): an unsafe.Pointer member is "unsafe
     /// pointer", where a typed pointer member is "pointer".
     /// </summary>
-    public static nuint VoidPointerMember(ж<uintptr>? member)
+    public static nuint VoidPointerMember(ж<uintptr>? member) => VoidPointerMember(member, GoCgoCheck.Kind);
+
+    /// <summary>
+    /// <see cref="VoidPointerMember(ж{uintptr})"/> under a check (door 1, DESIGN-cgo-struct-array-element.md section 4):
+    /// the address and element forms name the member's kind, "unsafe pointer"; the variable form's whole-object check
+    /// says "pointer"; and an element before the element form's slice carries a Go pointer across as 0.
+    /// </summary>
+    public static nuint VoidPointerMember(ж<uintptr>? member, GoCgoCheck check)
     {
         if (member is null || member.IsNilPointer)
             return 0;
 
         if (ManagedPointerTokens.IsTaggedToken(member.Value.Value) || GoMemory(member, out nuint address) is not null)
-            throw RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go unsafe pointer");
+        {
+            return check switch
+            {
+                GoCgoCheck.Outside => 0,
+                GoCgoCheck.Whole => throw RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go pointer"),
+                _ => throw RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go unsafe pointer")
+            };
+        }
 
         return address;
     }
