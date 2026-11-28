@@ -146,3 +146,31 @@ Two runs at the same tip cover the rest of the folds:
   osx-arm64 and osx-x64. The two skipped tests are host-gated: one is Windows-only and one is Linux-only.
 - converter-cgo on linux (run 45033828490): `ok go2cs`, with 110 tests passed, 0 failed and 14 skipped, plus 75
   pack-suite readings ok. It includes the reworded refusal anchors.
+
+## Amended 2026-11-28: osx-arm64 joins the -Cgo pack (the cgo arm, claude/p5-cgo-osx-arm64)
+
+osx-arm64 has its own darwin/arm64 flavor (D6 of DESIGN-darwin-arm64-flavour.md), so the cgo arm packs its C binding with
+zig's `aarch64-macos` and leaves no RID out. The tables above read "out by name" for osx-arm64; that row is now a J3 leg,
+and R-b, which used to read that refusal, now reads a doctored copy of the package with `runtimes/osx-arm64` removed. R-c
+is a reading, relabelled as COORD ruled (063545Z): master without -cgo converts go-pointer as go builds it under
+`CGO_ENABLED=0`, since INC 4 increment 1 (dfe8bdf189) removed the go.mod-less preflight refusal R-c used to measure.
+
+The reading ran on a newly built J1 (run 46117314414 at 5b6ef889d0, no `;feedrun=`; every job success):
+- J2: nugetgo.github.com.mattn.go-pointer.0.0.1-ci.46117314414.nupkg (sha256 4a5b8417…d7e2, 18 entries).
+  - Runtimes linux-arm64, linux-x64, osx-arm64, osx-x64 and win-x64.
+  - No entry names the copy or the overlay.
+  - R-a's input: the win-x64 assembly replaced by the linux-x64 flavor's. R-b's input: the `runtimes/osx-arm64`
+    entry removed, unsigned, four runtimes left.
+  - R-c READING: master 4a56f17a3a without -cgo converts only go-pointer's cgo-off view (exit 0; source files: doc.cs).
+
+| RID | J3: converted output = go run | Isolation | Red |
+|---|---|---|---|
+| win-x64 | PASS | PASS | R-a PASS: "converted for linux/amd64, and this process runs as windows/amd64" |
+| linux-x64 | PASS | PASS | |
+| osx-x64 | PASS | PASS | |
+| linux-arm64 | PASS | PASS | |
+| osx-arm64 | PASS | PASS | R-b PASS: NUGETGOCGO001 at build, "this build is for osx-arm64" |
+
+The run printed R-b's PASS as the whole MSBuild line, which the runner's dotnet problem matcher turned into an error
+annotation on the osx-arm64 leg, a green job. The reading now quotes the refusal's message alone. That change, and the
+R-c relabel (a7dfb01c46), are read on the tip by a reused-feed run, recorded on the seat.

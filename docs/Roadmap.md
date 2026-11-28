@@ -474,8 +474,10 @@ The standard library is converted with `CGO_ENABLED=0`.
   another `-platforms` target when `CC` names that target's C compiler.
 - A cgo module packs as one NuGet package for `win-x64`, `linux-x64`, `osx-x64`, `linux-arm64` and `osx-arm64`, each
   with its own C binding, and a build or a run on any other platform is refused by name. A real third-party cgo module
-  was packed this way and printed what Go printed on `win-x64`, `linux-x64`, `osx-x64` and `linux-arm64`, before
-  `osx-arm64` joined.
+  was packed this way and printed what Go printed on each of the five.
+  <!-- 2026-11-28 (P5): cgo-nuget-e2e run 46117314414 at 5b6ef889d0, J3 PASS on all five RIDs, osx-arm64 included
+       (docs/phase4/REHEARSAL-cgo-nuget-e2e-go-pointer.md, amended 2026-11-28). Before that reading the sentence ended
+       "printed what Go printed on win-x64, linux-x64, osx-x64 and linux-arm64, before osx-arm64 joined." -->
   <!-- 2026-11-28 (P5, the cgo arm on claude/p5-cgo-osx-arm64, stacked on D6 of DESIGN-darwin-arm64-flavour.md): osx-arm64
        joins with its own darwin/arm64 flavor (zig aarch64-macos); its reading is cgo-nuget-e2e's J3 osx-arm64 leg at the
        cgo arm. Before it: "for win-x64, linux-x64, osx-x64 and linux-arm64 ... printed what Go printed on each of those

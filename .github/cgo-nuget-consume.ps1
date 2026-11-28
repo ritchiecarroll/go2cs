@@ -155,7 +155,11 @@ if ($Rid -ceq 'osx-arm64') {
     $line = if ($line.Count) { $line[0].Trim() } else { '' }
     # The guard's own wording (NugetgoCgo.psm1): the line also carries file paths, so a bare RID match could pass on them.
     if ($refused.Exit -ne 0 -and $line -and $line.Contains('this build is for osx-arm64') -and $build -notmatch '\bNU3\d{3}\b') {
-        Reading "R-b PASS: the copy without runtimes/osx-arm64 restored and its build is refused: $line"
+        # The reading quotes the refusal's message alone. The whole MSBuild line ("<targets>(14,5): error NUGETGOCGO001:
+        # ... [<csproj>]") matches the runner's dotnet problem matcher, which turned this PASS into an error annotation on
+        # run 46117314414's osx-arm64 leg, a green job.
+        $message = $line.Substring($line.IndexOf('NUGETGOCGO001') + 'NUGETGOCGO001'.Length).TrimStart(':', ' ') -replace '\s+\[[^\]]*\]$', ''
+        Reading "R-b PASS: the copy without runtimes/osx-arm64 restored and its build is refused with NUGETGOCGO001 ($message)"
     }
     else { Failure "R-b: the copy without runtimes/osx-arm64 was not refused with NUGETGOCGO001 naming osx-arm64 (row exit $($refused.Exit), refusal line '$line'; see $($refused.Log))" }
 }
