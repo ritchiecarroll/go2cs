@@ -276,7 +276,7 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)%s, g, f, function);\n", indent, m), nil
 		}
 
-		return fmt.Sprintf("%s{\n%s    nuint ᴡ = global::go.golib.GoCgoArgs.VoidPointerMemberBack((nuint)%s, c, function);\n%s    %s = ᴡ == 0 ? default! : ᴡ == global::go.golib.GoCgoArgs.VoidPointerMember(%s) ? %s : new %s((uintptr)ᴡ);\n%s}\n",
+		return fmt.Sprintf("%s{\n%s    nuint ᴍword = global::go.golib.GoCgoArgs.VoidPointerMemberBack((nuint)%s, c, function);\n%s    %s = ᴍword == 0 ? default! : ᴍword == global::go.golib.GoCgoArgs.VoidPointerMember(%s) ? %s : new %s((uintptr)ᴍword);\n%s}\n",
 			indent, indent, m, indent, g, g, g, cgoVoidPointerType, indent), nil
 	}
 
