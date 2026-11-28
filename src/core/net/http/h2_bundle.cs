@@ -5170,7 +5170,7 @@ internal static partial void serve⁔(/*this*/ ж<http2serverConn> Ꮡsc, http2h
             }
             case 4 when selᴛ16.ꟷᐳ(out var msg): {
                 switch (msg.type()) {
-                case {} Δv when Δv._<Action<nint>>(out var v): {
+                case {} Δv when Δv._ᶠ<Action<nint>>(out var v): {
                     v(loopNum); // for testing
                     break;
                 }
@@ -5211,7 +5211,7 @@ internal static partial void serve⁔(/*this*/ ж<http2serverConn> Ꮡsc, http2h
                     Ꮡsc.startPush(v);
                     break;
                 }
-                case {} Δv when Δv._<Action<ж<http2serverConn>>>(out var v): {
+                case {} Δv when Δv._ᶠ<Action<ж<http2serverConn>>>(out var v): {
                     v(Ꮡsc);
                     break;
                 }

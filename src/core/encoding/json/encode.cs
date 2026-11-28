@@ -405,7 +405,7 @@ internal static encoderFunc valueEncoder(reflect.Value v) {
 
 internal static encoderFunc typeEncoder(reflect.Type t) {
     var (fiΔ1, ok) = ᏑencoderCache.Load(t); if (ok) {
-        return fiΔ1._<encoderFunc>();
+        return fiΔ1._ᶠ<encoderFunc>();
     }
 
     // To deal with recursive types, populate the map with an
@@ -420,7 +420,7 @@ internal static encoderFunc typeEncoder(reflect.Type t) {
         indirectʗ1()(e, v, opts);
     }));
     if (loaded) {
-        return fi._<encoderFunc>();
+        return fi._ᶠ<encoderFunc>();
     }
 
     var f = indirect();

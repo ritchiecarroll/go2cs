@@ -409,7 +409,7 @@ internal static (@string, error) lookupGorootExport(@string pkgDir) {
         });
     }
 
-    return f._<Func<(@string, error)>>()();
+    return f._ᶠ<Func<(@string, error)>>()();
 }
 
 } // end exportdata_package

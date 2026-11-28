@@ -181,7 +181,7 @@ internal static Compressor compressor(uint16 method) {
     if (!ok) {
         return default;
     }
-    return ci._<Compressor>();
+    return ci._ᶠ<Compressor>();
 }
 
 internal static Decompressor decompressor(uint16 method) {
@@ -189,7 +189,7 @@ internal static Decompressor decompressor(uint16 method) {
     if (!ok) {
         return default;
     }
-    return di._<Decompressor>();
+    return di._ᶠ<Decompressor>();
 }
 
 } // end zip_package

@@ -3371,7 +3371,7 @@ partial struct tLogKey {
 internal static void logf⁔(/*this*/ ref transportRequest tr, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
-    var (logf, ok) = tr.Request.Context().Value(new tLogKey())._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
+    var (logf, ok) = tr.Request.Context().Value(new tLogKey())._ᶠ<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
         logf(time.Now().Format(time.RFC3339Nano) + ": "u8 + format, args.ꓸꓸꓸ);
     }
 }

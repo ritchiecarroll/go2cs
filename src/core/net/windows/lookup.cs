@@ -350,7 +350,7 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr⁔(/*this*/ ж<Resol
     // can be overridden by tests. This is needed by net/http, so it
     // uses a context key instead of unexported variables.
     var resolverFunc = (context.Context p1, @string p2, @string p3) => Ꮡr.lookupIP(p1, p2, p3);
-    var (alt, _) = ctx.Value(new nettrace.LookupIPAltResolverKey())._<Func<context.Context, @string, @string, (slice<IPAddr>, error)>>(ᐧ); if (alt != nil) {
+    var (alt, _) = ctx.Value(new nettrace.LookupIPAltResolverKey())._ᶠ<Func<context.Context, @string, @string, (slice<IPAddr>, error)>>(ᐧ); if (alt != nil) {
         resolverFunc = alt;
     }
 

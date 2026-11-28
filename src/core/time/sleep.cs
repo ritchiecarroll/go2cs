@@ -192,7 +192,7 @@ public static ж<Timer> AfterFunc(Duration d, Action f) {
 }
 
 internal static partial void goFunc(any arg, uintptr seq, int64 delta) {
-    goǃ(arg._<Action>());
+    goǃ(arg._ᶠ<Action>());
 }
 
 } // end time_package

@@ -3146,7 +3146,7 @@ internal static partial error registerErr⁔(/*this*/ ж<ServeMux> Ꮡmux, @stri
         if (handler == nil) {
             return errors.New(httpNilHandlerˢ);
         }
-        var (f, okΔ1) = handler._<HandlerFunc>(ᐧ); if (okΔ1 && f == nil) {
+        var (f, okΔ1) = handler._ᶠ<HandlerFunc>(ᐧ); if (okΔ1 && f == nil) {
             return errors.New(httpNilHandlerˢ);
         }
 
