@@ -111,6 +111,7 @@
     <None Include="$(MSBuildThisFileDirectory)tailCalledFuncValue_test.go" />
     <None Include="$(MSBuildThisFileDirectory)targetScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)tempNamedAfterIdentifier_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)syscallCallbackAot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)loadScopedCaches_test.go" />
