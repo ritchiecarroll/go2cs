@@ -1165,6 +1165,13 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 		flags, err = parseCgoLinkFlags(goos, args, pkg.Dir)
 	}
 
+	// The package's own #cgo flags are held to cmd/go's allowlist at the pinned GOROOT before the capture links or the
+	// side build compiles with any of them (cgoFlagSecurity.go; COORD's ruling, 2026-11-28). The load's go list
+	// -compiled runs the same check today and fails the package, but the route does not rest on that.
+	if err == nil && cgoCaptureOverride == nil {
+		err = cgoFlagsAllowed(load, options, pkg, goos)
+	}
+
 	if err != nil {
 		return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
 	}

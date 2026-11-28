@@ -27,6 +27,8 @@
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bridgeTypeAccess_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoBuild_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoFlagSecurity.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoFlagSecurity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoG1_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPhase3_test.go" />
