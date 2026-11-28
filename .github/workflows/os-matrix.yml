@@ -1550,7 +1550,7 @@ jobs:
       # linker reads an import library, never the DLL itself, so the build writes one beside it. The build is
       # .github/cgo-probe.ps1, shared with release-smoke's cgo job (release-smoke-cgo).
       - name: GolibTests — build the cgo probe library
-        if: (needs.plan.outputs.stage == 'golib-tests' || needs.plan.outputs.stage == 'converter-cgo' || needs.plan.outputs.stage == 'cgo-e2e') && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
+        if: (needs.plan.outputs.stage == 'golib-tests' || needs.plan.outputs.stage == 'converter-cgo' || needs.plan.outputs.stage == 'cgo-e2e') && contains(fromJSON('["linux-x64","linux-arm64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
         shell: pwsh
         run: |
           & ./.github/cgo-probe.ps1 -Label 'golib-tests cgo probe'
