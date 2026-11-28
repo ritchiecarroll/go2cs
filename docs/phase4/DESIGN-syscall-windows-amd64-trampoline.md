@@ -310,6 +310,11 @@ two plants plus the unwind plant (section 5), on the measure-only branch; the CF
 `46083694102`); the .NET caller row; the bytes test, made to fail; a windows `go2cs-stdlib` build of `syscall`;
 GolibTests R/D and `go test` (the standard battery); repoguard. No converter change, so no CNR.
 
+Both shipped rows are opt-in on `GO2CS_TESTS_E2E=1`, as the other end-to-end rows are, because each makes a Native
+AOT publish that a plain `go test ./...` deadline does not hold; the cgo-e2e stage sets the switch. The row's `block`
+run takes the stub by reflection, so it runs under the JIT only: Native AOT + CFG does not run it. The stub's bytes
+are the same in every arm, so the JIT reading covers the check those bytes make.
+
 ## 10. Revision 2: the second read's folds
 
 | Point (COORD 230743Z / 230844Z) | Where it landed |

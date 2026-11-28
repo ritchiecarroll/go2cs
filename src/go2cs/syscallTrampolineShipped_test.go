@@ -203,6 +203,12 @@ func shippedTrampolineRow(t *testing.T, cfgArm bool) {
 		t.Skipf("the trampoline is windows/amd64 only: NOT MEASURED on %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 
+	// Each arm makes a Native AOT publish (15 to 25 minutes hosted), past a plain `go test ./...` deadline, so the
+	// rows run where the other end-to-end rows do: the cgo-e2e stage sets this switch.
+	if os.Getenv(testsE2EEnv) != "1" {
+		t.Skipf("opt-in (%s=1): publishes the trampoline row under Native AOT", testsE2EEnv)
+	}
+
 	dotnet, err := exec.LookPath("dotnet")
 
 	if err != nil {
