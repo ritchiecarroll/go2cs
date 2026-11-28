@@ -29,18 +29,23 @@ section 2, Forwarders), so every sqlite-shaped program published with Native AOT
 
 The binders stay generic, and the type arguments come from where they are known at build time: the call site.
 
-1. **A registration in `syscall`**, public for the generator only (`[EditorBrowsable(EditorBrowsableState.Never)]`):
-   - `RegisterNewCallback<TR>(Type funcType, Func<Delegate, Func<TR>> typed)`, and the `<T1, TR>`, `<T1, T2, TR>` and
+1. **A registration in `syscall`**: the nested class `syscall_package.GoNewCallbackShapes`, public for the generator
+   only (`[EditorBrowsable(EditorBrowsableState.Never)]`). It is a nested class with its own table and lock, never
+   members of `syscall_package` itself, because that class has an explicit static constructor (the package's Go
+   initialization): a call into it from a consumer's module initializer would run syscall's package init at that
+   consumer's module load, ahead of Go's order.
+   - `Register<TR>(Type funcType, Func<Delegate, Func<TR>> typed)`, and the `<T1, TR>`, `<T1, T2, TR>` and
      `<T1, T2, T3, T4, TR>` forms. Each stores, keyed by the func's runtime delegate type, a factory that binds with the
-     CLOSED binder (`GoCallbackBinder1<T1, TR>.Bind(typed(d))`). Because the registration is a closed generic call in
-     the consumer's code, ILC compiles that binder and its shim lambda.
-   - `RegisterNewCallbackRefusal(Type funcType, int arity, bool hasResult, bool floatResult, bool floatArgument)` for a
-     shape no binder takes: no result (an `Action`), or an arity other than 0, 1, 2 and 4. The generator reports the
-     shape's facts; `syscall` refuses with the JIT path's order and text (no result, float result, float argument,
-     arity), so each text lives in one place and both runtimes read the same line.
-   - A duplicate registration is tolerated: the first entry for a type stays. Registration and lookup take the lock the
-     identity table already takes (`s_goCallbackLock`), so two assemblies registering one `Func` type from module
-     initializers on two threads, and a lookup racing them, are ordered.
+     CLOSED binder (`GoCallbackBinder1<T1, TR>.Bind(typed(d))`) and a check for Go's float kinds. Because the
+     registration is a closed generic call in the consumer's code, ILC compiles that binder and its shim lambda.
+   - `Refusal(Type funcType, int arity, bool hasResult, bool floatResult, bool floatArgument)` for a shape no binder
+     takes: no result (an `Action`), or an arity other than 0, 1, 2 and 4. The generator reports the shape's facts;
+     `syscall` refuses with the JIT path's order and text (no result, float result, float argument, arity), so each
+     text lives in one place and both runtimes read the same line.
+   - A duplicate registration is tolerated: the first entry for a type stays, under the table's lock. `compileCallback`
+     reads the table while holding the identity table's lock (`s_goCallbackLock`), always in that order, so two
+     assemblies registering one `Func` type from module initializers on two threads, and a lookup racing them, are
+     ordered.
 2. **A go2cs-gen generator** (`NewCallbackShapeGenerator`) emits one file-local `[ModuleInitializer]` per compilation
    that registers each distinct delegate type its sites pass, once. Nothing changes in the emitted, visible C#: the
    same precedent as `RuntimeInitHookGenerator`, whose module initializer roots runtime for Native AOT.
@@ -67,24 +72,23 @@ The binders stay generic, and the type arguments come from where they are known 
    - **The typed adapter** is a cast (`d => (Func<T1, TR>)d`) for `Func<…>`, and
      `d => { var f = (Named)d; return (a1) => f(a1); }` for a named delegate type, so `Delegate.CreateDelegate` is no
      longer on the path.
-   - **Forwarders.** `golang.org/x/sys/windows.NewCallback(fn interface{})` is `return syscall.NewCallback(fn)`
-     (x/sys v0.50.0, `windows/syscall_windows.go:138-147`, and `NewCallbackCDecl` the same), so inside x/sys the
-     generator sees only `object`, and the func types are at its callers in other assemblies. modernc.org/libc's
-     windows init is one: `threadCallback = windows.NewCallback(ThreadProc)` with
-     `func ThreadProc(p uintptr) uintptr` (libc v1.82.14, `libc_windows.go:276` and `:3144`), which the converter
-     passes as the bare method group, as the probe's forwarder line shows. When a site's argument is a parameter of
-     type `object` of the method that contains it, the generator marks that method with an assembly attribute
-     (`[assembly: GoNewCallbackForwarder(typeof(holder), "NewCallback", 0)]`: holder type, method name, parameter
-     index). In every compilation it reads that attribute from the referenced assemblies and treats a call of a marked
-     method as a site, the argument at the index giving the type. A forwarder of a forwarder is marked the same way,
-     so the chain closes in build order. A parameter reassigned before the call only adds a registration, never loses
-     one. Default taken: the attribute, which needs no list of names; naming the two x/sys functions in the generator
-     is the alternative, for COORD to choose.
+   - **Forwarders.** `golang.org/x/sys/windows.NewCallback(fn interface{})` is `return syscall.NewCallback(fn)` (x/sys
+     v0.50.0, `windows/syscall_windows.go:138-147`, and `NewCallbackCDecl` the same), so inside x/sys the generator sees
+     only `object`, and the func types are at its callers in other assemblies. modernc.org/libc's windows init is one:
+     `threadCallback = windows.NewCallback(ThreadProc)` with `func ThreadProc(p uintptr) uintptr` (libc v1.82.14,
+     `libc_windows.go:276` and `:3144`), which the converter passes as the bare method group, as the probe's forwarder
+     line shows. When a site's argument is a parameter of type `object` of the method that contains it, the generator
+     marks that method with an assembly attribute, `[assembly: syscall_package.GoNewCallbackForwarder(typeof(holder),
+     "NewCallback", 0)]` (holder type, method name, parameter index). In every compilation it reads that attribute from
+     the referenced assemblies and treats a call of a marked method as a site, the argument at the index giving the
+     type. A forwarder of a forwarder is marked the same way, so the chain closes in build order. A parameter reassigned
+     before the call only adds a registration, never loses one. Default taken: the attribute, which needs no list of
+     names; naming the two x/sys functions in the generator is the alternative, for COORD to choose.
    - **Left unregistered**, so that no build that compiles today breaks (one unit row each): a delegate type naming a
      type parameter (`func reg[T ~uintptr](f func(T) uintptr)`; the initializer cannot name `T`); a compiler-made
      delegate type (a lambda with a `ref` parameter or more than 16 parameters); a type the generated file cannot
      access (`Compilation.IsSymbolAccessibleWithin` over every type in the signature); and a compilation whose
-     referenced `syscall` has no `RegisterNewCallback` (an older package), for which the generator emits nothing.
+     referenced `syscall` has no `GoNewCallbackShapes` (an older package), for which the generator emits nothing.
 3. **`compileCallback` looks the type up first.** The non-function check stays first. Then, under the lock and before
    `d.Method` (itself reflection): the identity table; a registered factory binds through its closed binder, and a
    refusal entry refuses with Go's text, with no `Delegate.Method`, `MakeGenericType` or `Invoke`. An unregistered

@@ -68,6 +68,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -129,9 +130,12 @@ partial class syscall_package
 
     // ---- the binders: GENERIC per arity, constructed once per func value ----
     //
-    // `Delegate.CreateDelegate` retargets whatever converted delegate shape the caller passed onto a
-    // `Func<…>` of the same signature, which is what makes the forward TYPED. The lambda then does
-    // the reinterprets. The returned shim is non-generic and therefore marshallable.
+    // `Bind` takes the func already TYPED as a `Func<…>` and returns a non-generic, marshallable shim
+    // whose lambda does the reinterprets. Two ways reach it: a shape go2cs-gen registered from the call
+    // site (`GoNewCallbackShapes`, below), whose typed adapter is a cast or a forwarding lambda and whose
+    // closed binder Native AOT compiles; and, where dynamic code is supported, `BindReflective`, which
+    // retargets whatever converted delegate shape the caller passed with `Delegate.CreateDelegate`
+    // (docs/phase4/DESIGN-newcallback-native-aot.md).
     //
     // Each shim crosses back into Go as cgocallbackg does, through the runtime's callback pair
     // (syscallCallbackEnter / syscallCallbackExit; DESIGN-native-call-seam §6.3, F-3): the Go function runs
@@ -140,10 +144,12 @@ partial class syscall_package
 
     private static class GoCallbackBinder0<TR>
     {
-        public static Delegate Bind(Delegate d)
+        public static Delegate BindReflective(Delegate d) =>
+            Bind((Func<TR>)Delegate.CreateDelegate(typeof(Func<TR>), d.Target, d.Method));
+
+        public static Delegate Bind(Func<TR> f)
         {
             goCallbackCheckResult<TR>();
-            var f = (Func<TR>)Delegate.CreateDelegate(typeof(Func<TR>), d.Target, d.Method);
             return new GoCallbackShim0(() =>
             {
                 runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
@@ -156,11 +162,13 @@ partial class syscall_package
 
     private static class GoCallbackBinder1<T1, TR>
     {
-        public static Delegate Bind(Delegate d)
+        public static Delegate BindReflective(Delegate d) =>
+            Bind((Func<T1, TR>)Delegate.CreateDelegate(typeof(Func<T1, TR>), d.Target, d.Method));
+
+        public static Delegate Bind(Func<T1, TR> f)
         {
             goCallbackCheckArg<T1>();
             goCallbackCheckResult<TR>();
-            var f = (Func<T1, TR>)Delegate.CreateDelegate(typeof(Func<T1, TR>), d.Target, d.Method);
             return new GoCallbackShim1(a1 =>
             {
                 runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
@@ -173,11 +181,13 @@ partial class syscall_package
 
     private static class GoCallbackBinder2<T1, T2, TR>
     {
-        public static Delegate Bind(Delegate d)
+        public static Delegate BindReflective(Delegate d) =>
+            Bind((Func<T1, T2, TR>)Delegate.CreateDelegate(typeof(Func<T1, T2, TR>), d.Target, d.Method));
+
+        public static Delegate Bind(Func<T1, T2, TR> f)
         {
             goCallbackCheckArg<T1>(); goCallbackCheckArg<T2>();
             goCallbackCheckResult<TR>();
-            var f = (Func<T1, T2, TR>)Delegate.CreateDelegate(typeof(Func<T1, T2, TR>), d.Target, d.Method);
             return new GoCallbackShim2((a1, a2) =>
             {
                 runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
@@ -190,13 +200,15 @@ partial class syscall_package
 
     private static class GoCallbackBinder4<T1, T2, T3, T4, TR>
     {
-        public static Delegate Bind(Delegate d)
+        public static Delegate BindReflective(Delegate d) =>
+            Bind((Func<T1, T2, T3, T4, TR>)Delegate.CreateDelegate(
+                typeof(Func<T1, T2, T3, T4, TR>), d.Target, d.Method));
+
+        public static Delegate Bind(Func<T1, T2, T3, T4, TR> f)
         {
             goCallbackCheckArg<T1>(); goCallbackCheckArg<T2>();
             goCallbackCheckArg<T3>(); goCallbackCheckArg<T4>();
             goCallbackCheckResult<TR>();
-            var f = (Func<T1, T2, T3, T4, TR>)Delegate.CreateDelegate(
-                typeof(Func<T1, T2, T3, T4, TR>), d.Target, d.Method);
             return new GoCallbackShim4((a1, a2, a3, a4) =>
             {
                 runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
@@ -209,6 +221,142 @@ partial class syscall_package
                 finally { runtime_package.syscallCallbackExit(entered); }
             });
         }
+    }
+
+    // ---- the shapes: registered from the call site by go2cs-gen, looked up before any reflection ----
+    //
+    // Native AOT compiles no code for a generic instantiation it cannot see at build time, so the binder
+    // for a func type is closed where that type IS seen: go2cs-gen emits, in each compilation that calls
+    // NewCallback (or a forwarder, below), a module initializer registering every delegate type passed
+    // there. The entry is keyed by the func's runtime delegate type; `Check` runs Go's kind checks in the
+    // reflective path's order (float result, float arguments) and `Bind` builds the shim through the
+    // closed binder. A refusal entry, for a shape no binder takes, has only `Check`.
+    internal sealed record GoCallbackShape(Action Check, Func<Delegate, Delegate>? Bind);
+
+    /// <summary>
+    /// The callback shapes go2cs-gen registers from the call site. For go2cs-gen's module initializers only.
+    /// </summary>
+    /// <remarks>
+    /// A NESTED class with its own table and lock, never members of <c>syscall_package</c> itself: that class has
+    /// an explicit static constructor (the package's Go initialization), so any call into it from a consumer's
+    /// module initializer would run syscall's package init at that consumer's module load, ahead of the order
+    /// Go's initialization gives it. Registration touches only this class; the table is read under
+    /// <c>s_goCallbackLock</c>, taken first, so the two locks are always taken in one order.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static class GoNewCallbackShapes
+    {
+        private static readonly Dictionary<Type, GoCallbackShape> s_shapes = new();
+        private static readonly object s_lock = new();
+
+        // The first entry for a type stays: two assemblies registering one Func type is normal.
+        private static void add(Type funcType, GoCallbackShape shape)
+        {
+            lock (s_lock)
+                s_shapes.TryAdd(funcType, shape);
+        }
+
+        internal static GoCallbackShape? Find(Type funcType)
+        {
+            lock (s_lock)
+                return s_shapes.GetValueOrDefault(funcType);
+        }
+
+        /// <summary>Registers a no-argument callback shape.</summary>
+        public static void Register<TR>(Type funcType, Func<Delegate, Func<TR>> typed) =>
+            add(funcType, new GoCallbackShape(
+                static () => goCallbackCheckFloatResult<TR>(),
+                d => GoCallbackBinder0<TR>.Bind(typed(d))));
+
+        /// <summary>Registers a one-argument callback shape.</summary>
+        public static void Register<T1, TR>(Type funcType, Func<Delegate, Func<T1, TR>> typed) =>
+            add(funcType, new GoCallbackShape(
+                static () => { goCallbackCheckFloatResult<TR>(); goCallbackCheckFloatArg<T1>(); },
+                d => GoCallbackBinder1<T1, TR>.Bind(typed(d))));
+
+        /// <summary>Registers a two-argument callback shape.</summary>
+        public static void Register<T1, T2, TR>(Type funcType, Func<Delegate, Func<T1, T2, TR>> typed) =>
+            add(funcType, new GoCallbackShape(
+                static () =>
+                {
+                    goCallbackCheckFloatResult<TR>();
+                    goCallbackCheckFloatArg<T1>(); goCallbackCheckFloatArg<T2>();
+                },
+                d => GoCallbackBinder2<T1, T2, TR>.Bind(typed(d))));
+
+        /// <summary>Registers a four-argument callback shape.</summary>
+        public static void Register<T1, T2, T3, T4, TR>(Type funcType,
+            Func<Delegate, Func<T1, T2, T3, T4, TR>> typed) =>
+            add(funcType, new GoCallbackShape(
+                static () =>
+                {
+                    goCallbackCheckFloatResult<TR>();
+                    goCallbackCheckFloatArg<T1>(); goCallbackCheckFloatArg<T2>();
+                    goCallbackCheckFloatArg<T3>(); goCallbackCheckFloatArg<T4>();
+                },
+                d => GoCallbackBinder4<T1, T2, T3, T4, TR>.Bind(typed(d))));
+
+        /// <summary>
+        /// Registers a callback shape no binder takes (no result, or an arity other than 0, 1, 2 and 4), with the
+        /// facts go2cs-gen read from it.
+        /// </summary>
+        public static void Refusal(Type funcType, int arity, bool hasResult, bool floatResult, bool floatArgument) =>
+            add(funcType, new GoCallbackShape(
+                () => goCallbackRefuse(arity, hasResult, floatResult, floatArgument), null));
+    }
+
+    private static void goCallbackCheckFloatResult<T>()
+    {
+        if (typeof(T) == typeof(float) || typeof(T) == typeof(double))
+            throw panic("compileCallback: float results not supported");
+    }
+
+    private static void goCallbackCheckFloatArg<T>()
+    {
+        if (typeof(T) == typeof(float) || typeof(T) == typeof(double))
+            throw panic("compileCallback: float arguments not supported");
+    }
+
+    // Go's refusals in the reflective path's order, from facts rather than from a reflected Type, so a
+    // registered refusal and the reflective path read the same text.
+    private static void goCallbackRefuse(int arity, bool hasResult, bool floatResult, bool floatArgument)
+    {
+        if (!hasResult)
+            throw panic("compileCallback: expected function with one uintptr-sized result");
+
+        if (floatResult)
+            throw panic("compileCallback: float results not supported");
+
+        if (floatArgument)
+            throw panic("compileCallback: float arguments not supported");
+
+        if (arity is not (0 or 1 or 2 or 4))
+            throw goCallbackArityRefusal(arity);
+    }
+
+    // §12: arities 0/1/2/4 are everything the consumers reach without gcc; the 2..10 range is a bounded,
+    // enumerated follow-on. This refusal deliberately does NOT borrow Go's "type … is currently not
+    // supported" text: Go has no unsupported-arity case at all (any arity fitting the frame works there),
+    // so this is OUR limitation and it says so rather than dressing itself as Go's contract.
+    private static PanicException goCallbackArityRefusal(int arity) =>
+        panic("compileCallback: " + arity +
+              "-argument callbacks are not implemented in this port; arities 0, 1, 2 and 4 are " +
+              "(docs/phase4/DESIGN-managed-newcallback.md §12)");
+
+    /// <summary>
+    /// Marks a method that passes its own <c>any</c> parameter straight to <c>NewCallback</c> or
+    /// <c>NewCallbackCDecl</c>, so go2cs-gen treats its calls, in the assemblies that reference this one, as
+    /// <c>NewCallback</c> sites. go2cs-gen emits it; it is not written by hand.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+    public sealed class GoNewCallbackForwarderAttribute(Type holder, string method, int parameter) : Attribute
+    {
+        public Type Holder { get; } = holder;
+
+        public string Method { get; } = method;
+
+        public int Parameter { get; } = parameter;
     }
 
     // ---- the table: identity, rooting and amortisation in one object (§13.1) ----
@@ -245,59 +393,84 @@ partial class syscall_package
             if (s_goCallbacks.TryGetValue(d, out var existing))
                 return existing.Code;
 
-            MethodInfo mi = d.Method;
-            ParameterInfo[] ps = mi.GetParameters();
-            Type ret = mi.ReturnType;
+            Delegate shim;
 
-            if (ret == typeof(void))
-                throw panic("compileCallback: expected function with one uintptr-sized result");
-
-            if (goCallbackIsFloat(ret))
-                throw panic("compileCallback: float results not supported");
-
-            foreach (ParameterInfo p in ps)
+            // A shape go2cs-gen registered binds through its closed binder, before `d.Method` (itself
+            // reflection), `MakeGenericType` or `Invoke` is reached.
+            if (GoNewCallbackShapes.Find(d.GetType()) is { } shape)
             {
-                if (goCallbackIsFloat(p.ParameterType))
-                    throw panic("compileCallback: float arguments not supported");
-            }
+                shape.Check();
 
-            Type[] targs;
-            Type open;
-            switch (ps.Length)
+                if (s_goCallbacks.Count >= goCallbackMax)
+                    throw panic("too many callback functions");
+
+                shim = shape.Bind!(d);
+            }
+            else if (!RuntimeFeature.IsDynamicCodeSupported)
             {
-                case 0: open = typeof(GoCallbackBinder0<>);       targs = [ret]; break;
-                case 1: open = typeof(GoCallbackBinder1<,>);      targs = [ps[0].ParameterType, ret]; break;
-                case 2: open = typeof(GoCallbackBinder2<,,>);     targs = [ps[0].ParameterType, ps[1].ParameterType, ret]; break;
-                case 4: open = typeof(GoCallbackBinder4<,,,,>);   targs = [ps[0].ParameterType, ps[1].ParameterType,
-                                                                           ps[2].ParameterType, ps[3].ParameterType, ret]; break;
-                default:
-                    // §12: arities 0/1/2/4 are everything the consumers reach without gcc; the 2..10
-                    // range is a bounded, enumerated follow-on. This refusal deliberately does NOT
-                    // borrow Go's "type … is currently not supported" text: Go has no unsupported-arity
-                    // case at all (any arity fitting the frame works there), so this is OUR limitation
-                    // and it says so rather than dressing itself as Go's contract.
-                    throw panic("compileCallback: " + ps.Length +
-                                "-argument callbacks are not implemented in this port; arities 0, 1, 2 and 4 are " +
-                                "(docs/phase4/DESIGN-managed-newcallback.md §12)");
+                // Native AOT (or an application that switched dynamic code off): no closed binder exists
+                // for an unregistered type, so refuse by name before anything is built. A go2cs limit,
+                // said as one, never Go's text.
+                throw panic("compileCallback: no native code for callback type " + d.GetType() +
+                            " under Native AOT; the project that calls NewCallback must reference go2cs-gen " +
+                            "and pass a value of that func type");
             }
-
-            if (s_goCallbacks.Count >= goCallbackMax)
-                throw panic("too many callback functions");
-
-            // ⚠ DoNotWrapExceptions IS LOAD-BEARING, not tidiness. The binder's own refusals --
-            // goCallbackCheckArg / goCallbackCheckResult, which raise Go's text as a panic -- run
-            // INSIDE this reflective call, and MethodInfo.Invoke wraps anything they throw in a
-            // TargetInvocationException. A wrapped panic is not a panic: `recover()` would not see
-            // it and the caller would get an infrastructure error where Go gives a fatal with its
-            // own message. Measured by the i7 on 193af90f5 as a latent defect behind refusals d2/d3.
-            Delegate shim = (Delegate)open.MakeGenericType(targs)
-                .GetMethod("Bind", BindingFlags.Public | BindingFlags.Static)!
-                .Invoke(null, BindingFlags.DoNotWrapExceptions, null, [d], null)!;
+            else
+            {
+                shim = goCallbackBindReflective(d);
+            }
 
             uintptr code = (nuint)(nint)Marshal.GetFunctionPointerForDelegate(shim);
             s_goCallbacks[d] = (shim, code);
             return code;
         }
+    }
+
+    // The reflective path, where dynamic code is supported: hand-written C#, or a func reached only
+    // through `any`, whose type no call site showed go2cs-gen. Called under s_goCallbackLock.
+    private static Delegate goCallbackBindReflective(Delegate d)
+    {
+        MethodInfo mi = d.Method;
+        ParameterInfo[] ps = mi.GetParameters();
+        Type ret = mi.ReturnType;
+
+        if (ret == typeof(void))
+            throw panic("compileCallback: expected function with one uintptr-sized result");
+
+        if (goCallbackIsFloat(ret))
+            throw panic("compileCallback: float results not supported");
+
+        foreach (ParameterInfo p in ps)
+        {
+            if (goCallbackIsFloat(p.ParameterType))
+                throw panic("compileCallback: float arguments not supported");
+        }
+
+        Type[] targs;
+        Type open;
+        switch (ps.Length)
+        {
+            case 0: open = typeof(GoCallbackBinder0<>);       targs = [ret]; break;
+            case 1: open = typeof(GoCallbackBinder1<,>);      targs = [ps[0].ParameterType, ret]; break;
+            case 2: open = typeof(GoCallbackBinder2<,,>);     targs = [ps[0].ParameterType, ps[1].ParameterType, ret]; break;
+            case 4: open = typeof(GoCallbackBinder4<,,,,>);   targs = [ps[0].ParameterType, ps[1].ParameterType,
+                                                                       ps[2].ParameterType, ps[3].ParameterType, ret]; break;
+            default:
+                throw goCallbackArityRefusal(ps.Length);
+        }
+
+        if (s_goCallbacks.Count >= goCallbackMax)
+            throw panic("too many callback functions");
+
+        // ⚠ DoNotWrapExceptions IS LOAD-BEARING, not tidiness. The binder's own refusals --
+        // goCallbackCheckArg / goCallbackCheckResult, which raise Go's text as a panic -- run
+        // INSIDE this reflective call, and MethodInfo.Invoke wraps anything they throw in a
+        // TargetInvocationException. A wrapped panic is not a panic: `recover()` would not see
+        // it and the caller would get an infrastructure error where Go gives a fatal with its
+        // own message. Measured by the i7 on 193af90f5 as a latent defect behind refusals d2/d3.
+        return (Delegate)open.MakeGenericType(targs)
+            .GetMethod("BindReflective", BindingFlags.Public | BindingFlags.Static)!
+            .Invoke(null, BindingFlags.DoNotWrapExceptions, null, [d], null)!;
     }
 
     // Go refuses float arguments and float results by KIND. The converted float types alias the CLR's,
