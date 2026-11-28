@@ -145,52 +145,47 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 		// gc_test.go testAssertVar assigned the whole `(error?, bool)` tuple to a bare `error y`
 		// with `ok` left `default` (CS0029) — same defect this branch exists to prevent, one
 		// expression kind short of catching it.
-		if !v.inFunction && valueSpec.Type == nil && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
-			_, isCall := valueSpec.Values[0].(*ast.CallExpr)
-			_, isTypeAssert := valueSpec.Values[0].(*ast.TypeAssertExpr)
-
-			if isCall || isTypeAssert {
-				if tuple, isTuple := v.info.TypeOf(valueSpec.Values[0]).(*types.Tuple); isTuple {
-					v.visitPackageTupleVarSpec(valueSpec, tuple)
+		//
+		// A TYPED package-level spec (`var ga, gb any = anys()`) takes the same route, each component
+		// converted to the declared type (see visitPackageTupleVarSpec).
+		//
+		// The comma-ok map index and channel receive (`var v, ok = m[k]`, `= <-ch`) and a parenthesized
+		// initializer take it too: typedTupleSpecContexts names every tuple form and the contexts that render it.
+		if !v.inFunction && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
+			if contexts, ok := v.typedTupleSpecContexts(valueSpec.Values[0]); ok {
+				if tuple, isTuple := v.info.TypeOf(valueSpec.Values[0]).(*types.Tuple); isTuple && tuple.Len() == len(valueSpec.Names) {
+					v.visitPackageTupleVarSpec(valueSpec, tuple, contexts)
 					return
 				}
 			}
 		}
 
-		// A FUNCTION-LOCAL `var name, offset, abs = t.locabs()` (a grouped var spec is not a
-		// `:=`, so visitAssignStmt never sees it) deconstructs the same way — the per-name
-		// loop below assigned the WHOLE tuple to the first name and silently DEFAULTED the
-		// rest (CS0029; time appendFormat read a zero abs). Emit the C# tuple deconstruction
-		// (`var (name, offset, abs) = t.locabs();`), matching the `:=` form. Gated to specs
-		// with no heap-escaping name (an escaping name needs its `ref heap<T>` box decl —
-		// none in the corpus takes this shape yet). Widened to a two-value TYPE ASSERTION for
-		// the identical reason as the package-level branch above — see that comment.
-		if v.inFunction && valueSpec.Type == nil && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
-			_, isCall := valueSpec.Values[0].(*ast.CallExpr)
-			_, isTypeAssert := valueSpec.Values[0].(*ast.TypeAssertExpr)
+		// A FUNCTION-LOCAL `var a, b T = pair()` — a TYPED spec fed by ONE multi-value expression — takes each
+		// result in turn, converted to T, as an assignment does. The per-name loop below has no such form: it
+		// assigned the WHOLE tuple to the first name and defaulted the rest, which C# accepts silently wherever
+		// the tuple converts to T (`any`, an interface: `{1 x} <nil>` where Go prints `1 x`) and refuses
+		// elsewhere (a func type, CS0029). Deconstruct into temps, then declare each name from its temp through
+		// typedTupleElementConversion. The expression is a call, or one of Go's comma-ok forms (`var v, ok any =
+		// m[k]`, `= x.(T)`, `= <-ch`), which go/types types as a 2-tuple in a declaration exactly as in `:=`. A
+		// name that gets a heap box (its address is taken) is declared through its box and then assigned, so
+		// the write lands in the box the `Ꮡname` pointer reads.
+		//
+		// An UNTYPED spec (`var name, offset, abs = t.locabs()` — a grouped var spec is not a `:=`, so
+		// visitAssignStmt never sees it) takes the same branch, each name typed by its own result. With no
+		// boxed name it is the plain C# deconstruction (`var (name, offset, abs) = t.locabs();`), matching the
+		// `:=` form; with one it takes the temps and the box like the typed spec. The box gate is "does this
+		// name get a `Ꮡname` BOX" (identHasHeapBox), NOT the raw identEscapesHeap flag, which the escape
+		// analysis blanket-sets for every inherently heap-allocated local (pointer/slice/map/chan/interface/func)
+		// with no box behind it: reading the raw flag rejected `var ctx, cancel = context.WithCancel(ctx)` (net
+		// sendfile_test), the trap paramAddressTakenNeedsBox documents.
+		if v.inFunction && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
+			if contexts, ok := v.typedTupleSpecContexts(valueSpec.Values[0]); ok {
+				tuple, isTuple := v.info.TypeOf(valueSpec.Values[0]).(*types.Tuple)
 
-			if isCall || isTypeAssert {
-				if _, isTuple := v.info.TypeOf(valueSpec.Values[0]).(*types.Tuple); isTuple {
-					// The gate is "does this name get a `Ꮡname` BOX", which is identHasHeapBox —
-					// NOT the raw identEscapesHeap flag, which the escape analysis blanket-sets for
-					// every INHERENTLY heap-allocated local (pointer/slice/map/chan/interface/func:
-					// already a reference, so no box is emitted unless its address is really taken).
-					// Reading the raw flag rejected every tuple whose results include an interface or
-					// a func — `var ctx, cancel = context.WithCancel(ctx)` (net sendfile_test) — and
-					// the per-name fallback then assigned the WHOLE ValueTuple to the first name with
-					// the rest `default` (CS0029), the very defect this branch exists to prevent.
-					// It is the trap paramAddressTakenNeedsBox documents: a verdict the box gate then
-					// refuses leaves identEscapesHeap set with no box behind it.
-					allPlain := true
+				if isTuple && tuple.Len() == len(valueSpec.Names) {
+					value := v.convExpr(ast.Unparen(valueSpec.Values[0]), contexts)
 
-					for _, ident := range valueSpec.Names {
-						if obj := v.info.Defs[ident]; obj != nil && v.identHasHeapBox(obj, obj.Type()) {
-							allPlain = false
-							break
-						}
-					}
-
-					if allPlain {
+					if valueSpec.Type == nil && !v.anyNameHasHeapBox(valueSpec.Names) {
 						names := make([]string, len(valueSpec.Names))
 
 						for i, ident := range valueSpec.Names {
@@ -198,11 +193,62 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						}
 
 						v.outputBuilder.WriteString(v.newline)
-						v.writeOutput("var (%s) = %s;", strings.Join(names, ", "), v.convExpr(valueSpec.Values[0], nil))
+						v.writeOutput("var (%s) = %s;", strings.Join(names, ", "), value)
 						return
 					}
+
+					temps := make([]string, len(valueSpec.Names))
+
+					for i, ident := range valueSpec.Names {
+						if ident.Name == "_" {
+							temps[i] = "_"
+						} else {
+							temps[i] = v.getTempVarName(getSanitizedIdentifier(v.getIdentName(ident)))
+						}
+					}
+
+					v.outputBuilder.WriteString(v.newline)
+					v.writeOutput("var (%s) = %s;", strings.Join(temps, ", "), value)
+
+					for i, ident := range valueSpec.Names {
+						if ident.Name == "_" {
+							continue
+						}
+
+						declared := tuple.At(i).Type()
+
+						if valueSpec.Type != nil {
+							declared = v.info.TypeOf(valueSpec.Type)
+						}
+
+						name := getSanitizedIdentifier(v.getIdentName(ident))
+						converted := v.typedTupleElementConversion(declared, tuple.At(i).Type(), temps[i])
+						v.outputBuilder.WriteString(v.newline)
+
+						if obj := v.info.Defs[ident]; obj != nil && v.identHasHeapBox(obj, obj.Type()) {
+							if heapDecl := v.convertToHeapTypeDecl(ident, false); heapDecl != "" {
+								v.writeOutput("%s", heapDecl)
+								v.outputBuilder.WriteString(v.newline)
+								v.writeOutput("%s = %s;", name, converted)
+								continue
+							}
+
+							panic(fmt.Sprintf("multi-value var spec: no heap declaration for address-taken name %q", ident.Name))
+						}
+
+						v.writeOutput("%s %s = %s;", v.getCSharpTypeName(declared), name, converted)
+					}
+
+					return
 				}
 			}
+		}
+
+		// In valid Go a var spec with several names and ONE value is always a tuple form, and both branches
+		// above take every tuple form. One that reaches the per-name loop below would get the whole tuple
+		// assigned to its first name and the zero value in the rest, silently, so refuse it by name instead.
+		if len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
+			panic(fmt.Sprintf("multi-value var spec %q has no tuple deconstruction for its initializer (%T)", valueSpec.Names[0].Name, ast.Unparen(valueSpec.Values[0])))
 		}
 
 		for i, ident := range valueSpec.Names {
@@ -1567,7 +1613,7 @@ func (v *Visitor) convInterfaceDeclValue(value ast.Expr, ifaceDeclType types.Typ
 //
 // A spec collectMovedInitVars flagged for init-order relocation relocates as ONE unit instead —
 // see writeMovedPackageTupleVarSpec.
-func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *types.Tuple) {
+func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *types.Tuple, tupleContexts []ExprContext) {
 	nonBlankCount := 0
 
 	for _, ident := range valueSpec.Names {
@@ -1600,7 +1646,7 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 	context := DefaultBasicLitContext()
 	context.u8StringOK = true
 
-	callExpr := v.convExpr(valueSpec.Values[0], []ExprContext{context})
+	callExpr := v.convExpr(ast.Unparen(valueSpec.Values[0]), append([]ExprContext{context}, tupleContexts...))
 
 	if moved {
 		v.writeMovedPackageTupleVarSpec(valueSpec, tuple, callExpr, nonBlankCount, ordinal)
@@ -1651,13 +1697,15 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 		}
 
 		firstLine = false
-		csTypeName := v.getCSharpTypeName(tuple.At(i).Type())
-		access := v.testDeclaredValueAccess(getGoAccess(ident.Name), ident.Pos(), tuple.At(i).Type())
+		nameType := v.packageTupleNameType(valueSpec, tuple, i)
+		csTypeName := v.getCSharpTypeName(nameType)
+		access := v.testDeclaredValueAccess(getGoAccess(ident.Name), ident.Pos(), nameType)
+		component := v.packageTupleComponent(valueSpec, tuple, i, componentSource)
 
 		if v.isAddressedGlobal(ident) {
-			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, fmt.Sprintf("%s.Item%d", componentSource, i+1), isInherentlyHeapAllocatedType(tuple.At(i).Type()))
+			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, component, isInherentlyHeapAllocatedType(nameType))
 		} else {
-			v.writeOutput("%s static %s %s = %s.Item%d;", access, csTypeName, csIDName, componentSource, i+1)
+			v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, component)
 		}
 	}
 
@@ -1702,7 +1750,7 @@ func (v *Visitor) writeMovedPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple 
 				methodName = packageInitMethodName(csIDName)
 			}
 
-			assignments = append(assignments, fmt.Sprintf("%s = %s.Item%d;", csIDName, componentSource, i+1))
+			assignments = append(assignments, fmt.Sprintf("%s = %s;", csIDName, v.packageTupleComponent(valueSpec, tuple, i, componentSource)))
 		}
 
 		if !firstLine {
@@ -1710,11 +1758,12 @@ func (v *Visitor) writeMovedPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple 
 		}
 
 		firstLine = false
-		csTypeName := v.getCSharpTypeName(tuple.At(i).Type())
-		access := v.testDeclaredValueAccess(getGoAccess(ident.Name), ident.Pos(), tuple.At(i).Type())
+		nameType := v.packageTupleNameType(valueSpec, tuple, i)
+		csTypeName := v.getCSharpTypeName(nameType)
+		access := v.testDeclaredValueAccess(getGoAccess(ident.Name), ident.Pos(), nameType)
 
 		if v.isAddressedGlobal(ident) {
-			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, "", isInherentlyHeapAllocatedType(tuple.At(i).Type()))
+			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, "", isInherentlyHeapAllocatedType(nameType))
 		} else {
 			v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
 		}
@@ -1763,4 +1812,101 @@ func claimHoistedConstFieldName(csIDName string) string {
 	}
 
 	return fmt.Sprintf("%s%s%d", csIDName, HoistedConstMarker, ordinal)
+}
+
+// anyNameHasHeapBox reports whether any of a spec's names gets a `Ꮡname` box (identHasHeapBox), which the
+// tuple-deconstruction branches of visitValueSpec do not declare.
+func (v *Visitor) anyNameHasHeapBox(names []*ast.Ident) bool {
+	for _, ident := range names {
+		if obj := v.info.Defs[ident]; obj != nil && v.identHasHeapBox(obj, obj.Type()) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// typedTupleElementConversion converts name, a temp holding one result (Go type actual) of a multi-value call,
+// to a slot of Go type declared: an interface takes the usual interface conversion (the empty interface its
+// pointer-boundary treatment), a func type of another delegate the nil-safe delegate conversion, and anything
+// else passes as it is. It is the per-element conversion visitReturnStmt applies to a forwarded multi-value
+// return.
+func (v *Visitor) typedTupleElementConversion(declared, actual types.Type, name string) string {
+	if types.Identical(declared, actual) {
+		return name
+	}
+
+	if declaredIsIface, declaredIfaceEmpty := isInterface(declared); declaredIsIface {
+		if !declaredIfaceEmpty {
+			return v.convertToInterfaceType(declared, actual, name)
+		}
+
+		if typeParam, ok := actual.(*types.TypeParam); ok && isEmptyInterfaceTarget(declared) {
+			return applyTypedNilTypeParamBox(typeParam, name)
+		}
+
+		return v.applyTypedNilPointerBoxToType(actual, name)
+	}
+
+	if targetName, sourceName, ok := v.funcConversion(nil, declared, nil, actual); ok {
+		return fmt.Sprintf("builtin.NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, name)
+	}
+
+	return name
+}
+
+// typedTupleSpecContexts reports whether value, the one initializer of a typed multi-name var spec, is an
+// expression Go deconstructs across the names — a call, or one of the comma-ok forms (type assertion, map
+// index, channel receive) — and returns the contexts that render it as a C# tuple. The comma-ok map index and
+// receive render their two-value forms (`m[key, ꟷ]`, `ᐸꟷ(ch, ꟷ)`) only when told so, as visitAssignStmt
+// tells them for `v, ok := m[k]`; a call and a type assertion render a tuple without help.
+func (v *Visitor) typedTupleSpecContexts(value ast.Expr) ([]ExprContext, bool) {
+	switch expr := ast.Unparen(value).(type) {
+	case *ast.CallExpr, *ast.TypeAssertExpr:
+		return nil, true
+	case *ast.IndexExpr:
+		_, isMap := v.info.TypeOf(expr.X).Underlying().(*types.Map)
+
+		// A constrained type parameter with a map core (`M ~map[K]V`) indexes through the same two-value
+		// indexer, as convIndexExpr treats it.
+		if tp, isTypeParam := types.Unalias(v.info.TypeOf(expr.X)).(*types.TypeParam); !isMap && isTypeParam {
+			isMap = typeParamMapCore(tp) != nil
+		}
+
+		if isMap {
+			indexContext := DefaultIndexExprContext()
+			indexContext.isTupleResult = true
+			return []ExprContext{indexContext}, true
+		}
+	case *ast.UnaryExpr:
+		if expr.Op == token.ARROW {
+			unaryContext := DefaultUnaryExprContext()
+			unaryContext.isTupleResult = true
+			return []ExprContext{unaryContext}, true
+		}
+	}
+
+	return nil, false
+}
+
+// packageTupleNameType is the Go type of name i of a package-level tuple var spec: the spec's declared type
+// when it has one (`var ga, gb any = anys()`), else the call's own result type.
+func (v *Visitor) packageTupleNameType(valueSpec *ast.ValueSpec, tuple *types.Tuple, i int) types.Type {
+	if valueSpec.Type != nil {
+		return v.info.TypeOf(valueSpec.Type)
+	}
+
+	return tuple.At(i).Type()
+}
+
+// packageTupleComponent renders the read of result i from componentSource (the call itself, or the hidden
+// holder it was evaluated into), converted to the spec's declared type when it has one.
+func (v *Visitor) packageTupleComponent(valueSpec *ast.ValueSpec, tuple *types.Tuple, i int, componentSource string) string {
+	component := fmt.Sprintf("%s.Item%d", componentSource, i+1)
+
+	if valueSpec.Type == nil {
+		return component
+	}
+
+	return v.typedTupleElementConversion(v.info.TypeOf(valueSpec.Type), tuple.At(i).Type(), component)
 }
