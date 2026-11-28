@@ -425,6 +425,8 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "slicecolsgoptr2lit"},
 		{name: "slicecolsgoptr2var"},
 		{name: "slicecolsreslice"},
+		{name: "slicecursreslice"},
+		{name: "slicecolsonce"},
 		{name: "slicecolsmid"},
 		{name: "slicecolsback"},
 		{name: "slicecolsresult"},

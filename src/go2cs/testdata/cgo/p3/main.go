@@ -76,6 +76,7 @@ struct go2cs_probe_node
 };
 
 int go2cs_probe_cursor_set(struct go2cs_probe_cursor *cursor, char *buffer, int k);
+void go2cs_probe_cursor_poke_prev(struct go2cs_probe_cursor *cursor);
 struct go2cs_probe_cursor go2cs_probe_cursor_at(char *buffer, int k);
 int go2cs_probe_pick(int *a, int **out);
 int go2cs_probe_pick_b(struct go2cs_probe_pair *pair, int **out);
@@ -365,6 +366,31 @@ func main() {
 		rest := cols[1:]
 		C.go2cs_probe_col_poke_prev(&rest[0])
 		fmt.Println("slicecolsreslice", int(cols[0].n), cols[0].ptr == unsafe.Pointer(&b[0]), int(cols[1].typ), C.GoStringN((*C.char)(cols[1].ptr), cols[1].n))
+	case "slicecursreslice":
+		// Door 1, P3's MUST on bb60cf6f6e: slicecolsreslice's twin over a TYPED pointer member (char *cur). A Go pointer
+		// in cursors[0].cur sits before the slice cmd/cgo checks, so Go runs the call. C writes cursors[0].n = 7, so that
+		// element's bytes change and its copy-out runs; the cur word went in as 0 and is still 0, and Go keeps the
+		// original pointer. go run prints:
+		//   slicecursreslice 7 true 1
+		var b [4]byte
+		cursors := make([]C.struct_go2cs_probe_cursor, 3)
+		kept := (*C.char)(unsafe.Pointer(&b[0]))
+		cursors[0].cur = kept
+		rest := cursors[1:]
+		C.go2cs_probe_cursor_poke_prev(&rest[0])
+		fmt.Println("slicecursreslice", int(cursors[0].n), cursors[0].cur == kept, int(cursors[1].n))
+	case "slicecolsonce":
+		// Door 1, P3's SHOULD 2 on bb60cf6f6e: the indexed operand is a call, &next()[0]. cmd/cgo evaluates it ONCE
+		// (_cgoIndexN := next()), so next runs once. go run prints:
+		//   slicecolsonce 1 alpha
+		cols := make([]C.struct_go2cs_probe_col, 3)
+		calls := 0
+		next := func() []C.struct_go2cs_probe_col {
+			calls++
+			return cols
+		}
+		C.go2cs_probe_col_fill(&next()[0], 3)
+		fmt.Println("slicecolsonce", calls, C.GoStringN((*C.char)(cols[0].ptr), cols[0].n))
 	case "slicecolsmid":
 		// Door 1: &cols[1] with ncol 2. C fills records 1 and 2; record 0 is untouched. go run prints:
 		//   slicecolsmid 0 42 1 2 beta

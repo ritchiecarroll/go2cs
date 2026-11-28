@@ -581,3 +581,11 @@ GO2CS_PROBE_EXPORT void go2cs_probe_col_slow(struct go2cs_probe_col *col, int mi
     go2cs_probe_pause(micros);
     col->n = 5;
 }
+
+// Door 1, P3's MUST on bb60cf6f6e: C handed an element of a Go array of cursors writes a scalar of the cursor BEFORE it
+// and marks the one it is handed, leaving the earlier cursor's char * member as it was.
+GO2CS_PROBE_EXPORT void go2cs_probe_cursor_poke_prev(struct go2cs_probe_cursor *cursor)
+{
+    cursor[-1].n = 7;
+    cursor->n = 1;
+}
