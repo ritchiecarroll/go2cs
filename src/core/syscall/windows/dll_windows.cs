@@ -22,6 +22,9 @@
 //   forwarders to syscalln while Go declared these bodyless (through Go 1.25.14); Go 1.26.11 gives them bodies with
 //   the same contract.
 // - callNative, loadLibraryImpl and the token-call refusals: original go2cs code.
+// - StdCallTrampoline: DERIVED FROM src/internal/runtime/syscall/windows/asm_windows_amd64.s, Go 1.26.11, TEXT
+//   asmstdcall; rewritten for the Windows x64 calling convention (a fixed frame the unwinder can describe).
+//   StdCallInfo: DERIVED FROM src/internal/runtime/syscall/windows/syscall_windows.go, Go 1.26.11, type StdCallInfo.
 
 // go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted dll_windows.go output).
 // Two parts of this file cannot work as literally converted:
@@ -69,6 +72,7 @@
 // write-enabled iterations under the identical harness, with nothing to count.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // Hand-owned native replacement of the converted dll_windows.go output — the converter skips
@@ -170,14 +174,16 @@ private static void refuseTokenCallTarget(nuint fn) {
 }
 
 // The system-call trampoline: invoke the native function at trap with the given uintptr
-// arguments. Mirrors runtime.syscall_syscalln: r2 is only meaningful for floating-point
-// returns (always 0 here) and err is GetLastError after the call (cleared first, so a
-// succeeding API that does not touch last-error reports 0, matching Go).
+// arguments. Mirrors runtime.syscall_syscalln: on amd64 r2 is XMM0 after the call, where a native
+// function leaves a floating-point result (see StdCallTrampoline), and 0 on arm64, whose Go
+// trampoline never writes it; err is GetLastError after the call (cleared first, so a succeeding
+// API that does not touch last-error reports 0, matching Go).
 private static unsafe (uintptr r1, uintptr r2, Errno err) syscalln(nuint fn, ReadOnlySpan<uintptr> a) {
     refuseTokenCallTarget(fn);
 
-    if (a.Length > MaxSyscallArgs) {
-        throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
+    // Go's limit and Go's text (runtime.syscall_syscalln): the words its trampoline's frame holds.
+    if (a.Length > StdCallTrampoline.MaxArgs) {
+        throw panic("runtime: SyscallN has too many arguments");
     }
 
     Span<nuint> words = stackalloc nuint[a.Length];
@@ -194,13 +200,15 @@ private static unsafe (uintptr r1, uintptr r2, Errno err) syscalln(nuint fn, Rea
         refuseRetainingProc(fn);
     }
 
-    (nuint r, int lastError) = anyToken
+    (nuint r1, nuint r2, int lastError) = anyToken
         ? NativeStructMarshal.CallDeep(words, fn, &callNative)
         : callNative(fn, words);
 
-    return (r, 0, (Errno)(uint32)lastError);
+    return (r1, r2, (Errno)(uint32)lastError);
 }
 
+// The words the C# call below passes: a go2cs limit, not Go's, reached only where the amd64 trampoline is not used
+// (arm64, or the fallback in StdCallTrampoline's header), and refused by name there.
 private const int MaxSyscallArgs = 18;
 
 // RETAINED POINTERS. CallDeep frees every copy when the call returns, so a native function that KEEPS a
@@ -249,7 +257,7 @@ private static unsafe void refuseRetainingProc(nuint fn) {
     }
 }
 
-private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan<nuint> a) {
+private static unsafe (nuint r1, nuint r2, int lastError) callNative(nuint fn, ReadOnlySpan<nuint> a) {
     nuint r;
     int lastError;
 
@@ -257,15 +265,36 @@ private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan
     // the g status to _Gsyscall and enters golib's transition seam, GoNativeCall (docs/phase4/DESIGN-native-call-seam.md
     // §12.2; COORD's Q2 ruling: one path per transition). Every SyscallN arity, and NativeStructMarshal.CallDeep,
     // come through here.
-    if (a.Length > MaxSyscallArgs) {
-        throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
-    }
+    delegate* unmanaged<StdCallInfo*, void> stdcall = StdCallTrampoline.Call;
 
-    Marshal.SetLastSystemError(0);
+    if (stdcall is null) {
+        if (a.Length > MaxSyscallArgs) {
+            throw panic($"syscall: {a.Length} arguments, more than the {MaxSyscallArgs} this port's C# call passes");
+        }
+
+        StdCallTrampoline.WarnUnavailable();
+        Marshal.SetLastSystemError(0);
+    }
 
     runtime_package.syscallEntersyscall();
 
     try {
+        if (stdcall is not null) {
+            // amd64: Go's own call shape, each of the first four words in its integer AND its XMM register,
+            // and XMM0 back as r2. The trampoline clears and reads last-error itself, around the call.
+            StdCallInfo call = default;
+            call.Fn = fn;
+            call.N = (nuint)a.Length;
+            call.Check = StdCallTrampoline.GuardCheck;
+
+            fixed (nuint* args = a) {
+                call.Args = (nuint)args;
+                stdcall(&call);
+            }
+
+            return (call.R1, call.R2, (int)(uint)call.Err);
+        }
+
         switch (a.Length) {
             case 0: r = ((delegate* unmanaged<nuint>)fn)(); break;
             case 1: r = ((delegate* unmanaged<nuint, nuint>)fn)(a[0]); break;
@@ -286,7 +315,7 @@ private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan
             case 16: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15]); break;
             case 17: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16]); break;
             case 18: r = ((delegate* unmanaged<nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint, nuint>)fn)(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]); break;
-            default: throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
+            default: throw panic($"syscall: {a.Length} arguments, more than the {MaxSyscallArgs} this port's C# call passes");
         }
 
         // Read inside the call's window: nothing may run between the native call and its last-error.
@@ -296,8 +325,370 @@ private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan
         runtime_package.syscallExitsyscall();
     }
 
-    return (r, lastError);
+    return (r, 0, lastError);
 }
+
+// What the amd64 trampoline reads and writes, at fixed offsets: Fn 0, N 8, Args 16, R1 24, R2 32, Err 40 (Go's
+// StdCallInfo, internal/runtime/syscall/windows/syscall_windows.go, in the same order), then Check 48, which Go's has
+// not: the process's CFG check routine, or 0 (StdCallTrampoline.GuardCheck).
+[StructLayout(LayoutKind.Sequential)]
+private struct StdCallInfo {
+    public nuint Fn;
+    public nuint N;
+    public nuint Args;
+    public nuint R1;
+    public nuint R2;
+    public nuint Err;
+    public nuint Check;
+}
+
+// THE AMD64 CALL SHAPE (docs/phase4/DESIGN-syscall-windows-amd64-trampoline.md). Go's windows/amd64 trampoline
+// (asmstdcall) loads each of the first four argument words into BOTH its integer register (RCX, RDX, R8, R9) and its
+// XMM register (XMM0-XMM3), because the Windows x64 convention passes a floating-point argument in the XMM register
+// of its position, and it stores XMM0, where a floating-point result is left, as r2. A Go program calls a C function
+// that takes or returns a double through Proc.Call or SyscallN that way (math.Float64bits words in,
+// math.Float64frombits(r2) out); modernc.org/libc's strtod does. A C# function pointer typed over nuint passes
+// integer registers only and reads RAX only, and no single C# call returns both RAX and XMM0, so the shape is Go's,
+// in machine code. Image below is the whole page: asmstdcall for the Windows x64 convention, its UNWIND_INFO and its
+// RUNTIME_FUNCTION, assembled from this GNU as source (syscallTrampolineBytes_test.go re-assembles it and pins the
+// bytes):
+//
+// ASM-BEGIN
+// .intel_syntax noprefix
+// .text
+// stub:
+// push rsi
+// push rdi
+// push rbx
+// sub rsp, 336
+// mov rbx, rcx
+// mov rcx, [rbx+8]
+// cmp rcx, 42
+// ja too_many
+// mov rax, [rbx+48]
+// test rax, rax
+// jz checked
+// mov rcx, [rbx]
+// call rax
+// mov rcx, [rbx+8]
+// checked:
+// mov rsi, [rbx+16]
+// mov rdi, rsp
+// cld
+// rep movsq
+// mov rcx, [rsp]
+// movq xmm0, rcx
+// mov rdx, [rsp+8]
+// movq xmm1, rdx
+// mov r8, [rsp+16]
+// movq xmm2, r8
+// mov r9, [rsp+24]
+// movq xmm3, r9
+// mov r10, gs:[0x30]
+// mov dword ptr [r10+0x68], 0
+// mov rax, [rbx]
+// call rax
+// mov [rbx+24], rax
+// movq [rbx+32], xmm0
+// mov r10, gs:[0x30]
+// mov eax, dword ptr [r10+0x68]
+// mov [rbx+40], rax
+// add rsp, 336
+// pop rbx
+// pop rdi
+// pop rsi
+// ret
+// too_many:
+// int3
+// stub_end:
+// .balign 4, 0xcc
+// unwind_info:
+// .byte 0x01, 10, 5, 0
+// .byte 10, 0x01
+// .short 42
+// .byte 3, 0x30
+// .byte 2, 0x70
+// .byte 1, 0x60
+// .short 0
+// runtime_function:
+// .long stub - stub, stub_end - stub, unwind_info - stub
+// ASM-END
+//
+// The prolog saves rsi, rdi and rbx and reserves 336 bytes, Go's MaxArgs (42) words, leaving RSP 16-byte aligned at
+// the call; a count above 42 reaches int3, as Go's asm crashes (syscalln refuses it before the stub, with Go's text).
+// When Check is not 0 the stub calls it with Fn in RCX before anything else: the routine returns for a valid call
+// target and ends the process with the CFG fast fail otherwise, so Fn is checked as the process's own indirect calls
+// are, and the stub is never an unchecked forwarder in a process that runs with CFG. Its home space is the stub's own
+// reserved stack, written afterwards; rbx, rsi and rdi survive it, and N is reloaded.
+// The N words are copied to [rsp] and the first four loaded into both register files; gs:[0x30] is the TEB, whose
+// LastErrorValue at 0x68 is cleared before the call and read after it, as Go's asm does; RAX goes to R1 and XMM0 to
+// R2. Words 0-3 are loaded even when N < 4: they are the stub's own reserved stack, which the callee ignores.
+//
+// UNWIND_INFO (version 1, no handler, no frame register): a 10-byte prolog and five code slots padded to six. In
+// reverse prolog order: at 10 UWOP_ALLOC_LARGE with a slot of 42 (336 / 8); at 3, 2 and 1 UWOP_PUSH_NONVOL of rbx
+// (3), rdi (7) and rsi (6). The RUNTIME_FUNCTION record is the image's last 12 bytes: begin 0, end 151, unwind info
+// 152, relative to the page.
+//
+// The page is written while it is not executable, made read-execute (never both at once), compared with the image,
+// and registered with RtlAddFunctionTable, so an exception raised in a callback the native function makes
+// (syscall.NewCallback) unwinds through this frame as it does through any compiled frame (WindowsNewCallback's
+// callback-panic line); only then is the pointer published, once per process, through the type initializer. Under
+// Control Flow Guard only offset 0 is a valid call target where the page can be narrowed (section 6 of the design).
+// arm64 keeps the C# call: Go's arm64 trampoline passes integer registers only and never writes r2. A process that cannot map executable memory (Arbitrary Code Guard)
+// keeps it too, and says so once on stderr.
+private static unsafe class StdCallTrampoline {
+    internal static readonly delegate* unmanaged<StdCallInfo*, void> Call = Build(out s_unavailable, out GuardCheck);
+
+    // The process image's CFG check routine, which the stub calls on Fn before the call; 0 when the process runs
+    // without CFG. Written once, by the type initializer.
+    internal static readonly nuint GuardCheck;
+
+    // Why an amd64 process has no trampoline, or null; written once, by the type initializer.
+    private static readonly string? s_unavailable;
+
+    private static int s_warned;
+
+    // Go's MaxArgs (internal/runtime/syscall/windows/syscall_windows.go): the words the stub's frame holds.
+    internal const int MaxArgs = 42;
+
+    // Says once, on stderr, that floating-point arguments and results are not passed, the first time a call in an
+    // amd64 process takes the C# call because the trampoline could not be built.
+    internal static void WarnUnavailable() {
+        if (s_unavailable is not null && System.Threading.Interlocked.Exchange(ref s_warned, 1) == 0) {
+            Console.Error.WriteLine($"go2cs: syscall: the amd64 call trampoline is unavailable ({s_unavailable}); " +
+                                    "floating-point arguments and results of Proc.Call and SyscallN are not passed (r2 reads 0)");
+        }
+    }
+
+    internal static ReadOnlySpan<byte> Image => [
+        // stub: the prolog
+        0x56, 0x57, 0x53, 0x48, 0x81, 0xEC, 0x50, 0x01, 0x00, 0x00,
+        // the StdCallInfo, and Go's argument-count check
+        0x48, 0x89, 0xCB, 0x48, 0x8B, 0x4B, 0x08, 0x48, 0x83, 0xF9, 0x2A, 0x77, 0x7F,
+        // the CFG check of Fn, when Check is not 0
+        0x48, 0x8B, 0x43, 0x30, 0x48, 0x85, 0xC0, 0x74, 0x09, 0x48, 0x8B, 0x0B, 0xFF, 0xD0, 0x48, 0x8B, 0x4B, 0x08,
+        // the N words to the stack
+        0x48, 0x8B, 0x73, 0x10, 0x48, 0x89, 0xE7, 0xFC, 0xF3, 0x48, 0xA5,
+        // the first four words, in both register files
+        0x48, 0x8B, 0x0C, 0x24, 0x66, 0x48, 0x0F, 0x6E, 0xC1,
+        0x48, 0x8B, 0x54, 0x24, 0x08, 0x66, 0x48, 0x0F, 0x6E, 0xCA,
+        0x4C, 0x8B, 0x44, 0x24, 0x10, 0x66, 0x49, 0x0F, 0x6E, 0xD0,
+        0x4C, 0x8B, 0x4C, 0x24, 0x18, 0x66, 0x49, 0x0F, 0x6E, 0xD9,
+        // SetLastError(0)
+        0x65, 0x4C, 0x8B, 0x14, 0x25, 0x30, 0x00, 0x00, 0x00, 0x41, 0xC7, 0x42, 0x68, 0x00, 0x00, 0x00, 0x00,
+        // the call, then r1 and r2
+        0x48, 0x8B, 0x03, 0xFF, 0xD0,
+        0x48, 0x89, 0x43, 0x18, 0x66, 0x0F, 0xD6, 0x43, 0x20,
+        // GetLastError()
+        0x65, 0x4C, 0x8B, 0x14, 0x25, 0x30, 0x00, 0x00, 0x00, 0x41, 0x8B, 0x42, 0x68, 0x48, 0x89, 0x43, 0x28,
+        // the epilog, then too_many
+        0x48, 0x81, 0xC4, 0x50, 0x01, 0x00, 0x00, 0x5B, 0x5F, 0x5E, 0xC3, 0xCC,
+        // .balign 4, padding with int3
+        0xCC,
+        // unwind_info, at 152
+        0x01, 0x0A, 0x05, 0x00, 0x0A, 0x01, 0x2A, 0x00, 0x03, 0x30, 0x02, 0x70, 0x01, 0x60, 0x00, 0x00,
+        // runtime_function, at 168: begin 0, end 151, unwind info 152
+        0x00, 0x00, 0x00, 0x00, 0x97, 0x00, 0x00, 0x00, 0x98, 0x00, 0x00, 0x00,
+    ];
+
+    private const int RuntimeFunctionSize = 12;
+
+    // The test switch that takes the fallback on any host, so its loud line and its integer calls are read where the
+    // trampoline would build (DESIGN §6).
+    private const string DisableVariable = "GO2CS_SYSCALL_TRAMPOLINE";
+
+    // Never throws: a type initializer that threw would make every later syscall throw TypeInitializationException.
+    // Any failure frees the page and leaves the pointer null, with the step for the loud line.
+    private static delegate* unmanaged<StdCallInfo*, void> Build(out string? unavailable, out nuint guardCheck) {
+        unavailable = null;
+        guardCheck = 0;
+
+        if (RuntimeInformation.ProcessArchitecture != Architecture.X64) {
+            return null;
+        }
+
+        nint page = 0;
+
+        try {
+            if (Environment.GetEnvironmentVariable(DisableVariable) == "off") {
+                unavailable = $"disabled by {DisableVariable}=off";
+                return null;
+            }
+
+            if (!controlFlowGuardEnabled(out bool cfg)) {
+                unavailable = $"GetProcessMitigationPolicy failed, error {Marshal.GetLastPInvokeError()}";
+                return null;
+            }
+
+            // Under CFG the stub checks Fn with the process's own check routine before the call, JIT or Native AOT,
+            // as a CFG-instrumented caller's indirect call does (DESIGN §6). Narrowing the page to its entry is added
+            // where it can be: a Native AOT process built with CFG checks its own indirect calls, and its call to
+            // SetProcessValidCallTargets through the resolved pointer [LibraryImport] uses ends the process with a fast
+            // fail (TestSyscallTrampolineCfgDotnetCaller), so there the page keeps the default protection, every
+            // location valid. IsDynamicCodeSupported stands for "this caller's indirect calls are not checked": a wrong
+            // "narrow" ends the process, a wrong "default" only leaves the page wider.
+            if (cfg) {
+                guardCheck = guardCheckRoutine();
+            }
+
+            bool narrow = cfg && RuntimeFeature.IsDynamicCodeSupported;
+
+            nuint size = (nuint)Environment.SystemPageSize;
+            ReadOnlySpan<byte> image = Image;
+
+            // Under CFG the page is allocated with every location an invalid call target (PAGE_TARGETS_INVALID needs
+            // an executable protection, so nothing is written yet), made writable to take the image, then made
+            // executable without updating its targets, and offset 0 alone is marked valid. Without CFG it is
+            // allocated writable and made executable. Never writable and executable at once.
+            page = narrow
+                ? win32VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READ | PAGE_TARGETS_INVALID)
+                : win32VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+
+            if (page == 0) {
+                unavailable = $"VirtualAlloc failed, error {Marshal.GetLastPInvokeError()}";
+                return null;
+            }
+
+            if (narrow && !win32VirtualProtect(page, size, PAGE_READWRITE, out _)) {
+                string step = $"VirtualProtect to read-write failed, error {Marshal.GetLastPInvokeError()}";
+                return release(ref page, step, out unavailable);
+            }
+
+            image.CopyTo(new Span<byte>((void*)page, image.Length));
+
+            if (!win32VirtualProtect(page, size, PAGE_EXECUTE_READ | (narrow ? PAGE_TARGETS_NO_UPDATE : 0), out _)) {
+                string step = $"VirtualProtect to execute-read failed, error {Marshal.GetLastPInvokeError()}";
+                return release(ref page, step, out unavailable);
+            }
+
+            if (!new ReadOnlySpan<byte>((void*)page, image.Length).SequenceEqual(image)) {
+                return release(ref page, "the mapped page differs from the image", out unavailable);
+            }
+
+            if (narrow) {
+                CfgCallTargetInfo entry = new() { Offset = 0, Flags = CFG_CALL_TARGET_VALID };
+
+                if (!win32SetProcessValidCallTargets(win32GetCurrentProcess(), page, size, 1, &entry)) {
+                    string step = $"SetProcessValidCallTargets failed, error {Marshal.GetLastPInvokeError()}";
+                    return release(ref page, step, out unavailable);
+                }
+            }
+
+            win32FlushInstructionCache(win32GetCurrentProcess(), page, size);
+
+            if (!win32RtlAddFunctionTable((uint*)(page + image.Length - RuntimeFunctionSize), 1, (ulong)page)) {
+                return release(ref page, "RtlAddFunctionTable failed", out unavailable);
+            }
+
+            return (delegate* unmanaged<StdCallInfo*, void>)page;
+        }
+        catch (Exception e) {
+            return release(ref page, $"{e.GetType().Name} ({e.Message})", out unavailable);
+        }
+    }
+
+    // The process image's own CFG check routine (IMAGE_LOAD_CONFIG_DIRECTORY64.GuardCFCheckFunctionPointer, which the
+    // loader fills), or 0 where the image carries none. Read from the loaded image's headers; no call is made.
+    private static nuint guardCheckRoutine() {
+        byte* image = (byte*)win32GetModuleHandle(0);
+
+        if (image is null || *(ushort*)image != 0x5A4D) {
+            return 0;
+        }
+
+        byte* nt = image + *(int*)(image + 0x3C);
+
+        // "PE  ", and an optional header of the PE32+ form
+        if (*(uint*)nt != 0x4550 || *(ushort*)(nt + 24) != 0x20B || *(uint*)(nt + 24 + 108) <= 10) {
+            return 0;
+        }
+
+        // DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG]
+        byte* directory = nt + 24 + 112 + 10 * 8;
+        uint rva = *(uint*)directory;
+
+        if (rva == 0 || *(uint*)(directory + 4) < 0x78 || *(uint*)(image + rva) < 0x78) {
+            return 0;
+        }
+
+        nuint* slot = *(nuint**)(image + rva + 0x70);
+        return slot is null ? 0 : *slot;
+    }
+
+    private static delegate* unmanaged<StdCallInfo*, void> release(ref nint page, string step, out string unavailable) {
+        unavailable = step;
+
+        if (page != 0) {
+            win32VirtualFree(page, 0, MEM_RELEASE);
+            page = 0;
+        }
+
+        return null;
+    }
+
+    // Whether the process runs with Control Flow Guard (PROCESS_MITIGATION_CONTROL_FLOW_GUARD_POLICY, bit 0).
+    private static bool controlFlowGuardEnabled(out bool enabled) {
+        uint flags;
+
+        if (!win32GetProcessMitigationPolicy(win32GetCurrentProcess(), ProcessControlFlowGuardPolicy, &flags, sizeof(uint))) {
+            enabled = false;
+            return false;
+        }
+
+        enabled = (flags & 1) != 0;
+        return true;
+    }
+
+    // CFG_CALL_TARGET_INFO.
+    [StructLayout(LayoutKind.Sequential)]
+    private struct CfgCallTargetInfo {
+        public nuint Offset;
+        public nuint Flags;
+    }
+
+    private const uint MEM_COMMIT = 0x00001000;
+    private const uint MEM_RESERVE = 0x00002000;
+    private const uint MEM_RELEASE = 0x00008000;
+    private const uint PAGE_READWRITE = 0x04;
+    private const uint PAGE_EXECUTE_READ = 0x20;
+    private const uint PAGE_TARGETS_INVALID = 0x40000000;   // VirtualAlloc's meaning of the bit
+    private const uint PAGE_TARGETS_NO_UPDATE = 0x40000000; // VirtualProtect's meaning of the same bit
+    private const nuint CFG_CALL_TARGET_VALID = 0x1;
+    private const int ProcessControlFlowGuardPolicy = 7;
+}
+
+[LibraryImport("kernel32.dll", EntryPoint = "VirtualAlloc", SetLastError = true)]
+private static partial nint win32VirtualAlloc(nint address, nuint size, uint allocationType, uint protect);
+
+[LibraryImport("kernel32.dll", EntryPoint = "VirtualFree")]
+[return: MarshalAs(UnmanagedType.Bool)]
+private static partial bool win32VirtualFree(nint address, nuint size, uint freeType);
+
+[LibraryImport("kernel32.dll", EntryPoint = "VirtualProtect", SetLastError = true)]
+[return: MarshalAs(UnmanagedType.Bool)]
+private static partial bool win32VirtualProtect(nint address, nuint size, uint newProtect, out uint oldProtect);
+
+[LibraryImport("kernel32.dll", EntryPoint = "FlushInstructionCache")]
+[return: MarshalAs(UnmanagedType.Bool)]
+private static partial bool win32FlushInstructionCache(nint process, nint address, nuint size);
+
+[LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW")]
+private static partial nint win32GetModuleHandle(nint moduleName);
+
+[LibraryImport("kernel32.dll", EntryPoint = "GetCurrentProcess")]
+private static partial nint win32GetCurrentProcess();
+
+[LibraryImport("kernel32.dll", EntryPoint = "RtlAddFunctionTable")]
+[return: MarshalAs(UnmanagedType.Bool)]
+private static unsafe partial bool win32RtlAddFunctionTable(uint* functionTable, uint entryCount, ulong baseAddress);
+
+[LibraryImport("kernel32.dll", EntryPoint = "GetProcessMitigationPolicy", SetLastError = true)]
+[return: MarshalAs(UnmanagedType.Bool)]
+private static unsafe partial bool win32GetProcessMitigationPolicy(nint process, int policy, void* buffer, nuint length);
+
+[LibraryImport("kernelbase.dll", EntryPoint = "SetProcessValidCallTargets", SetLastError = true)]
+[return: MarshalAs(UnmanagedType.Bool)]
+private static unsafe partial bool win32SetProcessValidCallTargets(nint process, nint virtualAddress, nuint regionSize, uint numberOfOffsets, void* offsetInformation);
 
 // The runtime-provided DLL loader entry points that OTHER packages reach by symbol via
 // `//go:linkname` — golang.org/x/sys/windows's LazyDLL/LazyProc route through `syscall.loadlibrary`

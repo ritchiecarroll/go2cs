@@ -210,6 +210,9 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 	}
 
 	dir := t.TempDir()
+	// The second and third publishes keep their intermediate output outside the project directory, where the
+	// default compile items would pick up the generated attribute files of the other (CS0579).
+	objcfg, objdirect := t.TempDir(), t.TempDir()
 	writeCgoFixture(t, dir, "probe.csproj", cfgDotnetProject)
 	writeCgoFixture(t, dir, "Program.cs", cfgDotnetProgram)
 	env := append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
@@ -279,7 +282,7 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 	}
 
 	if sdk("aot-cfg publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
-		"-p:ControlFlowGuard=Guard", "-p:IntermediateOutputPath="+filepath.Join(dir, "objcfg")+string(filepath.Separator),
+		"-p:ControlFlowGuard=Guard", "-p:IntermediateOutputPath="+objcfg+string(filepath.Separator),
 		"-o", filepath.Join(dir, "aotcfg")) {
 		text, code = run("aot-cfg", filepath.Join(dir, "aotcfg", "probe.exe"), "16")
 		expect("aot-cfg", text, code, "runtime: aot", "cfg: 1", "narrow: 0")
@@ -293,7 +296,7 @@ func TestSyscallTrampolineCfgDotnetCaller(t *testing.T) {
 
 	if sdk("aot-cfg-direct publish", "publish", "-c", "Release", "-r", "win-x64", "-nologo", "-p:PublishAot=true",
 		"-p:ControlFlowGuard=Guard", "-p:ProbeDirect=true",
-		"-p:IntermediateOutputPath="+filepath.Join(dir, "objdirect")+string(filepath.Separator),
+		"-p:IntermediateOutputPath="+objdirect+string(filepath.Separator),
 		"-o", filepath.Join(dir, "aotdirect")) {
 		run("aot-cfg-direct", filepath.Join(dir, "aotdirect", "probe.exe"), "16", "mark")
 	}
