@@ -43250,14 +43250,17 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
   either" does not: immune to the sleep; panics as Go does since this seat. `Waitꞏtwin` makes the same read after its
   await and throws the same panic.
 - **Measured (linux/amd64, Release, 2026-11-28).** The 2026-11-27 sequence as a standing row: 100 of 100 rounds end,
-  all 100 by the panic (before: 0 of 100 ended inside 2 s). Rows: GolibTests WaitGroupReuseTests (five, one inside a
-  synctest bubble), two rows in the scheduler child of WaitGroupTwinTests (twins; twins and a plain waiter together),
-  and Behavioral WaitGroupReuse against `go run`, plain and `--mn`. Three neuters, each restored byte-identical.
+  all 100 by the panic (before: 0 of 100 ended inside 2 s). Rows: GolibTests WaitGroupReuseTests (six, one inside a
+  synctest bubble, one that lands the race before the waiter sleeps: 197 of 200 rounds), two rows in the scheduler
+  child of WaitGroupTwinTests (twins; twins and a plain waiter together), and Behavioral WaitGroupReuse against
+  `go run`, plain and `--mn`. Three neuters, each restored byte-identical.
 - **Cost, default mode (G's required reading; the note's section 8 has every run).** As first designed the plain
   `Wait` was 7 to 9 times slower where `Done` follows the registration closely: `ManualResetEventSlim.Wait` spins
   before it sleeps and `Monitor.Wait` does not. The cut spins for the event's own count before it sleeps and reads
   level with before on four of five shapes. 64 waiters all asleep before `Done` read 8 percent slower (about 2.3 us
-  per waiter per generation): each woken waiter re-takes `Gate` for Go's re-read.
+  per waiter per generation): the woken waiters re-take `Gate` one after another. G ACCEPTED that cost (COORD
+  20261128T025814Z). Saved on the other side: the event object per WaitGroup and the lock object it allocated
+  lazily.
 - **Two named limits, both in the note's section 6.** Go's two `Add`-side misuse panics ("Add called concurrently with
   Wait") stay unreachable: their window is inside one hold of `Gate` here, and the same misuse shows at the waiter's
   read. The panic's frame is the C# one (waitgroup.cs and its line), because a hand-kept position record may map `go`

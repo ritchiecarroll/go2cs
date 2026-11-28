@@ -143,11 +143,12 @@ No frozen surface moves: `WaitGroupState` is internal.
 
 ## 8. After G's read: the answers, the cost reading, and one addition
 
-**G (COORD 20261128T015335Z): APPROVED, with one required reading.** Confirmed: no lost pulse (the generation is
-re-tested under `Gate` around `Monitor.Wait`), the lock order, that the twin never shares `Generation`, and the bubble
-flag (U4). The answers to section 7: (1) the counter on `Gate`; (2) yes, the twin panics too, and the twin note and the
-BOARD row now say "immune to the sleep; panics as Go does since this seat"; (3) the position limit of section 6 is
-accepted as named.
+**G (COORD 20261128T015335Z): APPROVED, with one required reading. Then (COORD 20261128T025814Z): the reading
+ACCEPTED, with one more row (U9, below) and this section's table required in the note.** Confirmed in the first
+ruling: no lost pulse (the generation is re-tested under `Gate` around `Monitor.Wait`), the lock order, that the twin
+never shares `Generation`, and the bubble flag (U4). The answers to section 7: (1) the counter on `Gate`; (2) yes, the
+twin panics too, and the twin note and the BOARD row now say "immune to the sleep; panics as Go does since this seat";
+(3) the position limit of section 6 is accepted as named.
 
 **The required reading: the default-mode cost of the plain `Wait`.** linux/amd64, 4 processors, Release, `GO2CS_MN`
 unset. A generation is `Add(1)`, the waiters in the plain `Wait`, `Done()`. Each number is the median of 5 repetitions
@@ -201,11 +202,23 @@ and -4 percent, inside the spread of the runs), and so does one sleeping waiter 
 **`Add` advances the generation and pulses only when a plain waiter was registered** (an entry whose slot is null). A
 WaitGroup whose waiters are all twins takes no pulse.
 
-**The recorded cost: 64 sleeping waiters read 8 percent slower** (mean 1,951,796 against 1,804,257 ns; the four runs
-are +1 to +12 percent against the before runs). That is about 2.3 us per waiter per generation, against a wake that
-costs about 28 us per waiter in both versions. By read it is the cost section 2 named: each woken waiter re-takes
-`Gate`, one after another, where the event's waiters queued on the event's private lock; here they queue behind the
-next generation's `Add` and registrations. The other side is the event, which is no longer allocated for a WaitGroup.
+**The recorded cost, ACCEPTED by G (COORD 20261128T025814Z): 64 sleeping waiters read 8 percent slower** (mean
+1,951,796 against 1,804,257 ns; the four runs are +1 to +12 percent against the before runs). That is about 2.3 us per
+waiter per generation, against a wake that costs about 28 us per waiter in both versions. The cause is the serial
+re-takes of `Gate` after `Monitor.Wait`: each woken waiter re-takes `Gate`, one after another, where the event's
+waiters queued on the event's private lock; here they queue behind the next generation's `Add` and registrations. G
+ruled the atomic-state re-read below NOT required, and approved the spin and the pulse-only-when-plain rule. G's check
+of the spin: it runs after the registration and the park, outside `Gate`, with the P released (where the event's own
+spin ran); its read is a hint and its exit always takes `Gate` and enters the approved loop; a waiter still in its spin
+is registered, so the zero arm counts it as a plain waiter and pulses.
+
+**The other side: what a WaitGroup no longer allocates.** Each `WaitGroupState` held one `ManualResetEventSlim`,
+allocated with the state. The first waiter to sleep on it made it allocate its private lock object. Both are gone; the
+waiters sleep on `Gate`, which every WaitGroup already had. G's ruling names the saving as "one allocation plus its
+lazy kernel event". Read by reflection on this box: after a waiter has slept on a `ManualResetEventSlim` and been set,
+its lock field holds an object and its kernel event field is still null (that event is created only when `WaitHandle`
+is read, which waitgroup.cs never did). So the lazy part saved is the lock object (with the runtime's own state for a
+lock that has been waited on, not measured here), not a kernel event of the event's own.
 
 Tried and not adopted: `Generation` written and tested under a lock of its own, taken inside `Gate` by `Add` only, with
 Go's re-read under `Gate` alone. Four runs read -2 to +9 percent against before (mean +4): this box cannot separate it
@@ -219,6 +232,26 @@ red in both modes (`a waiter panicked: false`; the plain run took 10.8 s through
 green, as section 4 predicted. U7 was not reached at that commit: it follows U6 in the same child, and the child stops
 at its first failed row. With the fix U1 prints `hang rounds=100 returned=0 panicked=100` and U6 prints
 `panicked=16 handoffs=0`.
+
+**U9, the row G required (COORD 20261128T025814Z): the race lands before the waiter sleeps.** GolibTests
+`AWaiterNotYetAsleepPanicsAsGoDoesWhenTheCountIsRaisedBeforeItSleeps`. One plain waiter on a count of 1. The test
+thread watches, without the lock, for the waiter's park to be published (the waiter does that under `Gate`, just before
+it leaves `Gate` for its spin), takes `Gate` at once, reads the waiter's thread state, and calls `Done()` and `Add(1)`
+under that same hold, as U2 drives the race. A thread asleep in `Monitor.Wait` reads `WaitSleepJoin`. A waiter that
+reads anything else is registered and not asleep, and it cannot go to sleep while the test holds `Gate`: it leaves
+through the spin's exit, takes `Gate` after the `Add`, finds its generation moved and the count at 1, and never calls
+`Monitor.Wait`. Every round must end in Go's panic with Go's text, whichever side of the sleep the calls landed on.
+The row prints the hits beside the rounds and requires at least one hit on a machine with more than one processor.
+20 control rounds wait until the waiter is asleep first, and there the same read must say asleep (20 of 20).
+
+As run (linux/amd64, 4 processors, Release): `rounds=200 not-asleep=197 asleep=3 panicked=200` three times, then 196
+and 4 twice after the restore below. The same row on the cut WITHOUT its spin (a reading, not a gate): `not-asleep=17`
+and `not-asleep=34` of 200, `panicked=200` both times. So about 160 to 180 of the 200 hits are rounds the spin kept
+awake. Two limits, named in the row: a waiter that has left its spin and is blocked taking the `Gate` the test holds
+reads `WaitSleepJoin` too, so "asleep" is an upper bound and "not asleep" a lower one; and from outside, a spin ended
+by the generation it read cannot be told from a spin that ran out, since both go straight to the read under `Gate`.
+Neuter: `reused` forced false in the plain path reds U9 by name in round 1 ("the waiter panicked (not asleep at the
+Done): it returned normally"), with U2 and U4; restored byte-identical.
 
 **The three neuters, as run (each restored byte-identical by sha256; 20 of 20 rows green after the restore).**
 (1) `Add` from zero back up steps the generation back: U1 red in round 1 and U2 red (0 of 8 ended), both by their
