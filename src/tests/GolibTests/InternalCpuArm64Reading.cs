@@ -173,7 +173,12 @@ internal static class InternalCpuArm64Reading
         using Process process = Process.Start(start)!;
         Task<string> stdout = process.StandardOutput.ReadToEndAsync();
         Task<string> stderr = process.StandardError.ReadToEndAsync();
-        Assert.IsTrue(process.WaitForExit(300_000), $"go {string.Join(' ', args)} did not finish in 5 minutes");
+        if (!process.WaitForExit(300_000))
+        {
+            // Kill the go command and its test binary before failing, so a hung reading leaves nothing running.
+            try { process.Kill(entireProcessTree: true); } catch (InvalidOperationException) { }
+            Assert.Fail($"go {string.Join(' ', args)} did not finish in 5 minutes; its process tree was killed");
+        }
         return (process.ExitCode, stdout.Result, stderr.Result);
     }
 }
