@@ -285,7 +285,6 @@ private static unsafe (nuint r1, nuint r2, int lastError) callNative(nuint fn, R
             StdCallInfo call = default;
             call.Fn = fn;
             call.N = (nuint)a.Length;
-            call.Check = StdCallTrampoline.GuardCheck;
 
             fixed (nuint* args = a) {
                 call.Args = (nuint)args;
@@ -329,8 +328,7 @@ private static unsafe (nuint r1, nuint r2, int lastError) callNative(nuint fn, R
 }
 
 // What the amd64 trampoline reads and writes, at fixed offsets: Fn 0, N 8, Args 16, R1 24, R2 32, Err 40 (Go's
-// StdCallInfo, internal/runtime/syscall/windows/syscall_windows.go, in the same order), then Check 48, which Go's has
-// not: the process's CFG check routine, or 0 (StdCallTrampoline.GuardCheck).
+// StdCallInfo, internal/runtime/syscall/windows/syscall_windows.go, in the same order).
 [StructLayout(LayoutKind.Sequential)]
 private struct StdCallInfo {
     public nuint Fn;
@@ -339,7 +337,6 @@ private struct StdCallInfo {
     public nuint R1;
     public nuint R2;
     public nuint Err;
-    public nuint Check;
 }
 
 // THE AMD64 CALL SHAPE (docs/phase4/DESIGN-syscall-windows-amd64-trampoline.md). Go's windows/amd64 trampoline
@@ -365,7 +362,7 @@ private struct StdCallInfo {
 // mov rcx, [rbx+8]
 // cmp rcx, 42
 // ja too_many
-// mov rax, [rbx+48]
+// mov rax, [rip + guard_check]
 // test rax, rax
 // jz checked
 // mov rcx, [rbx]
@@ -412,36 +409,38 @@ private struct StdCallInfo {
 // .short 0
 // runtime_function:
 // .long stub - stub, stub_end - stub, unwind_info - stub
+// .balign 8, 0xcc
+// guard_check:
+// .quad 0
 // ASM-END
 //
 // The prolog saves rsi, rdi and rbx and reserves 336 bytes, Go's MaxArgs (42) words, leaving RSP 16-byte aligned at
 // the call; a count above 42 reaches int3, as Go's asm crashes (syscalln refuses it before the stub, with Go's text).
-// When Check is not 0 the stub calls it with Fn in RCX before anything else: the routine returns for a valid call
-// target and ends the process with the CFG fast fail otherwise, so Fn is checked as the process's own indirect calls
-// are, and the stub is never an unchecked forwarder in a process that runs with CFG. Its home space is the stub's own
-// reserved stack, written afterwards; rbx, rsi and rdi survive it, and N is reloaded.
+// guard_check is the page's last 8 bytes: 0 in the image, and under Control Flow Guard the process image's own check
+// routine, written once before the page is made executable and compared with the rest. When it is not 0 the stub
+// calls it with Fn in RCX before anything else: the routine returns for a valid call target and ends the process
+// with the CFG fast fail otherwise, so Fn is checked as the process's own indirect calls are. The stub reads the
+// routine from its own read-only page, never from the caller's block or from writable memory, so no write a caller
+// can make turns the check off. Its home space is the stub's own reserved stack, written afterwards; rbx, rsi and
+// rdi survive it, and N is reloaded.
 // The N words are copied to [rsp] and the first four loaded into both register files; gs:[0x30] is the TEB, whose
 // LastErrorValue at 0x68 is cleared before the call and read after it, as Go's asm does; RAX goes to R1 and XMM0 to
 // R2. Words 0-3 are loaded even when N < 4: they are the stub's own reserved stack, which the callee ignores.
 //
 // UNWIND_INFO (version 1, no handler, no frame register): a 10-byte prolog and five code slots padded to six. In
 // reverse prolog order: at 10 UWOP_ALLOC_LARGE with a slot of 42 (336 / 8); at 3, 2 and 1 UWOP_PUSH_NONVOL of rbx
-// (3), rdi (7) and rsi (6). The RUNTIME_FUNCTION record is the image's last 12 bytes: begin 0, end 151, unwind info
-// 152, relative to the page.
+// (3), rdi (7) and rsi (6). The RUNTIME_FUNCTION record is at 176: begin 0, end 158, unwind info 160, relative to
+// the page; guard_check is at 192.
 //
 // The page is written while it is not executable, made read-execute (never both at once), compared with the image,
 // and registered with RtlAddFunctionTable, so an exception raised in a callback the native function makes
 // (syscall.NewCallback) unwinds through this frame as it does through any compiled frame (WindowsNewCallback's
 // callback-panic line); only then is the pointer published, once per process, through the type initializer. Under
 // Control Flow Guard only offset 0 is a valid call target where the page can be narrowed (section 6 of the design).
-// arm64 keeps the C# call: Go's arm64 trampoline passes integer registers only and never writes r2. A process that cannot map executable memory (Arbitrary Code Guard)
-// keeps it too, and says so once on stderr.
+// arm64 keeps the C# call: Go's arm64 trampoline passes integer registers only and never writes r2. A process that
+// cannot map executable memory (Arbitrary Code Guard) keeps it too, and says so once on stderr.
 private static unsafe class StdCallTrampoline {
-    internal static readonly delegate* unmanaged<StdCallInfo*, void> Call = Build(out s_unavailable, out GuardCheck);
-
-    // The process image's CFG check routine, which the stub calls on Fn before the call; 0 when the process runs
-    // without CFG. Written once, by the type initializer.
-    internal static readonly nuint GuardCheck;
+    internal static readonly delegate* unmanaged<StdCallInfo*, void> Call = Build(out s_unavailable);
 
     // Why an amd64 process has no trampoline, or null; written once, by the type initializer.
     private static readonly string? s_unavailable;
@@ -464,9 +463,10 @@ private static unsafe class StdCallTrampoline {
         // stub: the prolog
         0x56, 0x57, 0x53, 0x48, 0x81, 0xEC, 0x50, 0x01, 0x00, 0x00,
         // the StdCallInfo, and Go's argument-count check
-        0x48, 0x89, 0xCB, 0x48, 0x8B, 0x4B, 0x08, 0x48, 0x83, 0xF9, 0x2A, 0x77, 0x7F,
-        // the CFG check of Fn, when Check is not 0
-        0x48, 0x8B, 0x43, 0x30, 0x48, 0x85, 0xC0, 0x74, 0x09, 0x48, 0x8B, 0x0B, 0xFF, 0xD0, 0x48, 0x8B, 0x4B, 0x08,
+        0x48, 0x89, 0xCB, 0x48, 0x8B, 0x4B, 0x08, 0x48, 0x83, 0xF9, 0x2A, 0x0F, 0x87, 0x82, 0x00, 0x00, 0x00,
+        // the CFG check of Fn, when guard_check is not 0
+        0x48, 0x8B, 0x05, 0x9E, 0x00, 0x00, 0x00, 0x48, 0x85, 0xC0, 0x74, 0x09,
+        0x48, 0x8B, 0x0B, 0xFF, 0xD0, 0x48, 0x8B, 0x4B, 0x08,
         // the N words to the stack
         0x48, 0x8B, 0x73, 0x10, 0x48, 0x89, 0xE7, 0xFC, 0xF3, 0x48, 0xA5,
         // the first four words, in both register files
@@ -484,14 +484,20 @@ private static unsafe class StdCallTrampoline {
         // the epilog, then too_many
         0x48, 0x81, 0xC4, 0x50, 0x01, 0x00, 0x00, 0x5B, 0x5F, 0x5E, 0xC3, 0xCC,
         // .balign 4, padding with int3
-        0xCC,
-        // unwind_info, at 152
+        0xCC, 0xCC,
+        // unwind_info, at 160
         0x01, 0x0A, 0x05, 0x00, 0x0A, 0x01, 0x2A, 0x00, 0x03, 0x30, 0x02, 0x70, 0x01, 0x60, 0x00, 0x00,
-        // runtime_function, at 168: begin 0, end 151, unwind info 152
-        0x00, 0x00, 0x00, 0x00, 0x97, 0x00, 0x00, 0x00, 0x98, 0x00, 0x00, 0x00,
+        // runtime_function, at 176: begin 0, end 158, unwind info 160
+        0x00, 0x00, 0x00, 0x00, 0x9E, 0x00, 0x00, 0x00, 0xA0, 0x00, 0x00, 0x00,
+        // .balign 8, padding with int3
+        0xCC, 0xCC, 0xCC, 0xCC,
+        // guard_check, at 192: 0 here, the CFG check routine on the page
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    private const int RuntimeFunctionSize = 12;
+    // Where the RUNTIME_FUNCTION record and the guard_check slot sit in Image (the ASM block's layout).
+    private const int RuntimeFunctionOffset = 176;
+    private const int GuardCheckOffset = 192;
 
     // The test switch that takes the fallback on any host, so its loud line and its integer calls are read where the
     // trampoline would build (DESIGN §6).
@@ -499,9 +505,8 @@ private static unsafe class StdCallTrampoline {
 
     // Never throws: a type initializer that threw would make every later syscall throw TypeInitializationException.
     // Any failure frees the page and leaves the pointer null, with the step for the loud line.
-    private static delegate* unmanaged<StdCallInfo*, void> Build(out string? unavailable, out nuint guardCheck) {
+    private static delegate* unmanaged<StdCallInfo*, void> Build(out string? unavailable) {
         unavailable = null;
-        guardCheck = 0;
 
         if (RuntimeInformation.ProcessArchitecture != Architecture.X64) {
             return null;
@@ -520,15 +525,19 @@ private static unsafe class StdCallTrampoline {
                 return null;
             }
 
-            // Under CFG the stub checks Fn with the process's own check routine before the call, JIT or Native AOT,
-            // as a CFG-instrumented caller's indirect call does (DESIGN §6). Narrowing the page to its entry is added
+            // Under CFG the stub checks Fn with the process's own check routine, which it reads from its own page's
+            // guard_check slot, before the call, JIT or Native AOT, as a CFG-instrumented caller's indirect call does
+            // (DESIGN §6). Narrowing the page to its entry is added
             // where it can be: a Native AOT process built with CFG checks its own indirect calls, and its call to
             // SetProcessValidCallTargets through the resolved pointer [LibraryImport] uses ends the process with a fast
             // fail (TestSyscallTrampolineCfgDotnetCaller), so there the page keeps the default protection, every
             // location valid. IsDynamicCodeSupported stands for "this caller's indirect calls are not checked": a wrong
             // "narrow" ends the process, a wrong "default" only leaves the page wider.
-            if (cfg) {
-                guardCheck = guardCheckRoutine();
+            nuint guardCheck = 0;
+
+            if (cfg && (guardCheck = guardCheckRoutine()) == 0) {
+                unavailable = "the process runs with Control Flow Guard and its image names no check routine";
+                return null;
             }
 
             bool narrow = cfg && RuntimeFeature.IsDynamicCodeSupported;
@@ -554,14 +563,17 @@ private static unsafe class StdCallTrampoline {
                 return release(ref page, step, out unavailable);
             }
 
+            // The image, then the check routine into its guard_check slot, while the page is not executable.
             image.CopyTo(new Span<byte>((void*)page, image.Length));
+            *(nuint*)(page + GuardCheckOffset) = guardCheck;
 
             if (!win32VirtualProtect(page, size, PAGE_EXECUTE_READ | (narrow ? PAGE_TARGETS_NO_UPDATE : 0), out _)) {
                 string step = $"VirtualProtect to execute-read failed, error {Marshal.GetLastPInvokeError()}";
                 return release(ref page, step, out unavailable);
             }
 
-            if (!new ReadOnlySpan<byte>((void*)page, image.Length).SequenceEqual(image)) {
+            if (!new ReadOnlySpan<byte>((void*)page, GuardCheckOffset).SequenceEqual(image[..GuardCheckOffset]) ||
+                *(nuint*)(page + GuardCheckOffset) != guardCheck) {
                 return release(ref page, "the mapped page differs from the image", out unavailable);
             }
 
@@ -576,7 +588,7 @@ private static unsafe class StdCallTrampoline {
 
             win32FlushInstructionCache(win32GetCurrentProcess(), page, size);
 
-            if (!win32RtlAddFunctionTable((uint*)(page + image.Length - RuntimeFunctionSize), 1, (ulong)page)) {
+            if (!win32RtlAddFunctionTable((uint*)(page + RuntimeFunctionOffset), 1, (ulong)page)) {
                 return release(ref page, "RtlAddFunctionTable failed", out unavailable);
             }
 

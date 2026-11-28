@@ -329,6 +329,15 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
        2026-10-26 (R's docs follow-up) until the fix lands. -->
   * In a cgo package, a pointer into Go memory rebuilt from a number can reach C unchecked in three narrow
     cases ([cgo](#cgo)).
+* **On Windows x64, a system call to an address Control Flow Guard does not list as a call target ends the
+  process.** Every converted program runs with Control Flow Guard under the JIT (and under Native AOT when it is
+  built with `<ControlFlowGuard>Guard</ControlFlowGuard>`), and `syscall`'s call trampoline checks the function it
+  is given the way the process's own indirect calls are checked. An exported function, or a pointer the API handed
+  out, passes. An address computed by offset inside a system DLL, which Go and an unguarded call would reach, ends
+  the process with `0xc0000409` and no go2cs message. Call exported functions, through `LazyProc` or `GetProcAddress`.
+  <!-- docs/phase4/DESIGN-syscall-windows-amd64-trampoline.md section 6, P3's re-read of revision 3 (SHOULD 3,
+       2026-11-28): Go makes no CFG check in its trampoline, and neither did the C# function-pointer call under the
+       JIT; the check is what keeps the stub from being an unchecked forwarder in a CFG process. -->
 
 ## cgo
 

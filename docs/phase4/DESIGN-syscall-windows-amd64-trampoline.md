@@ -1,9 +1,10 @@
 # DESIGN — the windows/amd64 syscall trampoline: Go's register shape, and `r2` as XMM0
 
-> **Status: PROPOSED (2026-11-28), revision 3, for P3's re-read of the Native AOT + CFG arm.** P3's design read of
-> revision 2 (`5e3cef4e76`) was APPROVE WITH CHANGES: one MUST on the Native AOT + CFG arm, two SHOULDs, three NITs.
-> COORD 002011Z and 002455Z ruled the MUST: option (d), the stub checks `Fn` with the process's own CFG routine.
-> Code at `bb1f3e8f5a`. Section 11 lists the folds.
+> **Status: PROPOSED (2026-11-28), revision 4, for P3's re-read.** P3's design read of revision 2 (`5e3cef4e76`) was
+> APPROVE WITH CHANGES: one MUST on the Native AOT + CFG arm, two SHOULDs, three NITs. COORD 002011Z and 002455Z ruled
+> the MUST: option (d), the stub checks `Fn` with the process's own CFG routine. P3's re-read of revision 3 found the
+> stub took that routine from the caller's block (MUST); revision 4 keeps it on the stub's own read-only page.
+> Sections 11 and 12 list the folds.
 > Red row: behavioral `WindowsSyscallFloatReturn` on `claude/p1-syscall-xmm0-r2` (`755aedae3b`), compared with
 > `go run`: read red on windows/amd64 (behavioral-stderr 46079966559), lines 1-4 reading 0 where Go prints 2.5, 1.5,
 > 1024 and 12, line 5 equal. Ordered by COORD 222529Z; design read required by COORD 224618Z because the remedy maps
@@ -38,16 +39,16 @@ This design changes amd64 only. (windows/386, where Go's `r2` is `EDX`, is not a
 
 ## 2. The remedy
 
-Run Go's call shape, in machine code: a 150-byte transcription of `asmstdcall` for the Windows x64 convention,
+Run Go's call shape, in machine code: a 158-byte transcription of `asmstdcall` for the Windows x64 convention,
 called through `delegate* unmanaged<StdCallInfo*, void>`. `StdCallInfo` is Go's struct of the same name, in the same
-order (`Fn`, `N`, `Args`, `R1`, `R2`, `Err`, 8 bytes each), with one slot Go's has not: `Check`, at 48, the process's
-CFG check routine or 0 (section 6).
+order (`Fn`, `N`, `Args`, `R1`, `R2`, `Err`, 8 bytes each). The page also holds `guard_check`, the process's CFG check
+routine or 0, written once before the page is made executable (section 6).
 
 ```
 push rsi; push rdi; push rbx; sub rsp, 336          ; prolog: 336 = Go's MaxArgs (42) words, RSP 16-aligned at the call
 mov rbx, rcx                                        ; rbx = the StdCallInfo
 mov rcx, [rbx+8]; cmp rcx, 42; ja too_many          ; Go's argument-count check, in the stub
-mov rax, [rbx+48]; test rax, rax; jz checked        ; under CFG (section 6): the process's check routine on Fn,
+mov rax, [rip+guard_check]; test rax, rax; jz checked ; under CFG (section 6): the check routine on Fn,
 mov rcx, [rbx]; call rax; mov rcx, [rbx+8]          ;   which returns for a valid target and fast-fails otherwise
 checked:
 mov rsi, [rbx+16]; mov rdi, rsp; cld; rep movsq     ; the N words to [rsp] on
@@ -111,8 +112,10 @@ result type widens to carry `r2`).
   file's comment between `ASM-BEGIN` and `ASM-END`: the code, `.balign 4, 0xcc`, the `UNWIND_INFO` as `.byte` and
   `.short` directives, and the `RUNTIME_FUNCTION` as `.long stub - stub, stub_end - stub, unwind_info - stub`, so the
   assembler computes every offset. The array beside it, a `ReadOnlySpan<byte>` property (`Image`, data in the image's
-  read-only section, never a writable `byte[]` field), holds exactly the bytes that source assembles to: 180 bytes,
-  the code at 0-150, `int3` padding at 151, `UNWIND_INFO` at 152-167, the `RUNTIME_FUNCTION` at 168-179.
+  read-only section, never a writable `byte[]` field), holds exactly the bytes that source assembles to: 200 bytes,
+  the code at 0-157, `int3` padding at 158-159, `UNWIND_INFO` at 160-175, the `RUNTIME_FUNCTION` at 176-187, `int3`
+  padding at 188-191, and `guard_check` at 192-199, 0 in the image (so the pin and the re-assembly see 0) and written
+  on the page before it is made executable; the post-protect compare covers it.
   `RtlAddFunctionTable` takes a pointer to that last record.
 - **The check**, a repoguard test under the plain `go test ./...` (`syscallTrampolineBytes_test.go`):
   1. It extracts the `ASM` comment and the `Image` array from `dll_windows.cs`.
@@ -122,15 +125,16 @@ result type widens to carry `r2`).
      that is not GNU x86-64, or none), the re-assembly half logs NOT RUN (Inconclusive, never a pass) and the pin
      still holds. Otherwise it assembles the comment and compares `.text` with the array, and a failure there is red.
   4. Made to fail: one byte flipped in the array fails both halves, restored byte-identical.
-  The bytes in this revision were produced exactly that way (`as --64` then `objcopy -O binary`), 180 bytes, SHA-256
-  `547dd795fe5a7010f40787faf0d26f3fe68faa5314c02888c44b4c5a3f5237f4`.
+  The bytes in this revision were produced exactly that way (`as --64` then `objcopy -O binary`), 200 bytes, SHA-256
+  `83f78a2b893abcc9762ea0ca793290afd0d7bff3f93fe1b70efd5d9717cef554`. The `rip`-relative load resolves inside the
+  section (no relocation).
 
 ## 5. Unwind data (COORD point 4)
 
 `UNWIND_INFO` version 1, no handler, no frame register, prolog size 10, five code slots padded to six. In reverse
 prolog order: at offset 10, `UWOP_ALLOC_LARGE` with op info 0 and a slot of 42 (336 / 8); at 3, 2 and 1,
-`UWOP_PUSH_NONVOL` of `rbx` (3), `rdi` (7) and `rsi` (6). The `RUNTIME_FUNCTION` record, at page offset 168, is
-(begin 0, end 151, unwind info 152), each relative to the page base given to `RtlAddFunctionTable`. The `int3` at 150
+`UWOP_PUSH_NONVOL` of `rbx` (3), `rdi` (7) and `rsi` (6). The `RUNTIME_FUNCTION` record, at page offset 176, is
+(begin 0, end 158, unwind info 160), each relative to the page base given to `RtlAddFunctionTable`. The `int3` at 157
 lies after the prolog, inside the described range, so a crash there unwinds like any other body instruction. The CFG
 check is an ordinary call from the body; its fast fail ends the process without unwinding.
 
@@ -214,12 +218,32 @@ dropping the branch; the fix branch never carries the skip.
   unchecked call ... already makes in an uninstrumented build" was true under the JIT only.
   **The fix (COORD 002455Z, option (d)): the stub checks `Fn` itself.** When the process runs with CFG, the type
   initializer reads the process image's own check routine (`IMAGE_LOAD_CONFIG_DIRECTORY64.GuardCFCheckFunctionPointer`,
-  the slot the loader fills, through `GetModuleHandleW(NULL)` and the PE headers; no call is made) into the new
-  `StdCallInfo.Check`. When `Check` is not 0 the stub calls it with `Fn` in `RCX` before anything else: the routine
+  the slot the loader fills, through `GetModuleHandleW(NULL)` and the PE headers; no call is made) and writes it into
+  the page's `guard_check` slot with the image, before the page is made executable; the stub loads it `rip`-relative.
+  When it is not 0 the stub calls it with `Fn` in `RCX` before anything else: the routine
   returns for a valid call target and ends the process with the CFG fast fail otherwise, which is what the
   instrumented caller's own indirect call does at master. So every CFG process, JIT or Native AOT, checks `Fn`, and the
   stub is not an unchecked forwarder in any of them. The routine's home space is the stub's reserved stack, written
-  afterwards; `rbx`, `rsi` and `rdi` survive it, and `N` is reloaded. A process without CFG reads 0 and skips it.
+  afterwards; `rbx`, `rsi` and `rdi` survive it, and `N` is reloaded. A process without CFG reads 0 and skips it. A
+  process with CFG whose image names no check routine takes the loud fallback (`the process runs with Control Flow
+  Guard and its image names no check routine`); no known process reaches it.
+  **Where the routine lives (P3's re-read of revision 3, MUST).** Revision 3 had the stub read the routine from the
+  caller's block (`StdCallInfo.Check`, `[rbx+48]`), filled from a static in writable memory. A hijacked call that
+  reaches the entry with `RCX` on attacker-written memory writes 0 there and skips the check, or writes an address and
+  has it called unchecked; a write to the static turns the check off for every call. Revision 4 reads it from the
+  stub's own page, which is executable and never writable after the protect, so no write a caller or the process can
+  make outside `VirtualProtect` turns it off. `StdCallInfo.Check` and the static are gone. The shipped row's `block`
+  run enters the stub with a block the program builds (`Fn` an invalid target, every other word 0): it returned 7 on
+  revision 3 and must end with `0xC0000409` on revision 4.
+  **What stays after the check (stated, P3 SHOULD 2).** Two residuals remain where an attacker already controls an
+  indirect call target and `RCX`:
+  - Past the check: where the page is not narrowed (Native AOT + CFG, COORD 235045Z), the stub's own `mov rax, [rbx];
+    call rax` at offset 115 is a valid call target that follows the check. Reaching it usefully needs `RBX` on attacker memory as
+    well. This is the cost of keeping the default protection there; narrowing (option (c)) would remove it.
+  - Argument control: the checked entry lets a hijacked call that controls `RCX` alone choose every argument word, in
+    both register files, of any VALID target (`VirtualProtect` is one). Master's Native AOT + CFG process has no such
+    target. A cheap narrowing, proposed for COORD to rule: the stub refuses a block outside the current thread's stack
+    (`gs:[0x08]` and `gs:[0x10]` in the TEB); `syscalln`'s block is always a local.
   Measured before the code (`46087694121`, `aot-cfg-guardcheck` on the .NET caller row, Native AOT + CFG): the slot is
   present, the check of `GetTickCount` returns, and the check of an address on a `PAGE_TARGETS_INVALID` page ends the
   process with `0xC0000409`.
@@ -237,7 +261,8 @@ dropping the branch; the fix branch never carries the skip.
   Each must print `strtod` 2.5 through `LazyProc.Call`, `labs` 7, 19 and 42 words through `_snprintf`, errno 2, and
   under the JIT a `NewCallback` pointer called through `SyscallN`; and a second run of each calls, through `SyscallN`,
   a function on a page whose every location is an invalid target: under CFG it must end with `0xC0000409` before the
-  call returns, and in plain Native AOT it returns 7. Made to fail on the plant branch: `narrow = cfg` must end the
+  call returns, and in plain Native AOT it returns 7. Under the JIT a third run enters the stub with the program's own
+  block (above), which must also end with `0xC0000409`. Made to fail on the plant branch: `narrow = cfg` must end the
   Native AOT + CFG caller at its first syscall, and a stub without the check must let the CFG callers' unmarked call
   return 7.
 - **Never RWX, in either arm.** The CFG arm allocates `PAGE_EXECUTE_READ | PAGE_TARGETS_INVALID`
@@ -314,3 +339,13 @@ GolibTests R/D and `go test` (the standard battery); repoguard. No converter cha
 | NIT 6. No `SuppressGCTransition` | §3 |
 | COORD 002011Z (c): a direct import of `SetProcessValidCallTargets` | §6: not shipped (needs publish items `syscall` cannot add); arm recorded |
 | Layout | §4, §5: 180 bytes, code 0-150, `UNWIND_INFO` at 152, `RUNTIME_FUNCTION` at 168 |
+
+## 12. Revision 4: P3's re-read of revision 3 (COORD 021145Z)
+
+| Finding | Where it landed |
+|---|---|
+| MUST 1. The stub read its check routine from the caller's block, filled from a writable static | §2, §4, §6: `guard_check` on the stub's own page, `rip`-relative, written before the protect and compared; `StdCallInfo.Check` and the static removed; the row's `block` run, red on revision 3 |
+| SHOULD 2. Two residuals not stated | §6 "What stays after the check"; the thread-stack check proposed for COORD |
+| SHOULD 3. Under the JIT a call to a target CFG calls invalid now fast-fails where Go and master call it | docs/Limitations.md, one entry |
+| NIT 4. CFG on with no routine leaves the stub unchecked | §6: the loud fallback |
+| Layout | §4, §5: 200 bytes, `RUNTIME_FUNCTION` at 176, `guard_check` at 192 |
