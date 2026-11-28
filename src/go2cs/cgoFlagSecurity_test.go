@@ -613,7 +613,8 @@ func TestCgoFlagsAllowedChecksTheListingTheSideBuildCompilesWith(t *testing.T) {
 		proxyURL = "file:///" + filepath.ToSlash(filepath.Join(root, "proxy"))
 	}
 
-	env := append(os.Environ(), "GOWORK=off", "GOFLAGS=-mod=mod", "GOTOOLCHAIN=local", "CGO_ENABLED=1",
+	// -modcacherw: the module cache is otherwise written read-only, and t.TempDir cannot remove it on unix.
+	env := append(os.Environ(), "GOWORK=off", "GOFLAGS=-mod=mod -modcacherw", "GOTOOLCHAIN=local", "CGO_ENABLED=1",
 		"GOPROXY="+proxyURL, "GOSUMDB=off", "GONOSUMCHECK=1", "GOMODCACHE="+filepath.Join(root, "modcache"))
 	load := cgoLoad{env: env, dir: main}
 	listed, err := cgoSideList(load, Options{}, &packages.Package{PkgPath: "example.com/dep"})
