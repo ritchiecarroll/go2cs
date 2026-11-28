@@ -760,6 +760,11 @@ jobs:
 
               if (-not $minutes) { throw "Unknown stage '$($env:INPUT_STAGE)'." }
 
+              # A pinned ;cc= toolchain runs converter-cgo's tests under a 30m deadline (the tests step), so its job gets 35
+              # minutes before the mac multiplier. zig on darwin takes more than 600 s for the suite where Apple clang takes
+              # 179-436 s (H's BOARD proposal, 46059573891; COORD approved it 2026-11-27). The default compiler keeps 15.
+              if ($env:INPUT_STAGE -eq 'converter-cgo' -and $cgoCc) { $minutes = 35 }
+
               # The mac legs get 1.5x: macos-15 (arm64) is a 3-core runner, and every phase here
               # is parallel-MSBuild bound. Rounded to whole minutes; still under the 360 ceiling.
               if ($t.runner -like 'macos-*') { $minutes = [int][math]::Ceiling($minutes * 1.5) }
@@ -1930,6 +1935,8 @@ jobs:
         shell: pwsh
         env:
           CGO_TEST_FILTER: ${{ needs.plan.outputs.filter }}
+          # The pinned ;cc= toolchain, when one is selected: converter-cgo's test deadline is 30m for it, 10m otherwise.
+          CGO_CC_PINNED: ${{ needs.plan.outputs.cgo-cc }}
           GO2CS_CGO_BUILD: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
           # The -tests -recurse arms that build and run a converted test project (TestTestsRecurseRuns*). Not cgo tests:
           # they run in this stage because its budget (40-minute go test, 45-minute job) fits a cold build of the fixture's
@@ -1954,7 +1961,9 @@ jobs:
           $log = Join-Path $art "$($env:STAGE)-$goos-$rid.log"
 
           $filter = $env:CGO_TEST_FILTER
-          $testTimeout = '10m'
+          # 10m on the default compiler, so a real hang on the default path still trips fast. A pinned ;cc= toolchain takes
+          # 30m: zig on darwin overran 10m with no test hung, at master and on every branch (BOARD, 2026-11-27).
+          $testTimeout = if ($env:CGO_CC_PINNED) { '30m' } else { '10m' }
           if ($env:STAGE -eq 'cgo-e2e') {
               if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$|^TestACgoProjectBuilt|^TestCgoPhase3Program' }
               $testTimeout = '40m'
