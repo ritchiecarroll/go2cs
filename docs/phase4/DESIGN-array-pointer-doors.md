@@ -2573,6 +2573,9 @@ P3 cleared the seat (2026-11-21 17:41Z) with two SHOULD rows and one NIT. COORD 
 
 ## 23. Amendment 2026-11-28 (P5): an element that holds a pointer word, over C memory (design note, before code)
 
+> Amended by 23.8 (P3's review, 2026-11-28): the pointer-field accessors already on master replace items 1 and 5, the
+> read rule is the accessor's, no write reaches the window's indexer, and the class is the `[GoCgoStruct]` marker's.
+
 COORD asked (050241Z) whether door B can serve a C-memory struct element whose fields include an `unsafe.Pointer` or a
 pointer member, read and write, with the pointer minted as C memory on read, as H's go-sqlite3 slice does for one record,
 and what it costs. The shape is go-sqlite3 v1.14.53's row read (sqlite3.go:3105):
@@ -2723,3 +2726,79 @@ that a later call would read.
 from the table. If the seat is to be smaller, cut the read half alone (1 to 3, and the admission): go-sqlite3 needs only
 that. But rule 5 must then be cut as a refusal by name, because a pointer-word store through a native box would
 otherwise land in the read slot and be lost silently. P3 reads this note.
+
+### 23.8 Amendment 2026-11-28 (P5): P3's review, and the design as amended
+
+P3 read 23.1 to 23.7 at 1913dae537 (APPROVE WITH CHANGES, 072002Z): three MUST-FIX and two SHOULD-FIX findings. Each was
+checked at master 4a56f17a3a and holds. COORD had approved the design in principle (071332Z), with the code to start
+on P3's CLEAR. Where this subsection and 23.3 to 23.7 differ, this one is later. Nothing above is rewritten.
+
+<!-- Provenance. P3's verdict: claude/mailbox docs/phase4/inbox/COORD/20261128T072002Z-P3.md (copy to P5 at 072022Z).
+     Checked at master 4a56f17a3a: src/go2cs/cgoDeclarations.go cgoStructMarker (:295-335, gated on cgoRouteActive, a
+     direct pointer or unsafe.Pointer field only); src/core/golib/ж.CgoFields.cs cgoPointerField (get and set) and
+     cgoWordField; src/core/golib/CgoPointerWords.cs ReadWord and WriteWord; src/core/unsafe/unsafe.cs LoadWord and
+     StoreWord (W1, W2). The p3 fixture as converted by H's converter carries [global::go.golib.GoCgoStruct] on
+     struct_go2cs_probe_col, _cursor and _entry (package_info.cs). -->
+
+1. **The pointer-field accessors are already on master** (DESIGN-cgo-phase3-marshaling 18.9). This is finding 1; 23.3
+   missed them. The converter stamps `[GoCgoStruct]` on a cmd/cgo struct with a pointer or `unsafe.Pointer` field, on
+   the -cgo route only (`cgoStructMarker`). go2cs-gen gives each such field a get and set property on the box in place
+   of the ref one: `cgoPointerField` for a typed pointer, and `cgoWordField` with the word doors `LoadWord` and
+   `StoreWord` for an `unsafe.Pointer`. So `col.ptr` through `col := &colvals[i]` never reaches `FieldRef`, and the read
+   and the store through a `NativeBox<E>` over C memory work today (GolibTests `CgoPointerFieldTests`). The sentence in
+   23.3 that `FieldRef`'s refusal is "the only reason `col.ptr` cannot be read" does not hold for a marked struct.
+   **Amended:** item 1 (the `FieldRef` word arm) is dropped. Item 5's store call is dropped: a pointer-word store
+   through an index is rule 4's emission, `Ꮡ(s, i).ptr = v`, which binds the existing setter.
+2. **One read rule, the accessor's** (finding 2). 23.3 and item 2 took "any non-zero word is C memory", from the
+   copy-back. The accessor's read is stricter. 0 is nil. A word that names Go memory (the registry, a live pin, a
+   tagged token) is refused by name, since go2cs keeps no record of a Go pointer stored in C bytes. Any other word is
+   C memory (`CgoPointerWords.ReadWord`). The copy-back's rule differs because it knows the word it copied in.
+   **Amended:** item 2's word decode calls the accessor's reader, its classification included, so `colvals[i].ptr` and
+   `col.ptr` answer alike. The stores already agree.
+3. **No write may reach the window's indexer** (finding 3). Items 3 and 6 contradicted each other: `s[i] = v` is emitted
+   through the indexer, so it would land in the fresh decode and be lost silently, as would a swap, `s[i].inner.x = 1`,
+   `s[i].arr[j] = x`, any emission passing `ref s[i]`, and golib's own copy into the window, `clear`, and `append`
+   within capacity. **Amended:**
+   - The native struct window's indexer **refuses by name**. It hands out no ref.
+   - The converter emits **every** access whose path starts at an index of a class `E` through the element box. That
+     covers a read by value (the box's value read, which is item 2's decode), a field read, a field store, a
+     whole-element store, compound assignment, `++`, and a swap. This replaces rule 4.
+   - Each such access lands on a live field ref, on the accessor, or on a refusal by name. A whole-element store
+     reaches `NativeBox<E>.Value`'s refusal (rule 6). An array member reaches `FieldRef`'s refusal of a managed
+     reference.
+   - golib's own writers over a native struct window (copy into it, `clear`, `append` within capacity) refuse by name.
+   - Generic code converted without the rule (the one silent shape of 23.6) now reaches the indexer, so it refuses by
+     name. **No silent shape remains.**
+   Over Go memory the box route reads and writes the same storage, so the window's refusal binds only C memory.
+4. **The class is the marker's** (finding 4). 23.4's class was wider. The marker counts only a direct pointer or
+   `unsafe.Pointer` field of a cmd/cgo struct. A nested struct value's field, an array of pointers, a defined pointer
+   typedef, and a Go type defined over a C struct are not stamped, and none of them has an accessor. **Amended:** the
+   seat's class is `[GoCgoStruct]`. The doors refuse the rest by name, as today.
+5. **`DecodeValue`'s word arm is keyed on the marker** (finding 5). Without the key, an unmarked Go struct with a pointer
+   field, read by value over foreign bytes (transpiled C), would decode native pointers where it is refused today.
+   **Amended:** the word arm runs for a `[GoCgoStruct]` type only.
+
+**The amended seat.**
+- golib: the word arm of `DecodeValue` (marked types, the accessor's reader); the native struct window at the V3 arm of
+  doors A, B and C, with a refusing indexer; and refusals in golib's copy, `clear` and `append` over the window. About
+  200 lines.
+- converter: admission of `[GoCgoStruct]` element types in `arrayPointerViewOfBase`, and the box route for every access
+  starting at an index of such a type (amended rule 4). About 180 lines.
+- Every predicate is the marker's, which is gated on `cgoRouteActive`. The standard library converts off the route, so
+  the corpus footprint is zero by construction; the two-seeded four-target diff is still owed as the proof. The box
+  route also applies to Go-memory slices of a marked type, so cgo fixture goldens move. The seat's prediction names
+  them before the run.
+- Still about a day and a half, stacked on H's slice tip once H posts it SEAT READY, behind the cgo arm's rerun and the
+  D7 burst (COORD 071332Z).
+
+**Arms against `go run`** (the owner's rule: each shape let through, and each refusal, including the near-misses of
+findings 3 to 5). Through the doors over C memory:
+- **Let through:** slicecolsc and slicecolsview as read; a scalar-member store through an index; a pointer-word store
+  through an index; a read after C rewrites a word; a whole-element read by value.
+- **Refused by name:** a Go pointer stored into a pointer word; a word naming Go memory, read through an index and
+  through the box, both refused alike; a whole-element store; a swap of two elements; an array member's element store;
+  a generic `slices` call that writes, reaching the indexer; `copy` into the window, `clear`, and `append` within
+  capacity; an element type outside the marker (a nested struct's pointer field, an array of pointers); an unmarked Go
+  struct with a pointer field read by value over foreign bytes.
+- Each refusal's Go answer is noted beside its arm: where Go itself accepts the shape, the arm records the refusal as
+  a narrowing, with its BOARD row.
