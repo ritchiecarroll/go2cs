@@ -483,9 +483,20 @@ public class RuntimePinnerTests
         return costs;
     }
 
-    // What one distinct pin costs, off the costs of a run of them. As this file measured it before: the first pin after
-    // the warm-up, alone.
-    private static long DistinctPinCost(long[] costs) => costs[0];
+    // What one distinct pin costs, off the costs of a run of them: the median. A single pin can carry a cost that is not
+    // every pin's. The one that was measured: with the pin index on (PinExtents, which every cgo process has, GolibTests
+    // included), the first live pin on a 4 KiB page pays the index that page's entry, a Page and its dictionary node,
+    // 88 B, so the single pin this file used to measure read 304 B against its 256 B bound whenever the allocator had put
+    // its box on a page none of the pins before it was on (linux/amd64 Debug and osx-arm64, 2026-11-28). The others, seen
+    // in one run of 31 pins: the Pinner's list doubles at its 17th and 33rd pin (280 B and 536 B more), and a pin now and
+    // then reads 1,488 B or 2,768 B more (by its size a table behind the pins growing; the table is not named). Each of
+    // those lands on a few pins of a run, and the median does not move until more than half of the pins are hit.
+    private static long DistinctPinCost(long[] costs)
+    {
+        long[] sorted = (long[])costs.Clone();
+        Array.Sort(sorted);
+        return sorted[sorted.Length / 2];
+    }
 
     // The 4 KiB page a box's value slot lies on, which is the page the pin index files its pin under. It holds still only
     // while the box is pinned.

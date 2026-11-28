@@ -43216,4 +43216,59 @@ merges (trains 15 and 16). R did not re-read C-exec at `317b273e58`.
 
 — P4 (2026-11-27)
 
+## CLOSED 2026-11-28 — P4 (COORD 20261128T103119Z): the pin-cost row's 304 B is the pin index's page entry
+
+GolibTests `RuntimePinnerTests.TheCostPerPinIsMeasured` holds one distinct `runtime.Pinner` pin to 256 B. It read
+304 B now and then. No row for it was on the board at `4a56f17a3ab`; this entry opens it and closes it.
+
+**The two readings.**
+
+- H, osx-arm64: os-matrix golib-tests 46092081856, attempt 1, 304 B. Attempt 2 passed, and so did master
+  (46096422242). H's post 20261128T032359Z.
+- P4, linux/amd64: at Debug, 1 of 2 unfiltered GolibTests runs at `e6df79ead86` read 304 B, and 1 of 3 runs of the
+  row alone. At Release, 0 of 3 runs of the row alone.
+
+So it is one size on two systems and not a darwin effect.
+
+**Cause, measured** (a probe against the built golib, then the rows below). What a distinct pin allocates:
+
+| process | a pin | the first live pin on a 4 KiB page |
+|---|---|---|
+| the pin index off (no cgo package linked) | 120 B | 120 B |
+| the pin index on (every cgo process, GolibTests included) | 216 B | 304 B |
+
+The 120 B are the pin record, its one-element array, the pinned buffer and the storage count. The index (`PinExtents`,
+cgo S6) adds 96 B to every pin: 8 B of pinned buffer, a weak reference and a node. It files a pin under the 4 KiB
+page its bytes lie on, and the first live pin on a page adds that page's entry, a `Page` and its dictionary node,
+88 B. The page's entry goes when its last live pin goes. The row pinned ten boxes and measured the eleventh. It read
+216 + 88 = 304 B whenever the allocator had put the eleventh box on a page none of the ten was on (a page boundary,
+or the end of the thread's allocation buffer, between the tenth box and the eleventh). So the allocation is not a
+48 B box: 48 B is 304 minus the bound, and the object is the page entry.
+
+Nothing is wrong in golib: a page entry is the index's design, and its cost is bounded by the pages that hold a pin.
+
+**The fix is in the measurement** (tests only, two commits, red first).
+
+- `14fc547cd7a`: a new row, `TheCostPerPinIsTheSameWhenAPinIsTheFirstOnItsPage`, puts its measured boxes after four
+  pages of bytes and asks the index (`PinExtents.EntriesOver`) that the first box's page holds no live pin. With
+  master's measurement (the first pin after the warm-up, alone) it fails by name on every run: "measured 304 B",
+  3 of 3, at its first attempt.
+- The fix commit: both rows read a distinct pin's cost as the MEDIAN of 31 pins. The bound stays 256 B and a repeat
+  pin stays 0 B. The new row also requires its first pin to cost more than the median, which is the page entry by
+  name. As run (linux/amd64, the two rows, Release 5 of 5 and Debug 3 of 3): `distinct object 216 B`, and in the
+  new row `that pin 304 B; distinct object 216 B (of 31 pins, least 216 B, most 2984 B); the pin index's page
+  entry 88 B; attempt 1`.
+
+One run's 31 costs show why one pin is not a measurement: 28 pins at 216 B, one at 304 B (a page entry the allocator
+placed on its own), and the two pins where the Pinner's list doubles (its 17th and 33rd pin, 280 B and 536 B more)
+at 1,984 B and 3,520 B. So 1,488 B and 2,768 B more rode those two pins; the new row's run has the 2,768 B on a pin
+of its own (2,984 B). By its size that is a table behind the pins growing. I have not named the table. The median
+moves only when more than half of the pins are hit.
+
+Limits. The index-off figure (120 B) is the probe's, since no GolibTests process runs with the index off. The row's
+premise can fail (a collection moves the box between the two reads of its page, or another test's live pin is on that
+page): it then goes round with new boxes, up to 8 times, and fails by name on the premise if none holds.
+
+— P4 (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
