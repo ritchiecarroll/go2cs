@@ -100,6 +100,17 @@ else {
     $refusal = @(Get-Content -LiteralPath $rcLog | Where-Object { $_ -match [regex]::Escape($ModulePath) -and $_ -match 'fail|refus|GO2CS|error' } | Select-Object -First 1)
     $named = $refusal.Count -gt 0
     if ($rcExit -ne 0 -and $named) { Reading "R-c PASS: master $masterSha refuses $ModulePath (exit $rcExit): $($refusal[0] -replace [regex]::Escape($moduleDir), '<module dir>')" }
+    elseif ($rcExit -eq 0) {
+        # Since INC 4 increment 1 (dfe8bdf189, the go.mod-less copy) is on master, the refusal R-c read is gone: it was the
+        # release's go.mod-less preflight, before any cgo rule. Without -cgo, master converts the package's cgo-OFF view,
+        # as go builds it under CGO_ENABLED=0: pointer.go imports "C" and is excluded, so only doc.go converts. That is no
+        # longer a before-reading of the -Cgo pack, so R-c reads it and does not fail (P5, 2026-11-28, run 46105005290;
+        # pending COORD's ruling). Any other outcome still fails.
+        $rcProject = Join-Path $rcOut "src/$ModulePath"
+        $rcFiles = @(Get-ChildItem -LiteralPath $rcProject -File -Filter '*.cs' -ErrorAction SilentlyContinue | Where-Object { $_.Name -cne 'package_info.cs' } | ForEach-Object { $_.Name } | Sort-Object)
+        if (($rcFiles -join ',') -ceq 'doc.cs') { Reading "R-c READING (not a refusal since INC 4 is on master): master $masterSha converts only $ModulePath's cgo-off view without -cgo (exit 0; source files: $($rcFiles -join ', '))" }
+        else { Failure "R-c: master $masterSha converted $ModulePath without -cgo (exit 0) into [$($rcFiles -join ', ')], not the cgo-off view [doc.cs]" }
+    }
     else { Failure "R-c: master $masterSha did not refuse $ModulePath by name (exit $rcExit, named $named)" }
     & git -C $repo worktree remove --force $master 2>&1 | Out-Null
 }
