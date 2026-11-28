@@ -5,6 +5,13 @@ using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using C = go.cgotestꓸC_package;
 
+// The Go type cmd/cgo declares C char as for the bindings this build compiled (GolibTests.csproj).
+#if GOCGO_CHAR_UNSIGNED
+using ᴛchar = byte;
+#else
+using ᴛchar = sbyte;
+#endif
+
 namespace GolibTests;
 
 // cgo Phase 3, .5 cgo item 2, the argv shape (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.12.3; H's verdict (A), the
@@ -109,7 +116,7 @@ public unsafe class CgoArgvTests
         using CStrings strings = new();
         array<ж<C.@char>> argv = new(3);
         argv[0] = strings.Add("a");
-        argv[1] = new StandardBox<C.@char>((sbyte)'g');
+        argv[1] = new StandardBox<C.@char>((ᴛchar)'g');
 
         string message = RefusalOf(() => C.go2cs_probe_argv_count(new ElemRefBox<ж<C.@char>>(argv, 0)));
 

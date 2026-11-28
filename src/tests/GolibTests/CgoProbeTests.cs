@@ -8,6 +8,13 @@ using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using C = go.cgotestꓸC_package;
 
+// The Go type cmd/cgo declares C char as for the bindings this build compiled (GolibTests.csproj).
+#if GOCGO_CHAR_UNSIGNED
+using ᴛchar = byte;
+#else
+using ᴛchar = sbyte;
+#endif
+
 namespace GolibTests;
 
 // cgo Phase 2 increment 4d (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.10): the exit gate's arms that no system library
@@ -198,7 +205,7 @@ public unsafe class CgoProbeTests
             Assert.IsTrue(midCall > 0, $"round {round}: no collection ran while the C call was open, so the round says nothing about the pin");
 
             for (int i = 0; i < size; i++)
-                Assert.AreEqual((int8)('a' + i % 26), (int8)buffer[i], $"round {round}: byte {i} is what C wrote");
+                Assert.AreEqual((ᴛchar)('a' + i % 26), (ᴛchar)buffer[i], $"round {round}: byte {i} is what C wrote");
 
             if (AddressOf(twin) != twinBefore)
                 twinMoved++;
