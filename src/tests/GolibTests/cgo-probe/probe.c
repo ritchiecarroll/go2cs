@@ -246,6 +246,16 @@ GO2CS_PROBE_EXPORT int go2cs_probe_col_len(const struct go2cs_probe_col *col)
     return col->n;
 }
 
+GO2CS_PROBE_EXPORT int go2cs_probe_fname_len(go2cs_probe_fname_t name)
+{
+    int n = 0;
+
+    while (name[n] != 0)
+        n++;
+
+    return n;
+}
+
 GO2CS_PROBE_EXPORT go2cs_probe_fname_t go2cs_probe_fname(void)
 {
     return "main.db";

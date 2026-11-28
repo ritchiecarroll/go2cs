@@ -38,7 +38,9 @@ scratch buffer "so the records contain no Go pointers". `ptr` holds only C addre
 **The cure.** An `unsafe.Pointer` member takes the pointer-member path with the same semantics, so the layout is one
 address word and the check is the one cgo makes:
 - nil is 0, and a native pointer is its address.
-- A pointer into unpinned Go memory panics with cgo's message (cgocheck=1's), and a pinned one crosses (cgo S6).
+- A pointer into Go memory panics with cgo's message (cgocheck=1's). A runtime.Pinner-held one is refused too, which
+  is the named limit of docs/Limitations.md (a void * member never carries Go memory here); this line said "a pinned
+  one crosses (cgo S6)" until P3's NIT 3 on the slice's read (2026-11-28) corrected it to the code.
 - Copied back, an address C left alone keeps the original pointer's identity, and a new one is C memory, minted native.
   The Go side then reads it with `unsafe.Slice((*byte)(col.ptr), col.n)`, as go-sqlite3 does.
 

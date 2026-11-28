@@ -427,6 +427,8 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "slicecolsgo", csFails: cgoP3SliceElement},
 		{name: "slicecolsc", csFails: cgoP3NativeStructView},
 		{name: "slicecolgoptr"},
+		{name: "slicecolone"},
+		{name: "slicefnamelen"},
 		{name: "slicefname"},
 		// The S4 cure's near misses (P3, F1): a typedef of a typedef (uint64_t) and a typedef'd enum, each a constant
 		// cmd/cgo's check closure declares at the typedef.

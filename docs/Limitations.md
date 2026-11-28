@@ -336,7 +336,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
 `error GO2CS2001`, which names the file. With `-cgo`, on a machine with a C compiler (`go env CC`), a package
 converts when every C use it makes is a call of a C function a shared library defines, passing integers,
 floating-point numbers and pointers, structs of integers and pointers by value, one struct or one scalar by
-pointer, or a `void *` that is nil or points at C memory. `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN`,
+pointer, or a `void *` that is nil or points at C memory. A struct with a `void *` member converts by pointer, the
+member nil or C memory, and a C pointer typedef (`typedef const char *T`) converts as a result and as a parameter. `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN`,
 `C.GoBytes`, `C.malloc`, `C.free` and `defer C.f(…)` convert, with the package's C types and constants. A
 program that uses the converted package needs only the C library.
 
@@ -509,6 +510,13 @@ or never was. In each, the call goes ahead, and the memory may move while C uses
      row 11 is asserted as disclosed in PinExtentsChildTests; row 8 is the receiver-type FromRef arm of
      DESIGN-cgo-phase3-marshaling.md section 16.9, whose direct form the cgo route refuses at conversion. Moved into
      the cgo section at the batch-308 merge, where P4 gave cgo a section of its own. -->
+
+**A Go pointer in a `void *` member of one struct is refused with Go's text for `C.f(&x)`.** Go names the member's
+kind there, "Go pointer to unpinned Go unsafe pointer", and go2cs says the same. Through a variable holding the
+struct's address (`p := &x; C.f(p)`), Go checks the whole object and says "Go pointer to unpinned Go pointer"; go2cs
+still says "unsafe pointer" there.
+<!-- P3's NIT 4 on the go-sqlite3 slice (2026-11-28): runtime cgocall.go:765 and :775 against :858-859. Door 1
+     (DESIGN-cgo-struct-array-element.md) gives the wrapper the call form and closes it. -->
 
 **A Go array of C pointers costs its whole length on every call.** `C.f(&argv[0])` lets C read or fill every
 pointer in the array, as in Go. go2cs holds such an array as Go pointers rather than as machine words, so for the
