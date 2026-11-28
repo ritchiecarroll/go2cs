@@ -30,7 +30,8 @@ namespace go.golib;
     Whole,
 
     /// <summary>
-    /// An element of the backing array BEFORE the element form's slice: Go checks nothing there, and C may still read it.
+    /// An element of the backing array BEFORE the element form's slice, or past its capacity: Go checks nothing there,
+    /// and C may still reach it.
     /// A Go pointer in its pointer member crosses as 0, since a mirror cannot carry a Go address.
     /// </summary>
     Outside
@@ -74,6 +75,19 @@ namespace go.golib;
     /// <summary>The element form over a pointer to an array (<c>(*p)[i]</c>).</summary>
     public static GoCgoWindow Of<T>(ж<array<T>>? p) => p is null || p.IsNilPointer ? default : Of(p.Value);
 
+    /// <summary>The element form over a slice variable, held by its box (cmd/cgo's <c>_cgoIndexN := &amp;s</c>).</summary>
+    public static GoCgoWindow Of<T>(ж<slice<T>>? p) => p is null || p.IsNilPointer ? default : Of(p.Value);
+
+    /// <summary>
+    /// The indexed operand, evaluated ONCE and kept for the window (P3's SHOULD 2 on door 1): cmd/cgo binds it to
+    /// <c>_cgoIndexN</c>, so a call in it runs once, and the window checks the very array the element is in.
+    /// </summary>
+    public static T Keep<T>(T value, out T kept)
+    {
+        kept = value;
+        return value;
+    }
+
     /// <summary>The check of a single struct, handed by itself (the mirror door).</summary>
     public GoCgoCheck Single => m_form == Form.Variable ? GoCgoCheck.Whole : GoCgoCheck.Kind;
 
@@ -86,8 +100,8 @@ namespace go.golib;
                 return GoCgoCheck.Whole;
 
             case Form.Slice when ReferenceEquals(m_backing, backing):
-                // Go checks the slice from its start through its capacity; an element before it is C's to read and
-                // nothing Go checks. One past the capacity cannot be in the backing array's own span here.
+                // Go checks the slice from its start through its capacity; an element before it, or past its capacity
+                // (a three-index slice, cols[0:2:2]), is C's to reach and nothing Go checks.
                 return index >= m_start && index < m_end ? GoCgoCheck.Kind : GoCgoCheck.Outside;
 
             default:

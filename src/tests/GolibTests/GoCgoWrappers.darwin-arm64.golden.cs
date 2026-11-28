@@ -1740,7 +1740,7 @@ static unsafe partial class cgotestꓸC_package
     private static void ᴍout__Ctype_struct_go2cs_probe_cursorᴍ(ref struct_go2cs_probe_cursor v, in _Ctype_struct_go2cs_probe_cursorᴍ m, in _Ctype_struct_go2cs_probe_cursorᴍ s, global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> c, string function)
     {
         v.n = (@int)(int32)m.n;
-        v.cur = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.cur, v.cur, (nuint)s.cur, c, function);
+        v.cur = m.cur == s.cur ? v.cur : global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.cur, v.cur, (nuint)s.cur, c, function);
     }
 
     // _Ctype_struct_go2cs_probe_cursor's pointer members, each checked against one pinned argument inside the wrapper's `fixed`.
@@ -1786,7 +1786,7 @@ static unsafe partial class cgotestꓸC_package
     private static void ᴍout__Ctype_struct_go2cs_probe_nodeᴍ(ref struct_go2cs_probe_node v, in _Ctype_struct_go2cs_probe_nodeᴍ m, in _Ctype_struct_go2cs_probe_nodeᴍ s, global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> c, string function)
     {
         v.value = (@int)(int32)m.value;
-        v.next = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.next, v.next, (nuint)s.next, c, function);
+        v.next = m.next == s.next ? v.next : global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.next, v.next, (nuint)s.next, c, function);
     }
 
     // _Ctype_struct_go2cs_probe_node's pointer members, each checked against one pinned argument inside the wrapper's `fixed`.
@@ -1900,7 +1900,7 @@ static unsafe partial class cgotestꓸC_package
         v.tm_yday = (@int)(int32)m.tm_yday;
         v.tm_isdst = (@int)(int32)m.tm_isdst;
         v.tm_gmtoff = (@long)(int64)m.tm_gmtoff;
-        v.tm_zone = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.tm_zone, v.tm_zone, (nuint)s.tm_zone, c, function);
+        v.tm_zone = m.tm_zone == s.tm_zone ? v.tm_zone : global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.tm_zone, v.tm_zone, (nuint)s.tm_zone, c, function);
     }
 
     // _Ctype_struct_tm's pointer members, each checked against one pinned argument inside the wrapper's `fixed`.

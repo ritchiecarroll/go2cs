@@ -109,6 +109,8 @@ type cgoCheckClosure struct {
 	// DESIGN-cgo-struct-array-element.md section 4): the indexed operand for the element form (`_cgoIndexN`'s
 	// definition), or nil for the variable form. The address form takes the wrapper's default and has no entry.
 	windows map[int]ast.Expr
+	// indexObjects names each element-form argument's _cgoIndexN variable, so a call-bearing operand renders once.
+	indexObjects map[int]types.Object
 }
 
 // cgoClosureArgument is what one of a check closure's variables stands for: an expression, which for
@@ -116,6 +118,8 @@ type cgoCheckClosure struct {
 type cgoClosureArgument struct {
 	value    ast.Expr
 	declared ast.Expr
+	// hoist, when set, renders the value once into a local of that name (GoCgoWindow.Keep) and the name after that.
+	hoist string
 }
 
 // cgoRoute is a package's conversion through the cgo route.
@@ -474,7 +478,7 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 		formSlice
 	)
 
-	closure := &cgoCheckClosure{arguments: map[types.Object]cgoClosureArgument{}, windows: map[int]ast.Expr{}}
+	closure := &cgoCheckClosure{arguments: map[types.Object]cgoClosureArgument{}, windows: map[int]ast.Expr{}, indexObjects: map[int]types.Object{}}
 	forms := map[int]int{}
 	argumentObjects := map[int]types.Object{}
 	baseValues := map[int]ast.Expr{}
@@ -509,6 +513,7 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 
 				indexValues[index] = statement.Rhs[0]
 				closure.arguments[info.Defs[lhs]] = cgoClosureArgument{value: statement.Rhs[0]}
+				closure.indexObjects[index] = info.Defs[lhs]
 				continue
 			}
 
@@ -706,6 +711,29 @@ func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info,
 
 	closure.call = call
 	return closure
+}
+
+// cgoHasEffects reports whether an expression holds a call or a channel receive, so evaluating it twice could differ
+// from evaluating it once. A conversion counts too: it is harmless, and hoisting it is still correct.
+func cgoHasEffects(expr ast.Expr) bool {
+	found := false
+
+	ast.Inspect(expr, func(n ast.Node) bool {
+		switch node := n.(type) {
+		case *ast.CallExpr:
+			found = true
+		case *ast.UnaryExpr:
+			if node.Op == token.ARROW {
+				found = true
+			}
+		case *ast.FuncLit:
+			return false
+		}
+
+		return !found
+	})
+
+	return found
 }
 
 // cgoReceiverAddresses answers each `unsafe.Pointer(p)` in a tree, inside a method with a pointer receiver, whose operand
@@ -1540,7 +1568,24 @@ func (v *Visitor) convCgoCheckClosure(closure *cgoCheckClosure, context LambdaCo
 		v.cgoClosureArguments = map[types.Object]cgoClosureArgument{}
 	}
 
+	// Door 1 (P3's SHOULD 2): an element-form operand holding a call or a receive renders ONCE, into a local the window
+	// then reads, as cmd/cgo binds it to _cgoIndexN; a pure operand is rendered again for the window.
+	hoisted := map[int]string{}
+
+	for index, window := range closure.windows {
+		if object := closure.indexObjects[index]; window != nil && object != nil && cgoHasEffects(window) {
+			hoisted[index] = fmt.Sprintf("ᴍindex%d", v.cgoHoistCounter)
+			v.cgoHoistCounter++
+		}
+	}
+
 	for object, argument := range closure.arguments {
+		for index, name := range hoisted {
+			if closure.indexObjects[index] == object {
+				argument.hoist = name
+			}
+		}
+
 		v.cgoClosureArguments[object] = argument
 	}
 
@@ -1577,12 +1622,38 @@ func (v *Visitor) convCgoCheckClosure(closure *cgoCheckClosure, context LambdaCo
 
 		// cmd/cgo defines `_cgoIndexN := &a` for a variable a and `_cgoIndexN := a` otherwise; the window is of a.
 		operand := ast.Unparen(window)
+		addressed := false
 
 		if unary, ok := operand.(*ast.UnaryExpr); ok && unary.Op == token.AND {
 			operand = ast.Unparen(unary.X)
+			addressed = true
 		}
 
-		windows = append(windows, fmt.Sprintf("ᴍwindow%d: global::go.golib.GoCgoWindow.Of(%s)", index, v.convExpr(operand, nil)))
+		var rendered string
+
+		if name, ok := hoisted[index]; ok && v.cgoHoistRendered[name] {
+			// The operand was evaluated once, into the local; `&a` kept its box.
+			rendered = name
+
+			if addressed {
+				rendered += ".Value"
+			}
+		} else {
+			rendered = v.convExpr(operand, nil)
+		}
+
+		// A named slice or array type reaches slice<T> or array<T> through a user-defined conversion, which C# type
+		// inference does not follow (P3's SHOULD 3): the window takes the underlying type.
+		if operandType := v.info.TypeOf(operand); operandType != nil {
+			if _, named := types.Unalias(operandType).(*types.Named); named {
+				switch operandType.Underlying().(type) {
+				case *types.Slice, *types.Array:
+					rendered = fmt.Sprintf("((%s)%s)", v.getCSharpTypeName(operandType.Underlying()), rendered)
+				}
+			}
+		}
+
+		windows = append(windows, fmt.Sprintf("ᴍwindow%d: global::go.golib.GoCgoWindow.Of(%s)", index, rendered))
 	}
 
 	if len(windows) > 0 && strings.HasSuffix(call, ")") {
@@ -1596,6 +1667,26 @@ func (v *Visitor) convCgoCheckClosure(closure *cgoCheckClosure, context LambdaCo
 // pointer parameter's argument renders its box): its expression, converted to the type the closure declared it at when
 // it did (`var _cgoN T = x`, which gives an untyped constant its C type).
 func (v *Visitor) convCgoClosureArgument(argument cgoClosureArgument, context IdentContext) string {
+	if argument.hoist == "" {
+		return v.convCgoClosureArgumentValue(argument, context)
+	}
+
+	// Door 1 (P3's SHOULD 2): the element form's operand, evaluated once into a local the window reads.
+	if v.cgoHoistRendered[argument.hoist] {
+		return argument.hoist
+	}
+
+	if v.cgoHoistRendered == nil {
+		v.cgoHoistRendered = map[string]bool{}
+	}
+
+	v.cgoHoistRendered[argument.hoist] = true
+
+	return fmt.Sprintf("global::go.golib.GoCgoWindow.Keep(%s, out var %s)", v.convCgoClosureArgumentValue(argument, context), argument.hoist)
+}
+
+// convCgoClosureArgumentValue is convCgoClosureArgument's rendering of the value itself.
+func (v *Visitor) convCgoClosureArgumentValue(argument cgoClosureArgument, context IdentContext) string {
 	// The variable stood for a pointer as a value, so a pointer parameter renders its box (Ꮡp), never its dereference.
 	if valueType := v.info.TypeOf(argument.value); valueType != nil {
 		if _, isPointer := valueType.Underlying().(*types.Pointer); isPointer {

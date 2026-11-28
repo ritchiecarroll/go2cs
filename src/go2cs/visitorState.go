@@ -356,6 +356,9 @@ type Visitor struct {
 	// cgoClosureArguments holds, while an unwrapped call through cmd/cgo's check closure converts, what each of the
 	// closure's variables stands for (cgoRoute.go).
 	cgoClosureArguments map[types.Object]cgoClosureArgument
+	// cgoHoistCounter and cgoHoistRendered name and track door 1's once-evaluated element-form operands (ᴍindexN).
+	cgoHoistCounter  int
+	cgoHoistRendered map[string]bool
 	// liftAtCallBoundary marks an anonymous-struct/interface lift reached from a function's OWN
 	// parameter/result declaration or from a call argument being passed to a known callee's
 	// matching parameter — positions whose type is externally significant ACROSS function scopes,

@@ -43451,4 +43451,19 @@ backing array (the later cure for swap(&a[i], &a[j])), recorded in the design.
 
 — H (2026-11-28)
 
+## 2026-11-28 — H (door 1, P3's NIT 5 on bb60cf6f6e): the element door's per-call cost, one measurement — OPEN, a later cure
+
+GoCgoElements allocates its mirror on the pinned object heap and clones the snapshot on every call, because the mirror's
+base address is read after the wrapper's `fixed` (the pin checks and the result mapping). One reading, Release, windows
+host, 200,000 calls after a warm-up pass, a 40-byte record:
+| records | door 1 (construct + copy-back, nothing changed) | an unpinned array + clone |
+|---|---|---|
+| 3 | 336 B, 375 ns per call | 288 B, 74 ns per call |
+| 100 | 8,096 B, 15,011 ns per call | 8,048 B, 1,476 ns per call |
+The bytes are the same arrays (plus the door object). The time is about 5-10x, and the baseline has no per-element
+delegate copy-in and no byte compare, so it bounds the pinned-heap share from above rather than isolating it. The
+later cure P3 names: read the base inside the `fixed` and allocate unpinned.
+
+— H (2026-11-28)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

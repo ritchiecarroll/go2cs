@@ -274,7 +274,10 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 		case cgoPinCheck:
 			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)%s, g, f, function);\n", indent, m), nil
 		case cgoCopyOutSnapshot:
-			return fmt.Sprintf("%s%s = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)%s, %s, (nuint)%s, c, function);\n", indent, g, m, g, s), nil
+			// A word equal to the snapshot's keeps the original member before any member function runs (P3's MUST on
+			// bb60cf6f6e): an element before the element form's window carried its Go pointer across as 0, and
+			// PointerMemberBack answers nil for 0 before it compares.
+			return fmt.Sprintf("%s%s = %s == %s ? %s : global::go.golib.GoCgoArgs.PointerMemberBack((nuint)%s, %s, (nuint)%s, c, function);\n", indent, g, m, s, g, m, g, s), nil
 		}
 
 		return fmt.Sprintf("%s%s = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)%s, %s, global::go.golib.GoCgoArgs.PointerMember(%s), c, function);\n", indent, g, m, g, g), nil

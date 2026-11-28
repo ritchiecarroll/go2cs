@@ -541,8 +541,10 @@ part C uses. Where go2cs differs from Go:
   the same array, are refused by name, where Go hands C the one array;
 - a pointer C returns, or writes into a struct, that points inside an element (not at an element's start), or one
   past the array's end, is refused by name, and so is a pointer member C sets to another element;
-- for an element before the slice Go checks (`&s[0]` where `s` is `cols[1:]`), a Go pointer in a pointer member
-  crosses as NULL, and a NULL C stores there is not seen; Go checks nothing there either;
+- for an element before the slice Go checks (`&s[0]` where `s` is `cols[1:]`), or past its capacity (`cols[0:2:2]`), a
+  Go pointer in a pointer member crosses as NULL, and a NULL C stores there is not seen; Go checks nothing there either;
+- a C function used as a value (`defer C.f(&s[0])`, `go C.f(…)`, `f := C.f`) is checked as the address form, from the
+  first element of the backing array, where Go checks the slice the call names;
 - for `p := &x.cols[0]; C.f(p)`, Go checks the whole object that holds the array, and for a package-level variable
   holding Go pointers it panics; go2cs checks the array itself.
 An element of an array in C memory crosses by its own address, with no copy.

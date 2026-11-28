@@ -427,6 +427,7 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "slicecolsreslice"},
 		{name: "slicecursreslice"},
 		{name: "slicecolsonce"},
+		{name: "slicecolsnamed"},
 		{name: "slicecolsmid"},
 		{name: "slicecolsback"},
 		{name: "slicecolsresult"},
@@ -911,6 +912,16 @@ func fileName() _Ctype_go2cs_fname {
 func fileNameLen(f _Ctype_go2cs_fname) _Ctype_int {
 	return func() _Ctype_int{ _cgo0 := f; _cgoCheckPointer(_cgo0, nil); return _Cfunc_go2cs_fname_len(_cgo0); }()
 }
+
+type colList []_Ctype_struct_go2cs_col
+
+func fillNamed(cl colList) _Ctype_int {
+	return func() _Ctype_int{ _cgoIndex0 := &cl; _cgo0 := &(*_cgoIndex0)[0]; _cgoCheckPointer(_cgo0, *_cgoIndex0); return _Cfunc_go2cs_col_fill(_cgo0); }()
+}
+
+func fillOnce(next func() []_Ctype_struct_go2cs_col) _Ctype_int {
+	return func() _Ctype_int{ _cgoIndex0 := next(); _cgo0 := &_cgoIndex0[0]; _cgoCheckPointer(_cgo0, _cgoIndex0); return _Cfunc_go2cs_col_fill(_cgo0); }()
+}
 `
 	stub := func(name, params, result, uses string) string {
 		return "\n//go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_" + name +
@@ -952,5 +963,37 @@ type _Ctype_go2cs_fname *_Ctype_char
 		if !strings.Contains(bindings, want) {
 			t.Errorf("the bindings have no wrapper for %s", want)
 		}
+	}
+
+	// Door 1 (DESIGN-cgo-struct-array-element.md section 4, P3's SHOULDs 2 and 3 on bb60cf6f6e): the fold passes each
+	// form's window. The variable form names GoCgoWindow.Variable; a named slice operand reaches GoCgoWindow.Of through
+	// its underlying slice type; and a call operand is evaluated ONCE, kept in a local the window reads.
+	code := strings.ReplaceAll(readConverted(t, output, "fixture.cs"), "\r\n", "\n")
+	body := func(name string) string {
+		start := strings.Index(code, " "+name+"(")
+
+		if start < 0 {
+			t.Fatalf("the converted fixture has no %s", name)
+		}
+
+		end := strings.Index(code[start:], "\n}\n")
+
+		if end < 0 {
+			return code[start:]
+		}
+
+		return code[start : start+end]
+	}
+
+	if got := body("fillCol"); !strings.Contains(got, "ᴍwindow0: global::go.golib.GoCgoWindow.Variable") {
+		t.Errorf("the variable form's window is missing:\n%s", got)
+	}
+
+	if got := body("fillNamed"); !strings.Contains(got, "ᴍwindow0: global::go.golib.GoCgoWindow.Of(((slice<") {
+		t.Errorf("the named slice operand does not reach the window through its underlying type:\n%s", got)
+	}
+
+	if got := body("fillOnce"); strings.Count(got, "next()") != 1 || !strings.Contains(got, "global::go.golib.GoCgoWindow.Keep(") || !strings.Contains(got, "GoCgoWindow.Of(ᴍindex") {
+		t.Errorf("the call operand is not evaluated once and kept for the window:\n%s", got)
 	}
 }

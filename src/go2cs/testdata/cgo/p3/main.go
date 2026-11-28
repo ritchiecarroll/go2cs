@@ -109,6 +109,9 @@ import (
 	"unsafe"
 )
 
+// colList is a named slice of C records, door 1's slicecolsnamed arm.
+type colList []C.struct_go2cs_probe_col
+
 // goAddress is a Go struct of scalars, the shape of go2cs_probe_address, that increment 3.2's reinterpret arm reads C
 // memory through.
 type goAddress struct {
@@ -391,6 +394,13 @@ func main() {
 		}
 		C.go2cs_probe_col_fill(&next()[0], 3)
 		fmt.Println("slicecolsonce", calls, C.GoStringN((*C.char)(cols[0].ptr), cols[0].n))
+	case "slicecolsnamed":
+		// Door 1, P3's SHOULD 3 on bb60cf6f6e: the element form over a NAMED slice type. The window takes its
+		// underlying slice type. go run prints:
+		//   slicecolsnamed 3 gamma
+		cl := make(colList, 3)
+		C.go2cs_probe_col_fill(&cl[0], 3)
+		fmt.Println("slicecolsnamed", int(cl[2].typ), C.GoStringN((*C.char)(cl[2].ptr), cl[2].n))
 	case "slicecolsmid":
 		// Door 1: &cols[1] with ncol 2. C fills records 1 and 2; record 0 is untouched. go run prints:
 		//   slicecolsmid 0 42 1 2 beta
