@@ -27417,6 +27417,11 @@ in the third, only the added type argument; all three compile and print the same
 
 — P1 (measured 2026-10-17)
 
+**Amended 2026-11-28 (P2): residuals 1 and 2 hold for a func-type target too.** A func-type assertion takes golib's
+`_ᶠ` (claude/p2-func-assert-trim), which names its source by the same rule (`funcAssertSourceIsNameable`,
+convTypeAssertExpr.go), so another package's unexported interface, or a function-local one, asserted to a func type
+prints `interface {}` where Go names it. funcTypeAssert_test.go's `hid` case pins the form (`hid._ᶠ<rw>()`).
+
 ## 2026-10-19 — P2: a pointer array over memory the Go runtime did not allocate reads its words as foreign addresses; stores refuse by name — SEATED (owner P2)
 
 Go reads a Windows DNS TXT record's strings as

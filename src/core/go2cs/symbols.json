@@ -209,7 +209,7 @@
         "StrGenerator declares it. It also names golib's func-type assertion, `x._\u1da0<F>()`, whose delegate",
         "type argument carries no trim annotation."
       ],
-      "note": "U+1DA0 - sstring twin canonical value delegate suffix, in the family of HoistedLiteralMarker (U+02E2) and HoistedConstMarker (U+1D9C). Shared with go2cs-gen, which emits the field."
+      "note": "U+1DA0 - sstring twin canonical value delegate suffix, and golib's func-type assertion `_\u1da0`, in the family of HoistedLiteralMarker (U+02E2) and HoistedConstMarker (U+1D9C). Shared with go2cs-gen, which emits the twin field, and golib."
     },
     {
       "name": "TrueMarker",
