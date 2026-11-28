@@ -544,3 +544,30 @@ GO2CS_PROBE_EXPORT int go2cs_probe_bump(int step)
 
     return go2cs_probe_counter;
 }
+
+// Door 1 (docs/phase4/DESIGN-cgo-struct-array-element.md): C handed a pointer to an element of a Go array of records
+// may reach the whole array. go2cs_probe_col_back reads the record BEFORE the one it is handed; go2cs_probe_col_at
+// returns the record k past it; go2cs_probe_col_poke_prev writes a scalar of the record before it and fills the record
+// it is handed; go2cs_probe_col_slow pauses, then writes only the record it is handed, so another goroutine can write a
+// different record of the same array during the call.
+GO2CS_PROBE_EXPORT long long go2cs_probe_col_back(const struct go2cs_probe_col *col)
+{
+    return col[-1].i64;
+}
+
+GO2CS_PROBE_EXPORT struct go2cs_probe_col *go2cs_probe_col_at(struct go2cs_probe_col *col, int k)
+{
+    return col + k;
+}
+
+GO2CS_PROBE_EXPORT void go2cs_probe_col_poke_prev(struct go2cs_probe_col *col)
+{
+    col[-1].n = 7;
+    go2cs_probe_col_fill(col, 1);
+}
+
+GO2CS_PROBE_EXPORT void go2cs_probe_col_slow(struct go2cs_probe_col *col, int micros)
+{
+    go2cs_probe_pause(micros);
+    col->n = 5;
+}
