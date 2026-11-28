@@ -11,7 +11,11 @@
 //	   200 times: the wakes all complete; their latency goes to stderr with MN_INV_READING=1;
 //	V5 K goroutines block in a native sleep-poll loop that consumer C# brackets with GoNativeCall.Enter(Blocks) and
 //	   Exit: under GO2CS_MN=1 they hand their Ps off at once (handoffs rise, retakes do not, while they are blocked);
-//	V6 the same bracketed with Enter(MayBlock): the scheduler retakes the Ps (retakes rise) and injects none.
+//	V6 the same bracketed with Enter(MayBlock): the scheduler retakes the Ps (retakes rise) and injects none;
+//	V9 K goroutines make a native call bracketed with Enter(Blocks) that calls back into Go (ReenterManaged /
+//	   ReturnToNative), and the callback makes another Blocks call: under GO2CS_MN=1 the scheduler's blocked count and
+//	   free P permits come back to their base once every goroutine has ended (F1: before it, each crossing left one of
+//	   each behind for good).
 //
 // MN_INV_ONLY=V7 (never in the compared run: Go completes it) sets the thread ceiling with debug.SetMaxThreads(16),
 // prints the old ceiling, and then runs V2: under GO2CS_MN=1 the carriers V2 needs pass the ceiling, and the program
@@ -51,6 +55,14 @@ var newBracketedFlag func(blocks bool) (wait func(), set func())
 
 // counters reads the scheduler's handoffs, retakes, injections and sensed waits, and whether it is on. nil under Go.
 var counters func() (handoffs, retakes, injections, sensed int64, on bool)
+
+// nestedNative makes a Blocks native call that calls back into Go, depth calls deep, and runs callback in the innermost
+// callback: consumer C# with GoNativeCall.Enter / ReenterManaged / ReturnToNative / Exit. nil under Go.
+var nestedNative func(depth int, callback func())
+
+// balance reads the scheduler's blocked count and free P permits (READING's blocked= and p-free=), and whether it is
+// on. nil under Go.
+var balance func() (blocked, pFree int64, on bool)
 
 var reading = os.Getenv("MN_INV_READING") == "1"
 
@@ -155,6 +167,82 @@ func bracketed(k int, blocks bool) bool {
 	default:
 		return released && r1 > r0 && i1-i0 < int64(k/3)
 	}
+}
+
+// nester waits at the gate (its park point, so it runs multiplexed), then makes the nested crossing.
+func nester(gate chan struct{}, done chan<- int) {
+	<-gate
+	n := 0
+	cross := func() { n++ }
+	if nestedNative != nil {
+		nestedNative(2, cross)
+	} else {
+		cross()
+	}
+	done <- n
+}
+
+// quiet reads balance until two readings 50 ms apart agree: the counts at quiescence.
+func quiet() (blocked, pFree int64) {
+	b, f, _ := balance()
+	for i := 0; i < 100; i++ {
+		time.Sleep(50 * time.Millisecond)
+		b1, f1, _ := balance()
+		if b1 == b && f1 == f {
+			break
+		}
+		b, f = b1, f1
+	}
+	return b, f
+}
+
+// v9 (F1): the counts are snapshots, so they are read only at quiescence: a base after a warm-up pass, then a poll of up
+// to 5 s after every goroutine has ended. A leaked hand-off never comes back.
+func v9(k int) {
+	ww, ws := channelEvent()
+	blockAll(k, ww, ws)
+	var b0, f0 int64
+	on := false
+	if balance != nil {
+		_, _, on = balance()
+	}
+	var h0 int64
+	if on {
+		b0, f0 = quiet()
+		h0, _, _, _, _ = counters()
+	}
+	gate := make(chan struct{})
+	done := make(chan int, k)
+	for i := 0; i < k; i++ {
+		go nester(gate, done)
+	}
+	close(gate)
+	n := 0
+	for i := 0; i < k; i++ {
+		n += <-done
+	}
+	ok := n == k
+	if on {
+		// Not vacuous: every goroutine's two Blocks calls handed a P off (k goroutines, 2 calls each).
+		if h1, _, _, _, _ := counters(); h1-h0 < int64(2*k) {
+			fmt.Fprintf(os.Stderr, "V9 handoffs rose by %d, under 2k = %d: the crossings did not hand off\n", h1-h0, 2*k)
+			ok = false
+		}
+		deadline := time.Now().Add(5 * time.Second)
+		for {
+			b, f, _ := balance()
+			if b == b0 && f == f0 {
+				break
+			}
+			if time.Now().After(deadline) {
+				fmt.Fprintf(os.Stderr, "V9 blocked=%d p-free=%d, the base blocked=%d p-free=%d\n", b, f, b0, f0)
+				ok = false
+				break
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+	}
+	fmt.Println("V9 nested native callbacks balanced:", ok)
 }
 
 func busy(d time.Duration) int {
@@ -490,5 +578,8 @@ func main() {
 	}
 	if runs("V6") {
 		fmt.Println("V6 a MayBlock native call has its P retaken, not injected:", bracketed(k, false))
+	}
+	if runs("V9") {
+		v9(k)
 	}
 }

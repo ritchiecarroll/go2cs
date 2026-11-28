@@ -106,7 +106,8 @@ public sealed partial class Goroutine
     internal volatile object? m_pin;
 
     // M:N (N5 3b). Set while a native call entered with NativeCallHint.Blocks has handed this goroutine's P off;
-    // GoNativeCall.Exit takes a P back and clears it. Written and read only by the goroutine itself.
+    // GoNativeCall.Exit takes a P back and clears it, or GoNativeCall.ReenterManaged does first when the call calls back
+    // into Go (F1, DESIGN-mn-n5 section 10), and the Exit then takes none. Written and read only by the goroutine itself.
     internal bool m_nativeHandedOff;
 
     // Set when the twin's root has ended (FinishTwin, and main's twin): a carrier then lets go of a pinned goroutine,

@@ -6,7 +6,8 @@
 
 // The hand-written half of M:N N5's fixture (see main.go). This file has no .go counterpart, so a transpile never
 // regenerates it. It stands in for consumer C# that blocks where golib cannot see: a .NET wait (V1) and a native call
-// that does not enter the native-call seam (V2). Under Go, main.go falls back to a channel for both.
+// that does not enter the native-call seam (V2). Under Go, main.go falls back to a channel for both. It also stands in
+// for consumer C# that uses the seam: bracketed calls (V5, V6) and a native call that calls back into Go (V9).
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -45,10 +46,40 @@ internal static void InvisibleInit() {
         }, () => Volatile.Write(ref flag[0], 1));
     };
 
+    // F1 (V9): a Blocks native call that calls back into Go (cgocallbackg's pair), whose callback makes the next call,
+    // depth deep; the innermost callback runs the Go code it was given.
+    nestedNative = (depth, callback) => Nest(depth, callback);
+
+    // READING's blocked= and p-free= (additive keys, read by name): snapshots, read by V9 at quiescence only.
+    balance = () => {
+        string reading = go.golib.GoScheduler.Reading();
+        return (Counter(reading, "blocked"), Counter(reading, "p-free"), go.golib.GoScheduler.Enabled);
+    };
+
     counters = () => {
         string reading = go.golib.GoScheduler.Reading();
         return (Counter(reading, "handoffs"), Counter(reading, "retakes"), Counter(reading, "injections"), Counter(reading, "sensed"), go.golib.GoScheduler.Enabled);
     };
+}
+
+private static void Nest(nint depth, Action callback) {
+    go.golib.GoNativeCall.Enter(go.golib.NativeCallHint.Blocks);
+    try {
+        NativeSleepMilliseconds(1);
+        go.golib.GoNativeCall.ReenterManaged();
+        try {
+            if (depth > 1)
+                Nest(depth - 1, callback);
+            else
+                callback();
+        }
+        finally {
+            go.golib.GoNativeCall.ReturnToNative();
+        }
+    }
+    finally {
+        go.golib.GoNativeCall.Exit();
+    }
 }
 
 private static long Counter(string reading, string name) {

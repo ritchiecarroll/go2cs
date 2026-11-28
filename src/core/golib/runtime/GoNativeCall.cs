@@ -113,6 +113,16 @@ namespace go.golib;
 
         goroutine.m_nativeDepth++;
         goroutine.ExitBlockedOn();
+
+        // M:N (N5 3b, F1): the callback runs Go code, so it takes back the P a Blocks call gave away, as cgocallbackg's
+        // exitsyscall does. The flag is cleared here, so the outer Exit takes nothing; the callback's ReturnToNative is
+        // the MayBlock form (reentersyscall is entersyscall), and the rest of the outer call holds this P until the
+        // monitor retakes it. Each EnterBlocked meets exactly one ExitBlocked, at any nesting depth.
+        if (GoScheduler.Enabled && goroutine.m_nativeHandedOff)
+        {
+            goroutine.m_nativeHandedOff = false;
+            GoScheduler.ExitBlocked();
+        }
     }
 
     /// <summary>The callback <see cref="ReenterManaged"/> opened returns to native code: <c>cgocallbackg</c>'s <c>reentersyscall</c>.</summary>
