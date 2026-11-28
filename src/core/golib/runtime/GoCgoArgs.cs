@@ -371,7 +371,7 @@ namespace go.golib;
                 throw RuntimeErrorPanic.ErrorString($"cgo: C.{function} returned an address inside the stack copy of a Go argument as a void pointer, and go2cs cannot represent a pointer into that copy, so it refuses the result");
         }
 
-        return address;
+        return 0; // CONTROL (never lands): the copy-back loses every word C wrote
     }
 
     /// <summary>
