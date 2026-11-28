@@ -32,7 +32,7 @@ import (
 //   - Where as and objcopy run and as assembles x86-64 (a one-line probe, GNU as on every linux runner), the
 //     comment is assembled and its .text must equal the bytes. Elsewhere that half is NOT RUN, which is logged,
 //     never read as a pass.
-const trampolinePin = "793e5ccf3bc9781ae7916f6936441e4ca5e940e8dde87eaeb4b34508de6080ef"
+const trampolinePin = "b18b0ad28ddf0112e2acd035eba0c3c2345ebf652d616526437aa0b42f62b2e6"
 
 var (
 	trampolineAsm  = regexp.MustCompile(`(?s)// ASM-BEGIN\r?\n(.*?)// ASM-END`)

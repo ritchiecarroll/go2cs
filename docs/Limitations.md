@@ -335,7 +335,9 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   call trampoline checks the function it is given the way the process's own indirect calls are checked. An exported
   function, or a pointer the API handed out, passes. An address computed by offset inside a system DLL, which Go
   and an unguarded call would reach, ends the process with `0xc0000409` and no go2cs message. Call exported
-  functions, through `LazyProc` or `GetProcAddress`.
+  functions, through `LazyProc` or `GetProcAddress`. The trampoline makes one more check with the same exit code:
+  its argument block must lie on the calling thread's live stack, which every `Proc.Call` and `SyscallN` meets, so a
+  process that ends with `0xc0000409` at a system call was stopped by one of the two.
   <!-- docs/phase4/DESIGN-syscall-windows-amd64-trampoline.md section 6, P3's re-read of revision 3 (SHOULD 3,
        2026-11-28): Go makes no CFG check in its trampoline, and neither did the C# function-pointer call under the
        JIT; the check is what keeps the stub from being an unchecked forwarder in a CFG process. -->
