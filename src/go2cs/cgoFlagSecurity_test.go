@@ -1670,3 +1670,115 @@ func cgoSecExpr(name string) ast.Expr {
 
 	return ast.NewIdent(name)
 }
+
+// A listing that errors is refused (P3's SHOULD on 4b's re-read, 2026-11-28). go list -e answers a package it cannot
+// load with exit 0, an Error and no flag fields (measured at Go 1.26.11), so a listing read without its Error would
+// hand the flag check five empty lists to pass and the side build no flags to compile with.
+func TestCgoSideListRefusesAListingThatErrors(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module example.com/main\n\ngo 1.26\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	load := cgoLoad{env: append(os.Environ(), "GOWORK=off", "GOTOOLCHAIN=local", "GOFLAGS=", "GOPROXY=off"), dir: dir}
+	listed, err := cgoSideList(load, Options{}, &packages.Package{PkgPath: "example.com/nosuch"})
+
+	if err == nil || !strings.Contains(err.Error(), "no required module provides package example.com/nosuch") {
+		t.Errorf("got %v (listing %+v), want the listing refused in go list's words", err, listed)
+	}
+}
+
+// The one-listing property is a guard, not a comment (P3's NIT on 4b's re-read, 2026-11-28): cgoSideList has one call
+// site outside the tests, planCgoRoute, and the value it lists is the one handed to both cgoFlagsAllowed and
+// planCgoSideBuild.
+func TestCgoTheRouteListsThePackageOnce(t *testing.T) {
+	fset := token.NewFileSet()
+	files, err := filepath.Glob("*.go")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var sites []string
+	var route *ast.FuncDecl
+
+	for _, name := range files {
+		if strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+
+		file, err := parser.ParseFile(fset, name, nil, 0)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, decl := range file.Decls {
+			function, ok := decl.(*ast.FuncDecl)
+
+			if !ok || function.Body == nil {
+				continue
+			}
+
+			if function.Name.Name == "planCgoRoute" {
+				route = function
+			}
+
+			ast.Inspect(function.Body, func(n ast.Node) bool {
+				if call, ok := n.(*ast.CallExpr); ok {
+					if ident, ok := call.Fun.(*ast.Ident); ok && ident.Name == "cgoSideList" {
+						sites = append(sites, function.Name.Name+" at "+fset.Position(call.Pos()).String())
+					}
+				}
+
+				return true
+			})
+		}
+	}
+
+	if len(sites) != 1 || !strings.HasPrefix(sites[0], "planCgoRoute ") {
+		t.Fatalf("cgoSideList's call sites outside the tests: %q, want exactly one, in planCgoRoute", sites)
+	}
+
+	// The value cgoSideList assigns in planCgoRoute is an argument of both consumers.
+	var listed string
+
+	ast.Inspect(route.Body, func(n ast.Node) bool {
+		if assign, ok := n.(*ast.AssignStmt); ok && len(assign.Rhs) == 1 {
+			if call, ok := assign.Rhs[0].(*ast.CallExpr); ok {
+				if ident, ok := call.Fun.(*ast.Ident); ok && ident.Name == "cgoSideList" {
+					if name, ok := assign.Lhs[0].(*ast.Ident); ok {
+						listed = name.Name
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	if listed == "" {
+		t.Fatal("planCgoRoute does not assign cgoSideList's listing to a name")
+	}
+
+	handed := map[string]bool{}
+
+	ast.Inspect(route.Body, func(n ast.Node) bool {
+		if call, ok := n.(*ast.CallExpr); ok {
+			if ident, ok := call.Fun.(*ast.Ident); ok && (ident.Name == "cgoFlagsAllowed" || ident.Name == "planCgoSideBuild") {
+				for _, arg := range call.Args {
+					if name, ok := arg.(*ast.Ident); ok && name.Name == listed {
+						handed[ident.Name] = true
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	if !handed["cgoFlagsAllowed"] || !handed["planCgoSideBuild"] {
+		t.Errorf("planCgoRoute's listing %s is handed to %v, want both cgoFlagsAllowed and planCgoSideBuild", listed, handed)
+	}
+}

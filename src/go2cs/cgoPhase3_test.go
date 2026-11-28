@@ -41,7 +41,9 @@ func cgoPhase3Offline(t *testing.T) map[string]string {
 	t.Helper()
 
 	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
-	files["cgo_import.go"] = cgoOfflineImportFile(cgoPhase2Libraries)
+	// The import file is written for the Phase 2 fixture's package; one directory holds one package, or go list refuses
+	// the listing the route checks the package's flags with ("found packages cgophase3 and cgophase2").
+	files["cgo_import.go"] = strings.Replace(cgoOfflineImportFile(cgoPhase2Libraries), "package cgophase2", "package cgophase3", 1)
 
 	return files
 }

@@ -20,6 +20,10 @@
 //   never runs pkg-config (its #cgo pkg-config names need no check here) and has no internal link. Their ported tests run.
 // - cgoSecHasFilePathPrefix: DERIVED FROM src/cmd/go/internal/str/path.go, Go 1.26.11, func HasFilePathPrefix.
 // - cgoSecSafeArg: DERIVED FROM src/cmd/go/internal/load/pkg.go, Go 1.26.11, func SafeArg.
+//
+// cgoLinkDirsAllowed's record scan is stricter than cmd/go in two ways, neither able to accept a directory cmd/go
+// refuses: a relative environment -L directory resolves against the load's directory (the record resolves one against
+// the package's), and no CGO_LDFLAGS_ALLOW applies to the scan.
 
 package main
 

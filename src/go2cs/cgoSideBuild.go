@@ -273,7 +273,13 @@ type cgoSideListing struct {
 	Dir, ImportPath, Root                string
 	Goroot                               bool
 	Module                               *cgoListedModule
+	Error                                *cgoListedError
 }
+
+// cgoListedError is go list's Error. With -e, go list answers a package it cannot load with exit 0, this field and no
+// flag fields (measured at Go 1.26.11, inside a module and outside one), so a listing that carries it has nothing to
+// check and nothing to compile with.
+type cgoListedError struct{ Err string }
 
 // dir is the package directory as go list reports it, which is the one cmd/go compiles in and hands CC with -I. It
 // can differ from the loader's spelling of the same directory: on darwin /var is a symlink to /private/var, and go's
@@ -294,7 +300,7 @@ type cgoListedModule struct{ Path, Version, Dir string }
 // cgoSideList lists the package in the load's own directory, by its import path, so a package of a replaced or
 // vendored module is listed in the main module's context, as cmd/go builds it.
 func cgoSideList(load cgoLoad, options Options, pkg *packages.Package) (cgoSideListing, error) {
-	fields := "-json=CgoCPPFLAGS,CgoCFLAGS,CgoCXXFLAGS,CgoFFLAGS,CgoLDFLAGS,CgoPkgConfig,Dir,ImportPath,Root,Goroot,Module"
+	fields := "-json=CgoCPPFLAGS,CgoCFLAGS,CgoCXXFLAGS,CgoFFLAGS,CgoLDFLAGS,CgoPkgConfig,Dir,ImportPath,Root,Goroot,Module,Error"
 	cmd := exec.Command("go", append(append([]string{"list", "-e", fields}, options.loaderBuildFlags()...), pkg.PkgPath)...)
 	cmd.Env = load.env
 	cmd.Dir = load.dir
@@ -308,6 +314,17 @@ func cgoSideList(load cgoLoad, options Options, pkg *packages.Package) (cgoSideL
 
 	if err := json.Unmarshal(out, &listed); err != nil {
 		return cgoSideListing{}, fmt.Errorf("cgo: go list of the package's C flags and module: %w", err)
+	}
+
+	// A listing that errors, or names no directory, carries no flags: the flag check would pass with nothing to check
+	// and the side build would compile without the package's flags (P3's SHOULD on 4b's re-read, 2026-11-28). -e stays,
+	// so the refusal carries go list's own words.
+	if listed.Error != nil {
+		return cgoSideListing{}, fmt.Errorf("cgo: go list of the package's C flags and module: %s", listed.Error.Err)
+	}
+
+	if listed.Dir == "" {
+		return cgoSideListing{}, fmt.Errorf("cgo: go list of the package's C flags and module named no directory for %s", pkg.PkgPath)
 	}
 
 	return listed, nil
